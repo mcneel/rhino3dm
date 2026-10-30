@@ -7,6 +7,7 @@
 #
 #   status = "replaced"       an equivalent is generated (`by`) and tested (`test`)
 #   status = "proposed-drop"  no RhinoCommon equivalent; retired only if Luis accepts
+#   status = "dropped"        removed by Luis's decision (`note` says which); no replacement
 #
 # `by` names generated classes as registered (X suffix while both surfaces coexist).
 
@@ -43,58 +44,22 @@ test = "test_subd_lists_iterate_like_foreach"
 [[retired]]
 class = "BND_SubDFaceIteratorFromSubD"
 members = ["First", "Next", "Last", "Current", "CurrentIndex"]
-status = "proposed-drop"
-note = "no RhinoCommon cursor; iterate subd.Faces"
+status = "dropped"
+note = "no RhinoCommon cursor; iterate subd.Faces (Luis 2026-10-30: dropped -- the list iterates; the neighbour cursors are kept, G129)"
 
 [[retired]]
 class = "BND_SubDEdgeIteratorFromSubD"
 members = ["First", "Next", "Last", "Current", "CurrentIndex"]
-status = "proposed-drop"
-note = "no RhinoCommon cursor; iterate subd.Edges"
+status = "dropped"
+note = "no RhinoCommon cursor; iterate subd.Edges (Luis 2026-10-30: dropped -- the list iterates; the neighbour cursors are kept, G129)"
 
 [[retired]]
 class = "BND_SubDVertexIteratorFromSubD"
 members = ["Next", "Last", "Current", "CurrentIndex"]
-status = "proposed-drop"
-note = "no RhinoCommon cursor; iterate subd.Vertices"
+status = "dropped"
+note = "no RhinoCommon cursor; iterate subd.Vertices (Luis 2026-10-30: dropped -- the list iterates; the neighbour cursors are kept, G129)"
 
 # ---- SubD component iterators: rooted at a component (its neighbours)
-
-[[retired]]
-class = "BND_SubDEdgeIteratorFromFace"
-member = "Count"
-status = "replaced"
-by = ["SubDFaceX.EdgeCount"]
-test = "test_subd_neighbours_replace_the_old_component_iterators"
-
-[[retired]]
-class = "BND_SubDVertexIteratorFromFace"
-member = "Count"
-status = "replaced"
-by = ["SubDFaceX.VertexCount"]
-test = "test_subd_neighbours_replace_the_old_component_iterators"
-
-[[retired]]
-class = "BND_SubDFaceIteratorFromEdge"
-member = "Count"
-status = "replaced"
-by = ["SubDEdgeX.FaceCount"]
-test = "test_subd_neighbours_replace_the_old_component_iterators"
-
-[[retired]]
-class = "BND_SubDVertexIteratorFromEdge"
-member = "Count"
-status = "replaced"
-by = ["SubDEdgeX.VertexFrom", "SubDEdgeX.VertexTo"]
-test = "test_subd_lists_iterate_like_foreach"
-note = "always 2"
-
-[[retired]]
-class = "BND_SubDFaceIteratorFromVertex"
-member = "Count"
-status = "replaced"
-by = ["SubDVertexX.FaceCount"]
-test = "test_subd_neighbours_replace_the_old_component_iterators"
 
 [[retired]]
 class = "BND_SubDEdgeIteratorFromVertex"
@@ -104,40 +69,10 @@ by = ["SubDVertexX.EdgeCount"]
 test = "test_subd_neighbours_replace_the_old_component_iterators"
 
 [[retired]]
-class = "BND_SubDEdgeIteratorFromFace"
-members = ["First", "Next", "Last", "Current", "CurrentIndex"]
-status = "proposed-drop"
-note = "no RhinoCommon cursor; face.EdgeAt(i) for i in range(face.EdgeCount)"
-
-[[retired]]
-class = "BND_SubDVertexIteratorFromFace"
-members = ["First", "Next", "Last", "Current", "CurrentIndex"]
-status = "proposed-drop"
-note = "no RhinoCommon cursor; face.VertexAt(i) for i in range(face.VertexCount)"
-
-[[retired]]
-class = "BND_SubDFaceIteratorFromEdge"
-members = ["First", "Next", "Last", "Current", "CurrentIndex"]
-status = "proposed-drop"
-note = "no RhinoCommon cursor; edge.FaceAt(i) for i in range(edge.FaceCount)"
-
-[[retired]]
-class = "BND_SubDVertexIteratorFromEdge"
-members = ["First", "Next", "Last", "Current", "CurrentIndex"]
-status = "proposed-drop"
-note = "no RhinoCommon cursor; edge.VertexFrom / edge.VertexTo"
-
-[[retired]]
-class = "BND_SubDFaceIteratorFromVertex"
-members = ["First", "Next", "Last", "Current", "CurrentIndex"]
-status = "proposed-drop"
-note = "no RhinoCommon cursor; vertex.FaceAt(i) for i in range(vertex.FaceCount)"
-
-[[retired]]
 class = "BND_SubDEdgeIteratorFromVertex"
 members = ["First", "Next", "Last", "Current", "CurrentIndex"]
-status = "proposed-drop"
-note = "no RhinoCommon cursor; vertex.EdgeAt(i) for i in range(vertex.EdgeCount)"
+status = "dropped"
+note = "no RhinoCommon cursor; vertex.EdgeAt(i) for i in range(vertex.EdgeCount) (Luis 2026-10-30: dropped -- the list iterates; the neighbour cursors are kept, G129)"
 
 # ---- SubD components: neighbour access (old names -> RhinoCommon's)
 
@@ -156,31 +91,10 @@ by = ["SubDFaceX.VertexAt"]
 test = "test_subd_neighbours_replace_the_old_component_iterators"
 
 [[retired]]
-class = "SubDFace"
-member = "Edges"
-status = "replaced"
-by = ["SubDFaceX.EdgeCount", "SubDFaceX.EdgeAt"]
-test = "test_subd_neighbours_replace_the_old_component_iterators"
-
-[[retired]]
-class = "SubDFace"
-member = "Vertices"
-status = "replaced"
-by = ["SubDFaceX.VertexCount", "SubDFaceX.VertexAt"]
-test = "test_subd_neighbours_replace_the_old_component_iterators"
-
-[[retired]]
 class = "SubDVertex"
 member = "Edge"
 status = "replaced"
 by = ["SubDVertexX.EdgeAt"]
-test = "test_subd_neighbours_replace_the_old_component_iterators"
-
-[[retired]]
-class = "SubDVertex"
-member = "Faces"
-status = "replaced"
-by = ["SubDVertexX.FaceCount", "SubDVertexX.FaceAt"]
 test = "test_subd_neighbours_replace_the_old_component_iterators"
 
 [[retired]]
@@ -193,27 +107,11 @@ note = "index 0 / 1"
 
 [[retired]]
 class = "SubDEdge"
-member = "Vertices"
-status = "replaced"
-by = ["SubDEdgeX.VertexFrom", "SubDEdgeX.VertexTo"]
-test = "test_subd_lists_iterate_like_foreach"
-
-[[retired]]
-class = "SubDEdge"
 member = "VertexCount"
 status = "replaced"
 by = ["SubDEdgeX.VertexFrom", "SubDEdgeX.VertexTo"]
 test = "test_subd_lists_iterate_like_foreach"
 note = "always 2"
-
-[[retired]]
-class = "SubDEdge"
-member = "Faces"
-status = "replaced"
-by = ["SubDEdgeX.FaceCount", "SubDEdgeX.FaceAt"]
-test = "test_subd_neighbours_replace_the_old_component_iterators"
-
-# ---- Luis, 2026-10-16: rhino3dm-only members with a RhinoCommon form (docs/vnext/rhino3dm-only-proposals.md)
 
 [[retired]]
 class = "Arc"
@@ -1122,6 +1020,14 @@ by = ["MaterialX.IsPhysicallyBased"]
 note = "triage M1 (Luis: map); on the material"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
+[[retired]]
+class = "DimensionStyle"
+member = "Field"
+status = "replaced"
+by = ["DimensionStyleX.Field"]
+note = "triage M1 (Luis: map); the nested enum, now with all 119 RhinoCommon values (the old one had 105); ArrowSize / LeaderArrowSize are Arrowsize / LeaderArrowsize as in RhinoCommon. JS keeps DimensionStyleField"
+test = "test_retired_likely_renames_l1_and_other_maps_m1"
+
 # ---- JS-only misc (triage JS3)
 
 [[retired]]
@@ -1577,13 +1483,13 @@ test = "test_post_effect_collection_and_data"
 [[retired]]
 class = "SubDFace"
 member = "IsNotConvex"
-status = "proposed-drop"
+status = "dropped"
 note = "removed (Luis 2026-10-29): not IsConvex, once RH-99868 lands -- equal except for a degenerate face, where both opennurbs predicates are False; test ControlNetCenterNormal.IsZero first to tell them apart (D72)"
 
 [[retired]]
 class = "SubDFace"
 member = "IsNotPlanar"
-status = "proposed-drop"
+status = "dropped"
 note = "removed (Luis 2026-10-29): not IsPlanar(tol), once RH-99868 lands -- equal except for a degenerate face (zero ControlNetCenterNormal or invalid ControlNetCenterPoint), where both opennurbs predicates are False (D72)"
 
 # ---- G3 control net (Luis 2026-10-28: map) and RH-99870 table moves (2026-10-29)
@@ -1643,3 +1549,373 @@ status = "replaced"
 by = ["DecalsX.__iter__"]
 note = "triage H3 (Luis 2026-10-29: follow RhinoCommon): the i-th decal of iterating attributes.Decals (len: list(...)); RhinoCommon's DecalEnumerator skips decals whose IsVisible is false, the old table counted them -- decals are object-attribute user data, not model components, so the manifest cannot count them either"
 test = "test_retired_decal_table_find_index_follows_rhinocommon"
+
+# ---- JS-only: JS2 toJSON on the value types, JS3 encodeOptions / writeGeometry (G124)
+
+[[retired]]
+class = "BoundingBox"
+member = "toJSON"
+status = "replaced"
+by = ["BoundingBoxX.Encode"]
+note = "triage JS2 (Luis: drop on the value types): JS only; a BoundingBoxX is a plain object JSON.stringify serializes as the old toJSON() did ({Min, Max})"
+test = "test_hand_js_only_members_js2_g124"
+
+[[retired]]
+class = "Sphere"
+member = "toJSON"
+status = "replaced"
+by = ["SphereX.Encode"]
+note = "triage JS2 (Luis: drop on the value types): JS only; a SphereX plain object stringifies as the old toJSON() ({EquatorialPlane, Radius})"
+test = "test_hand_js_only_members_js2_g124"
+
+[[retired]]
+class = "File3dm"
+member = "encodeOptions"
+status = "replaced"
+by = ["File3dmX.Encode"]
+note = "triage JS3 (Luis: fold): JS only; encode(options), one name (hand member, G123)"
+test = "test_hand_json_common_object_and_file3dm_f1"
+
+[[retired]]
+class = "ArchivableDictionary"
+member = "writeGeometry"
+status = "dropped"
+note = "triage JS3 (Luis: remove from the public API): JS only; an internal callback of the old encodeDict, a no-op on its own -- ArchivableDictionaryX.EncodeDict converts geometry values in C++"
+
+# ---- JS-only: JS1 overload splits (Luis 2026-10-28: retire for RhinoCommon's single name) (G125)
+# Kept under their old names until the generator reaches the overload: Intersection.lineLineTolerance,
+# PointCloud.addRangePointsColors / addRangePointsNormalsColors / addRangePointsNormalsColorsValues,
+# PolyCurve.appendLine. No RhinoCommon overload (Luis): addPointValue, insertPointValue,
+# addRangePointsValues, File3dmGroupTable.deleteId.
+
+[[retired]]
+class = "BoundingBox"
+member = "inflateXYZ"
+status = "replaced"
+by = ["BoundingBoxX.Inflate"]
+note = "triage JS1 (Luis: retire): JS only; inflate(box, x, y, z): the value is returned inflated"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "Curve"
+member = "closedCurveOrientationPlane"
+status = "replaced"
+by = ["CurveX.ClosedCurveOrientation"]
+note = "triage JS1 (Luis: retire): JS only; closedCurveOrientation(plane)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "Curve"
+member = "derivativeAtSide"
+status = "replaced"
+by = ["CurveX.DerivativeAt"]
+note = "triage JS1 (Luis: retire): JS only; derivativeAt(t, count, side)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "Curve"
+member = "toNurbsCurveSubDomain"
+status = "replaced"
+by = ["CurveX.ToNurbsCurve"]
+note = "triage JS1 (Luis: retire): JS only; toNurbsCurve(subdomain)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "DracoCompression"
+member = "compressOptions"
+status = "replaced"
+by = ["DracoCompressionX.Compress"]
+note = "triage JS1 (Luis: retire): JS only; compress(mesh, options): the same bytes"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "File3dmGroupTable"
+member = "deleteIndex"
+status = "replaced"
+by = ["File3dmGroupTableX.Delete"]
+note = "triage JS1 (Luis: retire): JS only; delete(index); returns nothing, as RhinoCommon (the old one returned true)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "File3dmObjectTable"
+member = "addPointXYZ"
+status = "replaced"
+by = ["File3dmObjectTableX.AddPoint"]
+note = "triage JS1 (Luis: retire): JS only; addPoint(x, y, z)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "Material"
+member = "setBitmapTextureFilename"
+status = "replaced"
+by = ["MaterialX.SetBitmapTexture"]
+note = "triage JS1 (Luis: retire): JS only; setBitmapTexture(filename); reports success (pilot #62: the old one returned the texture index as a bool)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "Material"
+member = "setBumpTextureFilename"
+status = "replaced"
+by = ["MaterialX.SetBumpTexture"]
+note = "triage JS1 (Luis: retire): JS only; setBumpTexture(filename); pilot #62"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "Material"
+member = "setEnvironmentTextureFilename"
+status = "replaced"
+by = ["MaterialX.SetEnvironmentTexture"]
+note = "triage JS1 (Luis: retire): JS only; setEnvironmentTexture(filename); pilot #62"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "Material"
+member = "setTransparencyTextureFilename"
+status = "replaced"
+by = ["MaterialX.SetTransparencyTexture"]
+note = "triage JS1 (Luis: retire): JS only; setTransparencyTexture(filename); pilot #62"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "PointCloud"
+member = "addPointColor"
+status = "replaced"
+by = ["PointCloudX.Add"]
+note = "triage JS1 (Luis: retire): JS only; add(point, color)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "PointCloud"
+member = "addPointNormal"
+status = "replaced"
+by = ["PointCloudX.Add"]
+note = "triage JS1 (Luis: retire): JS only; add(point, normal)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "PointCloud"
+member = "addPointNormalColor"
+status = "replaced"
+by = ["PointCloudX.Add"]
+note = "triage JS1 (Luis: retire): JS only; add(point, normal, color)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "PointCloud"
+member = "addPointNormalColorValue"
+status = "replaced"
+by = ["PointCloudX.Add"]
+note = "triage JS1 (Luis: retire): JS only; add(point, normal, color, value)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "PointCloud"
+member = "addRangePoints"
+status = "replaced"
+by = ["PointCloudX.AddRange"]
+note = "triage JS1 (Luis: retire): JS only; addRange(points)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "PointCloud"
+member = "addRangePointsNormals"
+status = "replaced"
+by = ["PointCloudX.AddRange"]
+note = "triage JS1 (Luis: retire): JS only; addRange(points, normals)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "PointCloud"
+member = "insertPointColor"
+status = "replaced"
+by = ["PointCloudX.Insert"]
+note = "triage JS1 (Luis: retire): JS only; insert(index, point, color)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "PointCloud"
+member = "insertPointNormal"
+status = "replaced"
+by = ["PointCloudX.Insert"]
+note = "triage JS1 (Luis: retire): JS only; insert(index, point, normal)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "PointCloud"
+member = "insertPointNormalColor"
+status = "replaced"
+by = ["PointCloudX.Insert"]
+note = "triage JS1 (Luis: retire): JS only; insert(index, point, normal, color)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "PointCloud"
+member = "insertPointNormalColorValue"
+status = "replaced"
+by = ["PointCloudX.Insert"]
+note = "triage JS1 (Luis: retire): JS only; insert(index, point, normal, color, value)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "PolyCurve"
+member = "appendArc"
+status = "replaced"
+by = ["PolyCurveX.Append"]
+note = "triage JS1 (Luis: retire): JS only; append(arc)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "PolyCurve"
+member = "appendCurve"
+status = "replaced"
+by = ["PolyCurveX.Append"]
+note = "triage JS1 (Luis: retire): JS only; append(curve)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "Surface"
+member = "toNurbsSurfaceTolerance"
+status = "replaced"
+by = ["SurfaceX.ToNurbsSurface"]
+note = "triage JS1 (Luis: retire): JS only; toNurbsSurface(tolerance) -> [surface, accuracy]"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "Transform"
+member = "mirrorPlane"
+status = "replaced"
+by = ["TransformX.Mirror"]
+note = "triage JS1 (Luis: retire): JS only; mirror(plane)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "Transform"
+member = "rotationVectors"
+status = "replaced"
+by = ["TransformX.Rotation"]
+note = "triage JS1 (Luis: retire): JS only; rotation(start, end, center)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "Transform"
+member = "translationVector"
+status = "replaced"
+by = ["TransformX.Translation"]
+note = "triage JS1 (Luis: retire): JS only; translation(vector)"
+test = "test_retired_js_overload_splits_js1"
+
+[[retired]]
+class = "Transform"
+member = "translationXYZ"
+status = "replaced"
+by = ["TransformX.Translation"]
+note = "triage JS1 (Luis: retire): JS only; translation(x, y, z)"
+test = "test_retired_js_overload_splits_js1"
+
+# ---- U12 merged (RH-99905, rhino 9.x e6b9e144642): generated (G127)
+
+[[retired]]
+class = "Centermark"
+member = "GetDisplayLines"
+status = "replaced"
+by = ["CentermarkX.GetDisplayLines"]
+note = "U12 (pilot #41) merged: RhinoCommon's GetDisplayLines(style, scale) -> (success, lines); the old one took the style only (scale 1.0) and returned the lines"
+test = "test_centermark_get_display_lines_u12_g127"
+
+# ---- overload-audit gaps closed (G128)
+
+[[retired]]
+class = "Intersection"
+member = "lineLineTolerance"
+status = "replaced"
+by = ["IntersectionX.LineLine"]
+note = "triage JS1 (Luis: retire): JS only; lineLine(a, b, tolerance, finiteSegments), generated once a static's out parameters reach its sibling (G128)"
+test = "test_retired_line_line_tolerance_and_plane_circle_g128"
+
+[[retired]]
+class = "PointCloud"
+member = "addRangePointsNormalsColors"
+status = "replaced"
+by = ["PointCloudX.AddRange"]
+note = "triage JS1 (Luis: retire): JS only; addRange(points, normals, colors), generated once an int[] local reaches a native (G128)"
+test = "test_retired_add_range_with_colors_and_array_natives_g128"
+
+[[retired]]
+class = "PointCloud"
+member = "addRangePointsNormalsColorsValues"
+status = "replaced"
+by = ["PointCloudX.AddRange"]
+note = "triage JS1 (Luis: retire): JS only; addRange(points, normals, colors, values) (G128)"
+test = "test_retired_add_range_with_colors_and_array_natives_g128"
+
+# ---- SubD neighbour iterators (G129; Luis 2026-10-30, option 1): the neighbour properties return lists
+
+[[retired]]
+class = "BND_SubDEdgeIteratorFromFace"
+member = "Count"
+status = "replaced"
+by = ["SubDFaceX.Edges"]
+note = "face.Edges is a list (Luis 2026-10-30, option 1, G129): len(face.Edges) / .length"
+test = "test_subd_neighbour_lists_g129"
+
+[[retired]]
+class = "BND_SubDEdgeIteratorFromFace"
+members = ["First", "Next", "Last", "Current", "CurrentIndex"]
+status = "dropped"
+note = "Luis 2026-10-30 (option 1, G129): face.Edges is a list -- iterate it, or index it ([0], [-1] / [length - 1])"
+
+[[retired]]
+class = "BND_SubDVertexIteratorFromFace"
+member = "Count"
+status = "replaced"
+by = ["SubDFaceX.Vertices"]
+note = "face.Vertices is a list (Luis 2026-10-30, option 1, G129): len(face.Vertices) / .length"
+test = "test_subd_neighbour_lists_g129"
+
+[[retired]]
+class = "BND_SubDVertexIteratorFromFace"
+members = ["First", "Next", "Last", "Current", "CurrentIndex"]
+status = "dropped"
+note = "Luis 2026-10-30 (option 1, G129): face.Vertices is a list -- iterate it, or index it ([0], [-1] / [length - 1])"
+
+[[retired]]
+class = "BND_SubDFaceIteratorFromEdge"
+member = "Count"
+status = "replaced"
+by = ["SubDEdgeX.Faces"]
+note = "edge.Faces is a list (Luis 2026-10-30, option 1, G129): len(edge.Faces) / .length"
+test = "test_subd_neighbour_lists_g129"
+
+[[retired]]
+class = "BND_SubDFaceIteratorFromEdge"
+members = ["First", "Next", "Last", "Current", "CurrentIndex"]
+status = "dropped"
+note = "Luis 2026-10-30 (option 1, G129): edge.Faces is a list -- iterate it, or index it ([0], [-1] / [length - 1])"
+
+[[retired]]
+class = "BND_SubDVertexIteratorFromEdge"
+member = "Count"
+status = "replaced"
+by = ["SubDEdgeX.Vertices"]
+note = "edge.Vertices is a list (Luis 2026-10-30, option 1, G129): len(edge.Vertices) / .length"
+test = "test_subd_neighbour_lists_g129"
+
+[[retired]]
+class = "BND_SubDVertexIteratorFromEdge"
+members = ["First", "Next", "Last", "Current", "CurrentIndex"]
+status = "dropped"
+note = "Luis 2026-10-30 (option 1, G129): edge.Vertices is a list -- iterate it, or index it ([0], [-1] / [length - 1])"
+
+[[retired]]
+class = "BND_SubDFaceIteratorFromVertex"
+member = "Count"
+status = "replaced"
+by = ["SubDVertexX.Faces"]
+note = "vertex.Faces is a list (Luis 2026-10-30, option 1, G129): len(vertex.Faces) / .length"
+test = "test_subd_neighbour_lists_g129"
+
+[[retired]]
+class = "BND_SubDFaceIteratorFromVertex"
+members = ["First", "Next", "Last", "Current", "CurrentIndex"]
+status = "dropped"
+note = "Luis 2026-10-30 (option 1, G129): vertex.Faces is a list -- iterate it, or index it ([0], [-1] / [length - 1])"

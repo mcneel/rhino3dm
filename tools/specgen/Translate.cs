@@ -198,8 +198,9 @@ static class TranslateCommand
             {
                 // a generic class (File3dmCommonComponentTable<T>; G92) is collected as a BASE only:
                 // its members are never translated (TranslateClass), derived types see them bound
-                if (c.Modifiers.Any(SyntaxKind.StaticKeyword)
-                    || c.Parent is TypeDeclarationSyntax || Wanted.ContainsKey(c.Identifier.Text)) continue;
+                // a static class (Intersection; G128) is translated too -- its statics only, like any
+                // class's -- but never the native-method declarations (no bodies) or RhinoMath (Wanted)
+                if (c.Parent is TypeDeclarationSyntax || Wanted.ContainsKey(c.Identifier.Text)) continue;
                 var n = c.Identifier.Text;
                 var ns = c.Ancestors().OfType<BaseNamespaceDeclarationSyntax>().FirstOrDefault()?.Name.ToString() ?? "";
                 classNs.TryAdd(n, new()); classNs[n].Add(ns);
@@ -1005,6 +1006,8 @@ class Tx
     {
         if (et is PredefinedTypeSyntax p && Prim.TryGetValue(p.Keyword.Text, out var c) && p.Keyword.Text != "void") return c;
         if (et is IdentifierNameSyntax id && All.TryGetValue(id.Identifier.Text, out var ti) && !ti.IsStaticClass && !ti.IsData) return ti.Cpp;
+        // System.Drawing.Color (G128: PointCloud.AddRange(points, colors)): BND_Color, as a single one (G79)
+        if (Cur.ClassMode && et.ToString() is "Color" or "System.Drawing.Color" or "Drawing.Color") return "BND_Color";
         return null;
     }
 
@@ -3634,8 +3637,13 @@ class Tx
                 args.Add($"RH3DM_S({Expr(e)}).data()");
             else if (Cur.ClassMode && t is "byte[]")
                 args.Add($"RH3DM_IP((void*)({Expr(e)}).data())");   // its bytes, as the pointer the native takes (G107)
-            else if (Cur.ClassMode && t is "bool[]" or "Boolean[]" or "System.Boolean[]")
-                args.Add($"({Expr(e)}).data()");                // an RH3DM_BoolVec local's bool* (G111)
+            // an RH3DM_BoolVec LOCAL's bool* (G111) -- a bool[] parameter is a std::vector<bool>, which has
+            // no data() (G128: MeshTopologyEdgeList.GetConnectedFaces(i, out bool[]) is refused)
+            else if (Cur.ClassMode && t is "bool[]" or "Boolean[]" or "System.Boolean[]"
+                     && !(e is IdentifierNameSyntax bpn && ParamNames.Contains(bpn.Identifier.Text)))
+                args.Add($"({Expr(e)}).data()");
+            else if (Cur.ClassMode && t is "int[]" or "double[]")
+                args.Add($"({Expr(e)}).data()");                // a std::vector local's elements (G128: argb_list.ToArray())
             else if (Cur.ClassMode && t is "Guid" or "System.Guid")
                 args.Add(Expr(e));                             // an ON_UUID by value (G89, G91)
             else if (Cur.ClassMode && e is CastExpressionSyntax { Type: PredefinedTypeSyntax { Keyword.Text: "int" } } ce0 && IsEnumT(TypeOf(ce0.Expression)))
@@ -3680,6 +3688,16 @@ class Tx
             && fae.ToString() is "Color" or "System.Drawing.Color" or "Drawing.Color" && inv.ArgumentList.Arguments is [var fa0]
             && TypeOf(fa0.Expression) is "int" or "uint")
             return $"RH3DM_ColorFromArgb((int)({Expr(fa0.Expression)}))";
+        // Color.FromArgb(r, g, b) / (a, r, g, b) (G128: MeshVertexColorList.SetColor(index, r, g, b))
+        if (Cur.ClassMode && inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "FromArgb", Expression: var fae4 }
+            && fae4.ToString() is "Color" or "System.Drawing.Color" or "Drawing.Color"
+            && inv.ArgumentList.Arguments.Count is 3 or 4
+            && inv.ArgumentList.Arguments.All(x => TypeOf(x.Expression) is "int" or "byte"))
+        {
+            var cs = inv.ArgumentList.Arguments.Select(x => $"(int)({Expr(x.Expression)})").ToList();
+            if (cs.Count == 3) cs.Insert(0, "255");
+            return $"RH3DM_ColorFromArgb4({string.Join(", ", cs)})";
+        }
         if (Cur.ClassMode && inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "ToArgb", Expression: var tae }
             && inv.ArgumentList.Arguments.Count == 0 && TypeOf(tae) is "Color" or "System.Drawing.Color" or "Drawing.Color")
             return $"RH3DM_ColorToArgb({Expr(tae)})";

@@ -971,6 +971,15 @@ module.exports = (t, ctx) => {
       assert.deepStrictEqual([a.vertSweepStart, a.vertSweepEnd], Array.from(b.vertSweep()));
       assert.deepStrictEqual([a.boundsMinU, a.boundsMinV, a.boundsMaxU, a.boundsMaxV], Array.from(b.getUVBounds()));
     });
+    // DimensionStyle.Field: the generator registers DimensionStyleField (the old name) with all of
+    // RhinoCommon's values (the old one had 105 of 119, `ArrowSize` for `Arrowsize`)
+    const F = r.DimensionStyleField;
+    assert.strictEqual(Object.keys(F.values).length, 119);
+    assert.deepStrictEqual([F.Arrowsize.value, F.ZeroSuppress.value, F.ClippingArrowSize.value, F.Count.value], [5, 76, 119, 122]);
+    const ods = new r.DimensionStyle(); ods.setFieldOverride(F.TextHeight);
+    assert(ods.isFieldOverridden(F.TextHeight));
+    const nds = new r.DimensionStyleX(); nds.setFieldOverride(F.TextHeight);
+    assert(nds.isFieldOverriden(F.TextHeight) && !nds.isFieldOverriden(F.Arrowsize));
   });
 
   t('test_retired_tight_bounding_box_l1', () => {
@@ -1352,5 +1361,220 @@ module.exports = (t, ctx) => {
     const od = call(oo.get(0), 'attributes').decals();
     assert.strictEqual(nd.length, od.count);
     nd.forEach((d, i) => assert.strictEqual(String(d.textureInstanceId), String(call(od.findIndex(i), 'textureInstanceId'))));
+  });
+  t('test_hand_json_bounding_box_and_meshing_parameters_g123', () => {
+    // F1 hand members (G123: binding-agnostic, src/hand/hand_json.*): the old bindings' JSON form, key for key;
+    // on a value type a member is a class function taking the value (as the generated ones)
+    const nb = r.BoundingBoxX.create(1, 2, 3, 4, 5.5, 6), ob = new r.BoundingBox(1, 2, 3, 4, 5.5, 6);
+    assert.deepStrictEqual(r.BoundingBoxX.encode(nb), ob.encode());
+    assert.deepStrictEqual(ob.encode(), { Min: { X: 1, Y: 2, Z: 3 }, Max: { X: 4, Y: 5.5, Z: 6 } });
+    const back = r.BoundingBoxX.decode(ob.encode());
+    assert.deepStrictEqual([back.Min.X, back.Min.Y, back.Min.Z, back.Max.X, back.Max.Y, back.Max.Z], [1, 2, 3, 4, 5.5, 6]);
+    ctx.raises(() => r.BoundingBoxX.decode({ Min: { X: 0, Y: 0, Z: 0 } }), /missing key: Max/);
+
+    assert.deepStrictEqual(new r.MeshingParametersX().encode(), new r.MeshingParameters().encode());
+    const mp = new r.MeshingParametersX();
+    mp.jaggedSeams = true; mp.refineGrid = false; mp.gridMinCount = 17; mp.gridMaxCount = 300;
+    mp.tolerance = 0.25; mp.minimumEdgeLength = 0.01; mp.maximumEdgeLength = 12.5; mp.refineAngle = 0.3;
+    const d = mp.encode();
+    assert.deepStrictEqual([d.JaggedSeams, d.RefineGrid, d.GridMinCount, d.GridMaxCount], [true, false, 17, 300]);
+    assert.deepStrictEqual([d.Tolerance, d.MinimumEdgeLength, d.MaximumEdgeLength, d.RefineAngle], [0.25, 0.01, 12.5, 0.3]);
+    assert.deepStrictEqual(Object.keys(d).sort(), Object.keys(new r.MeshingParameters().encode()).sort());
+    const nback = r.MeshingParametersX.decode(d);
+    assert(nback instanceof r.MeshingParametersX);
+    assert.deepStrictEqual(nback.encode(), d);
+    // the old JS decode read every key (only Python's ignored them: pilot #57)
+    assert.deepStrictEqual(r.MeshingParameters.decode(d).encode(), d);
+  });
+  t('test_hand_json_value_types_f2', () => {
+    // F2 hand members (G123): the value types' encode / decode (Python's old dicts; JS had only BoundingBox, Sphere)
+    const P = (x, y, z) => r.Point3dX.create(x, y, z);
+    assert.deepStrictEqual(r.Point3dX.encode(P(1, 2, 3)), { X: 1, Y: 2, Z: 3 });
+    assert.deepStrictEqual(r.Point4dX.encode(r.Point4dX.create(1, 2, 3, 4)), { X: 1, Y: 2, Z: 3, W: 4 });
+    assert.deepStrictEqual(r.Vector2dX.encode(r.Vector2dX.create(1, 2)), { X: 1, Y: 2 });
+    const pl = r.PlaneX.create(P(1, 2, 3), r.Vector3dX.create(1, 1, 1));
+    assert.deepStrictEqual(r.PlaneX.encode(r.PlaneX.decode(r.PlaneX.encode(pl))), r.PlaneX.encode(pl));
+    const sp = r.SphereX.create(pl, 4);
+    const os = new r.Sphere([1, 2, 3], 4);
+    assert.deepStrictEqual(r.SphereX.encode(r.SphereX.create(P(1, 2, 3), 4)), os.encode());
+    // the whole plane comes back (the old JS decode kept only its origin)
+    assert.deepStrictEqual(r.SphereX.encode(r.SphereX.decode(r.SphereX.encode(sp))), r.SphereX.encode(sp));
+    // pilot #59: the old JS decode kept only the plane's origin -- a tilted sphere came back world-aligned
+    assert.deepStrictEqual(r.Sphere.decode(r.SphereX.encode(sp)).encode().EquatorialPlane.ZAxis, { X: 0, Y: 0, Z: 1 });
+    assert.deepStrictEqual(Object.keys(r.CircleX.encode(r.CircleX.create(2.5))), ['radius', 'plane']);
+  });
+  t('test_hand_json_common_object_and_file3dm_f1', () => {
+    // F1 hand members (G123): CommonObject / File3dm encode, decode -- the old forms
+    const f = ctx.readModel('file3dm_stuff.3dm'), of = ctx.readOld('file3dm_stuff.3dm');
+    const g = objs(f)[0].geometry, og = call(of.objects().get(0), 'geometry');
+    const d = g.encode();
+    assert.deepStrictEqual(d, og.encode());
+    assert.strictEqual(d.archive3dm, 60);
+    const back = r.CommonObjectX.decode(d);
+    assert.strictEqual(back.constructor.name, g.constructor.name);
+    assert.deepStrictEqual(back.encode(), d);
+    const s = f.encode();
+    assert(typeof s === 'string' && s.length > 1000);
+    assert.strictEqual(objs(r.File3dmX.decode(s)).length, objs(f).length);
+    assert.strictEqual(objs(r.File3dmX.decode(of.encode())).length, objs(f).length);
+    const opts = new r.File3dmWriteOptionsX();
+    opts.version = 7;
+    assert.strictEqual(objs(r.File3dmX.decode(f.encode(opts))).length, objs(f).length);
+  });
+  t('test_hand_rdk_xml_and_embedded_files_f3_f4', () => {
+    const f = ctx.readModel('file3dm_stuff.3dm'), of = ctx.readOld('file3dm_stuff.3dm');
+    assert.strictEqual(f.rdkXml(), of.rdkXml());
+    assert(f.rdkXml().startsWith('<xml>'));
+    assert.deepStrictEqual(list(f.plugInData).map(p => p.rdkXml()).filter(x => x), [of.plugInData().get(0).rdkXml()]);
+    const na = objs(ctx.readModel('sphereDecals.3dm'))[0].attributes;
+    const oa = call(ctx.readOld('sphereDecals.3dm').objects().get(0), 'attributes');
+    assert.strictEqual(na.rdkXml(), oa.rdkXml());
+    assert(na.rdkXml().length > 0);
+    const p = of.embeddedFilePaths()[0];
+    const b = f.getEmbeddedFileAsBase64(p);
+    assert.strictEqual(b, of.getEmbeddedFileAsBase64(p));
+    assert(b.length > 1000);
+    const name = p.split('/').pop();
+    assert.strictEqual(f.getEmbeddedFileAsBase64(name.toUpperCase()), b);
+    assert.strictEqual(f.getEmbeddedFileAsBase64Strict(name, true), '');
+    assert.strictEqual(f.getEmbeddedFileAsBase64Strict(p, true), b);
+    // no host file system in WASM: a file in the module's own
+    assert.strictEqual(new r.File3dmX().write('/tmp/part4_f4.3dm', 7), true);
+    const ef = r.File3dmEmbeddedFileX.read('/tmp/part4_f4.3dm');
+    assert(ef instanceof r.File3dmEmbeddedFileX && ef.length > 0);
+    assert.strictEqual(r.File3dmEmbeddedFileX.read('/tmp/missing_f4.txt'), null);
+  });
+  t('test_hand_archivable_dictionary_f4', () => {
+    const g = objs(ctx.readModel('file3dm_stuff.3dm'))[0].geometry;
+    const enc = r.ArchivableDictionaryX.encodeDict({ b: true, f: 2.5, s: 'héllo', g: g, gl: [g, g] });
+    const back = r.ArchivableDictionaryX.decodeDict(enc);
+    assert.deepStrictEqual([back.b, back.f, back.s], [true, 2.5, 'héllo']);
+    assert.strictEqual(back.g.constructor.name, g.constructor.name);
+    assert.deepStrictEqual(back.g.encode(), g.encode());
+    assert.deepStrictEqual(back.gl.map(x => x.constructor.name), [g.constructor.name, g.constructor.name]);
+    const old = r.ArchivableDictionary.decodeDict(r.ArchivableDictionaryX.encodeDict({ b: true, f: 2.5, s: 'héllo', g: g }));
+    assert.deepStrictEqual([old.b, old.f, old.s], [true, 2.5, 'héllo']);
+    // pilot #58 (JS): the old decodeDict cannot return a geometry list at all (an unregistered vector type)
+    assert.throws(() => r.ArchivableDictionary.decodeDict(enc), /unknown type/);
+    ctx.raises(() => r.ArchivableDictionaryX.encodeDict({ x: {} }), /Unable to serialize 'x'/);
+  });
+
+  t('test_hand_render_content_add_g124', () => {
+    // File3dmRenderContentTable.add (hand-kept) -> add on the kind's collection, a copy as before
+    const oldSrc = ctx.readOld('file3dm_stuff.3dm'), src = ctx.readModel('file3dm_stuff.3dm');
+    const old = new r.File3dm(), f = new r.File3dmX();
+    const orc = call(oldSrc, 'renderContent'), into = call(old, 'renderContent');
+    for (let i = 0; i < orc.count; i++) if (orc.get(i).isTopLevel) into.add(orc.get(i));
+    const pairs = [[src.renderMaterials, f.renderMaterials], [src.renderEnvironments, f.renderEnvironments],
+                   [src.renderTextures, f.renderTextures]];
+    for (const [have, to] of pairs) for (const c of list(have)) to.add(c);
+    const got = pairs.flatMap(([, to]) => list(to).map(c => `${c.id} ${c.kind}`)).sort();
+    const oc = call(old, 'renderContent'), want = [];
+    for (let i = 0; i < oc.count; i++) if (oc.get(i).isTopLevel) want.push(`${oc.get(i).id} ${oc.get(i).kind}`);
+    assert(got.length > 0);
+    assert.deepStrictEqual(got, want.sort());
+    const m = list(src.renderMaterials)[0];
+    f.renderMaterials.add(m);
+    const ids = list(f.renderMaterials).map(c => c.id);
+    assert.strictEqual(new Set(ids).size, list(src.renderMaterials).length + 1);
+    const back = r.File3dmX.fromByteArray(f.toByteArray(null));
+    assert.deepStrictEqual(list(back.renderMaterials).map(c => c.id).sort(), ids.slice().sort());
+  });
+
+  t('test_hand_js_only_members_js2_g124', () => {
+    // JS2: toJSON kept on CommonObject / MeshingParameters (over encode; JSON.stringify calls it)
+    const J = v => JSON.parse(JSON.stringify(v));
+    const g = objs(ctx.readModel('file3dm_stuff.3dm'))[0].geometry;
+    const og = call(ctx.readOld('file3dm_stuff.3dm').objects().get(0), 'geometry');
+    assert.deepStrictEqual(J(g), J(g.encode()));
+    assert.deepStrictEqual(J(g), J(og));
+    const mp = new r.MeshingParametersX(), omp = new r.MeshingParameters();
+    assert.deepStrictEqual(J(mp), J(mp.encode()));
+    assert.deepStrictEqual(J(mp), J(omp));
+    // JS2: dropped on the value types -- a plain object stringifies to the old toJSON() dict
+    const bb = new r.BoundingBox([0, 1, 2], [3, 4, 5]);
+    assert.deepStrictEqual(J(r.BoundingBoxX.create(r.Point3dX.create(0, 1, 2), r.Point3dX.create(3, 4, 5))), J(bb));
+    const os = new r.Sphere([1, 2, 3], 4);
+    assert.deepStrictEqual(J(r.SphereX.create(r.Point3dX.create(1, 2, 3), 4)), J(os));
+    // EmbeddedFile.fromByteArray (kept): the bytes become the embedded file's content
+    const bytes = new Uint8Array(Array.from({ length: 300 }, (_, i) => i % 251));
+    const ne = r.File3dmEmbeddedFileX.fromByteArray(bytes), oe = r.EmbeddedFile.fromByteArray(bytes);
+    assert(ne instanceof r.File3dmEmbeddedFileX);
+    assert.strictEqual(ne.length, oe.length);
+    // JS3: encodeOptions(options) -> encode(options): the same archive
+    const src = ctx.readModel('file3dm_stuff.3dm'), osrc = ctx.readOld('file3dm_stuff.3dm');
+    const no = new r.File3dmWriteOptionsX(), oo = new r.File3dmWriteOptions();
+    no.version = 7; oo.version = 7;
+    const nb = r.File3dmX.decode(src.encode(no)), ob = r.File3dmX.decode(osrc.encodeOptions(oo));
+    assert.deepStrictEqual([nb.archiveVersion, objs(nb).length], [ob.archiveVersion, objs(ob).length]);
+    assert.strictEqual(nb.archiveVersion, 70);
+    // File3dm.destroy (kept): embind's delete() under the old name; a later use throws
+    const f = new r.File3dmX();
+    f.destroy();
+    assert.throws(() => f.objects, /deleted/);
+  });
+
+  t('test_centermark_get_display_lines_u12_g127', () => {
+    // U12 (RH-99905): generated from RhinoCommon; the same centermark read back by the old binding
+    if (!r.CentermarkX) ctx.skip('G127');
+    const cm = new r.CentermarkX();
+    cm.adjustFromPoints(r.PlaneX.worldXY, { X: 1, Y: 2, Z: 0 });
+    cm.radius = 3.0;
+    const f = new r.File3dmX();
+    f.objects.add(cm, null);
+    const bytes = f.toByteArray(null);
+    const old = call(r.File3dm.fromByteArray(bytes).objects().get(0), 'geometry');
+    const neu = objs(r.File3dmX.fromByteArray(bytes))[0].geometry;
+    assert(old instanceof r.Centermark && neu instanceof r.CentermarkX);
+    const [ok, lines] = neu.getDisplayLines(new r.DimensionStyleX(), 1.0);
+    const ol = old.getDisplayLines(new r.DimensionStyle());
+    const olines = []; for (let i = 0; i < ol.size(); i++) olines.push(ol.get(i));
+    const R = x => Math.round(x * 1e9) / 1e9;
+    const key = l => [R(l.From.X), R(l.From.Y), R(l.To.X), R(l.To.Y)].join(',');
+    const okey = l => [R(l.from[0]), R(l.from[1]), R(l.to[0]), R(l.to[1])].join(',');
+    assert(ok && olines.length > 0);
+    assert.deepStrictEqual(Array.from(lines).map(key).sort(), olines.map(okey).sort());
+  });
+
+  t('test_mesh_vertex_color_add_rgb_g128', () => {
+    // MeshVertexColorList.add(r, g, b) / setColor(index, r, g, b): generated (Color.FromArgb(r, g, b), G128)
+    const old = new r.Mesh(), neu = new r.MeshX();
+    for (const [x, y] of [[0, 0], [1, 0], [1, 1]]) { old.vertices().add(x, y, 0); neu.vertices.add(x, y, 0); }
+    assert.deepStrictEqual([neu.vertexColors.add(255, 0, 0), neu.vertexColors.add(0, 128, 0)],
+                           [old.vertexColors().add(255, 0, 0), old.vertexColors().add(0, 128, 0)]);
+    assert.strictEqual(neu.vertexColors.setColor(2, 0, 0, 255), true);
+    old.vertexColors().add(0, 0, 255);
+    assert.deepStrictEqual(Array.from(neu.vertexColors.toARGBArray()), Array.from(new r.MeshX(old).vertexColors.toARGBArray()));
+    assert.deepStrictEqual(Array.from(neu.vertexColors.toARGBArray()).map(c => c >>> 0), [0xFFFF0000, 0xFF008000, 0xFF0000FF]);
+    ctx.raises(() => neu.vertexColors.add(300, 0, 0), /Value of '300' is not valid for 'red'/);
+  });
+
+  t('test_subd_neighbour_lists_g129', () => {
+    // G129 (option 1): neighbour lists of the generated components, against the old binding's iterators
+    const newSubD = objs(ctx.readModel('subdBox.3dm')).map(o => o.geometry).find(g => g instanceof r.SubDX);
+    const oldObjs = ctx.readOld('subdBox.3dm').objects();
+    let oldSubD = null;
+    for (let i = 0; i < oldObjs.count; i++) { const g = call(oldObjs.get(i), 'geometry'); if (g instanceof r.SubD) { oldSubD = g; break; } }
+    const oldIds = it => { const out = []; for (let i = 0; i < it.count; i++) out.push(it.get(i).id); return out; };
+    const byId = it => { const m = new Map(); for (let i = 0; i < it.count; i++) { const c = it.get(i); m.set(c.id, c); } return m; };
+    // old SubD-rooted iterators index by id: walk them with the cursor instead
+    const oldAll = it => { const m = new Map(); let c = it.first(); for (let k = 0; k < it.count; k++, c = it.next()) m.set(c.id, c); return m; };   // count steps: the old one's end is a null-component wrapper
+    const of = oldAll(call(oldSubD, 'faces')), oe = oldAll(call(oldSubD, 'edges')), ov = oldAll(call(oldSubD, 'vertices'));
+    let checked = 0;
+    for (const [comps, olds, props] of [[newSubD.faces, of, ['edges', 'vertices']], [newSubD.edges, oe, ['faces', 'vertices']],
+                                        [newSubD.vertices, ov, ['faces']]]) {
+      for (const c of list(comps)) {
+        for (const prop of props) {
+          assert.deepStrictEqual(c[prop].map(x => x.id), oldIds(olds.get(c.id)[prop]()), `${prop} of ${c.id}`);
+          checked++;
+        }
+      }
+    }
+    assert(checked > 50);
+    const face = list(newSubD.faces)[0];
+    const v = list(newSubD.vertices)[0];
+    for (const a of [face.edges, face.vertices, v.faces, v.edges]) assert(Array.isArray(a));   // as RhinoCommon's vertex.edges
+    assert.strictEqual(face.edges.length, face.edgeCount);
+    assert.deepStrictEqual(face.edges.map(e => e.id), Array.from({ length: face.edgeCount }, (_, i) => face.edgeAt(i).id));
   });
 };

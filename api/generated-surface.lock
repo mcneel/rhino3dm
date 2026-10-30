@@ -14,6 +14,7 @@ js  AngularDimensionX.constructor<>
 js  AngularDimensionX.constructor<BND_ArcX, double>
 js  AngularDimensionX.constructor<const BND_DimAngular&>
 js  AngularDimensionX.create [class_function]
+js  AngularDimensionX.decode [class_function]
 js  AngularDimensionX.defPoint1 [property]
 js  AngularDimensionX.defPoint2 [property]
 js  AngularDimensionX.dimlinePoint [property]
@@ -28,6 +29,7 @@ js  AnnotationBaseX.annotationType [property]
 js  AnnotationBaseX.clearPropertyOverrides [function]
 js  AnnotationBaseX.computeMemoryEstimate [class_function]
 js  AnnotationBaseX.constructor<const BND_AnnotationBase&>
+js  AnnotationBaseX.decode [class_function]
 js  AnnotationBaseX.dimensionLengthDisplay [property]
 js  AnnotationBaseX.dimensionScale [property]
 js  AnnotationBaseX.dimensionStyleId [property]
@@ -76,6 +78,7 @@ js  ArcCurveX.computeMemoryEstimate [class_function]
 js  ArcCurveX.constructor(dispatched)
 js  ArcCurveX.constructor<>
 js  ArcCurveX.createControlPointCurve [class_function]
+js  ArcCurveX.decode [class_function]
 js  ArcCurveX.isCompleteCircle [property]
 js  ArcCurveX.radius [property]
 js  ArcX.Length [class_function]
@@ -106,6 +109,8 @@ js  ArcX.toNurbsCurve [class_function]
 js  ArcX.transform [class_function]
 js  ArcX.trim [class_function]
 js  ArcX.unset [class_function]
+js  ArchivableDictionaryX.decodeDict [class_function]
+js  ArchivableDictionaryX.encodeDict [class_function]
 js  ArrowheadX.getPoints [class_function]
 js  BezierCurveX.changeDimension [function]
 js  BezierCurveX.constructor<const BND_BezierCurve&>
@@ -131,8 +136,10 @@ js  BoundingBoxX.closestPoint [class_function]
 js  BoundingBoxX.contains [class_function]
 js  BoundingBoxX.corner [class_function]
 js  BoundingBoxX.create [class_function]
+js  BoundingBoxX.decode [class_function]
 js  BoundingBoxX.diagonal [class_function]
 js  BoundingBoxX.empty [class_function]
+js  BoundingBoxX.encode [class_function]
 js  BoundingBoxX.furthestPoint [class_function]
 js  BoundingBoxX.getCorners [class_function]
 js  BoundingBoxX.getEdges [class_function]
@@ -173,6 +180,7 @@ js  BrepEdgeListX.get [function]
 js  BrepEdgeX.adjacentFaces [function]
 js  BrepEdgeX.computeMemoryEstimate [class_function]
 js  BrepEdgeX.createControlPointCurve [class_function]
+js  BrepEdgeX.decode [class_function]
 js  BrepEdgeX.edgeCurveIndex [property]
 js  BrepEdgeX.edgeIndex [property]
 js  BrepEdgeX.endVertex [property]
@@ -201,6 +209,7 @@ js  BrepFaceX.adjacentFaces [function]
 js  BrepFaceX.clearMaterialChannelIndex [function]
 js  BrepFaceX.computeMemoryEstimate [class_function]
 js  BrepFaceX.createExtrusion [function]
+js  BrepFaceX.decode [class_function]
 js  BrepFaceX.duplicateFace [function]
 js  BrepFaceX.duplicateSurface [function]
 js  BrepFaceX.faceIndex [property]
@@ -222,6 +231,7 @@ js  BrepLoopListX.addPlanarFaceLoop [function]
 js  BrepLoopListX.count [property]
 js  BrepLoopListX.get [function]
 js  BrepLoopX.computeMemoryEstimate [class_function]
+js  BrepLoopX.decode [class_function]
 js  BrepLoopX.face [property]
 js  BrepLoopX.isSurfaceBoundary [property]
 js  BrepLoopX.loopIndex [property]
@@ -239,6 +249,7 @@ js  BrepTrimListX.get [function]
 js  BrepTrimListX.matchEnds [function]
 js  BrepTrimX.computeMemoryEstimate [class_function]
 js  BrepTrimX.createControlPointCurve [class_function]
+js  BrepTrimX.decode [class_function]
 js  BrepTrimX.edge [property]
 js  BrepTrimX.endVertex [property]
 js  BrepTrimX.face [property]
@@ -255,6 +266,7 @@ js  BrepVertexListX.add [function]
 js  BrepVertexListX.count [property]
 js  BrepVertexListX.get [function]
 js  BrepVertexX.computeMemoryEstimate [class_function]
+js  BrepVertexX.decode [class_function]
 js  BrepVertexX.edgeIndices [function]
 js  BrepVertexX.tolerance [property]
 js  BrepVertexX.vertexIndex [property]
@@ -284,8 +296,10 @@ js  BrepX.cullUnusedLoops [function]
 js  BrepX.cullUnusedSurfaces [function]
 js  BrepX.cullUnusedTrims [function]
 js  BrepX.cullUnusedVertices [function]
+js  BrepX.decode [class_function]
 js  BrepX.duplicate [function]
 js  BrepX.duplicateBrep [function]
+js  BrepX.duplicateSubBrep [function]
 js  BrepX.duplicateVertices [function]
 js  BrepX.edges [property]
 js  BrepX.faces [property]
@@ -317,6 +331,14 @@ js  CachedTextureCoordinatesX.indexOf [function]
 js  CachedTextureCoordinatesX.isReadOnly [property]
 js  CachedTextureCoordinatesX.mappingId [property]
 js  CachedTextureCoordinatesX.tryGetAt [function]
+js  CentermarkX.adjustFromPoints [function]
+js  CentermarkX.computeMemoryEstimate [class_function]
+js  CentermarkX.constructor<>
+js  CentermarkX.constructor<const BND_Centermark&>
+js  CentermarkX.decode [class_function]
+js  CentermarkX.getDisplayLines [function]
+js  CentermarkX.plainTextToRtf [class_function]
+js  CentermarkX.radius [property]
 js  CircleX.boundingBox [class_function]
 js  CircleX.center [class_function]
 js  CircleX.circumference [class_function]
@@ -325,6 +347,7 @@ js  CircleX.closestPoint [class_function]
 js  CircleX.create [class_function]
 js  CircleX.derivativeAt [class_function]
 js  CircleX.diameter [class_function]
+js  CircleX.encode [class_function]
 js  CircleX.epsilonEquals [class_function]
 js  CircleX.isInPlane [class_function]
 js  CircleX.isValid [class_function]
@@ -347,9 +370,13 @@ js  Color4fX.fromArgb [class_function]
 js  Color4fX.l [class_function]
 js  Color4fX.white [class_function]
 js  CommonObjectX.computeMemoryEstimate [class_function]
+js  CommonObjectX.decode [class_function]
+js  CommonObjectX.encode [function]
 js  CommonObjectX.hasUserData [property]
 js  CommonObjectX.isValid [property]
 js  CommonObjectX.isValidWithLog [function]
+js  CommonObjectX.rdkXml [function]
+js  CommonObjectX.toJSON [function]
 js  ComponentIndexX.compareTo [class_function]
 js  ComponentIndexX.componentIndexType [class_function]
 js  ComponentIndexX.create [class_function]
@@ -399,6 +426,7 @@ js  ControlPointX.y [class_function]
 js  ControlPointX.z [class_function]
 js  CurveProxyX.computeMemoryEstimate [class_function]
 js  CurveProxyX.createControlPointCurve [class_function]
+js  CurveProxyX.decode [class_function]
 js  CurveProxyX.proxyCurveIsReversed [property]
 js  CurveX.changeClosedCurveSeam [function]
 js  CurveX.changeDimension [function]
@@ -407,6 +435,7 @@ js  CurveX.computeMemoryEstimate [class_function]
 js  CurveX.constructor<const BND_Curve&>
 js  CurveX.createControlPointCurve [class_function]
 js  CurveX.curvatureAt [function]
+js  CurveX.decode [class_function]
 js  CurveX.degree [property]
 js  CurveX.derivativeAt [function]
 js  CurveX.dimension [property]
@@ -527,6 +556,7 @@ js  DimensionStyleX.componentType [property]
 js  DimensionStyleX.computeMemoryEstimate [class_function]
 js  DimensionStyleX.constructor<>
 js  DimensionStyleX.copyFrom [function]
+js  DimensionStyleX.decode [class_function]
 js  DimensionStyleX.deleteAllUserStrings [function]
 js  DimensionStyleX.dimRadialTextAngleType [property]
 js  DimensionStyleX.dimRadialTextLocation [property]
@@ -634,6 +664,7 @@ js  DimensionX.centermarkSize [property]
 js  DimensionX.centermarkStyle [property]
 js  DimensionX.computeMemoryEstimate [class_function]
 js  DimensionX.constructor<const BND_Dimension&>
+js  DimensionX.decode [class_function]
 js  DimensionX.detailMeasured [property]
 js  DimensionX.dimensionLineExtension [property]
 js  DimensionX.distanceScale [property]
@@ -728,6 +759,7 @@ js  EnvironmentX.backgroundProjection [property]
 js  EnvironmentX.computeMemoryEstimate [class_function]
 js  EnvironmentX.constructor<>
 js  EnvironmentX.constructor<const BND_Environment&>
+js  EnvironmentX.decode [class_function]
 js  ExtrusionX.addInnerProfile [function]
 js  ExtrusionX.capCount [property]
 js  ExtrusionX.computeMemoryEstimate [class_function]
@@ -737,6 +769,7 @@ js  ExtrusionX.create [class_function]
 js  ExtrusionX.createBoxExtrusion [class_function]
 js  ExtrusionX.createCylinderExtrusion [class_function]
 js  ExtrusionX.createPipeExtrusion [class_function]
+js  ExtrusionX.decode [class_function]
 js  ExtrusionX.getBrepFormComponentIndex [function]
 js  ExtrusionX.getMesh [function]
 js  ExtrusionX.getPathPlane [function]
@@ -819,13 +852,16 @@ js  File3dmEmbeddedFileX.componentType [property]
 js  File3dmEmbeddedFileX.compressedLength [property]
 js  File3dmEmbeddedFileX.computeMemoryEstimate [class_function]
 js  File3dmEmbeddedFileX.constructor<>
+js  File3dmEmbeddedFileX.decode [class_function]
 js  File3dmEmbeddedFileX.filename [property]
+js  File3dmEmbeddedFileX.fromByteArray [class_function]
 js  File3dmEmbeddedFileX.isValidComponentName [class_function]
 js  File3dmEmbeddedFileX.length [property]
 js  File3dmEmbeddedFileX.modelComponentTypeIgnoresCase [class_function]
 js  File3dmEmbeddedFileX.modelComponentTypeIncludesParent [class_function]
 js  File3dmEmbeddedFileX.modelComponentTypeRequiresUniqueName [class_function]
 js  File3dmEmbeddedFileX.namePathSeparator [class_function]
+js  File3dmEmbeddedFileX.read [class_function]
 js  File3dmEmbeddedFileX.saveToFile [function]
 js  File3dmEmbeddedFilesX.add [function]
 js  File3dmEmbeddedFilesX.count [property]
@@ -837,6 +873,7 @@ js  File3dmGroupTableX.addGroup [function]
 js  File3dmGroupTableX.componentType [property]
 js  File3dmGroupTableX.count [property]
 js  File3dmGroupTableX.delete [function]
+js  File3dmGroupTableX.deleteId [function]
 js  File3dmGroupTableX.dump [function]
 js  File3dmGroupTableX.findId [function]
 js  File3dmGroupTableX.findIndex [function]
@@ -957,6 +994,7 @@ js  File3dmObjectTableXIter.next [function]
 js  File3dmObjectX.attributes [property]
 js  File3dmObjectX.componentType [property]
 js  File3dmObjectX.computeMemoryEstimate [class_function]
+js  File3dmObjectX.decode [class_function]
 js  File3dmObjectX.geometry [property]
 js  File3dmObjectX.getTextureMapping [function]
 js  File3dmObjectX.isValidComponentName [class_function]
@@ -970,6 +1008,7 @@ js  File3dmPlugInDataTableX.count [property]
 js  File3dmPlugInDataTableX.dump [function]
 js  File3dmPlugInDataTableX.get [function]
 js  File3dmPlugInDataX.plugInId [property]
+js  File3dmPlugInDataX.rdkXml [function]
 js  File3dmRenderContentX.autoDelete [property]
 js  File3dmRenderContentX.childSlotAmount [function]
 js  File3dmRenderContentX.childSlotName [property]
@@ -977,6 +1016,7 @@ js  File3dmRenderContentX.childSlotOn [function]
 js  File3dmRenderContentX.children [property]
 js  File3dmRenderContentX.componentType [property]
 js  File3dmRenderContentX.computeMemoryEstimate [class_function]
+js  File3dmRenderContentX.decode [class_function]
 js  File3dmRenderContentX.deleteChild [function]
 js  File3dmRenderContentX.findChild [function]
 js  File3dmRenderContentX.getParameter [function]
@@ -1006,26 +1046,31 @@ js  File3dmRenderContentX.typeId [property]
 js  File3dmRenderContentX.typeName [property]
 js  File3dmRenderContentX.xML [function]
 js  File3dmRenderEnvironmentX.computeMemoryEstimate [class_function]
+js  File3dmRenderEnvironmentX.decode [class_function]
 js  File3dmRenderEnvironmentX.isValidComponentName [class_function]
 js  File3dmRenderEnvironmentX.modelComponentTypeIgnoresCase [class_function]
 js  File3dmRenderEnvironmentX.modelComponentTypeIncludesParent [class_function]
 js  File3dmRenderEnvironmentX.modelComponentTypeRequiresUniqueName [class_function]
 js  File3dmRenderEnvironmentX.namePathSeparator [class_function]
 js  File3dmRenderEnvironmentX.toEnvironment [function]
+js  File3dmRenderEnvironmentsX.add [function]
 js  File3dmRenderEnvironmentsX.find [function]
 js  File3dmRenderEnvironmentsX.iterator [function]
 js  File3dmRenderEnvironmentsXIter.next [function]
 js  File3dmRenderMaterialX.computeMemoryEstimate [class_function]
+js  File3dmRenderMaterialX.decode [class_function]
 js  File3dmRenderMaterialX.isValidComponentName [class_function]
 js  File3dmRenderMaterialX.modelComponentTypeIgnoresCase [class_function]
 js  File3dmRenderMaterialX.modelComponentTypeIncludesParent [class_function]
 js  File3dmRenderMaterialX.modelComponentTypeRequiresUniqueName [class_function]
 js  File3dmRenderMaterialX.namePathSeparator [class_function]
 js  File3dmRenderMaterialX.toMaterial [function]
+js  File3dmRenderMaterialsX.add [function]
 js  File3dmRenderMaterialsX.find [function]
 js  File3dmRenderMaterialsX.iterator [function]
 js  File3dmRenderMaterialsXIter.next [function]
 js  File3dmRenderTextureX.computeMemoryEstimate [class_function]
+js  File3dmRenderTextureX.decode [class_function]
 js  File3dmRenderTextureX.filename [property]
 js  File3dmRenderTextureX.isValidComponentName [class_function]
 js  File3dmRenderTextureX.modelComponentTypeIgnoresCase [class_function]
@@ -1033,6 +1078,7 @@ js  File3dmRenderTextureX.modelComponentTypeIncludesParent [class_function]
 js  File3dmRenderTextureX.modelComponentTypeRequiresUniqueName [class_function]
 js  File3dmRenderTextureX.namePathSeparator [class_function]
 js  File3dmRenderTextureX.toTexture [function]
+js  File3dmRenderTexturesX.add [function]
 js  File3dmRenderTexturesX.find [function]
 js  File3dmRenderTexturesX.iterator [function]
 js  File3dmRenderTexturesXIter.next [function]
@@ -1124,12 +1170,16 @@ js  File3dmX.bitmaps [property]
 js  File3dmX.constructor<>
 js  File3dmX.created [property]
 js  File3dmX.createdBy [property]
+js  File3dmX.decode [class_function]
 js  File3dmX.dimStyles [property]
 js  File3dmX.dump [function]
 js  File3dmX.dumpSummary [function]
 js  File3dmX.earthAnchorPoint [property]
 js  File3dmX.embeddedFiles [property]
+js  File3dmX.encode [function]
 js  File3dmX.fromByteArray [class_function]
+js  File3dmX.getEmbeddedFileAsBase64 [function]
+js  File3dmX.getEmbeddedFileAsBase64Strict [function]
 js  File3dmX.hatchPatterns [property]
 js  File3dmX.instanceDefinitions [property]
 js  File3dmX.lastEdited [property]
@@ -1144,6 +1194,7 @@ js  File3dmX.notes [property]
 js  File3dmX.objects [property]
 js  File3dmX.plugInData [property]
 js  File3dmX.polish [function]
+js  File3dmX.rdkXml [function]
 js  File3dmX.read [class_function]
 js  File3dmX.readArchiveVersion [class_function]
 js  File3dmX.readNotes [class_function]
@@ -1203,6 +1254,7 @@ js  FontX.weight [property]
 js  GeometryBaseX.componentIndex [function]
 js  GeometryBaseX.computeMemoryEstimate [class_function]
 js  GeometryBaseX.dataCRC [function]
+js  GeometryBaseX.decode [class_function]
 js  GeometryBaseX.deleteAllUserStrings [function]
 js  GeometryBaseX.duplicate [function]
 js  GeometryBaseX.getBoundingBox [function]
@@ -1234,6 +1286,7 @@ js  GroundPlaneX.textureSizeLocked [property]
 js  GroupX.componentType [property]
 js  GroupX.computeMemoryEstimate [class_function]
 js  GroupX.constructor<const BND_Group&>
+js  GroupX.decode [class_function]
 js  GroupX.deleteAllUserStrings [function]
 js  GroupX.getUserString [function]
 js  GroupX.getUserStrings [function]
@@ -1249,6 +1302,7 @@ js  HatchPatternX.componentType [property]
 js  HatchPatternX.computeMemoryEstimate [class_function]
 js  HatchPatternX.constructor<>
 js  HatchPatternX.constructor<const BND_HatchPatternX&>
+js  HatchPatternX.decode [class_function]
 js  HatchPatternX.deleteAllUserStrings [function]
 js  HatchPatternX.description [property]
 js  HatchPatternX.fillType [property]
@@ -1270,6 +1324,7 @@ js  HatchX.basePoint [property]
 js  HatchX.computeMemoryEstimate [class_function]
 js  HatchX.constructor<const BND_Hatch&>
 js  HatchX.createFromBrep [class_function]
+js  HatchX.decode [class_function]
 js  HatchX.patternIndex [property]
 js  HatchX.patternRotation [property]
 js  HatchX.patternScale [property]
@@ -1280,6 +1335,7 @@ js  InstanceDefinitionGeometryX.componentType [property]
 js  InstanceDefinitionGeometryX.computeMemoryEstimate [class_function]
 js  InstanceDefinitionGeometryX.constructor<>
 js  InstanceDefinitionGeometryX.constructor<const BND_InstanceDefinitionGeometry&>
+js  InstanceDefinitionGeometryX.decode [class_function]
 js  InstanceDefinitionGeometryX.deleteAllUserStrings [function]
 js  InstanceDefinitionGeometryX.description [property]
 js  InstanceDefinitionGeometryX.getObjectIds [function]
@@ -1305,6 +1361,7 @@ js  InstanceDefinitionGeometryX.userStringCount [property]
 js  InstanceReferenceGeometryX.computeMemoryEstimate [class_function]
 js  InstanceReferenceGeometryX.constructor<BND_UUID, BND_TransformX>
 js  InstanceReferenceGeometryX.constructor<const BND_InstanceReferenceGeometry&>
+js  InstanceReferenceGeometryX.decode [class_function]
 js  InstanceReferenceGeometryX.parentIdefId [property]
 js  InstanceReferenceGeometryX.xform [property]
 js  IntersectionX.arcArc [class_function]
@@ -1315,6 +1372,7 @@ js  IntersectionX.lineCylinder [class_function]
 js  IntersectionX.lineLine [class_function]
 js  IntersectionX.linePlane [class_function]
 js  IntersectionX.lineSphere [class_function]
+js  IntersectionX.planeCircle [class_function]
 js  IntersectionX.planePlane [class_function]
 js  IntersectionX.planePlanePlane [class_function]
 js  IntersectionX.planeSphere [class_function]
@@ -1356,6 +1414,7 @@ js  LayerX.computeMemoryEstimate [class_function]
 js  LayerX.constructor<>
 js  LayerX.constructor<const BND_Layer&>
 js  LayerX.copyAttributesFrom [function]
+js  LayerX.decode [class_function]
 js  LayerX.default [function]
 js  LayerX.deleteAllUserStrings [function]
 js  LayerX.deleteModelVisible [function]
@@ -1422,6 +1481,7 @@ js  LeaderX.constructor<>
 js  LeaderX.constructor<const BND_Leader&>
 js  LeaderX.create [class_function]
 js  LeaderX.createWithRichText [class_function]
+js  LeaderX.decode [class_function]
 js  LeaderX.getTextPoint2d [function]
 js  LeaderX.leaderArrowBlockId [property]
 js  LeaderX.leaderArrowSize [property]
@@ -1441,6 +1501,7 @@ js  LightX.computeMemoryEstimate [class_function]
 js  LightX.constructor<>
 js  LightX.constructor<const BND_Light&>
 js  LightX.coordinateSystem [property]
+js  LightX.decode [class_function]
 js  LightX.diffuse [property]
 js  LightX.direction [property]
 js  LightX.getAttenuation [function]
@@ -1475,6 +1536,7 @@ js  LineCurveX.constructor(dispatched)
 js  LineCurveX.constructor<>
 js  LineCurveX.constructor<BND_LineX, double, double>
 js  LineCurveX.createControlPointCurve [class_function]
+js  LineCurveX.decode [class_function]
 js  LineCurveX.line [property]
 js  LineX.Length [class_function]
 js  LineX.boundingBox [class_function]
@@ -1511,6 +1573,7 @@ js  LinearDimensionX.computeMemoryEstimate [class_function]
 js  LinearDimensionX.constructor<>
 js  LinearDimensionX.constructor<const BND_DimLinear&>
 js  LinearDimensionX.create [class_function]
+js  LinearDimensionX.decode [class_function]
 js  LinearDimensionX.dimensionLinePoint [property]
 js  LinearDimensionX.distanceBetweenArrowTips [property]
 js  LinearDimensionX.extensionLine1End [property]
@@ -1548,6 +1611,7 @@ js  LinetypeX.constructor<const BND_LinetypeX&>
 js  LinetypeX.continuous [class_function]
 js  LinetypeX.dashDot [class_function]
 js  LinetypeX.dashed [class_function]
+js  LinetypeX.decode [class_function]
 js  LinetypeX.default [function]
 js  LinetypeX.deleteAllUserStrings [function]
 js  LinetypeX.dots [class_function]
@@ -1577,6 +1641,7 @@ js  LinetypeX.removeSegment [function]
 js  LinetypeX.removeTaper [function]
 js  LinetypeX.segmentCount [property]
 js  LinetypeX.setSegment [function]
+js  LinetypeX.setSegments [function]
 js  LinetypeX.setTaper [function]
 js  LinetypeX.setUserString [function]
 js  LinetypeX.shapeBounds [property]
@@ -1605,6 +1670,7 @@ js  MaterialX.computeMemoryEstimate [class_function]
 js  MaterialX.constructor(dispatched)
 js  MaterialX.constructor<>
 js  MaterialX.copyFrom [function]
+js  MaterialX.decode [class_function]
 js  MaterialX.default [function]
 js  MaterialX.diffuseColor [property]
 js  MaterialX.disableLighting [property]
@@ -1659,17 +1725,21 @@ js  MeshFaceListX.convertQuadsToTriangles [function]
 js  MeshFaceListX.convertTrianglesToQuads [function]
 js  MeshFaceListX.count [property]
 js  MeshFaceListX.cullDegenerateFaces [function]
+js  MeshFaceListX.deleteFaces [function]
 js  MeshFaceListX.destroy [function]
 js  MeshFaceListX.get [function]
 js  MeshFaceListX.getFace [function]
 js  MeshFaceListX.getFaceCenter [function]
 js  MeshFaceListX.getFaceVertices [function]
+js  MeshFaceListX.getTopologicalVertices [function]
 js  MeshFaceListX.hasNakedEdges [function]
 js  MeshFaceListX.insert [function]
 js  MeshFaceListX.isHidden [function]
 js  MeshFaceListX.quadCount [property]
+js  MeshFaceListX.removeAt [function]
 js  MeshFaceListX.set [function]
 js  MeshFaceListX.setFace [function]
+js  MeshFaceListX.toIntArray [function]
 js  MeshFaceListX.triangleCount [property]
 js  MeshFaceX.compareTo [class_function]
 js  MeshFaceX.create [class_function]
@@ -1705,6 +1775,8 @@ js  MeshTopologyEdgeListX.isHidden [function]
 js  MeshTopologyEdgeListX.isSwappableEdge [function]
 js  MeshTopologyEdgeListX.swapEdge [function]
 js  MeshVertexColorListX.add [function]
+js  MeshVertexColorListX.addRange [function]
+js  MeshVertexColorListX.appendColors [function]
 js  MeshVertexColorListX.capacity [property]
 js  MeshVertexColorListX.clear [function]
 js  MeshVertexColorListX.count [property]
@@ -1712,6 +1784,7 @@ js  MeshVertexColorListX.destroy [function]
 js  MeshVertexColorListX.get [function]
 js  MeshVertexColorListX.set [function]
 js  MeshVertexColorListX.setColor [function]
+js  MeshVertexColorListX.setColors [function]
 js  MeshVertexColorListX.toARGBArray [function]
 js  MeshVertexListX.add [function]
 js  MeshVertexListX.addVertices [function]
@@ -1761,6 +1834,7 @@ js  MeshX.createFromSubDControlNetWithTextureCoordinates [class_function]
 js  MeshX.createFromSurfaceControlNet [class_function]
 js  MeshX.createPartitions [function]
 js  MeshX.createQuickHull3D [class_function]
+js  MeshX.decode [class_function]
 js  MeshX.destroyPartition [function]
 js  MeshX.destroyTopology [function]
 js  MeshX.destroyTree [function]
@@ -1770,6 +1844,7 @@ js  MeshX.evaluateMeshGeometry [function]
 js  MeshX.faces [property]
 js  MeshX.flip [function]
 js  MeshX.getCachedTextureCoordinates [function]
+js  MeshX.getNakedEdgePointStatus [function]
 js  MeshX.getNgonAndFacesCount [function]
 js  MeshX.hasCachedTextureCoordinates [property]
 js  MeshX.hasPrincipalCurvatures [property]
@@ -1795,9 +1870,11 @@ js  MeshingParametersX.computeCurvature [property]
 js  MeshingParametersX.constructor<>
 js  MeshingParametersX.constructor<const BND_MeshingParameters&>
 js  MeshingParametersX.copyFrom [function]
+js  MeshingParametersX.decode [class_function]
 js  MeshingParametersX.default [class_function]
 js  MeshingParametersX.defaultAnalysisMesh [class_function]
 js  MeshingParametersX.doublePrecision [property]
+js  MeshingParametersX.encode [function]
 js  MeshingParametersX.fastRenderMesh [class_function]
 js  MeshingParametersX.gridAmplification [property]
 js  MeshingParametersX.gridAngle [property]
@@ -1817,12 +1894,14 @@ js  MeshingParametersX.relativeTolerance [property]
 js  MeshingParametersX.simplePlanes [property]
 js  MeshingParametersX.smooth [class_function]
 js  MeshingParametersX.textureRange [property]
+js  MeshingParametersX.toJSON [function]
 js  MeshingParametersX.tolerance [property]
 js  ModelComponentX.clearId [function]
 js  ModelComponentX.clearIndex [function]
 js  ModelComponentX.clearName [function]
 js  ModelComponentX.computeMemoryEstimate [class_function]
 js  ModelComponentX.dataCRC [function]
+js  ModelComponentX.decode [class_function]
 js  ModelComponentX.deletedName [property]
 js  ModelComponentX.hasId [property]
 js  ModelComponentX.hasIndex [property]
@@ -1882,7 +1961,9 @@ js  NurbsCurveX.createFromArc [class_function]
 js  NurbsCurveX.createFromCircle [class_function]
 js  NurbsCurveX.createFromEllipse [class_function]
 js  NurbsCurveX.createFromLine [class_function]
+js  NurbsCurveX.decode [class_function]
 js  NurbsCurveX.grevilleParameter [function]
+js  NurbsCurveX.grevilleParameters [function]
 js  NurbsCurveX.grevillePoint [function]
 js  NurbsCurveX.hasBezierSpans [property]
 js  NurbsCurveX.increaseDegree [function]
@@ -1923,6 +2004,7 @@ js  NurbsSurfaceX.createFromCylinder [class_function]
 js  NurbsSurfaceX.createFromSphere [class_function]
 js  NurbsSurfaceX.createFromTorus [class_function]
 js  NurbsSurfaceX.createRuledSurface [class_function]
+js  NurbsSurfaceX.decode [class_function]
 js  NurbsSurfaceX.increaseDegreeU [function]
 js  NurbsSurfaceX.increaseDegreeV [function]
 js  NurbsSurfaceX.isRational [property]
@@ -1945,6 +2027,7 @@ js  ObjectAttributesX.constructor<>
 js  ObjectAttributesX.constructor<const BND_3dmObjectAttributes&>
 js  ObjectAttributesX.customMeshingParameters [property]
 js  ObjectAttributesX.decals [property]
+js  ObjectAttributesX.decode [class_function]
 js  ObjectAttributesX.deleteAllUserStrings [function]
 js  ObjectAttributesX.detailBackgroundVisible [property]
 js  ObjectAttributesX.displayOrder [property]
@@ -2013,6 +2096,7 @@ js  OrdinateDimensionX.computeMemoryEstimate [class_function]
 js  OrdinateDimensionX.constructor<>
 js  OrdinateDimensionX.constructor<const BND_DimOrdinate&>
 js  OrdinateDimensionX.create [class_function]
+js  OrdinateDimensionX.decode [class_function]
 js  OrdinateDimensionX.defPoint [property]
 js  OrdinateDimensionX.direction [property]
 js  OrdinateDimensionX.get3dPoints [function]
@@ -2063,6 +2147,7 @@ js  PlaneSurfaceX.constructor(dispatched)
 js  PlaneSurfaceX.constructor<>
 js  PlaneSurfaceX.constructor<BND_PlaneX, BND_IntervalX, BND_IntervalX>
 js  PlaneSurfaceX.createThroughBox [class_function]
+js  PlaneSurfaceX.decode [class_function]
 js  PlaneSurfaceX.getExtents [function]
 js  PlaneSurfaceX.plane [property]
 js  PlaneSurfaceX.setExtents [function]
@@ -2074,7 +2159,9 @@ js  PlaneX.createFromFrame [class_function]
 js  PlaneX.createFromNormal [class_function]
 js  PlaneX.createFromNormalYup [class_function]
 js  PlaneX.createFromPoints [class_function]
+js  PlaneX.decode [class_function]
 js  PlaneX.distanceTo [class_function]
+js  PlaneX.encode [class_function]
 js  PlaneX.epsilonEquals [class_function]
 js  PlaneX.equals [class_function]
 js  PlaneX.extendThroughBox [class_function]
@@ -2100,6 +2187,7 @@ js  Point2dX.create [class_function]
 js  Point2dX.distanceTo [class_function]
 js  Point2dX.distanceToSquared [class_function]
 js  Point2dX.divide [class_function]
+js  Point2dX.encode [class_function]
 js  Point2dX.epsilonEquals [class_function]
 js  Point2dX.equals [class_function]
 js  Point2dX.isValid [class_function]
@@ -2115,6 +2203,7 @@ js  Point2fX.compareTo [class_function]
 js  Point2fX.create [class_function]
 js  Point2fX.distanceTo [class_function]
 js  Point2fX.divide [class_function]
+js  Point2fX.encode [class_function]
 js  Point2fX.epsilonEquals [class_function]
 js  Point2fX.equals [class_function]
 js  Point2fX.isValid [class_function]
@@ -2161,6 +2250,7 @@ js  Point3dX.create [class_function]
 js  Point3dX.distanceTo [class_function]
 js  Point3dX.distanceToSquared [class_function]
 js  Point3dX.divide [class_function]
+js  Point3dX.encode [class_function]
 js  Point3dX.epsilonEquals [class_function]
 js  Point3dX.equals [class_function]
 js  Point3dX.fromPoint3f [class_function]
@@ -2180,6 +2270,7 @@ js  Point3fX.create [class_function]
 js  Point3fX.distanceTo [class_function]
 js  Point3fX.distanceToSquared [class_function]
 js  Point3fX.divide [class_function]
+js  Point3fX.encode [class_function]
 js  Point3fX.epsilonEquals [class_function]
 js  Point3fX.equals [class_function]
 js  Point3fX.isValid [class_function]
@@ -2191,6 +2282,7 @@ js  Point3fX.transform [class_function]
 js  Point3fX.unset [class_function]
 js  Point4dX.add [class_function]
 js  Point4dX.create [class_function]
+js  Point4dX.encode [class_function]
 js  Point4dX.epsilonEquals [class_function]
 js  Point4dX.equals [class_function]
 js  Point4dX.isValid [class_function]
@@ -2208,7 +2300,9 @@ js  PointCloudItemX.x [property]
 js  PointCloudItemX.y [property]
 js  PointCloudItemX.z [property]
 js  PointCloudX.add [function]
+js  PointCloudX.addPointValue [function]
 js  PointCloudX.addRange [function]
+js  PointCloudX.addRangePointsValues [function]
 js  PointCloudX.appendNew [function]
 js  PointCloudX.clearColors [function]
 js  PointCloudX.clearHiddenFlags [function]
@@ -2223,6 +2317,7 @@ js  PointCloudX.containsHiddenFlags [property]
 js  PointCloudX.containsNormals [property]
 js  PointCloudX.containsPointValues [property]
 js  PointCloudX.count [property]
+js  PointCloudX.decode [class_function]
 js  PointCloudX.get [function]
 js  PointCloudX.getColors [function]
 js  PointCloudX.getNormals [function]
@@ -2232,12 +2327,14 @@ js  PointCloudX.getRandomSubsample [function]
 js  PointCloudX.hiddenPointCount [property]
 js  PointCloudX.insert [function]
 js  PointCloudX.insertNew [function]
+js  PointCloudX.insertPointValue [function]
 js  PointCloudX.insertRange [function]
 js  PointCloudX.merge [function]
 js  PointCloudX.pointAt [function]
 js  PointCloudX.removeAt [function]
 js  PointX.computeMemoryEstimate [class_function]
 js  PointX.constructor(dispatched)
+js  PointX.decode [class_function]
 js  PointX.location [property]
 js  PolyCurveX.append [function]
 js  PolyCurveX.appendSegment [function]
@@ -2245,6 +2342,7 @@ js  PolyCurveX.computeMemoryEstimate [class_function]
 js  PolyCurveX.constructor<>
 js  PolyCurveX.constructor<const BND_PolyCurve&>
 js  PolyCurveX.createControlPointCurve [class_function]
+js  PolyCurveX.decode [class_function]
 js  PolyCurveX.duplicatePolyCurve [function]
 js  PolyCurveX.explode [function]
 js  PolyCurveX.hasGap [property]
@@ -2261,6 +2359,7 @@ js  PolylineCurveX.computeMemoryEstimate [class_function]
 js  PolylineCurveX.constructor(dispatched)
 js  PolylineCurveX.constructor<>
 js  PolylineCurveX.createControlPointCurve [class_function]
+js  PolylineCurveX.decode [class_function]
 js  PolylineCurveX.parameter [function]
 js  PolylineCurveX.point [function]
 js  PolylineCurveX.pointCount [property]
@@ -2316,6 +2415,7 @@ js  RadialDimensionX.computeMemoryEstimate [class_function]
 js  RadialDimensionX.constructor<>
 js  RadialDimensionX.constructor<const BND_DimRadial&>
 js  RadialDimensionX.create [class_function]
+js  RadialDimensionX.decode [class_function]
 js  RadialDimensionX.dimlinePoint [property]
 js  RadialDimensionX.get3dPoints [function]
 js  RadialDimensionX.getDisplayLines [function]
@@ -2344,6 +2444,7 @@ js  RenderSettingsX.backgroundStyle [property]
 js  RenderSettingsX.computeMemoryEstimate [class_function]
 js  RenderSettingsX.constructor<>
 js  RenderSettingsX.constructor<const BND_RenderSettingsX*>
+js  RenderSettingsX.decode [class_function]
 js  RenderSettingsX.depthCue [property]
 js  RenderSettingsX.dithering [property]
 js  RenderSettingsX.flatShade [property]
@@ -2389,6 +2490,7 @@ js  RevSurfaceX.createFromCone [class_function]
 js  RevSurfaceX.createFromCylinder [class_function]
 js  RevSurfaceX.createFromSphere [class_function]
 js  RevSurfaceX.createFromTorus [class_function]
+js  RevSurfaceX.decode [class_function]
 js  RevSurfaceX.interval [property]
 js  RevSurfaceX.isTransposed [property]
 js  SafeFrameX.actionFrameLinked [property]
@@ -2414,7 +2516,9 @@ js  SphereX.center [class_function]
 js  SphereX.closestParameter [class_function]
 js  SphereX.closestPoint [class_function]
 js  SphereX.create [class_function]
+js  SphereX.decode [class_function]
 js  SphereX.diameter [class_function]
+js  SphereX.encode [class_function]
 js  SphereX.epsilonEquals [class_function]
 js  SphereX.isValid [class_function]
 js  SphereX.latitudeDegrees [class_function]
@@ -2490,6 +2594,7 @@ js  SubDEdgeX.dartCount [property]
 js  SubDEdgeX.endSharpness [function]
 js  SubDEdgeX.faceAt [function]
 js  SubDEdgeX.faceCount [property]
+js  SubDEdgeX.faces [property]
 js  SubDEdgeX.getSharpness [function]
 js  SubDEdgeX.isCrease [property]
 js  SubDEdgeX.isDartCrease [property]
@@ -2501,6 +2606,7 @@ js  SubDEdgeX.subdivisionPoint [property]
 js  SubDEdgeX.tag [property]
 js  SubDEdgeX.vertexFrom [property]
 js  SubDEdgeX.vertexTo [property]
+js  SubDEdgeX.vertices [property]
 js  SubDFaceListX.clearPerFaceColors [function]
 js  SubDFaceListX.count [property]
 js  SubDFaceListX.find [function]
@@ -2515,6 +2621,7 @@ js  SubDFaceX.controlNetCenterPoint [property]
 js  SubDFaceX.edgeAt [function]
 js  SubDFaceX.edgeCount [property]
 js  SubDFaceX.edgeDirectionMatchesFaceOrientation [function]
+js  SubDFaceX.edges [property]
 js  SubDFaceX.hasEdges [property]
 js  SubDFaceX.hasSharpEdges [property]
 js  SubDFaceX.isConvex [property]
@@ -2530,6 +2637,7 @@ js  SubDFaceX.texturePointsAreSet [property]
 js  SubDFaceX.texturePointsCapacity [property]
 js  SubDFaceX.vertexAt [function]
 js  SubDFaceX.vertexCount [property]
+js  SubDFaceX.vertices [property]
 js  SubDVertexListX.count [property]
 js  SubDVertexListX.find [function]
 js  SubDVertexListX.first [property]
@@ -2543,6 +2651,7 @@ js  SubDVertexX.edgeCount [property]
 js  SubDVertexX.edges [property]
 js  SubDVertexX.faceAt [function]
 js  SubDVertexX.faceCount [property]
+js  SubDVertexX.faces [property]
 js  SubDVertexX.isCorner [property]
 js  SubDVertexX.isCrease [property]
 js  SubDVertexX.isDart [property]
@@ -2558,6 +2667,7 @@ js  SubDX.clearEdgeSharpness [function]
 js  SubDX.clearEvaluationCache [function]
 js  SubDX.computeMemoryEstimate [class_function]
 js  SubDX.constructor<const BND_SubD&>
+js  SubDX.decode [class_function]
 js  SubDX.edges [property]
 js  SubDX.empty [class_function]
 js  SubDX.errorCount [class_function]
@@ -2596,10 +2706,13 @@ js  SunX.setPosition [function]
 js  SunX.timeZone [property]
 js  SunX.vector [property]
 js  SurfaceProxyX.computeMemoryEstimate [class_function]
+js  SurfaceProxyX.decode [class_function]
 js  SurfaceX.computeMemoryEstimate [class_function]
 js  SurfaceX.constructor<const BND_Surface&>
+js  SurfaceX.decode [class_function]
 js  SurfaceX.degree [function]
 js  SurfaceX.domain [function]
+js  SurfaceX.evaluate [function]
 js  SurfaceX.extend [function]
 js  SurfaceX.frameAt [function]
 js  SurfaceX.getNextDiscontinuity [function]
@@ -2639,6 +2752,7 @@ js  SurfaceX.tryGetTorus [function]
 js  TextDotX.computeMemoryEstimate [class_function]
 js  TextDotX.constructor<const BND_TextDot&>
 js  TextDotX.constructor<std::wstring, BND_Point3dX>
+js  TextDotX.decode [class_function]
 js  TextDotX.fontFace [property]
 js  TextDotX.fontHeight [property]
 js  TextDotX.point [property]
@@ -2649,6 +2763,7 @@ js  TextEntityX.constructor<>
 js  TextEntityX.constructor<const BND_Text&>
 js  TextEntityX.create [class_function]
 js  TextEntityX.createWithRichText [class_function]
+js  TextEntityX.decode [class_function]
 js  TextEntityX.getTextTransform [function]
 js  TextEntityX.plainTextToRtf [class_function]
 js  TextEntityX.textHorizontalAlignment [property]
@@ -2666,6 +2781,7 @@ js  TextureMappingX.createOcsMapping [class_function]
 js  TextureMappingX.createPlaneMapping [class_function]
 js  TextureMappingX.createSphereMapping [class_function]
 js  TextureMappingX.createSurfaceParameterMapping [class_function]
+js  TextureMappingX.decode [class_function]
 js  TextureMappingX.evaluate [function]
 js  TextureMappingX.getUserString [function]
 js  TextureMappingX.getUserStrings [function]
@@ -2692,6 +2808,7 @@ js  TextureX.applyUvwTransform [property]
 js  TextureX.computeMemoryEstimate [class_function]
 js  TextureX.constructor<>
 js  TextureX.constructor<const BND_Texture&>
+js  TextureX.decode [class_function]
 js  TextureX.enabled [property]
 js  TextureX.fileName [property]
 js  TextureX.fileReference [property]
@@ -2777,6 +2894,7 @@ js  Vector2dX.add [class_function]
 js  Vector2dX.compareTo [class_function]
 js  Vector2dX.create [class_function]
 js  Vector2dX.divide [class_function]
+js  Vector2dX.encode [class_function]
 js  Vector2dX.epsilonEquals [class_function]
 js  Vector2dX.equals [class_function]
 js  Vector2dX.isTiny [class_function]
@@ -2799,6 +2917,7 @@ js  Vector3dX.create [class_function]
 js  Vector3dX.crossProduct [class_function]
 js  Vector3dX.decompose [class_function]
 js  Vector3dX.divide [class_function]
+js  Vector3dX.encode [class_function]
 js  Vector3dX.epsilonEquals [class_function]
 js  Vector3dX.equals [class_function]
 js  Vector3dX.isParallelTo [class_function]
@@ -2830,6 +2949,7 @@ js  Vector3fX.compareTo [class_function]
 js  Vector3fX.create [class_function]
 js  Vector3fX.crossProduct [class_function]
 js  Vector3fX.divide [class_function]
+js  Vector3fX.encode [class_function]
 js  Vector3fX.epsilonEquals [class_function]
 js  Vector3fX.equals [class_function]
 js  Vector3fX.isUnitVector [class_function]
@@ -2892,6 +3012,7 @@ js  ViewportX.changeToTwoPointPerspectiveProjection [function]
 js  ViewportX.computeMemoryEstimate [class_function]
 js  ViewportX.constructor<>
 js  ViewportX.constructor<const BND_ViewportX&>
+js  ViewportX.decode [class_function]
 js  ViewportX.defaultCameraDirection [class_function]
 js  ViewportX.defaultPerspective [class_function]
 js  ViewportX.defaultTop [class_function]
@@ -3084,6 +3205,8 @@ py  ArcX.__init__(BND_Point3dX, BND_Vector3dX, BND_Point3dX)
 py  ArcX.__init__(BND_Point3dX, double, double)
 py  ArcX.__ne__()
 py  ArcX.__repr__()
+py  ArchivableDictionaryX.DecodeDict(jsonObject) [static]
+py  ArchivableDictionaryX.EncodeDict(dict) [static]
 py  ArrowheadX.GetPoints(arrowType) [static]
 py  BezierCurveX.ChangeDimension(desiredDimension)
 py  BezierCurveX.ControlVertexCount [property ro]
@@ -3112,8 +3235,10 @@ py  BoundingBoxX.Contains(box, strict)
 py  BoundingBoxX.Contains(point)
 py  BoundingBoxX.Contains(point, strict)
 py  BoundingBoxX.Corner(minX, minY, minZ)
+py  BoundingBoxX.Decode(jsonObject) [static]
 py  BoundingBoxX.Diagonal [property ro]
 py  BoundingBoxX.Empty [property ro static]
+py  BoundingBoxX.Encode()
 py  BoundingBoxX.FurthestPoint(point)
 py  BoundingBoxX.GetCorners()
 py  BoundingBoxX.GetEdges()
@@ -3303,6 +3428,7 @@ py  BrepX.CullUnusedTrims()
 py  BrepX.CullUnusedVertices()
 py  BrepX.Duplicate()
 py  BrepX.DuplicateBrep()
+py  BrepX.DuplicateSubBrep(faceIndices)
 py  BrepX.DuplicateVertices()
 py  BrepX.Edges [property ro]
 py  BrepX.Faces [property ro]
@@ -3338,6 +3464,11 @@ py  CachedTextureCoordinatesX.MappingId [property ro]
 py  CachedTextureCoordinatesX.TryGetAt(index)
 py  CachedTextureCoordinatesX.__getitem__()
 py  CachedTextureCoordinatesX.__len__()
+py  CentermarkX.AdjustFromPoints(plane, centerPoint)
+py  CentermarkX.GetDisplayLines(style, scale)
+py  CentermarkX.Radius [property rw]
+py  CentermarkX.__init__()
+py  CentermarkX.__init__(const BND_Centermark&)
 py  CircleX.BoundingBox [property ro]
 py  CircleX.Center [property rw]
 py  CircleX.Circumference [property rw]
@@ -3345,6 +3476,7 @@ py  CircleX.ClosestParameter(testPoint)
 py  CircleX.ClosestPoint(testPoint)
 py  CircleX.DerivativeAt(derivative, t)
 py  CircleX.Diameter [property rw]
+py  CircleX.Encode()
 py  CircleX.EpsilonEquals(other, epsilon)
 py  CircleX.IsInPlane(plane, tolerance)
 py  CircleX.IsValid [property ro]
@@ -3391,9 +3523,12 @@ py  Color4fX.__init__(int)
 py  Color4fX.__ne__()
 py  Color4fX.__repr__()
 py  CommonObjectX.ComputeMemoryEstimate(obj) [static]
+py  CommonObjectX.Decode(jsonObject) [static]
+py  CommonObjectX.Encode()
 py  CommonObjectX.HasUserData [property ro]
 py  CommonObjectX.IsValid [property ro]
 py  CommonObjectX.IsValidWithLog()
+py  CommonObjectX.RdkXml()
 py  ComponentIndexX.CompareTo(other)
 py  ComponentIndexX.ComponentIndexType [property ro]
 py  ComponentIndexX.Equals(other)
@@ -3913,6 +4048,7 @@ py  File3dmEmbeddedFileX.ComponentType [property ro]
 py  File3dmEmbeddedFileX.CompressedLength [property ro]
 py  File3dmEmbeddedFileX.Filename [property ro]
 py  File3dmEmbeddedFileX.Length [property ro]
+py  File3dmEmbeddedFileX.Read(fileName) [static]
 py  File3dmEmbeddedFileX.SaveToFile(filename)
 py  File3dmEmbeddedFileX.__init__()
 py  File3dmEmbeddedFilesX.Add(filename)
@@ -3926,6 +4062,7 @@ py  File3dmGroupTableX.Add(item)
 py  File3dmGroupTableX.AddGroup()
 py  File3dmGroupTableX.ComponentType [property ro]
 py  File3dmGroupTableX.Count [property ro]
+py  File3dmGroupTableX.Delete(id)
 py  File3dmGroupTableX.Delete(index)
 py  File3dmGroupTableX.Delete(item)
 py  File3dmGroupTableX.Dump()
@@ -4114,6 +4251,7 @@ py  File3dmPlugInDataTableX.Dump()
 py  File3dmPlugInDataTableX.__getitem__()
 py  File3dmPlugInDataTableX.__len__()
 py  File3dmPlugInDataX.PlugInId [property ro]
+py  File3dmPlugInDataX.RdkXml()
 py  File3dmRenderContentX.AutoDelete [property ro]
 py  File3dmRenderContentX.ChildSlotAmount(childSlotName)
 py  File3dmRenderContentX.ChildSlotName [property ro]
@@ -4144,17 +4282,20 @@ py  File3dmRenderContentX.TypeId [property ro]
 py  File3dmRenderContentX.TypeName [property ro]
 py  File3dmRenderContentX.XML(recursive)
 py  File3dmRenderEnvironmentX.ToEnvironment()
+py  File3dmRenderEnvironmentsX.Add(environment)
 py  File3dmRenderEnvironmentsX.Find(g)
 py  File3dmRenderEnvironmentsX.__iter__()
 py  File3dmRenderEnvironmentsXIter.__iter__()
 py  File3dmRenderEnvironmentsXIter.__next__()
 py  File3dmRenderMaterialX.ToMaterial()
+py  File3dmRenderMaterialsX.Add(material)
 py  File3dmRenderMaterialsX.Find(g)
 py  File3dmRenderMaterialsX.__iter__()
 py  File3dmRenderMaterialsXIter.__iter__()
 py  File3dmRenderMaterialsXIter.__next__()
 py  File3dmRenderTextureX.Filename [property ro]
 py  File3dmRenderTextureX.ToTexture()
+py  File3dmRenderTexturesX.Add(texture)
 py  File3dmRenderTexturesX.Find(g)
 py  File3dmRenderTexturesX.__iter__()
 py  File3dmRenderTexturesXIter.__iter__()
@@ -4251,12 +4392,17 @@ py  File3dmX.ArchiveVersion [property ro]
 py  File3dmX.Bitmaps [property ro]
 py  File3dmX.Created [property ro]
 py  File3dmX.CreatedBy [property ro]
+py  File3dmX.Decode(buffer) [static]
 py  File3dmX.DimStyles [property ro]
 py  File3dmX.Dump()
 py  File3dmX.DumpSummary()
 py  File3dmX.EarthAnchorPoint [property rw]
 py  File3dmX.EmbeddedFiles [property ro]
+py  File3dmX.Encode()
+py  File3dmX.Encode(options)
 py  File3dmX.FromByteArray(bytes) [static]
+py  File3dmX.GetEmbeddedFileAsBase64(path)
+py  File3dmX.GetEmbeddedFileAsBase64(path, strict)
 py  File3dmX.HatchPatterns [property ro]
 py  File3dmX.InstanceDefinitions [property ro]
 py  File3dmX.LastEdited [property ro]
@@ -4271,6 +4417,7 @@ py  File3dmX.Notes [property ro]
 py  File3dmX.Objects [property ro]
 py  File3dmX.PlugInData [property ro]
 py  File3dmX.Polish()
+py  File3dmX.RdkXml()
 py  File3dmX.Read(path) [static]
 py  File3dmX.ReadArchiveVersion(path) [static]
 py  File3dmX.ReadNotes(path) [static]
@@ -4427,8 +4574,10 @@ py  IntersectionX.LineBox(line, box, tolerance) [static]
 py  IntersectionX.LineCircle(line, circle) [static]
 py  IntersectionX.LineCylinder(line, cylinder) [static]
 py  IntersectionX.LineLine(lineA, lineB) [static]
+py  IntersectionX.LineLine(lineA, lineB, tolerance, finiteSegments) [static]
 py  IntersectionX.LinePlane(line, plane) [static]
 py  IntersectionX.LineSphere(line, sphere) [static]
+py  IntersectionX.PlaneCircle(plane, circle) [static]
 py  IntersectionX.PlanePlane(planeA, planeB) [static]
 py  IntersectionX.PlanePlanePlane(planeA, planeB, planeC) [static]
 py  IntersectionX.PlaneSphere(plane, sphere) [static]
@@ -4704,6 +4853,7 @@ py  LinetypeX.RemoveSegment(index)
 py  LinetypeX.RemoveTaper()
 py  LinetypeX.SegmentCount [property ro]
 py  LinetypeX.SetSegment(index, length, isSolid)
+py  LinetypeX.SetSegments(segments)
 py  LinetypeX.SetTaper(startWidth, endWidth)
 py  LinetypeX.SetTaper(startWidth, taperPoint, endWidth)
 py  LinetypeX.SetUserString(key, value)
@@ -4793,17 +4943,23 @@ py  MeshFaceListX.ConvertQuadsToTriangles()
 py  MeshFaceListX.ConvertTrianglesToQuads(angleToleranceRadians, minimumDiagonalLengthRatio)
 py  MeshFaceListX.Count [property rw]
 py  MeshFaceListX.CullDegenerateFaces()
+py  MeshFaceListX.DeleteFaces(faceIndexes)
+py  MeshFaceListX.DeleteFaces(faceIndexes, compact)
 py  MeshFaceListX.Destroy()
 py  MeshFaceListX.GetFace(index)
 py  MeshFaceListX.GetFaceCenter(faceIndex)
 py  MeshFaceListX.GetFaceVertices(faceIndex)
+py  MeshFaceListX.GetTopologicalVertices(faceIndex)
 py  MeshFaceListX.HasNakedEdges(faceIndex)
 py  MeshFaceListX.Insert(index, face)
 py  MeshFaceListX.IsHidden(faceIndex)
 py  MeshFaceListX.QuadCount [property ro]
+py  MeshFaceListX.RemoveAt(index)
+py  MeshFaceListX.RemoveAt(index, compact)
 py  MeshFaceListX.SetFace(index, face)
 py  MeshFaceListX.SetFace(index, vertex1, vertex2, vertex3)
 py  MeshFaceListX.SetFace(index, vertex1, vertex2, vertex3, vertex4)
+py  MeshFaceListX.ToIntArray(asTriangles)
 py  MeshFaceListX.TriangleCount [property ro]
 py  MeshFaceListX.__getitem__()
 py  MeshFaceListX.__len__()
@@ -4861,12 +5017,17 @@ py  MeshTopologyEdgeListX.IsHidden(topologyEdgeIndex)
 py  MeshTopologyEdgeListX.IsSwappableEdge(topologyEdgeIndex)
 py  MeshTopologyEdgeListX.SwapEdge(topologyEdgeIndex)
 py  MeshVertexColorListX.Add(color)
+py  MeshVertexColorListX.Add(red, green, blue)
+py  MeshVertexColorListX.AddRange(colors)
+py  MeshVertexColorListX.AppendColors(colors)
 py  MeshVertexColorListX.Capacity [property rw]
 py  MeshVertexColorListX.Clear()
 py  MeshVertexColorListX.Count [property rw]
 py  MeshVertexColorListX.Destroy()
 py  MeshVertexColorListX.SetColor(face, color)
 py  MeshVertexColorListX.SetColor(index, color)
+py  MeshVertexColorListX.SetColor(index, red, green, blue)
+py  MeshVertexColorListX.SetColors(colors)
 py  MeshVertexColorListX.ToARGBArray()
 py  MeshVertexColorListX.__getitem__()
 py  MeshVertexColorListX.__len__()
@@ -4935,6 +5096,7 @@ py  MeshX.Flip(vertexNormals, faceNormals, faceOrientation)
 py  MeshX.Flip(vertexNormals, faceNormals, faceOrientation, ngonsBoundaryDirection)
 py  MeshX.GetCachedTextureCoordinates(file, objectId, texture)
 py  MeshX.GetCachedTextureCoordinates(textureMappingId)
+py  MeshX.GetNakedEdgePointStatus()
 py  MeshX.GetNgonAndFacesCount()
 py  MeshX.HasCachedTextureCoordinates [property ro]
 py  MeshX.HasPrincipalCurvatures [property ro]
@@ -4962,9 +5124,11 @@ py  MeshingParametersX.ClosedObjectPostProcess [property rw]
 py  MeshingParametersX.Coarse [property ro static]
 py  MeshingParametersX.ComputeCurvature [property rw]
 py  MeshingParametersX.CopyFrom(source)
+py  MeshingParametersX.Decode(jsonObject) [static]
 py  MeshingParametersX.Default [property ro static]
 py  MeshingParametersX.DefaultAnalysisMesh [property ro static]
 py  MeshingParametersX.DoublePrecision [property rw]
+py  MeshingParametersX.Encode()
 py  MeshingParametersX.FastRenderMesh [property ro static]
 py  MeshingParametersX.GridAmplification [property rw]
 py  MeshingParametersX.GridAngle [property rw]
@@ -5054,6 +5218,7 @@ py  NurbsCurveX.CreateFromCircle(circle) [static]
 py  NurbsCurveX.CreateFromEllipse(ellipse) [static]
 py  NurbsCurveX.CreateFromLine(line) [static]
 py  NurbsCurveX.GrevilleParameter(index)
+py  NurbsCurveX.GrevilleParameters()
 py  NurbsCurveX.GrevillePoint(index)
 py  NurbsCurveX.HasBezierSpans [property ro]
 py  NurbsCurveX.IncreaseDegree(desiredDegree)
@@ -5254,8 +5419,10 @@ py  PlaneX.CreateFromFrame(origin, xDirection, yDirection) [static]
 py  PlaneX.CreateFromNormal(origin, normal) [static]
 py  PlaneX.CreateFromNormalYup(origin, normal, yDirection) [static]
 py  PlaneX.CreateFromPoints(origin, xPoint, yPoint) [static]
+py  PlaneX.Decode(jsonObject) [static]
 py  PlaneX.DistanceTo(bbox)
 py  PlaneX.DistanceTo(testPoint)
+py  PlaneX.Encode()
 py  PlaneX.EpsilonEquals(other, epsilon)
 py  PlaneX.Equals(plane)
 py  PlaneX.ExtendThroughBox(box)
@@ -5299,6 +5466,7 @@ py  Point2dX.CompareTo(other)
 py  Point2dX.DistanceTo(other)
 py  Point2dX.DistanceToSquared(other)
 py  Point2dX.Divide(point, t) [static]
+py  Point2dX.Encode()
 py  Point2dX.EpsilonEquals(other, epsilon)
 py  Point2dX.Equals(point)
 py  Point2dX.IsValid [property ro]
@@ -5338,6 +5506,7 @@ py  Point2dX.__truediv__()
 py  Point2fX.CompareTo(other)
 py  Point2fX.DistanceTo(other)
 py  Point2fX.Divide(point, t) [static]
+py  Point2fX.Encode()
 py  Point2fX.EpsilonEquals(other, epsilon)
 py  Point2fX.Equals(point)
 py  Point2fX.IsValid [property ro]
@@ -5412,6 +5581,7 @@ py  Point3dX.CompareTo(other)
 py  Point3dX.DistanceTo(other)
 py  Point3dX.DistanceToSquared(other)
 py  Point3dX.Divide(point, t) [static]
+py  Point3dX.Encode()
 py  Point3dX.EpsilonEquals(other, epsilon)
 py  Point3dX.Equals(point)
 py  Point3dX.FromPoint3f(point) [static]
@@ -5459,6 +5629,7 @@ py  Point3fX.CompareTo(other)
 py  Point3fX.DistanceTo(other)
 py  Point3fX.DistanceToSquared(other)
 py  Point3fX.Divide(point, value) [static]
+py  Point3fX.Encode()
 py  Point3fX.EpsilonEquals(other, epsilon)
 py  Point3fX.Equals(point)
 py  Point3fX.IsValid [property ro]
@@ -5490,6 +5661,7 @@ py  Point3fX.__rmul__()
 py  Point3fX.__sub__()
 py  Point3fX.__truediv__()
 py  Point4dX.Add(point1, point2) [static]
+py  Point4dX.Encode()
 py  Point4dX.EpsilonEquals(other, epsilon)
 py  Point4dX.Equals(point)
 py  Point4dX.IsValid [property ro]
@@ -5525,8 +5697,12 @@ py  PointCloudX.Add(point, color)
 py  PointCloudX.Add(point, normal)
 py  PointCloudX.Add(point, normal, color)
 py  PointCloudX.Add(point, normal, color, value)
+py  PointCloudX.Add(point, value)
 py  PointCloudX.AddRange(points)
 py  PointCloudX.AddRange(points, normals)
+py  PointCloudX.AddRange(points, normals, colors)
+py  PointCloudX.AddRange(points, normals, colors, values)
+py  PointCloudX.AddRange(points, values)
 py  PointCloudX.AppendNew()
 py  PointCloudX.ClearColors()
 py  PointCloudX.ClearHiddenFlags()
@@ -5549,6 +5725,7 @@ py  PointCloudX.Insert(index, point, color)
 py  PointCloudX.Insert(index, point, normal)
 py  PointCloudX.Insert(index, point, normal, color)
 py  PointCloudX.Insert(index, point, normal, color, value)
+py  PointCloudX.Insert(index, point, value)
 py  PointCloudX.InsertNew(index)
 py  PointCloudX.InsertRange(index, points)
 py  PointCloudX.Merge(other)
@@ -5735,7 +5912,9 @@ py  SphereX.BoundingBox [property ro]
 py  SphereX.Center [property rw]
 py  SphereX.ClosestParameter(testPoint)
 py  SphereX.ClosestPoint(testPoint)
+py  SphereX.Decode(jsonObject) [static]
 py  SphereX.Diameter [property rw]
+py  SphereX.Encode()
 py  SphereX.EpsilonEquals(other, epsilon)
 py  SphereX.EquatorialPlane [property rw]
 py  SphereX.EquitorialPlane [property rw]
@@ -5832,6 +6011,7 @@ py  SubDEdgeX.DartCount [property ro]
 py  SubDEdgeX.EndSharpness(endIndex, useCreaseSharpness)
 py  SubDEdgeX.FaceAt(index)
 py  SubDEdgeX.FaceCount [property ro]
+py  SubDEdgeX.Faces [property ro]
 py  SubDEdgeX.GetSharpness()
 py  SubDEdgeX.GetSharpness(useCreaseSharpness)
 py  SubDEdgeX.IsCrease [property ro]
@@ -5844,6 +6024,7 @@ py  SubDEdgeX.SubdivisionPoint [property ro]
 py  SubDEdgeX.Tag [property ro]
 py  SubDEdgeX.VertexFrom [property ro]
 py  SubDEdgeX.VertexTo [property ro]
+py  SubDEdgeX.Vertices [property ro]
 py  SubDFaceListX.ClearPerFaceColors()
 py  SubDFaceListX.Count [property ro]
 py  SubDFaceListX.Find(id)
@@ -5860,6 +6041,7 @@ py  SubDFaceX.ControlNetCenterPoint [property ro]
 py  SubDFaceX.EdgeAt(index)
 py  SubDFaceX.EdgeCount [property ro]
 py  SubDFaceX.EdgeDirectionMatchesFaceOrientation(index)
+py  SubDFaceX.Edges [property ro]
 py  SubDFaceX.HasEdges [property ro]
 py  SubDFaceX.HasSharpEdges [property ro]
 py  SubDFaceX.IsConvex [property ro]
@@ -5875,6 +6057,7 @@ py  SubDFaceX.TexturePointsAreSet [property ro]
 py  SubDFaceX.TexturePointsCapacity [property ro]
 py  SubDFaceX.VertexAt(index)
 py  SubDFaceX.VertexCount [property ro]
+py  SubDFaceX.Vertices [property ro]
 py  SubDVertexListX.Count [property ro]
 py  SubDVertexListX.Find(id)
 py  SubDVertexListX.First [property ro]
@@ -5890,6 +6073,7 @@ py  SubDVertexX.EdgeCount [property ro]
 py  SubDVertexX.Edges [property ro]
 py  SubDVertexX.FaceAt(index)
 py  SubDVertexX.FaceCount [property ro]
+py  SubDVertexX.Faces [property ro]
 py  SubDVertexX.IsCorner [property ro]
 py  SubDVertexX.IsCrease [property ro]
 py  SubDVertexX.IsDart [property ro]
@@ -5945,6 +6129,7 @@ py  SunX.Vector [property rw]
 py  SunX.__init__()
 py  SurfaceX.Degree(direction)
 py  SurfaceX.Domain(direction)
+py  SurfaceX.Evaluate(u, v, numberDerivatives)
 py  SurfaceX.Extend(direction, interval)
 py  SurfaceX.FrameAt(u, v)
 py  SurfaceX.GetNextDiscontinuity(direction, continuityType, t0, t1)
@@ -6173,6 +6358,7 @@ py  TransformX.__setitem__()
 py  Vector2dX.Add(vector1, vector2) [static]
 py  Vector2dX.CompareTo(other)
 py  Vector2dX.Divide(vector, t) [static]
+py  Vector2dX.Encode()
 py  Vector2dX.EpsilonEquals(other, epsilon)
 py  Vector2dX.Equals(vector)
 py  Vector2dX.IsTiny()
@@ -6214,6 +6400,7 @@ py  Vector3dX.CompareTo(other)
 py  Vector3dX.CrossProduct(a, b) [static]
 py  Vector3dX.Decompose(v, a, b) [static]
 py  Vector3dX.Divide(vector, t) [static]
+py  Vector3dX.Encode()
 py  Vector3dX.EpsilonEquals(other, epsilon)
 py  Vector3dX.Equals(vector)
 py  Vector3dX.IsParallelTo(other)
@@ -6276,6 +6463,7 @@ py  Vector3fX.Add(vector1, vector2) [static]
 py  Vector3fX.CompareTo(other)
 py  Vector3fX.CrossProduct(a, b) [static]
 py  Vector3fX.Divide(vector, t) [static]
+py  Vector3fX.Encode()
 py  Vector3fX.EpsilonEquals(other, epsilon)
 py  Vector3fX.Equals(vector)
 py  Vector3fX.IsUnitVector [property ro]

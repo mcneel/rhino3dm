@@ -109,8 +109,8 @@ def main(argv):
         h = getattr(r, hname)
         if not isinstance(h, type) or hname.startswith('_') or hname in gen_names:
             continue
-        if hname in {c for hb in bnd_gen.HAND_BINDINGS for c in hb.get('classes', [])}:
-            continue                             # vNext hand bindings (G90), not the old ones
+        if hname in {c for hb in bnd_gen.HAND_BINDINGS for c in hb.get('classes', [])} | bnd_gen.hand_class_names():
+            continue                             # vNext hand bindings (G90) and holders (G123), not the old ones
         if hasattr(h, '__members__'):           # enums: values, not API members
             continue
         if hname.endswith('Iterator'):           # Python-protocol helpers
@@ -257,7 +257,7 @@ def main(argv):
         if e:
             dec = 'kept (%s)' % e.get('decided', '')
         elif rt:
-            dec = ('retired: replaced by %s' % ', '.join('`%s`' % x for x in rt.get('by', []))) if rt['status'] == 'replaced' else 'retired: proposed drop'
+            dec = ('retired: replaced by %s' % ', '.join('`%s`' % x for x in rt.get('by', []))) if rt['status'] == 'replaced' else 'retired: dropped' if rt['status'] == 'dropped' else 'retired: proposed drop'
         else:
             dec = '**undecided**'
         L.append('| %s | %s | %s | %s |' % (c, n, dec, (e.get('upstream') or '-').replace('|', '/') if e else '-'))
@@ -459,6 +459,8 @@ def retired_tag(e):
         if e.get('missing_js'):
             return '**JS replacement missing**: %s' % ', '.join('`%s`' % b for b in e['missing_js'])
         tag = '**replaced** by %s' % ', '.join('`%s`' % b for b in e['by'])
+    elif e['status'] == 'dropped':
+        tag = '**dropped** (decided)'
     else:
         tag = '**proposed drop**'
     return tag + (' (%s)' % e['note'] if e.get('note') else '')
@@ -559,13 +561,27 @@ def write_review(path, review, stamp, commit, retired=None, r=None, gen_of=None,
           '| partial (by code) | %d |' % sum(t.startswith('**partial') for t in tags),
           '| replacement missing | %d |' % sum(t.startswith('**replacement missing') for t in tags), '']
     kept = load_kept(root)
-    def decision(c, n):
+    def built(c, n, e, js_row):
+        """G123: a kept member has its vNext implementation -- a hand member (gen_registry.HAND_MEMBERS)
+        of that name on the generated counterpart or a base, or an implementation the entry records
+        (`vnext`: a hand class, a fallback)"""
+        if e.get('vnext'):
+            return True
+        import emit_hand
+        regs = gen_chain(c) + ([c + 'X'] if c + 'X' in emit_hand.hand_class_names() else [])
+        return any(n in emit_hand.hand_names(reg)[1 if js_row else 0] for reg in regs)
+    def decision(c, n, js_row=False):
         e = kept.get((c, n)) or kept.get((c, None))
         if not e:
             return ''
-        return '**keep** (hand-written; %s)%s' % (e['decided'], ('; upstream: ' + e['upstream']) if e.get('upstream') else '')
-    L += ['Kept hand-written (`api/exceptions.toml` `[[hand_kept]]`): %d members.'
-          % sum(1 for c, _, _, _, _, n in notrc if decision(c, n)), '']
+        return '**keep** (hand-written; %s)%s%s' % (e['decided'], '' if built(c, n, e, js_row) else '; **not built**',
+                                                   ('; upstream: ' + e['upstream']) if e.get('upstream') else '')
+    kept_rows = [(c, n, False) for c, _, _, _, _, n in notrc] + [(c, n, True) for c, n, _, _ in (js or {}).get('rows', [])]
+    unbuilt = sorted('%s.`%s`%s' % (c, n, ' (JS)' if j else '') for c, n, j in kept_rows
+                     if decision(c, n, j) and 'not built' in decision(c, n, j))
+    L += ['Kept hand-written (`api/exceptions.toml` `[[hand_kept]]`): %d members; %d not built yet%s'
+          % (sum(1 for c, n, j in kept_rows if decision(c, n, j)), len(unbuilt),
+             (': ' + ', '.join(unbuilt)) if unbuilt else ' (every one has its vNext implementation).'), '']
     by_class = {}
     for c, h, inrc, rcn, decl, n in notrc:
         hh = hint(n, rcn, decl) if inrc else ''
@@ -591,7 +607,7 @@ def write_review(path, review, stamp, commit, retired=None, r=None, gen_of=None,
             by.setdefault(c, []).append((n, hh, gt))
         for c in sorted(by):
             L += ['### %s (JS only)' % c, '', '| Member | Kind | Hint | Generated | Decision |', '|---|---|---|---|---|']
-            L += ['| `%s` | js | %s | %s | %s |' % (n, hh, gt, decision(c, n)) for n, hh, gt in by[c]]
+            L += ['| `%s` | js | %s | %s | %s |' % (n, hh, gt, decision(c, n, True)) for n, hh, gt in by[c]]
             L.append('')
     L += ['## In RhinoCommon, but Rhino-only there', '',
           'These ARE RhinoCommon members, but compiled out of the portable build (they need',

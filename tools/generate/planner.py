@@ -3392,7 +3392,7 @@ def _out_companion(q):
     """the C++ signature parts of a tuple member's companion taking its out
     arguments by reference and returning its success (G83): [(type, name, is_out)]
     in C# order, or None when the tuple is not that simple"""
-    if q['shape'][0] != 'tuple' or q.get('static'):
+    if q['shape'][0] != 'tuple':
         return None
     _, has_success, outs = q['shape']
     # a bool status, or a C# result passed through unconverted (G109: `uint SharpEdgeCount(out
@@ -3959,7 +3959,8 @@ def resolve_markers(text, cls, per_reg, manifest):
                       and _args_fit(ps, want))
                 # `TryGetArc(out arc, tolerance)` (G83): a tuple-returning sibling called with
                 # its out arguments -- through its C++ companion taking them by reference
-                if (not ok and kind == 'call' and m['Kind'] == 'method' and len(ps) == len(want)
+                # (G128: a static's too -- `LineLine(lineA, lineB, out a, out b)` from its tolerance overload)
+                if (not ok and kind in ('call', 'scall') and m['Kind'] == 'method' and len(ps) == len(want)
                         and _args_fit(ps, want)
                         and out_companion(q) is not None):
                     ok = 'out'
@@ -4034,10 +4035,11 @@ def resolve_markers(text, cls, per_reg, manifest):
                 o['override_of'] = q
         deps.append(q)
         writes = writes or kind == 'set' or (kind in ('call', 'index') and bool(q.get('nonconst') or q.get('setter_of')))
+        suffix = '_out' if ok == 'out' else '_vec' if ok == 'vec' else ''
         if kind in ('sget', 'scall', 'osget', 'oscall') or base_q:
-            out.append('%s::%s' % (owner['gen'], q['cpp']))
+            out.append('%s::%s%s' % (owner['gen'], q['cpp'], suffix))
         else:
-            out.append(q['cpp'] + ('_out' if ok == 'out' else '_vec' if ok == 'vec' else ''))
+            out.append(q['cpp'] + suffix)
         # a setter taking a class POINTER (a nullable class property; G112): the translator wrote the
         # argument as C# has it (a const& parameter, a local, null) -- pass its address; a modeled
         # field's setter (mfget) also keeps the pointer, so its argument is recorded
@@ -4145,7 +4147,7 @@ def translated_pass(per_class, manifest, skipped):
                     params = [((t + '&') if t and q.get('Mode') == 'ref' else t, n)
                               for (t, n), q in zip(params, r.get('Params') or [])]
                 outs = [q.get('Mode') == 'out' for q in r.get('Params') or []]
-                if any(outs) and (ret is None or ret.endswith('*') or x['Kind'] != 'method' or x.get('Static')
+                if any(outs) and (ret is None or ret.endswith('*') or x['Kind'] != 'method'
                                   or any(t not in VT_CPP.values() and t[:-1] not in DATA_CPP.values() and not t.startswith('std::vector<')
                                          and t not in ('int', 'double', 'bool', 'float', 'unsigned int')
                                          for (t, _), o in zip(params, outs) if o)):

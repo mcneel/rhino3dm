@@ -58,4 +58,191 @@ module.exports = (t, ctx) => {
     assert.deepStrictEqual([0, 1].map(i => abcd(nf.get(i))), [0, 1].map(i => of.get(i)));
     assert.deepStrictEqual(abcd(nf.get(0)), [1, 4, 2, 2]);     // a triangle repeats its last vertex
   });
+
+  t('test_retired_js_overload_splits_js1', () => {
+    // JS1 (Luis 2026-10-28): the old JS-only split names retire for RhinoCommon's single name; each
+    // old member against the overload the dispatcher picks, same input, same result
+    const A = v => [v.X, v.Y, v.Z];
+    const cloud = pc => { const c = new r.PointCloudX(pc);
+      return [c.count, Array.from(c.getPoints()).map(A), Array.from(c.getNormals()).map(A),
+              Array.from(c.getColors()), Array.from(c.getPointValues())]; };
+    const sig = c => [c.count, Array.from(c.getPoints()).map(A), Array.from(c.getNormals()).map(A),
+                      Array.from(c.getColors()), Array.from(c.getPointValues())];
+    const red = { r: 255, g: 0, b: 0, a: 255 };
+    // PointCloud add* / insert*
+    const o = new r.PointCloud(), n = new r.PointCloudX();
+    o.addPointNormal([1, 0, 0], [0, 0, 1]); n.add(P(1, 0, 0), P(0, 0, 1));
+    o.addPointNormalColor([2, 0, 0], [0, 1, 0], red); n.add(P(2, 0, 0), P(0, 1, 0), red);
+    o.addPointNormalColorValue([3, 0, 0], [1, 0, 0], red, 2.5); n.add(P(3, 0, 0), P(1, 0, 0), red, 2.5);
+    // inserts at the end: the old ones misalign the channels anywhere else (pilot #64, U37 --
+    // test_point_cloud_insert_and_add_range_keep_channels_aligned_u37 covers the front)
+    o.insertPointNormal(3, [4, 0, 0], [0, 0, 1]); n.insert(3, P(4, 0, 0), P(0, 0, 1));
+    o.insertPointNormalColor(4, [5, 0, 0], [0, 0, 1], red); n.insert(4, P(5, 0, 0), P(0, 0, 1), red);
+    o.insertPointNormalColorValue(5, [6, 0, 0], [0, 0, 1], red, 1.5); n.insert(5, P(6, 0, 0), P(0, 0, 1), red, 1.5);
+    assert.deepStrictEqual(sig(n), cloud(o));
+    const oc = new r.PointCloud(), nc = new r.PointCloudX();
+    oc.addPointColor([1, 2, 3], red); nc.add(P(1, 2, 3), red);
+    oc.insertPointColor(1, [4, 5, 6], red); nc.insert(1, P(4, 5, 6), red);
+    assert.deepStrictEqual(sig(nc), cloud(oc));
+    // addRange(points) / (points, normals)
+    const pts = [[0, 0, 0], [1, 1, 1]], nrm = [[0, 0, 1], [0, 1, 0]];
+    const or1 = new r.PointCloud(), nr1 = new r.PointCloudX();
+    or1.addRangePoints(pts); nr1.addRange(pts.map(q => P(...q)));
+    assert.deepStrictEqual(sig(nr1), cloud(or1));
+    const or2 = new r.PointCloud(), nr2 = new r.PointCloudX();
+    or2.addRangePointsNormals(pts, nrm); nr2.addRange(pts.map(q => P(...q)), nrm.map(q => P(...q)));
+    assert.deepStrictEqual(sig(nr2), cloud(or2));
+    // Transform mirrorPlane / rotationVectors / translationVector / translationXYZ
+    const M = x => [x.M00, x.M01, x.M02, x.M03, x.M10, x.M11, x.M12, x.M13, x.M20, x.M21, x.M22, x.M23];
+    const OM = x => { const a = x.toFloatArray(true); return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(i => a[i]); };
+    const opl = r.Plane.worldXY(), npl = r.PlaneX.worldXY;
+    assert.deepStrictEqual(M(r.TransformX.mirror(npl)), OM(r.Transform.mirrorPlane(opl)));
+    assert.deepStrictEqual(M(r.TransformX.rotation(P(1, 0, 0), P(0, 1, 0), P(1, 2, 3))),
+                           OM(r.Transform.rotationVectors([1, 0, 0], [0, 1, 0], [1, 2, 3])));
+    assert.deepStrictEqual(M(r.TransformX.translation(P(1, 2, 3))), OM(r.Transform.translationVector([1, 2, 3])));
+    assert.deepStrictEqual(M(r.TransformX.translation(1, 2, 3)), OM(r.Transform.translationXYZ(1, 2, 3)));
+    // BoundingBox inflateXYZ (a value: inflate returns the inflated box)
+    const ob = new r.BoundingBox([0, 0, 0], [1, 1, 1]); ob.inflateXYZ(1, 2, 3);
+    const nb = r.BoundingBoxX.inflate(r.BoundingBoxX.create(P(0, 0, 0), P(1, 1, 1)), 1, 2, 3);
+    assert.deepStrictEqual([A(nb.Min), A(nb.Max)], [Array.from(ob.min), Array.from(ob.max)]);
+    // Curve closedCurveOrientationPlane / derivativeAtSide / toNurbsCurveSubDomain
+    const ocrv = new r.Circle(5).toNurbsCurve(), ncrv = new r.NurbsCurveX(ocrv);
+    assert.strictEqual(ncrv.closedCurveOrientation(npl).value, ocrv.closedCurveOrientationPlane(opl).value);
+    const od = ocrv.derivativeAtSide(0.5, 1, r.CurveEvaluationSide.Below);
+    const nd = ncrv.derivativeAt(0.5, 1, r.CurveEvaluationSide.Below);
+    assert.deepStrictEqual(Array.from(nd).map(A), Array.from(od).map(v => Array.from(v)));
+    const dom = ocrv.domain;
+    const osub = ocrv.toNurbsCurveSubDomain([dom[0], (dom[0] + dom[1]) / 2]);
+    const nsub = ncrv.toNurbsCurve(r.IntervalX.create(dom[0], (dom[0] + dom[1]) / 2));
+    assert.strictEqual(nsub.points.count, osub.points().count);
+    assert.deepStrictEqual(A(nsub.pointAtEnd).map(x => +x.toFixed(9)), Array.from(osub.pointAtEnd).map(x => +x.toFixed(9)));
+    // Surface toNurbsSurfaceTolerance
+    const osrf = new r.Sphere([0, 0, 0], 2).toNurbsSurface();
+    const ot = osrf.toNurbsSurfaceTolerance(0.01), nt = new r.SurfaceX(osrf).toNurbsSurface(0.01);
+    assert.strictEqual(nt[1], ot[1]);                                  // the accuracy
+    assert.deepStrictEqual([nt[0].points.countU, nt[0].points.countV], [ot[0].points().countU, ot[0].points().countV]);
+    // PolyCurve appendArc / appendCurve
+    const opc = new r.PolyCurve(), npc = new r.PolyCurveX();
+    const arc = r.Arc.createFromPoints([0, 0, 0], [1, 1, 0], [2, 0, 0]);
+    assert.strictEqual(npc.append(r.ArcX.create(P(0, 0, 0), P(1, 1, 0), P(2, 0, 0))), opc.appendArc(arc));
+    const line = new r.LineCurve([2, 0, 0], [4, 0, 0]);
+    assert.strictEqual(npc.append(new r.CurveX(line)), opc.appendCurve(line));
+    assert.strictEqual(npc.segmentCount, opc.segmentCount);
+    assert.deepStrictEqual(A(npc.pointAtEnd), Array.from(opc.pointAtEnd));
+    // Material set*TextureFilename
+    const om = new r.Material(), nm = new r.MaterialX();
+    // pilot #62: the old ones return ON_Material::AddTexture's INDEX as a bool -- the first texture
+    // (index 0) reports false on success; RhinoCommon's report success
+    const okOld = [];
+    for (const k of ['Bitmap', 'Bump', 'Environment', 'Transparency']) {
+      assert.strictEqual(nm['set' + k + 'Texture']('/tmp/' + k + '.png'), true);
+      okOld.push(om['set' + k + 'TextureFilename']('/tmp/' + k + '.png'));
+      assert.strictEqual(nm['get' + k + 'Texture']().fileName, om['get' + k + 'Texture']().fileName);
+    }
+    assert.deepStrictEqual(okOld, [false, true, true, true]);
+    // File3dmObjectTable addPointXYZ; File3dmGroupTable deleteId / deleteIndex
+    const of = new r.File3dm(), nf = new r.File3dmX();
+    of.objects().addPointXYZ(1, 2, 3); nf.objects.addPoint(1, 2, 3);
+    const op = of.objects().get(0).geometry().location, np = Array.from(nf.objects)[0].geometry.location;
+    assert.deepStrictEqual(A(np), Array.from(op));
+    for (let i = 0; i < 3; i++) { of.groups().add(new r.Group()); nf.allGroups.addGroup(); }
+    // deleteIndex -> delete(index): RhinoCommon's File3dmCommonComponentTable.Delete(int) returns
+    // nothing (the old one returned true); deleteId has no RhinoCommon overload (reported, kept)
+    assert.strictEqual(of.groups().deleteIndex(0), true);
+    assert.strictEqual(nf.allGroups.delete(0), undefined);
+    assert.strictEqual(nf.allGroups.count, of.groups().count);
+    assert.strictEqual(nf.allGroups.count, 2);
+    // DracoCompression compressOptions
+    const omesh = new r.Mesh();
+    for (const [x, y] of [[0, 0], [1, 0], [1, 1], [0, 1]]) omesh.vertices().add(x, y, 0);
+    omesh.faces().addQuadFace(0, 1, 2, 3);
+    const oopt = new r.DracoCompressionOptions(), nopt = new r.DracoCompressionOptionsX();
+    const odr = r.DracoCompression.compressOptions(omesh, oopt), ndr = r.DracoCompressionX.compress(new r.MeshX(omesh), nopt);
+    assert(odr && ndr);
+    // the same compressed bytes (the old one exposes them as base64)
+    assert.strictEqual(Buffer.from(Array.from(ndr.toByteArray())).toString('base64'), odr.toBase64String());
+  });
+
+  t('test_hand_point_cloud_values_and_group_delete_id_g126', () => {
+    // kept by hand under the old JS names (Luis 2026-10-30, upstream U38)
+    const o = new r.PointCloud(), n = new r.PointCloudX();
+    o.addPointValue([1, 0, 0], 1.5); n.addPointValue(P(1, 0, 0), 1.5);
+    o.addRangePointsValues([[2, 0, 0], [3, 0, 0]], [2.5, 3.5]); n.addRangePointsValues([P(2, 0, 0), P(3, 0, 0)], [2.5, 3.5]);
+    o.insertPointValue(0, [0, 0, 0], 0.5); n.insertPointValue(0, P(0, 0, 0), 0.5);
+    assert.deepStrictEqual(Array.from(n.getPointValues()), [0.5, 1.5, 2.5, 3.5]);
+    assert.deepStrictEqual(Array.from(new r.PointCloudX(o).getPointValues()), [0.5, 2.5, 3.5, 0]);   // pilot #64 (old)
+    assert.deepStrictEqual(Array.from(n.getPoints()).map(q => q.X), [0, 1, 2, 3]);
+    // channels stay aligned (pilot #64: the generated insert does not)
+    const c = new r.PointCloudX();
+    c.add(P(1, 0, 0), P(0, 0, 1)); c.add(P(2, 0, 0), P(0, 1, 0));
+    c.insertPointValue(0, P(0, 0, 0), 9);
+    assert.deepStrictEqual(Array.from(c.getNormals()).map(q => [q.X, q.Y, q.Z]), [[0, 0, 0], [0, 0, 1], [0, 1, 0]]);
+    assert.deepStrictEqual(Array.from(c.getPointValues()), [9, 0, 0]);
+    // deleteId
+    const of = new r.File3dm(), nf = new r.File3dmX();
+    for (let i = 0; i < 3; i++) { of.groups().add(new r.Group()); nf.allGroups.addGroup(); }
+    assert.strictEqual(nf.allGroups.deleteId(nf.allGroups.findIndex(1).id), of.groups().deleteId(of.groups().findIndex(1).id));
+    assert.strictEqual(nf.allGroups.deleteId(require('crypto').randomUUID()), false);
+    assert.strictEqual(nf.allGroups.count, 2);
+  });
+
+  t('test_point_cloud_insert_and_add_range_keep_channels_aligned_u37', () => {
+    // U37 (RH-99914, pilot #64): insert keeps every channel with its point; a range adding a
+    // channel the cloud lacked puts it on the NEW points
+    const red = { r: 255, g: 0, b: 0, a: 255 }, lime = { r: 0, g: 255, b: 0, a: 255 }, blue = { r: 0, g: 0, b: 255, a: 255 };
+    const c = new r.PointCloudX();
+    c.add(P(1, 0, 0), P(0, 0, 1), red, 1); c.add(P(2, 0, 0), P(0, 1, 0), lime, 2);
+    c.insert(0, P(0, 0, 0), P(1, 0, 0), blue, 9);
+    assert.deepStrictEqual(Array.from(c.getPointValues()), [9, 1, 2]);
+    assert.deepStrictEqual(Array.from(c.getNormals()).map(q => [q.X, q.Y, q.Z]), [[1, 0, 0], [0, 0, 1], [0, 1, 0]]);
+    assert.deepStrictEqual(Array.from(c.getColors()).map(k => [k.r, k.g, k.b]), [[0, 0, 255], [255, 0, 0], [0, 255, 0]]);
+    const d = new r.PointCloudX();
+    d.add(P(1, 0, 0)); d.add(P(2, 0, 0));
+    d.addRange([P(3, 0, 0), P(4, 0, 0)], [P(0, 0, 1), P(0, 0, 1)]);
+    assert.deepStrictEqual(Array.from(d.getNormals()).map(q => [q.X, q.Y, q.Z]), [[0, 0, 0], [0, 0, 0], [0, 0, 1], [0, 0, 1]]);
+  });
+
+  t('test_retired_line_line_tolerance_and_plane_circle_g128', () => {
+    // JS1: lineLineTolerance -> lineLine(a, b, tolerance, finiteSegments), now generated (G128)
+    const L = (a, b) => ({ From: P(...a), To: P(...b) });
+    const cases = [[[0, 0, 0], [4, 0, 0], [2, -1, 0], [2, 3, 0]], [[0, 0, 0], [1, 0, 0], [3, -1, 0], [3, 1, 0]],
+                   [[0, 0, 0], [1, 0, 0], [0, 0, 1], [1, 0, 1]]];
+    for (const [a0, a1, b0, b1] of cases)
+      for (const [tol, finite] of [[0.0, false], [0.001, true], [5.0, true]]) {
+        const o = r.Intersection.lineLineTolerance(new r.Line(a0, a1), new r.Line(b0, b1), tol, finite);
+        const n = r.IntersectionX.lineLine(L(a0, a1), L(b0, b1), tol, finite);
+        assert.deepStrictEqual(Array.from(n), Array.from(o));
+      }
+    const circle = r.CircleX.create(r.PlaneX.worldZX, 2.0);
+    const [kind, t0, t1] = r.IntersectionX.planeCircle(r.PlaneX.worldXY, circle);
+    assert.strictEqual(kind, r.PlaneCircleIntersection.Secant);
+    assert.deepStrictEqual([t0, t1].map(t => Math.round(r.CircleX.pointAt(circle, t).X * 1e9) / 1e9).sort((x, y) => x - y), [-2, 2]);
+  });
+
+  t('test_retired_add_range_with_colors_and_array_natives_g128', () => {
+    // JS1: addRangePointsNormalsColors / ...Values -> addRange(points, normals, colors[, values]) (G128)
+    const red = { r: 255, g: 0, b: 0, a: 255 }, blue = { r: 0, g: 0, b: 255, a: 255 };
+    const pts = [[0, 0, 0], [1, 0, 0]], nrm = [[0, 0, 1], [0, 1, 0]];
+    const sig = c => JSON.stringify([Array.from(c.getNormals()).map(v => [v.X, v.Y, v.Z]),
+                                     Array.from(c.getColors()).map(k => [k.r, k.g, k.b]), Array.from(c.getPointValues())]);
+    const o3 = new r.PointCloud(), n3 = new r.PointCloudX();
+    o3.addRangePointsNormalsColors(pts, nrm, [red, blue]); n3.addRange(pts.map(q => P(...q)), nrm.map(q => P(...q)), [red, blue]);
+    assert.strictEqual(sig(n3), sig(new r.PointCloudX(o3)));
+    const o4 = new r.PointCloud(), n4 = new r.PointCloudX();
+    o4.addRangePointsNormalsColorsValues(pts, nrm, [red, blue], [1.5, 2.5]);
+    n4.addRange(pts.map(q => P(...q)), nrm.map(q => P(...q)), [red, blue], [1.5, 2.5]);
+    assert.deepStrictEqual(Array.from(n4.getPointValues()), [1.5, 2.5]);
+    assert.strictEqual(o4.count, 0);            // pilot #66: the old one adds nothing (a chained != in its size check)
+    // int / double sequences in and out through the members the same rule unlocked
+    const m = new r.MeshX();
+    for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) m.vertices.add(i, j, 0);
+    for (let j = 0; j < 2; j++) for (let i = 0; i < 2; i++) { const a = j * 3 + i; m.faces.addFace(a, a + 1, a + 4, a + 3); }
+    assert.deepStrictEqual(Array.from(m.faces.toIntArray(false)).slice(0, 8), [0, 1, 4, 3, 1, 2, 5, 4]);
+    assert.deepStrictEqual(Array.from(m.getNakedEdgePointStatus()), [true, true, true, true, false, true, true, true, true]);
+    assert.strictEqual(m.faces.deleteFaces([0, 3], true), 2);
+    assert.deepStrictEqual([m.faces.count, m.vertices.count], [2, 7]);
+    const lt = new r.LinetypeX();
+    assert.strictEqual(lt.setSegments([1.0, -0.5]), true);
+    assert.deepStrictEqual([0, 1].map(i => Array.from(lt.getSegment(i))), [[1.0, true], [0.5, false]]);
+  });
 };

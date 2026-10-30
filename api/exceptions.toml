@@ -138,24 +138,190 @@ decided = "Luis, 2026-10-15"
 vnext = "src/bindings/bnd_bitmapx.* (File3dmBitmapTableX), with the review fixes (G90)"
 reason = "RhinoCommon's BitmapTable is RHINO_SDK only; File3dmManifestTable yields BitmapEntry for images (pilot #37)"
 
-[[hand_kept]]
-class = "Centermark"
-members = ["GetDisplayLines"]
-decided = "Luis, 2026-10-16"
-reason = "RhinoCommon's Centermark.GetDisplayLines is commented out (pilot #41); kept until the upstream fix"
-upstream = "loop to 6 (not 9) and uncomment Centermark.GetDisplayLines (pilot #41)"
-
 # ---- Rhino-only in RhinoCommon (Luis 2026-10-16): kept until upstream makes them portable
 
 [[hand_kept]]
 class = "EmbeddedFile"
 members = ["fromByteArray"]
 decided = "Luis, 2026-10-18"
+vnext = "File3dmEmbeddedFileX.fromByteArray (hand member, JS only, G124)"
 reason = "JS only: builds an embedded file from bytes (WASM has no host file system to read the file from); RhinoCommon's File3dmEmbeddedFile has no such factory"
 
 [[hand_kept]]
 class = "File3dm"
 members = ["destroy", "getEmbeddedFileAsBase64Strict"]
 decided = "Luis, 2026-10-18"
+vnext = "File3dmX.destroy = embind's delete() (hand alias, JS only, G124: the old one freed the model twice); File3dmX.getEmbeddedFileAsBase64Strict (G123)"
 reason = "JS only: destroy() frees the model's contents explicitly (embind objects are not collected promptly); getEmbeddedFileAsBase64Strict returns an embedded file's bytes as base64 (no host file system in WASM). No RhinoCommon counterparts"
 
+
+# ---- triage F, serialization and file interop (Luis 2026-10-28): built as hand members
+# (gen_registry.HAND_MEMBERS, src/hand/: plain C++ registered in every binding, G123)
+
+[[hand_kept]]
+class = "CommonObject"
+members = ["Encode", "Decode"]
+decided = "Luis, 2026-10-28"
+reason = "F1: the JSON form Rhino.Compute exchanges (an opennurbs archive in a dict); kept by hand until the portable JSON API is upstream"
+upstream = "a portable JSON Encode/Decode for CommonObject and File3dm in RhinoCommon (design first)"
+
+[[hand_kept]]
+class = "File3dm"
+members = ["Encode", "Decode"]
+decided = "Luis, 2026-10-28"
+reason = "F1: the JSON form of a whole model; kept by hand until the portable JSON API is upstream"
+upstream = "a portable JSON Encode/Decode for CommonObject and File3dm in RhinoCommon (design first)"
+
+[[hand_kept]]
+class = "BoundingBox"
+members = ["Encode", "Decode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Circle"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "MeshingParameters"
+members = ["Encode", "Decode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form Rhino.Compute sends meshing parameters in; no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Plane"
+members = ["Encode", "Decode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Sphere"
+members = ["Encode", "Decode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Point2d"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Point2f"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Point3d"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Point3f"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Point4d"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Vector2d"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Vector3d"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Vector3f"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "CommonObject"
+members = ["RdkXml"]
+decided = "Luis, 2026-10-28"
+reason = "F3: an object's RDK user data as XML (added 2018, 93c21a63); kept after review"
+
+[[hand_kept]]
+class = "File3dm"
+members = ["RdkXml", "GetEmbeddedFileAsBase64"]
+decided = "Luis, 2026-10-28"
+reason = "F3 RdkXml: the model's RDK document data as XML; F4 GetEmbeddedFileAsBase64: an embedded file's bytes without a host file system"
+
+[[hand_kept]]
+class = "File3dmRdkDocumentData"
+members = ["RdkXml"]
+decided = "Luis, 2026-10-28"
+vnext = "File3dmPlugInDataX.RdkXml (hand member, G123): the plug-in data entry the old class was"
+reason = "F3: the RDK document data as XML; kept after review"
+
+[[hand_kept]]
+class = "File3dmRenderContentTable"
+members = ["Add"]
+decided = "Luis, 2026-10-28 (upstream); hand-kept for 9.2, 2026-10-29"
+vnext = "File3dmRenderMaterialsX.Add / File3dmRenderEnvironmentsX.Add / File3dmRenderTexturesX.Add (hand members, G124): on the kind's collection, where FindId went (H1)"
+upstream = "RhinoCommon has no way to add render content to a File3dm (File3dmRenderMaterial() is commented out since 2022)"
+reason = "copies a render content (e.g. from another model) into the model"
+
+[[hand_kept]]
+class = "PointCloud"
+members = ["addPointValue", "insertPointValue", "addRangePointsValues"]
+decided = "Luis, 2026-10-30"
+vnext = "PointCloudX: Python Add(point, value) / Insert(index, point, value) / AddRange(points, values) overloads, JS addPointValue / insertPointValue / addRangePointsValues (hand members, G126); every channel stays aligned (pilot #64)"
+upstream = "U38: RhinoCommon PointCloud.Add(Point3d, double), Insert(int, Point3d, double), AddRange(IEnumerable<Point3d>, IEnumerable<double>)"
+reason = "a point with a value but no normal or color; RhinoCommon carries a value only with both"
+
+[[hand_kept]]
+class = "File3dmGroupTable"
+members = ["deleteId"]
+decided = "Luis, 2026-10-30"
+vnext = "File3dmGroupTableX: Python Delete(id) overload, JS deleteId (hand member, G126)"
+upstream = "U38: RhinoCommon File3dmGroupTable / File3dmCommonComponentTable Delete(Guid)"
+reason = "delete a group by id; RhinoCommon deletes by group or by index"
+
+[[hand_kept]]
+class = "SubDFace"
+members = ["Edges", "Vertices"]
+decided = "Luis, 2026-10-30 (option B: neighbouring components, Pierre)"
+vnext = "SubDFaceX.Edges / Vertices (hand properties, G129): lists of the generated components, as RhinoCommon's vertex.Edges (Luis 2026-10-30, option 1). JS: an array property (`face.edges`), the old one a function returning an iterator (`face.edges()`)"
+reason = "a component's neighbours in one call; RhinoCommon has only EdgeAt(i) / VertexAt(i)"
+
+[[hand_kept]]
+class = "SubDEdge"
+members = ["Faces", "Vertices"]
+decided = "Luis, 2026-10-30 (option B)"
+vnext = "SubDEdgeX.Faces / Vertices (hand properties, G129)"
+reason = "as SubDFace.Edges"
+
+[[hand_kept]]
+class = "SubDVertex"
+members = ["Faces"]
+decided = "Luis, 2026-10-30 (option B)"
+vnext = "SubDVertexX.Faces (hand property, G129); vertex.Edges is RhinoCommon's (generated)"
+reason = "as SubDFace.Edges"
+
+[[hand_kept]]
+class = "ArchivableDictionary"
+members = ["EncodeDict", "DecodeDict"]
+decided = "Luis, 2026-10-28"
+reason = "F4: a dict of rhino3dm values to and from its JSON form (Rhino.Compute)"
+
+[[hand_kept]]
+class = "EmbeddedFile"
+members = ["Read"]
+decided = "Luis, 2026-10-28"
+reason = "F4: reads a file from disk into an embedded file; RhinoCommon's File3dmEmbeddedFile has no such factory"

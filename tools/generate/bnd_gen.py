@@ -24,6 +24,7 @@ from gen_registry import *
 from planner import *
 from emit_classes import *
 from emit_values import *
+from emit_hand import hand_class_registrations, hand_js_aliases, hand_js_post
 
 
 def _derives(d, base):
@@ -273,6 +274,7 @@ def js_post_script():
   var GRID = %s;
   var KEEP_ARGS = %s;
   var KEEP_SET = %s;
+  var ALIASES = %s;
   function install() {
     var M = Module, missing = [];
     M.rh3dmPostUnresolved = missing;
@@ -334,6 +336,12 @@ def js_post_script():
       Object.defineProperty(proto, ks[1], { get: g, set: function (v) { s.call(this, v); keep(this, '__rh3dm_set_' + ks[1], v); },
                                             enumerable: d.enumerable, configurable: true });
     });
+    // G124: JS-only names calling another method (File3dmX.destroy -> embind's delete)
+    ALIASES.forEach(function (a) {
+      var C = M[a[0]], proto = C && C.prototype;
+      if (!proto || typeof proto[a[2]] !== 'function') { missing.push('alias ' + a[0] + '.' + a[1]); return; }
+      proto[a[1]] = function () { return this[a[2]].apply(this, arguments); };
+    });
     ITERS.forEach(function (c) {
       var C = M[c], proto = C && C.prototype, f = proto && proto.next;
       if (typeof f !== 'function') { missing.push('iter ' + c); return; }
@@ -385,7 +393,18 @@ def js_post_script():
 ''' % (j(JS_POST['keep']), j(JS_POST['iters']), j(JS_POST['static_props']), j(JS_POST['enumerable']),
        json.dumps(sorted(set(map(tuple, JS_POST['grid']))), separators=(',', ':')),
        json.dumps(sorted(set(map(tuple, JS_POST['keep_args']))), separators=(',', ':')),
-       json.dumps(sorted(set(map(tuple, JS_POST['keep_set']))), separators=(',', ':')))
+       json.dumps(sorted(set(map(tuple, JS_POST['keep_set']))), separators=(',', ':')),
+       json.dumps(sorted(set(map(tuple, JS_POST['aliases']))), separators=(',', ':')))
+
+
+def hand_chain(cls):
+    """cls and its bases: JS re-registers a base's class functions on each derived class (G123:
+    CommonObjectX.decode on every class), so a class file includes its bases' hand headers"""
+    out, c = [], cls
+    while c:
+        out.append(c['reg'])
+        c = BY_REG.get(c.get('base') or '')
+    return out
 
 
 def main():
@@ -566,7 +585,8 @@ def main():
         # verbatim: C++ enum classes number implicit enumerators exactly as
         # C# does (first 0, then previous + 1)
         pairs = [(v.split('=')[0].strip(), v) for v in enum_values[ename]]
-        if ename not in VT_DEFINED_ENUMS:      # else the values header defines it (G107)
+        # else the values header defines it (G107), or opennurbs does (OWNED_ENUMS)
+        if ename not in VT_DEFINED_ENUMS and not CS_ENUMS[ename].get('defined'):
             gen_enum_defs.append('enum class %s : int { %s };'
                                  % (cpp, ', '.join(v for _, v in pairs)))
         vals = '\n'.join('      .value("%s", %s::%s)' % (n, cpp, n)
@@ -581,6 +601,15 @@ def main():
         else:
             gen_enum_py.append('  py::enum_<%s>(m, "%s")\n%s;' % (cpp, ename, vals))
         gen_enum_js.append('  enum_<%s>("%s")\n%s;' % (cpp, CS_ENUMS[ename].get('js', ename), vals))
+    # a nested enum the old bindings register (DimensionStyle.Field, at module level or in the
+    # old class): the generated owner exposes that type under its nested name, as RhinoCommon
+    # nests it (D18) -- pybind11 cannot register a C++ type twice (and type::of takes classes only:
+    # the type of a cast value). M3 moves the registration
+    for ename in sorted(e for e, c in CS_ENUMS.items() if c.get('owner') and not c['gen']):
+        owner = CS_ENUMS[ename]['owner']
+        if owner in BY_CS:
+            gen_enum_py_nested.append('  m.attr("%s").attr("%s") = py::cast(%s()).get_type();'
+                                      % (BY_CS[owner]['reg'], ename.split('.')[1], CS_ENUMS[ename]['cpp']))
     vt_path = (os.environ.get('RH3DM_VALUETYPES') or os.path.join(ROOT, 'api', 'valuetypes.json'))
     if os.path.exists(vt_path):
         vt = json.load(open(vt_path))
@@ -792,6 +821,7 @@ def main():
         files.update(emit_valuetypes(vt, emit_valuetype_bindings(vt, skipped)))
     else:
         vt_regs = []
+    check_hand_members({c['reg'] for c in CLASSES} | set(vt_regs), os.path.join(ROOT, 'src'))   # G123
 
     # translated enums reach the bindings as the type registered under the
     # RhinoCommon name (today the old bindings' enum): RH3DM_Pub casts
@@ -1453,6 +1483,16 @@ inline RH3DM_Bytes RH3DM_ReadAllBytes(const std::wstring& path) {
 // Color.A); ON_Color's is transparency.
 inline BND_Color RH3DM_ColorFromArgb(int argb)       // Color.FromArgb(int)
 { return ON_Color_to_Binding(ON_Color((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, 255 - ((argb >> 24) & 0xFF))); }
+// Color.FromArgb(r, g, b) / (a, r, g, b): each component 0..255, else .NET's ArgumentException (G128)
+inline int RH3DM_ColorByte(int v, const char* name)
+{
+  if (v < 0 || v > 255)
+    throw std::invalid_argument("Value of '" + std::to_string(v) + "' is not valid for '" + name + "'. '" + name
+                                + "' should be greater than or equal to 0 and less than or equal to 255.");
+  return v;
+}
+inline BND_Color RH3DM_ColorFromArgb4(int a, int r, int g, int b)
+{ return ON_Color_to_Binding(ON_Color(RH3DM_ColorByte(r, "red"), RH3DM_ColorByte(g, "green"), RH3DM_ColorByte(b, "blue"), 255 - RH3DM_ColorByte(a, "alpha"))); }
 inline BND_Color RH3DM_ColorFromWin32(int abgr)      // Interop.ColorFromWin32: always opaque
 { return ON_Color_to_Binding(ON_Color(abgr & 0xFF, (abgr >> 8) & 0xFF, (abgr >> 16) & 0xFF, 0)); }
 inline int RH3DM_ColorToArgb(const BND_Color& v)     // Color.ToArgb()
@@ -1581,7 +1621,7 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
                            | {cs + 'X' for p in plans for l in p.get('locals') or [] for cs, cpp in DATA_CPP.items()
                               if re.match(r'^%s\b' % re.escape(cpp), l)})
         dep_includes = ''.join('#include "gen_%s.h"\n' % d.lower() for d in deps + data_deps) \
-            + ''.join('#include "../bindings/%s"\n' % h for h in sorted({x['header'] for x in HAND_MEMBERS.get(cls['reg'], [])}
+            + ''.join('#include "../%s"\n' % h for h in sorted({x['header'] for r in hand_chain(cls) for x in HAND_MEMBERS.get(r, []) if 'header' in x}
                                                                        | {x['header'] for x in HAND_FALLBACKS.get(cls['reg'], [])}
                 | {st['header'] for st in HAND_STANDINS.values()
                    if any('new %s(' % st['gen'] in (p['shape'][2] if p['shape'][0] == 'translated' else '') for p in plans)}))
@@ -1727,11 +1767,16 @@ void initGen{reg}(void)
     keep = [c for c in JS_POST['enumerable'] if c not in grids and (has(c, 'iterator') or (has(c, 'count') and has(c, 'get')))]
     JS_POST['not_iterable'] = sorted(set(JS_POST['enumerable']) - set(keep) - grids)
     JS_POST['enumerable'] = keep
+    JS_POST['aliases'].extend(hand_js_aliases())   # G124
+    _hk, _he = hand_js_post()                          # G129
+    JS_POST['keep'].extend(_hk)
+    JS_POST['enumerable'].extend(_he)
     files['gen_post.js'] = js_post_script()
     files['gen_pre.js'] = js_pre_script()
     if JS_POST['not_iterable']:
         # IEnumerable in C#, no for...of in JS: the list's indexer (or enumerator) is not generated
         print('  not iterable in JS (no indexer generated): %s' % ', '.join(sorted(JS_POST['not_iterable'])))
+    hand_cls = hand_class_registrations()   # G123: holders for hand members with no generated class
     files['gen_init.cpp'] = BANNER + '''#include "gen_common.h"
 
 {hand_inc}
@@ -1770,9 +1815,9 @@ void initGeneratedBindings(void)
         enums_py_nested='\n'.join(gen_enum_py_nested),
         inits_py=inits_py, inits_js=inits_js,
         # hand-written bindings (G90): after every generated class (they may derive from one)
-        hand_inc=''.join('#include "../bindings/%s"\n' % h['header'] for h in HAND_BINDINGS),
-        hand_py=''.join('  %s(m);\n' % h['init'] for h in HAND_BINDINGS),
-        hand_js=''.join('  %s();\n' % h['init'] for h in HAND_BINDINGS),
+        hand_inc=''.join('#include "../%s"\n' % h['header'] for h in HAND_BINDINGS) + hand_cls[0],
+        hand_py=''.join('  %s(m);\n' % h['init'] for h in HAND_BINDINGS) + hand_cls[1],
+        hand_js=''.join('  %s();\n' % h['init'] for h in HAND_BINDINGS) + hand_cls[2],
         vt_py_decls=''.join('void initGen%s(rh3dmpymodule&);\n' % r for r in vt_regs),
         vt_js_decls=''.join('void initGen%s(void);\n' % r for r in vt_regs),
         vt_py=''.join('  initGen%s(m);\n' % r for r in vt_regs),

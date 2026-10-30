@@ -2,6 +2,7 @@
 pybind11 / embind registrations."""
 
 from gen_registry import *
+from emit_hand import hand_names, hand_registrations
 
 
 def failthrow_line(ft, call, m):
@@ -695,8 +696,8 @@ def emit_decl_def(p, cls):
     if p['shape'][0] == 'translatedout':
         parts, tbody = p['shape'][3], p['shape'][2].split('\n')
         sig = ', '.join('%s%s %s' % (t, '&' if o else '', n) for t, n, o in parts)
-        cq = '' if p.get('nonconst') else ' const'
-        decl += '\n  %s %s_out(%s)%s;' % (p['shape'][1], p['cpp'], sig, cq)
+        cq = '' if p.get('nonconst') or p['static'] else ' const'
+        decl += '\n  %s%s %s_out(%s)%s;' % ('static ' if p['static'] else '', p['shape'][1], p['cpp'], sig, cq)
         body.append('\n%s %s::%s_out(%s)%s {' % (p['shape'][1], cls['gen'], p['cpp'], sig, cq))
         body += tbody[1:-1]
         body.append('}')
@@ -732,7 +733,8 @@ def emit_decl_def(p, cls):
         ret = companion_result(has_success) or 'bool'       # the C# result itself (G109), else the status
         sig = ', '.join('%s%s %s' % (t, '&' if o else '', n) for t, n, o in parts)
         call = '%s(%s)' % (p['fn']['name'], ', '.join(p['call_exprs']))
-        L = ['%s %s::%s_out(%s) const {' % (ret, cls['gen'], p['cpp'], sig)]
+        cq = '' if p['static'] else ' const'                # a static's companion is static (G128)
+        L = ['%s %s::%s_out(%s)%s {' % (ret, cls['gen'], p['cpp'], sig, cq)]
         L += emit_guard_lines(p)
         out_names = {n for n, _ in outs}
         for x in p['locals']:
@@ -745,7 +747,7 @@ def emit_decl_def(p, cls):
             L.append('  %s' % x)
         L.append('  return (%s)%s;' % (call, (' ' + has_success) if isinstance(has_success, str) else ''))
         L.append('}')
-        decl += '\n  %s %s_out(%s) const;' % (ret, p['cpp'], sig)
+        decl += '\n  %s%s %s_out(%s)%s;' % ('static ' if p['static'] else '', ret, p['cpp'], sig, cq)
         body.append('\n' + '\n'.join(L))
     return decl, '\n'.join(body)
 
@@ -1493,15 +1495,15 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
     instance_names = {p['m']['Name'] for p in plans if not p['static'] and p['m']['Kind'] != 'property'
                       and not p.get('setter_of')}
     live = {id(p) for p in plans}
-    # hand-written members (G90: File3dmX.Bitmaps, gen_registry.HAND_MEMBERS): free
-    # functions taking this object; the result refers to it, so it keeps it alive
-    for h in HAND_MEMBERS.get(cls['reg'], []):
-        if h['kind'] == 'property':
-            py.append('      .def_property_readonly("%s", py::cpp_function(&%s, py::keep_alive<0, 1>()))' % (h['name'], h['fn']))
-            js.append('      .property("%s", &%s)' % (camel(h['name']), h['fn']))
-        else:
-            py.append('      .def("%s", &%s, py::keep_alive<0, 1>())' % (h['name'], h['fn']))
-            js.append('      .function("%s", &%s, allow_raw_pointers())' % (camel(h['name']), h['fn']))
+    # hand members (G90/G123, gen_registry.HAND_MEMBERS): free functions over this class,
+    # registered by emit_hand -- never under a name the generated surface already uses, except a
+    # Python overload the generated member lacks (`overload`, G126: appended after its overloads)
+    clash = hand_names(cls['reg'], strict=True)[0] & {p['m']['Name'] for p in plans}
+    if clash:
+        raise SystemExit('HAND_MEMBERS %s: %s is generated (retire the hand member)' % (cls['reg'], sorted(clash)))
+    hpy, hjs = hand_registrations(cls['reg'])
+    py += hpy
+    js += hjs
     for p in plans:
         if p.get('setter_of'):
             continue           # registered with its getter below
@@ -1682,6 +1684,8 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             py.append('      .def("%s", &%s::%s%s)' % (n, cls['gen'], g, pyargs))
         js_methods.setdefault((camel(n), len(p['bind_args']), p['static']), []).append(p)
 
+    # G126: Python overloads the generated member lacks, after its own (pybind11 tries in order)
+    py += hand_registrations(cls['reg'], overloads=True)[0]
     # embind keeps ONE function per name+arity. Same-arity overloads get a
     # generated C++ dispatcher on argument shape (isoCurve(int, t) vs
     # isoCurve(IsoStatus, t)); overloads JS cannot tell apart collapse to the

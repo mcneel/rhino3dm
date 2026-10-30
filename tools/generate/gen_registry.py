@@ -360,6 +360,12 @@ CLASSES = [
      'mode': 'pointer', 'hand': 'BND_DimOrdinate', 'hand_header': 'bnd_annotationbase.h',
      'copy': ('ON_DimOrdinate::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
      'gen': 'BND_OrdinateDimensionX', 'reg': 'OrdinateDimensionX', 'base': 'DimensionX'},
+    # U12 (RH-99905, rhino 9.x e6b9e144642): GetDisplayLines uncommented upstream -- the last
+    # Dimension subclass the old bindings have (G127)
+    {'type': 'Rhino.Geometry.Centermark', 'cs': 'Centermark', 'on': 'ON_Centermark',
+     'mode': 'pointer', 'hand': 'BND_Centermark', 'hand_header': 'bnd_annotationbase.h',
+     'copy': ('ON_Centermark::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
+     'gen': 'BND_CentermarkX', 'reg': 'CentermarkX', 'base': 'DimensionX'},
     # G116 (2026-10-28, batch 2 J1): the two remaining portable annotation classes; the old
     # bindings register them as Leader / Text
     {'type': 'Rhino.Geometry.Leader', 'cs': 'Leader', 'on': 'ON_Leader',
@@ -839,6 +845,26 @@ CS_ENUMS = {
 
 
 RENUMBERED_ENUMS = {}   # RhinoCommon enum -> (the hand C++ enum not reused, the differing members) (G78)
+
+# nested enums the generator registers on opennurbs' own C++ type -- the type the C layer
+# passes (ON_DimStyle::field), so no RH3DM_ copy is defined -- because the old registration is
+# not RhinoCommon's (DimensionStyle.Field: 105 of 119 values, `ArrowSize` for `Arrowsize`).
+# extend_enum_table checks every RhinoCommon value is an enumerator of that type, same number.
+OWNED_ENUMS = {'DimensionStyle.Field': ('ON_DimStyle::field', 'opennurbs_dimensionstyle.h')}
+
+
+def owned_enum_mismatches(cpp, header, rc_values):
+    """RhinoCommon values {name: int} that the C++ enum `cpp` (declared once in opennurbs'
+    `header`) lacks or numbers differently: [(name, RhinoCommon, C++)]"""
+    text = open(os.path.join(ROOT, 'src', 'lib', 'opennurbs', header), errors='replace').read()
+    decls = re.findall(r'\benum\s+class\s+%s\s*(?::\s*[\w ]+)?\s*\{([^{}]*)\}' % re.escape(cpp.split('::')[-1]), text)
+    if len(decls) != 1:
+        raise SystemExit('OWNED_ENUMS %s: %d declarations in %s' % (cpp, len(decls), header))
+    vals, cur = {}, -1
+    for part in [q.strip() for q in re.sub(r'//[^\n]*|/\*.*?\*/', '', decls[0], flags=re.S).split(',') if q.strip()]:
+        cur = int(part.split('=', 1)[1].strip(), 0) if '=' in part else cur + 1
+        vals[part.split('=')[0].strip()] = cur
+    return [(n, v, vals.get(n)) for n, v in rc_values.items() if vals.get(n) != v]
 _CPP_ENUMS = None
 
 
@@ -883,7 +909,8 @@ def extend_enum_table(manifest):
     are left out: their short names repeat across types."""
     hand, hand_js = {}, {}
     for f in glob.glob(os.path.join(ROOT, 'src', 'bindings', '*.cpp')):
-        text = open(f, errors='replace').read()
+        # a commented-out registration registers nothing (G128: bnd_intersect.cpp's PlaneCircleIntersection)
+        text = re.sub(r'//[^\n]*', '', open(f, errors='replace').read())
         for cpp, name in re.findall(r'py::enum_<([^>]+)>\(m, "(\w+)"', text):
             hand.setdefault(name, cpp.strip())
         # nested under a class: `py::class_<...> pyDimStyle(m, "DimensionStyle");
@@ -945,6 +972,17 @@ def extend_enum_table(manifest):
         joined = key.replace('.', '')
         if key in HIDDEN_ENUMS or joined in HIDDEN_ENUMS:
             continue
+        if key in OWNED_ENUMS:
+            cpp, header = OWNED_ENUMS[key]
+            if key in hand or joined in hand:
+                raise SystemExit('OWNED_ENUMS %s: the old bindings still register it -- remove that' % key)
+            bad = owned_enum_mismatches(cpp, header, rc_values.get(key) or {})
+            if bad or not rc_values.get(key):
+                raise SystemExit('OWNED_ENUMS %s: %s does not number RhinoCommon\'s values as it does: %s'
+                                 % (key, cpp, bad[:5]))
+            CS_ENUMS[key] = {'cpp': cpp, 'gen': True, 'defined': True, 'owner': owner,
+                             'js': hand_js.get(cpp, joined)}
+            continue
         if key in hand:
             CS_ENUMS[key] = {'cpp': hand[key], 'gen': False, 'owner': owner,
                              'js': hand_js.get(hand[key], joined)}
@@ -973,13 +1011,15 @@ def extend_enum_table(manifest):
 # `iters` -- iterator classes whose next().value holds the iterator; `static_props` -- (class,
 # name) of RhinoCommon static properties, registered as zero-argument class functions, made
 # getters; `enumerable` -- classes whose RhinoCommon type is IEnumerable: for...of
+# G124: `aliases` -- (class, name, existing method): a JS-only name calling another method (hand
+# members of kind 'alias': File3dmX.destroy -> embind's delete)
 # G112: `keep_args` -- (class, member, argument index, static): the result holds that argument (Python
 # keep_alive<0, N>); `keep_set` -- (class, property): the object holds the value its setter took
 # (Python keep_alive<1, 2>, a borrowing modeled-field setter)
 # 'user_strings' (D62, Luis 2026-10-20): a class registering RhinoCommon's internal CommonObject
 # user-string members under their public names, where rhino3dm has them and RhinoCommon does not
 JS_POST = {'keep': [], 'iters': [], 'static_props': [], 'enumerable': [], 'not_iterable': [], 'grid': [],
-           'keep_args': [], 'keep_set': []}
+           'keep_args': [], 'keep_set': [], 'aliases': []}
 
 # IEnumerable classes whose RhinoCommon enumerator is a private class over two counts and a
 # (u, v) getter, row-major in u (G102): {C# simple name: (count u, count v, getter)}. Each entry
@@ -1615,14 +1655,163 @@ def view_copyable(c):
 # generate from. gen_init calls each `init` after every generated class exists (its
 # classes may derive from generated ones), and aliases `for...of` on its tables.
 HAND_BINDINGS = [
-    {'init': 'initBitmapXBindings', 'header': 'bnd_bitmapx.h', 'iter_tables': ['File3dmBitmapTableX'],
+    {'init': 'initBitmapXBindings', 'header': 'bindings/bnd_bitmapx.h', 'iter_tables': ['File3dmBitmapTableX'],
      'classes': ['BitmapX', 'File3dmBitmapTableX', 'File3dmBitmapTableXIter']},
 ]
-# members a generated class registers from hand-written free functions taking it
-# (`const BND_<reg>&`): Python `keep_alive<0, 1>` (the result refers to the object)
+# Hand members (G90; binding-agnostic since G123): rhino3dm-only members of a generated class
+# or value type (api/exceptions.toml [[hand_kept]]), written ONCE as plain C++ free functions
+# over it -- no binding headers: dictionaries etc. go through src/hand/hand_common.h -- and
+# registered by the generator in every binding (emit_hand.hand_registrations: pybind11 and
+# embind now; nanobind in M2 by porting that one function). Files under src/hand/ are checked
+# to be binding-free. Keys:
+#   name     the Python name (RhinoCommon spelling)
+#   kind     'method'   R fn(const BND_<reg>& self, args...)
+#            'static'   R fn(args...)
+#            'property' R fn(const BND_<reg>& self); with 'set': void set(BND_<reg>& self, V)
+#   fn       the C++ function;  header: its header, relative to src/
+#   args     the argument names (Python keywords), in order
+#   js       the JS name (default: camelCase of name); None: not registered in JS
+#   py       False: not registered in Python
+#   keep_alive  the result refers to self (a view): Python keeps self alive while it lives
+# On a value type JS has no instances (values are plain objects, G38): a method is the class
+# function `rhino.BoundingBoxX.encode(box)`, as the generated value-type members are.
+def _hm(name, kind, fn, header, **kw):
+    return dict(name=name, kind=kind, fn=fn, header=header, **kw)
+
+
+_J, _F = 'hand/hand_json.h', 'hand/hand_file3dm.h'
 HAND_MEMBERS = {
-    'File3dmX': [{'name': 'Bitmaps', 'kind': 'property', 'fn': 'RH3DM_Hand_File3dmX_Bitmaps', 'header': 'bnd_bitmapx.h'}],
+    'File3dmX': [
+        _hm('Bitmaps', 'property', 'RH3DM_Hand_File3dmX_Bitmaps', 'bindings/bnd_bitmapx.h', keep_alive=True),
+        # F1 (kept until a portable JSON API is upstream); encode(options) is one name in JS too (JS3)
+        _hm('Encode', 'method', 'RH3DM_Hand_File3dm_Encode', _J),
+        _hm('Encode', 'method', 'RH3DM_Hand_File3dm_EncodeOptions', _J, args=['options']),
+        _hm('Decode', 'static', 'RH3DM_Hand_File3dm_Decode', _J, args=['buffer']),
+        # F3, F4 (JS keeps the old getEmbeddedFileAsBase64Strict name for the 2-argument form)
+        _hm('RdkXml', 'method', 'RH3DM_Hand_File3dm_RdkXml', _F),
+        _hm('GetEmbeddedFileAsBase64', 'method', 'RH3DM_Hand_File3dm_GetEmbeddedFileAsBase64', _F, args=['path']),
+        _hm('GetEmbeddedFileAsBase64', 'method', 'RH3DM_Hand_File3dm_GetEmbeddedFileAsBase64Strict', _F,
+            args=['path', 'strict'], js='getEmbeddedFileAsBase64Strict'),
+    ],
+    # triage F (Luis 2026-10-28): F1 CommonObject/File3dm Encode/Decode; F2 the values'; F3 RdkXml; F4
+    'CommonObjectX': [
+        _hm('Encode', 'method', 'RH3DM_Hand_CommonObject_Encode', _J),
+        _hm('Decode', 'static', 'RH3DM_Hand_CommonObject_Decode', _J, args=['jsonObject']),
+        _hm('RdkXml', 'method', 'RH3DM_Hand_CommonObject_RdkXml', _F),
+    ],
+    'File3dmPlugInDataX': [_hm('RdkXml', 'method', 'RH3DM_Hand_File3dmPlugInData_RdkXml', _F)],
+    'File3dmEmbeddedFileX': [_hm('Read', 'static', 'RH3DM_Hand_EmbeddedFile_Read', _F, args=['fileName'])],
+    # File3dmRenderContentTable.Add, on the kind's collection (where Find went, triage H1)
+    'File3dmRenderMaterialsX': [_hm('Add', 'method', 'RH3DM_Hand_RenderMaterials_Add', _F, args=['material'])],
+    'File3dmRenderEnvironmentsX': [_hm('Add', 'method', 'RH3DM_Hand_RenderEnvironments_Add', _F, args=['environment'])],
+    'File3dmRenderTexturesX': [_hm('Add', 'method', 'RH3DM_Hand_RenderTextures_Add', _F, args=['texture'])],
+    'ArchivableDictionaryX': [
+        _hm('EncodeDict', 'static', 'RH3DM_Hand_ArchivableDictionary_EncodeDict', _J, args=['dict']),
+        _hm('DecodeDict', 'static', 'RH3DM_Hand_ArchivableDictionary_DecodeDict', _J, args=['jsonObject'])],
+    'MeshingParametersX': [
+        _hm('Encode', 'method', 'RH3DM_Hand_MeshingParameters_Encode', _J),
+        _hm('Decode', 'static', 'RH3DM_Hand_MeshingParameters_Decode', _J, args=['jsonObject']),
+        # JS2 (Luis 2026-10-28): toJSON kept on the classes, over Encode (JSON.stringify calls it)
+        _hm('toJSON', 'method', 'RH3DM_Hand_MeshingParameters_ToJSON', _J, args=['key'], py=False, js='toJSON')],
 }
+HAND_MEMBERS['CommonObjectX'].append(
+    _hm('toJSON', 'method', 'RH3DM_Hand_CommonObject_ToJSON', _J, args=['key'], py=False, js='toJSON'))
+# JS-only members kept by hand (Luis 2026-10-18): EmbeddedFile.fromByteArray; File3dm.destroy,
+# now embind's delete() under the old name (the old one freed the model twice)
+HAND_MEMBERS['File3dmEmbeddedFileX'].append(
+    _hm('FromByteArray', 'static', 'RH3DM_Hand_EmbeddedFile_FromByteArray', _F, args=['bytes'], py=False))
+HAND_MEMBERS['File3dmX'].append(dict(name='destroy', kind='alias', of='delete', py=False, js='destroy'))
+# overloads rhino3dm has and RhinoCommon lacks (Luis 2026-10-30: kept by hand, upstream U38): Python
+# overloads of the generated members (as the old bindings had them), JS the old split names
+_PC = 'hand/hand_pointcloud.h'
+HAND_MEMBERS['PointCloudX'] = [
+    _hm('Add', 'method', 'RH3DM_Hand_PointCloud_AddValue', _PC, args=['point', 'value'], overload=True, js='addPointValue'),
+    _hm('Insert', 'method', 'RH3DM_Hand_PointCloud_InsertValue', _PC, args=['index', 'point', 'value'], overload=True,
+        js='insertPointValue'),
+    _hm('AddRange', 'method', 'RH3DM_Hand_PointCloud_AddRangeValues', _PC, args=['points', 'values'], overload=True,
+        js='addRangePointsValues')]
+HAND_MEMBERS['File3dmGroupTableX'] = [
+    _hm('Delete', 'method', 'RH3DM_Hand_GroupTable_DeleteId', _PC, args=['id'], overload=True, js='deleteId')]
+# F2 on the value types: Encode everywhere, Decode where the old binding had it
+for _t, _dec in [('BoundingBox', True), ('Plane', True), ('Sphere', True), ('Circle', False),
+                 ('Point2d', False), ('Point2f', False), ('Point3d', False), ('Point3f', False), ('Point4d', False),
+                 ('Vector2d', False), ('Vector3d', False), ('Vector3f', False)]:
+    HAND_MEMBERS[_t + 'X'] = [_hm('Encode', 'method', 'RH3DM_Hand_%s_Encode' % _t, _J)] + (
+        [_hm('Decode', 'static', 'RH3DM_Hand_%s_Decode' % _t, _J, args=['jsonObject'])] if _dec else [])
+# hand classes with no generated counterpart, registered from gen_init after every generated class:
+# a name -- an empty holder for its hand members (statics only, G123) -- or a hand TYPE (G129):
+# {name, cpp, header[, enumerable]} -- a C++ class in src/hand/ whose hand members are its instance
+# members (the SubD neighbour cursors); `enumerable`: JS for...of over its count / get, as RhinoCommon
+# lists (Python iterates its __getitem__ to the IndexError)
+HAND_CLASSES = ['ArchivableDictionaryX']
+# SubD neighbours (G129; Luis 2026-10-30, option 1): `face.Edges` and friends, rhino3dm 8.32's, as lists
+# of the generated components -- as RhinoCommon's own vertex.Edges is generated (owned, each item keeping
+# the component alive), so all six neighbour properties look alike
+_SD = 'hand/hand_subd.h'
+HAND_MEMBERS['SubDFaceX'] = [_hm('Edges', 'property', 'RH3DM_Hand_SubDFace_Edges', _SD, list=True),
+                             _hm('Vertices', 'property', 'RH3DM_Hand_SubDFace_Vertices', _SD, list=True)]
+HAND_MEMBERS['SubDEdgeX'] = [_hm('Faces', 'property', 'RH3DM_Hand_SubDEdge_Faces', _SD, list=True),
+                             _hm('Vertices', 'property', 'RH3DM_Hand_SubDEdge_Vertices', _SD, list=True)]
+HAND_MEMBERS['SubDVertexX'] = [_hm('Faces', 'property', 'RH3DM_Hand_SubDVertex_Faces', _SD, list=True)]
+
+
+def hand_class_names():
+    return {c if isinstance(c, str) else c['name'] for c in HAND_CLASSES}
+HAND_MEMBER_KEYS = {'name', 'kind', 'fn', 'header', 'args', 'js', 'py', 'keep_alive', 'set', 'of', 'overload', 'list'}
+# the one file under src/hand/ allowed to name a binding: the neutral types' implementation
+HAND_SHIM = {'hand/hand_common.h', 'hand/hand_common.cpp'}
+HAND_BINDING_WORDS = re.compile(r'\bpy::|\bnb::|\bemscripten\b|\bON_PYTHON_COMPILE\b|\bON_WASM_COMPILE\b|\bNANOBIND\b')
+
+
+def check_hand_members(regs, src_root):
+    """G123: every HAND_MEMBERS entry is well formed, names a registered class or value type
+    (`regs`), and declares its functions in its header; every file under src/hand/ (but the
+    shim) is binding-free. Stops the generator otherwise."""
+    errs = []
+    for reg, entries in HAND_MEMBERS.items():
+        if reg not in regs and reg not in hand_class_names():
+            errs.append('%s: not a generated class or value type' % reg)
+        for e in entries:
+            where = '%s.%s' % (reg, e.get('name'))
+            bad = set(e) - HAND_MEMBER_KEYS
+            if bad:
+                errs.append('%s: unknown keys %s' % (where, sorted(bad)))
+            if e.get('kind') == 'alias':
+                # JS only, no C++: the name calls method `of` (an embind built-in such as delete)
+                if e.get('py', True) or not e.get('of') or set(e) - {'name', 'kind', 'of', 'py', 'js'}:
+                    errs.append("%s: an alias is JS only (py: False) and takes just 'of'" % where)
+                continue
+            if 'of' in e:
+                errs.append("%s: 'of' belongs to an alias" % where)
+            if e.get('overload') and e.get('js', camel(e.get('name', ''))) == camel(e.get('name', '')):
+                # embind keeps one overload per arity: a JS overload needs its own name (or js: None)
+                errs.append('%s: an overload takes its own JS name' % where)
+            if e.get('kind') not in ('method', 'static', 'property'):
+                errs.append('%s: kind %r' % (where, e.get('kind')))
+            if 'set' in e and e.get('kind') != 'property':
+                errs.append('%s: a setter on a %s' % (where, e.get('kind')))
+            if e.get('kind') == 'property' and e.get('args'):
+                errs.append('%s: a property takes no arguments' % where)
+            if e.get('list') and (e.get('kind') != 'property' or 'set' in e or e.get('keep_alive')):
+                errs.append('%s: `list` is a read-only property (its items keep the object alive)' % where)
+            path = os.path.join(src_root, e.get('header', ''))
+            if not os.path.isfile(path):
+                errs.append('%s: no header %s' % (where, e.get('header')))
+                continue
+            text = open(path).read()
+            for f in [e.get('fn')] + ([e['set']] if e.get('set') else []):
+                if not f or not re.search(r'\b%s\s*\(' % re.escape(f), text):
+                    errs.append('%s: %s is not declared in %s' % (where, f, e['header']))
+    hand = os.path.join(src_root, 'hand')
+    for fn in sorted(os.listdir(hand)) if os.path.isdir(hand) else []:
+        rel = 'hand/' + fn
+        if rel not in HAND_SHIM and fn.endswith(('.h', '.cpp')):
+            for i, line in enumerate(open(os.path.join(hand, fn)), 1):
+                if HAND_BINDING_WORDS.search(line.split('//')[0]):
+                    errs.append('src/%s:%d names a binding (hand members are binding-free: '
+                                'use hand_common.h): %s' % (rel, i, line.strip()))
+    if errs:
+        raise SystemExit('HAND_MEMBERS (G123):\n  ' + '\n  '.join(errs))
 # a hand path BEHIND a generated member (G119): where RhinoCommon's body gives up with
 # `throw new NotSupportedException(..)`, the generated body calls the hand function instead.
 # File3dmObjectTable.Add(GeometryBase, ObjectAttributes): RhinoCommon adds only linear/angular
@@ -1631,7 +1820,7 @@ HAND_MEMBERS = {
 # 2026-10-28: keep that hand path; the RhinoCommon fix is upstream U30 (D71).
 HAND_FALLBACKS = {
     'File3dmObjectTableX': [{'member': 'Add', 'params': ['GeometryBase', 'ObjectAttributes'],
-                             'throws': 'NotSupportedException', 'header': 'bnd_objecttablex.h',
+                             'throws': 'NotSupportedException', 'header': 'bindings/bnd_objecttablex.h',
                              'call': 'RH3DM_Hand_File3dmObjectTable_AddAny(m_ptr, item, attributes)'}],
 }
 # a hand class standing in for a RhinoCommon class nothing generates (G91): RhinoCommon's
@@ -1642,5 +1831,5 @@ HAND_STANDINS = {
     # the index RhinoCommon passes is the manifest's, always unset for an image (images carry
     # no model index: ON_ModelComponent::IndexRequired(Image) is false) -- so the stand-in is
     # made from Instantiate's `id` instead: (file, index) -> (file, id)
-    'BitmapEntry': {'gen': 'BND_BitmapX', 'args': ['int'], 'header': 'bnd_bitmapx.h', 'rebind': ('index', 'id')},
+    'BitmapEntry': {'gen': 'BND_BitmapX', 'args': ['int'], 'header': 'bindings/bnd_bitmapx.h', 'rebind': ('index', 'id')},
 }

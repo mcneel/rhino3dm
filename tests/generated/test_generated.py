@@ -2840,6 +2840,21 @@ def test_retired_likely_renames_l1_and_other_maps_m1():
         assert (a.HorzSweepStart, a.HorzSweepEnd) == tuple(b.HorzSweep())
         assert (a.VertSweepStart, a.VertSweepEnd) == tuple(b.VertSweep())
         assert (a.BoundsMinU, a.BoundsMinV, a.BoundsMaxU, a.BoundsMaxV) == tuple(b.GetUVBounds())
+    # DimensionStyle.Field -> the nested enum on the generated class (D18), registered by the
+    # generator on ON_DimStyle::field with all of RhinoCommon's values (the old one had 105 of 119,
+    # `ArrowSize` for `Arrowsize`); old members taking a field accept it
+    F = r.DimensionStyleX.Field
+    assert len(F.__members__) == 119
+    assert (int(F.Arrowsize), int(F.ZeroSuppress), int(F.ClippingArrowSize), int(F.Count)) == (5, 76, 119, 122)
+    old = r.DimensionStyle(); old.SetFieldOverride(F.TextHeight)
+    assert old.IsFieldOverridden(F.TextHeight)
+    # the other two nested enums the old bindings register: exposed on their generated owners
+    assert r.EnvironmentX.BackgroundProjections is r.EnvironmentBackgroundProjections
+    assert r.RenderChannelsX.Modes is r.RenderChannelsModes
+    ds = r.DimensionStyleX()
+    ds.SetFieldOverride(r.DimensionStyleX.Field.TextHeight)
+    assert ds.IsFieldOverriden(r.DimensionStyleX.Field.TextHeight)
+    assert not ds.IsFieldOverriden(r.DimensionStyleX.Field.Arrowsize)
 
 
 def test_annotation_font_and_held_back_c_members_g115():
@@ -3502,3 +3517,385 @@ def test_retired_decal_table_find_index_follows_rhinocommon():
     assert all(d.IsVisible for d in new)
     assert [str(d.TextureInstanceId) for d in new] == [str(old.FindIndex(i).TextureInstanceId) for i in range(len(old))]
     assert [str(d.TextureInstanceId) for d in new] == [str(old[i].TextureInstanceId) for i in range(len(old))]
+
+
+def test_hand_json_bounding_box_and_meshing_parameters_g123():
+    # F1 hand members (G123: binding-agnostic, src/hand/hand_json.*): the old bindings' JSON form, key for key
+    new, old = r.BoundingBoxX(1, 2, 3, 4, 5.5, 6), r.BoundingBox(1, 2, 3, 4, 5.5, 6)
+    assert new.Encode() == old.Encode() == {'Min': {'X': 1, 'Y': 2, 'Z': 3}, 'Max': {'X': 4, 'Y': 5.5, 'Z': 6}}
+    back = r.BoundingBoxX.Decode(old.Encode())
+    assert isinstance(back, r.BoundingBoxX)
+    assert (back.Min.X, back.Min.Y, back.Min.Z, back.Max.X, back.Max.Y, back.Max.Z) == (1, 2, 3, 4, 5.5, 6)
+    with pytest.raises(KeyError):
+        r.BoundingBoxX.Decode({'Min': {'X': 0, 'Y': 0, 'Z': 0}})
+    with pytest.raises(KeyError):
+        r.BoundingBoxX.Decode({'Min': {'X': 0, 'Y': 0}, 'Max': {'X': 1, 'Y': 1, 'Z': 1}})
+
+    assert r.MeshingParametersX().Encode() == r.MeshingParameters().Encode()
+    mp = r.MeshingParametersX()
+    mp.JaggedSeams, mp.RefineGrid, mp.GridMinCount, mp.GridMaxCount = True, False, 17, 300
+    mp.Tolerance, mp.MinimumEdgeLength, mp.MaximumEdgeLength, mp.RefineAngle = 0.25, 0.01, 12.5, 0.3
+    d = mp.Encode()
+    assert (d['JaggedSeams'], d['RefineGrid'], d['GridMinCount'], d['GridMaxCount']) == (True, False, 17, 300)
+    assert (d['Tolerance'], d['MinimumEdgeLength'], d['MaximumEdgeLength'], d['RefineAngle']) == (0.25, 0.01, 12.5, 0.3)
+    assert set(d) == set(r.MeshingParameters().Encode())
+    back = r.MeshingParametersX.Decode(d)
+    assert isinstance(back, r.MeshingParametersX)
+    assert back.Encode() == d
+    # pilot #57: the old Python Decode cast GridMinCount to bool (17 -> 1); everything else round-trips
+    assert r.MeshingParameters.Decode(d).Encode() == dict(d, GridMinCount=1)
+
+
+def test_hand_json_value_types_f2():
+    # F2 hand members (G123): every value type's Encode is the old one, key for key
+    pairs = [(r.Point2dX(1, 2), r.Point2d(1, 2)), (r.Point2fX(1.5, 2.5), r.Point2f(1.5, 2.5)),
+             (r.Point3dX(1, 2, 3), r.Point3d(1, 2, 3)), (r.Point3fX(1, 2, 3), r.Point3f(1, 2, 3)),
+             (r.Point4dX(1, 2, 3, 4), r.Point4d(1, 2, 3, 4)), (r.Vector2dX(1, 2), r.Vector2d(1, 2)),
+             (r.Vector3dX(1, 2, 3), r.Vector3d(1, 2, 3)), (r.Vector3fX(1, 2, 3), r.Vector3f(1, 2, 3)),
+             (r.CircleX(2.5), r.Circle(2.5)),
+             (r.PlaneX(r.Point3dX(1, 2, 3), r.Vector3dX(0, 0, 1)), r.Plane(r.Point3d(1, 2, 3), r.Vector3d(0, 0, 1))),
+             (r.SphereX(r.Point3dX(1, 2, 3), 4), r.Sphere(r.Point3d(1, 2, 3), 4))]
+    for new, old in pairs:
+        assert new.Encode() == old.Encode(), type(new).__name__
+    # Decode reads the old dicts; a sphere keeps its whole equatorial plane
+    tilted = r.PlaneX(r.Point3dX(1, 2, 3), r.Vector3dX(1, 1, 1))
+    assert r.PlaneX.Decode(tilted.Encode()).Encode() == tilted.Encode()
+    s = r.SphereX(tilted, 4)
+    assert r.SphereX.Decode(s.Encode()).Encode() == s.Encode()
+    assert isinstance(r.SphereX.Decode(s.Encode()), r.SphereX) and isinstance(r.PlaneX.Decode(tilted.Encode()), r.PlaneX)
+    assert r.SphereX.Decode(r.Sphere(r.Point3d(1, 2, 3), 4).Encode()).Radius == 4
+
+
+def _first_geometry(f):
+    return next(iter(f.Objects)).Geometry
+
+
+def test_hand_json_common_object_and_file3dm_f1():
+    # F1 hand members (G123): CommonObject / File3dm Encode, Decode -- the old forms
+    path = os.path.join(MODELS, 'file3dm_stuff.3dm')
+    new, old = _first_geometry(r.File3dmX.Read(path)), r.File3dm.Read(path).Objects[0].Geometry
+    d = new.Encode()
+    assert d == old.Encode()
+    assert set(d) == {'version', 'archive3dm', 'opennurbs', 'data'} and d['archive3dm'] == 60
+    back = r.CommonObjectX.Decode(d)
+    assert type(back).__name__ == type(new).__name__          # the most derived generated class
+    assert back.Encode() == d
+    assert type(r.CommonObject.Decode(back.Encode())).__name__ == type(old).__name__
+    # File3dm: base64 of the model's bytes
+    f = r.File3dmX.Read(path)
+    s = f.Encode()
+    assert isinstance(s, str) and len(s) > 1000
+    g = r.File3dmX.Decode(s)
+    assert isinstance(g, r.File3dmX)
+    assert len(list(g.Objects)) == len(list(f.Objects)) and len(list(r.File3dm.Decode(s).Objects)) == len(list(f.Objects))
+    assert len(list(r.File3dmX.Decode(r.File3dm.Read(path).Encode()).Objects)) == len(list(f.Objects))
+    opts = r.File3dmWriteOptionsX()
+    opts.Version = 7
+    assert len(list(r.File3dmX.Decode(f.Encode(opts)).Objects)) == len(list(f.Objects))
+
+
+def test_hand_rdk_xml_and_embedded_files_f3_f4(tmp_path):
+    # F3 RdkXml (model, object attributes, plug-in data entry); F4 GetEmbeddedFileAsBase64, EmbeddedFile.Read
+    path = os.path.join(MODELS, 'file3dm_stuff.3dm')
+    f, of = r.File3dmX.Read(path), r.File3dm.Read(path)
+    assert f.RdkXml() == of.RdkXml() and f.RdkXml().startswith('<xml>')
+    entries = [p.RdkXml() for p in f.PlugInData]
+    assert [x for x in entries if x] == [of.PlugInData[0].RdkXml()]
+    decals = os.path.join(MODELS, 'sphereDecals.3dm')
+    na = next(iter(r.File3dmX.Read(decals).Objects)).Attributes
+    oa = r.File3dm.Read(decals).Objects[0].Attributes
+    assert na.RdkXml() == oa.RdkXml() != ''
+    assert _first_geometry(f).RdkXml() == ''
+    p = of.EmbeddedFilePaths2()[0]
+    b = f.GetEmbeddedFileAsBase64(p)
+    assert b == of.GetEmbeddedFileAsBase64(p) and len(b) > 1000
+    name = p.rsplit('/', 1)[-1]
+    assert f.GetEmbeddedFileAsBase64(name.upper()) == b                 # not strict: the file name, any case
+    assert f.GetEmbeddedFileAsBase64(name, True) == '' == of.GetEmbeddedFileAsBase64(name, True)
+    assert f.GetEmbeddedFileAsBase64(p, True) == b
+    assert f.GetEmbeddedFileAsBase64('nothing.png') == ''
+    note = tmp_path / 'note.txt'
+    note.write_text('hello')
+    ef = r.File3dmEmbeddedFileX.Read(str(note))
+    assert isinstance(ef, r.File3dmEmbeddedFileX) and ef.Length == 5 and ef.Filename.endswith('note.txt')
+    assert r.File3dmEmbeddedFileX.Read(str(tmp_path / 'missing.txt')) is None
+
+
+def test_hand_archivable_dictionary_f4():
+    # F4 ArchivableDictionary.EncodeDict / DecodeDict: RhinoCommon's dictionary archive, read by both bindings
+    path = os.path.join(MODELS, 'file3dm_stuff.3dm')
+    g = _first_geometry(r.File3dmX.Read(path))
+    d = {'b': True, 'i': 7, 'f': 2.5, 's': 'héllo', 'p': r.Point3dX(1, 2, 3), 'v': r.Vector3dX(0, 0, 1),
+         'g': g, 'gl': [g, g]}
+    enc = r.ArchivableDictionaryX.EncodeDict(d)
+    assert set(enc) == {'version', 'archive3dm', 'opennurbs', 'data'}
+    back = r.ArchivableDictionaryX.DecodeDict(enc)
+    assert {k: back[k] for k in 'bifs'} == {'b': True, 'i': 7, 'f': 2.5, 's': 'héllo'}
+    assert isinstance(back['p'], r.Point3dX) and (back['p'].X, back['p'].Y, back['p'].Z) == (1, 2, 3)
+    assert isinstance(back['v'], r.Vector3dX) and back['v'].Z == 1
+    assert type(back['g']).__name__ == type(g).__name__ and back['g'].Encode() == g.Encode()
+    assert [type(x).__name__ for x in back['gl']] == [type(g).__name__] * 2
+    # the old binding reads it (with pilot #58: a geometry list gets `count` Nones in front)
+    old = r.ArchivableDictionary.DecodeDict(enc)
+    assert {k: old[k] for k in 'bifs'} == {k: back[k] for k in 'bifs'}
+    assert old['gl'][:2] == [None, None] and len(old['gl']) == 4
+    # and the new one reads the old one's
+    og = r.File3dm.Read(path).Objects[0].Geometry
+    back2 = r.ArchivableDictionaryX.DecodeDict(r.ArchivableDictionary.EncodeDict({'i': 3, 'p': r.Point3d(4, 5, 6), 'gl': [og]}))
+    assert back2['i'] == 3 and (back2['p'].X, back2['p'].Y, back2['p'].Z) == (4, 5, 6) and len(back2['gl']) == 1
+    with pytest.raises(RuntimeError, match="Unable to serialize 'x'"):
+        r.ArchivableDictionaryX.EncodeDict({'x': {}})
+    with pytest.raises(RuntimeError):
+        r.ArchivableDictionaryX.DecodeDict(r.CommonObjectX.Decode(g.Encode()).Encode())   # an object, not a dictionary
+
+
+def test_hand_render_content_add_g124():
+    # File3dmRenderContentTable.Add (hand-kept): on the kind's collection, where FindId went (H1);
+    # a copy, as the old Add (ONX_Model::AddModelComponent: an id already there is made unique)
+    src = os.path.join(MODELS, 'file3dm_stuff.3dm')
+    old_src, new_src = r.File3dm.Read(src), r.File3dmX.Read(src)
+    old, new = r.File3dm(), r.File3dmX()
+    for c in old_src.RenderContent:
+        if c.IsTopLevel:
+            old.RenderContent.Add(c)
+    kinds = ((new_src.RenderMaterials, new.RenderMaterials), (new_src.RenderEnvironments, new.RenderEnvironments),
+             (new_src.RenderTextures, new.RenderTextures))
+    for have, into in kinds:
+        for c in have:
+            into.Add(c)
+    def contents(f, col):
+        return sorted((str(c.Id), c.Kind, c.Name) for c in col)
+    got = contents(new, [c for k in (new.RenderMaterials, new.RenderEnvironments, new.RenderTextures) for c in k])
+    assert got and got == contents(old, [c for c in old.RenderContent if c.IsTopLevel])
+    assert got == contents(new_src, [c for k, _ in kinds for c in k])          # ids kept: none conflict
+    # added twice: a second copy, a new id
+    m = next(iter(new_src.RenderMaterials))
+    new.RenderMaterials.Add(m)
+    ids = [str(c.Id) for c in new.RenderMaterials]
+    assert len(ids) == len(set(ids)) == len(list(new_src.RenderMaterials)) + 1
+    # written and read back
+    back = r.File3dmX.FromByteArray(new.ToByteArray())
+    assert sorted(str(c.Id) for c in back.RenderMaterials) == sorted(ids)
+    with pytest.raises(TypeError):
+        new.RenderMaterials.Add(next(iter(new_src.RenderEnvironments)))   # the kind's own content only
+
+
+def test_hand_point_cloud_values_and_group_delete_id_g126():
+    # kept by hand (Luis 2026-10-30, upstream U38): overloads RhinoCommon lacks, as Python overloads
+    P, PX = r.Point3d, r.Point3dX
+    o, n = r.PointCloud(), r.PointCloudX()
+    o.Add(P(1, 0, 0), 1.5); n.Add(PX(1, 0, 0), 1.5)
+    o.AddRange([P(2, 0, 0), P(3, 0, 0)], [2.5, 3.5]); n.AddRange([PX(2, 0, 0), PX(3, 0, 0)], [2.5, 3.5])
+    o.Insert(0, P(0, 0, 0), 0.5); n.Insert(0, PX(0, 0, 0), 0.5)
+    assert list(n.GetPointValues()) == [0.5, 1.5, 2.5, 3.5]
+    assert list(o.GetValues()) == [0.5, 2.5, 3.5, 0.0]      # pilot #64: the old Insert misaligns the values
+    assert [q.X for q in n.GetPoints()] == [q.X for q in r.PointCloudX(o).GetPoints()] == [0, 1, 2, 3]
+    # RhinoCommon's overloads still win their own calls
+    n.Add(PX(4, 0, 0), r.Vector3dX(0, 0, 1))
+    assert n.ContainsNormals and n.Count == 5
+    with pytest.raises(ValueError, match='equal number'):
+        n.AddRange([PX(0, 0, 0)], [1.0, 2.0])
+    # every channel stays aligned with its points (pilot #64: RhinoCommon's Insert does not)
+    c = r.PointCloudX()
+    c.Add(PX(1, 0, 0), r.Vector3dX(0, 0, 1)); c.Add(PX(2, 0, 0), r.Vector3dX(0, 1, 0))
+    c.Insert(0, PX(0, 0, 0), 9.0)
+    assert [(q.X, q.Y, q.Z) for q in c.GetNormals()] == [(0, 0, 0), (0, 0, 1), (0, 1, 0)]
+    assert list(c.GetPointValues()) == [9.0, 0.0, 0.0]
+    g = r.PointCloudX()
+    g.Add(PX(1, 0, 0), r.Vector3dX(0, 0, 1)); g.Add(PX(2, 0, 0), r.Vector3dX(0, 1, 0))
+    g.Insert(0, PX(0, 0, 0), r.Vector3dX(1, 0, 0))
+    assert [(q.X, q.Y, q.Z) for q in g.GetNormals()] == [(1, 0, 0), (0, 0, 1), (0, 1, 0)]   # U37 (pilot #64) fixed
+    # File3dmGroupTable.Delete(id)
+    of, nf = r.File3dm(), r.File3dmX()
+    for _ in range(3):
+        of.Groups.Add(r.Group()); nf.AllGroups.AddGroup()
+    assert nf.AllGroups.Delete(nf.AllGroups.FindIndex(1).Id) == of.Groups.Delete(of.Groups.FindIndex(1).Id) == True
+    assert nf.AllGroups.Delete(uuid.uuid4()) == of.Groups.Delete(uuid.uuid4()) == False
+    nf.AllGroups.Delete(0)                                  # RhinoCommon's Delete(int) still wins an int
+    assert nf.AllGroups.Count == 1
+
+
+@pytest.mark.skipif(not hasattr(r, 'CentermarkX'), reason='G127')
+def test_centermark_get_display_lines_u12_g127():
+    # U12 (RH-99905): RhinoCommon's Centermark.GetDisplayLines, uncommented upstream with its loop
+    # over the 6 lines, now generates; the kept hand member retires. The same centermark, saved
+    # by the generated binding and read back by the old one
+    cm = r.CentermarkX()
+    cm.AdjustFromPoints(r.PlaneX.WorldXY, r.Point3dX(1, 2, 0))
+    cm.Radius = 3.0
+    f = r.File3dmX()
+    f.Objects.Add(cm, None)
+    old = next(o.Geometry for o in r.File3dm.FromByteArray(f.ToByteArray()).Objects)
+    assert isinstance(old, r.Centermark)
+    new = next(o.Geometry for o in r.File3dmX.FromByteArray(f.ToByteArray()).Objects)
+    assert isinstance(new, r.CentermarkX)
+    ok, lines = new.GetDisplayLines(r.DimensionStyleX(), 1.0)
+    olines = old.GetDisplayLines(r.DimensionStyle())
+    assert ok and len(lines) == len(olines) > 0
+    key = lambda l: (round(l.From.X, 9), round(l.From.Y, 9), round(l.To.X, 9), round(l.To.Y, 9))
+    assert sorted(key(l) for l in lines) == sorted(key(l) for l in olines)
+
+
+def test_point_cloud_insert_and_add_range_keep_channels_aligned_u37():
+    # U37 (RH-99914, pilot #64): RhinoCommon's C layer inserted only the point (the normals / colors /
+    # values padded at the END), and a range adding a channel the cloud lacked put it on the FIRST points
+    PX, VX = r.Point3dX, r.Vector3dX
+    c = r.PointCloudX()
+    c.Add(PX(1, 0, 0), VX(0, 0, 1)); c.Add(PX(2, 0, 0), VX(0, 1, 0))
+    c.Insert(0, PX(0, 0, 0), VX(1, 0, 0))
+    assert [(q.X, q.Y, q.Z) for q in c.GetNormals()] == [(1, 0, 0), (0, 0, 1), (0, 1, 0)]
+    c.Insert(1, PX(9, 0, 0))                                # point only: a zero normal at 1
+    assert [(q.X, q.Y, q.Z) for q in c.GetNormals()] == [(1, 0, 0), (0, 0, 0), (0, 0, 1), (0, 1, 0)]
+    assert [q.X for q in c.GetPoints()] == [0, 9, 1, 2]
+    d = r.PointCloudX()
+    d.Add(PX(1, 0, 0)); d.Add(PX(2, 0, 0))
+    d.AddRange([PX(3, 0, 0), PX(4, 0, 0)], [VX(0, 0, 1), VX(0, 0, 1)])
+    assert [(q.X, q.Y, q.Z) for q in d.GetNormals()] == [(0, 0, 0), (0, 0, 0), (0, 0, 1), (0, 0, 1)]
+
+
+
+def test_mesh_vertex_color_add_rgb_g128():
+    # overload-audit gap: MeshVertexColorList.Add(r, g, b) / SetColor(index, r, g, b) -- RhinoCommon builds
+    # the color with Color.FromArgb(r, g, b), which the translator now reads (G128)
+    old, new = r.Mesh(), r.MeshX()
+    for x, y in [(0, 0), (1, 0), (1, 1)]:
+        old.Vertices.Add(x, y, 0); new.Vertices.Add(x, y, 0)
+    assert [new.VertexColors.Add(*c) for c in [(255, 0, 0), (0, 128, 0)]] == \
+           [old.VertexColors.Add(*c) for c in [(255, 0, 0), (0, 128, 0)]] == [0, 1]
+    assert new.VertexColors.SetColor(2, 0, 0, 255)
+    old.VertexColors.Add(0, 0, 255)
+    assert list(new.VertexColors.ToARGBArray()) == list(r.MeshX(old).VertexColors.ToARGBArray())
+    assert [c & 0xFFFFFFFF for c in new.VertexColors.ToARGBArray()] == [0xFFFF0000, 0xFF008000, 0xFF0000FF]
+    with pytest.raises(ValueError, match="Value of '300' is not valid for 'red'"):
+        new.VertexColors.Add(300, 0, 0)
+
+
+def test_intersection_line_line_tolerance_and_plane_circle_g128():
+    # overload-audit gap: Intersection.LineLine(a, b, tolerance, finiteSegments) -- a static with
+    # out parameters calling its sibling's (G128); PlaneCircle comes with it
+    P, PX, LX = r.Point3d, r.Point3dX, r.LineX
+    cases = [((0, 0, 0), (4, 0, 0), (2, -1, 0), (2, 3, 0)),      # crossing inside both
+             ((0, 0, 0), (1, 0, 0), (3, -1, 0), (3, 1, 0)),      # past the end of the first
+             ((0, 0, 0), (1, 0, 0), (0, 0, 1), (1, 0, 1))]       # parallel
+    for a0, a1, b0, b1 in cases:
+        for tol, finite in [(0.0, False), (0.001, True), (5.0, True)]:
+            old = r.Intersection.LineLine(r.Line(P(*a0), P(*a1)), r.Line(P(*b0), P(*b1)), tol, finite)
+            new = r.IntersectionX.LineLine(LX(PX(*a0), PX(*a1)), LX(PX(*b0), PX(*b1)), tol, finite)
+            assert tuple(new) == tuple(old)
+    ok, a, b = r.IntersectionX.LineLine(LX(PX(0, 0, 0), PX(1, 0, 0)), LX(PX(3, -1, 0), PX(3, 1, 0)), 0.001, True)
+    assert (ok, a, b) == (False, 1.0, 0.5)                 # clamped to the segment: 2 apart
+    # PlaneCircle: a circle of radius 2 in the world XZ plane against the XY plane meets it at x = +-2
+    circle = r.CircleX(r.PlaneX.WorldZX, 2.0)
+    kind, t0, t1 = r.IntersectionX.PlaneCircle(r.PlaneX.WorldXY, circle)
+    assert kind == r.PlaneCircleIntersection.Secant
+    xs = sorted(round(circle.PointAt(t).X, 9) for t in (t0, t1))
+    assert xs == [-2.0, 2.0]
+    kind, t0, t1 = r.IntersectionX.PlaneCircle(r.PlaneX.WorldXY, r.CircleX(r.PlaneX.WorldXY, 2.0))
+    assert kind == r.PlaneCircleIntersection.Coincident and t0 == t1 < -1e300   # RhinoMath.UnsetValue
+
+
+def _grid_mesh():
+    # 3 x 3 vertices (index j*3 + i at (i, j)), four quads; vertex 4 (1, 1) is the only interior one
+    m = r.MeshX()
+    for j in range(3):
+        for i in range(3):
+            m.Vertices.Add(float(i), float(j), 0.0)
+    for j in range(2):
+        for i in range(2):
+            a = j * 3 + i
+            m.Faces.AddFace(a, a + 1, a + 4, a + 3)
+    return m
+
+
+def test_members_unlocked_by_array_natives_g128():
+    # G128 (Luis: option 1): a body passing an int[] / double[] local to a native translates; every
+    # member it unlocked, on inputs whose results are known by hand (and the old binding's, where it has one)
+    PX, VX = r.Point3dX, r.Vector3dX
+    m = _grid_mesh()
+    assert list(m.Faces.ToIntArray(False)) == [0, 1, 4, 3, 1, 2, 5, 4, 3, 4, 7, 6, 4, 5, 8, 7]
+    assert list(m.Faces.ToIntArray(True))[:6] == [0, 1, 4, 4, 3, 0]           # a quad as two triangles
+    assert len(m.Faces.ToIntArray(True)) == 4 * 6
+    assert list(m.GetNakedEdgePointStatus()) == [True] * 4 + [False] + [True] * 4
+    tv = list(m.Faces.GetTopologicalVertices(0))
+    assert len(tv) == 4 and len(set(tv)) == 4 and all(0 <= t < m.Vertices.Count for t in tv)   # no duplicate vertices here
+    # DeleteFaces / RemoveAt: compact (the default) drops the vertex only the deleted face used
+    for op, faces, verts in [(lambda x: x.Faces.DeleteFaces([0], True), 3, 8), (lambda x: x.Faces.DeleteFaces([0, 3]), 2, 7),
+                             (lambda x: x.Faces.RemoveAt(0), 3, 8), (lambda x: x.Faces.RemoveAt(0, False), 3, 9)]:
+        g = _grid_mesh(); op(g)
+        assert (g.Faces.Count, g.Vertices.Count) == (faces, verts)
+    assert _grid_mesh().Faces.DeleteFaces([0, 1]) == 2
+    # vertex colors: SetColors replaces, AppendColors / AddRange append
+    vc = m.VertexColors
+    assert vc.SetColors([(255, 0, 0, 255)] * 9) and vc.Count == 9
+    assert vc.AppendColors([(0, 0, 255, 255)] * 2) and vc.AddRange([(0, 255, 0, 255)])
+    argb = [c & 0xFFFFFFFF for c in vc.ToARGBArray()]
+    assert argb == [0xFFFF0000] * 9 + [0xFF0000FF] * 2 + [0xFF00FF00]
+    # NurbsCurve.GrevilleParameters: the average of each control point's `degree` knots
+    c = r.NurbsCurveX.CreateFromCircle(r.CircleX(2.0))
+    k, d = list(c.Knots), c.Degree
+    expect = [sum(k[i:i + d]) / d for i in range(c.Points.Count)]
+    assert [round(x, 12) for x in c.GrevilleParameters()] == [round(x, 12) for x in expect]
+    # Surface.Evaluate: a plane surface's point and first derivatives
+    s = r.PlaneSurfaceX(r.PlaneX.WorldXY, r.IntervalX(0, 2), r.IntervalX(0, 3))
+    ok, pt, ders = s.Evaluate(0.5, 1.5, 1)
+    assert ok and (pt.X, pt.Y, pt.Z) == (0.5, 1.5, 0.0)
+    assert [(v.X, v.Y, v.Z) for v in ders] == [(1, 0, 0), (0, 1, 0)]
+    # Brep.DuplicateSubBrep: the chosen faces only
+    box = r.BrepX.CreateFromBox(r.BoundingBoxX(0, 0, 0, 1, 2, 3))
+    sub = box.DuplicateSubBrep([0, 1])
+    assert sub.Faces.Count == 2 and sub.IsValid and box.Faces.Count == 6
+    # Linetype.SetSegments: lengths >= 0 dashes, < 0 gaps
+    lt = r.LinetypeX()
+    assert lt.SetSegments([1.0, -0.5, 0.25, -0.5])
+    assert lt.SegmentCount == 4
+    assert [tuple(lt.GetSegment(i)) for i in range(4)] == [(1.0, True), (0.5, False), (0.25, True), (0.5, False)]
+    # PointCloud.AddRange(points, normals, colors[, values]), against the old binding's
+    pts, nrm = [(0, 0, 0), (1, 0, 0)], [(0, 0, 1), (0, 1, 0)]
+    cols, vals = [(255, 0, 0, 255), (0, 0, 255, 255)], [1.5, 2.5]
+    o3, n3 = r.PointCloud(), r.PointCloudX()
+    o3.AddRange([r.Point3d(*p) for p in pts], [r.Vector3d(*v) for v in nrm], cols)
+    n3.AddRange([PX(*p) for p in pts], [VX(*v) for v in nrm], cols)
+    o4, n4 = r.PointCloud(), r.PointCloudX()
+    o4.AddRange([r.Point3d(*p) for p in pts], [r.Vector3d(*v) for v in nrm], cols, vals)
+    n4.AddRange([PX(*p) for p in pts], [VX(*v) for v in nrm], cols, vals)
+    sig = lambda c: ([(q.X, q.Y, q.Z) for q in c.GetNormals()], list(c.GetColors()), list(c.GetPointValues()))
+    assert sig(n3) == sig(r.PointCloudX(o3))
+    assert list(n4.GetPointValues()) == [1.5, 2.5] and n4.Count == 2
+    assert o4.Count == 0              # pilot #66: the old (points, normals, colors, values) adds nothing
+    with pytest.raises(ValueError, match='equal number of points, vectors, and colors'):
+        n3.AddRange([PX(0, 0, 0)], [VX(0, 0, 1)], cols)
+
+
+def test_subd_neighbour_lists_g129():
+    # G129 (Luis 2026-10-30, option 1): rhino3dm 8.32's neighbour properties as lists of the generated
+    # components, as RhinoCommon's vertex.Edges -- face.Edges / .Vertices, edge.Faces / .Vertices,
+    # vertex.Faces; every neighbour list against the old binding's iterator, by id, in order
+    p = os.path.join(MODELS, 'subdBox.3dm')
+    new = next(o.Geometry for o in r.File3dmX.Read(p).Objects if isinstance(o.Geometry, r.SubDX))
+    old = next(o.Geometry for o in r.File3dm.Read(p).Objects if isinstance(o.Geometry, r.SubD))
+    ids = lambda it: [c.Id for c in it]
+    by_id = lambda comps: {c.Id: c for c in comps}
+    of, oe, ov = by_id(old.Faces), by_id(old.Edges), by_id(old.Vertices)
+    checked = 0
+    for comps, olds, props in [(new.Faces, of, ('Edges', 'Vertices')), (new.Edges, oe, ('Faces', 'Vertices')),
+                               (new.Vertices, ov, ('Faces',))]:
+        for c in comps:
+            for prop in props:
+                assert ids(getattr(c, prop)) == ids(getattr(olds[c.Id], prop)), (type(c).__name__, prop, c.Id)
+                checked += 1
+    assert checked > 50
+    # vertex.Edges: RhinoCommon's (a list), the same edges in the same order
+    for v in new.Vertices:
+        assert ids(v.Edges) == ids(ov[v.Id].Edges)
+    # lists, like RhinoCommon's vertex.Edges: the same kind of value on every component
+    face = next(iter(new.Faces))
+    v = next(iter(new.Vertices))
+    for lst in (face.Edges, face.Vertices, v.Faces, v.Edges):
+        assert isinstance(lst, list)
+    assert len(face.Edges) == face.EdgeCount and [e.Id for e in face.Edges] == [face.EdgeAt(i).Id for i in range(face.EdgeCount)]
+    assert face.Edges[-1].Id == face.EdgeAt(face.EdgeCount - 1).Id
+    assert all(isinstance(e, r.SubDEdgeX) and e.FaceCount >= 1 for e in face.Edges)
+    # lifetimes: each item keeps its component (and so the SubD) alive
+    faces = next(iter(new.Edges)).Faces
+    del new, face, v; gc.collect()
+    assert len(faces) >= 1 and faces[0].EdgeCount >= 3
