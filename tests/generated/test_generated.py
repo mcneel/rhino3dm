@@ -3899,3 +3899,56 @@ def test_subd_neighbour_lists_g129():
     faces = next(iter(new.Edges)).Faces
     del new, face, v; gc.collect()
     assert len(faces) >= 1 and faces[0].EdgeCount >= 3
+
+
+def test_polycurve_append_line_and_point_cloud_add_range_colors_g130():
+    # overload-audit gaps, part 2 (G130): PolyCurve.Append(Line) -- `Append(new LineCurve(line))`, the
+    # temporary freed after a callee that only reads it -- and PointCloud.AddRange(points, colors)
+    P, PX = r.Point3d, r.Point3dX
+    new, old = r.PolyCurveX(), r.PolyCurve()
+    assert new.Append(r.LineX(PX(0, 0, 0), PX(2, 0, 0))) == old.Append(r.Line(P(0, 0, 0), P(2, 0, 0))) == True
+    assert new.Append(r.LineX(PX(2, 0, 0), PX(2, 3, 0))) == old.Append(r.Line(P(2, 0, 0), P(2, 3, 0))) == True
+    assert new.SegmentCount == old.SegmentCount == 2
+    e = new.PointAtEnd
+    assert (e.X, e.Y, e.Z) == (2, 3, 0)
+    assert new.Append(r.LineX(PX(0, 0, 0), PX(0, 0, 0))) is False          # `if (!line.IsValid) return false;`
+    assert new.SegmentCount == 2
+    # AddRange(points, colors): RhinoCommon swaps to ABGR for the native, as .NET does
+    cols = [(255, 0, 0, 255), (0, 128, 255, 255)]
+    o, n = r.PointCloud(), r.PointCloudX()
+    o.AddRange([P(0, 0, 0), P(1, 0, 0)], cols)
+    n.AddRange([PX(0, 0, 0), PX(1, 0, 0)], cols)
+    rgb = lambda c: [k[:3] for k in c.GetColors()]
+    assert rgb(n) == rgb(r.PointCloudX(o)) == [(255, 0, 0), (0, 128, 255)]
+    with pytest.raises(ValueError, match='equal number of points and colors'):
+        n.AddRange([PX(0, 0, 0)], cols)
+
+
+@pytest.mark.xfail(reason='pilot #67 / U40: RhinoCommon AddRange(points, colors) on rhino3dm / .NET Core builds stores '
+                          '.NET opacity in ON_Color\'s transparency byte -- an opaque color comes back fully transparent',
+                   strict=True)
+def test_point_cloud_add_range_colors_keeps_opacity_u40():
+    n = r.PointCloudX()
+    n.AddRange([r.Point3dX(0, 0, 0)], [(255, 0, 0, 255)])
+    assert list(n.GetColors()) == [(255, 0, 0, 255)]
+
+
+
+def test_static_and_instance_method_one_name_g132():
+    # RhinoCommon's BoundingBox.Union(a, b) (static, a new box) and bbox.Union(other) (instance, in place):
+    # pybind11 and nanobind cannot overload one name across the two; the module joins them (G132)
+    a, b = r.BoundingBoxX(0, 0, 0, 1, 1, 1), r.BoundingBoxX(2, 2, 2, 3, 3, 3)
+    u = r.BoundingBoxX.Union(a, b)
+    box = lambda x: (x.Min.X, x.Min.Y, x.Min.Z, x.Max.X, x.Max.Y, x.Max.Z)
+    assert box(u) == (0, 0, 0, 3, 3, 3)
+    assert box(a) == (0, 0, 0, 1, 1, 1)                     # the static leaves its arguments alone
+    old = r.BoundingBox.Union(r.BoundingBox(0, 0, 0, 1, 1, 1), r.BoundingBox(2, 2, 2, 3, 3, 3))
+    assert box(u) == box(old)                                # as the old (static-only) binding
+    assert box(r.BoundingBoxX.Union(a, r.Point3dX(-1, 0, 5))) == (-1, 0, 0, 1, 1, 5)
+    assert a.Union(b) is None                                # the instance form grows the box itself
+    assert box(a) == (0, 0, 0, 3, 3, 3)
+    a.Union(r.Point3dX(5, 0, 0))
+    assert box(a) == (0, 0, 0, 5, 3, 3)
+    with pytest.raises(TypeError):
+        r.BoundingBoxX.Union(a)                              # on the class, only the static's overloads
+    assert '_static_Union' in vars(r.BoundingBoxX)

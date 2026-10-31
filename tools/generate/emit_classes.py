@@ -1417,7 +1417,14 @@ def js_class_shape(t):
         return ('seqptr:' + m.group(1), 'RH3DM_JsIsSeq({v})', 'RH3DM_JsSeqPtr<%s>({v})' % m.group(1))
     m = re.match(r'(?:const )?std::vector<(\w+)>&?$', t)
     if m:                                  # a sequence (G82; by value too, G94): an array or a point list
-        return ('seq:' + m.group(1), 'RH3DM_JsIsSeq({v})', 'RH3DM_JsSeq<%s>({v})' % m.group(1))
+        # its elements' shape too (G130: addRange(points, colors) took the (points, normals) branch, a
+        # color converted as a vector threw); an empty sequence matches any
+        el = js_class_shape(m.group(1)) if m.group(1) != t else None
+        check = 'RH3DM_JsIsSeq({v})'
+        if el and el[1] and el[1] != 'true':
+            first = el[1].replace('{v}', 'RH3DM_JsSeqFirst({v})')
+            check = '(RH3DM_JsIsSeq({v}) && (RH3DM_JsSeqFirst({v}).isUndefined() || %s))' % first
+        return ('seq:' + m.group(1), check, 'RH3DM_JsSeq<%s>({v})' % m.group(1))
     m = re.match(r'const (BND_(\w+))\*$', t)
     if m:                                  # an optional class argument: null or an instance
         reg = m.group(2)
@@ -1519,7 +1526,10 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         # pybind11 numbers a static function's arguments from 1, a method's from 2 (1 is self)
         pyargs = ''.join(', py::keep_alive<0, %d>()' % (i + (1 if p['static'] else 2)) for i in p.get('keep_args') or []) + pyargs
         if p['static'] and n in instance_names:
-            pass               # Python: one name cannot be static AND instance; JS keeps it
+            # Python: one name cannot be static AND instance (pybind11 and nanobind both refuse):
+            # `_static_<Name>`, joined to the instance form by rhino3dm/__init__.py (G132)
+            if p['m']['Kind'] != 'property':
+                py.append('      .def_static("_static_%s", &%s::%s%s)' % (n, cls['gen'], g, pyargs))
         elif p['static']:
             # a view of an argument's object handed back (G89: TryConvertBrep's RH3DM_ViewCopyOf):
             # the argument -- and through it the file -- stays alive while the view does

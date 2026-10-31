@@ -315,6 +315,34 @@ vnext = "SubDVertexX.Faces (hand property, G129); vertex.Edges is RhinoCommon's 
 reason = "as SubDFace.Edges"
 
 [[hand_kept]]
+class = "Mesh"
+members = ["toThreejsBuffers"]
+decided = "Luis, 2026-10-08 (three.js interop; again 2026-10-28)"
+vnext = "MeshX.toThreejsBuffers + its inverse createFromThreejsBuffers (hand members, JS only, G131); the old one computed normals on the caller's mesh, this one on a copy"
+reason = "three.js BufferGeometry typed arrays (3DMLoader's fast path)"
+
+[[hand_kept]]
+class = "PointCloud"
+members = ["toThreejsBuffers"]
+decided = "Luis, 2026-10-08 (three.js interop)"
+vnext = "PointCloudX.toThreejsBuffers + createFromThreejsBuffers (hand members, JS only, G131)"
+reason = "as Mesh.toThreejsBuffers"
+
+[[hand_kept]]
+class = "Mesh"
+members = ["toThreejsJSON", "toThreejsJSONRotate", "toThreejsJSONMerged", "createFromThreejsJSON"]
+decided = "Luis, 2026-10-31 (ship deprecated in 9.2, remove later)"
+vnext = "MeshX hand members, JS only (G133): 8.x's output and decoding, each warning once (console.warn) that toThreejsBuffers / createFromThreejsBuffers replace it; normals computed on a copy, an out-of-range face index throws"
+reason = "deprecated: 3DMLoader's JSON fallback, for callers not yet on the buffers"
+
+[[hand_kept]]
+class = "PointCloud"
+members = ["toThreejsJSON", "createFromThreejsJSON"]
+decided = "Luis, 2026-10-31 (ship deprecated in 9.2, remove later)"
+vnext = "PointCloudX hand members, JS only (G133), deprecated as Mesh's"
+reason = "as Mesh.toThreejsJSON"
+
+[[hand_kept]]
 class = "ArchivableDictionary"
 members = ["EncodeDict", "DecodeDict"]
 decided = "Luis, 2026-10-28"

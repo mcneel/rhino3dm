@@ -311,10 +311,12 @@ def emit_valuetype_bindings(vt, skipped):
                 skipped['value-type enum param'] = skipped.get('value-type enum param', 0) + 1
                 continue
             if k == 'method' and m['Static'] and n in instance_names:
-                # Python cannot overload one name as static AND instance
-                # (BoundingBox.Union(a, b) vs bbox.Union(other)): the instance
-                # form keeps the name; counted, and still reachable in JS
-                skipped['py static shadowed by instance'] = skipped.get('py static shadowed by instance', 0) + 1
+                # Python cannot overload one name as static AND instance (pybind11 and
+                # nanobind both refuse): the static goes in as `_static_<Name>`, and
+                # rhino3dm/__init__.py joins the two behind one descriptor (G132:
+                # BoundingBox.Union(a, b) and bbox.Union(other)); JS keeps both
+                pyl.append('      .def_static("_static_%s", [](%s) { return %s; }%s)'
+                           % (n, sig(m), pub(m, '%s::%s(%s)' % (T, n, names(m))), pyargs(m)))
                 js_fn(n, [p['Type'] for p in m['Params']],
                       'return %s::%s(%s);' % (T, n, ', '.join('a%d' % i for i in range(len(m['Params'])))))
                 continue

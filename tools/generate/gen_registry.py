@@ -1748,6 +1748,29 @@ HAND_CLASSES = ['ArchivableDictionaryX']
 # of the generated components -- as RhinoCommon's own vertex.Edges is generated (owned, each item keeping
 # the component alive), so all six neighbour properties look alike
 _SD = 'hand/hand_subd.h'
+# three.js interop (G131; Luis 2026-10-08/-28): toThreejsBuffers kept, createFromThreejsBuffers its inverse
+# (the JSON family is deprecated); JS only
+_TJ = 'hand/hand_threejs.h'
+HAND_MEMBERS.setdefault('MeshX', []).extend([
+    _hm('ToThreejsBuffers', 'method', 'RH3DM_Hand_Mesh_ToThreejsBuffers', _TJ, args=['rotateToYUp'], py=False),
+    _hm('CreateFromThreejsBuffers', 'static', 'RH3DM_Hand_Mesh_CreateFromThreejsBuffers', _TJ, args=['buffers', 'rotateFromYUp'], py=False)])
+HAND_MEMBERS['PointCloudX'] += [
+    _hm('ToThreejsBuffers', 'method', 'RH3DM_Hand_PointCloud_ToThreejsBuffers', _TJ, args=['rotateToYUp'], py=False),
+    _hm('CreateFromThreejsBuffers', 'static', 'RH3DM_Hand_PointCloud_CreateFromThreejsBuffers', _TJ, args=['buffers', 'rotateFromYUp'], py=False)]
+# the JSON family (G133; Luis 2026-10-31): shipped deprecated in 9.2 -- each warns once, naming the buffers
+# member that replaces it -- and removed later; JS only, as in 8.x
+HAND_MEMBERS['MeshX'] += [
+    _hm('ToThreejsJSON', 'method', 'RH3DM_Hand_Mesh_ToThreejsJSON', _TJ, py=False, js='toThreejsJSON'),
+    _hm('ToThreejsJSONRotate', 'method', 'RH3DM_Hand_Mesh_ToThreejsJSONRotate', _TJ, args=['rotateToYUp'], py=False,
+        js='toThreejsJSONRotate'),
+    _hm('ToThreejsJSONMerged', 'static', 'RH3DM_Hand_Mesh_ToThreejsJSONMerged', _TJ, args=['meshes', 'rotateYUp'],
+        py=False, js='toThreejsJSONMerged'),
+    _hm('CreateFromThreejsJSON', 'static', 'RH3DM_Hand_Mesh_CreateFromThreejsJSON', _TJ, args=['data'], py=False,
+        js='createFromThreejsJSON')]
+HAND_MEMBERS['PointCloudX'] += [
+    _hm('ToThreejsJSON', 'method', 'RH3DM_Hand_PointCloud_ToThreejsJSON', _TJ, py=False, js='toThreejsJSON'),
+    _hm('CreateFromThreejsJSON', 'static', 'RH3DM_Hand_PointCloud_CreateFromThreejsJSON', _TJ, args=['json'], py=False,
+        js='createFromThreejsJSON')]
 HAND_MEMBERS['SubDFaceX'] = [_hm('Edges', 'property', 'RH3DM_Hand_SubDFace_Edges', _SD, list=True),
                              _hm('Vertices', 'property', 'RH3DM_Hand_SubDFace_Vertices', _SD, list=True)]
 HAND_MEMBERS['SubDEdgeX'] = [_hm('Faces', 'property', 'RH3DM_Hand_SubDEdge_Faces', _SD, list=True),

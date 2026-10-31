@@ -245,4 +245,141 @@ module.exports = (t, ctx) => {
     assert.strictEqual(lt.setSegments([1.0, -0.5]), true);
     assert.deepStrictEqual([0, 1].map(i => Array.from(lt.getSegment(i))), [[1.0, true], [0.5, false]]);
   });
+
+  t('test_retired_append_line_and_add_range_colors_g130', () => {
+    // JS1: appendLine -> append(line), addRangePointsColors -> addRange(points, colors) (G130)
+    const L = (a, b) => ({ From: P(...a), To: P(...b) });
+    const opc = new r.PolyCurve(), npc = new r.PolyCurveX();
+    assert.strictEqual(npc.append(L([0, 0, 0], [2, 0, 0])), opc.appendLine(new r.Line([0, 0, 0], [2, 0, 0])));
+    assert.strictEqual(npc.append(L([2, 0, 0], [2, 3, 0])), opc.appendLine(new r.Line([2, 0, 0], [2, 3, 0])));
+    assert.deepStrictEqual([npc.segmentCount, opc.segmentCount], [2, 2]);
+    assert.deepStrictEqual([npc.pointAtEnd.X, npc.pointAtEnd.Y], [2, 3]);
+    const red = { r: 255, g: 0, b: 0, a: 255 }, blue = { r: 0, g: 128, b: 255, a: 255 };
+    const o = new r.PointCloud(), n = new r.PointCloudX();
+    o.addRangePointsColors([[0, 0, 0], [1, 0, 0]], [red, blue]);
+    n.addRange([P(0, 0, 0), P(1, 0, 0)], [red, blue]);
+    const cols = c => Array.from(c.getColors()).map(k => [k.r, k.g, k.b]);
+    assert.deepStrictEqual(cols(n), cols(new r.PointCloudX(o)));
+    assert.deepStrictEqual(cols(n), [[255, 0, 0], [0, 128, 255]]);
+  });
+
+  t('test_threejs_buffers_round_trip_g131', () => {
+    // three.js (Luis 2026-10-08/-28): toThreejsBuffers kept (as the old one: typed arrays, quads as two
+    // triangles), createFromThreejsBuffers its inverse; on a mesh with uvs and colors, both rotations
+    const m = new r.MeshX();
+    for (const [x, y] of [[0, 0], [1, 0], [1, 1], [0, 1], [2, 0]]) m.vertices.add(x, y, 0);
+    m.faces.addFace(0, 1, 2, 3); m.faces.addFace(1, 4, 2);
+    m.normals.computeNormals();
+    for (const [u, v] of [[0, 0], [1, 0], [1, 1], [0, 1], [2, 0]]) m.textureCoordinates.add(u, v);
+    for (let i = 0; i < 5; i++) m.vertexColors.add(255, i * 50, 0);
+    const old = new r.Mesh();
+    for (const [x, y] of [[0, 0], [1, 0], [1, 1], [0, 1], [2, 0]]) old.vertices().add(x, y, 0);
+    old.faces().addQuadFace(0, 1, 2, 3); old.faces().addTriFace(1, 4, 2);
+    for (const rot of [false, true]) {
+      const b = m.toThreejsBuffers(rot);
+      assert(b.position instanceof Float32Array && b.index instanceof Uint32Array && b.normal instanceof Float32Array);
+      assert(b.uv instanceof Float32Array && b.color instanceof Float32Array);
+      assert.deepStrictEqual(Array.from(b.index), [0, 1, 2, 2, 3, 0, 1, 4, 2]);
+      const ob = old.toThreejsBuffers(rot);
+      assert.deepStrictEqual(Array.from(b.position), Array.from(ob.position));     // the same as the old one
+      assert.deepStrictEqual(Array.from(b.index), Array.from(ob.index));
+      // and back: the same vertices, triangles, uvs and colors
+      const back = r.MeshX.createFromThreejsBuffers(b, rot);
+      assert.strictEqual(back.vertices.count, 5);
+      assert.strictEqual(back.faces.count, 3);                                   // a quad comes back as two triangles
+      for (let i = 0; i < 5; i++) {
+        const p = back.vertices.point3dAt(i), q = m.vertices.point3dAt(i);
+        ctx.approx(p.X, q.X, 1e-6); ctx.approx(p.Y, q.Y, 1e-6); ctx.approx(p.Z, q.Z, 1e-6);
+      }
+      assert.deepStrictEqual(Array.from(back.vertexColors.toARGBArray()), Array.from(m.vertexColors.toARGBArray()));
+      assert.strictEqual(back.textureCoordinates.count, 5);
+    }
+    // non-indexed buffers: every 3 vertices a triangle; bad lengths are refused
+    const tri = r.MeshX.createFromThreejsBuffers({ position: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]) }, false);
+    assert.deepStrictEqual([tri.vertices.count, tri.faces.count], [3, 1]);
+    ctx.raises(() => r.MeshX.createFromThreejsBuffers({ position: [0, 0, 0, 1] }, false), /'position' has 4 numbers/);
+    ctx.raises(() => r.MeshX.createFromThreejsBuffers({ position: [0, 0, 0, 1, 0, 0, 0, 1, 0], index: [0, 1, 7] }, false), /outside the vertices/);
+    // point clouds: positions, colors, normals both ways
+    const pc = new r.PointCloudX();
+    pc.add(P(1, 2, 3), P(0, 0, 1), { r: 255, g: 0, b: 0, a: 255 }); pc.add(P(4, 5, 6), P(0, 1, 0), { r: 0, g: 0, b: 255, a: 255 });
+    const pb = pc.toThreejsBuffers(false);
+    assert.deepStrictEqual(Array.from(pb.position), [1, 2, 3, 4, 5, 6]);
+    assert.deepStrictEqual(Array.from(pb.color), [1, 0, 0, 0, 0, 1]);
+    const pback = r.PointCloudX.createFromThreejsBuffers(pb, false);
+    assert.deepStrictEqual(Array.from(pback.getPoints()).map(q => [q.X, q.Y, q.Z]), [[1, 2, 3], [4, 5, 6]]);
+    assert.deepStrictEqual(Array.from(pback.getColors()).map(k => [k.r, k.g, k.b]), [[255, 0, 0], [0, 0, 255]]);
+    assert.deepStrictEqual(Array.from(pback.getNormals()).map(q => [q.X, q.Y, q.Z]), [[0, 0, 1], [0, 1, 0]]);
+    const oldPc = new r.PointCloud(); oldPc.addPointNormalColor([1, 2, 3], [0, 0, 1], { r: 255, g: 0, b: 0, a: 255 });
+    oldPc.addPointNormalColor([4, 5, 6], [0, 1, 0], { r: 0, g: 0, b: 255, a: 255 });
+    const opb = oldPc.toThreejsBuffers(true), npb = pc.toThreejsBuffers(true);
+    assert.deepStrictEqual(Array.from(npb.position), Array.from(opb.position));
+    assert.deepStrictEqual(Array.from(npb.normal), Array.from(opb.normal));
+  });
+
+  t('test_threejs_json_family_deprecated_g133', () => {
+    // the JSON family (Luis 2026-10-31): shipped deprecated in 9.2 -- 8.x's output, a warning once each
+    const warned = [];
+    const warn = console.warn;
+    console.warn = (...a) => warned.push(a.join(' '));
+    try {
+      const quad = [[0, 0], [1, 0], [1, 1], [0, 1], [2, 0]];
+      const m = new r.MeshX(), old = new r.Mesh();
+      for (const [x, y] of quad) { m.vertices.add(x, y, 0); old.vertices().add(x, y, 0); }
+      m.faces.addFace(0, 1, 2, 3); m.faces.addFace(1, 4, 2);
+      old.faces().addQuadFace(0, 1, 2, 3); old.faces().addTriFace(1, 4, 2);
+      for (let i = 0; i < 5; i++) { m.vertexColors.add(255, i * 50, 0); old.vertexColors().add(255, i * 50, 0); }
+      const same = (a, b) => {
+        // the same object as 8.x's: keys, types, item sizes, and the numbers (float precision)
+        assert.deepStrictEqual(Object.keys(a.data).sort(), Object.keys(b.data).sort());
+        if (b.data.index) assert.deepStrictEqual(a.data.index, b.data.index);
+        assert.deepStrictEqual(Object.keys(a.data.attributes).sort(), Object.keys(b.data.attributes).sort());
+        for (const k of Object.keys(b.data.attributes)) {
+          const x = a.data.attributes[k], y = b.data.attributes[k];
+          assert.deepStrictEqual([x.itemSize, x.type, x.array.length], [y.itemSize, y.type, y.array.length], k);
+          x.array.forEach((v, i) => ctx.approx(v, y.array[i], 1e-6));
+        }
+      };
+      const j = m.toThreejsJSON();
+      same(j, old.toThreejsJSON());
+      assert.deepStrictEqual(j.data.index, { type: 'Uint16Array', array: [0, 1, 2, 2, 3, 0, 1, 4, 2] });
+      assert.strictEqual(m.normals.count, 0, "the normals are computed on a copy, not on the caller's mesh");
+      same(m.toThreejsJSONRotate(true), old.toThreejsJSONRotate(true));
+      const m2 = new r.MeshX(), old2 = new r.Mesh();
+      for (const [x, y] of [[5, 0], [6, 0], [5, 1]]) { m2.vertices.add(x, y, 0); old2.vertices().add(x, y, 0); }
+      m2.faces.addFace(0, 1, 2); old2.faces().addTriFace(0, 1, 2);
+      // (8.x's merge mixes a colored mesh with an uncolored one into no colors: compare uncolored)
+      const plain = new r.MeshX(), oldPlain = new r.Mesh();
+      for (const [x, y] of quad) { plain.vertices.add(x, y, 0); oldPlain.vertices().add(x, y, 0); }
+      plain.faces.addFace(0, 1, 2, 3); oldPlain.faces().addQuadFace(0, 1, 2, 3);
+      same(r.MeshX.toThreejsJSONMerged([plain, m2], true), r.Mesh.toThreejsJSONMerged([oldPlain, old2], true));
+      // and back, as 8.x: a mesh always turned from Y-up
+      const back = r.MeshX.createFromThreejsJSON(j), oldBack = r.Mesh.createFromThreejsJSON(j);
+      assert.deepStrictEqual([back.vertices.count, back.faces.count], [5, 3]);
+      assert.deepStrictEqual(Array.from(back.toThreejsBuffers(false).position), Array.from(oldBack.toThreejsBuffers(false).position));
+      assert.deepStrictEqual(Array.from(back.vertexColors.toARGBArray()), Array.from(m.vertexColors.toARGBArray()));
+      assert.strictEqual(r.MeshX.createFromThreejsJSON({}), null);
+      ctx.raises(() => r.MeshX.createFromThreejsJSON({ data: { index: { array: [0, 1, 7] },
+        attributes: { position: { itemSize: 3, array: [0, 0, 0, 1, 0, 0, 0, 1, 0] } } } }), /outside the vertices/);
+      // point clouds; an RGBA color's 4th channel is opacity
+      const pc = new r.PointCloudX(), oldPc = new r.PointCloud();
+      pc.add(P(1, 2, 3), P(0, 0, 1), { r: 255, g: 0, b: 0, a: 255 }); pc.add(P(4, 5, 6), P(0, 1, 0), { r: 0, g: 0, b: 255, a: 255 });
+      oldPc.addPointNormalColor([1, 2, 3], [0, 0, 1], { r: 255, g: 0, b: 0, a: 255 });
+      oldPc.addPointNormalColor([4, 5, 6], [0, 1, 0], { r: 0, g: 0, b: 255, a: 255 });
+      same(pc.toThreejsJSON(), oldPc.toThreejsJSON());
+      const rgba = { data: { attributes: { position: { itemSize: 3, array: [1, 2, 3] },
+                                           color: { itemSize: 4, array: [1, 0, 0, 0.5] } } } };
+      const cols = c => Array.from(c.getColors()).map(k => [k.r, k.g, k.b, k.a]);
+      assert.deepStrictEqual(cols(r.PointCloudX.createFromThreejsJSON(rgba)), cols(r.PointCloud.createFromThreejsJSON(rgba)));
+      assert.deepStrictEqual(Array.from(r.PointCloudX.createFromThreejsJSON(pc.toThreejsJSON()).getPoints()).map(q => [q.X, q.Y, q.Z]),
+                             [[1, 2, 3], [4, 5, 6]]);
+      // each member warned once, naming its replacement
+      const mine = warned.filter(w => /^rhino3dm: .* is deprecated/.test(w));
+      for (const name of ['Mesh.toThreejsJSON ', 'Mesh.toThreejsJSONRotate', 'Mesh.toThreejsJSONMerged', 'Mesh.createFromThreejsJSON',
+                          'PointCloud.toThreejsJSON', 'PointCloud.createFromThreejsJSON'])
+        assert.strictEqual(mine.filter(w => w.includes(name)).length, 1, name);
+      assert(mine.every(w => /use .*Buffers/.test(w)));
+    } finally {
+      console.warn = warn;
+    }
+  });
 };

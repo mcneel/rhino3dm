@@ -1832,6 +1832,8 @@ js  MeshX.copyFrom [function]
 js  MeshX.createFromSubDControlNet [class_function]
 js  MeshX.createFromSubDControlNetWithTextureCoordinates [class_function]
 js  MeshX.createFromSurfaceControlNet [class_function]
+js  MeshX.createFromThreejsBuffers [class_function]
+js  MeshX.createFromThreejsJSON [class_function]
 js  MeshX.createPartitions [function]
 js  MeshX.createQuickHull3D [class_function]
 js  MeshX.decode [class_function]
@@ -1861,6 +1863,10 @@ js  MeshX.setSurfaceParametersFromTextureCoordinates [function]
 js  MeshX.setTextureCoordinates [function]
 js  MeshX.solidOrientation [function]
 js  MeshX.textureCoordinates [property]
+js  MeshX.toThreejsBuffers [function]
+js  MeshX.toThreejsJSON [function]
+js  MeshX.toThreejsJSONMerged [class_function]
+js  MeshX.toThreejsJSONRotate [function]
 js  MeshX.topologyEdges [property]
 js  MeshX.vertexColors [property]
 js  MeshX.vertices [property]
@@ -2317,6 +2323,8 @@ js  PointCloudX.containsHiddenFlags [property]
 js  PointCloudX.containsNormals [property]
 js  PointCloudX.containsPointValues [property]
 js  PointCloudX.count [property]
+js  PointCloudX.createFromThreejsBuffers [class_function]
+js  PointCloudX.createFromThreejsJSON [class_function]
 js  PointCloudX.decode [class_function]
 js  PointCloudX.get [function]
 js  PointCloudX.getColors [function]
@@ -2332,6 +2340,8 @@ js  PointCloudX.insertRange [function]
 js  PointCloudX.merge [function]
 js  PointCloudX.pointAt [function]
 js  PointCloudX.removeAt [function]
+js  PointCloudX.toThreejsBuffers [function]
+js  PointCloudX.toThreejsJSON [function]
 js  PointX.computeMemoryEstimate [class_function]
 js  PointX.constructor(dispatched)
 js  PointX.decode [class_function]
@@ -3267,6 +3277,8 @@ py  BoundingBoxX.__init__(double, double, double, double, double, double)
 py  BoundingBoxX.__init__(std::vector<BND_Point3dX>)
 py  BoundingBoxX.__init__(std::vector<BND_Point3dX>, BND_TransformX)
 py  BoundingBoxX.__repr__()
+py  BoundingBoxX._static_Union(a, b) [static]
+py  BoundingBoxX._static_Union(box, point) [static]
 py  BoxX.Area [property ro]
 py  BoxX.BoundingBox [property ro]
 py  BoxX.Center [property ro]
@@ -5699,6 +5711,7 @@ py  PointCloudX.Add(point, normal, color)
 py  PointCloudX.Add(point, normal, color, value)
 py  PointCloudX.Add(point, value)
 py  PointCloudX.AddRange(points)
+py  PointCloudX.AddRange(points, colors)
 py  PointCloudX.AddRange(points, normals)
 py  PointCloudX.AddRange(points, normals, colors)
 py  PointCloudX.AddRange(points, normals, colors, values)
@@ -5740,6 +5753,7 @@ py  PointX.__init__(BND_Point3dX)
 py  PointX.__init__(const BND_Point&)
 py  PolyCurveX.Append(arc)
 py  PolyCurveX.Append(curve)
+py  PolyCurveX.Append(line)
 py  PolyCurveX.AppendSegment(curve)
 py  PolyCurveX.DuplicatePolyCurve()
 py  PolyCurveX.Explode()

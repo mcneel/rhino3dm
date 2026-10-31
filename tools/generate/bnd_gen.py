@@ -894,6 +894,11 @@ template <class T> inline emscripten::val RH3DM_JsArray(const std::vector<T*>& v
 inline bool RH3DM_JsIsSeq(const emscripten::val& v) {
   return v.isArray() || (v.typeOf().as<std::string>() == "object" && !v.isNull()
                          && v["toArray"].typeOf().as<std::string>() == "function"); }
+// a sequence argument's first element, or undefined (G130: same-arity overloads told apart by their
+// sequences' element shape)
+inline emscripten::val RH3DM_JsSeqFirst(const emscripten::val& v) {
+  emscripten::val a = v.isArray() ? v : v.call<emscripten::val>("toArray");
+  return a["length"].as<int>() > 0 ? a[0] : emscripten::val::undefined(); }
 template <class T> inline std::vector<T> RH3DM_JsSeq(const emscripten::val& v) {
   if (v.isArray()) return emscripten::vecFromJSArray<T>(v);
   if (RH3DM_JsIsSeq(v)) return emscripten::vecFromJSArray<T>(v.call<emscripten::val>("toArray"));
@@ -1493,6 +1498,23 @@ inline int RH3DM_ColorByte(int v, const char* name)
 }
 inline BND_Color RH3DM_ColorFromArgb4(int a, int r, int g, int b)
 { return ON_Color_to_Binding(ON_Color(RH3DM_ColorByte(r, "red"), RH3DM_ColorByte(g, "green"), RH3DM_ColorByte(b, "blue"), 255 - RH3DM_ColorByte(a, "alpha"))); }
+// an object made only to pass to a call (G130: `Append(new LineCurve(line))`): owned, freed when the
+// call's full expression ends -- the callee copies it (each member this unlocks is reviewed)
+template<class T> struct RH3DM_TmpArgT
+{
+  T* p;
+  explicit RH3DM_TmpArgT(T* x) : p(x) {}
+  RH3DM_TmpArgT(const RH3DM_TmpArgT&) = delete;
+  ~RH3DM_TmpArgT() { delete p; }
+  operator const T*() const { return p; }
+  operator const T&() const { return *p; }
+};
+template<class T> inline RH3DM_TmpArgT<T> RH3DM_TmpArg(T* p) { return RH3DM_TmpArgT<T>(p); }
+// a Color's components as .NET reads them (G130): bytes, A the opacity (ON_Color's alpha is transparency)
+inline int RH3DM_ColorA(const BND_Color& v) { return 255 - Binding_to_ON_Color(v).Alpha(); }
+inline int RH3DM_ColorR(const BND_Color& v) { return Binding_to_ON_Color(v).Red(); }
+inline int RH3DM_ColorG(const BND_Color& v) { return Binding_to_ON_Color(v).Green(); }
+inline int RH3DM_ColorB(const BND_Color& v) { return Binding_to_ON_Color(v).Blue(); }
 inline BND_Color RH3DM_ColorFromWin32(int abgr)      // Interop.ColorFromWin32: always opaque
 { return ON_Color_to_Binding(ON_Color(abgr & 0xFF, (abgr >> 8) & 0xFF, (abgr >> 16) & 0xFF, 0)); }
 inline int RH3DM_ColorToArgb(const BND_Color& v)     // Color.ToArgb()
@@ -1777,10 +1799,32 @@ void initGen{reg}(void)
         # IEnumerable in C#, no for...of in JS: the list's indexer (or enumerator) is not generated
         print('  not iterable in JS (no indexer generated): %s' % ', '.join(sorted(JS_POST['not_iterable'])))
     hand_cls = hand_class_registrations()   # G123: holders for hand members with no generated class
+    # G132: RhinoCommon's static AND instance method under one name (BoundingBox.Union(a, b) and
+    # bbox.Union(other)). pybind11 and nanobind both refuse to overload a name across the two, so the
+    # emitters register the static as `_static_<Name>`; once every class exists, one descriptor per
+    # pair answers the static on the class and the instance method on an instance. Run at module init
+    # (not in rhino3dm/__init__.py), so `import _rhino3dm` has it too.
+    PY_STATIC_OR_INSTANCE = '''
+  py::exec(R"py(
+class _StaticOrInstance(object):
+    def __init__(self, instance_method, static_method):
+        self._instance, self._static = instance_method, static_method
+        self.__doc__ = '\\n'.join(d for d in (static_method.__doc__, instance_method.__doc__) if d)
+    def __get__(self, obj, cls=None):
+        return self._static if obj is None else self._instance.__get__(obj, cls)
+for _cls in list(vars(_m).values()):
+    if isinstance(_cls, type):
+        for _attr in [a for a in vars(_cls) if a.startswith('_static_')]:
+            _inst = vars(_cls).get(_attr[len('_static_'):])
+            if _inst is not None:
+                setattr(_cls, _attr[len('_static_'):], _StaticOrInstance(_inst, getattr(_cls, _attr)))
+)py", py::dict(py::arg("_m") = m));
+'''
     files['gen_init.cpp'] = BANNER + '''#include "gen_common.h"
 
 {hand_inc}
 #if defined(ON_PYTHON_COMPILE)
+#include <pybind11/eval.h>   // py::exec (G132)
 {py_decls}
 {vt_py_decls}
 void initGeneratedBindings(rh3dmpymodule& m)
@@ -1792,7 +1836,7 @@ void initGeneratedBindings(rh3dmpymodule& m)
   }});
 {enums_py}
 {vt_py}{inits_py}
-{hand_py}{enums_py_nested}
+{hand_py}{enums_py_nested}{py_static_or_instance}
 }}
 #endif
 
@@ -1813,6 +1857,7 @@ void initGeneratedBindings(void)
                            for cls in CLASSES),
         enums_py='\n'.join(gen_enum_py), enums_js='\n'.join(gen_enum_js),
         enums_py_nested='\n'.join(gen_enum_py_nested),
+        py_static_or_instance=PY_STATIC_OR_INSTANCE,
         inits_py=inits_py, inits_js=inits_js,
         # hand-written bindings (G90): after every generated class (they may derive from one)
         hand_inc=''.join('#include "../%s"\n' % h['header'] for h in HAND_BINDINGS) + hand_cls[0],

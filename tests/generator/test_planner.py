@@ -1994,7 +1994,10 @@ def test_guid_empty_early_return_and_js_sequence_shape():
     assert P.early_return_cpp(g, ('direct', 'int'), 'int') is None
     import emit_classes as E
     key, check, conv = E.js_class_shape('const std::vector<BND_Point3dX>&')
-    assert key == 'seq:BND_Point3dX' and check.format(v='v1') == 'RH3DM_JsIsSeq(v1)'
+    # G130: the elements' shape too (an empty sequence matches any)
+    assert key == 'seq:BND_Point3dX' and check.format(v='v1').startswith('(RH3DM_JsIsSeq(v1) && (RH3DM_JsSeqFirst(v1).isUndefined() || ')
+    assert 'RH3DM_JsSeqFirst(v1)["Z"].isNumber()' in check.format(v='v1')
+    assert 'hasOwnProperty("r")' in E.js_class_shape('std::vector<BND_Color>')[1]
     assert conv.format(v='v1') == 'RH3DM_JsSeq<BND_Point3dX>(v1)'
 
 

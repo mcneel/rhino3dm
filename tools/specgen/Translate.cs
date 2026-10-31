@@ -1020,6 +1020,41 @@ class Tx
         return m.Success ? m.Groups[1].Value.Split('.').Last() + "[]" : null;
     }
 
+    // `Append(new LineCurve(line))` (G130): a new class object passed straight to a call of this class may be
+    // a temporary freed after the call only when the callee cannot keep it -- the overload(s) taking it (a
+    // parameter of its class or a base) use that parameter solely as `p.ConstPointer()`, in a null test, or
+    // in GC.KeepAlive(p)
+    bool TmpArgSafe(ObjectCreationExpressionSyntax oc, string cls)
+    {
+        if (oc.Parent is not ArgumentSyntax arg || arg.Parent is not ArgumentListSyntax al
+            || al.Parent is not InvocationExpressionSyntax { Expression: IdentifierNameSyntax callee }) return false;
+        int idx = al.Arguments.IndexOf(arg);
+        var bases = Classes.TryGetValue(cls, out var ci) ? ci.Chain().Select(t => t.Cs).ToHashSet() : new HashSet<string> { cls };
+        var cands = Cur.Chain().SelectMany(t => t.MethodDecls)
+            .Where(m => m.Identifier.Text == callee.Identifier.Text && m.ParameterList.Parameters.Count == al.Arguments.Count
+                        && bases.Contains(m.ParameterList.Parameters[idx].Type?.ToString().Split('.').Last() ?? "")).ToList();
+        if (cands.Count == 0) return false;
+        foreach (var md in cands)
+        {
+            var pn = md.ParameterList.Parameters[idx].Identifier.Text;
+            var body = (SyntaxNode)md.Body ?? md.ExpressionBody;
+            if (body == null) return false;
+            foreach (var u in body.DescendantNodes().OfType<IdentifierNameSyntax>().Where(x => x.Identifier.Text == pn))
+            {
+                bool constPtr = u.Parent is MemberAccessExpressionSyntax { Name.Identifier.Text: "ConstPointer" } cpm && cpm.Expression == u
+                                && cpm.Parent is InvocationExpressionSyntax;
+                bool nullTest = u.Parent is BinaryExpressionSyntax nb && (nb.IsKind(SyntaxKind.EqualsExpression) || nb.IsKind(SyntaxKind.NotEqualsExpression))
+                                && (nb.Left.IsKind(SyntaxKind.NullLiteralExpression) || nb.Right.IsKind(SyntaxKind.NullLiteralExpression));
+                // `GC.KeepAlive(p)`: .NET's lifetime hint, nothing kept
+                bool keepAlive = u.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Parent: InvocationExpressionSyntax
+                                 { Expression: MemberAccessExpressionSyntax { Name.Identifier.Text: "KeepAlive", Expression: var kae } } } }
+                                 && kae.ToString() is "GC" or "System.GC";
+                if (!constPtr && !nullTest && !keepAlive) return false;
+            }
+        }
+        return true;
+    }
+
     // `ClosestIndexInList(this, p)` where the callee takes IList<Point3d> (G80): `this.ToArray()`
     InvocationExpressionSyntax ThisAsSequence(InvocationExpressionSyntax inv, TypeInfo owner, string name)
     {
@@ -3259,6 +3294,12 @@ class Tx
                     ClassValue(oc);
                     return $"$$adopt:{icn2}$$(RH3DM_IP({inl}))";
                 }
+                if (Cur.ClassMode && ClassOf(oc.Type) is string tcn && !IsInterop(tcn) && TmpArgSafe(oc, tcn))
+                {
+                    // `Append(new LineCurve(line))` (G130): an object made only to pass to the call -- owned by
+                    // RH3DM_TmpArg, freed when the call's full expression ends (the callee only reads it)
+                    return $"RH3DM_TmpArg($$new:{tcn}:{(oc.ArgumentList != null ? ArgTypes(oc.ArgumentList) : "")}$$({(oc.ArgumentList != null ? Args(oc.ArgumentList) : "")}))";
+                }
                 if (Cur.ClassMode && ClassOf(oc.Type) is string ncn)
                 {
                     ClassValue(oc);                                                 // G74
@@ -3295,6 +3336,10 @@ class Tx
             {
                 var name = ma.Name.Identifier.Text;
                 if (ma.Expression is ThisExpressionSyntax) return Ident(name);
+                // a System.Drawing.Color's components (G130): .NET's bytes, A the opacity
+                if (Cur.ClassMode && name is "A" or "R" or "G" or "B"
+                    && TypeOf(ma.Expression) is "Color" or "System.Drawing.Color" or "Drawing.Color")
+                    return $"RH3DM_Color{name}({Expr(ma.Expression)})";
                 if (Cur.ClassMode && ma.Expression is BaseExpressionSyntax)
                     return $"$$bget:{name}$$()";                                     // `base.Name` (G92)
                 if (Cur.ClassMode && TypeOf(ma.Expression)?.Split('.').Last() == "StringWrapper" && name is "NonConstPointer" or "ConstPointer")
@@ -3479,6 +3524,10 @@ class Tx
             }
             case MemberAccessExpressionSyntax ma:
             {
+                // a System.Drawing.Color's components (G130: PointCloud.AddRange(points, colors))
+                if (Cur.ClassMode && ma.Name.Identifier.Text is "A" or "R" or "G" or "B"
+                    && TypeOf(ma.Expression) is "Color" or "System.Drawing.Color" or "Drawing.Color")
+                    return "byte";
                 if (ma.Name.Identifier.Text == "m_items" && TypeOf(ma.Expression)?.Contains("RhinoList<") == true)
                     return ArrayCs(TypeOf(ma.Expression));                               // G117
                 var name = ma.Name.Identifier.Text;
@@ -3758,6 +3807,12 @@ class Tx
             && gca0.Expression is IdentifierNameSyntax gcp && ParamNames.Contains(gcp.Identifier.Text) && ArrayCs(TypeOf(gcp)) != null
             && gca1.RefKindKeyword.IsKind(SyntaxKind.OutKeyword) && gca1.Expression is IdentifierNameSyntax gcc)
             return $"RH3DM_ConstArray({Rn(gcp.Identifier.Text)}, {Rn(gcc.Identifier.Text)})";
+        // ... or on any array-typed expression (G130: `GetConstArray(argbList.ToArray(), out countColor)`):
+        // the copy the local takes is made before the temporary goes
+        if (Cur.ClassMode && CalleeName0(inv) == "GetConstArray" && inv.ArgumentList.Arguments is [var gcb0, var gcb1]
+            && ArrayCs(TypeOf(gcb0.Expression)) != null
+            && gcb1.RefKindKeyword.IsKind(SyntaxKind.OutKeyword) && gcb1.Expression is IdentifierNameSyntax gcc2)
+            return $"RH3DM_ConstArray({Expr(gcb0.Expression)}, {Rn(gcc2.Identifier.Text)})";
         // `m_mesh.NonConstPointer()` on a field (G85): a child view's pointer is its
         // parent's -- the generator resolves it on child views only, else refuses
         if (Cur.ClassMode && inv.ArgumentList.Arguments.Count == 0

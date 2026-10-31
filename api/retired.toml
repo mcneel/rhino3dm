@@ -1919,3 +1919,19 @@ class = "BND_SubDFaceIteratorFromVertex"
 members = ["First", "Next", "Last", "Current", "CurrentIndex"]
 status = "dropped"
 note = "Luis 2026-10-30 (option 1, G129): vertex.Faces is a list -- iterate it, or index it ([0], [-1] / [length - 1])"
+
+[[retired]]
+class = "PolyCurve"
+member = "appendLine"
+status = "replaced"
+by = ["PolyCurveX.Append"]
+note = "triage JS1 (Luis: retire): JS only; append(line), generated once a temporary LineCurve may be passed to a callee that only reads it (G130)"
+test = "test_retired_append_line_and_add_range_colors_g130"
+
+[[retired]]
+class = "PointCloud"
+member = "addRangePointsColors"
+status = "replaced"
+by = ["PointCloudX.AddRange"]
+note = "triage JS1 (Luis: retire): JS only; addRange(points, colors) (G130)"
+test = "test_retired_append_line_and_add_range_colors_g130"
