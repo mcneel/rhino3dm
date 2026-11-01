@@ -336,8 +336,9 @@ jobs:
       - name: setup python
         uses: actions/setup-python@v5.4.0
         with:
-          # Semantic version range syntax or exact version of a Python version
-          python-version: '3.9'
+          # Semantic version range syntax or exact version of a Python version. Not 3.9: it is end
+          # of life (2025-10) and setup-python has no build of it for ubuntu-latest (26.04)
+          python-version: '3.12'
       - name: info
         run: python --version && cmake --version
       - name: install dependencies

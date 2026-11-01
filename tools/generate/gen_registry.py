@@ -190,7 +190,7 @@ CLASSES = [
     # G107: Draco compression (Luis 2026-10-19: sync c/draco.cpp, U24) -- the handle RhinoCommon's
     # DracoCompression owns (Draco_Compress / Draco_Delete); its pointee is draco.cpp's own class,
     # opaque here (compiled renamed, src/CMakeLists.txt)
-    {'type': 'Rhino.FileIO.DracoCompression', 'cs': 'DracoCompression', 'on': 'BND_Draco',
+    {'type': 'Rhino.FileIO.DracoCompression', 'cs': 'DracoCompression', 'on': 'RH3DM_CL_Draco',
      'mode': 'pointer', 'noctor': True,
      'gen': 'BND_DracoCompression', 'reg': 'DracoCompression'},
     # G96: an INTERNAL handle (never registered): AnnotationBase.GetTextRuns's elements, which
@@ -772,6 +772,12 @@ CS_ENUMS = {
     'IsoStatus':        {'cpp': 'RH3DM_IsoStatus', 'gen': True},
 }
 
+
+# classes the C layer defines inside a .cpp under names the bindings use too (draco.cpp's BND_Draco,
+# BND_DracoCompressionOptions; the second is also RhinoCommon's DracoCompressionOptions, generated as
+# BND_DracoCompressionOptions since M3 dropped the X): src/CMakeLists.txt compiles that .cpp with them
+# renamed as here, and the generator reads the C signatures with the same names -- one type, one name
+C_CLASS_RENAMES = {'BND_Draco': 'RH3DM_CL_Draco', 'BND_DracoCompressionOptions': 'RH3DM_CL_DracoCompressionOptions'}
 
 # nested enums the generator registers on opennurbs' own C++ type -- the type the C layer
 # passes (ON_DimStyle::field), so no RH3DM_ copy is defined -- because the old registration is

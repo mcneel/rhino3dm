@@ -737,13 +737,15 @@ inline int RH3DM_ColorToArgb(const BND_Color& v)     // Color.ToArgb()
 { ON_Color c = Binding_to_ON_Color(v);
   return (int)(((unsigned int)(255 - c.Alpha()) << 24) | ((unsigned int)c.Red() << 16) | ((unsigned int)c.Green() << 8) | (unsigned int)c.Blue()); }
 
-// CRhCmnStringHolder::Array() yields RHMONO_STRING: wchar_t on Windows,
-// UTF-16 (ON__UINT16) on Linux/Android/WASM -- convert accordingly.
+// CRhCmnStringHolder::Array() yields RHMONO_STRING: wchar_t on Windows, UTF-16 everywhere
+// else (ON__UINT16 on Linux/Android/WASM, unichar on Apple) -- decided by its size, not a
+// platform list (an Apple build once read UTF-16 as wchar_t: every string came back garbled)
 inline std::wstring RH3DM_W(const CRhCmnStringHolder& h)
 {
   const RHMONO_STRING* a = h.Array();
   if (!a) return std::wstring();
-#if defined(ON_RUNTIME_LINUX) || defined(ON_RUNTIME_ANDROID) || defined(ON_RUNTIME_WASM)
+#if !defined(_WIN32)
+  static_assert(sizeof(RHMONO_STRING) == 2, "RHMONO_STRING is UTF-16 outside Windows");
   int n = 0;
   while (a[n]) n++;
   std::wstring out;
@@ -771,7 +773,8 @@ inline std::wstring RH3DM_W(const CRhCmnStringHolder& h)
 inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
 {
   std::vector<RHMONO_STRING> out(s.size() * 2 + 2, 0);
-#if defined(ON_RUNTIME_LINUX) || defined(ON_RUNTIME_ANDROID) || defined(ON_RUNTIME_WASM) || defined(__APPLE__)
+#if !defined(_WIN32)
+  static_assert(sizeof(RHMONO_STRING) == 2, "RHMONO_STRING is UTF-16 outside Windows");
   unsigned int err = 0;
   ON_ConvertUTF32ToUTF16(false, (const ON__UINT32*)s.c_str(), (int)s.size(),
                          (ON__UINT16*)out.data(), (int)out.size() - 1,
@@ -827,8 +830,8 @@ enum TextureMappingGetTransform : int;
 enum TextureMappingType : int;
 enum class TextureProjectionModes : int;
 enum class eColorFormat : int;
-class BND_Draco;
-class BND_DracoCompressionOptions;
+class RH3DM_CL_Draco;
+class RH3DM_CL_DracoCompressionOptions;
 enum class RH3DM_ActiveSpace : int { None = 0, ModelSpace = 1, PageSpace = 2, UVEditorSpace = 3, BlockEditorSpace = 4 };
 enum class RH3DM_AnnotationType : int { Unset = 0, Aligned = 1, Angular = 2, Diameter = 3, Radius = 4, Rotated = 5, Ordinate = 6, ArcLen = 7, CenterMark = 8, Text = 9, Leader = 10, Angular3pt = 11 };
 enum class RH3DM_AntialiasLevel : int { None = 0, Draft = 1, Good = 2, High = 3 };
@@ -929,9 +932,6 @@ enum class RH3DM_TextureUvwWrapping : int { Repeat = 0, Clamp = 1 };
 enum class RH3DM_ViewInfoFocalBlurModes : int { None, Automatic, Manual };
 enum class RH3DM_ViewSectionBehavior : int { ClipAndSection = 0, SectionOnly = 1 };
 enum class RH3DM_ViewType : int { ModelView = 0, PageView = 1, NestedView = 2, UVEditorView = 3, BlockEditorView = 4 };
-extern "C" BND_Draco* Draco_Compress(const ON_Mesh* mesh, const BND_DracoCompressionOptions* options);
-extern "C" BND_Draco* Draco_CompressPointCloud(const ON_PointCloud* pointcloud, const BND_DracoCompressionOptions* options);
-extern "C" BND_DracoCompressionOptions* Draco_NewOptions(int level, int positionQuantization, int tcQuantization, int normalQuantization, bool includeNormals, bool includeTcs, bool includeVertexColors, eColorFormat colorFormat);
 extern "C" ON::AnnotationType ON_V6_Annotation_AnnotationType(const ON_Annotation* annotationptr);
 extern "C" ON::LengthUnitSystem ON_3dmRenderSettings_GetUnitSystem(ON_3dmRenderSettings* pSettings);
 extern "C" ON::LengthUnitSystem ON_3dmSettings_GetSetUnitSystem(ON_3dmSettings* pSettings, bool model, bool set, ON::LengthUnitSystem set_val);
@@ -1211,10 +1211,13 @@ extern "C" ON_Write3dmBufferArchive* ON_WriteBufferArchive_NewMemoryWriter(int r
 extern "C" ON_XMLVariant* ON_XMLVariant_New();
 extern "C" ON__UINT64 ON_EmbeddedFile_CompressedLength(const ON_EmbeddedFile* ef);
 extern "C" ON__UINT64 ON_EmbeddedFile_Length(const ON_EmbeddedFile* ef);
+extern "C" RH3DM_CL_Draco* Draco_Compress(const ON_Mesh* mesh, const RH3DM_CL_DracoCompressionOptions* options);
+extern "C" RH3DM_CL_Draco* Draco_CompressPointCloud(const ON_PointCloud* pointcloud, const RH3DM_CL_DracoCompressionOptions* options);
+extern "C" RH3DM_CL_DracoCompressionOptions* Draco_NewOptions(int level, int positionQuantization, int tcQuantization, int normalQuantization, bool includeNormals, bool includeTcs, bool includeVertexColors, eColorFormat colorFormat);
 extern "C" TextRunTypeConsts ON_TextRun_Type(const ON_TextRun* constPtrTextRun);
 extern "C" TextureMappingType ON_TextureMapping_GetMappingType(const ON_TextureMapping* pTextureMapping);
 extern "C" TextureProjectionModes ON_Texture_GetProjectionMode(const ON_Texture* pConstTexture);
-extern "C" bool Draco_Write(const BND_Draco* draco, const RHMONO_STRING* path);
+extern "C" bool Draco_Write(const RH3DM_CL_Draco* draco, const RHMONO_STRING* path);
 extern "C" bool ONX_Model_AddEmbeddedFile(ONX_Model* model, const RHMONO_STRING* filename);
 extern "C" bool ONX_Model_AddModelComponent(ONX_Model* pModel, const ON_ModelComponent* pConstModelComponent);
 extern "C" bool ONX_Model_NamedCPlaneTable_Delete(ONX_Model* pModel, int index);
@@ -1946,10 +1949,10 @@ extern "C" double ON_Viewport_TargetDistance(const ON_Viewport* pConstViewport, 
 extern "C" double ON_XMLVariant_GetDoubleValue(const ON_XMLVariant* pV);
 extern "C" double ON_Xform_Determinant(const ON_Xform* xf);
 extern "C" float ON_XMLVariant_GetFloatValue(const ON_XMLVariant* pV);
-extern "C" int DracoColorAttribPos(const BND_Draco* draco);
-extern "C" int DracoNormaAttribPos(const BND_Draco* draco);
-extern "C" int DracoTexCoordAttribPos(const BND_Draco* draco);
-extern "C" int DracoVertexAttribPos(const BND_Draco* draco);
+extern "C" int DracoColorAttribPos(const RH3DM_CL_Draco* draco);
+extern "C" int DracoNormaAttribPos(const RH3DM_CL_Draco* draco);
+extern "C" int DracoTexCoordAttribPos(const RH3DM_CL_Draco* draco);
+extern "C" int DracoVertexAttribPos(const RH3DM_CL_Draco* draco);
 extern "C" int ONX_Model_AddGroup(ONX_Model* pModel);
 extern "C" int ONX_Model_AddLayer(ONX_Model* pModel, const RHMONO_STRING* layerName, int argb, bool bDefault);
 extern "C" int ONX_Model_AddLayer2(ONX_Model* pModel, const RHMONO_STRING* pLayerName, int argb, ON_UUID parentId);
@@ -2194,10 +2197,10 @@ extern "C" unsigned int ON_SubD_UpdateAllTagsAndSectorCoefficients(ON_SubD* subd
 extern "C" unsigned int ON_Sun_GetDataCRC(const ON_Sun* sun);
 extern "C" unsigned int ON_WriteBufferArchive_SizeOfArchive(const ON_Write3dmBufferArchive* pWrite3dmBufferArchive);
 extern "C" unsigned int ON_Xform_GetHashCode(const ON_Xform* xf);
-extern "C" void Draco_Delete(BND_Draco* draco);
-extern "C" void Draco_DeleteOptions(BND_DracoCompressionOptions* options);
-extern "C" void Draco_ToBase64(const BND_Draco* draco, ON_wString* str);
-extern "C" void Draco_ToByteArray(const BND_Draco* draco, std::vector<unsigned char>* bytes);
+extern "C" void Draco_Delete(RH3DM_CL_Draco* draco);
+extern "C" void Draco_DeleteOptions(RH3DM_CL_DracoCompressionOptions* options);
+extern "C" void Draco_ToBase64(const RH3DM_CL_Draco* draco, ON_wString* str);
+extern "C" void Draco_ToByteArray(const RH3DM_CL_Draco* draco, std::vector<unsigned char>* bytes);
 extern "C" void ONC_SpanVector(const ON_Curve* curve, ON_SimpleArray<double>* vector);
 extern "C" void ONX_ModelComponentIterator_Delete(ONX_ModelComponentIterator* modelIterator);
 extern "C" void ONX_Model_BoundingBox(const ONX_Model* pConstModel, ON_BoundingBox* pBBox);

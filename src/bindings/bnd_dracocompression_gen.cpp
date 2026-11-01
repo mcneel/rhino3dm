@@ -48,7 +48,7 @@ BND_DracoCompression* BND_DracoCompression::Gen_Compress(const BND_Mesh& mesh, c
   {
     return nullptr;
   }
-  return RH3DM_Adopt<BND_DracoCompression, BND_Draco>(RH3DM_IP(ptrDraco));
+  return RH3DM_Adopt<BND_DracoCompression, RH3DM_CL_Draco>(RH3DM_IP(ptrDraco));
 }
 
 BND_DracoCompression* BND_DracoCompression::Gen_Compress_2(const BND_PointCloud& pointCloud, const BND_DracoCompressionOptions* options) {
@@ -61,7 +61,7 @@ BND_DracoCompression* BND_DracoCompression::Gen_Compress_2(const BND_PointCloud&
   {
     return nullptr;
   }
-  return RH3DM_Adopt<BND_DracoCompression, BND_Draco>(RH3DM_IP(ptrDraco));
+  return RH3DM_Adopt<BND_DracoCompression, RH3DM_CL_Draco>(RH3DM_IP(ptrDraco));
 }
 
 BND_GeometryBase* BND_DracoCompression::Gen_DecompressByteArray(RH3DM_Bytes bytes) {

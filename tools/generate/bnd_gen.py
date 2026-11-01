@@ -458,6 +458,10 @@ def main():
     # (ON_LineCurveImpl*) while the definitions use the real ones
     # (ON_LineCurve*); same C symbol. Generate against the real types.
     unimpl = lambda t: re.sub(r'\b(ON_\w+?)Impl\*', r'\1*', t or '')
+    if C_CLASS_RENAMES:
+        _ren = re.compile(r'\b(%s)\b' % '|'.join(map(re.escape, C_CLASS_RENAMES)))
+        _unimpl = unimpl
+        unimpl = lambda t: _ren.sub(lambda m: C_CLASS_RENAMES[m.group(1)], _unimpl(t))
     for f in c_by_name.values():
         f['returns'] = unimpl(f['returns'])
         for q in f['params']:
@@ -573,7 +577,8 @@ def main():
     # pointer: opaque-declared (M3: before, the old bnd_draco.h declared them)
     c_class_defs = set()
     for f in glob.glob(os.path.join(ROOT, 'src', 'librhino3dm_native', '*.cpp')):
-        c_class_defs |= set(re.findall(r'^(?:class|struct)\s+(\w+)\s*$', open(f, errors='replace').read(), re.M))
+        c_class_defs |= {C_CLASS_RENAMES.get(n, n) for n in
+                         re.findall(r'^(?:class|struct)\s+(\w+)\s*$', open(f, errors='replace').read(), re.M)}
     opaque_classes = sorted({n for f in sig_fns for t in ([f['returns']] + [q['type'] for q in f['params']])
                              for n in re.findall(r'\b(\w+)\s*\*', t) if n in c_class_defs})
 
@@ -1558,13 +1563,15 @@ inline int RH3DM_ColorToArgb(const BND_Color& v)     // Color.ToArgb()
 { ON_Color c = Binding_to_ON_Color(v);
   return (int)(((unsigned int)(255 - c.Alpha()) << 24) | ((unsigned int)c.Red() << 16) | ((unsigned int)c.Green() << 8) | (unsigned int)c.Blue()); }
 
-// CRhCmnStringHolder::Array() yields RHMONO_STRING: wchar_t on Windows,
-// UTF-16 (ON__UINT16) on Linux/Android/WASM -- convert accordingly.
+// CRhCmnStringHolder::Array() yields RHMONO_STRING: wchar_t on Windows, UTF-16 everywhere
+// else (ON__UINT16 on Linux/Android/WASM, unichar on Apple) -- decided by its size, not a
+// platform list (an Apple build once read UTF-16 as wchar_t: every string came back garbled)
 inline std::wstring RH3DM_W(const CRhCmnStringHolder& h)
 {
   const RHMONO_STRING* a = h.Array();
   if (!a) return std::wstring();
-#if defined(ON_RUNTIME_LINUX) || defined(ON_RUNTIME_ANDROID) || defined(ON_RUNTIME_WASM)
+#if !defined(_WIN32)
+  static_assert(sizeof(RHMONO_STRING) == 2, "RHMONO_STRING is UTF-16 outside Windows");
   int n = 0;
   while (a[n]) n++;
   std::wstring out;
@@ -1592,7 +1599,8 @@ inline std::wstring RH3DM_W(const CRhCmnStringHolder& h)
 inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
 {
   std::vector<RHMONO_STRING> out(s.size() * 2 + 2, 0);
-#if defined(ON_RUNTIME_LINUX) || defined(ON_RUNTIME_ANDROID) || defined(ON_RUNTIME_WASM) || defined(__APPLE__)
+#if !defined(_WIN32)
+  static_assert(sizeof(RHMONO_STRING) == 2, "RHMONO_STRING is UTF-16 outside Windows");
   unsigned int err = 0;
   ON_ConvertUTF32ToUTF16(false, (const ON__UINT32*)s.c_str(), (int)s.size(),
                          (ON__UINT16*)out.data(), (int)out.size() - 1,

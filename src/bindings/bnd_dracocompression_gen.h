@@ -7,8 +7,8 @@
 class BND_DracoCompression
 {
 public:
-  BND_Draco* m_ptr = nullptr;
-  explicit BND_DracoCompression(BND_Draco* owned) : m_ptr(owned) {}
+  RH3DM_CL_Draco* m_ptr = nullptr;
+  explicit BND_DracoCompression(RH3DM_CL_Draco* owned) : m_ptr(owned) {}
   ~BND_DracoCompression() { if (m_ptr) Draco_Delete(m_ptr); }
   BND_DracoCompression(const BND_DracoCompression&) = delete;
 

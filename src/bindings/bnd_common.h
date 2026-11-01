@@ -126,7 +126,7 @@ void RH3DM_Deprecated(const char* member, const char* instead);
 
 // helpers several classes' hand-maintained members share (moved out of the per-class files, M3)
 class BND_File3dmRenderContent;
-class BND_Point3d;
+struct BND_Point3d;
 namespace bnd_shared
 {
 

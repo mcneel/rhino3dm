@@ -160,6 +160,12 @@ add_definitions(-DOPENNURBS_ZLIB_LIB_DIR)
 # yields a malformed string -> MSVC C4081). The native librhino3dm_native build already
 # defines this; mirror it here for the JS/Python build.
 add_definitions(-DON_CMAKE_BUILD)
+# No fused multiply-add contraction: the bindings must reproduce RhinoCommon's (.NET) results
+# bit for bit (tests/parity), and a contracted a*b+c rounds once instead of twice. GCC on aarch64
+# and Apple clang contract by default; MSVC does not unless /fp:contract
+if(NOT MSVC)
+  add_compile_options(-ffp-contract=off)
+endif()
 add_definitions(-DUNICODE)
 add_definitions(-DON_INCLUDE_DRACO)
 # The generated bindings call the flat C layer (RhinoCommon's c/), so those C
@@ -178,6 +184,13 @@ list(REMOVE_DUPLICATES pilot_clayer_SRC)
 # base64.cpp: the C layer's copy (reached through draco.cpp, G107) and the hand bindings' copy
 # (bindings/base64.cpp) define the same functions -- the module links the hand bindings' one
 list(REMOVE_ITEM pilot_clayer_SRC "${CMAKE_CURRENT_SOURCE_DIR}/librhino3dm_native/base64.cpp")
+# RhinoCommon's c/draco.cpp (synced verbatim but for include paths) defines classes named BND_Draco and
+# BND_DracoCompressionOptions; the second is also the generated binding of RhinoCommon's
+# DracoCompressionOptions. Compile the C layer's under other names (its exports are extern "C"; callers
+# hold opaque pointers) -- the generator reads the C signatures with the same names
+# (tools/generate/gen_registry.py C_CLASS_RENAMES).
+set_property(SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/librhino3dm_native/draco.cpp" APPEND PROPERTY COMPILE_DEFINITIONS
+  BND_Draco=RH3DM_CL_Draco BND_DracoCompressionOptions=RH3DM_CL_DracoCompressionOptions)
 
 if(${RHINO3DM_JS})
   # opennurbs (>= 8.32) is emscripten-aware: it auto-defines ON_RUNTIME_WASM,
