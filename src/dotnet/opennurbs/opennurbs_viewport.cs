@@ -117,6 +117,27 @@ namespace Rhino.DocObjects
       ConstructNonConstObject(ptr);
     }
 
+    /// <summary>
+    /// Gets a new viewport set to opennurbs' default top view: a parallel projection
+    /// looking down the world Z axis with Y up. This is the same as <see cref="ViewportInfo()"/>.
+    /// </summary>
+    /// <since>9.2</since>
+    public static ViewportInfo DefaultTop
+    {
+      get { return new ViewportInfo(UnsafeNativeMethods.ON_Viewport_NewDefault(false), true); }
+    }
+
+    /// <summary>
+    /// Gets a new viewport with the camera of opennurbs' default perspective view: looking
+    /// down at the origin from the front right, with Z up. The projection is parallel, as in
+    /// opennurbs; call <see cref="ChangeToPerspectiveProjection(double, bool, double)"/> for a perspective one.
+    /// </summary>
+    /// <since>9.2</since>
+    public static ViewportInfo DefaultPerspective
+    {
+      get { return new ViewportInfo(UnsafeNativeMethods.ON_Viewport_NewDefault(true), true); }
+    }
+
     internal ViewportInfo(IntPtr ptrOnViewport, bool controlPointer)
     {
       IntPtr ptr = ptrOnViewport;
@@ -146,6 +167,7 @@ namespace Rhino.DocObjects
     const int idxIsCameraUpLocked = 7;
     const int idxIsFrustumLeftRightSymmetric = 8;
     const int idxIsFrustumTopBottomSymmetric = 9;
+    const int idxIsValidCameraFrame = 10;
 
     bool GetBool(int which)
     {
@@ -171,6 +193,16 @@ namespace Rhino.DocObjects
     public bool IsValidFrustum
     {
       get { return GetBool(idxIsValidFrustum); }
+    }
+
+    /// <summary>
+    /// Gets a value that indicates whether the camera up, direction, X, Y and Z are valid.
+    /// Unlike <see cref="IsValidCamera"/>, this does not check the camera location.
+    /// </summary>
+    /// <since>9.2</since>
+    public bool IsValidCameraFrame
+    {
+      get { return GetBool(idxIsValidCameraFrame); }
     }
 
     /// <summary>

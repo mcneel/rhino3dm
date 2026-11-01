@@ -769,11 +769,6 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
     # the deleted C++ copy: deep copy through the C layer, as in .NET
     self_copy = any(len(p['bind_args']) == 1 and p['bind_args'][0][0] == 'const %s&' % cls['gen']
                     for p in arg_ctors)
-    # the bridge ctor copies from the hand BND class; 'bridge': False drops
-    # it (and with it every dependency on the hand header) for classes the
-    # generated surface can construct and populate on its own
-    bridge = ('\n  %s(const class %s& source);' % (cls['gen'], cls['hand'])
-              if cls.get('bridge', True) and cls['mode'] != 'abstract' else '')
     if cls['mode'] == 'static':
         # a C# static class: a namespace of static members
         return ('class {gen}\n{{\npublic:\n  {gen}() = delete;\n\n{methods}\n}};\n').format(
@@ -804,7 +799,7 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
     if base and base['mode'] != 'abstract':
         # concrete base owns the pointer (and the abstract getter override);
         # this class only adds members and a forwarding constructor
-        storage = '''  explicit {gen}({on}* owned) : {basegen}(owned) {{}}{bridge}{dctor}'''
+        storage = '''  explicit {gen}({on}* owned) : {basegen}(owned) {{}}{dctor}'''
         # the nearest ancestor's file proxy (G112: LinearDimension : Dimension : AnnotationBase -- only
         # AnnotationBase declares it; every class below forwards its (model, id) constructor)
         anc, bproxy = base, None
@@ -838,9 +833,9 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
                        % (cls['cs'], rnc, cp['Const'], oon, oon, oon, oon))
         return ('class {gen}{inherit}\n{{\npublic:\n' + storage
                 + '\n\n{methods}\n}};\n').format(
-            gen=cls['gen'], on=cls['on'], hand=cls['hand'],
+            gen=cls['gen'], on=cls['on'],
             basegen=base['gen'], methods=methods, inherit=inherit,
-            dctor=dctor, bridge=bridge)
+            dctor=dctor)
     acc = ('RH3DM_Const()', 'RH3DM_NonConst()') if cls.get('proxy') or cls.get('comp') or cls.get('shared') else ('m_ptr', 'm_ptr')
     override = ('\n  %s* %s() const override { return %s; }\n  %s* %sNC() const override { return %s; }'
                 % (base['on'], base['getter'], acc[0], base['on'], base['getter'], acc[1])) if base else ''
@@ -928,9 +923,9 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
     elif cls['mode'] == 'pointer' and cls.get('borrowed'):
         # a BORROWED pointer into another object (CachedTextureCoordinates in a mesh):
         # never deleted; whatever hands it out keeps the owner alive
-        # (a MANAGED class -- G99 Font -- is borrowed too, and may be constructed: bridge / arg ctors)
+        # (a MANAGED class -- G99 Font -- is borrowed too, and may be constructed: arg ctors)
         storage = '''  {on}* m_ptr = nullptr;
-  explicit {gen}({on}* borrowed) : m_ptr(borrowed) {{}}{bridge}{dctor}
+  explicit {gen}({on}* borrowed) : m_ptr(borrowed) {{}}{dctor}
   {gen}(const {gen}&) = delete;{override}'''
     elif cls['mode'] == 'pointer' and cls.get('shared'):
         # a std::shared_ptr HANDLE (Decal; G60): RhinoCommon's m_decal_sp -- this object
@@ -951,7 +946,7 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         # an IDisposable HANDLE (FileReference, File3dm): the plain storage, freed
         # with RhinoCommon's own Delete instead of `delete` (it may not be an ON_Object)
         storage = '''  {on}* m_ptr = nullptr;
-  explicit {gen}({on}* owned) : m_ptr(owned) {{}}{bridge}{dctor}
+  explicit {gen}({on}* owned) : m_ptr(owned) {{}}{dctor}
   ~{gen}() {{ if (m_ptr) ''' + cls['handle']['Delete'] + '''(m_ptr); }}{nocopy}{override}'''
     elif cls['mode'] == 'pointer' and cls.get('ff'):
         # DocumentOrFreeFloatingBase (GroundPlane): owns through its own New/Delete
@@ -986,11 +981,11 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         storage = (('''  mutable {on}* m_ptr = nullptr;
   const class %(ogen)s* m_pv_owner = nullptr;   // a view: the owner's sub-object (C# m_parent; G89)
   explicit {gen}({on}* owned) : m_ptr(owned) {{}}
-  explicit {gen}(const class %(ogen)s* owner) : m_pv_owner(owner) {{}}{bridge}{dctor}''' if pr.get('NoIndex') else '''  mutable {on}* m_ptr = nullptr;
+  explicit {gen}(const class %(ogen)s* owner) : m_pv_owner(owner) {{}}{dctor}''' if pr.get('NoIndex') else '''  mutable {on}* m_ptr = nullptr;
   const class %(ogen)s* m_pv_owner = nullptr;   // a view: the owner ...
   int m_pv_index = -1;                           // ... and its index (C# %(field)s)
   explicit {gen}({on}* owned) : m_ptr(owned) {{}}
-  {gen}(const class %(ogen)s* owner, int index) : m_pv_owner(owner), m_pv_index(index) {{}}{bridge}{dctor}''') + '''
+  {gen}(const class %(ogen)s* owner, int index) : m_pv_owner(owner), m_pv_index(index) {{}}{dctor}''') + '''
   ~{gen}() {{ delete {delete_expr}; }}{nocopy}
   static %(oarg)s RH3DM_PvOwner(const class %(ogen)s* owner);   // the owner's const pointer (gen_*.cpp)
   // CommonObject.ConstPointer: a view whose object left its owner throws
@@ -1068,7 +1063,7 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
   ONX_Model* m_model = nullptr;   // a view: the file ...
   ON_UUID m_id = ON_nil_uuid;     // ... and the id it resolves
   explicit {gen}({on}* owned) : m_ptr(owned) {{}}
-  {gen}(ONX_Model* model, ON_UUID id) : m_model(model), m_id(id) {{}}{viewctor}{childlink}{bridge}{dctor}''' + comp_state + '''{viewcopy}
+  {gen}(ONX_Model* model, ON_UUID id) : m_model(model), m_id(id) {{}}{viewctor}{childlink}{dctor}''' + comp_state + '''{viewcopy}
   ~{gen}() {{ delete {delete_expr}; }}{nocopy}
   // CommonObject.ConstPointer: a view whose object left the file throws
   {on}* RH3DM_Const() const {{
@@ -1081,7 +1076,7 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
                              else 'refused' if pr['NonConst'] == 'none' else 'copy on write (NonConstOperation -> _InternalDuplicate)') + '\n' + nonconst + commit + '{override}'
     elif cls['mode'] == 'pointer':
         storage = '''  {on}* m_ptr = nullptr;
-  explicit {gen}({on}* owned) : m_ptr(owned) {{}}{bridge}{dctor}
+  explicit {gen}({on}* owned) : m_ptr(owned) {{}}{dctor}
   ~{gen}() {{ delete {delete_expr}; }}{nocopy}{override}'''
     elif cls.get('fileview'):
         # a value OR a live view into a file's table (G104: ViewInfo from File3dm.Views): the view
@@ -1093,7 +1088,7 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
   const {on}* m_vptr = nullptr;
   bool m_named = false;
   explicit {gen}(const {on}& v) : m_val(v) {{}}
-  {gen}(ONX_Model* model, ON_UUID id, void* ptr, bool named) : m_model(model), m_id(id), m_vptr((const {on}*)ptr), m_named(named) {{}}{bridge}{dctor}
+  {gen}(ONX_Model* model, ON_UUID id, void* ptr, bool named) : m_model(model), m_id(id), m_vptr((const {on}*)ptr), m_named(named) {{}}{dctor}
   bool RH3DM_IsView() const {{ return m_model != nullptr; }}
   {on}* RH3DM_Val() const {{
     if (!m_model) return const_cast<{on}*>(&m_val);
@@ -1104,13 +1099,13 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
     else:
         # a value adopted from a native result (G49 valadopt) is copied in
         storage = '''  {on} m_val;
-  explicit {gen}(const {on}& v) : m_val(v) {{}}{bridge}{dctor}{override}'''
+  explicit {gen}(const {on}& v) : m_val(v) {{}}{dctor}{override}'''
     if cls['mode'] != 'child' and (cls.get('liter') or {}).get('index'):
         methods += '\n  class %sIter* Gen_iter() const;   // foreach (G98)' % cls['gen']
     return ('class {gen}{inherit}\n{{\npublic:\n' + storage
             + '\n\n{methods}\n}};\n').format(
-        gen=cls['gen'], on=cls['on'], hand=cls['hand'], methods=methods,
-        inherit=inherit, override=override, dctor=dctor, bridge=bridge,
+        gen=cls['gen'], on=cls['on'], methods=methods,
+        inherit=inherit, override=override, dctor=dctor,
         resolver=(cls.get('proxy') or {}).get('Resolver'), cs_full=cls['type'],
         viewctor=('\n  explicit %s(ONX_Model* model) : m_model(model) {}' % cls['gen']) if (cls.get('proxy') or {}).get('NoId') else '',
         childlink=CHILD_LINK.format(gen=cls['gen'], field=cls['proxy']['Child']['Field']) if (cls.get('proxy') or {}).get('Child') else '',
@@ -1154,7 +1149,7 @@ def BY_GEN_PTR(t):
 
 
 VARIANT_BT = {'bool': 'bool', 'double': 'double', 'int': 'int', 'float': 'float', 'Guid': 'BND_UUID',
-              'Vector2d': 'BND_Vector2dX', 'Vector3d': 'BND_Vector3dX'}
+              'Vector2d': 'BND_Vector2d', 'Vector3d': 'BND_Vector3d'}
 
 
 def emit_table_iter(cls):
@@ -1384,22 +1379,22 @@ def js_class_shape(t):
     # {X,Y,Z} is keyed on Z so a 3D object never passes the {X,Y} test
     # JS shape policy: {X,Y,Z} objects key on Z (so a 3D value never passes
     # the {X,Y} test below); everything else keys on its first field
-    vt = dict(VT_JS_KEY, **{'BND_Point3dX': 'Z', 'BND_Vector3dX': 'Z', 'BND_IntervalX': 'T0'})
-    if t in VT_JS_FIELDS and len(VT_JS_FIELDS[t]) > 1 and t not in ('BND_Point3dX', 'BND_Vector3dX', 'BND_Point2dX', 'BND_IntervalX'):
-        # a value object is checked on EVERY field (G100: ArcX {Plane, Radius, AngleDomain} and
-        # CircleX {Plane, Radius} share a first field -- a circle reached the Arc conversion);
+    vt = dict(VT_JS_KEY, **{'BND_Point3d': 'Z', 'BND_Vector3d': 'Z', 'BND_Interval': 'T0'})
+    if t in VT_JS_FIELDS and len(VT_JS_FIELDS[t]) > 1 and t not in ('BND_Point3d', 'BND_Vector3d', 'BND_Point2d', 'BND_Interval'):
+        # a value object is checked on EVERY field (G100: Arc {Plane, Radius, AngleDomain} and
+        # Circle {Plane, Radius} share a first field -- a circle reached the Arc conversion);
         # the shape key is the field set: a subset accepts a superset (js_shadowed)
         fs = VT_JS_FIELDS[t]
         return ('object:' + ','.join(sorted(fs)),
                 '(!{v}.isNull() && {v}.typeOf().as<std::string>() == "object" && %s)' % ' && '.join('{v}.hasOwnProperty("%s")' % f for f in fs),
                 '{v}.as<%s>()' % t)
     if t in vt:
-        lacks = ' && !{v}.hasOwnProperty("Z")' if t == 'BND_Point2dX' else ''
+        lacks = ' && !{v}.hasOwnProperty("Z")' if t == 'BND_Point2d' else ''
         # a point / vector's Z is a NUMBER: a Box value object has a Z too (an interval), and
-        # BoxX.Contains(box, otherBox) took the point branch
-        if t in ('BND_Point3dX', 'BND_Vector3dX', 'BND_Point3fX', 'BND_Vector3fX'):
+        # Box.Contains(box, otherBox) took the point branch
+        if t in ('BND_Point3d', 'BND_Vector3d', 'BND_Point3f', 'BND_Vector3f'):
             lacks += ' && {v}["Z"].isNumber()'
-        # `typeof null` is "object": checked first (PolyCurveX.append(null) called hasOwnProperty on null)
+        # `typeof null` is "object": checked first (PolyCurve.append(null) called hasOwnProperty on null)
         return ('object:' + vt[t],
                 '(!{v}.isNull() && {v}.typeOf().as<std::string>() == "object" && {v}.hasOwnProperty("%s")%s)' % (vt[t], lacks),
                 '{v}.as<%s>()' % t)
@@ -1443,13 +1438,13 @@ def js_class_shape(t):
 def js_seq_arg(t):
     """a parameter JS passes as an array (converted through emscripten::val): a std::vector by value
     or const reference, of values or of class pointers, or a byte buffer -- embind has no binding
-    type for any of them (unbound-type errors before: NurbsCurveX.create, writeMultipleObjects)"""
+    type for any of them (unbound-type errors before: NurbsCurve.create, writeMultipleObjects)"""
     return bool(re.match(r'^(?:const )?std::vector<.*>&?$', t)) or t in ('const RH3DM_Bytes&', 'RH3DM_Bytes')
 
 
 def js_branch_order(p, types=None):
     """dispatch order: overloads with an unchecked (`any`) argument last; among the rest, more
-    value-object fields first, so a specific type (ArcX) is tried before a general one (CircleX)"""
+    value-object fields first, so a specific type (Arc) is tried before a general one (Circle)"""
     ts = types if types is not None else [t for t, _ in p['bind_args']]
     shapes = [js_class_shape(t)[0] for t in ts]
     # a float twin (Point3f, Vector3f, ...) after its double twin (G118): JS cannot tell
@@ -1461,7 +1456,7 @@ def js_branch_order(p, types=None):
 
 
 # value types JS cannot tell from their double-precision twin (G118)
-JS_FLOAT_TWINS = {'BND_Point3fX', 'BND_Vector3fX', 'BND_Point2fX', 'BND_Vector2fX'}
+JS_FLOAT_TWINS = {'BND_Point3f', 'BND_Vector3f', 'BND_Point2f', 'BND_Vector2f'}
 
 
 def js_shadowed(shape_lists):
@@ -1518,7 +1513,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             # a virtual override (G115/G116): the base's registration reaches it through the virtual
             # call; registering it again hides the base's other overloads -- embind keeps the derived
             # name only, and pybind11 does not chain a derived def to the base's overloads
-            # (AnnotationBaseX.GetBoundingBox(True) / getBoundingBox(plane) were unreachable)
+            # (AnnotationBase.GetBoundingBox(True) / getBoundingBox(plane) were unreachable)
             continue
         n, g = p['m']['Name'], p['cpp']
         pyargs = ''.join(', py::arg("%s")' % a for _, a in p['bind_args'])
@@ -1536,13 +1531,13 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             ka = ', py::keep_alive<0, 1>()' if p['shape'][0] == 'translated' and 'RH3DM_ViewCopyOf(' in p['shape'][2] else ''
             if p['m']['Kind'] == 'property':
                 # a static PROPERTY is one in Python, as the value types register theirs (Luis,
-                # 2026-10-16): `MeshingParametersX.Default`, not `MeshingParametersX.Default()`
+                # 2026-10-16): `MeshingParameters.Default`, not `MeshingParameters.Default()`
                 sp = p.get('setter')
                 if sp is not None and id(sp) in live:
                     py.append('      .def_property_static("%s", [](py::object) { return %s::%s(); }, [](py::object, %s v) { %s::%s(v); })'
                               % (n, cls['gen'], g, sp['bind_args'][0][0], cls['gen'], sp['cpp']))
                 elif _ret_cpp(p, cls).endswith('*'):
-                    # a NEW object (SubDX.Empty): Python owns it -- a property getter's default
+                    # a NEW object (SubD.Empty): Python owns it -- a property getter's default
                     # policy (reference_internal) would leak it
                     py.append('      .def_property_readonly_static("%s", py::cpp_function([](py::object) { return %s::%s(); }, py::return_value_policy::take_ownership))'
                               % (n, cls['gen'], g))
@@ -1681,7 +1676,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         elif p['shape'][0] == 'translated' and p['shape'][1].endswith('*') and (
                 p.get('ret_borrowed') or (BY_GEN_PTR(p['shape'][1]) or {}).get('proxy')
                 # a File3dm table's result is a proxy of its file (G91: ManifestTable.FindId)
-                or (cls['mode'] == 'child' and cls.get('parent') == 'File3dmX')):
+                or (cls['mode'] == 'child' and cls.get('parent') == 'File3dm')):
             # a class value from a translated body (G89): borrowed (reference_internal), or a
             # new File3dm proxy (FindChild) that keeps this one -- and so the file -- alive
             py.append('      .def("%s", &%s::%s, %s%s)' % (n, cls['gen'], g, 'py::return_value_policy::reference_internal' if p.get('ret_borrowed')
@@ -1692,6 +1687,8 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             py.append('      .def("%s", &%s::%s, py::keep_alive<%d, 1>()%s)' % (n, cls['gen'], g, pos, pyargs))
         else:
             py.append('      .def("%s", &%s::%s%s)' % (n, cls['gen'], g, pyargs))
+            if n == 'ToString' and not p['bind_args'] and not p['static']:
+                py.append('      .def("__str__", &%s::%s)' % (cls['gen'], g))   # G136: str() is RhinoCommon's ToString
         js_methods.setdefault((camel(n), len(p['bind_args']), p['static']), []).append(p)
 
     # G126: Python overloads the generated member lacks, after its own (pybind11 tries in order)
@@ -1739,7 +1736,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         js_pruned.append('%s.%s/%d (dispatched)' % (cls['reg'], jn, arity))
         vparams = ', '.join('emscripten::val v%d' % i for i in range(arity))
         selfp = '' if static else '%s& self%s' % (cls['gen'], ', ' if arity else '')
-        # one C++ return type across the overloads (isoCurve: CurveX* both):
+        # one C++ return type across the overloads (isoCurve: Curve* both):
         # return it directly -- embind cannot wrap a raw pointer in a val
         rets = set()
         for p in ps:
@@ -1754,7 +1751,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         ps = sorted(ps, key=js_branch_order)
         # an overload that differs from another only by float twins (G118: SetVertex(int, Point3f)
         # beside SetVertex(int, Point3d)) is unreachable from JS: dropped there, the double one kept
-        twin = {'BND_Point3fX': 'BND_Point3dX', 'BND_Vector3fX': 'BND_Vector3dX', 'BND_Point2fX': 'BND_Point2dX', 'BND_Vector2fX': 'BND_Vector2dX'}
+        twin = {'BND_Point3f': 'BND_Point3d', 'BND_Vector3f': 'BND_Vector3d', 'BND_Point2f': 'BND_Point2d', 'BND_Vector2f': 'BND_Vector2d'}
         sigs_ = [[t for t, _ in q['bind_args']] for q in ps]
         keep_ = []
         for q, s in zip(ps, sigs_):
@@ -1851,7 +1848,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
     if cs_enumerable(cls['cs']):
         JS_POST['enumerable'].append(cls['reg'])       # filtered by bnd_gen against the final registrations
     # embind does not inherit class functions (statics): a derived class re-registers its bases'
-    # (LayerX.namePathSeparator is ModelComponentX's, as Layer.NamePathSeparator in C#/Python);
+    # (Layer.namePathSeparator is ModelComponent's, as Layer.NamePathSeparator in C#/Python);
     # bases are emitted first (CLASSES order), their statics recorded in JS_STATICS
     def js_reg_name(entry):
         m = re.match(r'\s*\.class_function\("(\w+)"', entry)
@@ -1881,13 +1878,10 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         else '<%s>' % cls['gen']
     py_dctor = '      .def(py::init<>())\n' if has_default_ctor else ''
     js_dctor = '      .constructor<>()\n' if has_default_ctor else ''
-    # embind constructors dispatch on arity only: the default (0) keeps its slot; the bridge (1,
-    # the old binding's object) joins the one-argument constructors' shape dispatcher -- before,
-    # a one-argument argument ctor was pruned (ArcCurveX(arc), FontX("Arial"), Point3dListX(points))
+    # embind constructors dispatch on arity only: the default (0) keeps its slot; argument
+    # constructors of one arity share a shape dispatcher (ArcCurve(arc), Font("Arial"))
     js_arity = {0} if has_default_ctor else set()
     js_ctors = {}                         # arity -> plans, in order
-    if cls.get('bridge', True) and cls.get('hand') and any(len(p['bind_args']) == 1 for p in arg_ctors):
-        js_ctors[1] = [{'bind_args': [('const %s&' % cls['hand'], 'source')], 'bridge': True}]
     for p in arg_ctors:
         types = ', '.join(t for t, _ in p['bind_args'])
         py_dctor += '      .def(py::init<%s>()%s)\n' % (
@@ -1953,16 +1947,6 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         if tp.get('find_id'):
             py += ['      .def("%s", &%s::Gen_FindId, py::keep_alive<0, 1>(), py::arg("g"))' % (tp['find_id'], g)]
             js += ['      .function("%s", &%s::Gen_FindId, allow_raw_pointers())' % (camel(tp['find_id']), g)]
-    has_bridge = cls.get('bridge', True)
-    if (not has_bridge and not has_default_ctor and cls['mode'] not in ('child', 'static') and not cls.get('proxy')
-            and not cls.get('comp') and not cls.get('noctor')
-            and not (BY_REG.get(cls.get('base', '')) or {}).get('proxy')):     # a proxy base's (file, id) view (G87)
-        raise SystemExit('%s: bridge-free class needs a generated constructor (or a view)'
-                         % cls['reg'])
-    py_bridge = ('      .def(py::init<const %s&>(), py::arg("source"))\n'
-                 % cls['hand']) if has_bridge else ''
-    js_bridge = ('      .constructor<const %s&>()\n' % cls['hand']
-                 ) if has_bridge and not any(q.get('bridge') for q in js_ctors.get(1, [])) else ''
     py_buf, py_bufdef = '', ''
     if cls.get('buffer'):
         py_buf = ', py::buffer_protocol()'
@@ -1973,14 +1957,14 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                      '          {{(py::ssize_t)a.Count(), (py::ssize_t)3}},\n'
                      '          {{(py::ssize_t)sizeof(ON_3dPoint), (py::ssize_t)sizeof(double)}}); }})\n'
                      ).format(gen=cls['gen'], expr=cls['buffer'])
-    py_block = ('  py::class_<{gen}{py_base}>(m, "{reg}"{py_buf})\n{py_dctor}{py_bridge}{py_bufdef}'
+    py_block = ('  py::class_<{gen}{py_base}>(m, "{reg}"{py_buf})\n{py_dctor}{py_bufdef}'
                 '{defs};').format(gen=cls['gen'], py_base=py_base,
-                                  reg=cls['reg'], hand=cls['hand'],
-                                  py_dctor=py_dctor, py_bridge=py_bridge, py_buf=py_buf, py_bufdef=py_bufdef,
+                                  reg=cls['reg'],
+                                  py_dctor=py_dctor, py_buf=py_buf, py_bufdef=py_bufdef,
                                   defs='\n'.join(py))
-    js_block = ('  class_{js_base}("{reg}")\n{js_dctor}{js_bridge}'
+    js_block = ('  class_{js_base}("{reg}")\n{js_dctor}'
                 '{defs};').format(js_base=js_base, reg=cls['reg'],
-                                  hand=cls['hand'], js_dctor=js_dctor, js_bridge=js_bridge,
+                                  js_dctor=js_dctor,
                                   defs='\n'.join(js))
     if tp:
         # the iterator: Python's __next__ signals the end with StopIteration, JS

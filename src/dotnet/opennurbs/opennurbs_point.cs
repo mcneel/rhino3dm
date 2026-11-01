@@ -969,6 +969,27 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Computes the additive inverse of all coordinates in the point, and returns the new point.
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <returns>A point value that, when summed with the point input, yields the <see cref="Origin"/>.</returns>
+    public static Point2d operator -(Point2d point)
+    {
+      return new Point2d(-point.X, -point.Y);
+    }
+
+    /// <summary>
+    /// Computes the additive inverse of all coordinates in the point, and returns the new point.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the - unary operator otherwise)</para>
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <returns>A point value that, when summed with the point input, yields the <see cref="Origin"/>.</returns>
+    public static Point2d Negate(Point2d point)
+    {
+      return new Point2d(-point.X, -point.Y);
+    }
+
+    /// <summary>
     /// Determines whether two <see cref="Point2d"/> have equal values.
     /// </summary>
     /// <param name="a">The first point.</param>
@@ -1672,6 +1693,17 @@ namespace Rhino.Geometry
     /// <returns>A point value that, when summed with the point input, yields the <see cref="Origin"/>.</returns>
     /// <since>5.0</since>
     public static Point3d operator -(Point3d point)
+    {
+      return new Point3d(-point.m_x, -point.m_y, -point.m_z);
+    }
+
+    /// <summary>
+    /// Computes the additive inverse of all coordinates in the point, and returns the new point.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the - unary operator otherwise)</para>
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <returns>A point value that, when summed with the point input, yields the <see cref="Origin"/>.</returns>
+    public static Point3d Negate(Point3d point)
     {
       return new Point3d(-point.m_x, -point.m_y, -point.m_z);
     }

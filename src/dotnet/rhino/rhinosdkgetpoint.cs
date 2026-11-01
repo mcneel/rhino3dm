@@ -696,10 +696,16 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_brep = brep.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoGetPoint_Constrain9(ptr_this, const_ptr_brep, wireDensity, faceIndex, allowPickingPointOffObject);
+      // 13-Oct-2026 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-57874
+      if (rc)
+        m_constraint_brep = brep.DuplicateBrep();
       GC.KeepAlive(brep);
       GC.KeepAlive(this);
       return rc;
     }
+
+    // Copy of the brep passed to Constrain(Brep), used by PointOnBrep (RH-57874)
+    private Brep m_constraint_brep;
 
     /// <summary>Constrains the picked point to lie on a mesh.</summary>
     /// <param name="mesh">A mesh to use as constraint.</param>
@@ -789,6 +795,7 @@ namespace Rhino.Input.Custom
     {
       IntPtr ptr = NonConstPointer();
       UnsafeNativeMethods.CRhinoGetPoint_ClearConstraints(ptr);
+      m_constraint_brep = null;
       GC.KeepAlive(this);
     }
 
@@ -1193,7 +1200,10 @@ namespace Rhino.Input.Custom
     /// parameter for the point.  The point returned by Point()
     /// is the same as curve.PointAt(t).
     /// </param>
-    /// <returns>A curve at a specified parameter value.</returns>
+    /// <returns>
+    /// A copy of the curve, or null if the point was not on a curve.
+    /// If the point was on a Brep edge, then an edge on a copy of the Brep is returned.
+    /// </returns>
     /// <example>
     /// <code source='examples\vbnet\ex_insertknot.vb' lang='vbnet'/>
     /// <code source='examples\cs\ex_insertknot.cs' lang='cs'/>
@@ -1202,12 +1212,31 @@ namespace Rhino.Input.Custom
     /// <since>5.0</since>
     public Curve PointOnCurve(out double t)
     {
+      // 13-Oct-2026 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-57874
       t = RhinoMath.UnsetValue;
-      DocObjects.ObjRef objref = PointOnObject();
-      if (objref == null)
+      int edge_index = -1;
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr ptr_geometry = UnsafeNativeMethods.CRhinoGetPoint_PointOnCurve(const_ptr_this, ref t, ref edge_index);
+      GC.KeepAlive(this);
+      if (IntPtr.Zero == ptr_geometry)
+      {
+        t = RhinoMath.UnsetValue;
         return null;
-      Curve rc = objref.CurveParameter(out t);
-      return rc;
+      }
+
+      if (edge_index >= 0)
+      {
+#pragma warning disable CA2000 // returned edge keeps the brep alive
+        Brep brep = new Brep(ptr_geometry, null);
+#pragma warning restore CA2000
+        if (edge_index < brep.Edges.Count)
+          return brep.Edges[edge_index];
+        brep.Dispose();
+        t = RhinoMath.UnsetValue;
+        return null;
+      }
+
+      return GeometryBase.CreateGeometryHelper(ptr_geometry, null) as Curve;
     }
 
     /// <summary>
@@ -1217,17 +1246,24 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="u">If the point was on a surface, then the u parameter.</param>
     /// <param name="v">If the point was on a surface, then the v parameter.</param>
-    /// <returns>The surface or null if the point was not on a surface.</returns>
+    /// <returns>
+    /// A copy of the surface or null if the point was not on a surface.
+    /// If the point was on a Brep face, then a copy of the face is returned.
+    /// </returns>
     /// <since>6.0</since>
     public Surface PointOnSurface(out double u, out double v)
     {
+      // 13-Oct-2026 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-57874
+      BrepFace face = PointOnBrep(out u, out v);
+      if (null != face)
+        return face;
+
       u = RhinoMath.UnsetValue;
       v = RhinoMath.UnsetValue;
-      DocObjects.ObjRef objref = PointOnObject();
-      if (objref == null)
-        return null;
-      Surface rc = objref.SurfaceParameter(out u, out v);
-      return rc;
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr ptr_surface = UnsafeNativeMethods.CRhinoGetPoint_PointOnSurface(const_ptr_this, ref u, ref v);
+      GC.KeepAlive(this);
+      return GeometryBase.CreateGeometryHelper(ptr_surface, null) as Surface;
     }
 
     /// <summary>
@@ -1236,22 +1272,34 @@ namespace Rhino.Input.Custom
     /// </summary>
     /// <param name="u">If the point was on a Brep face, then the u parameter.</param>
     /// <param name="v">If the point was on a Brep face, then the v parameter.</param>
-    /// <returns>The Brep face or null if the point was not on a Brep face.</returns>
+    /// <returns>
+    /// A face on a copy of the Brep, or null if the point was not on a Brep face.
+    /// </returns>
     /// <since>6.0</since>
     public BrepFace PointOnBrep(out double u, out double v)
     {
+      // 13-Oct-2026 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-57874
       u = RhinoMath.UnsetValue;
       v = RhinoMath.UnsetValue;
-      using (DocObjects.ObjRef objref = PointOnObject())
-      {
-        if (objref != null)
-        {
-          using (objref.SurfaceParameter(out u, out v))
-          {
-            return objref.Face();
-          }
-        }
-      }
+      int face_index = -1;
+      IntPtr const_ptr_this = ConstPointer();
+      IntPtr ptr_brep = UnsafeNativeMethods.CRhinoGetPoint_PointOnBrep(const_ptr_this, ref u, ref v, ref face_index);
+      GC.KeepAlive(this);
+
+      Brep brep = null;
+      if (IntPtr.Zero != ptr_brep)
+#pragma warning disable CA2000 // returned face keeps the brep alive
+        brep = new Brep(ptr_brep, null);
+#pragma warning restore CA2000
+      else if (face_index >= 0 && null != m_constraint_brep && face_index < m_constraint_brep.Faces.Count)
+        brep = m_constraint_brep.DuplicateBrep(); // detached face on the constraint brep
+
+      if (null != brep && face_index >= 0 && face_index < brep.Faces.Count)
+        return brep.Faces[face_index];
+
+      brep?.Dispose();
+      u = RhinoMath.UnsetValue;
+      v = RhinoMath.UnsetValue;
       return null;
     }
   }

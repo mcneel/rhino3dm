@@ -10,6 +10,24 @@ RH_C_FUNCTION ON_Material* ON_Material_New(const ON_Material* pConstOther)
   return rc;
 }
 
+// A copy of the system material with the given index (ON_Material::Default is -1,
+// ON_Material::DefaultLockedObject is -2), or nullptr.
+RH_C_FUNCTION ON_Material* ON_Material_NewSystemMaterial(int index)
+{
+  if (index == ON_Material::Default.Index())
+    return new ON_Material(ON_Material::Default);
+  if (index == ON_Material::DefaultLockedObject.Index())
+    return new ON_Material(ON_Material::DefaultLockedObject);
+  return nullptr;
+}
+
+RH_C_FUNCTION int ON_Material_CompareAppearance(const ON_Material* pConstA, const ON_Material* pConstB)
+{
+  if (nullptr == pConstA || nullptr == pConstB)
+    return 0;
+  return ON_Material::CompareAppearance(*pConstA, *pConstB);
+}
+
 RH_C_FUNCTION void ON_Material_CopyFrom(ON_Material* pThis, const ON_Material* pConstOther)
 {
   if( pThis && pConstOther )
@@ -401,6 +419,23 @@ RH_C_FUNCTION int ON_Material_NextTransparencyTexture(const ON_Material* pConstM
   if( pConstMaterial )
     return pConstMaterial->FindTexture(nullptr, ON_Texture::TYPE::transparency_texture, index);
   return -1;
+}
+
+RH_C_FUNCTION ON_UUID ON_Material_GetRdkMaterialInstanceId(const ON_Material* pConstMaterial)
+{
+  if (nullptr == pConstMaterial)
+    return ON_nil_uuid;
+  return pConstMaterial->RdkMaterialInstanceId();
+}
+
+RH_C_FUNCTION void ON_Material_SetRdkMaterialInstanceId(ON_Material* pMaterial, ON_UUID id)
+{
+  if (nullptr == pMaterial)
+    return;
+  // An RDK material instance id requires the universal render engine as the material's
+  // plug-in id (see ON_Material::SetRdkMaterialInstanceId).
+  pMaterial->SetMaterialPlugInId(ON_UniversalRenderEngineId);
+  pMaterial->SetRdkMaterialInstanceId(id);
 }
 
 #if !defined(RHINO3DM_BUILD)

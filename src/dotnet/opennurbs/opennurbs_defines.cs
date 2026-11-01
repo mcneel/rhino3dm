@@ -2515,3 +2515,16 @@ namespace Rhino.Display
     RadialDisabled = 4
   }
 }
+
+namespace Rhino.Display
+{
+  internal class InternalColors
+  {
+    /// <summary>
+    /// The ON_Color_Unset color is <see cref="System.Drawing.Color.Transparent"/> (0x00FFFFFF)
+    /// which, when used in C++ code will be translated by `ARGB_to_ABGR` as 0xFFFFFFFF
+    /// which is equivalent to ON_Color::Unset.
+    /// </summary>
+    internal static System.Drawing.Color ON_Color_Unset => System.Drawing.Color.Transparent;
+  }
+}

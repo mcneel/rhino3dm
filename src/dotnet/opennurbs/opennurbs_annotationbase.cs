@@ -1294,6 +1294,19 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Wrap text to the given width. Unlike <see cref="WrapText()"/>, this does not use
+    /// or change <see cref="FormatWidth"/>. Has no effect unless <see cref="TextIsWrapped"/> is true.
+    /// </summary>
+    /// <param name="wrapWidth">The width to wrap the text to, in model units. Must be positive.</param>
+    /// <since>9.2</since>
+    public void WrapText(double wrapWidth)
+    {
+      var ptr_this = NonConstPointer();
+      UnsafeNativeMethods.ON_V6_Annotation_WrapText2(ptr_this, wrapWidth);
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>
     /// Rotation of text in radians
     /// </summary>
     /// <since>6.0</since>

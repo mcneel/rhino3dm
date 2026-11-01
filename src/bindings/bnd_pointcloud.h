@@ -1,139 +1,25 @@
-#include "bindings.h"
-
+// three.js interop (Luis 2026-10-08, decided again 2026-10-28 JS2/three.js): keep toThreejsBuffers on
+// Mesh and PointCloud, and add its inverse createFromThreejsBuffers, before the JSON family
+// (toThreejsJSON, ...) is deprecated. JS only: the buffers are typed arrays three.js takes as they are
+// (position / normal / uv / color Float32Array, index Uint32Array; a mesh's quads as two triangles).
+// rhino3dm overloads RhinoCommon lacks (Luis 2026-10-30: kept by hand, upstream U38): a point cloud
+// point with a value but no normal or color, and a group deleted by id. Python registers them as
+// overloads of the generated Add / Insert / AddRange / Delete (as the old bindings did); JS keeps
+// the old names (addPointValue, ...), as embind cannot hold two overloads of one arity.
+// Hand-maintained members of PointCloud; the generated binding is bnd_pointcloud_gen.h (tools/generate/bnd_gen.py).
 #pragma once
 
-#if defined(ON_PYTHON_COMPILE)
-void initPointCloudBindings(rh3dmpymodule& m);
-#else
-void initPointCloudBindings(void* m);
-#endif
+#include "bnd_common.h"
+#include "bnd_pointcloud_gen.h"
+#include "bnd_point3d_gen.h"
 
-#if defined(ON_WASM_COMPILE)
-template<typename T>
-std::vector<T> Tuple_To_Vector(BND_TUPLE data);
-#endif
+BND_DICT BND_PointCloud_ToThreejsBuffers(const BND_PointCloud& cloud, bool rotateToYUp);
+BND_PointCloud* BND_PointCloud_CreateFromThreejsBuffers(BND_DICT buffers, bool rotateFromYUp);
+BND_DICT BND_PointCloud_ToThreejsJSON(const BND_PointCloud& cloud);
+BND_PointCloud* BND_PointCloud_CreateFromThreejsJSON(BND_DICT json);
 
-class BND_PointCloudItem
-{
-  ON_ModelComponentReference m_component_reference;
-  ON_PointCloud* m_pointcloud = nullptr;
-  int m_index = -1;
-public:
-  BND_PointCloudItem(int index, ON_PointCloud* pointcloud, const ON_ModelComponentReference& compref);
-  ON_3dPoint GetLocation() const { return m_pointcloud->m_P[m_index]; }
-  void SetLocation(const ON_3dPoint& pt);
-  double GetX() const { return GetLocation().x; }
-  void SetX(double v) {
-    ON_3dPoint pt = GetLocation();
-    pt.x = v;
-    SetLocation(pt);
-  }
-  double GetY() const { return GetLocation().y; }
-  void SetY(double v) {
-    ON_3dPoint pt = GetLocation();
-    pt.y = v;
-    SetLocation(pt);
-  }
-  double GetZ() const { return GetLocation().z; }
-  void SetZ(double v) {
-    ON_3dPoint pt = GetLocation();
-    pt.z = v;
-    SetLocation(pt);
-  }
-
-  ON_3dVector GetNormal() const;
-  void SetNormal(const ON_3dVector& v);
-  BND_Color GetColor() const;
-  void SetColor(const BND_Color& color);
-  double GetValue() const;
-  void SetValue(double v);
-  bool GetHidden() const;
-  void SetHidden(bool b);
-  int GetIndex() const { return m_index; }
-};
-
-
-class BND_PointCloud : public BND_GeometryBase //IEnumerable<PointCloudItem>
-{
-public:
-  ON_PointCloud* m_pointcloud = nullptr;
-protected:
-  void SetTrackedPointer(ON_PointCloud* pointcloud, const ON_ModelComponentReference* compref);
-
-public:
-  BND_PointCloud();
-  BND_PointCloud(ON_PointCloud* pointcloud, const ON_ModelComponentReference* compref);
-  BND_PointCloud(const std::vector<ON_3dPoint>& points);
-  BND_PointCloud(const class BND_Point3dList& points);
-
-#if defined(ON_WASM_COMPILE)
-  BND_PointCloud(emscripten::val points);
-#endif
-
-  int Count() const { return m_pointcloud->PointCount(); }
-  BND_PointCloudItem GetItem(int index);
-  int HiddenPointCount() const { return m_pointcloud->HiddenPointCount(); }
-  bool ContainsColors() const { return m_pointcloud->HasPointColors(); }
-  bool ContainsNormals() const { return m_pointcloud->HasPointNormals(); }
-  bool ContainsValues() const { return m_pointcloud->HasPointValues(); }
-  bool ContainsHiddenFlags() const { return m_pointcloud->m_H.Count()>0; }
-  void ClearColors() { m_pointcloud->m_C.Destroy(); }
-  void ClearNormals() { m_pointcloud->m_N.Destroy(); }
-  void ClearHiddenFlags() { m_pointcloud->DestroyHiddenPointArray(); }
-  BND_PointCloudItem AppendNew();
-  BND_PointCloudItem InsertNew(int index);
-  void Merge(const BND_PointCloud& other);
-
-  void Add1(ON_3dPoint point);
-  void Add2(ON_3dPoint point, ON_3dVector normal);
-  void Add3(ON_3dPoint point, BND_Color color);
-  void Add4(ON_3dPoint point, ON_3dVector normal, BND_Color color);
-  void Add5(ON_3dPoint point, double value);
-  void Add6(ON_3dPoint point, ON_3dVector normal, BND_Color color, double value);
-
-  void AddRangePoints(const std::vector<ON_3dPoint>& points);
-  void AddRangePointsNormals(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals);
-  void AddRangePointsColors(const std::vector<ON_3dPoint>& points, const std::vector<BND_Color>& colors);
-  void AddRangePointsValues(const std::vector<ON_3dPoint>& points, const std::vector<double>& values);
-  void AddRangePointsNormalsColors(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors);
-  void AddRangePointsNormalsColorsValues(const std::vector<ON_3dPoint>& points, const std::vector<ON_3dVector>& normals, const std::vector<BND_Color>& colors, const std::vector<double>& values);
-  void InsertRangePoints(int index, const std::vector<ON_3dPoint>& points);
-
-#if defined(ON_WASM_COMPILE)
-  void AddRange1(BND_TUPLE points);
-  void AddRange2(BND_TUPLE points, BND_TUPLE normals);
-  void AddRange3(BND_TUPLE points, BND_TUPLE colors);
-  void AddRange4(BND_TUPLE points, BND_TUPLE values);
-  void AddRange5(BND_TUPLE points, BND_TUPLE normals, BND_TUPLE colors);
-  void AddRange6(BND_TUPLE points, BND_TUPLE normals, BND_TUPLE colors, BND_TUPLE values);
-  void InsertRange(int index, BND_TUPLE points);
-#endif
-
-  void Insert1(int index, const ON_3dPoint& point);
-  void Insert2(int index, const ON_3dPoint& point, const ON_3dVector& normal);
-  void Insert3(int index, const ON_3dPoint& point, const BND_Color& color);
-  void Insert4(int index, const ON_3dPoint& point, const ON_3dVector& normal, const BND_Color& color);
-  void Insert5(int index, const ON_3dPoint& point, const double& value);
-  void Insert6(int index, const ON_3dPoint& point, const ON_3dVector& normal, const BND_Color& color, const double& value);
-  
-  void RemoveAt(int index);
-  BND_TUPLE GetPoints() const;
-  std::vector<ON_3dPoint> GetPoints2() const;
-  ON_3dPoint PointAt(int index) const;
-  BND_TUPLE GetNormals() const;
-  std::vector<ON_3dVector> GetNormals2() const;
-  BND_TUPLE GetColors() const;
-  std::vector<BND_Color> GetColors2() const;
-  BND_TUPLE GetValues() const;
-  std::vector<double> GetValues2() const;
-  int ClosestPoint(const ON_3dPoint& testPoint);
-
-#if defined(ON_WASM_COMPILE)
-  BND_DICT ToThreejsJSON() const;
-  // Zero-copy alternative to ToThreejsJSON: one bulk-copied Float32Array per attribute
-  // (position, and color/normal when present) instead of N per-element val.set() boundary
-  // crossings. The three.js 3DMLoader can feed these straight into BufferAttributes.
-  BND_DICT ToThreejsBuffers(bool rotateToYUp) const;
-  static BND_PointCloud* CreateFromThreejsJSON(BND_DICT json);
-#endif
-};
+// every channel the cloud has (normals, colors, hidden flags, values) stays aligned with its points;
+// values are added when the cloud has none (0 for the points already there)
+void BND_PointCloud_AddValue(const BND_PointCloud& cloud, BND_Point3d point, double value);
+void BND_PointCloud_InsertValue(const BND_PointCloud& cloud, int index, BND_Point3d point, double value);
+void BND_PointCloud_AddRangeValues(const BND_PointCloud& cloud, RH3DM_SeqArg<BND_Point3d> points, RH3DM_SeqArg<double> values);

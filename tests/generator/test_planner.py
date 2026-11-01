@@ -22,13 +22,13 @@ import planner as P               # noqa: E402
 
 VT = {
     'types': [
-        {'Cs': 'Point3d', 'Cpp': 'BND_Point3dX', 'IsStaticClass': False, 'LayoutSize': 24,
+        {'Cs': 'Point3d', 'Cpp': 'BND_Point3d', 'IsStaticClass': False, 'LayoutSize': 24,
          'Fields': [{'Name': 'm_x', 'Type': 'double'}, {'Name': 'm_y', 'Type': 'double'},
                     {'Name': 'm_z', 'Type': 'double'}]},
-        {'Cs': 'Interval', 'Cpp': 'BND_IntervalX', 'IsStaticClass': False, 'LayoutSize': 16,
+        {'Cs': 'Interval', 'Cpp': 'BND_Interval', 'IsStaticClass': False, 'LayoutSize': 16,
          'Fields': [{'Name': 'm_t0', 'Type': 'double'}, {'Name': 'm_t1', 'Type': 'double'}]},
-        {'Cs': 'Plane', 'Cpp': 'BND_PlaneX', 'IsStaticClass': False, 'LayoutSize': 128,
-         'Fields': [{'Name': 'm_origin', 'Type': 'BND_Point3dX'}]},
+        {'Cs': 'Plane', 'Cpp': 'BND_Plane', 'IsStaticClass': False, 'LayoutSize': 128,
+         'Fields': [{'Name': 'm_origin', 'Type': 'BND_Point3d'}]},
     ],
     'members': [
         {'Type': 'Interval', 'Name': 'Unset', 'Kind': 'property', 'Static': True, 'Ok': True},
@@ -82,14 +82,14 @@ def test_direct_return_wins_over_scratch_out_local():
     p, why = P.plan(member('bool', [('', 'double', 'tol')], calls),
                     cfn('bool', 'const ON_Curve*', 'ON_PLANE_STRUCT*', 'double'), CURVE)
     assert why is None and p['shape'] == ('direct', 'bool')
-    assert 'BND_PlaneX plane;' in p['locals'] and 'RH3DM_Ptr(&plane)' in p['call_exprs']
+    assert 'BND_Plane plane;' in p['locals'] and 'RH3DM_Ptr(&plane)' in p['call_exprs']
 
 
 def test_out_local_initializer_is_reproduced_or_refused():
     # G18: `Interval rc = Interval.Unset; F(ptr, ref rc)` keeps its initializer
     calls = [SELF, {'Kind': 'out', 'Text': 'rc', 'Value': 'Interval.Unset'}]
     p, why = P.plan(member('Interval', calls=calls), cfn('bool', 'const ON_Curve*', 'ON_Interval*'), CURVE)
-    assert why is None and 'BND_IntervalX rc = BND_IntervalX::Unset();' in p['locals']
+    assert why is None and 'BND_Interval rc = BND_Interval::Unset();' in p['locals']
     calls[1]['Value'] = 'SomethingUnknown.Value'     # cannot reproduce: refuse, never default
     p, why = P.plan(member('Interval', calls=calls), cfn('bool', 'const ON_Curve*', 'ON_Interval*'), CURVE)
     assert p is None and 'initialized' in why
@@ -101,7 +101,7 @@ def test_ref_of_by_value_value_type_passes_the_parameter_itself():
     p, why = P.plan(member('bool', [('', 'Plane', 'plane')], calls),
                     cfn('bool', 'const ON_Curve*', 'const ON_PLANE_STRUCT*'), CURVE)
     assert why is None and p['locals'] == [] and 'RH3DM_Ptr(&plane)' in p['call_exprs']
-    assert ('BND_PlaneX', 'plane') in p['bind_args']
+    assert ('BND_Plane', 'plane') in p['bind_args']
 
 
 def test_null_literal_to_c_pointer_is_nullptr():
@@ -199,7 +199,7 @@ def test_early_return_on_null_class_argument_makes_it_optional():
     arg = {'Kind': 'paramptr', 'Text': 'curve', 'Value': None}
     p, why = P.plan(member('bool', params=[('', 'Curve', 'curve')], calls=[SELF, arg], Guards=[guard]),
                     cfn('bool', 'ON_Curve*', 'const ON_Curve*'), CURVE)
-    assert why is None and p['bind_args'] == [('const BND_CurveX*', 'curve')]
+    assert why is None and p['bind_args'] == [('const BND_Curve*', 'curve')]
     assert 'curve ?' in p['call_exprs'][1]
     guard2 = dict(guard, Cond='null == name', Ids=['name'], NullCheckOf='name')
     p, why = P.plan(member('bool', params=[('', 'string', 'name')],
@@ -491,7 +491,7 @@ def test_views_are_derived_from_the_recorded_idioms(views):
     assert R.BY_CS['ObjectAttributes']['proxy']['NonConst'] == 'resolve'
     assert R.BY_CS['File3dmObject']['proxy'] == {'Resolver': 'ONX_Model_ModelObjectGeometryConstPtrFromId',
                                                  'NonConst': 'cow', 'Dup': 'ON_Object_Duplicate', 'Origin': 'file'}
-    assert not R.BY_CS['PolyCurve'].get('proxy')          # shares CurveX's storage: forwards, no view of its own
+    assert not R.BY_CS['PolyCurve'].get('proxy')          # shares Curve's storage: forwards, no view of its own
     assert P.self_access(R.BY_CS['PolyCurve'], 'static_cast<ON_PolyCurve*>(m_ptr)', 'NonConstPointer') \
         == 'static_cast<ON_PolyCurve*>(RH3DM_NonConst())'   # ... and reaches it through the base's pair
     assert not R.BY_CS['Brep'].get('proxy')               # Brep has no type record here: no view
@@ -700,10 +700,10 @@ def test_keyed_child_and_indexer_construct_without_a_call(comps):
 
 
 def test_linked_iter_needs_a_component_element_of_the_parent(comps):
-    lst = dict(mode='child', parent='SubDX', type=G + 'Collections.SubDVertexList', on='ON_SubD', reg='SubDVertexListX')
+    lst = dict(mode='child', parent='SubD', type=G + 'Collections.SubDVertexList', on='ON_SubD', reg='SubDVertexList')
     li = P.linked_iter(lst, [])
     assert li and li['item'] is R.BY_CS['SubDVertex'] and li['first']['name'] == 'ON_SubD_FirstVertex'
-    assert P.linked_iter(dict(lst, parent='BrepX'), []) is None      # the element's owner is not the parent
+    assert P.linked_iter(dict(lst, parent='Brep'), []) is None      # the element's owner is not the parent
 
 
 def test_conditional_child_is_an_early_return_on_the_sibling(tables):
@@ -766,7 +766,7 @@ def test_newobj_needs_the_returned_local_and_a_registered_class():
     base = dict(member('Texture', calls=[SELF, {'Kind': 'newobj', 'Text': 'tex', 'Value': 'Texture'}]))
     f = cfn('void', 'const ON_Curve*', 'ON_Texture*')
     p, why = P.plan(dict(base, ReturnLocal='tex'), f, CURVE)
-    assert why is None and p['shape'] == ('newobj', TEX, 'tex', None) and p['locals'] == ['BND_TextureX* tex = new BND_TextureX();']
+    assert why is None and p['shape'] == ('newobj', TEX, 'tex', None) and p['locals'] == ['BND_Texture* tex = new BND_Texture();']
     assert P.plan(dict(base, ReturnLocal='other'), f, CURVE)[0] is None          # the filled object is not the result
     bad = member('Texture', calls=[SELF, {'Kind': 'newobj', 'Text': 'h', 'Value': 'SimpleArrayGuid'}], ReturnLocal='h')
     assert P.plan(bad, f, CURVE)[0] is None                                       # not a generated class
@@ -895,7 +895,7 @@ def test_base_member_overridden_with_ungenerated_logic_is_refused():
     # GeometryBase.GetBoundingBox(Transform) vs AnnotationBase's managed override:
     # C++ inheritance would hand the derived objects the base logic (G49)
     import bnd_gen as G
-    base, derived = R.BY_REG['CurveX'], R.BY_REG['NurbsCurveX']
+    base, derived = R.BY_REG['Curve'], R.BY_REG['NurbsCurve']
     mb = {'Type': base['type'], 'Kind': 'method', 'Name': 'M', 'Variant': 'portable', 'Params': [{'Type': 'double'}]}
     for body, kept in (('pure', False), ('base', True)):
         md = dict(mb, Type=derived['type'], Body=body)
@@ -1021,7 +1021,7 @@ def test_native_calls_in_sequence():
 
 def test_array_fill_count_sibling_overridden_in_a_derived_class_is_refused():
     import bnd_gen as G
-    base, derived = R.BY_REG['CurveX'], R.BY_REG['NurbsCurveX']
+    base, derived = R.BY_REG['Curve'], R.BY_REG['NurbsCurve']
     fill = {'m': {'Name': 'GetSpans'}, 'shape': ('arrayfill', {'count_method': ('SpanCount', ['d'])})}
     for dplans, kept in (([], True), ([{'m': {'Name': 'SpanCount'}, 'shape': ('direct', 'int')}], False)):
         per_class = [(base, [fill]), (derived, list(dplans))]
@@ -1176,13 +1176,13 @@ def test_child_state_needs_a_store_only_constructor_with_the_parent_first():
            'ParentFields': ['m_parent'], 'CtorStore': cs}
     try:
         R.index_types({'members': [rec]})
-        assert R.BY_REG['DecalsX']['state'] == [('bool', 'm_read_only'), ('unsigned int', 'm_sn')]
+        assert R.BY_REG['Decals']['state'] == [('bool', 'm_read_only'), ('unsigned int', 'm_sn')]
         R.index_types({'members': [dict(rec, CtorStore=cs[:2] + [dict(cs[2], Field=None)])]})   # not stored
-        assert 'state' not in R.BY_REG['DecalsX']
+        assert 'state' not in R.BY_REG['Decals']
         R.index_types({'members': [dict(rec, CtorStore=cs[:2] + [dict(cs[2], Type='string')])]})
-        assert 'state' not in R.BY_REG['DecalsX']
+        assert 'state' not in R.BY_REG['Decals']
         R.index_types({'members': [dict(rec, ParentFields=None)]})                              # parent not first
-        assert 'state' not in R.BY_REG['DecalsX']
+        assert 'state' not in R.BY_REG['Decals']
     finally:
         R.index_types({'members': []})
 
@@ -1209,13 +1209,13 @@ def test_snapshot_enumerator_needs_a_copying_item_constructor():
              'Internal': True, 'Snapshot': sn},
             {'Type': T + 'Decals', 'Kind': 'method', 'Name': 'GetEnumerator', 'Variant': 'portable', 'Body': 'construct',
              'Child': 'DecalEnumerator', 'ChildArgs': ['m_parent', 'm_sn']}]}
-    DX, DS = R.BY_REG['DecalX'], R.BY_REG['DecalsX']
+    DX, DS = R.BY_REG['Decal'], R.BY_REG['Decals']
     vis = {'m': {'Name': 'IsVisible', 'Kind': 'property', 'Returns': 'bool'}, 'bind_args': [], 'static': False,
            'cpp': 'Gen_IsVisible'}
 
     def run(m, planned=(vis,)):
         R.index_types(m)
-        R.PLANNED['DecalX'] = list(planned)
+        R.PLANNED['Decal'] = list(planned)
         return P.snapshot_iter(DS, [], m)
     saved = dict(R.C_BY_NAME)
     try:
@@ -1254,22 +1254,22 @@ def test_abstract_base_of_an_abstract_base_forwards_its_getters():
     # G62: GeometryBase : CommonObject -- both abstract; the derived abstract
     # class answers the root's getters with its own
     import emit_classes as E
-    txt = E.emit_class(R.BY_REG['GeometryBaseX'], [], False, [])
-    assert 'class BND_GeometryBaseX : public BND_CommonObjectX' in txt
+    txt = E.emit_class(R.BY_REG['GeometryBase'], [], False, [])
+    assert 'class BND_GeometryBase : public BND_CommonObject' in txt
     assert 'ON_Object* RH3DM_ObjPtr() const override { return RH3DM_GeomPtr(); }' in txt
     assert 'ON_Object* RH3DM_ObjPtrNC() const override { return RH3DM_GeomPtrNC(); }' in txt
-    assert [a['reg'] for a in E.abstract_chain(R.BY_REG['GeometryBaseX'])] == ['GeometryBaseX', 'CommonObjectX']
-    py, js = E.emit_registrations(R.BY_REG['GeometryBaseX'], [], set())
-    assert 'py::class_<BND_GeometryBaseX, BND_CommonObjectX>' in py      # isinstance(brep, CommonObjectX)
-    assert 'class_<BND_GeometryBaseX, base<BND_CommonObjectX>>' in js
+    assert [a['reg'] for a in E.abstract_chain(R.BY_REG['GeometryBase'])] == ['GeometryBase', 'CommonObject']
+    py, js = E.emit_registrations(R.BY_REG['GeometryBase'], [], set())
+    assert 'py::class_<BND_GeometryBase, BND_CommonObject>' in py      # isinstance(brep, CommonObject)
+    assert 'class_<BND_GeometryBase, base<BND_CommonObject>>' in js
     # a class whose native type is no ON_Object stays off the root (pilot-findings #31)
-    assert R.BY_REG['CachedTextureCoordinatesX'].get('base') is None
+    assert R.BY_REG['CachedTextureCoordinates'].get('base') is None
 
 
 def test_translated_markers_resolve_only_to_generated_value_members():
     # G63: `return LightStyle == LightStyle.WorldLinear;` translated with markers;
     # the getter must be a generated, value-returning, non-overridden member
-    L = R.BY_REG['LightX']
+    L = R.BY_REG['Light']
     m = {'members': [
         {'Type': 'Rhino.DocObjects.LightStyle', 'Kind': 'enum', 'Name': 'LightStyle', 'Variant': 'portable',
          'Values': ['None = 0', 'WorldLinear = 11']},
@@ -1280,21 +1280,21 @@ def test_translated_markers_resolve_only_to_generated_value_members():
         R.CS_ENUMS.setdefault('LightStyle', {'cpp': 'LightStyle', 'gen': False})
         getter = {'m': m['members'][2], 'bind_args': [], 'static': False, 'cpp': 'Gen_LightStyle'}
         text = 'return $$get:LightStyle$$() == $$enum:LightStyle:WorldLinear$$;'
-        out, deps, writes = P.resolve_markers(text, L, {'LightX': [getter]}, m)
+        out, deps, writes = P.resolve_markers(text, L, {'Light': [getter]}, m)
         assert out == 'return Gen_LightStyle() == (LightStyle)11;' and deps == [getter] and not writes
         # not generated -> refused; a class-returning getter -> refused
-        assert P.resolve_markers(text, L, {'LightX': []}, m)[0] is None
+        assert P.resolve_markers(text, L, {'Light': []}, m)[0] is None
         objget = dict(getter, m=dict(m['members'][2], Returns='Mesh'))
-        assert P.resolve_markers(text, L, {'LightX': [objget]}, m)[0] is None
+        assert P.resolve_markers(text, L, {'Light': [objget]}, m)[0] is None
         assert P.resolve_markers('$$enum:LightStyle:Nope$$', L, {}, m)[0] is None
-        assert P.resolve_markers('$$set:LightStyle$$(v)', L, {'LightX': [getter]}, m)[0] is None
+        assert P.resolve_markers('$$set:LightStyle$$(v)', L, {'Light': [getter]}, m)[0] is None
     finally:
         R.index_types({'members': []})
 
 
 def test_translated_call_is_refused_when_a_derived_type_overrides_the_callee():
     # a non-virtual C++ call from the base would miss RhinoCommon's override
-    G, C = R.BY_REG['GeometryBaseX'], R.BY_REG['CurveX']
+    G, C = R.BY_REG['GeometryBase'], R.BY_REG['Curve']
     m = {'members': [
         {'Type': G['type'], 'Kind': 'type', 'Name': 'GeometryBase', 'Variant': 'portable'},
         {'Type': C['type'], 'Kind': 'type', 'Name': 'Curve', 'Variant': 'portable', 'Bases': ['GeometryBase']},
@@ -1303,7 +1303,7 @@ def test_translated_call_is_refused_when_a_derived_type_overrides_the_callee():
     try:
         R.index_types(m)
         getter = {'m': m['members'][2], 'bind_args': [], 'static': False, 'cpp': 'Gen_Thing'}
-        out, why, _ = P.resolve_markers('return $$get:Thing$$();', G, {'GeometryBaseX': [getter]}, m)
+        out, why, _ = P.resolve_markers('return $$get:Thing$$();', G, {'GeometryBase': [getter]}, m)
         assert out is None and 'overridden' in why
     finally:
         R.index_types({'members': []})
@@ -1311,13 +1311,13 @@ def test_translated_call_is_refused_when_a_derived_type_overrides_the_callee():
 
 def test_data_class_arguments_bind_by_pointer_only_when_optional():
     # G64: File3dm.Write(path, options) with `options = options ?? new File3dmWriteOptions();`
-    # -> `const BND_File3dmWriteOptionsX* options` read through a defaulted local;
+    # -> `const BND_File3dmWriteOptions* options` read through a defaulted local;
     # ViewInfo.SetPageSettings(pageSettings) null-throws -> by reference
     saved = (dict(R.DATA_CPP), dict(R.DATA_INFO))
     try:
-        R.DATA_CPP['File3dmWriteOptions'] = 'BND_File3dmWriteOptionsX'
+        R.DATA_CPP['File3dmWriteOptions'] = 'BND_File3dmWriteOptions'
         R.DATA_INFO['File3dmWriteOptions'] = {'fields': {'RenderMeshFlags'}, 'props': {'SaveUserData': True, 'Version': True}, 'methods': set()}
-        FX = R.BY_REG['File3dmX']
+        FX = R.BY_REG['File3dm']
         m = {'Type': FX['type'], 'Kind': 'method', 'Name': 'Write', 'Variant': 'portable', 'Body': 'trivial',
              'Returns': 'bool', 'ParamDefaults': {'options': 'File3dmWriteOptions'},
              'Params': [{'Name': 'path', 'Type': 'string', 'Mode': ''}, {'Name': 'options', 'Type': 'File3dmWriteOptions', 'Mode': ''}],
@@ -1326,13 +1326,13 @@ def test_data_class_arguments_bind_by_pointer_only_when_optional():
                                               {'Kind': 'parammember', 'Text': 'options.SaveUserData', 'Value': None}]}]}
         f = cfn('bool', 'ONX_Model*', 'const RHMONO_STRING*', 'unsigned int', 'bool')
         p, why = P.plan(m, f, FX)
-        assert why is None and p['bind_args'][1] == ('const BND_File3dmWriteOptionsX*', 'options')
-        assert p['locals'] == ['const BND_File3dmWriteOptionsX& rh3dm_options = options ? *options : BND_File3dmWriteOptionsX();']
+        assert why is None and p['bind_args'][1] == ('const BND_File3dmWriteOptions*', 'options')
+        assert p['locals'] == ['const BND_File3dmWriteOptions& rh3dm_options = options ? *options : BND_File3dmWriteOptions();']
         assert p['call_exprs'][2:] == ['(unsigned int)(rh3dm_options.RenderMeshFlags)', 'rh3dm_options.SaveUserData()']
         # no default and no null check: by reference, the member read through `.`
         m2 = dict(m, ParamDefaults=None)
         p2, why2 = P.plan(m2, f, FX)
-        assert why2 is None and p2['bind_args'][1] == ('const BND_File3dmWriteOptionsX&', 'options')
+        assert why2 is None and p2['bind_args'][1] == ('const BND_File3dmWriteOptions&', 'options')
         assert p2['call_exprs'][3] == 'options.SaveUserData()'
         # a member the data class did not translate: refused
         m3 = dict(m, Calls=[{'Name': 'F', 'Args': m['Calls'][0]['Args'][:3] + [{'Kind': 'parammember', 'Text': 'options.Nope', 'Value': None}]}])
@@ -1345,7 +1345,7 @@ def test_data_class_made_by_its_static_bridge():
     # G64: `ConstructionPlane rc = ConstructionPlane.FromIntPtr(p); return rc;` -> datafrom
     saved = (dict(R.DATA_CPP), dict(R.DATA_INFO))
     try:
-        R.DATA_CPP['ConstructionPlane'] = 'BND_ConstructionPlaneX'
+        R.DATA_CPP['ConstructionPlane'] = 'BND_ConstructionPlane'
         R.DATA_INFO['ConstructionPlane'] = {'fields': set(), 'props': {}, 'methods': {'FromIntPtr'}}
         m = member('ConstructionPlane', params=[('', 'int', 'index')], calls=[SELF, {'Kind': 'param', 'Text': 'index'}],
                    Body='pattern', Wrap='ConstructionPlane', WrapStatic='FromIntPtr', WrapArity=1)
@@ -1370,7 +1370,7 @@ def test_data_object_assembled_from_the_calls_out_locals():
     # rc.A = a; ... rc.PrinterName = sh.ToString(); return rc;`
     saved = (dict(R.DATA_CPP), dict(R.DATA_INFO))
     try:
-        _with_data('PageSettings', 'BND_PageSettingsX', props={'PageNumber': True, 'PrinterName': True})
+        _with_data('PageSettings', 'BND_PageSettings', props={'PageNumber': True, 'PrinterName': True})
         m = member('PageSettings', calls=[SELF, {'Kind': 'out', 'Text': 'n', 'Value': '0'}, {'Kind': 'expr', 'Text': 'sh.NonConstPointer()'}],
                    Body='pattern', Holder='StringHolder', HolderArg=2,
                    DataFill={'Local': 'rc', 'Type': 'PageSettings', 'Assigns': [['PageNumber', 'n'], ['PrinterName', '@holder']]})
@@ -1408,7 +1408,7 @@ def test_temporary_native_from_a_data_argument_guards_the_sequence():
     # if (L != IntPtr.Zero) { UNM.Add2(parent, L); UNM.Delete(L); }`
     saved = (dict(R.DATA_CPP), dict(R.DATA_INFO))
     try:
-        _with_data('ConstructionPlane', 'BND_ConstructionPlaneX', methods=['CopyToNative'])
+        _with_data('ConstructionPlane', 'BND_ConstructionPlane', methods=['CopyToNative'])
         tn = {'Local': 'L', 'Param': 'cplane', 'Method': 'CopyToNative', 'Guarded': True}
         m = member('void', params=[('', 'ConstructionPlane', 'cplane')], Body='pattern', Sequence=True, TempNative=tn,
                    Guards=[{'Cond': 'null == cplane', 'Exception': 'ArgumentNullException', 'Ids': ['cplane'], 'NullCheckOf': 'cplane'}],
@@ -1417,7 +1417,7 @@ def test_temporary_native_from_a_data_argument_guards_the_sequence():
         fns = {'A': dict(cfn('void', 'const ON_Curve*', 'const ON_X*'), name='A'), 'D': dict(cfn('void', 'ON_X*'), name='D')}
         p, why = P.plan_sequence(m, CURVE, fns)
         assert why is None
-        assert p['locals'] == ['void* rh3dm_tmp_cplane = const_cast<BND_ConstructionPlaneX&>(cplane).CopyToNative();']
+        assert p['locals'] == ['void* rh3dm_tmp_cplane = const_cast<BND_ConstructionPlane&>(cplane).CopyToNative();']
         assert p['shape'] == ('seq', ['A(m_ptr, (const ON_X*)rh3dm_tmp_cplane)', 'D((ON_X*)rh3dm_tmp_cplane)'], 'rh3dm_tmp_cplane')
         assert P.plan_sequence(dict(m, TempNative=None), CURVE, fns)[0] is None     # the local without its declaration
     finally:
@@ -1431,7 +1431,7 @@ def test_factory_result_filtered_by_the_targets_bool_getter():
     fac = {'Name': 'Instantiate', 'SwitchArg': 1,
            'Args': [{'Kind': 'expr', 'Text': 'm_parent'}, {'Kind': 'expr', 'Text': 'type'}, {'Kind': 'param', 'Text': 'id'}, {'Kind': 'expr', 'Text': 'index'}],
            'Cases': {'5': {'Args': ['id', 'm_parent'], 'New': 'Layer', 'Value': '5'}}}
-    LT = R.BY_REG['File3dmLayerTableX']
+    LT = R.BY_REG['File3dmLayerTable']
     m = {'Type': LT['type'], 'Kind': 'method', 'Name': 'FindId', 'Variant': 'portable', 'Body': 'pattern',
          'Returns': 'Layer', 'Params': [{'Name': 'id', 'Type': 'Guid', 'Mode': ''}], 'Factory': fac, 'ResultFilter': 'IsDeleted',
          'Calls': [{'Name': 'F', 'Args': [{'Kind': 'fieldptr', 'Text': 'm_parent', 'Value': 'ConstPointer'},
@@ -1460,10 +1460,10 @@ def test_factory_result_filtered_by_the_targets_bool_getter():
 def test_chain_through_a_value_type_sibling():
     # G67: PointCloudItem.X -- `return Location.X;` and `Point3d pt = Location; pt.X = value;
     # Location = pt;` -- the sibling returns a translated value type
-    PI = R.BY_REG['PointCloudItemX']
+    PI = R.BY_REG['PointCloudItem']
     loc_get = {'m': {'Kind': 'property', 'Name': 'Location', 'Returns': 'Point3d'}, 'bind_args': [], 'static': False,
                'shape': ('fromout', 'Point3d', 'rc'), 'cpp': 'Gen_Location'}
-    loc_set = {'m': {'Kind': 'method', 'Name': 'Location'}, 'bind_args': [('BND_Point3dX', 'value')], 'static': False,
+    loc_set = {'m': {'Kind': 'method', 'Name': 'Location'}, 'bind_args': [('BND_Point3d', 'value')], 'static': False,
                'shape': ('direct', 'void'), 'cpp': 'Gen_set_Location', 'setter_of': loc_get}
     loc_get['setter'] = loc_set
     x = {'Type': PI['type'], 'Kind': 'property', 'Name': 'X', 'Variant': 'portable', 'Body': 'chain',
@@ -1584,14 +1584,14 @@ def test_js_array_shape_for_vector_parameters():
     # G70: a std::vector parameter arrives in JS as an array (emscripten::val)
     import emit_classes as E
     key, check, conv = E.js_class_shape('emscripten::val')
-    # G83: or a point list (Point3dListX / PolylineX: anything with toArray())
+    # G83: or a point list (Point3dList / Polyline: anything with toArray())
     assert key == 'array' and check.format(v='v0') == 'RH3DM_JsIsSeq(v0)' and conv.format(v='v0') == 'v0'
 
 
 def test_table_iteration_through_an_internal_manifest_enumerator():
     # G71: File3dmEmbeddedFiles.GetEnumerator => new File3dmEmbeddedFileEnumerator(_file3dm),
     # whose MoveNext walks _manifest.GetEnumerator(ModelComponentType.EmbeddedFile)
-    EF, EFS = R.BY_REG['File3dmEmbeddedFileX'], R.BY_REG['File3dmEmbeddedFilesX']
+    EF, EFS = R.BY_REG['File3dmEmbeddedFile'], R.BY_REG['File3dmEmbeddedFiles']
     m = {'members': [
         {'Type': 'Rhino.DocObjects.ModelComponentType', 'Kind': 'enum', 'Name': 'ModelComponentType', 'Variant': 'portable',
          'Values': ['Unset = 0', 'EmbeddedFile = 15']},
@@ -1632,13 +1632,13 @@ def test_element_loop_plans_one_native_call_per_element():
     p, why = P.plan_arrayfill(x, CURVE, fns)
     assert why is None and p['shape'][0] == 'arrayfill' and p['shape'][1]['form'] == 'loop'
     assert p['shape'][1]['count_prop'] == 'Count' and p['shape'][1]['item'] == '{n}'
-    assert p['call_exprs'][1:] == ['rh3dm_i', 'RH3DM_Ptr(&pt)'] and p['locals'] == ['BND_Point3dX pt;']
+    assert p['call_exprs'][1:] == ['rh3dm_i', 'RH3DM_Ptr(&pt)'] and p['locals'] == ['BND_Point3d pt;']
     # ToPoint3fArray: `rc[i] = new Point3f((float)pt.X, (float)pt.Y, (float)pt.Z)` -- the
     # narrower value type's constructor over the element's fields
-    R.VT_CPP['Point3f'] = 'BND_Point3fX'
+    R.VT_CPP['Point3f'] = 'BND_Point3f'
     try:
         p, why = P.plan_arrayfill(dict(x, Returns='Point3f[]', ArrayFill=dict(af, ElemConv='narrow:Point3f')), CURVE, fns)
-        assert why is None and p['shape'][1]['item'] == 'BND_Point3fX((float){n}.m_x, (float){n}.m_y, (float){n}.m_z)'
+        assert why is None and p['shape'][1]['item'] == 'BND_Point3f((float){n}.m_x, (float){n}.m_y, (float){n}.m_z)'
     finally:
         R.VT_CPP.pop('Point3f', None)
     # the index must be an int parameter of the native; the count a sibling property
@@ -1661,7 +1661,7 @@ def test_wrap_tuple_out_pointers_become_a_nullable_tuple():
     assert p['locals'] == ['ON_Curve* leftptr = nullptr;', 'ON_Curve* rightptr = nullptr;']
     assert p['call_exprs'][2:] == ['&leftptr', '&rightptr']
     assert p['shape'][1]['fail'] == ['delete leftptr;', 'delete rightptr;']
-    assert p['shape'][1]['item'] == '{p} ? RH3DM_Wrap_CurveX({p}) : (BND_CurveX*)nullptr'
+    assert p['shape'][1]['item'] == '{p} ? RH3DM_Wrap_Curve({p}) : (BND_Curve*)nullptr'
     # a single pointer is not an out pointer; a non-array result or a void status is refused
     assert P.plan_wraptuple(x, CURVE, {'F': cfn('bool', 'const ON_Curve*', 'double', 'ON_Curve*', 'ON_Curve*')})[0] is None
     assert P.plan_wraptuple(dict(x, Returns='Curve'), CURVE, fns)[0] is None
@@ -1685,7 +1685,7 @@ def test_wrap_tuple_new_delete_pair_on_a_value_class_fills_in_place():
     assert why is None and p['shape'][1]['form'] == 'newptr' and p['shape'][1]['fail'] == []
     assert p['locals'] == ['ON_BezierCurve ptr_left;', 'ON_BezierCurve ptr_right;']
     assert p['call_exprs'][2:] == ['&ptr_left', '&ptr_right']
-    assert p['shape'][1]['item'] == 'rh3dm_ok ? new BND_BezierCurveX({p}) : (BND_BezierCurveX*)nullptr'
+    assert p['shape'][1]['item'] == 'rh3dm_ok ? new BND_BezierCurve({p}) : (BND_BezierCurve*)nullptr'
     assert p['bind_args'] == [('double', 't')]
     # an out parameter typed differently from the wrap is refused
     bad = dict(x, Params=[{'Name': 't', 'Type': 'double', 'Mode': ''}, {'Name': 'left', 'Type': 'Curve', 'Mode': 'out'},
@@ -1731,12 +1731,12 @@ def test_holder_array_empty_when_the_result_says_so():
 
 def test_out_params_with_a_wrapped_result_lead_the_tuple_with_the_object():
     # G73: Surface.ToNurbsSurface(tol, out accuracy): `IntPtr rc = F(ptr, tol, ref accuracy);
-    # return rc == Zero ? null : new NurbsSurface(rc, null);` -> (NurbsSurfaceX | None, accuracy)
+    # return rc == Zero ? null : new NurbsSurface(rc, null);` -> (NurbsSurface | None, accuracy)
     calls = [SELF, {'Kind': 'param', 'Text': 'tolerance'}, {'Kind': 'out', 'Text': 'accuracy', 'Value': '0'}]
     x = dict(member('NurbsCurve', params=[('', 'double', 'tolerance'), ('out', 'int', 'accuracy')], calls=calls),
              Wrap='NurbsCurve', WrapArity=2, WrapChecked=True)
     p, why = P.plan(x, cfn('ON_NurbsCurve*', 'const ON_Curve*', 'double', 'int*'), CURVE)
-    assert why is None and p['shape'] == ('tuple', ('result', 'BND_NurbsCurveX*', 'RH3DM_Wrap_NurbsCurveX({c})'), [('accuracy', 'int*')])
+    assert why is None and p['shape'] == ('tuple', ('result', 'BND_NurbsCurve*', 'RH3DM_Wrap_NurbsCurve({c})'), [('accuracy', 'int*')])
     # a C type that is not the wrapped class (or a derived one) is refused
     assert P.plan(x, cfn('ON_Surface*', 'const ON_Curve*', 'double', 'int*'), CURVE)[0] is None
 
@@ -1779,23 +1779,23 @@ def test_class_typed_values_resolve_against_the_other_class(monkeypatch):
                      {'Type': C['type'], 'Kind': 'method', 'Name': 'Duplicate', 'Variant': 'portable', 'Returns': 'GeometryBase'}]}
     degree = {'m': m['members'][1], 'bind_args': [], 'static': False, 'cpp': 'Gen_Degree'}
     dup = {'m': m['members'][2], 'bind_args': [], 'static': False, 'cpp': 'Gen_Duplicate'}
-    per_reg = {'NurbsCurveX': [degree], 'CurveX': [dup], 'GeometryBaseX': []}
-    monkeypatch.setattr(P, 'CTORS', {'NurbsCurveX': True})
+    per_reg = {'NurbsCurve': [degree], 'Curve': [dup], 'GeometryBase': []}
+    monkeypatch.setattr(P, 'CTORS', {'NurbsCurve': True})
     monkeypatch.setattr(P, 'ARGCTORS', {})
     try:
         R.index_types(m)
         out, deps, writes = P.resolve_markers('$$class:NurbsCurve$$ nc = $$new:NurbsCurve:$$(); return (nc)$$acc:NurbsCurve$$$$oget:NurbsCurve:Degree$$();', C, per_reg, m)
-        assert out == 'BND_NurbsCurveX* nc = new BND_NurbsCurveX(); return (nc)->Gen_Degree();' and deps == [degree]
+        assert out == 'BND_NurbsCurve* nc = new BND_NurbsCurve(); return (nc)->Gen_Degree();' and deps == [degree]
         out, _, _ = P.resolve_markers('return $$as:NurbsCurve$$($$call:Duplicate:$$());', C, per_reg, m)
-        assert out == 'return RH3DM_As<BND_NurbsCurveX>(Gen_Duplicate());'
+        assert out == 'return RH3DM_As<BND_NurbsCurve>(Gen_Duplicate());'
         # a parameter is a const reference; a class without a generated default ctor refuses `new`
-        assert P.resolve_markers('$$classarg:NurbsCurve$$', C, per_reg, m)[0] == 'const BND_NurbsCurveX&'
+        assert P.resolve_markers('$$classarg:NurbsCurve$$', C, per_reg, m)[0] == 'const BND_NurbsCurve&'
         monkeypatch.setattr(P, 'CTORS', {})
         assert P.resolve_markers('$$new:NurbsCurve:$$()', C, per_reg, m)[0] is None
         # a class the generator did not produce, or a nonconst call through a const parameter
         assert P.resolve_markers('$$class:Nope$$', C, per_reg, m)[0] is None
         nc = dict(degree, m=dict(m['members'][1], Kind='method', Params=[]), nonconst=True, cpp='Gen_Reverse')
-        assert P.resolve_markers('(x).$$ocallc:NurbsCurve:Degree:$$()', C, {'NurbsCurveX': [nc]}, m)[0] is None
+        assert P.resolve_markers('(x).$$ocallc:NurbsCurve:Degree:$$()', C, {'NurbsCurve': [nc]}, m)[0] is None
     finally:
         R.index_types({'members': []})
 
@@ -1807,15 +1807,15 @@ def test_value_mode_class_values_are_held_by_value(monkeypatch):
                      {'Type': MP['type'], 'Kind': 'property', 'Name': 'GridAngle', 'Variant': 'portable', 'Returns': 'double'}]}
     getter = {'m': m['members'][1], 'bind_args': [], 'static': False, 'cpp': 'Gen_GridAngle'}
     setter = {'m': dict(m['members'][1], Kind='method'), 'bind_args': [('double', 'value')], 'static': False, 'cpp': 'Gen_set_GridAngle', 'setter_of': getter}
-    monkeypatch.setattr(P, 'CTORS', {'MeshingParametersX': True})
+    monkeypatch.setattr(P, 'CTORS', {'MeshingParameters': True})
     try:
         R.index_types(m)
         text = 'auto o = $$new:MeshingParameters:$$(); (o)$$acc:MeshingParameters$$$$oset:MeshingParameters:GridAngle$$(1.0); return o;'
-        out, deps, writes = P.resolve_markers(text, MP, {'MeshingParametersX': [getter, setter]}, m)
-        assert out == 'auto o = BND_MeshingParametersX(); (o).Gen_set_GridAngle(1.0); return o;' and deps == [setter]
-        assert P.resolve_markers('$$class:MeshingParameters$$', MP, {'MeshingParametersX': [getter]}, m)[0] == 'BND_MeshingParametersX'
-        assert P.resolve_markers('$$class:MeshingParameters$$ x = nullptr;', MP, {'MeshingParametersX': [getter]}, m)[0] is None
-        assert P.resolve_markers('$$as:MeshingParameters$$(x)', MP, {'MeshingParametersX': [getter]}, m)[0] is None
+        out, deps, writes = P.resolve_markers(text, MP, {'MeshingParameters': [getter, setter]}, m)
+        assert out == 'auto o = BND_MeshingParameters(); (o).Gen_set_GridAngle(1.0); return o;' and deps == [setter]
+        assert P.resolve_markers('$$class:MeshingParameters$$', MP, {'MeshingParameters': [getter]}, m)[0] == 'BND_MeshingParameters'
+        assert P.resolve_markers('$$class:MeshingParameters$$ x = nullptr;', MP, {'MeshingParameters': [getter]}, m)[0] is None
+        assert P.resolve_markers('$$as:MeshingParameters$$(x)', MP, {'MeshingParameters': [getter]}, m)[0] is None
     finally:
         R.index_types({'members': []})
 
@@ -1879,20 +1879,20 @@ def test_managed_null_analyses_apply_only_while_no_writer_is_generated(monkeypat
 def test_scoped_view_resolves_the_scope_field_and_maps_the_element_key(monkeypatch):
     # G77: BrepLoopList(BrepFace): `m_brepface.ConstPointer()` is the face resolved from
     # (brep, m_scope); the indexer's element key is LoopIndex(face, index) while it resolves
-    LL, BF = R.BY_REG['BrepLoopListX'], R.BY_REG['BrepFaceX']
+    LL, BF = R.BY_REG['BrepLoopList'], R.BY_REG['BrepFace']
     fns = {'ON_Brep_BrepFacePointer': {'name': 'ON_Brep_BrepFacePointer', 'returns': 'const ON_BrepFace*', 'params': [{'type': 'const ON_Brep*'}, {'type': 'int'}]},
            'ON_BrepFace_LoopIndex': {'name': 'ON_BrepFace_LoopIndex', 'returns': 'int', 'params': [{'type': 'const ON_BrepFace*'}, {'type': 'int'}]}}
     for k, v in fns.items():
         monkeypatch.setitem(R.C_BY_NAME, k, v)
-    comp = dict(BF, comp={'Const': 'ON_Brep_BrepFacePointer', 'Owner': R.BY_REG['BrepX'], 'Ctor': ['key', 'owner']})
+    comp = dict(BF, comp={'Const': 'ON_Brep_BrepFacePointer', 'Owner': R.BY_REG['Brep'], 'Ctor': ['key', 'owner']})
     scls = dict(LL, scope={'key': '(BrepFace)', 'field': 'm_brepface', 'comp': comp}, scoped=True)
     m = dict(member('int', calls=[{'Kind': 'fieldptr', 'Text': 'm_brepface', 'Value': 'ConstPointer'}]), Type=LL['type'])
     p, why = P.plan(m, cfn('int', 'const ON_BrepFace*'), scls)
     assert why is None and p['call_exprs'] == ['(const ON_BrepFace*)ON_Brep_BrepFacePointer(m_ptr, m_scope)']
     # unscoped, the field pointer stays refused
     assert P.plan(m, cfn('int', 'const ON_BrepFace*'), dict(LL))[0] is None
-    BL = R.BY_REG['BrepLoopX']
-    monkeypatch.setitem(BL, 'comp', {'Ctor': ['key', 'owner'], 'Owner': R.BY_REG['BrepX'], 'Key': 'int', 'Const': 'X', 'OwnerNames': ['Brep']})
+    BL = R.BY_REG['BrepLoop']
+    monkeypatch.setitem(BL, 'comp', {'Ctor': ['key', 'owner'], 'Owner': R.BY_REG['Brep'], 'Key': 'int', 'Const': 'X', 'OwnerNames': ['Brep']})
     ix = dict(member('BrepLoop', params=[('', 'int', 'index')]), Type=LL['type'], Kind='indexer', Body='construct', Child='BrepLoop',
               ChildArgs=['__keymap__', 'm_brep'], ChildArgKinds=['keymap', 'field'],
               KeyMap={'Native': 'ON_BrepFace_LoopIndex', 'Field': 'm_brepface', 'Param': 'index'})
@@ -1906,7 +1906,7 @@ def test_scoped_view_resolves_the_scope_field_and_maps_the_element_key(monkeypat
 def test_scoped_member_dispatches_on_m_scope():
     # G77: the emitted member runs the scope's variant when m_scope >= 0
     import emit_classes as E
-    LL = R.BY_REG['BrepLoopListX']
+    LL = R.BY_REG['BrepLoopList']
     base = {'m': {'Name': 'Count', 'Kind': 'property'}, 'fn': {'name': 'A', 'params': []}, 'cls': LL, 'static': False,
             'call_exprs': [], 'locals': [], 'bind_args': [], 'shape': ('direct', 'int'), 'guards': [], 'cpp': 'Gen_Count'}
     sp = dict(base, fn={'name': 'B', 'params': []})
@@ -1916,21 +1916,23 @@ def test_scoped_member_dispatches_on_m_scope():
     assert 'if (m_scope >= 0) throw std::runtime_error' in refused
 
 
-def test_hand_enum_reused_only_with_rhinocommons_numbering():
-    # G78: ON_Dithering::Methods numbers SimpleNoise 0, RhinoCommon 2 -- the old bindings'
-    # enum is not reused for Dithering.Methods; the generated one carries RhinoCommon's values
-    assert R.cpp_enum_values('ON_Dithering::Methods') == {'SimpleNoise': 0, 'FloydSteinberg': 1}
+def test_every_enum_is_generated_never_the_old_bindings():
+    # M3: no enum of the old bindings is reused (G78's ON_Dithering::Methods numbered SimpleNoise 0,
+    # RhinoCommon 2): each is an RH3DM_ enum with RhinoCommon's values, under RhinoCommon's name;
+    # a nested one in its owner (Python) and as owner + name (JS)
     m = {'members': [
         {'Type': 'Rhino.Render.Dithering', 'Kind': 'type', 'Name': 'Dithering', 'Variant': 'portable'},
         {'Type': 'Rhino.Render.Dithering', 'Kind': 'enum', 'Name': 'Methods', 'Variant': 'portable',
-         'Values': ['None', 'FloydSteinberg', 'SimpleNoise'], 'EnumInts': [0, 1, 2]}]}
+         'Values': ['None', 'FloydSteinberg', 'SimpleNoise'], 'EnumInts': [0, 1, 2]},
+        {'Type': 'Rhino', 'Kind': 'enum', 'Name': 'UnitSystem', 'Variant': 'portable',
+         'Values': ['None', 'Angstroms'], 'EnumInts': [0, 12]}]}
     saved = dict(R.CS_ENUMS)
     try:
-        R.CS_ENUMS.pop('Dithering.Methods', None)
+        R.CS_ENUMS.pop('Dithering.Methods', None); R.CS_ENUMS.pop('UnitSystem', None)
         R.extend_enum_table(m)
-        e = R.CS_ENUMS['Dithering.Methods']
-        assert e['gen'] and e['cpp'] == 'RH3DM_Dithering_Methods' and e['js'] == 'DitheringXMethods'
-        assert R.RENUMBERED_ENUMS['DitheringMethods'][1]['SimpleNoise'] == (2, 0)
+        d, u = R.CS_ENUMS['Dithering.Methods'], R.CS_ENUMS['UnitSystem']
+        assert d == {'cpp': 'RH3DM_Dithering_Methods', 'gen': True, 'owner': 'Dithering', 'js': 'DitheringMethods'}
+        assert u == {'cpp': 'RH3DM_UnitSystem', 'gen': True}
     finally:
         R.CS_ENUMS.clear(); R.CS_ENUMS.update(saved)
 
@@ -1938,7 +1940,7 @@ def test_hand_enum_reused_only_with_rhinocommons_numbering():
 def test_variant_enum_map_reads_and_writes_as_rhinocommon_compares():
     # G78: Dithering.Method: `(v.ToInt() == 0) ? Methods.SimpleNoise : Methods.FloydSteinberg`,
     # set `new Variant((Methods.SimpleNoise == value) ? 0 : 1)`
-    D = R.BY_REG['DitheringX']
+    D = R.BY_REG['Dithering']
     saved = (dict(R.CS_ENUMS), dict(R.ENUM_NAMED), dict(R.WRAPPER), D.get('ff'))
     try:
         R.CS_ENUMS['Dithering.Methods'] = {'cpp': 'RH3DM_Dithering_Methods', 'gen': True, 'owner': 'Dithering'}
@@ -1973,7 +1975,7 @@ def test_sequence_parameter_where_csharp_passed_getconstarray():
     p, why = P.plan(member('void', params=[seq], calls=calls),
                     cfn('void', 'ON_Curve*', 'int', 'const ON_3dPoint*', 'const ON_3dVector*'), CURVE)
     assert why is None
-    assert p['bind_args'] == [('const std::vector<BND_Point3dX>&', 'points')]
+    assert p['bind_args'] == [('const std::vector<BND_Point3d>&', 'points')]
     assert p['call_exprs'][1:] == ['(int)points.size()', 'RH3DM_Ptr(points.data())', 'nullptr']
     # a C element type that is not the sequence's is refused, never reinterpreted
     _, why = P.plan(member('void', params=[seq], calls=calls),
@@ -1993,12 +1995,12 @@ def test_guid_empty_early_return_and_js_sequence_shape():
     assert P.early_return_cpp(g, ('conv', 'BND_UUID', 'ON_UUID_to_Binding({c})'), 'Guid') == 'ON_UUID_to_Binding(ON_nil_uuid)'
     assert P.early_return_cpp(g, ('direct', 'int'), 'int') is None
     import emit_classes as E
-    key, check, conv = E.js_class_shape('const std::vector<BND_Point3dX>&')
+    key, check, conv = E.js_class_shape('const std::vector<BND_Point3d>&')
     # G130: the elements' shape too (an empty sequence matches any)
-    assert key == 'seq:BND_Point3dX' and check.format(v='v1').startswith('(RH3DM_JsIsSeq(v1) && (RH3DM_JsSeqFirst(v1).isUndefined() || ')
+    assert key == 'seq:BND_Point3d' and check.format(v='v1').startswith('(RH3DM_JsIsSeq(v1) && (RH3DM_JsSeqFirst(v1).isUndefined() || ')
     assert 'RH3DM_JsSeqFirst(v1)["Z"].isNumber()' in check.format(v='v1')
     assert 'hasOwnProperty("r")' in E.js_class_shape('std::vector<BND_Color>')[1]
-    assert conv.format(v='v1') == 'RH3DM_JsSeq<BND_Point3dX>(v1)'
+    assert conv.format(v='v1') == 'RH3DM_JsSeq<BND_Point3d>(v1)'
 
 
 def test_members_calling_an_unsafe_native_are_refused():
@@ -2031,7 +2033,7 @@ def test_constructor_choosing_its_creation_call_is_one_ternary():
              'Calls': [{'Name': 'N1', 'Args': [{'Kind': 'expr', 'Text': 'IntPtr.Zero'}]},
                        {'Name': 'N2', 'Args': [{'Kind': 'parammember', 'Text': 'points.Count'}, {'Kind': 'param', 'Text': 'points'}]}]}
         p, why = P.cond_ctor_plan(x, PC, R.C_BY_NAME)
-        assert why is None and p['bind_args'] == [('const std::vector<BND_Point3dX>&', 'points')]
+        assert why is None and p['bind_args'] == [('const std::vector<BND_Point3d>&', 'points')]
         assert p['ctor_call'] == '(((int)points.size()) < 1) ? N1(nullptr) : N2((int)points.size(), RH3DM_Ptr(points.data()))'
         assert [f['name'] for f in p['extra_fns']][-1] == 'N2'
         # a condition over anything but the parameters is refused
@@ -2047,7 +2049,7 @@ def test_data_member_markers_resolve_or_refuse_with_dependents():
     PC = R.BY_CS['PolylineCurve']
     saved = dict(P.ARGCTORS)
     def vt():
-        return {'types': [{'Cs': 'Polyline', 'Cpp': 'BND_PolylineX', 'IsData': True, 'Fields': []}],
+        return {'types': [{'Cs': 'Polyline', 'Cpp': 'BND_Polyline', 'IsData': True, 'Fields': []}],
                 'members': [{'Type': 'Polyline', 'Name': 'ToPolylineCurve', 'Kind': 'method', 'Ok': True,
                              'Keys': ['Polyline.ToPolylineCurve/0'], 'Ret': '$$class:PolylineCurve$$', 'Params': [],
                              'Decl': '$$class:PolylineCurve$$ ToPolylineCurve() const;',
@@ -2056,13 +2058,13 @@ def test_data_member_markers_resolve_or_refuse_with_dependents():
                              'Refs': ['Polyline.ToPolylineCurve/0'], 'Ret': 'int', 'Params': [], 'Decl': 'int ToNurbs();', 'Def': ''}]}
     try:
         ctor = {'m': {'Params': [{'Type': 'System.Collections.Generic.IEnumerable<Point3d>'}]},
-                'bind_args': [('const std::vector<BND_Point3dX>&', 'points')]}
+                'bind_args': [('const std::vector<BND_Point3d>&', 'points')]}
         P.ARGCTORS[PC['reg']] = [ctor]
         v = vt()
         B.data_marker_pass(v, [(PC, [])], {'members': []}, {})
         m = v['members'][0]
-        assert m['Ok'] and m['Ret'] == 'BND_PolylineCurveX*' and m['ClassDeps'] == ['PolylineCurveX']
-        assert m['Def'] == 'return new BND_PolylineCurveX((*this).ToArray());'
+        assert m['Ok'] and m['Ret'] == 'BND_PolylineCurve*' and m['ClassDeps'] == ['PolylineCurve']
+        assert m['Def'] == 'return new BND_PolylineCurve((*this).ToArray());'
         # no such constructor generated: refused, and so is what depends on it
         P.ARGCTORS[PC['reg']] = []
         v = vt()
@@ -2134,7 +2136,7 @@ def test_internal_handle_adopt_linq_sources_and_native_enums():
     try:
         TR['handle'] = {'Delete': 'ON_TextRun_ReturnManagedTextRun', 'Field': 'm_pManagedTextRun'}
         out = P.resolve_markers('$$adopt:TextRun$$(RH3DM_IP(p))', CURVE, per_reg, {'members': []})[0]
-        assert out == 'RH3DM_Adopt<BND_TextRunX, ON_TextRun>(RH3DM_IP(p))'
+        assert out == 'RH3DM_Adopt<BND_TextRun, ON_TextRun>(RH3DM_IP(p))'
         TR.pop('handle')
         # not a handle: the constructor's ownership is unknown -- refused
         assert P.resolve_markers('$$adopt:TextRun$$(RH3DM_IP(p))', CURVE, per_reg, {'members': []})[0] is None
@@ -2200,16 +2202,16 @@ def test_js_dispatcher_shadowing_is_refused():
     assert E.js_shadowed([['object:Z', 'any:BND_Color'], ['object:Z', 'object:Z']]) == [(1, 0)]
     assert E.js_shadowed([['object:Z', 'color'], ['object:Z', 'object:Z']]) == []
     assert E.js_shadowed([['number'], ['string']]) == []
-    assert E.js_shadowed([['class:CurveX'], ['class:NurbsCurveX']]) == [(1, 0)]     # a base check takes derived
-    assert E.js_shadowed([['class:NurbsCurveX'], ['class:CurveX']]) == []
+    assert E.js_shadowed([['class:Curve'], ['class:NurbsCurve']]) == [(1, 0)]     # a base check takes derived
+    assert E.js_shadowed([['class:NurbsCurve'], ['class:Curve']]) == []
     color = E.js_class_shape('BND_Color')
     assert color[0] == 'color' and 'hasOwnProperty("r")' in color[1]
     assert E.js_class_shape('std::wstring')[0] == E.js_class_shape('BND_UUID')[0] == 'string'
 
 
 def test_js_value_objects_are_checked_on_every_field():
-    # G100: ArcX {Plane, Radius, AngleDomain} and CircleX {Plane, Radius} share their first field;
-    # keyed on it, ArcCurveX(circle) reached the Arc conversion ("Missing field: AngleDomain")
+    # G100: Arc {Plane, Radius, AngleDomain} and Circle {Plane, Radius} share their first field;
+    # keyed on it, ArcCurve(circle) reached the Arc conversion ("Missing field: AngleDomain")
     import emit_classes as E
     assert E.js_shadowed([['object:Plane,Radius'], ['object:AngleDomain,Plane,Radius']]) == [(1, 0)]
     assert E.js_shadowed([['object:AngleDomain,Plane,Radius'], ['object:Plane,Radius']]) == []

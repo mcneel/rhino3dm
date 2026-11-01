@@ -17,28 +17,28 @@
 class = "BND_SubDFaceIteratorFromSubD"
 member = "Count"
 status = "replaced"
-by = ["SubDFaceListX.Count"]
+by = ["SubDFaceList.Count"]
 test = "test_subd_lists_iterate_like_foreach"
 
 [[retired]]
 class = "BND_SubDEdgeIteratorFromSubD"
 member = "Count"
 status = "replaced"
-by = ["SubDEdgeListX.Count"]
+by = ["SubDEdgeList.Count"]
 test = "test_subd_lists_iterate_like_foreach"
 
 [[retired]]
 class = "BND_SubDVertexIteratorFromSubD"
 member = "Count"
 status = "replaced"
-by = ["SubDVertexListX.Count"]
+by = ["SubDVertexList.Count"]
 test = "test_subd_lists_iterate_like_foreach"
 
 [[retired]]
 class = "BND_SubDVertexIteratorFromSubD"
 member = "First"
 status = "replaced"
-by = ["SubDVertexListX.First"]
+by = ["SubDVertexList.First"]
 test = "test_subd_lists_iterate_like_foreach"
 
 [[retired]]
@@ -65,7 +65,7 @@ note = "no RhinoCommon cursor; iterate subd.Vertices (Luis 2026-10-30: dropped -
 class = "BND_SubDEdgeIteratorFromVertex"
 member = "Count"
 status = "replaced"
-by = ["SubDVertexX.EdgeCount"]
+by = ["SubDVertex.EdgeCount"]
 test = "test_subd_neighbours_replace_the_old_component_iterators"
 
 [[retired]]
@@ -80,28 +80,28 @@ note = "no RhinoCommon cursor; vertex.EdgeAt(i) for i in range(vertex.EdgeCount)
 class = "SubDFace"
 member = "Edge"
 status = "replaced"
-by = ["SubDFaceX.EdgeAt"]
+by = ["SubDFace.EdgeAt"]
 test = "test_subd_neighbours_replace_the_old_component_iterators"
 
 [[retired]]
 class = "SubDFace"
 member = "Vertex"
 status = "replaced"
-by = ["SubDFaceX.VertexAt"]
+by = ["SubDFace.VertexAt"]
 test = "test_subd_neighbours_replace_the_old_component_iterators"
 
 [[retired]]
 class = "SubDVertex"
 member = "Edge"
 status = "replaced"
-by = ["SubDVertexX.EdgeAt"]
+by = ["SubDVertex.EdgeAt"]
 test = "test_subd_neighbours_replace_the_old_component_iterators"
 
 [[retired]]
 class = "SubDEdge"
 member = "Vertex"
 status = "replaced"
-by = ["SubDEdgeX.VertexFrom", "SubDEdgeX.VertexTo"]
+by = ["SubDEdge.VertexFrom", "SubDEdge.VertexTo"]
 test = "test_subd_lists_iterate_like_foreach"
 note = "index 0 / 1"
 
@@ -109,7 +109,7 @@ note = "index 0 / 1"
 class = "SubDEdge"
 member = "VertexCount"
 status = "replaced"
-by = ["SubDEdgeX.VertexFrom", "SubDEdgeX.VertexTo"]
+by = ["SubDEdge.VertexFrom", "SubDEdge.VertexTo"]
 test = "test_subd_lists_iterate_like_foreach"
 note = "always 2"
 
@@ -117,14 +117,14 @@ note = "always 2"
 class = "Arc"
 member = "AngleRadians"
 status = "replaced"
-by = ["ArcX.Angle"]
+by = ["Arc.Angle"]
 test = "test_retired_arc_arccurve_brep_members"
 
 [[retired]]
 class = "ArcCurve"
 members = ["CreateFromArc", "CreateFromArcParams", "CreateFromCircle", "CreateFromCircleParams"]
 status = "replaced"
-by = ["ArcCurveX.__init__"]
+by = ["ArcCurve.__init__"]
 note = "the constructors ArcCurve(arc), ArcCurve(arc, t0, t1), ArcCurve(circle), ArcCurve(circle, t0, t1)"
 test = "test_retired_arc_arccurve_brep_members"
 
@@ -132,7 +132,7 @@ test = "test_retired_arc_arccurve_brep_members"
 class = "Brep"
 member = "CreateFromBoundingBox"
 status = "replaced"
-by = ["BrepX.CreateFromBox"]
+by = ["Brep.CreateFromBox"]
 note = "CreateFromBox(BoundingBox) and CreateFromBox(Box)"
 test = "test_retired_arc_arccurve_brep_members"
 
@@ -140,7 +140,7 @@ test = "test_retired_arc_arccurve_brep_members"
 class = "BrepTrim"
 members = ["EdgeIndex", "StartVertexIndex", "EndVertexIndex"]
 status = "replaced"
-by = ["BrepTrimX.Edge", "BrepTrimX.StartVertex", "BrepTrimX.EndVertex"]
+by = ["BrepTrim.Edge", "BrepTrim.StartVertex", "BrepTrim.EndVertex"]
 note = "trim.Edge.EdgeIndex, trim.StartVertex.VertexIndex, trim.EndVertex.VertexIndex"
 test = "test_retired_arc_arccurve_brep_members"
 
@@ -148,7 +148,7 @@ test = "test_retired_arc_arccurve_brep_members"
 class = "BrepVertex"
 member = "EdgeCount"
 status = "replaced"
-by = ["BrepVertexX.EdgeIndices"]
+by = ["BrepVertex.EdgeIndices"]
 note = "len(vertex.EdgeIndices())"
 test = "test_retired_arc_arccurve_brep_members"
 
@@ -156,14 +156,14 @@ test = "test_retired_arc_arccurve_brep_members"
 class = "ViewInfo"
 member = "WallpaperName"
 status = "replaced"
-by = ["ViewInfoX.WallpaperFilename"]
+by = ["ViewInfo.WallpaperFilename"]
 test = "test_retired_viewinfo_vector_sun_shutlining_members"
 
 [[retired]]
 class = "Vector3d"
 member = "DotProduct"
 status = "replaced"
-by = ["Vector3dX.__mul__"]
+by = ["Vector3d.__mul__"]
 note = "the * operator: a * b"
 test = "test_retired_viewinfo_vector_sun_shutlining_members"
 
@@ -171,7 +171,7 @@ test = "test_retired_viewinfo_vector_sun_shutlining_members"
 class = "Sun"
 member = "SunColorFromAltitude"
 status = "replaced"
-by = ["SunX.ColorFromAltitude"]
+by = ["Sun.ColorFromAltitude"]
 note = "rounds to the nearest integer per channel; the old binding truncated 255.5*c (D45)"
 test = "test_retired_viewinfo_vector_sun_shutlining_members"
 
@@ -179,7 +179,7 @@ test = "test_retired_viewinfo_vector_sun_shutlining_members"
 class = "ShutLining"
 member = "Curves"
 status = "replaced"
-by = ["File3dmShutLiningX.GetCurves", "File3dmShutLiningX.CurveRadius", "File3dmShutLiningX.AddCurve"]
+by = ["File3dmShutLining.GetCurves", "File3dmShutLining.CurveRadius", "File3dmShutLining.AddCurve"]
 note = "GetCurves() ids, then CurveEnabled/CurveRadius/CurveProfile/CurvePull/CurveIsBump(id) and their setters; AddCurve()"
 test = "test_retired_viewinfo_vector_sun_shutlining_members"
 
@@ -190,7 +190,7 @@ test = "test_retired_viewinfo_vector_sun_shutlining_members"
 class = "Sun"
 member = "Year"
 status = "replaced"
-by = ["SunX.GetDateTime", "SunX.SetDateTime"]
+by = ["Sun.GetDateTime", "Sun.SetDateTime"]
 note = "GetDateTime(DateTimeKind.Local).year; set: SetDateTime(d.replace(year=...), Local) -- the same ON_Sun::LocalDateTime"
 test = "test_retired_sun_date_members"
 
@@ -198,7 +198,7 @@ test = "test_retired_sun_date_members"
 class = "Sun"
 member = "Month"
 status = "replaced"
-by = ["SunX.GetDateTime", "SunX.SetDateTime"]
+by = ["Sun.GetDateTime", "Sun.SetDateTime"]
 note = "GetDateTime(DateTimeKind.Local).month"
 test = "test_retired_sun_date_members"
 
@@ -206,7 +206,7 @@ test = "test_retired_sun_date_members"
 class = "Sun"
 member = "Day"
 status = "replaced"
-by = ["SunX.GetDateTime", "SunX.SetDateTime"]
+by = ["Sun.GetDateTime", "Sun.SetDateTime"]
 note = "GetDateTime(DateTimeKind.Local).day"
 test = "test_retired_sun_date_members"
 
@@ -216,7 +216,7 @@ test = "test_retired_sun_date_members"
 class = "TextureMapping"
 member = "IsPeriodic"
 status = "replaced"
-by = ["TextureMappingX.MappingType"]
+by = ["TextureMapping.MappingType"]
 note = "MappingType in (SphereMapping, CylinderMapping) -- opennurbs' own test"
 test = "test_retired_texturemapping_members"
 
@@ -224,7 +224,7 @@ test = "test_retired_texturemapping_members"
 class = "TextureMapping"
 member = "ReverseTextureCoordinate"
 status = "replaced"
-by = ["TextureMappingX.UvwTransform"]
+by = ["TextureMapping.UvwTransform"]
 note = "UvwTransform = R * UvwTransform, R the identity with R[dir][dir] = -1, R[dir][3] = 1 (ON_TextureMapping's matrix)"
 test = "test_retired_texturemapping_members"
 
@@ -232,7 +232,7 @@ test = "test_retired_texturemapping_members"
 class = "TextureMapping"
 member = "SwapTextureCoordinate"
 status = "replaced"
-by = ["TextureMappingX.UvwTransform"]
+by = ["TextureMapping.UvwTransform"]
 note = "UvwTransform = S * UvwTransform, S the identity with rows i and j swapped"
 test = "test_retired_texturemapping_members"
 
@@ -240,7 +240,7 @@ test = "test_retired_texturemapping_members"
 class = "TextureMapping"
 member = "TileTextureCoordinate"
 status = "replaced"
-by = ["TextureMappingX.UvwTransform"]
+by = ["TextureMapping.UvwTransform"]
 note = "UvwTransform = T * UvwTransform, T the identity with T[dir][dir] = count, T[dir][3] = offset"
 test = "test_retired_texturemapping_members"
 
@@ -250,7 +250,7 @@ test = "test_retired_texturemapping_members"
 class = "Sun"
 member = "Hours"
 status = "replaced"
-by = ["SunX.GetDateTime", "SunX.SetDateTime"]
+by = ["Sun.GetDateTime", "Sun.SetDateTime"]
 note = "hour + minute/60 + second/3600 of GetDateTime(DateTimeKind.Local): RhinoCommon's DateTime holds whole seconds (D48)"
 test = "test_retired_sun_date_members"
 
@@ -258,7 +258,7 @@ test = "test_retired_sun_date_members"
 class = "TextureMapping"
 member = "RequiresVertexNormals"
 status = "replaced"
-by = ["TextureMappingX.MappingType", "TextureMappingX.Projection", "TextureMappingX.Capped"]
+by = ["TextureMapping.MappingType", "TextureMapping.Projection", "TextureMapping.Capped"]
 note = "not SurfaceParameters and (Projection == Ray, BoxMapping, or a capped CylinderMapping); a WCS-box projection makes MappingType throw, as RhinoCommon's (D49)"
 test = "test_retired_texturemapping_members"
 
@@ -268,7 +268,7 @@ test = "test_retired_texturemapping_members"
 class = "Layer"
 member = "PathSeparator"
 status = "replaced"
-by = ["ModelComponentX.NamePathSeparator"]
+by = ["ModelComponent.NamePathSeparator"]
 note = "RhinoCommon's Layer.PathSeparator (RHINO_SDK) is `=> ModelComponent.NamePathSeparator`; the old binding returns the same ON_ModelComponent constant"
 test = "test_retired_rhino_only_pairings"
 
@@ -276,7 +276,7 @@ test = "test_retired_rhino_only_pairings"
 class = "AnnotationBase"
 member = "GetDimensionScale"
 status = "replaced"
-by = ["AnnotationBaseX.DimensionScale", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.DimensionScale", "AnnotationBase.ParentDimensionStyle"]
 note = "the old GetDimensionScale(parentStyle) is ON_Annotation::DimScale(style): DimensionScale with ParentDimensionStyle set (D39); RhinoCommon's GetDimensionScale(RhinoDoc, style, viewport) is a different, view-dependent call"
 test = "test_retired_rhino_only_pairings"
 
@@ -284,7 +284,7 @@ test = "test_retired_rhino_only_pairings"
 class = "RenderContent"
 member = "FirstChild"
 status = "replaced"
-by = ["File3dmRenderContentX.Children"]
+by = ["File3dmRenderContent.Children"]
 note = "the portable File3dmRenderContent (not RHINO_SDK RenderContent): Children enumerates the same FirstChild / NextSibling chain"
 test = "test_render_content_parent_link_and_children"
 
@@ -292,7 +292,7 @@ test = "test_render_content_parent_link_and_children"
 class = "RenderContent"
 member = "NextSibling"
 status = "replaced"
-by = ["File3dmRenderContentX.Children"]
+by = ["File3dmRenderContent.Children"]
 note = "see FirstChild"
 test = "test_render_content_parent_link_and_children"
 
@@ -302,7 +302,7 @@ test = "test_render_content_parent_link_and_children"
 class = "PostEffect"
 member = "Id"
 status = "replaced"
-by = ["PostEffectDataX.Id"]
+by = ["PostEffectData.Id"]
 note = "RhinoCommon's portable PostEffectData (RenderSettings.PostEffects items), not the RHINO_SDK PostEffect plug-in class"
 test = "test_post_effect_collection_and_data"
 
@@ -310,7 +310,7 @@ test = "test_post_effect_collection_and_data"
 class = "PostEffect"
 member = "LocalName"
 status = "replaced"
-by = ["PostEffectDataX.LocalName"]
+by = ["PostEffectData.LocalName"]
 note = "RhinoCommon's portable PostEffectData (RenderSettings.PostEffects items), not the RHINO_SDK PostEffect plug-in class"
 test = "test_post_effect_collection_and_data"
 
@@ -318,7 +318,7 @@ test = "test_post_effect_collection_and_data"
 class = "PostEffect"
 member = "On"
 status = "replaced"
-by = ["PostEffectDataX.On"]
+by = ["PostEffectData.On"]
 note = "RhinoCommon's portable PostEffectData (RenderSettings.PostEffects items), not the RHINO_SDK PostEffect plug-in class"
 test = "test_post_effect_collection_and_data"
 
@@ -326,7 +326,7 @@ test = "test_post_effect_collection_and_data"
 class = "PostEffect"
 member = "Shown"
 status = "replaced"
-by = ["PostEffectDataX.Shown"]
+by = ["PostEffectData.Shown"]
 note = "RhinoCommon's portable PostEffectData (RenderSettings.PostEffects items), not the RHINO_SDK PostEffect plug-in class"
 test = "test_post_effect_collection_and_data"
 
@@ -334,7 +334,7 @@ test = "test_post_effect_collection_and_data"
 class = "PostEffect"
 member = "Type"
 status = "replaced"
-by = ["PostEffectDataX.Type"]
+by = ["PostEffectData.Type"]
 note = "RhinoCommon's portable PostEffectData (RenderSettings.PostEffects items), not the RHINO_SDK PostEffect plug-in class"
 test = "test_post_effect_collection_and_data"
 
@@ -342,7 +342,7 @@ test = "test_post_effect_collection_and_data"
 class = "PostEffect"
 member = "GetParameter"
 status = "replaced"
-by = ["PostEffectDataX.GetParameter"]
+by = ["PostEffectData.GetParameter"]
 note = "RhinoCommon's portable PostEffectData (RenderSettings.PostEffects items), not the RHINO_SDK PostEffect plug-in class"
 test = "test_post_effect_collection_and_data"
 
@@ -350,7 +350,7 @@ test = "test_post_effect_collection_and_data"
 class = "PostEffect"
 member = "SetParameter"
 status = "replaced"
-by = ["PostEffectDataX.SetParameter"]
+by = ["PostEffectData.SetParameter"]
 note = "RhinoCommon's portable PostEffectData (RenderSettings.PostEffects items), not the RHINO_SDK PostEffect plug-in class"
 test = "test_post_effect_collection_and_data"
 
@@ -360,7 +360,7 @@ test = "test_post_effect_collection_and_data"
 class = "MeshFaceList"
 member = "addTriFace"
 status = "replaced"
-by = ["MeshFaceListX.AddFace"]
+by = ["MeshFaceList.AddFace"]
 note = "JS only; the generated JS addFace dispatches RhinoCommon's overloads by arity"
 test = "test_js_mesh_face_list_old_names_are_addface_setface"
 
@@ -368,7 +368,7 @@ test = "test_js_mesh_face_list_old_names_are_addface_setface"
 class = "MeshFaceList"
 member = "addQuadFace"
 status = "replaced"
-by = ["MeshFaceListX.AddFace"]
+by = ["MeshFaceList.AddFace"]
 note = "JS only; the generated JS addFace dispatches RhinoCommon's overloads by arity"
 test = "test_js_mesh_face_list_old_names_are_addface_setface"
 
@@ -376,7 +376,7 @@ test = "test_js_mesh_face_list_old_names_are_addface_setface"
 class = "MeshFaceList"
 member = "setTriFace"
 status = "replaced"
-by = ["MeshFaceListX.SetFace"]
+by = ["MeshFaceList.SetFace"]
 note = "JS only; the generated JS setFace dispatches RhinoCommon's overloads by arity"
 test = "test_js_mesh_face_list_old_names_are_addface_setface"
 
@@ -384,7 +384,7 @@ test = "test_js_mesh_face_list_old_names_are_addface_setface"
 class = "MeshFaceList"
 member = "setQuadFace"
 status = "replaced"
-by = ["MeshFaceListX.SetFace"]
+by = ["MeshFaceList.SetFace"]
 note = "JS only; the generated JS setFace dispatches RhinoCommon's overloads by arity"
 test = "test_js_mesh_face_list_old_names_are_addface_setface"
 
@@ -394,7 +394,7 @@ test = "test_js_mesh_face_list_old_names_are_addface_setface"
 class = "ViewportInfo"
 member = "screenPort"
 status = "replaced"
-by = ["ViewportX.ScreenPort"]
+by = ["ViewportInfo.ScreenPort"]
 note = "JS only; the same (x, y, width, height) set; the read differs for a y-up or degenerate port (D58)"
 test = "test_viewport_screen_port_g105"
 
@@ -404,7 +404,7 @@ test = "test_viewport_screen_port_g105"
 class = "SubDFace"
 member = "ControlNetCenterPoint"
 status = "replaced"
-by = ["SubDFaceX.ControlNetCenterPoint"]
+by = ["SubDFace.ControlNetCenterPoint"]
 note = "U3: moved out of RhinoCommon's #if RHINO_SDK / #if !defined(RHINO3DM_BUILD) blocks (the limit-surface members stay fenced)"
 test = "test_subd_face_control_net_center_u3"
 
@@ -412,7 +412,7 @@ test = "test_subd_face_control_net_center_u3"
 class = "SubDFace"
 member = "ControlNetCenterNormal"
 status = "replaced"
-by = ["SubDFaceX.ControlNetCenterNormal"]
+by = ["SubDFace.ControlNetCenterNormal"]
 note = "U3: moved out of RhinoCommon's #if RHINO_SDK / #if !defined(RHINO3DM_BUILD) blocks (the limit-surface members stay fenced)"
 test = "test_subd_face_control_net_center_u3"
 
@@ -420,7 +420,7 @@ test = "test_subd_face_control_net_center_u3"
 class = "SubDFace"
 member = "ControlNetCenterFrame"
 status = "replaced"
-by = ["SubDFaceX.ControlNetCenterFrame"]
+by = ["SubDFace.ControlNetCenterFrame"]
 note = "U3: moved out of RhinoCommon's #if RHINO_SDK / #if !defined(RHINO3DM_BUILD) blocks (the limit-surface members stay fenced)"
 test = "test_subd_face_control_net_center_u3"
 
@@ -430,7 +430,7 @@ test = "test_subd_face_control_net_center_u3"
 class = "Material"
 member = "RenderMaterialInstanceId"
 status = "replaced"
-by = ["MaterialX.RenderMaterialInstanceId"]
+by = ["Material.RenderMaterialInstanceId"]
 note = "U1: ON_Material_Get/SetRdkMaterialInstanceId in c/on_material.cpp over public opennurbs; the setter sets the universal render engine plug-in id, as the RDK native did"
 test = "test_material_render_material_instance_id_u1"
 
@@ -440,7 +440,7 @@ test = "test_material_render_material_instance_id_u1"
 class = "SubD"
 member = "SharpEdgeCount"
 status = "replaced"
-by = ["SubDX.SharpEdgeCount"]
+by = ["SubD.SharpEdgeCount"]
 note = "U2: RhinoCommon's SharpEdgeCount() is a METHOD (the old one a read-only property): subd.SharpEdgeCount() / subd.sharpEdgeCount() (D60); the out overload's (count, range) tuple is shadowed by it (G105) and not registered"
 test = "test_subd_sharp_edge_count_u2"
 
@@ -450,7 +450,7 @@ test = "test_subd_sharp_edge_count_u2"
 class = "PointCloud"
 member = "InsertRange"
 status = "replaced"
-by = ["PointCloudX.InsertRange"]
+by = ["PointCloud.InsertRange"]
 note = "U11: the old binding's InsertRangePoints is a copy of the broken ON_PointCloud_InsertPoints (pilot-findings #34) and overruns the heap in 8.x; the generated member is RhinoCommon's over the fixed native. An index out of range now raises (IndexError / a JS exception) where the old one did nothing"
 test = "test_point_cloud_insert_range_u11"
 
@@ -460,7 +460,7 @@ test = "test_point_cloud_insert_range_u11"
 class = "ObjectAttributes"
 member = "DrawColor"
 status = "replaced"
-by = ["ObjectAttributesX.DrawColor"]
+by = ["ObjectAttributes.DrawColor"]
 note = "#5: Rhino's rules over the file; by-material now follows the material source and PBR base color (D63)"
 test = "test_draw_color_from_a_file_u5"
 
@@ -468,7 +468,7 @@ test = "test_draw_color_from_a_file_u5"
 class = "Mesh"
 member = "SetCachedTextureCoordinatesFromMaterial"
 status = "replaced"
-by = ["MeshX.SetCachedTextureCoordinatesFromMaterial"]
+by = ["Mesh.SetCachedTextureCoordinatesFromMaterial"]
 note = "#6 (U9): RhinoCommon returns nothing where the old returned bool (D65)"
 test = "test_mesh_texture_coordinates_from_a_file_u9"
 
@@ -476,7 +476,7 @@ test = "test_mesh_texture_coordinates_from_a_file_u9"
 class = "Mesh"
 member = "GetCachedTextureCoordinatesFromTexture"
 status = "replaced"
-by = ["MeshX.GetCachedTextureCoordinates"]
+by = ["Mesh.GetCachedTextureCoordinates"]
 note = "#6 (U9): RhinoCommon's name, an overload of GetCachedTextureCoordinates (D65)"
 test = "test_mesh_texture_coordinates_from_a_file_u9"
 
@@ -484,7 +484,7 @@ test = "test_mesh_texture_coordinates_from_a_file_u9"
 class = "RenderContent"
 member = "ChildSlotAmount"
 status = "replaced"
-by = ["File3dmRenderContentX.ChildSlotAmount"]
+by = ["File3dmRenderContent.ChildSlotAmount"]
 note = "#7 (U4): RenderContent's shape, slot name first; ChildSlotAmount of an unset slot is 0.0, not 100.0 (D64)"
 test = "test_render_content_child_slots_u4"
 
@@ -492,7 +492,7 @@ test = "test_render_content_child_slots_u4"
 class = "RenderContent"
 member = "SetChild"
 status = "replaced"
-by = ["File3dmRenderContentX.SetChild"]
+by = ["File3dmRenderContent.SetChild"]
 note = "#7 (U4): RenderContent's shape, slot name first; ChildSlotAmount of an unset slot is 0.0, not 100.0 (D64)"
 test = "test_render_content_child_slots_u4"
 
@@ -500,7 +500,7 @@ test = "test_render_content_child_slots_u4"
 class = "RenderContent"
 member = "SetChildSlotAmount"
 status = "replaced"
-by = ["File3dmRenderContentX.SetChildSlotAmount"]
+by = ["File3dmRenderContent.SetChildSlotAmount"]
 note = "#7 (U4): RenderContent's shape, slot name first; ChildSlotAmount of an unset slot is 0.0, not 100.0 (D64)"
 test = "test_render_content_child_slots_u4"
 
@@ -508,7 +508,7 @@ test = "test_render_content_child_slots_u4"
 class = "RenderContent"
 member = "SetChildSlotOn"
 status = "replaced"
-by = ["File3dmRenderContentX.SetChildSlotOn"]
+by = ["File3dmRenderContent.SetChildSlotOn"]
 note = "#7 (U4): RenderContent's shape, slot name first; ChildSlotAmount of an unset slot is 0.0, not 100.0 (D64)"
 test = "test_render_content_child_slots_u4"
 
@@ -518,7 +518,7 @@ test = "test_render_content_child_slots_u4"
 class = "CommonObject"
 member = "GetUserString"
 status = "replaced"
-by = ["GeometryBaseX.GetUserString", "ObjectAttributesX.GetUserString", "LayerX.GetUserString", "MaterialX.GetUserString", "LinetypeX.GetUserString", "GroupX.GetUserString", "HatchPatternX.GetUserString", "DimensionStyleX.GetUserString", "InstanceDefinitionGeometryX.GetUserString", "TextureMappingX.GetUserString", "ViewportX.GetUserString", "RenderSettingsX.GetUserString", "BitmapX.GetUserString"]
+by = ["GeometryBase.GetUserString", "ObjectAttributes.GetUserString", "Layer.GetUserString", "Material.GetUserString", "Linetype.GetUserString", "Group.GetUserString", "HatchPattern.GetUserString", "DimensionStyle.GetUserString", "InstanceDefinitionGeometry.GetUserString", "TextureMapping.GetUserString", "ViewportInfo.GetUserString", "RenderSettings.GetUserString", "Bitmap.GetUserString"]
 note = "D62: RhinoCommon publishes these per class; the generated classes register them where RhinoCommon does and, from its internal CommonObject members, on TextureMapping / Viewport / RenderSettings / Bitmap"
 test = "test_user_strings_kept_where_rhino3dm_had_them_d62"
 
@@ -526,7 +526,7 @@ test = "test_user_strings_kept_where_rhino3dm_had_them_d62"
 class = "CommonObject"
 member = "SetUserString"
 status = "replaced"
-by = ["GeometryBaseX.SetUserString", "ObjectAttributesX.SetUserString", "LayerX.SetUserString", "MaterialX.SetUserString", "LinetypeX.SetUserString", "GroupX.SetUserString", "HatchPatternX.SetUserString", "DimensionStyleX.SetUserString", "InstanceDefinitionGeometryX.SetUserString", "TextureMappingX.SetUserString", "ViewportX.SetUserString", "RenderSettingsX.SetUserString", "BitmapX.SetUserString"]
+by = ["GeometryBase.SetUserString", "ObjectAttributes.SetUserString", "Layer.SetUserString", "Material.SetUserString", "Linetype.SetUserString", "Group.SetUserString", "HatchPattern.SetUserString", "DimensionStyle.SetUserString", "InstanceDefinitionGeometry.SetUserString", "TextureMapping.SetUserString", "ViewportInfo.SetUserString", "RenderSettings.SetUserString", "Bitmap.SetUserString"]
 note = "D62: RhinoCommon publishes these per class; the generated classes register them where RhinoCommon does and, from its internal CommonObject members, on TextureMapping / Viewport / RenderSettings / Bitmap"
 test = "test_user_strings_kept_where_rhino3dm_had_them_d62"
 
@@ -534,7 +534,7 @@ test = "test_user_strings_kept_where_rhino3dm_had_them_d62"
 class = "CommonObject"
 member = "UserStringCount"
 status = "replaced"
-by = ["GeometryBaseX.UserStringCount", "ObjectAttributesX.UserStringCount", "LayerX.UserStringCount", "MaterialX.UserStringCount", "LinetypeX.UserStringCount", "GroupX.UserStringCount", "HatchPatternX.UserStringCount", "DimensionStyleX.UserStringCount", "InstanceDefinitionGeometryX.UserStringCount", "TextureMappingX.UserStringCount", "ViewportX.UserStringCount", "RenderSettingsX.UserStringCount", "BitmapX.UserStringCount"]
+by = ["GeometryBase.UserStringCount", "ObjectAttributes.UserStringCount", "Layer.UserStringCount", "Material.UserStringCount", "Linetype.UserStringCount", "Group.UserStringCount", "HatchPattern.UserStringCount", "DimensionStyle.UserStringCount", "InstanceDefinitionGeometry.UserStringCount", "TextureMapping.UserStringCount", "ViewportInfo.UserStringCount", "RenderSettings.UserStringCount", "Bitmap.UserStringCount"]
 note = "D62: RhinoCommon publishes these per class; the generated classes register them where RhinoCommon does and, from its internal CommonObject members, on TextureMapping / Viewport / RenderSettings / Bitmap"
 test = "test_user_strings_kept_where_rhino3dm_had_them_d62"
 
@@ -542,7 +542,7 @@ test = "test_user_strings_kept_where_rhino3dm_had_them_d62"
 class = "CommonObject"
 member = "GetUserStrings"
 status = "replaced"
-by = ["GeometryBaseX.GetUserStrings", "ObjectAttributesX.GetUserStrings", "LayerX.GetUserStrings", "MaterialX.GetUserStrings", "LinetypeX.GetUserStrings", "GroupX.GetUserStrings", "HatchPatternX.GetUserStrings", "DimensionStyleX.GetUserStrings", "InstanceDefinitionGeometryX.GetUserStrings", "TextureMappingX.GetUserStrings", "ViewportX.GetUserStrings", "RenderSettingsX.GetUserStrings", "BitmapX.GetUserStrings"]
+by = ["GeometryBase.GetUserStrings", "ObjectAttributes.GetUserStrings", "Layer.GetUserStrings", "Material.GetUserStrings", "Linetype.GetUserStrings", "Group.GetUserStrings", "HatchPattern.GetUserStrings", "DimensionStyle.GetUserStrings", "InstanceDefinitionGeometry.GetUserStrings", "TextureMapping.GetUserStrings", "ViewportInfo.GetUserStrings", "RenderSettings.GetUserStrings", "Bitmap.GetUserStrings"]
 note = "D62: RhinoCommon publishes these per class; the generated classes register them where RhinoCommon does and, from its internal CommonObject members, on TextureMapping / Viewport / RenderSettings / Bitmap"
 test = "test_user_strings_kept_where_rhino3dm_had_them_d62"
 
@@ -554,7 +554,7 @@ test = "test_user_strings_kept_where_rhino3dm_had_them_d62"
 class = "AnnotationBase"
 member = "GetAlternateDimensionLengthDisplay"
 status = "replaced"
-by = ["AnnotationBaseX.AlternateDimensionLengthDisplay", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.AlternateDimensionLengthDisplay", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -562,7 +562,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "SetAlternateDimensionLengthDisplay"
 status = "replaced"
-by = ["AnnotationBaseX.AlternateDimensionLengthDisplay", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.AlternateDimensionLengthDisplay", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -570,7 +570,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "GetDimensionLengthDisplay"
 status = "replaced"
-by = ["AnnotationBaseX.DimensionLengthDisplay", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.DimensionLengthDisplay", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -578,7 +578,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "SetDimensionLengthDisplay"
 status = "replaced"
-by = ["AnnotationBaseX.DimensionLengthDisplay", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.DimensionLengthDisplay", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -586,7 +586,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "GetMaskColor"
 status = "replaced"
-by = ["AnnotationBaseX.MaskColor", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.MaskColor", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -594,7 +594,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "SetMaskColor"
 status = "replaced"
-by = ["AnnotationBaseX.MaskColor", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.MaskColor", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -602,7 +602,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "GetMaskColorSource"
 status = "replaced"
-by = ["AnnotationBaseX.MaskColorSource", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.MaskColorSource", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -610,7 +610,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "SetMaskColorSource"
 status = "replaced"
-by = ["AnnotationBaseX.MaskColorSource", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.MaskColorSource", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -618,7 +618,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "GetMaskEnabled"
 status = "replaced"
-by = ["AnnotationBaseX.MaskEnabled", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.MaskEnabled", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -626,7 +626,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "SetMaskEnabled"
 status = "replaced"
-by = ["AnnotationBaseX.MaskEnabled", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.MaskEnabled", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -634,7 +634,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "GetMaskFrame"
 status = "replaced"
-by = ["AnnotationBaseX.MaskFrame", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.MaskFrame", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -642,7 +642,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "SetMaskFrame"
 status = "replaced"
-by = ["AnnotationBaseX.MaskFrame", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.MaskFrame", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -650,7 +650,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "GetMaskOffset"
 status = "replaced"
-by = ["AnnotationBaseX.MaskOffset", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.MaskOffset", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -658,7 +658,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "SetMaskOffset"
 status = "replaced"
-by = ["AnnotationBaseX.MaskOffset", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.MaskOffset", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -666,7 +666,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "GetTextHeight"
 status = "replaced"
-by = ["AnnotationBaseX.TextHeight", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.TextHeight", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -674,7 +674,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "SetTextHeight"
 status = "replaced"
-by = ["AnnotationBaseX.TextHeight", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.TextHeight", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -682,7 +682,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "AnnotationBase"
 member = "SetDimensionScale"
 status = "replaced"
-by = ["AnnotationBaseX.DimensionScale", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.DimensionScale", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then the property (D39); pass the annotation's own style (D67)"
 test = "test_retired_annotation_explicit_parent_accessors_c"
 
@@ -692,7 +692,7 @@ test = "test_retired_annotation_explicit_parent_accessors_c"
 class = "CommonObject"
 member = "GetUserStrings2"
 status = "replaced"
-by = ["GeometryBaseX.GetUserStrings", "ObjectAttributesX.GetUserStrings"]
+by = ["GeometryBase.GetUserStrings", "ObjectAttributes.GetUserStrings"]
 note = "triage E (Luis: drop): the generated original returns a list (D35)"
 test = "test_retired_numbered_list_duplicates_e"
 
@@ -700,7 +700,7 @@ test = "test_retired_numbered_list_duplicates_e"
 class = "File3dmGroupTable"
 member = "GroupMembers2"
 status = "replaced"
-by = ["File3dmGroupTableX.GroupMembers"]
+by = ["File3dmGroupTable.GroupMembers"]
 note = "triage E (Luis: drop): the generated original returns a list (D35)"
 test = "test_retired_numbered_list_duplicates_e"
 
@@ -708,7 +708,7 @@ test = "test_retired_numbered_list_duplicates_e"
 class = "NurbsCurveKnotList"
 member = "ToList2"
 status = "replaced"
-by = ["NurbsCurveKnotListX.__getitem__"]
+by = ["NurbsCurveKnotList.__getitem__"]
 note = "triage E (Luis: drop): the generated original returns a list (D35)"
 test = "test_retired_numbered_list_duplicates_e"
 
@@ -716,7 +716,7 @@ test = "test_retired_numbered_list_duplicates_e"
 class = "NurbsSurfaceKnotList"
 member = "ToList2"
 status = "replaced"
-by = ["NurbsSurfaceKnotListX.__getitem__"]
+by = ["NurbsSurfaceKnotList.__getitem__"]
 note = "triage E (Luis: drop): the generated original returns a list (D35)"
 test = "test_retired_numbered_list_duplicates_e"
 
@@ -724,7 +724,7 @@ test = "test_retired_numbered_list_duplicates_e"
 class = "PointCloud"
 member = "GetColors2"
 status = "replaced"
-by = ["PointCloudX.GetColors"]
+by = ["PointCloud.GetColors"]
 note = "triage E (Luis: drop): the generated original returns a list (D35)"
 test = "test_retired_numbered_list_duplicates_e"
 
@@ -732,7 +732,7 @@ test = "test_retired_numbered_list_duplicates_e"
 class = "PointCloud"
 member = "GetNormals2"
 status = "replaced"
-by = ["PointCloudX.GetNormals"]
+by = ["PointCloud.GetNormals"]
 note = "triage E (Luis: drop): the generated original returns a list (D35)"
 test = "test_retired_numbered_list_duplicates_e"
 
@@ -740,7 +740,7 @@ test = "test_retired_numbered_list_duplicates_e"
 class = "PointCloud"
 member = "GetPoints2"
 status = "replaced"
-by = ["PointCloudX.GetPoints"]
+by = ["PointCloud.GetPoints"]
 note = "triage E (Luis: drop): the generated original returns a list (D35)"
 test = "test_retired_numbered_list_duplicates_e"
 
@@ -748,7 +748,7 @@ test = "test_retired_numbered_list_duplicates_e"
 class = "PointCloud"
 member = "GetValues2"
 status = "replaced"
-by = ["PointCloudX.GetPointValues"]
+by = ["PointCloud.GetPointValues"]
 note = "triage E (Luis: drop): the generated original returns a list (D35)"
 test = "test_retired_numbered_list_duplicates_e"
 
@@ -756,7 +756,7 @@ test = "test_retired_numbered_list_duplicates_e"
 class = "PolyCurve"
 member = "Explode2"
 status = "replaced"
-by = ["PolyCurveX.Explode"]
+by = ["PolyCurve.Explode"]
 note = "triage E (Luis: drop): the generated original returns a list (D35)"
 test = "test_retired_numbered_list_duplicates_e"
 
@@ -764,7 +764,7 @@ test = "test_retired_numbered_list_duplicates_e"
 class = "Polyline"
 member = "GetSegments2"
 status = "replaced"
-by = ["PolylineX.GetSegments"]
+by = ["Polyline.GetSegments"]
 note = "triage E (Luis: drop): the generated original returns a list (D35)"
 test = "test_retired_numbered_list_duplicates_e"
 
@@ -772,7 +772,7 @@ test = "test_retired_numbered_list_duplicates_e"
 class = "Surface"
 member = "GetSpanVector2"
 status = "replaced"
-by = ["SurfaceX.GetSpanVector"]
+by = ["Surface.GetSpanVector"]
 note = "triage E (Luis: drop): the generated original returns a list (D35)"
 test = "test_retired_numbered_list_duplicates_e"
 
@@ -780,7 +780,7 @@ test = "test_retired_numbered_list_duplicates_e"
 class = "Transform"
 member = "ToFloatArray2"
 status = "replaced"
-by = ["TransformX.ToFloatArray"]
+by = ["Transform.ToFloatArray"]
 note = "triage E (Luis: drop): the generated original returns a list (D35)"
 test = "test_retired_numbered_list_duplicates_e"
 
@@ -790,7 +790,7 @@ test = "test_retired_numbered_list_duplicates_e"
 class = "SubD"
 member = "EdgeCount"
 status = "replaced"
-by = ["SubDX.Edges"]
+by = ["SubD.Edges"]
 note = "triage G1 (Luis: map): `subd.Edges.Count`; a component's Id"
 test = "test_retired_subd_counts_and_ids_g1"
 
@@ -798,7 +798,7 @@ test = "test_retired_subd_counts_and_ids_g1"
 class = "SubD"
 member = "FaceCount"
 status = "replaced"
-by = ["SubDX.Faces"]
+by = ["SubD.Faces"]
 note = "triage G1 (Luis: map): `subd.Edges.Count`; a component's Id"
 test = "test_retired_subd_counts_and_ids_g1"
 
@@ -806,7 +806,7 @@ test = "test_retired_subd_counts_and_ids_g1"
 class = "SubD"
 member = "VertexCount"
 status = "replaced"
-by = ["SubDX.Vertices"]
+by = ["SubD.Vertices"]
 note = "triage G1 (Luis: map): `subd.Edges.Count`; a component's Id"
 test = "test_retired_subd_counts_and_ids_g1"
 
@@ -814,7 +814,7 @@ test = "test_retired_subd_counts_and_ids_g1"
 class = "SubDEdge"
 member = "Index"
 status = "replaced"
-by = ["SubDEdgeX.Id"]
+by = ["SubDEdge.Id"]
 note = "triage G1 (Luis: map): `subd.Edges.Count`; a component's Id"
 test = "test_retired_subd_counts_and_ids_g1"
 
@@ -822,7 +822,7 @@ test = "test_retired_subd_counts_and_ids_g1"
 class = "SubDFace"
 member = "Index"
 status = "replaced"
-by = ["SubDFaceX.Id"]
+by = ["SubDFace.Id"]
 note = "triage G1 (Luis: map): `subd.Edges.Count`; a component's Id"
 test = "test_retired_subd_counts_and_ids_g1"
 
@@ -830,7 +830,7 @@ test = "test_retired_subd_counts_and_ids_g1"
 class = "SubDVertex"
 member = "Index"
 status = "replaced"
-by = ["SubDVertexX.Id"]
+by = ["SubDVertex.Id"]
 note = "triage G1 (Luis: map): `subd.Edges.Count`; a component's Id"
 test = "test_retired_subd_counts_and_ids_g1"
 
@@ -840,7 +840,7 @@ test = "test_retired_subd_counts_and_ids_g1"
 class = "BrepLoop"
 member = "TrimCount"
 status = "replaced"
-by = ["BrepLoopX.Trims"]
+by = ["BrepLoop.Trims"]
 note = "triage L1 (Luis: map); `loop.Trims.Count`"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -848,7 +848,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "Decal"
 member = "HorzSweepStart"
 status = "replaced"
-by = ["DecalX.HorzSweep"]
+by = ["Decal.HorzSweep"]
 note = "triage L1 (Luis: map); HorzSweep() -> (start, end)"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -856,7 +856,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "Decal"
 member = "HorzSweepEnd"
 status = "replaced"
-by = ["DecalX.HorzSweep"]
+by = ["Decal.HorzSweep"]
 note = "triage L1 (Luis: map); HorzSweep() -> (start, end)"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -864,7 +864,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "Decal"
 member = "VertSweepStart"
 status = "replaced"
-by = ["DecalX.VertSweep"]
+by = ["Decal.VertSweep"]
 note = "triage L1 (Luis: map); VertSweep() -> (start, end)"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -872,7 +872,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "Decal"
 member = "VertSweepEnd"
 status = "replaced"
-by = ["DecalX.VertSweep"]
+by = ["Decal.VertSweep"]
 note = "triage L1 (Luis: map); VertSweep() -> (start, end)"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -880,7 +880,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "NurbsCurveKnotList"
 member = "ToList"
 status = "replaced"
-by = ["NurbsCurveKnotListX.__getitem__"]
+by = ["NurbsCurveKnotList.__getitem__"]
 note = "triage L1 (Luis: map); iterate the list"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -888,7 +888,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "NurbsSurfaceKnotList"
 member = "ToList"
 status = "replaced"
-by = ["NurbsSurfaceKnotListX.__getitem__"]
+by = ["NurbsSurfaceKnotList.__getitem__"]
 note = "triage L1 (Luis: map); iterate the list"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -896,7 +896,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "NurbsSurfaceKnotList"
 member = "IsClampedStart"
 status = "replaced"
-by = ["NurbsSurfaceKnotListX.ClampedAtStart"]
+by = ["NurbsSurfaceKnotList.ClampedAtStart"]
 note = "triage L1 (Luis: map)"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -904,7 +904,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "NurbsSurfaceKnotList"
 member = "IsClampedEnd"
 status = "replaced"
-by = ["NurbsSurfaceKnotListX.ClampedAtEnd"]
+by = ["NurbsSurfaceKnotList.ClampedAtEnd"]
 note = "triage L1 (Luis: map)"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -912,7 +912,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "PhysicallyBasedMaterial"
 member = "EmissionColor"
 status = "replaced"
-by = ["PhysicallyBasedMaterialX.Emission"]
+by = ["PhysicallyBasedMaterial.Emission"]
 note = "triage L1 (Luis: map); a Color4f"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -920,7 +920,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "Point3dList"
 member = "Append"
 status = "replaced"
-by = ["Point3dListX.Add"]
+by = ["Point3dList.Add"]
 note = "triage L1 (Luis: map)"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -928,7 +928,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "PointCloud"
 member = "ContainsValues"
 status = "replaced"
-by = ["PointCloudX.ContainsPointValues"]
+by = ["PointCloud.ContainsPointValues"]
 note = "triage L1 (Luis: map)"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -936,7 +936,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "PointCloud"
 member = "GetValues"
 status = "replaced"
-by = ["PointCloudX.GetPointValues"]
+by = ["PointCloud.GetPointValues"]
 note = "triage L1 (Luis: map); empty where the old one raised TypeError (pilot #29)"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -944,7 +944,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "Polyline"
 member = "ClosesPoint"
 status = "replaced"
-by = ["PolylineX.ClosestPoint"]
+by = ["Polyline.ClosestPoint"]
 note = "triage L1 (Luis: map); the old name was a typo"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -952,7 +952,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "Polyline"
 member = "CreateFromPoints"
 status = "replaced"
-by = ["PolylineX.__init__"]
+by = ["Polyline.__init__"]
 note = "triage L1 (Luis: map); Polyline(points)"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -960,7 +960,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "Decal"
 member = "BoundsMinU"
 status = "replaced"
-by = ["DecalX.GetUVBounds"]
+by = ["Decal.GetUVBounds"]
 note = "triage M1 (Luis: map); GetUVBounds() -> (minU, minV, maxU, maxV)"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -968,7 +968,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "Decal"
 member = "BoundsMinV"
 status = "replaced"
-by = ["DecalX.GetUVBounds"]
+by = ["Decal.GetUVBounds"]
 note = "triage M1 (Luis: map); GetUVBounds() -> (minU, minV, maxU, maxV)"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -976,7 +976,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "Decal"
 member = "BoundsMaxU"
 status = "replaced"
-by = ["DecalX.GetUVBounds"]
+by = ["Decal.GetUVBounds"]
 note = "triage M1 (Luis: map); GetUVBounds() -> (minU, minV, maxU, maxV)"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -984,7 +984,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "Decal"
 member = "BoundsMaxV"
 status = "replaced"
-by = ["DecalX.GetUVBounds"]
+by = ["Decal.GetUVBounds"]
 note = "triage M1 (Luis: map); GetUVBounds() -> (minU, minV, maxU, maxV)"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -992,7 +992,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "Extrusion"
 member = "CreateWithPlane"
 status = "replaced"
-by = ["ExtrusionX.Create"]
+by = ["Extrusion.Create"]
 note = "triage M1 (Luis: map); Create(curve, plane, height, cap)"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -1000,7 +1000,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "MeshVertexList"
 member = "AddPoint3d"
 status = "replaced"
-by = ["MeshVertexListX.Add"]
+by = ["MeshVertexList.Add"]
 note = "triage M1 (Luis: map); Add(x, y, z) with doubles keeps double precision"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -1008,7 +1008,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "NurbsSurfacePointList"
 member = "MakeNonRational"
 status = "replaced"
-by = ["NurbsSurfaceX.MakeNonRational"]
+by = ["NurbsSurface.MakeNonRational"]
 note = "triage M1 (Luis: map); on the surface"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -1016,7 +1016,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "PhysicallyBasedMaterial"
 member = "Supported"
 status = "replaced"
-by = ["MaterialX.IsPhysicallyBased"]
+by = ["Material.IsPhysicallyBased"]
 note = "triage M1 (Luis: map); on the material"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -1024,7 +1024,7 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "DimensionStyle"
 member = "Field"
 status = "replaced"
-by = ["DimensionStyleX.Field"]
+by = ["DimensionStyle.Field"]
 note = "triage M1 (Luis: map); the nested enum, now with all 119 RhinoCommon values (the old one had 105); ArrowSize / LeaderArrowSize are Arrowsize / LeaderArrowsize as in RhinoCommon. JS keeps DimensionStyleField"
 test = "test_retired_likely_renames_l1_and_other_maps_m1"
 
@@ -1034,15 +1034,15 @@ test = "test_retired_likely_renames_l1_and_other_maps_m1"
 class = "Arc"
 member = "createFromPoints"
 status = "replaced"
-by = ["ArcX.__init__"]
-note = "triage JS3 (Luis: map): JS only; ArcX.create(p1, p2, p3)"
+by = ["Arc.__init__"]
+note = "triage JS3 (Luis: map): JS only; Arc.create(p1, p2, p3)"
 test = "test_retired_arc_arccurve_brep_members"
 
 [[retired]]
 class = "File3dm"
 member = "toByteArrayOptions"
 status = "replaced"
-by = ["File3dmX.ToByteArray"]
+by = ["File3dm.ToByteArray"]
 note = "triage JS3 (Luis: map): JS only; toByteArray(options) (D54)"
 test = "test_retired_file3dm_to_byte_array_options_js3"
 
@@ -1052,7 +1052,7 @@ test = "test_retired_file3dm_to_byte_array_options_js3"
 class = "AnnotationBase"
 member = "GetFont"
 status = "replaced"
-by = ["AnnotationBaseX.Font", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.Font", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style`, then Font (D39, D67); a managed font (G115)"
 test = "test_annotation_font_and_held_back_c_members_g115"
 
@@ -1060,7 +1060,7 @@ test = "test_annotation_font_and_held_back_c_members_g115"
 class = "AnnotationBase"
 member = "SetFont"
 status = "replaced"
-by = ["AnnotationBaseX.Font", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.Font", "AnnotationBase.ParentDimensionStyle"]
 note = "triage C (Luis: drop): `ann.ParentDimensionStyle = style; ann.Font = font` (D39, D67); None raises, as C#'s NullReferenceException"
 test = "test_annotation_font_and_held_back_c_members_g115"
 
@@ -1068,7 +1068,7 @@ test = "test_annotation_font_and_held_back_c_members_g115"
 class = "GeometryBase"
 member = "GetTightBoundingBox"
 status = "replaced"
-by = ["GeometryBaseX.GetBoundingBox"]
+by = ["GeometryBase.GetBoundingBox"]
 note = "triage L1 (Luis: map): GetBoundingBox(true); an annotation answers with its own box (G115)"
 test = "test_retired_tight_bounding_box_l1"
 
@@ -1076,7 +1076,7 @@ test = "test_retired_tight_bounding_box_l1"
 class = "MeshVertexList"
 member = "SetCount"
 status = "replaced"
-by = ["MeshVertexListX.Count"]
+by = ["MeshVertexList.Count"]
 note = "triage D1 (Luis: Count setter): RhinoCommon's settable Count (G115); a negative count is ignored, as in C#"
 test = "test_translated_setters_beside_planned_getters_g115"
 
@@ -1088,7 +1088,7 @@ test = "test_translated_setters_beside_planned_getters_g115"
 class = "File3dm"
 member = "RenderContent"
 status = "replaced"
-by = ["File3dmX.RenderMaterials", "File3dmX.RenderEnvironments", "File3dmX.RenderTextures"]
+by = ["File3dm.RenderMaterials", "File3dm.RenderEnvironments", "File3dm.RenderTextures"]
 note = "triage H1 (Luis: map): one collection per kind of render content"
 test = "test_retired_file3dm_tables_and_settings_h1"
 
@@ -1096,7 +1096,7 @@ test = "test_retired_file3dm_tables_and_settings_h1"
 class = "File3dmRenderContentTable"
 member = "FindId"
 status = "replaced"
-by = ["File3dmRenderMaterialsX.Find", "File3dmRenderEnvironmentsX.Find", "File3dmRenderTexturesX.Find"]
+by = ["File3dmRenderMaterials.Find", "File3dmRenderEnvironments.Find", "File3dmRenderTextures.Find"]
 note = "triage H1 (Luis: map): Find(id) on the kind's collection"
 test = "test_retired_file3dm_tables_and_settings_h1"
 
@@ -1104,7 +1104,7 @@ test = "test_retired_file3dm_tables_and_settings_h1"
 class = "File3dmRenderContentTable"
 member = "FindIndex"
 status = "replaced"
-by = ["ManifestTableX.FindIndex"]
+by = ["ManifestTable.FindIndex"]
 note = "triage H1 (Luis: map): File3dm.Manifest.FindIndex(i, ModelComponentType.RenderContent) -- the same ONX_Model::ComponentFromIndex"
 test = "test_retired_file3dm_tables_and_settings_h1"
 
@@ -1112,7 +1112,7 @@ test = "test_retired_file3dm_tables_and_settings_h1"
 class = "File3dmLinetypeTable"
 member = "Current"
 status = "replaced"
-by = ["File3dmSettingsX.CurrentLinePatternId"]
+by = ["File3dmSettings.CurrentLinePatternId"]
 note = "triage H1 (Luis: map): the id; AllLinetypes.FindId(id) for the linetype"
 test = "test_retired_file3dm_tables_and_settings_h1"
 
@@ -1120,7 +1120,7 @@ test = "test_retired_file3dm_tables_and_settings_h1"
 class = "File3dmLinetypeTable"
 member = "Scale"
 status = "replaced"
-by = ["File3dmSettingsX.LinetypeDisplayScale"]
+by = ["File3dmSettings.LinetypeDisplayScale"]
 note = "triage H1 (Luis: map)"
 test = "test_retired_file3dm_tables_and_settings_h1"
 
@@ -1128,7 +1128,7 @@ test = "test_retired_file3dm_tables_and_settings_h1"
 class = "File3dmObjectTable"
 member = "AddObject"
 status = "replaced"
-by = ["File3dmObjectTableX.Add"]
+by = ["File3dmObjectTable.Add"]
 note = "triage H1 (Luis: map): Add(File3dmObject); Add(geometry, attributes) also takes any geometry (G117, G119, D71)"
 test = "test_retired_file3dm_tables_and_settings_h1"
 
@@ -1136,7 +1136,7 @@ test = "test_retired_file3dm_tables_and_settings_h1"
 class = "File3dmSettings"
 member = "EarthAnchorPoint"
 status = "replaced"
-by = ["File3dmX.EarthAnchorPoint"]
+by = ["File3dm.EarthAnchorPoint"]
 note = "triage H1 (Luis: map): on File3dm, a copy out and in (G115)"
 test = "test_retired_file3dm_tables_and_settings_h1"
 
@@ -1144,7 +1144,7 @@ test = "test_retired_file3dm_tables_and_settings_h1"
 class = "File3dmSettings"
 member = "ModelBasePoint"
 status = "replaced"
-by = ["File3dmSettingsX.ModelBasepoint"]
+by = ["File3dmSettings.ModelBasepoint"]
 note = "triage H1 (Luis: map): RhinoCommon spells it ModelBasepoint"
 test = "test_retired_file3dm_tables_and_settings_h1"
 
@@ -1152,7 +1152,7 @@ test = "test_retired_file3dm_tables_and_settings_h1"
 class = "RenderSettings"
 member = "RenderEnvironments"
 status = "replaced"
-by = ["RenderSettingsX.RenderEnvironmentId", "RenderSettingsX.RenderEnvironmentOverride"]
+by = ["RenderSettings.RenderEnvironmentId", "RenderSettings.RenderEnvironmentOverride"]
 note = "triage H1 (Luis: map): per usage"
 test = "test_retired_file3dm_tables_and_settings_h1"
 
@@ -1160,7 +1160,7 @@ test = "test_retired_file3dm_tables_and_settings_h1"
 class = "RenderEnvironments"
 member = "BackgroundId"
 status = "replaced"
-by = ["RenderSettingsX.RenderEnvironmentId", "RenderSettingsX.SetRenderEnvironmentId"]
+by = ["RenderSettings.RenderEnvironmentId", "RenderSettings.SetRenderEnvironmentId"]
 note = "triage H1 (Luis: map): RenderEnvironmentId(EnvironmentUsage.Background, EnvironmentPurpose.Standard) / SetRenderEnvironmentId (commits; G116)"
 test = "test_retired_file3dm_tables_and_settings_h1"
 
@@ -1168,7 +1168,7 @@ test = "test_retired_file3dm_tables_and_settings_h1"
 class = "RenderEnvironments"
 member = "ReflectionId"
 status = "replaced"
-by = ["RenderSettingsX.RenderEnvironmentId", "RenderSettingsX.SetRenderEnvironmentId"]
+by = ["RenderSettings.RenderEnvironmentId", "RenderSettings.SetRenderEnvironmentId"]
 note = "triage H1 (Luis: map): RenderEnvironmentId(EnvironmentUsage.Reflection, EnvironmentPurpose.Standard) / SetRenderEnvironmentId (commits; G116)"
 test = "test_retired_file3dm_tables_and_settings_h1"
 
@@ -1176,7 +1176,7 @@ test = "test_retired_file3dm_tables_and_settings_h1"
 class = "RenderEnvironments"
 member = "SkylightingId"
 status = "replaced"
-by = ["RenderSettingsX.RenderEnvironmentId", "RenderSettingsX.SetRenderEnvironmentId"]
+by = ["RenderSettings.RenderEnvironmentId", "RenderSettings.SetRenderEnvironmentId"]
 note = "triage H1 (Luis: map): RenderEnvironmentId(EnvironmentUsage.Skylighting, EnvironmentPurpose.Standard) / SetRenderEnvironmentId (commits; G116)"
 test = "test_retired_file3dm_tables_and_settings_h1"
 
@@ -1184,7 +1184,7 @@ test = "test_retired_file3dm_tables_and_settings_h1"
 class = "RenderEnvironments"
 member = "ReflectionOverride"
 status = "replaced"
-by = ["RenderSettingsX.RenderEnvironmentOverride", "RenderSettingsX.SetRenderEnvironmentOverride"]
+by = ["RenderSettings.RenderEnvironmentOverride", "RenderSettings.SetRenderEnvironmentOverride"]
 note = "triage H1 (Luis: map): per usage, EnvironmentUsage.Reflection"
 test = "test_retired_file3dm_tables_and_settings_h1"
 
@@ -1192,7 +1192,7 @@ test = "test_retired_file3dm_tables_and_settings_h1"
 class = "RenderEnvironments"
 member = "SkylightingOverride"
 status = "replaced"
-by = ["RenderSettingsX.RenderEnvironmentOverride", "RenderSettingsX.SetRenderEnvironmentOverride"]
+by = ["RenderSettings.RenderEnvironmentOverride", "RenderSettings.SetRenderEnvironmentOverride"]
 note = "triage H1 (Luis: map): per usage, EnvironmentUsage.Skylighting"
 test = "test_retired_file3dm_tables_and_settings_h1"
 
@@ -1200,7 +1200,7 @@ test = "test_retired_file3dm_tables_and_settings_h1"
 class = "File3dm"
 member = "EmbeddedFilePaths"
 status = "replaced"
-by = ["File3dmX.EmbeddedFiles"]
+by = ["File3dm.EmbeddedFiles"]
 note = "triage H1 (Luis: map): [f.Filename for f in file.EmbeddedFiles]; a Windows path reads in this platform's form (D69)"
 test = "test_embedded_file_paths_vs_embedded_files_h1"
 
@@ -1208,7 +1208,7 @@ test = "test_embedded_file_paths_vs_embedded_files_h1"
 class = "File3dm"
 member = "EmbeddedFilePaths2"
 status = "replaced"
-by = ["File3dmX.EmbeddedFiles"]
+by = ["File3dm.EmbeddedFiles"]
 note = "triage E (Luis: drop) / H1: as EmbeddedFilePaths (D69)"
 test = "test_embedded_file_paths_vs_embedded_files_h1"
 
@@ -1218,7 +1218,7 @@ test = "test_embedded_file_paths_vs_embedded_files_h1"
 class = "ObjectAttributes"
 member = "MeshModifiers"
 status = "replaced"
-by = ["ObjectAttributesX.File3dmMeshModifiers"]
+by = ["ObjectAttributes.File3dmMeshModifiers"]
 note = "triage I1 (Luis: map): RhinoCommon's name"
 test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 
@@ -1226,7 +1226,7 @@ test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 class = "File3dmShutLiningCurveTable"
 member = "FindId"
 status = "replaced"
-by = ["File3dmShutLiningX.GetCurves"]
+by = ["File3dmShutLining.GetCurves"]
 note = "triage I3 (Luis: map): curves are addressed by id (Curve*(id) / SetCurve*(id, v))"
 test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 
@@ -1234,7 +1234,7 @@ test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 class = "File3dmShutLiningCurveTable"
 member = "FindIndex"
 status = "replaced"
-by = ["File3dmShutLiningX.GetCurves"]
+by = ["File3dmShutLining.GetCurves"]
 note = "triage I3 (Luis: map): GetCurves()[i] is the id"
 test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 
@@ -1242,7 +1242,7 @@ test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 class = "ShutLiningCurve"
 member = "Enabled"
 status = "replaced"
-by = ["File3dmShutLiningX.CurveEnabled", "File3dmShutLiningX.SetCurveEnabled"]
+by = ["File3dmShutLining.CurveEnabled", "File3dmShutLining.SetCurveEnabled"]
 note = "triage I3 (Luis: map): CurveEnabled(id) / SetCurveEnabled(id, v)"
 test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 
@@ -1250,7 +1250,7 @@ test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 class = "ShutLiningCurve"
 member = "IsBump"
 status = "replaced"
-by = ["File3dmShutLiningX.CurveIsBump", "File3dmShutLiningX.SetCurveIsBump"]
+by = ["File3dmShutLining.CurveIsBump", "File3dmShutLining.SetCurveIsBump"]
 note = "triage I3 (Luis: map): CurveIsBump(id) / SetCurveIsBump(id, v)"
 test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 
@@ -1258,7 +1258,7 @@ test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 class = "ShutLiningCurve"
 member = "Profile"
 status = "replaced"
-by = ["File3dmShutLiningX.CurveProfile", "File3dmShutLiningX.SetCurveProfile"]
+by = ["File3dmShutLining.CurveProfile", "File3dmShutLining.SetCurveProfile"]
 note = "triage I3 (Luis: map): CurveProfile(id) / SetCurveProfile(id, v)"
 test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 
@@ -1266,7 +1266,7 @@ test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 class = "ShutLiningCurve"
 member = "Pull"
 status = "replaced"
-by = ["File3dmShutLiningX.CurvePull", "File3dmShutLiningX.SetCurvePull"]
+by = ["File3dmShutLining.CurvePull", "File3dmShutLining.SetCurvePull"]
 note = "triage I3 (Luis: map): CurvePull(id) / SetCurvePull(id, v)"
 test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 
@@ -1274,7 +1274,7 @@ test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 class = "ShutLiningCurve"
 member = "Radius"
 status = "replaced"
-by = ["File3dmShutLiningX.CurveRadius", "File3dmShutLiningX.SetCurveRadius"]
+by = ["File3dmShutLining.CurveRadius", "File3dmShutLining.SetCurveRadius"]
 note = "triage I3 (Luis: map): CurveRadius(id) / SetCurveRadius(id, v)"
 test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 
@@ -1282,7 +1282,7 @@ test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 class = "ShutLiningCurve"
 member = "Id"
 status = "replaced"
-by = ["File3dmShutLiningX.GetCurves"]
+by = ["File3dmShutLining.GetCurves"]
 note = "triage I3 (Luis: map; the class is not kept -- RhinoCommon addresses curves by id): the getter is GetCurves()[i]; the SETTER (retarget) has no RhinoCommon counterpart (Luis 2026-10-28: drop) -- DeleteAllCurves() + AddCurve(newId) (RH-99854) + the settings"
 test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 
@@ -1292,7 +1292,7 @@ test = "test_retired_mesh_modifiers_i1_and_shut_lining_i3"
 class = "Leader"
 member = "Points"
 status = "replaced"
-by = ["LeaderX.Points3D"]
+by = ["Leader.Points3D"]
 note = "triage J1 (Luis: map): Points3D (and Points2D, in the leader plane)"
 test = "test_retired_annotation_geometry_j1"
 
@@ -1300,7 +1300,7 @@ test = "test_retired_annotation_geometry_j1"
 class = "DimLinear"
 member = "Points"
 status = "replaced"
-by = ["LinearDimensionX.Get3dPoints"]
+by = ["LinearDimension.Get3dPoints"]
 note = "triage J1 (Luis: map): Get3dPoints() -> (success, points...) in RhinoCommon's order (D68)"
 test = "test_retired_annotation_geometry_j1"
 
@@ -1308,7 +1308,7 @@ test = "test_retired_annotation_geometry_j1"
 class = "DimAngular"
 member = "Points"
 status = "replaced"
-by = ["AngularDimensionX.Get3dPoints"]
+by = ["AngularDimension.Get3dPoints"]
 note = "triage J1 (Luis: map): Get3dPoints() -> (success, points...) in RhinoCommon's order (D68)"
 test = "test_retired_annotation_geometry_j1"
 
@@ -1316,7 +1316,7 @@ test = "test_retired_annotation_geometry_j1"
 class = "DimRadial"
 member = "Points"
 status = "replaced"
-by = ["RadialDimensionX.Get3dPoints"]
+by = ["RadialDimension.Get3dPoints"]
 note = "triage J1 (Luis: map): Get3dPoints() -> (success, points...) in RhinoCommon's order (D68)"
 test = "test_retired_annotation_geometry_j1"
 
@@ -1324,7 +1324,7 @@ test = "test_retired_annotation_geometry_j1"
 class = "DimOrdinate"
 member = "Points"
 status = "replaced"
-by = ["OrdinateDimensionX.Get3dPoints"]
+by = ["OrdinateDimension.Get3dPoints"]
 note = "triage J1 (Luis: map): Get3dPoints() -> (success, points...) in RhinoCommon's order (D68)"
 test = "test_retired_annotation_geometry_j1"
 
@@ -1332,7 +1332,7 @@ test = "test_retired_annotation_geometry_j1"
 class = "DimAngular"
 member = "Angle"
 status = "replaced"
-by = ["DimensionX.NumericValue"]
+by = ["Dimension.NumericValue"]
 note = "triage J1 (Luis: map): the same Measurement()"
 test = "test_retired_annotation_geometry_j1"
 
@@ -1340,7 +1340,7 @@ test = "test_retired_annotation_geometry_j1"
 class = "MeshVertexList"
 member = "SetPoint3dAt"
 status = "replaced"
-by = ["MeshVertexListX.SetVertex"]
+by = ["MeshVertexList.SetVertex"]
 note = "triage D2 (Luis: rename to SetVertex): SetVertex(index, Point3d)"
 test = "test_retired_set_point3d_at_d2"
 
@@ -1350,7 +1350,7 @@ test = "test_retired_set_point3d_at_d2"
 class = "AnnotationBase"
 member = "RunReplace"
 status = "replaced"
-by = ["AnnotationBaseX.RunReplace", "AnnotationBaseX.ParentDimensionStyle"]
+by = ["AnnotationBase.RunReplace", "AnnotationBase.ParentDimensionStyle"]
 note = "audit (Luis 2026-10-29: map): ParentDimensionStyle = dimstyle; RunReplace(str, ...) -- RhinoCommon passes the parent style (D39)"
 test = "test_retired_rhino3dm_only_overloads_from_the_audit"
 
@@ -1358,7 +1358,7 @@ test = "test_retired_rhino3dm_only_overloads_from_the_audit"
 class = "CachedTextureCoordinates"
 member = "IndexOf"
 status = "replaced"
-by = ["CachedTextureCoordinatesX.IndexOf"]
+by = ["CachedTextureCoordinates.IndexOf"]
 note = "audit (Luis: map): IndexOf(Point3d)"
 test = "test_retired_rhino3dm_only_overloads_from_the_audit"
 
@@ -1366,7 +1366,7 @@ test = "test_retired_rhino3dm_only_overloads_from_the_audit"
 class = "CachedTextureCoordinates"
 member = "Contains"
 status = "replaced"
-by = ["CachedTextureCoordinatesX.Contains"]
+by = ["CachedTextureCoordinates.Contains"]
 note = "audit (Luis: map): Contains(Point3d)"
 test = "test_retired_rhino3dm_only_overloads_from_the_audit"
 
@@ -1374,7 +1374,7 @@ test = "test_retired_rhino3dm_only_overloads_from_the_audit"
 class = "File3dmObjectTable"
 member = "AddPoint"
 status = "replaced"
-by = ["File3dmObjectTableX.AddPoint"]
+by = ["File3dmObjectTable.AddPoint"]
 note = "audit (Luis: map): the (x, y, z, attributes) overload -> AddPoint(Point3d, attributes)"
 test = "test_retired_rhino3dm_only_overloads_from_the_audit"
 
@@ -1382,7 +1382,7 @@ test = "test_retired_rhino3dm_only_overloads_from_the_audit"
 class = "GeometryBase"
 member = "GetBoundingBox"
 status = "replaced"
-by = ["GeometryBaseX.GetBoundingBox"]
+by = ["GeometryBase.GetBoundingBox"]
 note = "audit (Luis: map): GetBoundingBox() -> GetBoundingBox(False) (ON_Geometry::BoundingBox)"
 test = "test_retired_rhino3dm_only_overloads_from_the_audit"
 
@@ -1390,7 +1390,7 @@ test = "test_retired_rhino3dm_only_overloads_from_the_audit"
 class = "Material"
 member = "SetTexture"
 status = "replaced"
-by = ["MaterialX.SetTexture"]
+by = ["Material.SetTexture"]
 note = "audit (Luis: map): SetTexture(texture) -> SetTexture(texture, texture.TextureType); the old one returned the texture index as a bool (False at index 0)"
 test = "test_retired_rhino3dm_only_overloads_from_the_audit"
 
@@ -1398,7 +1398,7 @@ test = "test_retired_rhino3dm_only_overloads_from_the_audit"
 class = "SubDEdge"
 member = "EndSharpness"
 status = "replaced"
-by = ["SubDEdgeX.EndSharpness"]
+by = ["SubDEdge.EndSharpness"]
 note = "audit (Luis: map): EndSharpness(i) -> EndSharpness(i, False), the opennurbs one-argument form"
 test = "test_retired_rhino3dm_only_overloads_from_the_audit"
 
@@ -1408,7 +1408,7 @@ test = "test_retired_rhino3dm_only_overloads_from_the_audit"
 class = "File3dmMeshModifiers"
 member = "CreateDisplacement"
 status = "replaced"
-by = ["File3dmMeshModifiersX.CreateDisplacement"]
+by = ["File3dmMeshModifiers.CreateDisplacement"]
 note = "triage I2 (Luis: upstream): RH-99854 -- returns the existing one or a new one with defaults; saving needs U29 in rhino3dm's opennurbs (pilot #43)"
 test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
 
@@ -1416,7 +1416,7 @@ test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
 class = "File3dmMeshModifiers"
 member = "CreateEdgeSoftening"
 status = "replaced"
-by = ["File3dmMeshModifiersX.CreateEdgeSoftening"]
+by = ["File3dmMeshModifiers.CreateEdgeSoftening"]
 note = "triage I2 (Luis: upstream): RH-99854 -- returns the existing one or a new one with defaults; saving needs U29 in rhino3dm's opennurbs (pilot #43)"
 test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
 
@@ -1424,7 +1424,7 @@ test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
 class = "File3dmMeshModifiers"
 member = "CreateThickening"
 status = "replaced"
-by = ["File3dmMeshModifiersX.CreateThickening"]
+by = ["File3dmMeshModifiers.CreateThickening"]
 note = "triage I2 (Luis: upstream): RH-99854 -- returns the existing one or a new one with defaults; saving needs U29 in rhino3dm's opennurbs (pilot #43)"
 test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
 
@@ -1432,7 +1432,7 @@ test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
 class = "File3dmMeshModifiers"
 member = "CreateCurvePiping"
 status = "replaced"
-by = ["File3dmMeshModifiersX.CreateCurvePiping"]
+by = ["File3dmMeshModifiers.CreateCurvePiping"]
 note = "triage I2 (Luis: upstream): RH-99854 -- returns the existing one or a new one with defaults; saving needs U29 in rhino3dm's opennurbs (pilot #43)"
 test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
 
@@ -1440,7 +1440,7 @@ test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
 class = "File3dmMeshModifiers"
 member = "CreateShutLining"
 status = "replaced"
-by = ["File3dmMeshModifiersX.CreateShutLining"]
+by = ["File3dmMeshModifiers.CreateShutLining"]
 note = "triage I2 (Luis: upstream): RH-99854 -- returns the existing one or a new one with defaults; saving needs U29 in rhino3dm's opennurbs (pilot #43)"
 test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
 
@@ -1448,7 +1448,7 @@ test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
 class = "File3dmShutLiningCurveTable"
 member = "Add"
 status = "replaced"
-by = ["File3dmShutLiningX.AddCurve"]
+by = ["File3dmShutLining.AddCurve"]
 note = "triage I3: RH-99854 AddCurve(Guid curveId) -- a curve following the curve object curveId (no duplicate id)"
 test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
 
@@ -1456,7 +1456,7 @@ test = "test_retired_mesh_modifier_creators_i2_and_add_curve_rh99854"
 class = "Mesh"
 member = "CreateFromSubDControlNet"
 status = "replaced"
-by = ["MeshX.CreateFromSubDControlNet", "MeshX.CreateFromSubDControlNetWithTextureCoordinates"]
+by = ["Mesh.CreateFromSubDControlNet", "Mesh.CreateFromSubDControlNetWithTextureCoordinates"]
 note = "audit (Luis 2026-10-29: use the RhinoCommon methods): (subd, False) -> CreateFromSubDControlNet(subd); (subd, True) -> CreateFromSubDControlNetWithTextureCoordinates(subd); both ON_SubD_GetControlNetMesh(subd, flag)"
 test = "test_retired_create_from_subd_control_net_flag"
 
@@ -1466,7 +1466,7 @@ test = "test_retired_create_from_subd_control_net_flag"
 class = "File3dmPostEffectTable"
 member = "FindId"
 status = "replaced"
-by = ["PostEffectCollectionX.PostEffectDataFromId"]
+by = ["PostEffectCollection.PostEffectDataFromId"]
 note = "triage H1 (Luis: map): RenderSettings.PostEffects.PostEffectDataFromId(id)"
 test = "test_post_effect_collection_and_data"
 
@@ -1474,7 +1474,7 @@ test = "test_post_effect_collection_and_data"
 class = "File3dmPostEffectTable"
 member = "FindIndex"
 status = "replaced"
-by = ["PostEffectCollectionX.__iter__"]
+by = ["PostEffectCollection.__iter__"]
 note = "triage H1 (Luis: map): the i-th item of RenderSettings.PostEffects, in the same order"
 test = "test_post_effect_collection_and_data"
 
@@ -1498,7 +1498,7 @@ note = "removed (Luis 2026-10-29): not IsPlanar(tol), once RH-99868 lands -- equ
 class = "SubDEdge"
 member = "ControlNetPoint"
 status = "replaced"
-by = ["SubDEdgeX.VertexFrom", "SubDEdgeX.VertexTo"]
+by = ["SubDEdge.VertexFrom", "SubDEdge.VertexTo"]
 note = "triage G3 (Luis: map): ControlNetPoint(0) / (1) -> VertexFrom / VertexTo .ControlNetPoint (opennurbs: m_vertex[i]->m_P); also ControlNetLine.From / To"
 test = "test_retired_subd_control_net_g3_and_table_moves"
 
@@ -1506,7 +1506,7 @@ test = "test_retired_subd_control_net_g3_and_table_moves"
 class = "SubDEdge"
 member = "ControlNetDirection"
 status = "replaced"
-by = ["SubDEdgeX.ControlNetLine"]
+by = ["SubDEdge.ControlNetLine"]
 note = "triage G3 (Luis: map): ControlNetLine.Direction -- opennurbs' ControlNetDirection is ControlNetPoint(1) - ControlNetPoint(0); ControlNetLine generated by G122"
 test = "test_retired_subd_control_net_g3_and_table_moves"
 
@@ -1514,7 +1514,7 @@ test = "test_retired_subd_control_net_g3_and_table_moves"
 class = "SubDEdge"
 member = "VertexId"
 status = "replaced"
-by = ["SubDEdgeX.VertexFrom", "SubDEdgeX.VertexTo"]
+by = ["SubDEdge.VertexFrom", "SubDEdge.VertexTo"]
 note = "triage G3 (Luis: map): VertexId(0) / (1) -> VertexFrom.Id / VertexTo.Id"
 test = "test_retired_subd_control_net_g3_and_table_moves"
 
@@ -1522,7 +1522,7 @@ test = "test_retired_subd_control_net_g3_and_table_moves"
 class = "SubDFace"
 member = "ControlNetPoint"
 status = "replaced"
-by = ["SubDFaceX.VertexAt"]
+by = ["SubDFace.VertexAt"]
 note = "triage G3 (Luis: map): ControlNetPoint(i) -> VertexAt(i).ControlNetPoint (opennurbs: the i-th vertex in face order)"
 test = "test_retired_subd_control_net_g3_and_table_moves"
 
@@ -1530,7 +1530,7 @@ test = "test_retired_subd_control_net_g3_and_table_moves"
 class = "File3dmLinetypeTable"
 member = "CurrentSource"
 status = "replaced"
-by = ["File3dmSettingsX.CurrentLinetypeSource"]
+by = ["File3dmSettings.CurrentLinetypeSource"]
 note = "RH-99870: on File3dmSettings beside CurrentLinePatternId (ON_3dmSettings::m_current_linetype_source)"
 test = "test_settings_current_linetype_source_rh99870"
 
@@ -1538,7 +1538,7 @@ test = "test_settings_current_linetype_source_rh99870"
 class = "File3dmInstanceDefinitionTable"
 member = "AddInstanceDefinition"
 status = "replaced"
-by = ["File3dmInstanceDefinitionTableX.Add"]
+by = ["File3dmInstanceDefinitionTable.Add"]
 note = "RhinoCommon's inherited File3dmCommonComponentTable.Add(item): the same ONX_Model::AddModelComponent call"
 test = "test_retired_subd_control_net_g3_and_table_moves"
 
@@ -1546,7 +1546,7 @@ test = "test_retired_subd_control_net_g3_and_table_moves"
 class = "File3dmDecalTable"
 member = "FindIndex"
 status = "replaced"
-by = ["DecalsX.__iter__"]
+by = ["Decals.__iter__"]
 note = "triage H3 (Luis 2026-10-29: follow RhinoCommon): the i-th decal of iterating attributes.Decals (len: list(...)); RhinoCommon's DecalEnumerator skips decals whose IsVisible is false, the old table counted them -- decals are object-attribute user data, not model components, so the manifest cannot count them either"
 test = "test_retired_decal_table_find_index_follows_rhinocommon"
 
@@ -1556,23 +1556,23 @@ test = "test_retired_decal_table_find_index_follows_rhinocommon"
 class = "BoundingBox"
 member = "toJSON"
 status = "replaced"
-by = ["BoundingBoxX.Encode"]
-note = "triage JS2 (Luis: drop on the value types): JS only; a BoundingBoxX is a plain object JSON.stringify serializes as the old toJSON() did ({Min, Max})"
+by = ["BoundingBox.Encode"]
+note = "triage JS2 (Luis: drop on the value types): JS only; a BoundingBox is a plain object JSON.stringify serializes as the old toJSON() did ({Min, Max})"
 test = "test_hand_js_only_members_js2_g124"
 
 [[retired]]
 class = "Sphere"
 member = "toJSON"
 status = "replaced"
-by = ["SphereX.Encode"]
-note = "triage JS2 (Luis: drop on the value types): JS only; a SphereX plain object stringifies as the old toJSON() ({EquatorialPlane, Radius})"
+by = ["Sphere.Encode"]
+note = "triage JS2 (Luis: drop on the value types): JS only; a Sphere plain object stringifies as the old toJSON() ({EquatorialPlane, Radius})"
 test = "test_hand_js_only_members_js2_g124"
 
 [[retired]]
 class = "File3dm"
 member = "encodeOptions"
 status = "replaced"
-by = ["File3dmX.Encode"]
+by = ["File3dm.Encode"]
 note = "triage JS3 (Luis: fold): JS only; encode(options), one name (hand member, G123)"
 test = "test_hand_json_common_object_and_file3dm_f1"
 
@@ -1580,7 +1580,7 @@ test = "test_hand_json_common_object_and_file3dm_f1"
 class = "ArchivableDictionary"
 member = "writeGeometry"
 status = "dropped"
-note = "triage JS3 (Luis: remove from the public API): JS only; an internal callback of the old encodeDict, a no-op on its own -- ArchivableDictionaryX.EncodeDict converts geometry values in C++"
+note = "triage JS3 (Luis: remove from the public API): JS only; an internal callback of the old encodeDict, a no-op on its own -- ArchivableDictionary.EncodeDict converts geometry values in C++"
 
 # ---- JS-only: JS1 overload splits (Luis 2026-10-28: retire for RhinoCommon's single name) (G125)
 # Kept under their old names until the generator reaches the overload: Intersection.lineLineTolerance,
@@ -1592,7 +1592,7 @@ note = "triage JS3 (Luis: remove from the public API): JS only; an internal call
 class = "BoundingBox"
 member = "inflateXYZ"
 status = "replaced"
-by = ["BoundingBoxX.Inflate"]
+by = ["BoundingBox.Inflate"]
 note = "triage JS1 (Luis: retire): JS only; inflate(box, x, y, z): the value is returned inflated"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1600,7 +1600,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "Curve"
 member = "closedCurveOrientationPlane"
 status = "replaced"
-by = ["CurveX.ClosedCurveOrientation"]
+by = ["Curve.ClosedCurveOrientation"]
 note = "triage JS1 (Luis: retire): JS only; closedCurveOrientation(plane)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1608,7 +1608,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "Curve"
 member = "derivativeAtSide"
 status = "replaced"
-by = ["CurveX.DerivativeAt"]
+by = ["Curve.DerivativeAt"]
 note = "triage JS1 (Luis: retire): JS only; derivativeAt(t, count, side)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1616,7 +1616,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "Curve"
 member = "toNurbsCurveSubDomain"
 status = "replaced"
-by = ["CurveX.ToNurbsCurve"]
+by = ["Curve.ToNurbsCurve"]
 note = "triage JS1 (Luis: retire): JS only; toNurbsCurve(subdomain)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1624,7 +1624,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "DracoCompression"
 member = "compressOptions"
 status = "replaced"
-by = ["DracoCompressionX.Compress"]
+by = ["DracoCompression.Compress"]
 note = "triage JS1 (Luis: retire): JS only; compress(mesh, options): the same bytes"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1632,7 +1632,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "File3dmGroupTable"
 member = "deleteIndex"
 status = "replaced"
-by = ["File3dmGroupTableX.Delete"]
+by = ["File3dmGroupTable.Delete"]
 note = "triage JS1 (Luis: retire): JS only; delete(index); returns nothing, as RhinoCommon (the old one returned true)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1640,7 +1640,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "File3dmObjectTable"
 member = "addPointXYZ"
 status = "replaced"
-by = ["File3dmObjectTableX.AddPoint"]
+by = ["File3dmObjectTable.AddPoint"]
 note = "triage JS1 (Luis: retire): JS only; addPoint(x, y, z)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1648,7 +1648,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "Material"
 member = "setBitmapTextureFilename"
 status = "replaced"
-by = ["MaterialX.SetBitmapTexture"]
+by = ["Material.SetBitmapTexture"]
 note = "triage JS1 (Luis: retire): JS only; setBitmapTexture(filename); reports success (pilot #62: the old one returned the texture index as a bool)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1656,7 +1656,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "Material"
 member = "setBumpTextureFilename"
 status = "replaced"
-by = ["MaterialX.SetBumpTexture"]
+by = ["Material.SetBumpTexture"]
 note = "triage JS1 (Luis: retire): JS only; setBumpTexture(filename); pilot #62"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1664,7 +1664,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "Material"
 member = "setEnvironmentTextureFilename"
 status = "replaced"
-by = ["MaterialX.SetEnvironmentTexture"]
+by = ["Material.SetEnvironmentTexture"]
 note = "triage JS1 (Luis: retire): JS only; setEnvironmentTexture(filename); pilot #62"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1672,7 +1672,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "Material"
 member = "setTransparencyTextureFilename"
 status = "replaced"
-by = ["MaterialX.SetTransparencyTexture"]
+by = ["Material.SetTransparencyTexture"]
 note = "triage JS1 (Luis: retire): JS only; setTransparencyTexture(filename); pilot #62"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1680,7 +1680,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "PointCloud"
 member = "addPointColor"
 status = "replaced"
-by = ["PointCloudX.Add"]
+by = ["PointCloud.Add"]
 note = "triage JS1 (Luis: retire): JS only; add(point, color)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1688,7 +1688,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "PointCloud"
 member = "addPointNormal"
 status = "replaced"
-by = ["PointCloudX.Add"]
+by = ["PointCloud.Add"]
 note = "triage JS1 (Luis: retire): JS only; add(point, normal)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1696,7 +1696,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "PointCloud"
 member = "addPointNormalColor"
 status = "replaced"
-by = ["PointCloudX.Add"]
+by = ["PointCloud.Add"]
 note = "triage JS1 (Luis: retire): JS only; add(point, normal, color)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1704,7 +1704,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "PointCloud"
 member = "addPointNormalColorValue"
 status = "replaced"
-by = ["PointCloudX.Add"]
+by = ["PointCloud.Add"]
 note = "triage JS1 (Luis: retire): JS only; add(point, normal, color, value)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1712,7 +1712,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "PointCloud"
 member = "addRangePoints"
 status = "replaced"
-by = ["PointCloudX.AddRange"]
+by = ["PointCloud.AddRange"]
 note = "triage JS1 (Luis: retire): JS only; addRange(points)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1720,7 +1720,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "PointCloud"
 member = "addRangePointsNormals"
 status = "replaced"
-by = ["PointCloudX.AddRange"]
+by = ["PointCloud.AddRange"]
 note = "triage JS1 (Luis: retire): JS only; addRange(points, normals)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1728,7 +1728,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "PointCloud"
 member = "insertPointColor"
 status = "replaced"
-by = ["PointCloudX.Insert"]
+by = ["PointCloud.Insert"]
 note = "triage JS1 (Luis: retire): JS only; insert(index, point, color)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1736,7 +1736,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "PointCloud"
 member = "insertPointNormal"
 status = "replaced"
-by = ["PointCloudX.Insert"]
+by = ["PointCloud.Insert"]
 note = "triage JS1 (Luis: retire): JS only; insert(index, point, normal)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1744,7 +1744,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "PointCloud"
 member = "insertPointNormalColor"
 status = "replaced"
-by = ["PointCloudX.Insert"]
+by = ["PointCloud.Insert"]
 note = "triage JS1 (Luis: retire): JS only; insert(index, point, normal, color)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1752,7 +1752,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "PointCloud"
 member = "insertPointNormalColorValue"
 status = "replaced"
-by = ["PointCloudX.Insert"]
+by = ["PointCloud.Insert"]
 note = "triage JS1 (Luis: retire): JS only; insert(index, point, normal, color, value)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1760,7 +1760,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "PolyCurve"
 member = "appendArc"
 status = "replaced"
-by = ["PolyCurveX.Append"]
+by = ["PolyCurve.Append"]
 note = "triage JS1 (Luis: retire): JS only; append(arc)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1768,7 +1768,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "PolyCurve"
 member = "appendCurve"
 status = "replaced"
-by = ["PolyCurveX.Append"]
+by = ["PolyCurve.Append"]
 note = "triage JS1 (Luis: retire): JS only; append(curve)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1776,7 +1776,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "Surface"
 member = "toNurbsSurfaceTolerance"
 status = "replaced"
-by = ["SurfaceX.ToNurbsSurface"]
+by = ["Surface.ToNurbsSurface"]
 note = "triage JS1 (Luis: retire): JS only; toNurbsSurface(tolerance) -> [surface, accuracy]"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1784,7 +1784,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "Transform"
 member = "mirrorPlane"
 status = "replaced"
-by = ["TransformX.Mirror"]
+by = ["Transform.Mirror"]
 note = "triage JS1 (Luis: retire): JS only; mirror(plane)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1792,7 +1792,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "Transform"
 member = "rotationVectors"
 status = "replaced"
-by = ["TransformX.Rotation"]
+by = ["Transform.Rotation"]
 note = "triage JS1 (Luis: retire): JS only; rotation(start, end, center)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1800,7 +1800,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "Transform"
 member = "translationVector"
 status = "replaced"
-by = ["TransformX.Translation"]
+by = ["Transform.Translation"]
 note = "triage JS1 (Luis: retire): JS only; translation(vector)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1808,7 +1808,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "Transform"
 member = "translationXYZ"
 status = "replaced"
-by = ["TransformX.Translation"]
+by = ["Transform.Translation"]
 note = "triage JS1 (Luis: retire): JS only; translation(x, y, z)"
 test = "test_retired_js_overload_splits_js1"
 
@@ -1818,7 +1818,7 @@ test = "test_retired_js_overload_splits_js1"
 class = "Centermark"
 member = "GetDisplayLines"
 status = "replaced"
-by = ["CentermarkX.GetDisplayLines"]
+by = ["Centermark.GetDisplayLines"]
 note = "U12 (pilot #41) merged: RhinoCommon's GetDisplayLines(style, scale) -> (success, lines); the old one took the style only (scale 1.0) and returned the lines"
 test = "test_centermark_get_display_lines_u12_g127"
 
@@ -1828,7 +1828,7 @@ test = "test_centermark_get_display_lines_u12_g127"
 class = "Intersection"
 member = "lineLineTolerance"
 status = "replaced"
-by = ["IntersectionX.LineLine"]
+by = ["Intersection.LineLine"]
 note = "triage JS1 (Luis: retire): JS only; lineLine(a, b, tolerance, finiteSegments), generated once a static's out parameters reach its sibling (G128)"
 test = "test_retired_line_line_tolerance_and_plane_circle_g128"
 
@@ -1836,7 +1836,7 @@ test = "test_retired_line_line_tolerance_and_plane_circle_g128"
 class = "PointCloud"
 member = "addRangePointsNormalsColors"
 status = "replaced"
-by = ["PointCloudX.AddRange"]
+by = ["PointCloud.AddRange"]
 note = "triage JS1 (Luis: retire): JS only; addRange(points, normals, colors), generated once an int[] local reaches a native (G128)"
 test = "test_retired_add_range_with_colors_and_array_natives_g128"
 
@@ -1844,7 +1844,7 @@ test = "test_retired_add_range_with_colors_and_array_natives_g128"
 class = "PointCloud"
 member = "addRangePointsNormalsColorsValues"
 status = "replaced"
-by = ["PointCloudX.AddRange"]
+by = ["PointCloud.AddRange"]
 note = "triage JS1 (Luis: retire): JS only; addRange(points, normals, colors, values) (G128)"
 test = "test_retired_add_range_with_colors_and_array_natives_g128"
 
@@ -1854,7 +1854,7 @@ test = "test_retired_add_range_with_colors_and_array_natives_g128"
 class = "BND_SubDEdgeIteratorFromFace"
 member = "Count"
 status = "replaced"
-by = ["SubDFaceX.Edges"]
+by = ["SubDFace.Edges"]
 note = "face.Edges is a list (Luis 2026-10-30, option 1, G129): len(face.Edges) / .length"
 test = "test_subd_neighbour_lists_g129"
 
@@ -1868,7 +1868,7 @@ note = "Luis 2026-10-30 (option 1, G129): face.Edges is a list -- iterate it, or
 class = "BND_SubDVertexIteratorFromFace"
 member = "Count"
 status = "replaced"
-by = ["SubDFaceX.Vertices"]
+by = ["SubDFace.Vertices"]
 note = "face.Vertices is a list (Luis 2026-10-30, option 1, G129): len(face.Vertices) / .length"
 test = "test_subd_neighbour_lists_g129"
 
@@ -1882,7 +1882,7 @@ note = "Luis 2026-10-30 (option 1, G129): face.Vertices is a list -- iterate it,
 class = "BND_SubDFaceIteratorFromEdge"
 member = "Count"
 status = "replaced"
-by = ["SubDEdgeX.Faces"]
+by = ["SubDEdge.Faces"]
 note = "edge.Faces is a list (Luis 2026-10-30, option 1, G129): len(edge.Faces) / .length"
 test = "test_subd_neighbour_lists_g129"
 
@@ -1896,7 +1896,7 @@ note = "Luis 2026-10-30 (option 1, G129): edge.Faces is a list -- iterate it, or
 class = "BND_SubDVertexIteratorFromEdge"
 member = "Count"
 status = "replaced"
-by = ["SubDEdgeX.Vertices"]
+by = ["SubDEdge.Vertices"]
 note = "edge.Vertices is a list (Luis 2026-10-30, option 1, G129): len(edge.Vertices) / .length"
 test = "test_subd_neighbour_lists_g129"
 
@@ -1910,7 +1910,7 @@ note = "Luis 2026-10-30 (option 1, G129): edge.Vertices is a list -- iterate it,
 class = "BND_SubDFaceIteratorFromVertex"
 member = "Count"
 status = "replaced"
-by = ["SubDVertexX.Faces"]
+by = ["SubDVertex.Faces"]
 note = "vertex.Faces is a list (Luis 2026-10-30, option 1, G129): len(vertex.Faces) / .length"
 test = "test_subd_neighbour_lists_g129"
 
@@ -1924,7 +1924,7 @@ note = "Luis 2026-10-30 (option 1, G129): vertex.Faces is a list -- iterate it, 
 class = "PolyCurve"
 member = "appendLine"
 status = "replaced"
-by = ["PolyCurveX.Append"]
+by = ["PolyCurve.Append"]
 note = "triage JS1 (Luis: retire): JS only; append(line), generated once a temporary LineCurve may be passed to a callee that only reads it (G130)"
 test = "test_retired_append_line_and_add_range_colors_g130"
 
@@ -1932,6 +1932,6 @@ test = "test_retired_append_line_and_add_range_colors_g130"
 class = "PointCloud"
 member = "addRangePointsColors"
 status = "replaced"
-by = ["PointCloudX.AddRange"]
+by = ["PointCloud.AddRange"]
 note = "triage JS1 (Luis: retire): JS only; addRange(points, colors) (G130)"
 test = "test_retired_append_line_and_add_range_colors_g130"

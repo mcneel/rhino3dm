@@ -37,53 +37,53 @@ static class TranslateCommand
         var Wanted = new Dictionary<string, string>
         {
             ["RhinoMath"]   = "RH3DM_RhinoMath",
-            ["Interval"]    = "BND_IntervalX",
-            ["Point2d"]     = "BND_Point2dX",
-            ["Vector2d"]    = "BND_Vector2dX",
-            ["Point3d"]     = "BND_Point3dX",
-            ["Vector3d"]    = "BND_Vector3dX",
-            ["Line"]        = "BND_LineX",
-            ["BoundingBox"] = "BND_BoundingBoxX",
-            ["Plane"]       = "BND_PlaneX",
-            ["Circle"]      = "BND_CircleX",
-            ["Arc"]         = "BND_ArcX",
-            ["Sphere"]      = "BND_SphereX",
-            ["Transform"]   = "BND_TransformX",
-            ["Ellipse"]     = "BND_EllipseX",
-            ["Cylinder"]    = "BND_CylinderX",
-            ["Cone"]        = "BND_ConeX",
-            ["Torus"]       = "BND_TorusX",
-            ["Box"]         = "BND_BoxX",
+            ["Interval"]    = "BND_Interval",
+            ["Point2d"]     = "BND_Point2d",
+            ["Vector2d"]    = "BND_Vector2d",
+            ["Point3d"]     = "BND_Point3d",
+            ["Vector3d"]    = "BND_Vector3d",
+            ["Line"]        = "BND_Line",
+            ["BoundingBox"] = "BND_BoundingBox",
+            ["Plane"]       = "BND_Plane",
+            ["Circle"]      = "BND_Circle",
+            ["Arc"]         = "BND_Arc",
+            ["Sphere"]      = "BND_Sphere",
+            ["Transform"]   = "BND_Transform",
+            ["Ellipse"]     = "BND_Ellipse",
+            ["Cylinder"]    = "BND_Cylinder",
+            ["Cone"]        = "BND_Cone",
+            ["Torus"]       = "BND_Torus",
+            ["Box"]         = "BND_Box",
             // collection elements (Mesh vertices/faces, NURBS control points)
-            ["Point2f"]     = "BND_Point2fX",
-            ["Point3f"]     = "BND_Point3fX",
-            ["Vector3f"]    = "BND_Vector3fX",
-            ["Point4d"]     = "BND_Point4dX",
-            ["MeshFace"]    = "BND_MeshFaceX",
-            ["ControlPoint"] = "BND_ControlPointX",
+            ["Point2f"]     = "BND_Point2f",
+            ["Point3f"]     = "BND_Point3f",
+            ["Vector3f"]    = "BND_Vector3f",
+            ["Point4d"]     = "BND_Point4d",
+            ["MeshFace"]    = "BND_MeshFace",
+            ["ControlPoint"] = "BND_ControlPoint",
             // a component's (type, index) address (Brep/Mesh/SubD component queries)
-            ["ComponentIndex"] = "BND_ComponentIndexX",
+            ["ComponentIndex"] = "BND_ComponentIndex",
             // an RGBA float colour (PhysicallyBasedMaterial.BaseColor; G69)
-            ["Color4f"]     = "BND_Color4fX",
+            ["Color4f"]     = "BND_Color4f",
             // a SubD edge's end sharpness pair (two floats; SubD.SharpEdgeCount's out
             // range, SubDEdge.Sharpness; G109)
-            ["SubDEdgeSharpness"] = "BND_SubDEdgeSharpnessX",
+            ["SubDEdgeSharpness"] = "BND_SubDEdgeSharpness",
         };
         // DATA classes (G64; Luis 2026-10-13, option 2): classes whose state is
         // plain fields -- translated whole, emitted as C++ classes with fields,
         // bound as classes (nullable, mutable in place) rather than value objects
         var DataWanted = new Dictionary<string, string>
         {
-            ["ConstructionPlane"] = "BND_ConstructionPlaneX",
-            ["ConstructionPlaneGridDefaults"] = "BND_ConstructionPlaneGridDefaultsX",
-            ["File3dmWriteOptions"] = "BND_File3dmWriteOptionsX",
-            ["DracoCompressionOptions"] = "BND_DracoCompressionOptionsX",   // G107
-            ["PageSettings"] = "BND_PageSettingsX",
+            ["ConstructionPlane"] = "BND_ConstructionPlane",
+            ["ConstructionPlaneGridDefaults"] = "BND_ConstructionPlaneGridDefaults",
+            ["File3dmWriteOptions"] = "BND_File3dmWriteOptions",
+            ["DracoCompressionOptions"] = "BND_DracoCompressionOptions",   // G107
+            ["PageSettings"] = "BND_PageSettings",
             // managed-state classes (G80; Luis 2026-10-14, option 4): RhinoList<T> read
             // as RhinoList of Point3d (monomorphized below), its subclasses on it
-            ["RhinoList"] = "BND_RhinoListPoint3dX",
-            ["Point3dList"] = "BND_Point3dListX",
-            ["Polyline"] = "BND_PolylineX",
+            ["RhinoList"] = "BND_RhinoListPoint3d",
+            ["Point3dList"] = "BND_Point3dList",
+            ["Polyline"] = "BND_Polyline",
         };
         foreach (var kv in DataWanted) Wanted[kv.Key] = kv.Value;
         // generic data bases instantiated for ONE element type: `RhinoList<T>` with
@@ -898,6 +898,49 @@ class Tx
     string _retDataCpp;                          // ... of this C++ type
     readonly HashSet<string> _seqAliases = new();     // `ICollection<T> c = param as ICollection<T>;` (G80)
     readonly HashSet<string> _eqComparers = new();    // `EqualityComparer<T> c = EqualityComparer<T>.Default;` (G80)
+    // ToString (G136, pilot #68): `var culture = CultureInfo.InvariantCulture;` / `IFormatProvider provider = ...`
+    // locals (dropped: formatting is always invariant) and `StringBuilder sb` locals (a std::wstring)
+    readonly HashSet<string> _cultureLocals = new();
+    readonly HashSet<string> _sbLocals = new();
+    bool IsInvariantCulture(ExpressionSyntax e) =>
+        e is IdentifierNameSyntax ci && _cultureLocals.Contains(ci.Identifier.Text)
+        || e is MemberAccessExpressionSyntax { Name.Identifier.Text: "InvariantCulture" };
+    static bool IsStringClass(ExpressionSyntax e) => e.ToString() is "String" or "string" or "System.String";
+    // a composite format string with its arguments (`String.Format` / `AppendFormat`): the pieces
+    // concatenated, each argument in .NET's invariant form (RH3DM_NetStr); `{n}` items only
+    string FormatConcat(ExpressionSyntax fmt, IReadOnlyList<ExpressionSyntax> args)
+    {
+        if (fmt is not LiteralExpressionSyntax { RawKind: (int)SyntaxKind.StringLiteralExpression } lit)
+            throw new NotSupported("format string not a literal");
+        var f = lit.Token.ValueText;
+        var parts = new List<string>();
+        var text = new StringBuilder();
+        void Flush()
+        {
+            if (text.Length > 0)
+                parts.Add("std::wstring(L\"" + text.ToString().Replace("\\", "\\\\").Replace("\"", "\\\"") + "\")");
+            text.Clear();
+        }
+        for (int i = 0; i < f.Length; i++)
+        {
+            char c = f[i];
+            if (c == '{' && i + 1 < f.Length && f[i + 1] == '{') { text.Append('{'); i++; continue; }
+            if (c == '}' && i + 1 < f.Length && f[i + 1] == '}') { text.Append('}'); i++; continue; }
+            if (c == '{')
+            {
+                int close = f.IndexOf('}', i);
+                if (close < 0 || !int.TryParse(f.Substring(i + 1, close - i - 1), out var k) || k < 0 || k >= args.Count)
+                    throw new NotSupported("format item " + f);
+                Flush();
+                parts.Add($"RH3DM_NetStr({Expr(args[k])})");
+                i = close;
+                continue;
+            }
+            text.Append(c);
+        }
+        Flush();
+        return parts.Count == 0 ? "std::wstring()" : "(" + string.Join(" + ", parts) + ")";
+    }
     string _retVector;                           // the member returns a std::vector (C#'s null is the empty one; G70)
     bool _hidden;                                // a non-public class member (G85): Guid is an ON_UUID here (G89)
     string _yieldVec;                            // an iterator member's class sequence (G89: `yield return EdgeAt(i)`)
@@ -961,6 +1004,7 @@ class Tx
             if (t is IdentifierNameSyntax { Identifier.Text: "IntPtr" }) return "void*";
             if (t is QualifiedNameSyntax qn) return Type(qn.Right);    // DocObjects.ObjectType
         }
+        if (t is PredefinedTypeSyntax { Keyword.Text: "string" }) return "std::wstring";      // G136 (value types)
         if (t is IdentifierNameSyntax id && All.TryGetValue(id.Identifier.Text, out var ti)
             && !ti.IsStaticClass) return ti.Cpp;
         if (t is IdentifierNameSyntax eid && Enums.ContainsKey(eid.Identifier.Text))
@@ -1792,6 +1836,20 @@ class Tx
             case LocalDeclarationStatementSyntax ld:
             {
                 if (ld.UsingKeyword != default) throw new NotSupported("using declaration");
+                // G136: an invariant-culture local (dropped) / a StringBuilder (a std::wstring)
+                if (ld.Declaration.Variables is [{ Initializer.Value: var cv } cvar] && IsInvariantCulture(cv))
+                {
+                    _cultureLocals.Add(cvar.Identifier.Text);
+                    break;
+                }
+                if (ld.Declaration.Variables is [{ Initializer.Value: ObjectCreationExpressionSyntax { ArgumentList.Arguments.Count: 0 } sbc } sbv]
+                    && sbc.Type.ToString() is "StringBuilder" or "System.Text.StringBuilder" or "Text.StringBuilder")
+                {
+                    _sbLocals.Add(sbv.Identifier.Text);
+                    Scope[sbv.Identifier.Text] = "StringBuilder";
+                    yield return pad + $"std::wstring {Rn(sbv.Identifier.Text)};";
+                    break;
+                }
                 var isConst = ld.IsConst ? "const " : "";
                 // `EqualityComparer<T> comparer = EqualityComparer<T>.Default;`: the type's == (G80)
                 if (ld.Declaration.Variables is [{ Initializer.Value: MemberAccessExpressionSyntax { Name.Identifier.Text: "Default", Expression: GenericNameSyntax { Identifier.Text: "EqualityComparer" } } } eqv])
@@ -3587,6 +3645,11 @@ class Tx
                     return "Color";
                 if (inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "ConstPointer" or "NonConstPointer" } && inv.ArgumentList.Arguments.Count == 0)
                     return "IntPtr";                                                // G85
+                // G136: the string results of ToString's idioms
+                if (inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "Format" } sfmt && IsStringClass(sfmt.Expression))
+                    return "string";
+                if (inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "ToString" or "AppendFormat" })
+                    return "string";
                 if (inv.Expression is IdentifierNameSyntax f)
                     return Cur.Chain().Select(ct => ct.MemberTypes.GetValueOrDefault(f.Identifier.Text + "()")).FirstOrDefault(x => x != null);
                 if (inv.Expression is MemberAccessExpressionSyntax m)
@@ -3722,6 +3785,33 @@ class Tx
     string Invocation(InvocationExpressionSyntax inv)
     {
         inv = Unqualify(inv);
+        // G136 (pilot #68): RhinoCommon's ToString -- String.Format([provider,] format, args), a number's
+        // ToString(culture), a value's ToString(), StringBuilder.AppendFormat / ToString
+        if (inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "Format" } sfm && IsStringClass(sfm.Expression))
+        {
+            var fargs = inv.ArgumentList.Arguments.Select(a => a.Expression).ToList();
+            if (fargs.Count > 0 && IsInvariantCulture(fargs[0])) fargs.RemoveAt(0);
+            if (fargs.Count == 0) throw new NotSupported("String.Format()");
+            return FormatConcat(fargs[0], fargs.Skip(1).ToList());
+        }
+        if (inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "AppendFormat", Expression: IdentifierNameSyntax afs }
+            && _sbLocals.Contains(afs.Identifier.Text) && inv.ArgumentList.Arguments.Count >= 1)
+        {
+            var fargs = inv.ArgumentList.Arguments.Select(a => a.Expression).ToList();
+            return $"({Rn(afs.Identifier.Text)} += {FormatConcat(fargs[0], fargs.Skip(1).ToList())})";
+        }
+        if (inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "ToString" } tsm)
+        {
+            var targs = inv.ArgumentList.Arguments;
+            if (tsm.Expression is IdentifierNameSyntax sbi && _sbLocals.Contains(sbi.Identifier.Text) && targs.Count == 0)
+                return Rn(sbi.Identifier.Text);
+            var tt = TypeOf(tsm.Expression);
+            if (tt is "double" or "float" or "int" or "uint" or "long" or "ulong" or "short" or "ushort" or "byte"
+                && (targs.Count == 0 || (targs.Count == 1 && IsInvariantCulture(targs[0].Expression))))
+                return $"RH3DM_NetStr({Expr(tsm.Expression)})";
+            if (tt != null && All.ContainsKey(tt) && targs.Count == 0)
+                return $"({Expr(tsm.Expression)}).ToString()";
+        }
         // `Marshal.Copy(ptr, bytes, start, n)` (G101): the native buffer's bytes into the array
         if (Cur.ClassMode && inv.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "Copy", Expression: var mce } && mce.ToString().EndsWith("Marshal")
             && inv.ArgumentList.Arguments is [var mc0, var mc1, var mc2, var mc3] && TypeOf(mc0.Expression) == "IntPtr" && TypeOf(mc1.Expression) is "byte[]")

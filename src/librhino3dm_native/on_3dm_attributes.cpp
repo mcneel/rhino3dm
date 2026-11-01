@@ -1005,3 +1005,44 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_SetObjectFrame(ON_3dmObjectAttributes*
   }
 }
 
+
+// The draw color of an object in a File3dm: CRhinoObjectAttributes::DrawColor's rules over the
+// model instead of a document. Layer (or parent): the layer's per-viewport color. Material: the
+// material the attributes select (ONX_Model::MaterialFromAttributes), its PBR base color if it is
+// physically based, else its diffuse color. Rhino's black/white switching against the viewport
+// background needs the application's display settings and is not applied.
+RH_C_FUNCTION int ON_3dmObjectAttributes_DrawColor(const ON_3dmObjectAttributes* pConstAttributes, const ONX_Model* pConstModel, ON_UUID viewport_id)
+{
+  if (nullptr == pConstAttributes)
+    return 0;
+
+  ON_Color rc = pConstAttributes->m_color;
+  switch (pConstAttributes->ColorSource())
+  {
+  case ON::color_from_parent:
+  case ON::color_from_layer:
+    if (nullptr != pConstModel)
+    {
+      const ON_Layer* layer = ON_Layer::FromModelComponentRef(pConstModel->LayerFromIndex(pConstAttributes->m_layer_index), &ON_Layer::Default);
+      rc = layer->PerViewportColor(viewport_id);
+    }
+    break;
+  case ON::color_from_object:
+    break;
+  case ON::color_from_material:
+    if (nullptr != pConstModel)
+    {
+      const ON_Material* material = ON_Material::FromModelComponentRef(pConstModel->MaterialFromAttributes(*pConstAttributes), &ON_Material::Default);
+      const auto pbr = material->PhysicallyBased();
+      if (nullptr != pbr)
+        rc = pbr->BaseColor();
+      else
+        rc = material->Diffuse();
+    }
+    break;
+  default:
+    break;
+  }
+
+  return (int)ABGR_to_ARGB((unsigned int)rc);
+}

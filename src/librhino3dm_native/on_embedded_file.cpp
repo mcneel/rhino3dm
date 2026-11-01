@@ -32,3 +32,13 @@ RH_C_FUNCTION ON__UINT64 ON_EmbeddedFile_CompressedLength(const ON_EmbeddedFile*
 
   return static_cast<ON__UINT64>(ef->CompressedLength());
 }
+
+RH_C_FUNCTION ON__UINT64 ON_EmbeddedFile_Length(const ON_EmbeddedFile* ef)
+{
+  return ef ? (ON__UINT64)ef->Length() : 0;
+}
+
+RH_C_FUNCTION bool ON_EmbeddedFile_Clear(ON_EmbeddedFile* ef)
+{
+  return ef ? ef->Clear() : false;
+}

@@ -15,7 +15,7 @@ def hand_names(reg, strict=False):
 
 
 def hand_headers(reg):
-    """the headers reg's hand members are declared in, as includes from src/generated"""
+    """the headers reg's hand members are declared in, as includes from a generated file"""
     return sorted({'../' + e['header'] for e in HAND_MEMBERS.get(reg, []) if 'header' in e})
 
 
@@ -43,8 +43,8 @@ def hand_registrations(reg, value=False, overloads=False):
             elif kind == 'static':
                 py.append('      .def_static("%s", &%s%s)' % (e['name'], fn, args))
             elif e.get('list'):
-                # new objects as a list (G129): RH3DM_HandList (hand_common.h), as generated sequences
-                py.append('      .def_property_readonly("%s", &RH3DM_HandList<&%s, BND_%s>)' % (e['name'], fn, reg))
+                # new objects as a list (G129): RH3DM_ListOf (bnd_common.h), as generated sequences
+                py.append('      .def_property_readonly("%s", &RH3DM_ListOf<&%s, BND_%s>)' % (e['name'], fn, reg))
             elif e.get('set'):
                 py.append('      .def_property("%s", py::cpp_function(&%s%s), &%s)' % (e['name'], fn, ka, e['set']))
             else:
@@ -62,7 +62,7 @@ def hand_registrations(reg, value=False, overloads=False):
         elif kind == 'static':
             js.append('      .class_function("%s", &%s, allow_raw_pointers())' % (jn, fn))
         elif e.get('list'):
-            js.append('      .property("%s", &RH3DM_HandList<&%s, BND_%s>)' % (jn, fn, reg))
+            js.append('      .property("%s", &RH3DM_ListOf<&%s, BND_%s>)' % (jn, fn, reg))
         elif e.get('set'):
             js.append('      .property("%s", &%s, &%s)' % (jn, fn, e['set']))
         else:
@@ -88,7 +88,7 @@ def hand_class_registrations():
             bad = [e['name'] for e in HAND_MEMBERS.get(reg, []) if e['kind'] != 'static']
             if bad:
                 raise SystemExit('HAND_CLASSES %s: a holder class takes statics only, not %s' % (reg, bad))
-            tag = 'RH3DM_Hand_%sHolder' % reg
+            tag = 'BND_%s' % reg          # a holder for its statics (M3: no generated class takes the name)
             inc += ['#include "%s"' % h for h in hand_headers(reg)] + ['struct %s {};' % tag]
         else:
             tag = hc['cpp']

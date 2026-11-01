@@ -5,8 +5,7 @@
 #   python.sh check   compile only the generated objects (fast: catches generator output errors)
 #   python.sh build   full module build
 #   python.sh test    regression + parity + planner tests against the built module
-#   python.sh report  regenerate docs/vnext/coverage.md, old-coverage.md, rhino3dm-only-members.md
-#   python.sh all     build, test, report
+#   python.sh all     build, test
 # -ffp-contract=off: no fused multiply-add, so results are bitwise comparable
 # with the .NET oracle (tests/parity/README.md).
 set -u
@@ -33,10 +32,10 @@ configure() {
 
 check() {
   configure
-  targets=$(cd /src/src/generated && ls *.cpp | sed 's#^#generated/#; s#\.cpp$#.o#')
+  targets=$(cd /src/src/bindings && ls *.cpp | sed 's#^#bindings/#; s#\.cpp$#.o#')
   make -k -j"$(nproc)" $targets > /work/python_check.log 2>&1
-  ec=$?; echo "GENERATED OBJECTS EXIT = $ec"
-  grep -E "error:" /work/python_check.log | sed -E 's#^/src/src/generated/##' | sort -u | head -20
+  ec=$?; echo "BINDINGS OBJECTS EXIT = $ec"
+  grep -E "error:" /work/python_check.log | sed -E 's#^/src/src/bindings/##' | sort -u | head -20
   return $ec
 }
 
@@ -55,18 +54,10 @@ test_() {
   python3 tests/parity/test_parity.py $B 2>&1 | tail -14
 }
 
-report() {
-  cd /src
-  python3 tools/generate/coverage.py $B api/manifest.json docs/vnext/coverage.md > /dev/null && echo "docs/vnext/coverage.md updated"
-  python3 tools/generate/old_coverage.py $B api/manifest.json docs/vnext/old-coverage.md > /dev/null \
-    && echo "docs/vnext/old-coverage.md + rhino3dm-only-members.md updated"
-}
-
 case "${1:-all}" in
   check)  check ;;
   build)  build ;;
   test)   test_ ;;
-  report) report ;;
-  all)    build && test_ && report ;;
-  *) echo "usage: python.sh check|build|test|report|all"; exit 2 ;;
+  all)    build && test_ ;;
+  *) echo "usage: python.sh check|build|test|all"; exit 2 ;;
 esac

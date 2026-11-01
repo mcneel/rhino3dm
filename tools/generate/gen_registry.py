@@ -24,8 +24,6 @@ CLASSES = [
     # abstract class it extends, mirroring the RHINOCOMMON hierarchy (the
     # spec), not opennurbs's (ON_Viewport is ON_Geometry there, but
     # ViewportInfo is not a GeometryBase in .NET).
-    # 'copy' is the expression constructing this class's storage from the
-    # hand-written BND source object.
     # the root (G62): RhinoCommon's CommonObject over every class whose native
     # object is an ON_Object. An abstract base may itself extend an abstract base:
     # it answers the base's getters with its own. CachedTextureCoordinates is a
@@ -34,302 +32,248 @@ CLASSES = [
     {'type': 'Rhino.Runtime.CommonObject', 'cs': 'CommonObject',
      'on': 'ON_Object',
      'mode': 'abstract', 'getter': 'RH3DM_ObjPtr',
-     'gen': 'BND_CommonObjectX', 'reg': 'CommonObjectX'},
+     'gen': 'BND_CommonObject', 'reg': 'CommonObject'},
     {'type': 'Rhino.Geometry.GeometryBase', 'cs': 'GeometryBase',
      'on': 'ON_Geometry',
      'mode': 'abstract', 'getter': 'RH3DM_GeomPtr',
      'self_extra': ['ON_Object'],
-     'gen': 'BND_GeometryBaseX', 'reg': 'GeometryBaseX', 'base': 'CommonObjectX'},
+     'gen': 'BND_GeometryBase', 'reg': 'GeometryBase', 'base': 'CommonObject'},
     {'type': 'Rhino.DocObjects.ModelComponent', 'cs': 'ModelComponent',
      'on': 'ON_ModelComponent',
      'mode': 'abstract', 'getter': 'RH3DM_McPtr',
      'self_extra': ['ON_Object'],
-     'gen': 'BND_ModelComponentX', 'reg': 'ModelComponentX', 'base': 'CommonObjectX'},
+     'gen': 'BND_ModelComponent', 'reg': 'ModelComponent', 'base': 'CommonObject'},
     {'type': 'Rhino.Geometry.Curve', 'cs': 'Curve', 'on': 'ON_Curve',
-     'mode': 'pointer', 'hand': 'BND_Curve', 'hand_header': 'bnd_curve.h',
-     'copy': 'source.m_curve ? source.m_curve->DuplicateCurve() : nullptr',
-     'gen': 'BND_CurveX', 'reg': 'CurveX', 'base': 'GeometryBaseX'},
+     'mode': 'pointer',
+     'gen': 'BND_Curve', 'reg': 'Curve', 'base': 'GeometryBase'},
     {'type': 'Rhino.Geometry.Surface', 'cs': 'Surface', 'on': 'ON_Surface',
-     'mode': 'pointer', 'hand': 'BND_Surface', 'hand_header': 'bnd_surface.h',
-     'copy': 'source.m_surface ? source.m_surface->DuplicateSurface() : nullptr',
-     'gen': 'BND_SurfaceX', 'reg': 'SurfaceX', 'base': 'GeometryBaseX'},
+     'mode': 'pointer',
+     'gen': 'BND_Surface', 'reg': 'Surface', 'base': 'GeometryBase'},
     # m_brep is private on BND_Brep; copy via the public GeometryPointer()
     {'type': 'Rhino.Geometry.Brep', 'cs': 'Brep', 'on': 'ON_Brep',
-     'mode': 'pointer', 'hand': 'BND_Brep', 'hand_header': 'bnd_brep.h',
-     'copy': ('source.GeometryPointer()'
-              ' ? new ON_Brep(*ON_Brep::Cast(source.GeometryPointer())) : nullptr'),
-     'gen': 'BND_BrepX', 'reg': 'BrepX', 'base': 'GeometryBaseX'},
+     'mode': 'pointer',
+     'gen': 'BND_Brep', 'reg': 'Brep', 'base': 'GeometryBase'},
     {'type': 'Rhino.Geometry.Mesh', 'cs': 'Mesh', 'on': 'ON_Mesh',
-     'mode': 'pointer', 'hand': 'BND_Mesh', 'hand_header': 'bnd_mesh.h',
-     'copy': ('source.GeometryPointer()'
-              ' ? new ON_Mesh(*ON_Mesh::Cast(source.GeometryPointer())) : nullptr'),
-     'gen': 'BND_MeshX', 'reg': 'MeshX', 'base': 'GeometryBaseX'},
+     'mode': 'pointer',
+     'gen': 'BND_Mesh', 'reg': 'Mesh', 'base': 'GeometryBase'},
     # the manifest's richest class (46 candidates): camera/frustum math is
     # all doubles, bools, points and vectors -- exactly the marshalled set
     {'type': 'Rhino.DocObjects.ViewportInfo', 'cs': 'ViewportInfo', 'user_strings': True,
      'on': 'ON_Viewport',
-     'mode': 'pointer', 'hand': 'BND_Viewport', 'hand_header': 'bnd_viewport.h',
-     'copy': 'source.m_viewport ? new ON_Viewport(*source.m_viewport) : nullptr',
-     'gen': 'BND_ViewportX', 'reg': 'ViewportX', 'bridge': False, 'base': 'CommonObjectX'},
+     'mode': 'pointer',
+     'gen': 'BND_ViewportInfo', 'reg': 'ViewportInfo', 'base': 'CommonObject'},
     # hand binding file is bnd_beam.h / C layer on_beam.cpp (opennurbs's
     # historical name for ON_Extrusion)
     {'type': 'Rhino.Geometry.Extrusion', 'cs': 'Extrusion', 'on': 'ON_Extrusion',
-     'mode': 'pointer', 'hand': 'BND_Extrusion', 'hand_header': 'bnd_beam.h',
-     'copy': ('source.GeometryPointer()'
-              ' ? new ON_Extrusion(*ON_Extrusion::Cast(source.GeometryPointer()))'
-              ' : nullptr'),
-     'gen': 'BND_ExtrusionX', 'reg': 'ExtrusionX', 'base': 'SurfaceX'},
+     'mode': 'pointer',
+     'gen': 'BND_Extrusion', 'reg': 'Extrusion', 'base': 'Surface'},
     {'type': 'Rhino.Geometry.PointCloud', 'cs': 'PointCloud', 'on': 'ON_PointCloud',
-     'mode': 'pointer', 'hand': 'BND_PointCloud', 'hand_header': 'bnd_pointcloud.h',
-     'copy': ('source.GeometryPointer()'
-              ' ? new ON_PointCloud(*ON_PointCloud::Cast(source.GeometryPointer()))'
-              ' : nullptr'),
-     'gen': 'BND_PointCloudX', 'reg': 'PointCloudX', 'base': 'GeometryBaseX',
+     'mode': 'pointer',
+     'gen': 'BND_PointCloud', 'reg': 'PointCloud', 'base': 'GeometryBase',
      # bulk tier: Python buffer protocol over the contiguous ON_3dPoint storage
      # (3 doubles each) -> numpy.asarray(cloud) is an (N, 3) zero-copy view
      'buffer': 'm_ptr->m_P'},
     # G99 (Luis 2026-10-16, option A): RhinoCommon's Font holds a MANAGED font -- an entry of
-    # opennurbs' process-wide list (ON_Font::GetManagedFont): shared, immutable, never freed. FontX
-    # does the same (`managed`: a borrowed pointer, never deleted); the bridge passes the old
-    # BND_Font's managed font through
+    # opennurbs' process-wide list (ON_Font::GetManagedFont): shared, immutable, never freed. Font
+    # does the same (`managed`: a borrowed pointer, never deleted)
     {'type': 'Rhino.DocObjects.Font', 'cs': 'Font', 'on': 'ON_Font',
-     'mode': 'pointer', 'hand': 'BND_Font', 'hand_header': 'bnd_font.h', 'managed': True,
-     'copy': 'const_cast<ON_Font*>(source.m_managed_font)',
-     'gen': 'BND_FontX', 'reg': 'FontX'},
+     'mode': 'pointer', 'managed': True,
+     'gen': 'BND_Font', 'reg': 'Font'},
     # hand class holds ON_BezierCurve BY VALUE (private; public ONBezier()
     # accessor added for this) -- second value-mode class
     {'type': 'Rhino.Geometry.BezierCurve', 'cs': 'BezierCurve',
      'on': 'ON_BezierCurve',
-     'mode': 'value', 'hand': 'BND_BezierCurve', 'hand_header': 'bnd_bezier.h',
-     'copy': 'source.ONBezier()',
-     'gen': 'BND_BezierCurveX', 'reg': 'BezierCurveX'},
+     'mode': 'value',
+     'gen': 'BND_BezierCurve', 'reg': 'BezierCurve'},
     # m_polycurve is private; the BND_Curve base's m_curve is public and
     # aliases the same object (the Brep approach)
     {'type': 'Rhino.Geometry.PolyCurve', 'cs': 'PolyCurve', 'on': 'ON_PolyCurve',
-     'mode': 'pointer', 'hand': 'BND_PolyCurve', 'hand_header': 'bnd_polycurve.h',
-     'copy': ('source.m_curve'
-              ' ? new ON_PolyCurve(*ON_PolyCurve::Cast(source.m_curve))'
-              ' : nullptr'),
-     'gen': 'BND_PolyCurveX', 'reg': 'PolyCurveX', 'base': 'CurveX'},
+     'mode': 'pointer',
+     'gen': 'BND_PolyCurve', 'reg': 'PolyCurve', 'base': 'Curve'},
     # concrete subtypes: the hand classes keep their specific pointer
     # private, so copy through the public base pointer (Brep/PolyCurve idiom)
     {'type': 'Rhino.Geometry.LineCurve', 'cs': 'LineCurve', 'on': 'ON_LineCurve',
-     'mode': 'pointer', 'hand': 'BND_LineCurve', 'hand_header': 'bnd_linecurve.h',
-     'copy': ('source.m_curve'
-              ' ? new ON_LineCurve(*ON_LineCurve::Cast(source.m_curve)) : nullptr'),
-     'gen': 'BND_LineCurveX', 'reg': 'LineCurveX', 'base': 'CurveX'},
+     'mode': 'pointer',
+     'gen': 'BND_LineCurve', 'reg': 'LineCurve', 'base': 'Curve'},
     {'type': 'Rhino.Geometry.ArcCurve', 'cs': 'ArcCurve', 'on': 'ON_ArcCurve',
-     'mode': 'pointer', 'hand': 'BND_ArcCurve', 'hand_header': 'bnd_arccurve.h',
-     'copy': ('source.m_curve'
-              ' ? new ON_ArcCurve(*ON_ArcCurve::Cast(source.m_curve)) : nullptr'),
-     'gen': 'BND_ArcCurveX', 'reg': 'ArcCurveX', 'base': 'CurveX'},
+     'mode': 'pointer',
+     'gen': 'BND_ArcCurve', 'reg': 'ArcCurve', 'base': 'Curve'},
     {'type': 'Rhino.Geometry.NurbsCurve', 'cs': 'NurbsCurve', 'on': 'ON_NurbsCurve',
-     'mode': 'pointer', 'hand': 'BND_NurbsCurve', 'hand_header': 'bnd_nurbscurve.h',
-     'copy': ('source.m_curve'
-              ' ? new ON_NurbsCurve(*ON_NurbsCurve::Cast(source.m_curve)) : nullptr'),
-     'gen': 'BND_NurbsCurveX', 'reg': 'NurbsCurveX', 'base': 'CurveX'},
+     'mode': 'pointer',
+     'gen': 'BND_NurbsCurve', 'reg': 'NurbsCurve', 'base': 'Curve'},
     {'type': 'Rhino.Geometry.PolylineCurve', 'cs': 'PolylineCurve', 'on': 'ON_PolylineCurve',
-     'mode': 'pointer', 'hand': 'BND_PolylineCurve', 'hand_header': 'bnd_polylinecurve.h',
-     'copy': ('source.m_curve'
-              ' ? new ON_PolylineCurve(*ON_PolylineCurve::Cast(source.m_curve)) : nullptr'),
-     'gen': 'BND_PolylineCurveX', 'reg': 'PolylineCurveX', 'base': 'CurveX'},
+     'mode': 'pointer',
+     'gen': 'BND_PolylineCurve', 'reg': 'PolylineCurve', 'base': 'Curve'},
     {'type': 'Rhino.Geometry.NurbsSurface', 'cs': 'NurbsSurface', 'on': 'ON_NurbsSurface',
-     'mode': 'pointer', 'hand': 'BND_NurbsSurface', 'hand_header': 'bnd_nurbssurface.h',
-     'copy': ('source.m_surface'
-              ' ? new ON_NurbsSurface(*ON_NurbsSurface::Cast(source.m_surface)) : nullptr'),
-     'gen': 'BND_NurbsSurfaceX', 'reg': 'NurbsSurfaceX', 'base': 'SurfaceX'},
+     'mode': 'pointer',
+     'gen': 'BND_NurbsSurface', 'reg': 'NurbsSurface', 'base': 'Surface'},
     {'type': 'Rhino.Geometry.PlaneSurface', 'cs': 'PlaneSurface', 'on': 'ON_PlaneSurface',
-     'mode': 'pointer', 'hand': 'BND_PlaneSurface', 'hand_header': 'bnd_planesurface.h',
-     'copy': ('source.m_surface'
-              ' ? new ON_PlaneSurface(*ON_PlaneSurface::Cast(source.m_surface)) : nullptr'),
-     'gen': 'BND_PlaneSurfaceX', 'reg': 'PlaneSurfaceX', 'base': 'SurfaceX'},
+     'mode': 'pointer',
+     'gen': 'BND_PlaneSurface', 'reg': 'PlaneSurface', 'base': 'Surface'},
     {'type': 'Rhino.Geometry.RevSurface', 'cs': 'RevSurface', 'on': 'ON_RevSurface',
-     'mode': 'pointer', 'hand': 'BND_RevSurface', 'hand_header': 'bnd_revsurface.h',
-     'copy': 'source.m_revsurface ? new ON_RevSurface(*source.m_revsurface) : nullptr',
-     'gen': 'BND_RevSurfaceX', 'reg': 'RevSurfaceX', 'base': 'SurfaceX'},
+     'mode': 'pointer',
+     'gen': 'BND_RevSurface', 'reg': 'RevSurface', 'base': 'Surface'},
     {'type': 'Rhino.DocObjects.Linetype', 'cs': 'Linetype', 'on': 'ON_Linetype',
-     'mode': 'pointer', 'hand': 'BND_Linetype', 'hand_header': 'bnd_linetype.h',
-     'copy': ('source.m_linetype'
-              ' ? new ON_Linetype(*source.m_linetype) : nullptr'),
-     'gen': 'BND_LinetypeX', 'reg': 'LinetypeX', 'bridge': False, 'base': 'ModelComponentX'},
+     'mode': 'pointer',
+     'gen': 'BND_Linetype', 'reg': 'Linetype', 'base': 'ModelComponent'},
     {'type': 'Rhino.DocObjects.DimensionStyle', 'cs': 'DimensionStyle',
      'on': 'ON_DimStyle',
-     'mode': 'pointer', 'hand': 'BND_DimensionStyle',
-     'hand_header': 'bnd_dimensionstyle.h',
-     'copy': ('source.m_dimstyle'
-              ' ? new ON_DimStyle(*source.m_dimstyle) : nullptr'),
-     'gen': 'BND_DimensionStyleX', 'reg': 'DimensionStyleX', 'bridge': False, 'base': 'ModelComponentX'},
+     'mode': 'pointer',
+
+     'gen': 'BND_DimensionStyle', 'reg': 'DimensionStyle', 'base': 'ModelComponent'},
     {'type': 'Rhino.DocObjects.Group', 'cs': 'Group', 'on': 'ON_Group',
-     'mode': 'pointer', 'hand': 'BND_Group', 'hand_header': 'bnd_group.h',
-     'copy': 'source.m_group ? new ON_Group(*source.m_group) : nullptr',
-     'gen': 'BND_GroupX', 'reg': 'GroupX', 'base': 'ModelComponentX'},
+     'mode': 'pointer',
+     'gen': 'BND_Group', 'reg': 'Group', 'base': 'ModelComponent'},
     # G91: what ManifestTable.Instantiate makes for ModelComponentType.HatchPattern (and the
     # File3dmHatchPatternTable's items); no old binding
     {'type': 'Rhino.DocObjects.HatchPattern', 'cs': 'HatchPattern', 'on': 'ON_HatchPattern',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'base': 'ModelComponentX',
-     'gen': 'BND_HatchPatternX', 'reg': 'HatchPatternX'},
+     'mode': 'pointer', 'base': 'ModelComponent',
+     'gen': 'BND_HatchPattern', 'reg': 'HatchPattern'},
     {'type': 'Rhino.Geometry.InstanceDefinitionGeometry', 'cs': 'InstanceDefinitionGeometry',
      'on': 'ON_InstanceDefinition',
-     'mode': 'pointer', 'hand': 'BND_InstanceDefinitionGeometry', 'hand_header': 'bnd_instance.h',
-     'copy': 'source.m_idef ? new ON_InstanceDefinition(*source.m_idef) : nullptr',
-     'gen': 'BND_InstanceDefinitionGeometryX', 'reg': 'InstanceDefinitionGeometryX', 'base': 'ModelComponentX'},
+     'mode': 'pointer',
+     'gen': 'BND_InstanceDefinitionGeometry', 'reg': 'InstanceDefinitionGeometry', 'base': 'ModelComponent'},
     # -- replacement phase 2: classes not begun before (docs/vnext/old-coverage.md)
     {'type': 'Rhino.DocObjects.Layer', 'cs': 'Layer', 'on': 'ON_Layer',
-     'mode': 'pointer', 'hand': 'BND_Layer', 'hand_header': 'bnd_layer.h',
-     'copy': 'source.m_layer ? new ON_Layer(*source.m_layer) : nullptr',
-     'gen': 'BND_LayerX', 'reg': 'LayerX', 'base': 'ModelComponentX'},
+     'mode': 'pointer',
+     'gen': 'BND_Layer', 'reg': 'Layer', 'base': 'ModelComponent'},
     {'type': 'Rhino.DocObjects.Material', 'cs': 'Material', 'on': 'ON_Material',
-     'mode': 'pointer', 'hand': 'BND_Material', 'hand_header': 'bnd_material.h',
-     'copy': 'source.m_material ? new ON_Material(*source.m_material) : nullptr',
-     'gen': 'BND_MaterialX', 'reg': 'MaterialX', 'base': 'ModelComponentX'},
+     'mode': 'pointer',
+     'gen': 'BND_Material', 'reg': 'Material', 'base': 'ModelComponent'},
     {'type': 'Rhino.Geometry.Light', 'cs': 'Light', 'on': 'ON_Light',
-     'mode': 'pointer', 'hand': 'BND_Light', 'hand_header': 'bnd_light.h',
-     'copy': ('ON_Light::Cast(source.GeometryPointer())'
-              ' ? new ON_Light(*ON_Light::Cast(source.GeometryPointer())) : nullptr'),
-     'gen': 'BND_LightX', 'reg': 'LightX', 'base': 'GeometryBaseX'},
+     'mode': 'pointer',
+     'gen': 'BND_Light', 'reg': 'Light', 'base': 'GeometryBase'},
     {'type': 'Rhino.DocObjects.ObjectAttributes', 'cs': 'ObjectAttributes',
      'on': 'ON_3dmObjectAttributes',
-     'mode': 'pointer', 'hand': 'BND_3dmObjectAttributes', 'hand_header': 'bnd_3dm_attributes.h',
-     'copy': 'source.m_attributes ? new ON_3dmObjectAttributes(*source.m_attributes) : nullptr',
-     'gen': 'BND_ObjectAttributesX', 'reg': 'ObjectAttributesX', 'base': 'CommonObjectX'},
+     'mode': 'pointer',
+     'gen': 'BND_ObjectAttributes', 'reg': 'ObjectAttributes', 'base': 'CommonObject'},
     {'type': 'Rhino.Geometry.MeshingParameters', 'cs': 'MeshingParameters',
      'on': 'ON_MeshParameters',
-     'mode': 'value', 'hand': 'BND_MeshingParameters', 'hand_header': 'bnd_mesh.h',
-     'copy': 'source.ONMeshParameters()',
-     'gen': 'BND_MeshingParametersX', 'reg': 'MeshingParametersX'},
+     'mode': 'value',
+     'gen': 'BND_MeshingParameters', 'reg': 'MeshingParameters'},
     {'type': 'Rhino.DocObjects.Texture', 'cs': 'Texture', 'on': 'ON_Texture',
-     'mode': 'pointer', 'hand': 'BND_Texture', 'hand_header': 'bnd_texture.h',
-     'copy': 'source.m_texture ? new ON_Texture(*source.m_texture) : nullptr',
-     'gen': 'BND_TextureX', 'reg': 'TextureX', 'base': 'CommonObjectX'},
+     'mode': 'pointer',
+     'gen': 'BND_Texture', 'reg': 'Texture', 'base': 'CommonObject'},
     {'type': 'Rhino.Render.TextureMapping', 'cs': 'TextureMapping', 'user_strings': True, 'on': 'ON_TextureMapping',
-     'mode': 'pointer', 'hand': 'BND_TextureMapping', 'hand_header': 'bnd_texture_mapping.h',
-     'copy': 'source.m_mapping ? new ON_TextureMapping(*source.m_mapping) : nullptr',
-     'gen': 'BND_TextureMappingX', 'reg': 'TextureMappingX', 'base': 'ModelComponentX'},
+     'mode': 'pointer',
+     'gen': 'BND_TextureMapping', 'reg': 'TextureMapping', 'base': 'ModelComponent'},
     {'type': 'Rhino.DocObjects.EarthAnchorPoint', 'cs': 'EarthAnchorPoint',
      'on': 'ON_EarthAnchorPoint',
-     'mode': 'value', 'hand': 'BND_EarthAnchorPoint', 'hand_header': 'bnd_3dm_settings.h',
-     'copy': 'source.m_anchor_point',
-     'gen': 'BND_EarthAnchorPointX', 'reg': 'EarthAnchorPointX'},
+     'mode': 'value',
+     'gen': 'BND_EarthAnchorPoint', 'reg': 'EarthAnchorPoint'},
     {'type': 'Rhino.DocObjects.ViewInfo', 'cs': 'ViewInfo', 'on': 'ON_3dmView',
-     'mode': 'value', 'hand': 'BND_ViewInfo', 'hand_header': 'bnd_3dm_settings.h',
-     'copy': 'source.m_view',
+     'mode': 'value',
      # G104: RhinoCommon's `internal ViewInfo(File3dm parent, Guid id, IntPtr ptr, bool namedViewTable)` -- a
      # LIVE view into the file's (named) view table. ConstPointer/NonConstPointer resolve it with
      # ONX_Model_ViewPointer(file, id, ptr, named); the generated view resolves on every access (RhinoCommon
      # returns its cached ptr while non-zero, which dangles once the table reallocates)
      'fileview': {'resolver': 'ONX_Model_ViewPointer', 'ctor': ['File3dm', 'Guid', 'IntPtr', 'bool']},
-     'gen': 'BND_ViewInfoX', 'reg': 'ViewInfoX'},
-    # -- more geometry: bridge copies go through Duplicate() (works for any ON_Geometry)
+     'gen': 'BND_ViewInfo', 'reg': 'ViewInfo'},
+    # -- more geometry
     {'type': 'Rhino.Geometry.Point', 'cs': 'Point', 'on': 'ON_Point',
-     'mode': 'pointer', 'hand': 'BND_Point', 'hand_header': 'bnd_pointgeometry.h',
-     'copy': ('ON_Point::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
-     'gen': 'BND_PointX', 'reg': 'PointX', 'base': 'GeometryBaseX'},
+     'mode': 'pointer',
+     'gen': 'BND_Point', 'reg': 'Point', 'base': 'GeometryBase'},
     {'type': 'Rhino.Geometry.TextDot', 'cs': 'TextDot', 'on': 'ON_TextDot',
-     'mode': 'pointer', 'hand': 'BND_TextDot', 'hand_header': 'bnd_annotationbase.h',
-     'copy': ('ON_TextDot::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
-     'gen': 'BND_TextDotX', 'reg': 'TextDotX', 'base': 'GeometryBaseX'},
+     'mode': 'pointer',
+     'gen': 'BND_TextDot', 'reg': 'TextDot', 'base': 'GeometryBase'},
     {'type': 'Rhino.Geometry.Hatch', 'cs': 'Hatch', 'on': 'ON_Hatch',
-     'mode': 'pointer', 'hand': 'BND_Hatch', 'hand_header': 'bnd_hatch.h',
-     'copy': ('ON_Hatch::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
-     'gen': 'BND_HatchX', 'reg': 'HatchX', 'base': 'GeometryBaseX'},
+     'mode': 'pointer',
+     'gen': 'BND_Hatch', 'reg': 'Hatch', 'base': 'GeometryBase'},
     {'type': 'Rhino.Geometry.SubD', 'cs': 'SubD', 'on': 'ON_SubD',
-     'mode': 'pointer', 'hand': 'BND_SubD', 'hand_header': 'bnd_subd.h',
-     'copy': ('ON_SubD::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
-     'gen': 'BND_SubDX', 'reg': 'SubDX', 'base': 'GeometryBaseX'},
+     'mode': 'pointer',
+     'gen': 'BND_SubD', 'reg': 'SubD', 'base': 'GeometryBase'},
     # -- batch 2 (G46): native-backed classes
     # an IDisposable HANDLE (specgen Handle): owns its pointer, frees it with its own Delete
     {'type': 'Rhino.FileIO.FileReference', 'cs': 'FileReference', 'on': 'ON_FileReference',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'noctor': True,
-     'gen': 'BND_FileReferenceX', 'reg': 'FileReferenceX'},
+     'mode': 'pointer', 'noctor': True,
+     'gen': 'BND_FileReference', 'reg': 'FileReference'},
     # G107: Draco compression (Luis 2026-10-19: sync c/draco.cpp, U24) -- the handle RhinoCommon's
     # DracoCompression owns (Draco_Compress / Draco_Delete); its pointee is draco.cpp's own class,
     # opaque here (compiled renamed, src/CMakeLists.txt)
     {'type': 'Rhino.FileIO.DracoCompression', 'cs': 'DracoCompression', 'on': 'BND_Draco',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'noctor': True,
-     'gen': 'BND_DracoCompressionX', 'reg': 'DracoCompressionX'},
+     'mode': 'pointer', 'noctor': True,
+     'gen': 'BND_DracoCompression', 'reg': 'DracoCompression'},
     # G96: an INTERNAL handle (never registered): AnnotationBase.GetTextRuns's elements, which
     # PlainText / TextHasRtfFormatting read through LINQ -- a pooled ON_TextRun the object
     # gives back with ON_TextRun_ReturnManagedTextRun (specgen InternalHandles)
     {'type': 'Rhino.Geometry.TextRun', 'cs': 'TextRun', 'on': 'ON_TextRun',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'noctor': True, 'internal': True,
-     'gen': 'BND_TextRunX', 'reg': 'TextRunX'},
+     'mode': 'pointer', 'noctor': True, 'internal': True,
+     'gen': 'BND_TextRun', 'reg': 'TextRun'},
     # a decal (G60): a std::shared_ptr<ON_Decal> handle (specgen SharedHandle)
     {'type': 'Rhino.Render.Decal', 'cs': 'Decal', 'on': 'ON_Decal',
-     'mode': 'pointer', 'hand': 'BND_File3dmDecal', 'bridge': False, 'noctor': True,
-     'gen': 'BND_DecalX', 'reg': 'DecalX'},
+     'mode': 'pointer', 'noctor': True,
+     'gen': 'BND_Decal', 'reg': 'Decal'},
     # an object's decals (G60): a child of its attributes keeping RhinoCommon's
     # constructor state (read-only flag, document serial number; specgen CtorStore)
     {'type': 'Rhino.Render.Decals', 'cs': 'Decals', 'on': 'ON_3dmObjectAttributes',
-     'mode': 'child', 'parent': 'ObjectAttributesX', 'hand': 'BND_File3dmDecalTable', 'bridge': False,
-     'gen': 'BND_DecalsX', 'reg': 'DecalsX'},
+     'mode': 'child', 'parent': 'ObjectAttributes',
+     'gen': 'BND_Decals', 'reg': 'Decals'},
     # mesh modifiers (G46): children of an object's attributes (old names: Displacement, ...)
     {'type': 'Rhino.FileIO.File3dmMeshModifiers', 'cs': 'File3dmMeshModifiers', 'on': 'ON_3dmObjectAttributes',
-     'mode': 'child', 'parent': 'ObjectAttributesX', 'hand': 'BND_File3dmMeshModifiers', 'bridge': False,
-     'gen': 'BND_File3dmMeshModifiersX', 'reg': 'File3dmMeshModifiersX'},
+     'mode': 'child', 'parent': 'ObjectAttributes',
+     'gen': 'BND_File3dmMeshModifiers', 'reg': 'File3dmMeshModifiers'},
     {'type': 'Rhino.FileIO.File3dmDisplacement', 'cs': 'File3dmDisplacement', 'on': 'ON_3dmObjectAttributes',
-     'mode': 'child', 'parent': 'File3dmMeshModifiersX', 'hand': 'BND_File3dmDisplacement', 'bridge': False,
-     'gen': 'BND_File3dmDisplacementX', 'reg': 'File3dmDisplacementX'},
+     'mode': 'child', 'parent': 'File3dmMeshModifiers',
+     'gen': 'BND_File3dmDisplacement', 'reg': 'File3dmDisplacement'},
     {'type': 'Rhino.FileIO.File3dmEdgeSoftening', 'cs': 'File3dmEdgeSoftening', 'on': 'ON_3dmObjectAttributes',
-     'mode': 'child', 'parent': 'File3dmMeshModifiersX', 'hand': 'BND_File3dmEdgeSoftening', 'bridge': False,
-     'gen': 'BND_File3dmEdgeSofteningX', 'reg': 'File3dmEdgeSofteningX'},
+     'mode': 'child', 'parent': 'File3dmMeshModifiers',
+     'gen': 'BND_File3dmEdgeSoftening', 'reg': 'File3dmEdgeSoftening'},
     {'type': 'Rhino.FileIO.File3dmThickening', 'cs': 'File3dmThickening', 'on': 'ON_3dmObjectAttributes',
-     'mode': 'child', 'parent': 'File3dmMeshModifiersX', 'hand': 'BND_File3dmThickening', 'bridge': False,
-     'gen': 'BND_File3dmThickeningX', 'reg': 'File3dmThickeningX'},
+     'mode': 'child', 'parent': 'File3dmMeshModifiers',
+     'gen': 'BND_File3dmThickening', 'reg': 'File3dmThickening'},
     {'type': 'Rhino.FileIO.File3dmCurvePiping', 'cs': 'File3dmCurvePiping', 'on': 'ON_3dmObjectAttributes',
-     'mode': 'child', 'parent': 'File3dmMeshModifiersX', 'hand': 'BND_File3dmCurvePiping', 'bridge': False,
-     'gen': 'BND_File3dmCurvePipingX', 'reg': 'File3dmCurvePipingX'},
+     'mode': 'child', 'parent': 'File3dmMeshModifiers',
+     'gen': 'BND_File3dmCurvePiping', 'reg': 'File3dmCurvePiping'},
     {'type': 'Rhino.FileIO.File3dmShutLining', 'cs': 'File3dmShutLining', 'on': 'ON_3dmObjectAttributes',
-     'mode': 'child', 'parent': 'File3dmMeshModifiersX', 'hand': 'BND_File3dmShutLining', 'bridge': False,
-     'gen': 'BND_File3dmShutLiningX', 'reg': 'File3dmShutLiningX'},
+     'mode': 'child', 'parent': 'File3dmMeshModifiers',
+     'gen': 'BND_File3dmShutLining', 'reg': 'File3dmShutLining'},
     # a BORROWED pointer into a mesh (specgen Borrowed): never deleted; the mesh is kept alive
     {'type': 'Rhino.Render.CachedTextureCoordinates', 'cs': 'CachedTextureCoordinates', 'on': 'ON_TextureCoordinates',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'noctor': True,
-     'gen': 'BND_CachedTextureCoordinatesX', 'reg': 'CachedTextureCoordinatesX'},
+     'mode': 'pointer', 'noctor': True,
+     'gen': 'BND_CachedTextureCoordinates', 'reg': 'CachedTextureCoordinates'},
     {'type': 'Rhino.DocObjects.Environment', 'cs': 'Environment', 'on': 'ON_Environment',
-     'mode': 'pointer', 'hand': 'BND_Environment', 'hand_header': 'bnd_texture.h',
-     'copy': 'source.m_env ? new ON_Environment(*source.m_env) : nullptr',
-     'gen': 'BND_EnvironmentX', 'reg': 'EnvironmentX', 'base': 'CommonObjectX'},
+     'mode': 'pointer',
+     'gen': 'BND_Environment', 'reg': 'Environment', 'base': 'CommonObject'},
     # -- batch 1 (G43): COMPONENTS -- objects RhinoCommon makes as (owner, key) and
     # resolves through the owner on every access (specgen Component). The proxy
     # bases exist for RhinoCommon's inheritance (protected constructors: no init).
     {'type': 'Rhino.Geometry.SurfaceProxy', 'cs': 'SurfaceProxy', 'on': 'ON_SurfaceProxy',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'noctor': True,
-     'gen': 'BND_SurfaceProxyX', 'reg': 'SurfaceProxyX', 'base': 'SurfaceX'},
+     'mode': 'pointer', 'noctor': True,
+     'gen': 'BND_SurfaceProxy', 'reg': 'SurfaceProxy', 'base': 'Surface'},
     {'type': 'Rhino.Geometry.CurveProxy', 'cs': 'CurveProxy', 'on': 'ON_CurveProxy',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'noctor': True,
-     'gen': 'BND_CurveProxyX', 'reg': 'CurveProxyX', 'base': 'CurveX'},
+     'mode': 'pointer', 'noctor': True,
+     'gen': 'BND_CurveProxy', 'reg': 'CurveProxy', 'base': 'Curve'},
     {'type': 'Rhino.Geometry.BrepFace', 'cs': 'BrepFace', 'on': 'ON_BrepFace',
-     'mode': 'pointer', 'hand': None, 'bridge': False,
-     'gen': 'BND_BrepFaceX', 'reg': 'BrepFaceX', 'base': 'SurfaceProxyX'},
+     'mode': 'pointer',
+     'gen': 'BND_BrepFace', 'reg': 'BrepFace', 'base': 'SurfaceProxy'},
     {'type': 'Rhino.Geometry.BrepEdge', 'cs': 'BrepEdge', 'on': 'ON_BrepEdge',
-     'mode': 'pointer', 'hand': None, 'bridge': False,
-     'gen': 'BND_BrepEdgeX', 'reg': 'BrepEdgeX', 'base': 'CurveProxyX'},
+     'mode': 'pointer',
+     'gen': 'BND_BrepEdge', 'reg': 'BrepEdge', 'base': 'CurveProxy'},
     {'type': 'Rhino.Geometry.BrepTrim', 'cs': 'BrepTrim', 'on': 'ON_BrepTrim',
-     'mode': 'pointer', 'hand': None, 'bridge': False,
-     'gen': 'BND_BrepTrimX', 'reg': 'BrepTrimX', 'base': 'CurveProxyX'},
+     'mode': 'pointer',
+     'gen': 'BND_BrepTrim', 'reg': 'BrepTrim', 'base': 'CurveProxy'},
     {'type': 'Rhino.Geometry.BrepVertex', 'cs': 'BrepVertex', 'on': 'ON_BrepVertex',
-     'mode': 'pointer', 'hand': None, 'bridge': False,
-     'gen': 'BND_BrepVertexX', 'reg': 'BrepVertexX', 'base': 'PointX'},
+     'mode': 'pointer',
+     'gen': 'BND_BrepVertex', 'reg': 'BrepVertex', 'base': 'Point'},
     {'type': 'Rhino.Geometry.BrepLoop', 'cs': 'BrepLoop', 'on': 'ON_BrepLoop',
-     'mode': 'pointer', 'hand': None, 'bridge': False,
-     'gen': 'BND_BrepLoopX', 'reg': 'BrepLoopX', 'base': 'GeometryBaseX'},
+     'mode': 'pointer',
+     'gen': 'BND_BrepLoop', 'reg': 'BrepLoop', 'base': 'GeometryBase'},
     # the SubD components' abstract base (G46): `Id` is the components' key
     {'type': 'Rhino.Geometry.SubDComponent', 'cs': 'SubDComponent', 'on': 'ON_SubDComponentBase',
      'mode': 'abstract', 'getter': 'RH3DM_SubDCompPtr',
-     'gen': 'BND_SubDComponentX', 'reg': 'SubDComponentX'},
+     'gen': 'BND_SubDComponent', 'reg': 'SubDComponent'},
     {'type': 'Rhino.Geometry.SubDFace', 'cs': 'SubDFace', 'on': 'ON_SubDFace',
-     'mode': 'pointer', 'hand': None, 'bridge': False,
-     'gen': 'BND_SubDFaceX', 'reg': 'SubDFaceX', 'base': 'SubDComponentX'},
+     'mode': 'pointer',
+     'gen': 'BND_SubDFace', 'reg': 'SubDFace', 'base': 'SubDComponent'},
     {'type': 'Rhino.Geometry.SubDEdge', 'cs': 'SubDEdge', 'on': 'ON_SubDEdge',
-     'mode': 'pointer', 'hand': None, 'bridge': False,
-     'gen': 'BND_SubDEdgeX', 'reg': 'SubDEdgeX', 'base': 'SubDComponentX'},
+     'mode': 'pointer',
+     'gen': 'BND_SubDEdge', 'reg': 'SubDEdge', 'base': 'SubDComponent'},
     {'type': 'Rhino.Geometry.SubDVertex', 'cs': 'SubDVertex', 'on': 'ON_SubDVertex',
-     'mode': 'pointer', 'hand': None, 'bridge': False,
-     'gen': 'BND_SubDVertexX', 'reg': 'SubDVertexX', 'base': 'SubDComponentX'},
+     'mode': 'pointer',
+     'gen': 'BND_SubDVertex', 'reg': 'SubDVertex', 'base': 'SubDComponent'},
     {'type': 'Rhino.Geometry.AnnotationBase', 'cs': 'AnnotationBase', 'on': 'ON_Annotation',
-     'mode': 'pointer', 'hand': 'BND_AnnotationBase', 'hand_header': 'bnd_annotationbase.h',
-     'copy': ('ON_Annotation::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
-     'gen': 'BND_AnnotationBaseX', 'reg': 'AnnotationBaseX', 'base': 'GeometryBaseX',
+     'mode': 'pointer',
+     'gen': 'BND_AnnotationBase', 'reg': 'AnnotationBase', 'base': 'GeometryBase',
      'delete_as_object': True,
      # G88: RhinoCommon's managed `m_parent_dimstyle`, modeled: the object (or, for a
      # File3dm view, a light copy -- a new view of the same file and id) the
@@ -339,257 +283,247 @@ CLASSES = [
                                        'prop': 'ParentDimensionStyle', 'id_prop': 'DimensionStyleId'}}},
     # the dimension classes and instance references (2026-10-20, triage batch B): portable in
     # RhinoCommon; the old bindings register them as DimLinear / DimAngular / DimRadial /
-    # DimOrdinate / InstanceReference (paired through 'hand')
+    # DimOrdinate / InstanceReference
     {'type': 'Rhino.Geometry.Dimension', 'cs': 'Dimension', 'on': 'ON_Dimension',
-     'mode': 'pointer', 'hand': 'BND_Dimension', 'hand_header': 'bnd_annotationbase.h',
-     'copy': ('ON_Dimension::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
-     'gen': 'BND_DimensionX', 'reg': 'DimensionX', 'base': 'AnnotationBaseX'},
+     'mode': 'pointer',
+     'gen': 'BND_Dimension', 'reg': 'Dimension', 'base': 'AnnotationBase'},
     {'type': 'Rhino.Geometry.LinearDimension', 'cs': 'LinearDimension', 'on': 'ON_DimLinear',
-     'mode': 'pointer', 'hand': 'BND_DimLinear', 'hand_header': 'bnd_annotationbase.h',
-     'copy': ('ON_DimLinear::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
-     'gen': 'BND_LinearDimensionX', 'reg': 'LinearDimensionX', 'base': 'DimensionX'},
+     'mode': 'pointer',
+     'gen': 'BND_LinearDimension', 'reg': 'LinearDimension', 'base': 'Dimension'},
     {'type': 'Rhino.Geometry.AngularDimension', 'cs': 'AngularDimension', 'on': 'ON_DimAngular',
-     'mode': 'pointer', 'hand': 'BND_DimAngular', 'hand_header': 'bnd_annotationbase.h',
-     'copy': ('ON_DimAngular::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
-     'gen': 'BND_AngularDimensionX', 'reg': 'AngularDimensionX', 'base': 'DimensionX'},
+     'mode': 'pointer',
+     'gen': 'BND_AngularDimension', 'reg': 'AngularDimension', 'base': 'Dimension'},
     {'type': 'Rhino.Geometry.RadialDimension', 'cs': 'RadialDimension', 'on': 'ON_DimRadial',
-     'mode': 'pointer', 'hand': 'BND_DimRadial', 'hand_header': 'bnd_annotationbase.h',
-     'copy': ('ON_DimRadial::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
-     'gen': 'BND_RadialDimensionX', 'reg': 'RadialDimensionX', 'base': 'DimensionX'},
+     'mode': 'pointer',
+     'gen': 'BND_RadialDimension', 'reg': 'RadialDimension', 'base': 'Dimension'},
     {'type': 'Rhino.Geometry.OrdinateDimension', 'cs': 'OrdinateDimension', 'on': 'ON_DimOrdinate',
-     'mode': 'pointer', 'hand': 'BND_DimOrdinate', 'hand_header': 'bnd_annotationbase.h',
-     'copy': ('ON_DimOrdinate::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
-     'gen': 'BND_OrdinateDimensionX', 'reg': 'OrdinateDimensionX', 'base': 'DimensionX'},
+     'mode': 'pointer',
+     'gen': 'BND_OrdinateDimension', 'reg': 'OrdinateDimension', 'base': 'Dimension'},
     # U12 (RH-99905, rhino 9.x e6b9e144642): GetDisplayLines uncommented upstream -- the last
     # Dimension subclass the old bindings have (G127)
     {'type': 'Rhino.Geometry.Centermark', 'cs': 'Centermark', 'on': 'ON_Centermark',
-     'mode': 'pointer', 'hand': 'BND_Centermark', 'hand_header': 'bnd_annotationbase.h',
-     'copy': ('ON_Centermark::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
-     'gen': 'BND_CentermarkX', 'reg': 'CentermarkX', 'base': 'DimensionX'},
+     'mode': 'pointer',
+     'gen': 'BND_Centermark', 'reg': 'Centermark', 'base': 'Dimension'},
     # G116 (2026-10-28, batch 2 J1): the two remaining portable annotation classes; the old
     # bindings register them as Leader / Text
     {'type': 'Rhino.Geometry.Leader', 'cs': 'Leader', 'on': 'ON_Leader',
-     'mode': 'pointer', 'hand': 'BND_Leader', 'hand_header': 'bnd_annotationbase.h',
-     'copy': ('ON_Leader::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
-     'gen': 'BND_LeaderX', 'reg': 'LeaderX', 'base': 'AnnotationBaseX'},
+     'mode': 'pointer',
+     'gen': 'BND_Leader', 'reg': 'Leader', 'base': 'AnnotationBase'},
     {'type': 'Rhino.Geometry.TextEntity', 'cs': 'TextEntity', 'on': 'ON_Text',
-     'mode': 'pointer', 'hand': 'BND_Text', 'hand_header': 'bnd_annotationbase.h',
-     'copy': ('ON_Text::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
-     'gen': 'BND_TextEntityX', 'reg': 'TextEntityX', 'base': 'AnnotationBaseX'},
+     'mode': 'pointer',
+     'gen': 'BND_TextEntity', 'reg': 'TextEntity', 'base': 'AnnotationBase'},
     {'type': 'Rhino.Geometry.InstanceReferenceGeometry', 'cs': 'InstanceReferenceGeometry', 'on': 'ON_InstanceRef',
-     'mode': 'pointer', 'hand': 'BND_InstanceReferenceGeometry', 'hand_header': 'bnd_instance.h',
-     'copy': ('ON_InstanceRef::Cast(source.GeometryPointer() ? source.GeometryPointer()->Duplicate() : nullptr)'),
-     'gen': 'BND_InstanceReferenceGeometryX', 'reg': 'InstanceReferenceGeometryX', 'base': 'GeometryBaseX'},
+     'mode': 'pointer',
+     'gen': 'BND_InstanceReferenceGeometry', 'reg': 'InstanceReferenceGeometry', 'base': 'GeometryBase'},
     # -- static classes: no instances, static members only
     {'type': 'Rhino.Geometry.Intersect.Intersection', 'cs': 'Intersection', 'on': None,
-     'mode': 'static', 'hand': None, 'bridge': False,
-     'gen': 'BND_IntersectionX', 'reg': 'IntersectionX'},
+     'mode': 'static',
+     'gen': 'BND_Intersection', 'reg': 'Intersection'},
     # G122: a managed C# class (BlockId, ArrowType: no native object) with one static over the C
     # layer -- bound for its statics only, as the old binding did (Arrowhead.GetPoints); its
     # instance members need data-class Guid / nested-enum fields (deviations D73)
     {'type': 'Rhino.Geometry.Arrowhead', 'cs': 'Arrowhead', 'on': None,
-     'mode': 'static', 'hand': None, 'bridge': False,
-     'gen': 'BND_ArrowheadX', 'reg': 'ArrowheadX'},
+     'mode': 'static',
+     'gen': 'BND_Arrowhead', 'reg': 'Arrowhead'},
     # the file's render settings: a VIEW of the file (no id) whose setters copy
     # on write and commit back (RenderSettings.Commit, see G41)
     {'type': 'Rhino.Render.RenderSettings', 'cs': 'RenderSettings', 'user_strings': True, 'on': 'ON_3dmRenderSettings',
-     'mode': 'pointer', 'hand': None, 'bridge': False,
-     'gen': 'BND_RenderSettingsX', 'reg': 'RenderSettingsX', 'base': 'CommonObjectX'},
+     'mode': 'pointer',
+     'gen': 'BND_RenderSettings', 'reg': 'RenderSettings', 'base': 'CommonObject'},
     # the RDK settings inside the render settings (DocumentOrFreeFloatingBase):
     # write-through views of the file (ON_X_FromONX_Model), or free-floating
     # objects with their own New/Delete; every property is the Variant idiom (G42)
     {'type': 'Rhino.Render.GroundPlane', 'cs': 'GroundPlane', 'on': 'ON_GroundPlane',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_GroundPlaneX', 'reg': 'GroundPlaneX'},
+     'mode': 'pointer', 'gen': 'BND_GroundPlane', 'reg': 'GroundPlane'},
     {'type': 'Rhino.Render.SafeFrame', 'cs': 'SafeFrame', 'on': 'ON_SafeFrame',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_SafeFrameX', 'reg': 'SafeFrameX'},
+     'mode': 'pointer', 'gen': 'BND_SafeFrame', 'reg': 'SafeFrame'},
     {'type': 'Rhino.Render.Sun', 'cs': 'Sun', 'on': 'ON_Sun',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_SunX', 'reg': 'SunX'},
+     'mode': 'pointer', 'gen': 'BND_Sun', 'reg': 'Sun'},
     # Luis 2026-10-16: RenderSettings.PostEffects -- the portable PostEffectCollection (free-floating,
     # ON_PostEffects) and its PostEffectData items (the old PostEffect's portable counterpart)
     {'type': 'Rhino.Render.PostEffects.PostEffectCollection', 'cs': 'PostEffectCollection', 'on': 'ON_PostEffects',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_PostEffectCollectionX', 'reg': 'PostEffectCollectionX'},
+     'mode': 'pointer', 'gen': 'BND_PostEffectCollection', 'reg': 'PostEffectCollection'},
     # a component of (collection, id) (G98: specgen DetectGuidComponent) -- the old PostEffect's
     # portable counterpart
     {'type': 'Rhino.Render.PostEffects.PostEffectData', 'cs': 'PostEffectData', 'on': 'ON_PostEffect',
-     'mode': 'pointer', 'hand': None, 'old': 'BND_File3dmPostEffect', 'bridge': False, 'noctor': True,
-     'gen': 'BND_PostEffectDataX', 'reg': 'PostEffectDataX'},
+     'mode': 'pointer', 'noctor': True,
+     'gen': 'BND_PostEffectData', 'reg': 'PostEffectData'},
     {'type': 'Rhino.Render.Skylight', 'cs': 'Skylight', 'on': 'ON_Skylight',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_SkylightX', 'reg': 'SkylightX'},
+     'mode': 'pointer', 'gen': 'BND_Skylight', 'reg': 'Skylight'},
     {'type': 'Rhino.Render.LinearWorkflow', 'cs': 'LinearWorkflow', 'on': 'ON_LinearWorkflow',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_LinearWorkflowX', 'reg': 'LinearWorkflowX'},
+     'mode': 'pointer', 'gen': 'BND_LinearWorkflow', 'reg': 'LinearWorkflow'},
     {'type': 'Rhino.Render.Dithering', 'cs': 'Dithering', 'on': 'ON_Dithering',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_DitheringX', 'reg': 'DitheringX'},
+     'mode': 'pointer', 'gen': 'BND_Dithering', 'reg': 'Dithering'},
     {'type': 'Rhino.Render.RenderChannels', 'cs': 'RenderChannels', 'on': 'ON_RenderChannels',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'gen': 'BND_RenderChannelsX', 'reg': 'RenderChannelsX'},
+     'mode': 'pointer', 'gen': 'BND_RenderChannels', 'reg': 'RenderChannels'},
     # -- File3dm: an owning ONX_Model; its tables are views onto it
     {'type': 'Rhino.FileIO.File3dm', 'cs': 'File3dm', 'on': 'ONX_Model',
-     'mode': 'pointer', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmX', 'reg': 'File3dmX'},
+     'mode': 'pointer',
+     'gen': 'BND_File3dm', 'reg': 'File3dm'},
     # the items of File3dm.Objects: a proxy (model, id) whose Geometry is a
     # copy-on-write VIEW and whose Attributes write through (ParentViews)
     {'type': 'Rhino.FileIO.File3dmObject', 'cs': 'File3dmObject', 'on': 'ON_ModelGeometryComponent',
-     'mode': 'pointer', 'hand': None, 'bridge': False, 'base': 'ModelComponentX',
-     'gen': 'BND_File3dmObjectX', 'reg': 'File3dmObjectX'},
+     'mode': 'pointer', 'base': 'ModelComponent',
+     'gen': 'BND_File3dmObject', 'reg': 'File3dmObject'},
     {'type': 'Rhino.FileIO.File3dmObjectTable', 'cs': 'File3dmObjectTable', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmObjectTableX', 'reg': 'File3dmObjectTableX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmObjectTable', 'reg': 'File3dmObjectTable'},
     {'type': 'Rhino.FileIO.File3dmSettings', 'cs': 'File3dmSettings', 'on': 'ON_3dmSettings',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
+     'mode': 'child', 'parent': 'File3dm',
      'derive': '&{p}->m_settings',
-     'gen': 'BND_File3dmSettingsX', 'reg': 'File3dmSettingsX'},
+     'gen': 'BND_File3dmSettings', 'reg': 'File3dmSettings'},
     {'type': 'Rhino.FileIO.File3dmStringTable', 'cs': 'File3dmStringTable', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmStringTableX', 'reg': 'File3dmStringTableX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmStringTable', 'reg': 'File3dmStringTable'},
     {'type': 'Rhino.FileIO.File3dmNotes', 'cs': 'File3dmNotes', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmNotesX', 'reg': 'File3dmNotesX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmNotes', 'reg': 'File3dmNotes'},
     {'type': 'Rhino.FileIO.File3dmLayerTable', 'cs': 'File3dmLayerTable', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmLayerTableX', 'reg': 'File3dmLayerTableX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmLayerTable', 'reg': 'File3dmLayerTable'},
     {'type': 'Rhino.FileIO.File3dmMaterialTable', 'cs': 'File3dmMaterialTable', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmMaterialTableX', 'reg': 'File3dmMaterialTableX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmMaterialTable', 'reg': 'File3dmMaterialTable'},
     {'type': 'Rhino.FileIO.File3dmLinetypeTable', 'cs': 'File3dmLinetypeTable', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmLinetypeTableX', 'reg': 'File3dmLinetypeTableX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmLinetypeTable', 'reg': 'File3dmLinetypeTable'},
     {'type': 'Rhino.FileIO.File3dmGroupTable', 'cs': 'File3dmGroupTable', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmGroupTableX', 'reg': 'File3dmGroupTableX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmGroupTable', 'reg': 'File3dmGroupTable'},
     # G91 (Luis 2026-10-15): File3dm.Manifest -- the public abstract ManifestTable, its bodies
     # from the internal File3dmManifestTable (`impl`) that File3dm constructs
     {'type': 'Rhino.FileIO.ManifestTable', 'cs': 'ManifestTable', 'on': 'ONX_Model', 'impl': 'File3dmManifestTable',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_ManifestTableX', 'reg': 'ManifestTableX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_ManifestTable', 'reg': 'ManifestTable'},
     {'type': 'Rhino.FileIO.File3dmDimStyleTable', 'cs': 'File3dmDimStyleTable', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmDimStyleTableX', 'reg': 'File3dmDimStyleTableX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmDimStyleTable', 'reg': 'File3dmDimStyleTable'},
     {'type': 'Rhino.FileIO.File3dmInstanceDefinitionTable', 'cs': 'File3dmInstanceDefinitionTable', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmInstanceDefinitionTableX', 'reg': 'File3dmInstanceDefinitionTableX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmInstanceDefinitionTable', 'reg': 'File3dmInstanceDefinitionTable'},
     {'type': 'Rhino.FileIO.File3dmViewTable', 'cs': 'File3dmViewTable', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmViewTableX', 'reg': 'File3dmViewTableX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmViewTable', 'reg': 'File3dmViewTable'},
     {'type': 'Rhino.FileIO.File3dmNamedConstructionPlanes', 'cs': 'File3dmNamedConstructionPlanes', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmNamedConstructionPlanesX', 'reg': 'File3dmNamedConstructionPlanesX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmNamedConstructionPlanes', 'reg': 'File3dmNamedConstructionPlanes'},
     {'type': 'Rhino.FileIO.File3dmHatchPatternTable', 'cs': 'File3dmHatchPatternTable', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmHatchPatternTableX', 'reg': 'File3dmHatchPatternTableX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmHatchPatternTable', 'reg': 'File3dmHatchPatternTable'},
     {'type': 'Rhino.FileIO.File3dmPlugInDataTable', 'cs': 'File3dmPlugInDataTable', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmPlugInDataTableX', 'reg': 'File3dmPlugInDataTableX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmPlugInDataTable', 'reg': 'File3dmPlugInDataTable'},
     # G104 (Luis: generate it): the table's item -- RhinoCommon's `internal File3dmPlugInData(File3dm parent,
     # Guid id)` stores the file and a plug-in id (registry state from CtorStore); PlugInId reads the id
     {'type': 'Rhino.FileIO.File3dmPlugInData', 'cs': 'File3dmPlugInData', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmPlugInDataX', 'reg': 'File3dmPlugInDataX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmPlugInData', 'reg': 'File3dmPlugInData'},
     # embedded files (G71): a File3dm proxy component and the file's collection of them
     # (RhinoCommon's File3dmEmbeddedFiles: Add plus a manifest enumerator, no Count)
-    # 'old': the hand class it replaces, for old-coverage only (no bridge): the old
-    # bindings register these as "EmbeddedFile" / "File3dmEmbeddedFileTable"
+    # (8.x registered these as "EmbeddedFile" / "File3dmEmbeddedFileTable")
     {'type': 'Rhino.FileIO.File3dmEmbeddedFile', 'cs': 'File3dmEmbeddedFile', 'on': 'ON_EmbeddedFile',
-     'mode': 'pointer', 'hand': None, 'old': 'BND_File3dmEmbeddedFile', 'bridge': False, 'base': 'ModelComponentX',
-     'gen': 'BND_File3dmEmbeddedFileX', 'reg': 'File3dmEmbeddedFileX'},
+     'mode': 'pointer', 'base': 'ModelComponent',
+     'gen': 'BND_File3dmEmbeddedFile', 'reg': 'File3dmEmbeddedFile'},
     {'type': 'Rhino.FileIO.File3dmEmbeddedFiles', 'cs': 'File3dmEmbeddedFiles', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'old': 'BND_File3dmEmbeddedFileTable', 'bridge': False,
-     'gen': 'BND_File3dmEmbeddedFilesX', 'reg': 'File3dmEmbeddedFilesX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmEmbeddedFiles', 'reg': 'File3dmEmbeddedFiles'},
     # render content (G87): File3dm proxies of (file, id) resolved by
     # ONX_Model_FindRenderContentFromId -- read-only, as in RhinoCommon (every member
     # goes through ConstPointer); the three collections walk the manifest by kind
     {'type': 'Rhino.FileIO.File3dmRenderContent', 'cs': 'File3dmRenderContent', 'on': 'ON_RenderContent',
-     'mode': 'pointer', 'hand': None, 'old': 'BND_File3dmRenderContent', 'bridge': False, 'base': 'ModelComponentX',
-     'proxy_nonconst': 'none', 'gen': 'BND_File3dmRenderContentX', 'reg': 'File3dmRenderContentX'},
+     'mode': 'pointer', 'base': 'ModelComponent',
+     'proxy_nonconst': 'none', 'gen': 'BND_File3dmRenderContent', 'reg': 'File3dmRenderContent'},
     {'type': 'Rhino.FileIO.File3dmRenderMaterial', 'cs': 'File3dmRenderMaterial', 'on': 'ON_RenderMaterial',
-     'mode': 'pointer', 'hand': None, 'old': 'BND_File3dmRenderMaterial', 'bridge': False, 'base': 'File3dmRenderContentX',
-     'gen': 'BND_File3dmRenderMaterialX', 'reg': 'File3dmRenderMaterialX'},
+     'mode': 'pointer', 'base': 'File3dmRenderContent',
+     'gen': 'BND_File3dmRenderMaterial', 'reg': 'File3dmRenderMaterial'},
     {'type': 'Rhino.FileIO.File3dmRenderEnvironment', 'cs': 'File3dmRenderEnvironment', 'on': 'ON_RenderEnvironment',
-     'mode': 'pointer', 'hand': None, 'old': 'BND_File3dmRenderEnvironment', 'bridge': False, 'base': 'File3dmRenderContentX',
-     'gen': 'BND_File3dmRenderEnvironmentX', 'reg': 'File3dmRenderEnvironmentX'},
+     'mode': 'pointer', 'base': 'File3dmRenderContent',
+     'gen': 'BND_File3dmRenderEnvironment', 'reg': 'File3dmRenderEnvironment'},
     {'type': 'Rhino.FileIO.File3dmRenderTexture', 'cs': 'File3dmRenderTexture', 'on': 'ON_RenderTexture',
-     'mode': 'pointer', 'hand': None, 'old': 'BND_File3dmRenderTexture', 'bridge': False, 'base': 'File3dmRenderContentX',
-     'gen': 'BND_File3dmRenderTextureX', 'reg': 'File3dmRenderTextureX'},
+     'mode': 'pointer', 'base': 'File3dmRenderContent',
+     'gen': 'BND_File3dmRenderTexture', 'reg': 'File3dmRenderTexture'},
     {'type': 'Rhino.FileIO.File3dmRenderMaterials', 'cs': 'File3dmRenderMaterials', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmRenderMaterialsX', 'reg': 'File3dmRenderMaterialsX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmRenderMaterials', 'reg': 'File3dmRenderMaterials'},
     {'type': 'Rhino.FileIO.File3dmRenderEnvironments', 'cs': 'File3dmRenderEnvironments', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmRenderEnvironmentsX', 'reg': 'File3dmRenderEnvironmentsX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmRenderEnvironments', 'reg': 'File3dmRenderEnvironments'},
     {'type': 'Rhino.FileIO.File3dmRenderTextures', 'cs': 'File3dmRenderTextures', 'on': 'ONX_Model',
-     'mode': 'child', 'parent': 'File3dmX', 'hand': None, 'bridge': False,
-     'gen': 'BND_File3dmRenderTexturesX', 'reg': 'File3dmRenderTexturesX'},
+     'mode': 'child', 'parent': 'File3dm',
+     'gen': 'BND_File3dmRenderTextures', 'reg': 'File3dmRenderTextures'},
     # -- collections: views onto a parent object (mode 'child')
     {'type': 'Rhino.Geometry.Collections.MeshVertexList', 'cs': 'MeshVertexList', 'on': 'ON_Mesh',
-     'mode': 'child', 'parent': 'MeshX', 'hand': None, 'bridge': False,
-     'gen': 'BND_MeshVertexListX', 'reg': 'MeshVertexListX'},
+     'mode': 'child', 'parent': 'Mesh',
+     'gen': 'BND_MeshVertexList', 'reg': 'MeshVertexList'},
     {'type': 'Rhino.Geometry.Collections.MeshFaceList', 'cs': 'MeshFaceList', 'on': 'ON_Mesh',
-     'mode': 'child', 'parent': 'MeshX', 'hand': None, 'bridge': False,
-     'gen': 'BND_MeshFaceListX', 'reg': 'MeshFaceListX'},
-    # 'old': the old bindings register this list as "MeshNormalList" (same members, m_N)
+     'mode': 'child', 'parent': 'Mesh',
+     'gen': 'BND_MeshFaceList', 'reg': 'MeshFaceList'},
+    # (8.x registered this list as "MeshNormalList": same members, m_N)
     {'type': 'Rhino.Geometry.Collections.MeshVertexNormalList', 'cs': 'MeshVertexNormalList', 'on': 'ON_Mesh',
-     'mode': 'child', 'parent': 'MeshX', 'hand': None, 'old': 'BND_MeshNormalList', 'bridge': False,
-     'gen': 'BND_MeshVertexNormalListX', 'reg': 'MeshVertexNormalListX'},
+     'mode': 'child', 'parent': 'Mesh',
+     'gen': 'BND_MeshVertexNormalList', 'reg': 'MeshVertexNormalList'},
     {'type': 'Rhino.Geometry.Collections.MeshVertexColorList', 'cs': 'MeshVertexColorList', 'on': 'ON_Mesh',
-     'mode': 'child', 'parent': 'MeshX', 'hand': None, 'bridge': False,
-     'gen': 'BND_MeshVertexColorListX', 'reg': 'MeshVertexColorListX'},
+     'mode': 'child', 'parent': 'Mesh',
+     'gen': 'BND_MeshVertexColorList', 'reg': 'MeshVertexColorList'},
     {'type': 'Rhino.Geometry.Collections.MeshTextureCoordinateList', 'cs': 'MeshTextureCoordinateList', 'on': 'ON_Mesh',
-     'mode': 'child', 'parent': 'MeshX', 'hand': None, 'bridge': False,
-     'gen': 'BND_MeshTextureCoordinateListX', 'reg': 'MeshTextureCoordinateListX'},
+     'mode': 'child', 'parent': 'Mesh',
+     'gen': 'BND_MeshTextureCoordinateList', 'reg': 'MeshTextureCoordinateList'},
     {'type': 'Rhino.Geometry.Collections.MeshTopologyEdgeList', 'cs': 'MeshTopologyEdgeList', 'on': 'ON_Mesh',
-     'mode': 'child', 'parent': 'MeshX', 'hand': None, 'bridge': False,
-     'gen': 'BND_MeshTopologyEdgeListX', 'reg': 'MeshTopologyEdgeListX'},
+     'mode': 'child', 'parent': 'Mesh',
+     'gen': 'BND_MeshTopologyEdgeList', 'reg': 'MeshTopologyEdgeList'},
     # G47: reached through `new BrepLoopList(this)` -- the (Brep) constructor, which nulls
     # m_brepface: members are planned from the bodies specialized for it
     {'type': 'Rhino.Geometry.Collections.BrepLoopList', 'cs': 'BrepLoopList', 'on': 'ON_Brep',
-     'mode': 'child', 'parent': 'BrepX', 'hand': None, 'bridge': False,
-     'gen': 'BND_BrepLoopListX', 'reg': 'BrepLoopListX'},
+     'mode': 'child', 'parent': 'Brep',
+     'gen': 'BND_BrepLoopList', 'reg': 'BrepLoopList'},
     {'type': 'Rhino.Geometry.Collections.BrepTrimList', 'cs': 'BrepTrimList', 'on': 'ON_Brep',
-     'mode': 'child', 'parent': 'BrepX', 'hand': None, 'bridge': False,
-     'gen': 'BND_BrepTrimListX', 'reg': 'BrepTrimListX'},
+     'mode': 'child', 'parent': 'Brep',
+     'gen': 'BND_BrepTrimList', 'reg': 'BrepTrimList'},
     {'type': 'Rhino.Geometry.Collections.BrepFaceList', 'cs': 'BrepFaceList', 'on': 'ON_Brep',
-     'mode': 'child', 'parent': 'BrepX', 'hand': None, 'bridge': False,
-     'gen': 'BND_BrepFaceListX', 'reg': 'BrepFaceListX'},
+     'mode': 'child', 'parent': 'Brep',
+     'gen': 'BND_BrepFaceList', 'reg': 'BrepFaceList'},
     {'type': 'Rhino.Geometry.Collections.BrepEdgeList', 'cs': 'BrepEdgeList', 'on': 'ON_Brep',
-     'mode': 'child', 'parent': 'BrepX', 'hand': None, 'bridge': False,
-     'gen': 'BND_BrepEdgeListX', 'reg': 'BrepEdgeListX'},
+     'mode': 'child', 'parent': 'Brep',
+     'gen': 'BND_BrepEdgeList', 'reg': 'BrepEdgeList'},
     {'type': 'Rhino.Geometry.Collections.BrepVertexList', 'cs': 'BrepVertexList', 'on': 'ON_Brep',
-     'mode': 'child', 'parent': 'BrepX', 'hand': None, 'bridge': False,
-     'gen': 'BND_BrepVertexListX', 'reg': 'BrepVertexListX'},
+     'mode': 'child', 'parent': 'Brep',
+     'gen': 'BND_BrepVertexList', 'reg': 'BrepVertexList'},
     {'type': 'Rhino.Geometry.Collections.BrepSurfaceList', 'cs': 'BrepSurfaceList', 'on': 'ON_Brep',
-     'mode': 'child', 'parent': 'BrepX', 'hand': None, 'bridge': False,
-     'gen': 'BND_BrepSurfaceListX', 'reg': 'BrepSurfaceListX'},
+     'mode': 'child', 'parent': 'Brep',
+     'gen': 'BND_BrepSurfaceList', 'reg': 'BrepSurfaceList'},
     {'type': 'Rhino.Geometry.Collections.NurbsCurvePointList', 'cs': 'NurbsCurvePointList', 'on': 'ON_NurbsCurve',
-     'mode': 'child', 'parent': 'NurbsCurveX', 'hand': None, 'bridge': False,
-     'gen': 'BND_NurbsCurvePointListX', 'reg': 'NurbsCurvePointListX'},
+     'mode': 'child', 'parent': 'NurbsCurve',
+     'gen': 'BND_NurbsCurvePointList', 'reg': 'NurbsCurvePointList'},
     {'type': 'Rhino.Geometry.Collections.NurbsCurveKnotList', 'cs': 'NurbsCurveKnotList', 'on': 'ON_NurbsCurve',
-     'mode': 'child', 'parent': 'NurbsCurveX', 'hand': None, 'bridge': False,
-     'gen': 'BND_NurbsCurveKnotListX', 'reg': 'NurbsCurveKnotListX'},
+     'mode': 'child', 'parent': 'NurbsCurve',
+     'gen': 'BND_NurbsCurveKnotList', 'reg': 'NurbsCurveKnotList'},
     {'type': 'Rhino.Geometry.Collections.NurbsSurfacePointList', 'cs': 'NurbsSurfacePointList', 'on': 'ON_NurbsSurface',
-     'mode': 'child', 'parent': 'NurbsSurfaceX', 'hand': None, 'bridge': False,
-     'gen': 'BND_NurbsSurfacePointListX', 'reg': 'NurbsSurfacePointListX'},
+     'mode': 'child', 'parent': 'NurbsSurface',
+     'gen': 'BND_NurbsSurfacePointList', 'reg': 'NurbsSurfacePointList'},
     # -- batch 1 (G43): lists of components, and children with a key
     # (`new NurbsSurfaceKnotList(this, 0)`, `new PointCloudItem(this, index)`)
     {'type': 'Rhino.Geometry.Collections.SubDFaceList', 'cs': 'SubDFaceList', 'on': 'ON_SubD',
-     'mode': 'child', 'parent': 'SubDX', 'hand': None, 'bridge': False,
-     'gen': 'BND_SubDFaceListX', 'reg': 'SubDFaceListX'},
+     'mode': 'child', 'parent': 'SubD',
+     'gen': 'BND_SubDFaceList', 'reg': 'SubDFaceList'},
     {'type': 'Rhino.Geometry.Collections.SubDEdgeList', 'cs': 'SubDEdgeList', 'on': 'ON_SubD',
-     'mode': 'child', 'parent': 'SubDX', 'hand': None, 'bridge': False,
-     'gen': 'BND_SubDEdgeListX', 'reg': 'SubDEdgeListX'},
+     'mode': 'child', 'parent': 'SubD',
+     'gen': 'BND_SubDEdgeList', 'reg': 'SubDEdgeList'},
     {'type': 'Rhino.Geometry.Collections.SubDVertexList', 'cs': 'SubDVertexList', 'on': 'ON_SubD',
-     'mode': 'child', 'parent': 'SubDX', 'hand': None, 'bridge': False,
-     'gen': 'BND_SubDVertexListX', 'reg': 'SubDVertexListX'},
+     'mode': 'child', 'parent': 'SubD',
+     'gen': 'BND_SubDVertexList', 'reg': 'SubDVertexList'},
     {'type': 'Rhino.Geometry.Collections.NurbsSurfaceKnotList', 'cs': 'NurbsSurfaceKnotList', 'on': 'ON_NurbsSurface',
-     'mode': 'child', 'parent': 'NurbsSurfaceX', 'hand': None, 'bridge': False,
-     'gen': 'BND_NurbsSurfaceKnotListX', 'reg': 'NurbsSurfaceKnotListX'},
+     'mode': 'child', 'parent': 'NurbsSurface',
+     'gen': 'BND_NurbsSurfaceKnotList', 'reg': 'NurbsSurfaceKnotList'},
     {'type': 'Rhino.Geometry.PointCloudItem', 'cs': 'PointCloudItem', 'on': 'ON_PointCloud',
-     'mode': 'child', 'parent': 'PointCloudX', 'hand': None, 'bridge': False,
-     'gen': 'BND_PointCloudItemX', 'reg': 'PointCloudItemX'},
+     'mode': 'child', 'parent': 'PointCloud',
+     'gen': 'BND_PointCloudItem', 'reg': 'PointCloudItem'},
     # `Material.PhysicallyBased => IsPhysicallyBased ? new PhysicallyBasedMaterial(this) : null`
     {'type': 'Rhino.DocObjects.PhysicallyBasedMaterial', 'cs': 'PhysicallyBasedMaterial', 'on': 'ON_Material',
-     'mode': 'child', 'parent': 'MaterialX', 'hand': None, 'bridge': False,
-     'gen': 'BND_PhysicallyBasedMaterialX', 'reg': 'PhysicallyBasedMaterialX'},
+     'mode': 'child', 'parent': 'Material',
+     'gen': 'BND_PhysicallyBasedMaterial', 'reg': 'PhysicallyBasedMaterial'},
 ]
 BY_CS = {c['cs']: c for c in CLASSES}
-# an internal implementation type is its public class (G91: File3dmManifestTable -> ManifestTableX)
+# an internal implementation type is its public class (G91: File3dmManifestTable -> ManifestTable)
 for _c in CLASSES:
     if _c.get('impl'):
         BY_CS.setdefault(_c['impl'], _c)
@@ -645,7 +579,7 @@ CS_ARG_CTYPES = {
 # which is the C layer's struct layout (sizes static_assert'ed by the
 # RH3DM_Ptr/RH3DM_Val adapters): they cross the C boundary by their bits,
 # no per-type conversion; register_value_types() fills these.
-VT_CPP = {}          # C# name -> generated struct (Plane -> BND_PlaneX)
+VT_CPP = {}          # C# name -> generated struct (Plane -> BND_Plane)
 VT_FIELDS = {}       # C# name -> its field names in layout order (m_x, m_y, m_z) (G72)
 # a scratch out local the C# body declares itself (`Plane plane; ...
 # IsPlanar(ptr, true, ref plane, tol)`) is typed by its C pointer type
@@ -679,7 +613,7 @@ def field_backed(vt, cs):
 
 
 CLASS_BODIES = {}     # (simple type, Kind, Name, (C# param types)) -> class-mode translation (G63)
-DATA_CPP = {}         # C# data class -> generated class (ConstructionPlane -> BND_ConstructionPlaneX) (G64)
+DATA_CPP = {}         # C# data class -> generated class (ConstructionPlane -> BND_ConstructionPlane) (G64)
 DATA_INFO = {}        # C# data class -> {'fields': {...}, 'props': {name: has_setter}, 'methods': {...}}
 
 
@@ -831,20 +765,13 @@ EXMAP_BASE = dict(EXMAP)
 EXMSG = {}
 # C# enum parameter/return types. The C side always takes/returns int (the C#
 # call site casts, `(int)continuityType`). 'cpp' is the binding-side spelling:
-# an enum the HAND bindings already register (reused -- registering the same
-# python name twice would throw), or an RH3DM_-prefixed enum class this
-# generator defines and registers from the manifest's Values.
+# an RH3DM_-prefixed enum class this generator defines and registers from the
+# manifest's Values (extend_enum_table adds the rest; 'py'/'js': registered names).
 CS_ENUMS = {
-    'CoordinateSystem': {'cpp': 'ON::coordinate_system', 'gen': False},
-    'TransformSimilarityType': {'cpp': 'TransformSimilarityType', 'gen': False},
-    'TransformRigidType': {'cpp': 'TransformRigidType', 'gen': False},
-    'UnitSystem':       {'cpp': 'ON::LengthUnitSystem', 'gen': False},
     'Continuity':       {'cpp': 'RH3DM_Continuity', 'gen': True},
     'IsoStatus':        {'cpp': 'RH3DM_IsoStatus', 'gen': True},
 }
 
-
-RENUMBERED_ENUMS = {}   # RhinoCommon enum -> (the hand C++ enum not reused, the differing members) (G78)
 
 # nested enums the generator registers on opennurbs' own C++ type -- the type the C layer
 # passes (ON_DimStyle::field), so no RH3DM_ copy is defined -- because the old registration is
@@ -865,144 +792,45 @@ def owned_enum_mismatches(cpp, header, rc_values):
         cur = int(part.split('=', 1)[1].strip(), 0) if '=' in part else cur + 1
         vals[part.split('=')[0].strip()] = cur
     return [(n, v, vals.get(n)) for n, v in rc_values.items() if vals.get(n) != v]
-_CPP_ENUMS = None
-
-
-def cpp_enum_values(cpp):
-    """the members and values of a C++ enum declared in opennurbs or the hand
-    bindings' headers (`ON_Dithering::Methods` -> {SimpleNoise: 0, ...}), or None"""
-    global _CPP_ENUMS
-    if _CPP_ENUMS is None:
-        _CPP_ENUMS = {}
-        heads = glob.glob(os.path.join(ROOT, 'src', 'lib', 'opennurbs', '*.h')) + glob.glob(os.path.join(ROOT, 'src', 'bindings', '*.h'))
-        for h in heads:
-            t = open(h, errors='replace').read()
-            for mm in re.finditer(r'\benum\s+(?:class\s+|struct\s+)?(\w+)\s*(?::\s*[\w ]+)?\{([^{}]*)\}', t):
-                body = re.sub(r'//[^\n]*|/\*.*?\*/', '', mm.group(2), flags=re.S)
-                vals, cur, ok = {}, -1, True
-                for part in [q.strip() for q in body.split(',') if q.strip()]:
-                    nm = part.split('=')[0].strip()
-                    if '=' in part:
-                        v = part.split('=', 1)[1].strip()
-                        try:
-                            cur = int(v, 0)
-                        except ValueError:
-                            if v in vals:
-                                cur = vals[v]
-                            else:
-                                ok = False
-                                break
-                    else:
-                        cur += 1
-                    vals[nm] = cur
-                if ok:
-                    _CPP_ENUMS.setdefault(mm.group(1), []).append(vals)
-    found = _CPP_ENUMS.get(cpp.split('::')[-1]) or []
-    return found[0] if len(found) == 1 else None
 
 
 def extend_enum_table(manifest):
-    """every namespace-level portable RhinoCommon enum gets a CS_ENUMS entry:
-    the old bindings' C++ type when they register that exact Python name
-    (re-registering it would throw), otherwise a generated RH3DM_<Name>
-    defined from the manifest's values. Nested enums (DimensionStyle.Field)
-    are left out: their short names repeat across types."""
-    hand, hand_js = {}, {}
-    for f in glob.glob(os.path.join(ROOT, 'src', 'bindings', '*.cpp')):
-        # a commented-out registration registers nothing (G128: bnd_intersect.cpp's PlaneCircleIntersection)
-        text = re.sub(r'//[^\n]*', '', open(f, errors='replace').read())
-        for cpp, name in re.findall(r'py::enum_<([^>]+)>\(m, "(\w+)"', text):
-            hand.setdefault(name, cpp.strip())
-        # nested under a class: `py::class_<...> pyDimStyle(m, "DimensionStyle");
-        # py::enum_<ON_DimStyle::field>(pyDimStyle, "Field")` is DimensionStyle.Field
-        cls_vars = dict((v, n) for v, n in re.findall(r'py::class_<[^;]*?>\s*(\w+)\s*\(m,\s*"(\w+)"', text))
-        for cpp, var, name in re.findall(r'py::enum_<([^>]+)>\((\w+), "(\w+)"', text):
-            if var in cls_vars:
-                hand.setdefault(cls_vars[var] + '.' + name, cpp.strip())
-        for cpp, name in re.findall(r'\benum_<([^>]+)>\("(\w+)"\)', text):
-            hand_js.setdefault(cpp.strip(), name)
-    # a hand enum declared only inside a .cpp (bnd_intersect.cpp's
-    # LineSphereIntersection) cannot be named by generated code -- and its
-    # Python name is taken, so no RH3DM_ copy either: members using it are
-    # refused (G49; before, a tuple silently dropped it)
-    in_headers = set()
-    for f in glob.glob(os.path.join(ROOT, 'src', 'bindings', '*.h')):
-        in_headers |= set(re.findall(r'\benum\s+(?:class\s+)?(\w+)', open(f, errors='replace').read()))
-    def visible(cpp):
-        return '::' in cpp or cpp.startswith('ON') or cpp in in_headers
-    HIDDEN_ENUMS.clear()
-    HIDDEN_ENUMS.update(n for n, c in hand.items() if not visible(c))
-    # a hand enum is reused only when it numbers RhinoCommon's members as RhinoCommon
-    # does (G78: ON_Dithering::Methods has SimpleNoise = 0, RhinoCommon 2) -- compared
-    # on the members both name; otherwise the generated enum, with RhinoCommon's values
+    """every portable RhinoCommon enum gets a CS_ENUMS entry: a generated RH3DM_<Name> (nested:
+    RH3DM_<Owner>_<Name>) defined from the manifest's values (M3: none is the old bindings'). Nested
+    enums register in their owner's generated class (Python) and under owner + name (JS)."""
     rc_values = {}
     tnames = {y['Type'] for y in manifest['members'] if y['Kind'] == 'type'}
     for x in manifest['members']:
         if x['Kind'] == 'enum' and x['Variant'] == 'portable' and x.get('EnumInts') and x.get('Values'):
             names = [v.split('=')[0].strip() for v in x['Values']]
             k = (x['Type'].replace('+', '.').split('.')[-1] + '.' + x['Name']) if x['Type'] in tnames else x['Name']
-            rc_values[k] = rc_values[k.replace('.', '')] = dict(zip(names, x['EnumInts']))   # hand keys: either spelling
-    for k in list(hand):
-        cv = cpp_enum_values(hand[k])
-        rv = rc_values.get(k)
-        if cv and rv and any(n in cv and cv[n] != v for n, v in rv.items()):
-            RENUMBERED_ENUMS[k] = (hand.pop(k), {n: (v, cv.get(n)) for n, v in rv.items() if cv.get(n) != v})
-    type_names = {x['Type'] for x in manifest['members'] if x['Kind'] == 'type'}
+            rc_values[k] = dict(zip(names, x['EnumInts']))
     seen, nested = {}, {}
     for x in manifest['members']:
         if x['Kind'] != 'enum' or x['Variant'] != 'portable':
             continue
-        if x['Type'] in type_names:
+        if x['Type'] in tnames:
             # nested (DimensionStyle.ArrowType): keyed by its owner's simple name
             nested.setdefault(x['Type'].replace('+', '.').split('.')[-1] + '.' + x['Name'], set()).add(x['Type'])
             continue
         seen.setdefault(x['Name'], set()).add(x['Type'])
     for name, owners in seen.items():
-        if name in CS_ENUMS or len(owners) != 1 or name in HIDDEN_ENUMS:
+        if name in CS_ENUMS or len(owners) != 1:
             continue
-        CS_ENUMS[name] = ({'cpp': hand[name], 'gen': False} if name in hand
-                          else {'cpp': 'RH3DM_' + name, 'gen': True})
-    # nested: Python registers it IN its owner's generated class (DimensionStyleX.ArrowType,
-    # as RhinoCommon nests it); JS has no nesting -- owner + name (the old bindings'
-    # DimensionStyleField). A hand registration under the same qualified name is reused.
+        CS_ENUMS[name] = {'cpp': 'RH3DM_' + name, 'gen': True}
     for key, owners in nested.items():
         if key in CS_ENUMS or len(owners) != 1:
             continue
-        owner = key.split('.')[0]
-        joined = key.replace('.', '')
-        if key in HIDDEN_ENUMS or joined in HIDDEN_ENUMS:
-            continue
+        owner, js = key.split('.')[0], key.replace('.', '')
         if key in OWNED_ENUMS:
             cpp, header = OWNED_ENUMS[key]
-            if key in hand or joined in hand:
-                raise SystemExit('OWNED_ENUMS %s: the old bindings still register it -- remove that' % key)
             bad = owned_enum_mismatches(cpp, header, rc_values.get(key) or {})
             if bad or not rc_values.get(key):
                 raise SystemExit('OWNED_ENUMS %s: %s does not number RhinoCommon\'s values as it does: %s'
                                  % (key, cpp, bad[:5]))
-            CS_ENUMS[key] = {'cpp': cpp, 'gen': True, 'defined': True, 'owner': owner,
-                             'js': hand_js.get(cpp, joined)}
+            CS_ENUMS[key] = {'cpp': cpp, 'gen': True, 'defined': True, 'owner': owner, 'js': js}
             continue
-        if key in hand:
-            CS_ENUMS[key] = {'cpp': hand[key], 'gen': False, 'owner': owner,
-                             'js': hand_js.get(hand[key], joined)}
-        elif joined in hand:
-            # registered by the old bindings at module level under the joined name
-            # (`EnvironmentBackgroundProjections`): reuse it, never register it twice
-            CS_ENUMS[key] = {'cpp': hand[joined], 'gen': False, 'owner': owner,
-                             'js': hand_js.get(hand[joined], joined)}
-        else:
-            CS_ENUMS[key] = {'cpp': 'RH3DM_' + key.replace('.', '_'), 'gen': True, 'owner': owner,
-                             'js': key.replace('.', '')}
-            if key in RENUMBERED_ENUMS or joined in RENUMBERED_ENUMS:
-                # the old bindings register this JS name with their (differently numbered)
-                # enum: the generated one takes its owner's generated name (G78)
-                CS_ENUMS[key]['js'] = owner + 'X' + key.split('.')[-1]
-    # a renumbered enum at module level would take the hand enum's Python name: refused
-    for k in RENUMBERED_ENUMS:
-        if '.' not in k and not any(c.get('owner') for kk, c in CS_ENUMS.items() if kk.replace('.', '') == k):
-            CS_ENUMS.pop(k, None)
-            HIDDEN_ENUMS.add(k)
+        CS_ENUMS[key] = {'cpp': 'RH3DM_' + key.replace('.', '_'), 'gen': True, 'owner': owner, 'js': js}
 
 
 # what the JS post-script (src/generated/gen_post.js, linked with --post-js) installs on the
@@ -1012,7 +840,7 @@ def extend_enum_table(manifest):
 # name) of RhinoCommon static properties, registered as zero-argument class functions, made
 # getters; `enumerable` -- classes whose RhinoCommon type is IEnumerable: for...of
 # G124: `aliases` -- (class, name, existing method): a JS-only name calling another method (hand
-# members of kind 'alias': File3dmX.destroy -> embind's delete)
+# members of kind 'alias': File3dm.destroy -> embind's delete)
 # G112: `keep_args` -- (class, member, argument index, static): the result holds that argument (Python
 # keep_alive<0, N>); `keep_set` -- (class, property): the object holds the value its setter took
 # (Python keep_alive<1, 2>, a borrowing modeled-field setter)
@@ -1031,7 +859,7 @@ GRID_ENUMS = {
 
 
 # JS value objects (G101; Luis 2026-10-17 "leaking fields"): a struct field no RhinoCommon property
-# reads directly (field_backed) was a JS field under its C++ name (CylinderX.m_basecircle). Here the
+# reads directly (field_backed) was a JS field under its C++ name (Cylinder.m_basecircle). Here the
 # RhinoCommon properties that DECOMPOSE it -- together exactly its content, each with a getter and
 # a setter -- become the value object's fields instead (getter/setter fields; set in this order).
 # A property without a setter (readonly struct) names `('ctor', other field)`: set through the
@@ -1184,8 +1012,8 @@ JS_VT_DROP = {'GetHashCode', 'Clone', 'op_Inequality', 'op_UnaryPlus', 'op_Modul
 OBSOLETE = set()     # (C# simple type, member name, parameter count) marked [Obsolete] (manifest; G106)
 
 
-# a JS function (the value type's namespace is a constructor) already owns these: `Vector3dX.length` would
-# collide with Function.length -- RhinoCommon's spelling is kept (Vector3dX.Length(v); G106)
+# a JS function (the value type's namespace is a constructor) already owns these: `Vector3d.length` would
+# collide with Function.length -- RhinoCommon's spelling is kept (Vector3d.Length(v); G106)
 JS_FN_OWN = {'length', 'name', 'prototype', 'caller', 'arguments', 'apply', 'call', 'bind', 'toString'}
 
 
@@ -1204,7 +1032,6 @@ VT_PROPS = set()     # (C# type, name) of translated instance properties (Interv
 VT_PROP_RET = {}     # (C# type, name) -> C++ return type of that property's getter
 VT_PROP_SET = set()  # (C# type, name) of translated instance properties with a setter (G67)
 VT_NUM_CTORS = set() # (C# type, arity) of translated all-numeric constructors (Point3d(x, y, z))
-HIDDEN_ENUMS = set() # Python names of hand enums declared only in a .cpp (see extend_enum_table)
 
 
 
@@ -1655,141 +1482,151 @@ def view_copyable(c):
 # generate from. gen_init calls each `init` after every generated class exists (its
 # classes may derive from generated ones), and aliases `for...of` on its tables.
 HAND_BINDINGS = [
-    {'init': 'initBitmapXBindings', 'header': 'bindings/bnd_bitmapx.h', 'iter_tables': ['File3dmBitmapTableX'],
-     'classes': ['BitmapX', 'File3dmBitmapTableX', 'File3dmBitmapTableXIter']},
+    {'init': 'initBitmapBindings', 'header': 'bindings/bnd_bitmap.h', 'iter_tables': ['File3dmBitmapTable'],
+     'classes': ['Bitmap', 'File3dmBitmapTable', 'File3dmBitmapTableIter']},
 ]
 # Hand members (G90; binding-agnostic since G123): rhino3dm-only members of a generated class
 # or value type (api/exceptions.toml [[hand_kept]]), written ONCE as plain C++ free functions
-# over it -- no binding headers: dictionaries etc. go through src/hand/hand_common.h -- and
+# over it -- no binding headers: dictionaries etc. go through src/bindings/bnd_common.h -- and
 # registered by the generator in every binding (emit_hand.hand_registrations: pybind11 and
-# embind now; nanobind in M2 by porting that one function). Files under src/hand/ are checked
-# to be binding-free. Keys:
+# embind now; nanobind in M2 by porting that one function). The files holding them are checked
+# to be binding-free. M3 layout (Luis 2026-11-01): a class's hand members live in
+# src/bindings/bnd_<class>.h/.cpp, beside its generated bnd_<class>_gen.*, named BND_<Class>_<Member>.
+# Keys:
 #   name     the Python name (RhinoCommon spelling)
 #   kind     'method'   R fn(const BND_<reg>& self, args...)
 #            'static'   R fn(args...)
 #            'property' R fn(const BND_<reg>& self); with 'set': void set(BND_<reg>& self, V)
-#   fn       the C++ function;  header: its header, relative to src/
+#   fn       the C++ function;  header: its header, relative to src/ (default bindings/bnd_<class>.h)
 #   args     the argument names (Python keywords), in order
 #   js       the JS name (default: camelCase of name); None: not registered in JS
 #   py       False: not registered in Python
 #   keep_alive  the result refers to self (a view): Python keeps self alive while it lives
 # On a value type JS has no instances (values are plain objects, G38): a method is the class
-# function `rhino.BoundingBoxX.encode(box)`, as the generated value-type members are.
+# function `rhino.BoundingBox.encode(box)`, as the generated value-type members are.
 def _hm(name, kind, fn, header, **kw):
     return dict(name=name, kind=kind, fn=fn, header=header, **kw)
 
 
-_J, _F = 'hand/hand_json.h', 'hand/hand_file3dm.h'
+_J, _F = None, None
 HAND_MEMBERS = {
-    'File3dmX': [
-        _hm('Bitmaps', 'property', 'RH3DM_Hand_File3dmX_Bitmaps', 'bindings/bnd_bitmapx.h', keep_alive=True),
+    'File3dm': [
+        _hm('Bitmaps', 'property', 'BND_File3dm_Bitmaps', 'bindings/bnd_bitmap.h', keep_alive=True),
         # F1 (kept until a portable JSON API is upstream); encode(options) is one name in JS too (JS3)
-        _hm('Encode', 'method', 'RH3DM_Hand_File3dm_Encode', _J),
-        _hm('Encode', 'method', 'RH3DM_Hand_File3dm_EncodeOptions', _J, args=['options']),
-        _hm('Decode', 'static', 'RH3DM_Hand_File3dm_Decode', _J, args=['buffer']),
+        _hm('Encode', 'method', 'BND_File3dm_Encode', _J),
+        _hm('Encode', 'method', 'BND_File3dm_EncodeOptions', _J, args=['options']),
+        _hm('Decode', 'static', 'BND_File3dm_Decode', _J, args=['buffer']),
         # F3, F4 (JS keeps the old getEmbeddedFileAsBase64Strict name for the 2-argument form)
-        _hm('RdkXml', 'method', 'RH3DM_Hand_File3dm_RdkXml', _F),
-        _hm('GetEmbeddedFileAsBase64', 'method', 'RH3DM_Hand_File3dm_GetEmbeddedFileAsBase64', _F, args=['path']),
-        _hm('GetEmbeddedFileAsBase64', 'method', 'RH3DM_Hand_File3dm_GetEmbeddedFileAsBase64Strict', _F,
+        _hm('RdkXml', 'method', 'BND_File3dm_RdkXml', _F),
+        _hm('GetEmbeddedFileAsBase64', 'method', 'BND_File3dm_GetEmbeddedFileAsBase64', _F, args=['path']),
+        _hm('GetEmbeddedFileAsBase64', 'method', 'BND_File3dm_GetEmbeddedFileAsBase64Strict', _F,
             args=['path', 'strict'], js='getEmbeddedFileAsBase64Strict'),
     ],
     # triage F (Luis 2026-10-28): F1 CommonObject/File3dm Encode/Decode; F2 the values'; F3 RdkXml; F4
-    'CommonObjectX': [
-        _hm('Encode', 'method', 'RH3DM_Hand_CommonObject_Encode', _J),
-        _hm('Decode', 'static', 'RH3DM_Hand_CommonObject_Decode', _J, args=['jsonObject']),
-        _hm('RdkXml', 'method', 'RH3DM_Hand_CommonObject_RdkXml', _F),
+    'CommonObject': [
+        _hm('Encode', 'method', 'BND_CommonObject_Encode', _J),
+        _hm('Decode', 'static', 'BND_CommonObject_Decode', _J, args=['jsonObject']),
+        _hm('RdkXml', 'method', 'BND_CommonObject_RdkXml', _F),
     ],
-    'File3dmPlugInDataX': [_hm('RdkXml', 'method', 'RH3DM_Hand_File3dmPlugInData_RdkXml', _F)],
-    'File3dmEmbeddedFileX': [_hm('Read', 'static', 'RH3DM_Hand_EmbeddedFile_Read', _F, args=['fileName'])],
+    'File3dmPlugInData': [_hm('RdkXml', 'method', 'BND_File3dmPlugInData_RdkXml', _F)],
+    'File3dmEmbeddedFile': [_hm('Read', 'static', 'BND_File3dmEmbeddedFile_Read', _F, args=['fileName'])],
     # File3dmRenderContentTable.Add, on the kind's collection (where Find went, triage H1)
-    'File3dmRenderMaterialsX': [_hm('Add', 'method', 'RH3DM_Hand_RenderMaterials_Add', _F, args=['material'])],
-    'File3dmRenderEnvironmentsX': [_hm('Add', 'method', 'RH3DM_Hand_RenderEnvironments_Add', _F, args=['environment'])],
-    'File3dmRenderTexturesX': [_hm('Add', 'method', 'RH3DM_Hand_RenderTextures_Add', _F, args=['texture'])],
-    'ArchivableDictionaryX': [
-        _hm('EncodeDict', 'static', 'RH3DM_Hand_ArchivableDictionary_EncodeDict', _J, args=['dict']),
-        _hm('DecodeDict', 'static', 'RH3DM_Hand_ArchivableDictionary_DecodeDict', _J, args=['jsonObject'])],
-    'MeshingParametersX': [
-        _hm('Encode', 'method', 'RH3DM_Hand_MeshingParameters_Encode', _J),
-        _hm('Decode', 'static', 'RH3DM_Hand_MeshingParameters_Decode', _J, args=['jsonObject']),
+    'File3dmRenderMaterials': [_hm('Add', 'method', 'BND_File3dmRenderMaterials_Add', _F, args=['material'])],
+    'File3dmRenderEnvironments': [_hm('Add', 'method', 'BND_File3dmRenderEnvironments_Add', _F, args=['environment'])],
+    'File3dmRenderTextures': [_hm('Add', 'method', 'BND_File3dmRenderTextures_Add', _F, args=['texture'])],
+    'ArchivableDictionary': [
+        _hm('EncodeDict', 'static', 'BND_ArchivableDictionary_EncodeDict', _J, args=['dict']),
+        _hm('DecodeDict', 'static', 'BND_ArchivableDictionary_DecodeDict', _J, args=['jsonObject'])],
+    'MeshingParameters': [
+        _hm('Encode', 'method', 'BND_MeshingParameters_Encode', _J),
+        _hm('Decode', 'static', 'BND_MeshingParameters_Decode', _J, args=['jsonObject']),
         # JS2 (Luis 2026-10-28): toJSON kept on the classes, over Encode (JSON.stringify calls it)
-        _hm('toJSON', 'method', 'RH3DM_Hand_MeshingParameters_ToJSON', _J, args=['key'], py=False, js='toJSON')],
+        _hm('toJSON', 'method', 'BND_MeshingParameters_ToJSON', _J, args=['key'], py=False, js='toJSON')],
 }
-HAND_MEMBERS['CommonObjectX'].append(
-    _hm('toJSON', 'method', 'RH3DM_Hand_CommonObject_ToJSON', _J, args=['key'], py=False, js='toJSON'))
+HAND_MEMBERS['CommonObject'].append(
+    _hm('toJSON', 'method', 'BND_CommonObject_ToJSON', _J, args=['key'], py=False, js='toJSON'))
 # JS-only members kept by hand (Luis 2026-10-18): EmbeddedFile.fromByteArray; File3dm.destroy,
 # now embind's delete() under the old name (the old one freed the model twice)
-HAND_MEMBERS['File3dmEmbeddedFileX'].append(
-    _hm('FromByteArray', 'static', 'RH3DM_Hand_EmbeddedFile_FromByteArray', _F, args=['bytes'], py=False))
-HAND_MEMBERS['File3dmX'].append(dict(name='destroy', kind='alias', of='delete', py=False, js='destroy'))
+HAND_MEMBERS['File3dmEmbeddedFile'].append(
+    _hm('FromByteArray', 'static', 'BND_File3dmEmbeddedFile_FromByteArray', _F, args=['bytes'], py=False))
+HAND_MEMBERS['File3dm'].append(dict(name='destroy', kind='alias', of='delete', py=False, js='destroy'))
 # overloads rhino3dm has and RhinoCommon lacks (Luis 2026-10-30: kept by hand, upstream U38): Python
 # overloads of the generated members (as the old bindings had them), JS the old split names
-_PC = 'hand/hand_pointcloud.h'
-HAND_MEMBERS['PointCloudX'] = [
-    _hm('Add', 'method', 'RH3DM_Hand_PointCloud_AddValue', _PC, args=['point', 'value'], overload=True, js='addPointValue'),
-    _hm('Insert', 'method', 'RH3DM_Hand_PointCloud_InsertValue', _PC, args=['index', 'point', 'value'], overload=True,
+_PC = None
+HAND_MEMBERS['PointCloud'] = [
+    _hm('Add', 'method', 'BND_PointCloud_AddValue', _PC, args=['point', 'value'], overload=True, js='addPointValue'),
+    _hm('Insert', 'method', 'BND_PointCloud_InsertValue', _PC, args=['index', 'point', 'value'], overload=True,
         js='insertPointValue'),
-    _hm('AddRange', 'method', 'RH3DM_Hand_PointCloud_AddRangeValues', _PC, args=['points', 'values'], overload=True,
+    _hm('AddRange', 'method', 'BND_PointCloud_AddRangeValues', _PC, args=['points', 'values'], overload=True,
         js='addRangePointsValues')]
-HAND_MEMBERS['File3dmGroupTableX'] = [
-    _hm('Delete', 'method', 'RH3DM_Hand_GroupTable_DeleteId', _PC, args=['id'], overload=True, js='deleteId')]
+HAND_MEMBERS['File3dmGroupTable'] = [
+    _hm('Delete', 'method', 'BND_File3dmGroupTable_DeleteId', _PC, args=['id'], overload=True, js='deleteId')]
 # F2 on the value types: Encode everywhere, Decode where the old binding had it
 for _t, _dec in [('BoundingBox', True), ('Plane', True), ('Sphere', True), ('Circle', False),
                  ('Point2d', False), ('Point2f', False), ('Point3d', False), ('Point3f', False), ('Point4d', False),
                  ('Vector2d', False), ('Vector3d', False), ('Vector3f', False)]:
-    HAND_MEMBERS[_t + 'X'] = [_hm('Encode', 'method', 'RH3DM_Hand_%s_Encode' % _t, _J)] + (
-        [_hm('Decode', 'static', 'RH3DM_Hand_%s_Decode' % _t, _J, args=['jsonObject'])] if _dec else [])
+    HAND_MEMBERS[_t] = [_hm('Encode', 'method', 'BND_%s_Encode' % _t, _J)] + (
+        [_hm('Decode', 'static', 'BND_%s_Decode' % _t, _J, args=['jsonObject'])] if _dec else [])
 # hand classes with no generated counterpart, registered from gen_init after every generated class:
 # a name -- an empty holder for its hand members (statics only, G123) -- or a hand TYPE (G129):
-# {name, cpp, header[, enumerable]} -- a C++ class in src/hand/ whose hand members are its instance
+# {name, cpp, header[, enumerable]} -- a hand-written C++ class whose hand members are its instance
 # members (the SubD neighbour cursors); `enumerable`: JS for...of over its count / get, as RhinoCommon
 # lists (Python iterates its __getitem__ to the IndexError)
-HAND_CLASSES = ['ArchivableDictionaryX']
+HAND_CLASSES = ['ArchivableDictionary']
 # SubD neighbours (G129; Luis 2026-10-30, option 1): `face.Edges` and friends, rhino3dm 8.32's, as lists
 # of the generated components -- as RhinoCommon's own vertex.Edges is generated (owned, each item keeping
 # the component alive), so all six neighbour properties look alike
-_SD = 'hand/hand_subd.h'
+_SD = None
 # three.js interop (G131; Luis 2026-10-08/-28): toThreejsBuffers kept, createFromThreejsBuffers its inverse
 # (the JSON family is deprecated); JS only
-_TJ = 'hand/hand_threejs.h'
-HAND_MEMBERS.setdefault('MeshX', []).extend([
-    _hm('ToThreejsBuffers', 'method', 'RH3DM_Hand_Mesh_ToThreejsBuffers', _TJ, args=['rotateToYUp'], py=False),
-    _hm('CreateFromThreejsBuffers', 'static', 'RH3DM_Hand_Mesh_CreateFromThreejsBuffers', _TJ, args=['buffers', 'rotateFromYUp'], py=False)])
-HAND_MEMBERS['PointCloudX'] += [
-    _hm('ToThreejsBuffers', 'method', 'RH3DM_Hand_PointCloud_ToThreejsBuffers', _TJ, args=['rotateToYUp'], py=False),
-    _hm('CreateFromThreejsBuffers', 'static', 'RH3DM_Hand_PointCloud_CreateFromThreejsBuffers', _TJ, args=['buffers', 'rotateFromYUp'], py=False)]
+_TJ = None
+HAND_MEMBERS.setdefault('Mesh', []).extend([
+    _hm('ToThreejsBuffers', 'method', 'BND_Mesh_ToThreejsBuffers', _TJ, args=['rotateToYUp'], py=False),
+    _hm('CreateFromThreejsBuffers', 'static', 'BND_Mesh_CreateFromThreejsBuffers', _TJ, args=['buffers', 'rotateFromYUp'], py=False)])
+HAND_MEMBERS['PointCloud'] += [
+    _hm('ToThreejsBuffers', 'method', 'BND_PointCloud_ToThreejsBuffers', _TJ, args=['rotateToYUp'], py=False),
+    _hm('CreateFromThreejsBuffers', 'static', 'BND_PointCloud_CreateFromThreejsBuffers', _TJ, args=['buffers', 'rotateFromYUp'], py=False)]
 # the JSON family (G133; Luis 2026-10-31): shipped deprecated in 9.2 -- each warns once, naming the buffers
 # member that replaces it -- and removed later; JS only, as in 8.x
-HAND_MEMBERS['MeshX'] += [
-    _hm('ToThreejsJSON', 'method', 'RH3DM_Hand_Mesh_ToThreejsJSON', _TJ, py=False, js='toThreejsJSON'),
-    _hm('ToThreejsJSONRotate', 'method', 'RH3DM_Hand_Mesh_ToThreejsJSONRotate', _TJ, args=['rotateToYUp'], py=False,
+HAND_MEMBERS['Mesh'] += [
+    _hm('ToThreejsJSON', 'method', 'BND_Mesh_ToThreejsJSON', _TJ, py=False, js='toThreejsJSON'),
+    _hm('ToThreejsJSONRotate', 'method', 'BND_Mesh_ToThreejsJSONRotate', _TJ, args=['rotateToYUp'], py=False,
         js='toThreejsJSONRotate'),
-    _hm('ToThreejsJSONMerged', 'static', 'RH3DM_Hand_Mesh_ToThreejsJSONMerged', _TJ, args=['meshes', 'rotateYUp'],
+    _hm('ToThreejsJSONMerged', 'static', 'BND_Mesh_ToThreejsJSONMerged', _TJ, args=['meshes', 'rotateYUp'],
         py=False, js='toThreejsJSONMerged'),
-    _hm('CreateFromThreejsJSON', 'static', 'RH3DM_Hand_Mesh_CreateFromThreejsJSON', _TJ, args=['data'], py=False,
+    _hm('CreateFromThreejsJSON', 'static', 'BND_Mesh_CreateFromThreejsJSON', _TJ, args=['data'], py=False,
         js='createFromThreejsJSON')]
-HAND_MEMBERS['PointCloudX'] += [
-    _hm('ToThreejsJSON', 'method', 'RH3DM_Hand_PointCloud_ToThreejsJSON', _TJ, py=False, js='toThreejsJSON'),
-    _hm('CreateFromThreejsJSON', 'static', 'RH3DM_Hand_PointCloud_CreateFromThreejsJSON', _TJ, args=['json'], py=False,
+HAND_MEMBERS['PointCloud'] += [
+    _hm('ToThreejsJSON', 'method', 'BND_PointCloud_ToThreejsJSON', _TJ, py=False, js='toThreejsJSON'),
+    _hm('CreateFromThreejsJSON', 'static', 'BND_PointCloud_CreateFromThreejsJSON', _TJ, args=['json'], py=False,
         js='createFromThreejsJSON')]
-HAND_MEMBERS['SubDFaceX'] = [_hm('Edges', 'property', 'RH3DM_Hand_SubDFace_Edges', _SD, list=True),
-                             _hm('Vertices', 'property', 'RH3DM_Hand_SubDFace_Vertices', _SD, list=True)]
-HAND_MEMBERS['SubDEdgeX'] = [_hm('Faces', 'property', 'RH3DM_Hand_SubDEdge_Faces', _SD, list=True),
-                             _hm('Vertices', 'property', 'RH3DM_Hand_SubDEdge_Vertices', _SD, list=True)]
-HAND_MEMBERS['SubDVertexX'] = [_hm('Faces', 'property', 'RH3DM_Hand_SubDVertex_Faces', _SD, list=True)]
+HAND_MEMBERS['SubDFace'] = [_hm('Edges', 'property', 'BND_SubDFace_Edges', _SD, list=True),
+                             _hm('Vertices', 'property', 'BND_SubDFace_Vertices', _SD, list=True)]
+HAND_MEMBERS['SubDEdge'] = [_hm('Faces', 'property', 'BND_SubDEdge_Faces', _SD, list=True),
+                             _hm('Vertices', 'property', 'BND_SubDEdge_Vertices', _SD, list=True)]
+HAND_MEMBERS['SubDVertex'] = [_hm('Faces', 'property', 'BND_SubDVertex_Faces', _SD, list=True)]
+
+
+# a hand member's header defaults to its class's hand file (M3 layout): bindings/bnd_<class>.h
+for _reg, _es in HAND_MEMBERS.items():
+    for _e in _es:
+        if _e.get('kind') != 'alias' and not _e.get('header'):
+            _e['header'] = 'bindings/bnd_%s.h' % _reg.lower()
 
 
 def hand_class_names():
     return {c if isinstance(c, str) else c['name'] for c in HAND_CLASSES}
 HAND_MEMBER_KEYS = {'name', 'kind', 'fn', 'header', 'args', 'js', 'py', 'keep_alive', 'set', 'of', 'overload', 'list'}
-# the one file under src/hand/ allowed to name a binding: the neutral types' implementation
-HAND_SHIM = {'hand/hand_common.h', 'hand/hand_common.cpp'}
+# the one hand file allowed to name a binding: the neutral types' implementation
+HAND_SHIM = {'bindings/bnd_common.h', 'bindings/bnd_common.cpp'}
 HAND_BINDING_WORDS = re.compile(r'\bpy::|\bnb::|\bemscripten\b|\bON_PYTHON_COMPILE\b|\bON_WASM_COMPILE\b|\bNANOBIND\b')
 
 
 def check_hand_members(regs, src_root):
     """G123: every HAND_MEMBERS entry is well formed, names a registered class or value type
-    (`regs`), and declares its functions in its header; every file under src/hand/ (but the
-    shim) is binding-free. Stops the generator otherwise."""
+    (`regs`), and declares its functions in its header; every file holding hand members (their
+    headers and .cpp, but the shim and the hand BINDINGS) is binding-free. Stops the generator
+    otherwise."""
     errs = []
     for reg, entries in HAND_MEMBERS.items():
         if reg not in regs and reg not in hand_class_names():
@@ -1825,14 +1662,21 @@ def check_hand_members(regs, src_root):
             for f in [e.get('fn')] + ([e['set']] if e.get('set') else []):
                 if not f or not re.search(r'\b%s\s*\(' % re.escape(f), text):
                     errs.append('%s: %s is not declared in %s' % (where, f, e['header']))
-    hand = os.path.join(src_root, 'hand')
-    for fn in sorted(os.listdir(hand)) if os.path.isdir(hand) else []:
-        rel = 'hand/' + fn
-        if rel not in HAND_SHIM and fn.endswith(('.h', '.cpp')):
-            for i, line in enumerate(open(os.path.join(hand, fn)), 1):
-                if HAND_BINDING_WORDS.search(line.split('//')[0]):
-                    errs.append('src/%s:%d names a binding (hand members are binding-free: '
-                                'use hand_common.h): %s' % (rel, i, line.strip()))
+    binding_files = {h['header'] for h in HAND_BINDINGS}
+    neutral = sorted({f for es in HAND_MEMBERS.values() for e in es if e.get('header') for f in
+                      (e['header'], e['header'][:-2] + '.cpp')} - binding_files - {h[:-2] + '.cpp' for h in binding_files}
+                     - HAND_SHIM)
+    for rel in neutral:
+        path = os.path.join(src_root, rel)
+        for i, line in enumerate(open(path) if os.path.isfile(path) else [], 1):
+            if HAND_BINDING_WORDS.search(line.split('//')[0]):
+                errs.append('src/%s:%d names a binding (hand members are binding-free: '
+                            'use bnd_common.h): %s' % (rel, i, line.strip()))
+    # a holder class's tag (BND_<name>) must not be a generated class's C++ name
+    taken = {c['gen'] for c in CLASSES}
+    for hc in HAND_CLASSES:
+        if isinstance(hc, str) and 'BND_' + hc in taken:
+            errs.append('HAND_CLASSES %s: its holder BND_%s is a generated class' % (hc, hc))
     if errs:
         raise SystemExit('HAND_MEMBERS (G123):\n  ' + '\n  '.join(errs))
 # a hand path BEHIND a generated member (G119): where RhinoCommon's body gives up with
@@ -1842,17 +1686,17 @@ def check_hand_members(regs, src_root):
 # anything else its switch lacks -- throws); rhino3dm 8.x's Add took any geometry. Luis
 # 2026-10-28: keep that hand path; the RhinoCommon fix is upstream U30 (D71).
 HAND_FALLBACKS = {
-    'File3dmObjectTableX': [{'member': 'Add', 'params': ['GeometryBase', 'ObjectAttributes'],
-                             'throws': 'NotSupportedException', 'header': 'bindings/bnd_objecttablex.h',
-                             'call': 'RH3DM_Hand_File3dmObjectTable_AddAny(m_ptr, item, attributes)'}],
+    'File3dmObjectTable': [{'member': 'Add', 'params': ['GeometryBase', 'ObjectAttributes'],
+                             'throws': 'NotSupportedException', 'header': 'bindings/bnd_file3dmobjecttable.h',
+                             'call': 'BND_File3dmObjectTable_AddAny(m_ptr, item, attributes)'}],
 }
 # a hand class standing in for a RhinoCommon class nothing generates (G91): RhinoCommon's
 # BitmapEntry has no working member outside Rhino (pilot #37), so where a body constructs
-# one (`new BitmapEntry(index, file)`: ManifestTable.Instantiate) the kept BitmapX is made
+# one (`new BitmapEntry(index, file)`: ManifestTable.Instantiate) the kept Bitmap is made
 # from the same arguments. A deviation, recorded as D44.
 HAND_STANDINS = {
     # the index RhinoCommon passes is the manifest's, always unset for an image (images carry
     # no model index: ON_ModelComponent::IndexRequired(Image) is false) -- so the stand-in is
     # made from Instantiate's `id` instead: (file, index) -> (file, id)
-    'BitmapEntry': {'gen': 'BND_BitmapX', 'args': ['int'], 'header': 'bindings/bnd_bitmapx.h', 'rebind': ('index', 'id')},
+    'BitmapEntry': {'gen': 'BND_Bitmap', 'args': ['int'], 'header': 'bindings/bnd_bitmap.h', 'rebind': ('index', 'id')},
 }

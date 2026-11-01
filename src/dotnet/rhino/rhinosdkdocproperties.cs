@@ -229,7 +229,9 @@ namespace Rhino.DocObjects.Tables
     public int Add(ViewInfo view)
     {
       IntPtr ptr_const_view = view.ConstPointer();
-      return UnsafeNativeMethods.CRhinoDocProperties_AddNamedView2(m_doc.RuntimeSerialNumber, ptr_const_view);
+      int rc = UnsafeNativeMethods.CRhinoDocProperties_AddNamedView2(m_doc.RuntimeSerialNumber, ptr_const_view);
+      GC.KeepAlive(view);
+      return rc;
     }
 
     /// <summary>Remove named view from the document.</summary>

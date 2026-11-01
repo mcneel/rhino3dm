@@ -19,14 +19,14 @@ const factory = require(modPath);
 
 class Skip extends Error {}
 
-factory().then(async r => {
+factory().then(async module => {
+  const r = module;
   const tests = [];
   const ctx = {
     r, assert,
     MODELS: path.join(__dirname, '..', '..', 'models'),
     // a .3dm from tests/models, through the generated reader (bytes: no host file system in WASM)
-    readModel: name => r.File3dmX.fromByteArray(new Uint8Array(fs.readFileSync(path.join(__dirname, '..', '..', 'models', name)))),
-    readOld: name => r.File3dm.fromByteArray(new Uint8Array(fs.readFileSync(path.join(__dirname, '..', '..', 'models', name)))),
+    readModel: name => r.File3dm.fromByteArray(new Uint8Array(fs.readFileSync(path.join(__dirname, '..', '..', 'models', name)))),
     approx: (a, b, tol = 1e-9, msg) => assert(Math.abs(a - b) <= tol, (msg || '') + ` ${a} != ${b} (tol ${tol})`),
     // a property generated as a JS property, or (older shape) a zero-argument function
     val: v => (typeof v === 'function' ? v() : v),
@@ -60,12 +60,8 @@ factory().then(async r => {
       if (coll && typeof coll[Symbol.iterator] === 'function') return [...coll];
       throw new Error('not iterable');
     },
-    // the old binding's curve the Python tests start from (curve())
-    curve: () => {
-      const pts = new r.Point3dList(0);
-      for (const p of [[0, 0, 0], [1, 2, 0], [4, 1, 0], [6, -2, 0]]) pts.add(p[0], p[1], p[2]);
-      return r.Curve.createControlPointCurve(pts, 3);
-    },
+    // the curve the Python tests start from (curve()), built by the generated surface
+    curve: () => r.Curve.createControlPointCurve([[0, 0, 0], [1, 2, 0], [4, 1, 0], [6, -2, 0]].map(([X, Y, Z]) => ({ X, Y, Z })), 3),
   };
   const t = (name, fn) => tests.push({ name, fn });
   const files = fs.readdirSync(__dirname).filter(f => /^test_.*\.js$/.test(f)).sort();

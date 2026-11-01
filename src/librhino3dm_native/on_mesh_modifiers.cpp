@@ -99,6 +99,12 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_HasDisplacement(const ON_3dmObjectAttr
   return (nullptr != attr) ? (nullptr != attr->MeshModifiers().Displacement()) : false;
 }
 
+RH_C_FUNCTION bool ON_3dmObjectAttributes_CreateDisplacement(ON_3dmObjectAttributes* attr)
+{
+  // Gives the attributes a displacement when they have none; an existing one is kept.
+  return nullptr != Displacement(attr);
+}
+
 RH_C_FUNCTION bool ON_3dmObjectAttributes_Displacement_GetOn(const ON_3dmObjectAttributes* attr)
 {
   const auto* dsp = Displacement(attr);
@@ -523,6 +529,12 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_HasEdgeSoftening(const ON_3dmObjectAtt
   return (nullptr != attr) ? (nullptr != attr->MeshModifiers().EdgeSoftening()) : false;
 }
 
+RH_C_FUNCTION bool ON_3dmObjectAttributes_CreateEdgeSoftening(ON_3dmObjectAttributes* attr)
+{
+  // Gives the attributes a edge softening when they have none; an existing one is kept.
+  return nullptr != EdgeSoftening(attr);
+}
+
 RH_C_FUNCTION bool ON_3dmObjectAttributes_EdgeSoftening_GetOn(const ON_3dmObjectAttributes* attr)
 {
   const auto es = EdgeSoftening(attr);
@@ -645,6 +657,12 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_HasThickening(const ON_3dmObjectAttrib
   return (nullptr != attr) ? (nullptr != attr->MeshModifiers().Thickening()) : false;
 }
 
+RH_C_FUNCTION bool ON_3dmObjectAttributes_CreateThickening(ON_3dmObjectAttributes* attr)
+{
+  // Gives the attributes a thickening when they have none; an existing one is kept.
+  return nullptr != Thickening(attr);
+}
+
 RH_C_FUNCTION void ON_3dmObjectAttributes_Thickening_SetOn(ON_3dmObjectAttributes* attr, bool b)
 {
   auto th = Thickening(attr);
@@ -729,6 +747,12 @@ RH_C_FUNCTION void ON_3dmObjectAttributes_Thickening_SetBothSides(ON_3dmObjectAt
 RH_C_FUNCTION bool ON_3dmObjectAttributes_HasCurvePiping(const ON_3dmObjectAttributes* attr)
 {
   return (nullptr != attr) ? (nullptr != attr->MeshModifiers().CurvePiping()) : false;
+}
+
+RH_C_FUNCTION bool ON_3dmObjectAttributes_CreateCurvePiping(ON_3dmObjectAttributes* attr)
+{
+  // Gives the attributes a curve piping when they have none; an existing one is kept.
+  return nullptr != CurvePiping(attr);
 }
 
 RH_C_FUNCTION bool ON_3dmObjectAttributes_CurvePiping_GetOn(const ON_3dmObjectAttributes* attr)
@@ -844,6 +868,12 @@ RH_C_FUNCTION bool ON_3dmObjectAttributes_HasShutLining(const ON_3dmObjectAttrib
   return (nullptr != attr) ? (nullptr != attr->MeshModifiers().ShutLining()) : false;
 }
 
+RH_C_FUNCTION bool ON_3dmObjectAttributes_CreateShutLining(ON_3dmObjectAttributes* attr)
+{
+  // Gives the attributes a shut-lining when they have none; an existing one is kept.
+  return nullptr != ShutLining(attr);
+}
+
 RH_C_FUNCTION bool ON_3dmObjectAttributes_ShutLining_GetOn(const ON_3dmObjectAttributes* attr)
 {
   const auto sl = ShutLining(attr);
@@ -940,6 +970,22 @@ RH_C_FUNCTION ON_UUID ON_3dmObjectAttributes_ShutLining_AddCurve(ON_3dmObjectAtt
     return ON_nil_uuid;
 
   return sl->AddCurve().Id();
+}
+
+RH_C_FUNCTION ON_UUID ON_3dmObjectAttributes_ShutLining_AddCurve2(ON_3dmObjectAttributes* attr, ON_UUID curve_id)
+{
+  // Adds a shut-lining curve that follows the curve object 'curve_id' (ON_ShutLining::AddCurve()
+  // adds one with a nil id, to be set). A curve already following 'curve_id' is not added twice.
+  auto sl = ShutLining(attr);
+  if ((nullptr == sl) || (ON_nil_uuid == curve_id))
+    return ON_nil_uuid;
+
+  if (nullptr == sl->FindCurve(curve_id))
+  {
+    sl->AddCurve().SetId(curve_id);
+  }
+
+  return curve_id;
 }
 
 RH_C_FUNCTION void ON_3dmObjectAttributes_ShutLining_DeleteAllCurves(ON_3dmObjectAttributes* attr)

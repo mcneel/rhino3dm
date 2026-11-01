@@ -24,7 +24,7 @@ def natural_size(t, by_cpp):
 
 
 def vt_file(t):
-    return 'gen_%s' % ((t['Cs'] + 'X') if not t['IsStaticClass'] else t['Cs']).lower()
+    return 'gen_%s' % t['Cs'].lower()
 
 
 def emit_valuetypes(vt, blocks):
@@ -55,6 +55,53 @@ def emit_valuetypes(vt, blocks):
     files['gen_vt_common.h'] = '\n'.join([
         VT_BANNER, '#pragma once', '#include <cmath>', '#include <limits>',
         '#include <stdexcept>', '#include <type_traits>', '#include <string>', '#include <vector>', '',
+        '#include <charconv>',
+        '#include <algorithm>',
+        '',
+        "// RhinoCommon's ToString (G136, pilot #68): a value as .NET formats it with the invariant culture.",
+        "// A double / float: the shortest round-trip digits, scientific from 1E+15 (a float's from 1E+07) and",
+        '// from 1E-05 down, with a signed exponent of at least two digits; NaN, Infinity, -Infinity, -0',
+        'template <class F>',
+        'inline std::wstring RH3DM_NetFloat(F x, int sciAt)',
+        '{',
+        '  if (x != x) return L"NaN";',
+        '  if (x == std::numeric_limits<F>::infinity()) return L"Infinity";',
+        '  if (x == -std::numeric_limits<F>::infinity()) return L"-Infinity";',
+        '  char buf[64];',
+        '  auto res = std::to_chars(buf, buf + sizeof buf, x, std::chars_format::scientific);',
+        '  std::string sci(buf, res.ptr);                     // [-]d[.ddd]e[+-]XX',
+        "  const bool neg = sci[0] == '-';",
+        '  if (neg) sci.erase(0, 1);',
+        "  const size_t e = sci.find('e');",
+        '  const int exp = std::stoi(sci.substr(e + 1));',
+        '  std::string digits = sci.substr(0, e);',
+        "  digits.erase(std::remove(digits.begin(), digits.end(), '.'), digits.end());",
+        '  std::string out;',
+        '  if (exp >= sciAt || exp < -4)',
+        '  {',
+        '    out = digits.substr(0, 1);',
+        '    if (digits.size() > 1) out += "." + digits.substr(1);',
+        '    std::string ex = std::to_string(exp < 0 ? -exp : exp);',
+        '    if (ex.size() < 2) ex = "0" + ex;',
+        '    out += std::string("E") + (exp < 0 ? "-" : "+") + ex;',
+        '  }',
+        '  else if (exp < 0)',
+        '    out = "0." + std::string((size_t)(-exp - 1), \'0\') + digits;',
+        '  else if ((int)digits.size() <= exp + 1)',
+        "    out = digits + std::string((size_t)(exp + 1) - digits.size(), '0');",
+        '  else',
+        '    out = digits.substr(0, (size_t)exp + 1) + "." + digits.substr((size_t)exp + 1);',
+        '  if (neg) out = "-" + out;',
+        '  return std::wstring(out.begin(), out.end());',
+        '}',
+        'inline std::wstring RH3DM_NetStr(double x) { return RH3DM_NetFloat<double>(x, 15); }',
+        'inline std::wstring RH3DM_NetStr(float x) { return RH3DM_NetFloat<float>(x, 7); }',
+        'inline std::wstring RH3DM_NetStr(bool b) { return b ? L"True" : L"False"; }',
+        'template <class I, typename std::enable_if<std::is_integral<I>::value && !std::is_same<I, bool>::value, int>::type = 0>',
+        'inline std::wstring RH3DM_NetStr(I i) { return std::to_wstring(i); }',
+        'inline const std::wstring& RH3DM_NetStr(const std::wstring& s) { return s; }',
+        "template <class T> inline auto RH3DM_NetStr(const T& v) -> decltype(v.ToString()) { return v.ToString(); }   // a value's own",
+        '',
         '// C# semantics helpers: Math.Max/Min promote mixed arguments;',
         '// Math.Sign returns int',
         'template <class A, class B> inline typename std::common_type<A, B>::type',
@@ -192,7 +239,7 @@ def emit_valuetypes(vt, blocks):
         cpp += [m['Def'] + '\n' for m in mine if m.get('Def')]
         if t['Cs'] in blocks:
             py_block, js_tag, js_block = blocks[t['Cs']]
-            reg = t['Cs'] + 'X'
+            reg = t['Cs']
             cpp.append(''.join('#include "%s"\n' % h for h in sorted(BRIDGE_INCLUDES.get(t['Cs'], ())))
                        + ''.join('#include "%s"\n' % h for h in hand_headers(reg))
                        + '''#include "gen_common.h"
@@ -234,7 +281,7 @@ def emit_valuetype_bindings(vt, skipped):
     repr, a sequence constructor and implicit conversion from tuple/list.
     JS: embind value_object, so a value is a plain garbage-collected
     {X, Y, Z} object (no wasm-heap instance, no .delete()); behavior is
-    exposed as functions, rhino.Point3dX.DistanceTo(p, q), and mutating
+    exposed as functions, rhino.Point3d.DistanceTo(p, q), and mutating
     members return the new value since a JS value is a copy."""
     blocks = {}   # C# type -> (py block, js tag decl, js block)
     # the JS property identifying a value object's shape: its first field's
@@ -249,7 +296,7 @@ def emit_valuetype_bindings(vt, skipped):
         if t['IsStaticClass']:
             continue
         T, cs = t['Cpp'], t['Cs']
-        reg = cs + 'X'
+        reg = cs
         if t.get('IsData'):
             blocks[cs] = emit_data_bindings(t, vt, skipped)
             continue
@@ -379,6 +426,9 @@ def emit_valuetype_bindings(vt, skipped):
                 self_sig = ', '.join(['%s& self' % T] + ([sig(m)] if sig(m) else []))
                 pyl.append('      .def("%s", [](%s) { return %s; }%s)'
                            % (n, self_sig, pub(m, 'self.%s(%s)' % (n, names(m))), pyargs(m)))
+                if n == 'ToString' and not m['Params']:
+                    # G136 (pilot #68): str() is RhinoCommon's ToString (8.x's RH3DM-180 "1,2,3"); repr stays the class form
+                    pyl.append('      .def("__str__", [](%s& self) { return self.ToString(); })' % T)
                 types = [T] + [p['Type'] for p in m['Params']]
                 call = 'a0.%s(%s)' % (n, ', '.join('a%d' % (i + 1) for i in range(len(m['Params']))))
                 if m['Ret'] == 'void':     # mutator: a JS value is a copy -> return it
@@ -619,7 +669,7 @@ def emit_data_bindings(t, vt, skipped):
     unregistered generic base (RhinoList) are bound on its first registered
     subclass."""
     T, cs = t['Cpp'], t['Cs']
-    reg = cs + 'X'
+    reg = cs
     if reg in HAND_MEMBERS:
         raise SystemExit('HAND_MEMBERS %s: a data class takes no hand members yet (G123)' % reg)
     if cs in MONO_BASES:
@@ -678,7 +728,7 @@ def emit_data_bindings(t, vt, skipped):
     js_ctor_arity = set()
     # same-arity constructors (Point3dList(int capacity) / (IEnumerable<Point3d> points)): one JS
     # constructor dispatching on argument shape -- before, all but the first were dropped, and
-    # `new Point3dListX([p, p, p])` silently took the capacity constructor (an empty list)
+    # `new Point3dList([p, p, p])` silently took the capacity constructor (an empty list)
     from emit_classes import js_class_shape, js_shadowed, js_branch_order
     by_arity = {}
     for m in ctors:

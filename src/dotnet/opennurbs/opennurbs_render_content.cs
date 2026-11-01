@@ -558,6 +558,64 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
+    /// Sets a copy of another render content as the child in the specified child slot,
+    /// replacing any existing child in that slot.
+    /// </summary>
+    /// <param name="child">The render content to copy into the child slot.</param>
+    /// <param name="childSlotName">The child slot name.</param>
+    /// <returns>True if successful, else false.</returns>
+    /// <since>9.1</since>
+    public bool SetChild(File3dmRenderContent child, string childSlotName)
+    {
+      // ConstPointer, as in SetParameter: a copy would take the change and lose it.
+      bool rc = UnsafeNativeMethods.ON_RenderContent_SetChild(ConstPointer(), child?.ConstPointer() ?? IntPtr.Zero, childSlotName);
+      GC.KeepAlive(this);
+      GC.KeepAlive(child);
+      return rc;
+    }
+
+    /// <summary>
+    /// Sets the on-ness property for the texture in the specified child slot.
+    /// </summary>
+    /// <param name="childSlotName">The child slot name of the texture.</param>
+    /// <param name="on">Value for the on-ness property.</param>
+    /// <returns>True if successful, else false.</returns>
+    /// <since>9.1</since>
+    public bool SetChildSlotOn(string childSlotName, bool on)
+    {
+      bool rc = UnsafeNativeMethods.ON_RenderContent_SetChildSlotOn(ConstPointer(), childSlotName, on);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the amount property for the texture in the specified child slot.
+    /// </summary>
+    /// <param name="childSlotName">The child slot name of the texture.</param>
+    /// <returns>The amount, typically from 0.0 to 100.0; 0.0 if the slot has no amount.</returns>
+    /// <since>9.1</since>
+    public double ChildSlotAmount(string childSlotName)
+    {
+      double rc = UnsafeNativeMethods.ON_RenderContent_ChildSlotAmount(ConstPointer(), childSlotName);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Sets the amount property for the texture in the specified child slot.
+    /// </summary>
+    /// <param name="childSlotName">The child slot name of the texture.</param>
+    /// <param name="amount">The texture amount. Values are typically from 0.0 to 100.0.</param>
+    /// <returns>True if successful, else false.</returns>
+    /// <since>9.1</since>
+    public bool SetChildSlotAmount(string childSlotName, double amount)
+    {
+      bool rc = UnsafeNativeMethods.ON_RenderContent_SetChildSlotAmount(ConstPointer(), childSlotName, amount);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
     /// Gets the render content's state as an XML string.
     /// </summary>
     /// <since>8.0</since>
@@ -569,6 +627,20 @@ namespace Rhino.FileIO
         GC.KeepAlive(this);
         return sw.ToString();
       }
+    }
+
+    /// <summary>
+    /// Sets the render content's state from an XML string.
+    /// </summary>
+    /// <param name="xml">The XML, as returned by <see cref="XML(bool)"/>.</param>
+    /// <returns>True if successful, else false.</returns>
+    /// <since>9.2</since>
+    public bool SetXML(string xml)
+    {
+      // ConstPointer, as in SetParameter: a copy would take the change and lose it.
+      bool rc = UnsafeNativeMethods.ON_RenderContent_SetXML(ConstPointer(), xml);
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>

@@ -820,6 +820,8 @@ namespace Rhino.Geometry
       IntPtr rebuildOptions_ptr = rebuildOptions.ConstPointer();
       IntPtr result = UnsafeNativeMethods.ON_Curve_NurbsCurveFit2(curve_ptr, domain, rebuildOptions_ptr, 
         ref maximumSeparation, ref thisSeparationParameter, ref nurbsSeparationParameter);    
+      GC.KeepAlive(curve);
+      GC.KeepAlive(rebuildOptions);
       if (IntPtr.Zero == result) return null;
       else
         return GeometryBase.CreateGeometryHelper(result, null) as NurbsCurve;
@@ -2114,7 +2116,7 @@ namespace Rhino.Geometry
     /// <param name="textStyle">The font style. The font style can be any number of the following: 0 - Normal, 1 - Bold, 2 - Italic</param>
     /// <param name="closeLoops">Set this value to True when dealing with normal fonts and when you expect closed loops. You may want to set this to False when specifying a single-stroke font where you don't want closed loops.</param>
     /// <param name="plane">The plane on which the outline curves will lie.</param>
-    /// <param name="smallCapsScale">Displays lower-case letters as small caps. Set the relative text size to a percentage of the normal text.</param>
+    /// <param name="smallCapsScale">Displays lower-case letters as small caps. Set the relative text size to a percentage of the normal text. Use 1.0 for no small caps.</param>
     /// <param name="tolerance">The tolerance for the operation.</param>
     /// <returns>An array containing one or more curves if successful.</returns>
     /// <since>6.0</since>
@@ -4477,6 +4479,11 @@ namespace Rhino.Geometry
     /// <returns>
     /// true if the curve has at least the c type continuity at the parameter t.
     /// </returns>
+    /// <remarks>
+    /// G1 uses a 1 degree tangent angle tolerance. G2 reports a discontinuity if the curvature
+    /// vectors differ in direction by more than 2 degrees or in magnitude by more than 5%.
+    /// These tolerances do not depend on the document's angle tolerance.
+    /// </remarks>
     /// <since>5.0</since>
     [ConstOperation]
     public bool IsContinuous(Continuity continuityType, double t)
@@ -4528,6 +4535,11 @@ namespace Rhino.Geometry
     ///  ends of their domains.  All closed curves (IsClosed()=true) are at least C0_locus_continuous at 
     ///  the ends of their domains.
     /// </returns>
+    /// <remarks>
+    /// G1 uses a 1 degree tangent angle tolerance. G2 reports a discontinuity if the curvature
+    /// vectors differ in direction by more than 2 degrees or in magnitude by more than 5%.
+    /// These tolerances do not depend on the document's angle tolerance.
+    /// </remarks>
     /// <since>5.0</since>
     [ConstOperation]
     public bool GetNextDiscontinuity(Continuity continuityType, double t0, double t1, out double t)
@@ -4549,13 +4561,18 @@ namespace Rhino.Geometry
     /// </param>
     /// <param name="cosAngleTolerance">
     /// default = cos(1 degree) Used only when continuity is G1_continuous or G2_continuous.
-    /// If the  cosine of the angle between two tangent vectors is &lt;= cos_angle_tolerance,
+    /// If the cosine of the angle between two tangent vectors is &lt;= cosAngleTolerance,
     /// then a G1 discontinuity is reported.
+    /// For G2, values tighter than cos(1 degree) are treated as cos(1 degree), and angles
+    /// less than about 18 degrees are doubled for the curvature direction test. With the
+    /// default, a G2 discontinuity is reported if the curvature vectors differ by more than 2 degrees.
     /// </param>
     /// <param name="curvatureTolerance">
-    /// (default = ON_SQRT_EPSILON) Used only when continuity is G2_continuous. If K0 and K1
-    /// are curvatures evaluated from above and below and |K0 - K1| &gt; curvature_tolerance,
-    /// then a curvature discontinuity is reported.
+    /// (default = RhinoMath.SqrtEpsilon) Used only when continuity is G2_continuous. If K0 and K1
+    /// are curvatures evaluated from above and below and |K0 - K1| &lt;= curvatureTolerance,
+    /// then the curvature is considered continuous. Otherwise, a curvature discontinuity is
+    /// reported if the curvature direction test fails or ||K0| - |K1|| &gt; 0.05 * max(|K0|, |K1|).
+    /// Increasing curvatureTolerance can only loosen the test.
     /// </param>
     /// <param name="t1">
     /// (t0 != t1)  If there is a discontinuity at t1 it will be ignored unless continuityType is
@@ -7176,14 +7193,15 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// If the curvature &lt;= <see cref="CurvatureKinkZeroTolerance"/>, then it
-    /// is treated as zero curvature. Put another way, if
-    /// (radius of curvature) *  <see cref="CurvatureKinkZeroTolerance"/> &gt;= 1,
-    /// then the radius is treated as infinite.
+    /// If the curvature &lt;= <see cref="CurvatureKinkZeroTolerance"/>, then it is treated as flat:
+    /// its value is treated as <see cref="CurvatureKinkZeroTolerance"/> and the direction of the
+    /// curvature vector is ignored. Put another way, every radius of curvature
+    /// &gt;= 1/<see cref="CurvatureKinkZeroTolerance"/> is treated as 1/<see cref="CurvatureKinkZeroTolerance"/>.
+    /// If you know of a finite radius R that should be considered flat, set this to 1.0/R.
     /// If <see cref="CurvatureKinkZeroTolerance"/> &gt; 0, then the curvature
     /// kink test is scale dependent.
     /// If <see cref="CurvatureKinkZeroTolerance"/> = 0, then the curvature kink
-    /// test is indpendent of scale.
+    /// test is independent of scale. The default is 0.
     /// </summary>
     /// <returns></returns>
     /// <since>9.0</since>
@@ -7344,13 +7362,21 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Calculates the curvature radius ratio and the angle between the two curvature vectors.  
+    /// Calculates the curvature radius ratio and the angle between the two curvature vectors,
+    /// as used by <see cref="IsCurvatureKink(Vector3d, Vector3d)"/>.
     /// </summary>
     /// <param name="curvatureFromBelow"></param>
     /// <param name="curvatureFromAbove"></param>
-    /// <param name="radiusOfCurvatureRatio"></param>
-    /// <param name="curvatureVectorAngleDegrees">If one or both of the vectors have zero length, this returns RhinoMath.UnsetValue</param>
-    /// <returns></returns>
+    /// <param name="radiusOfCurvatureRatio">
+    /// min/max of the lengths of curvatureFromBelow and curvatureFromAbove, where a length
+    /// &lt;= <see cref="CurvatureKinkZeroTolerance"/> is treated as <see cref="CurvatureKinkZeroTolerance"/>.
+    /// This is 1 when both lengths are &lt;= <see cref="CurvatureKinkZeroTolerance"/>.
+    /// </param>
+    /// <param name="curvatureVectorAngleDegrees">
+    /// The angle between curvatureFromBelow and curvatureFromAbove. If one or both lengths are
+    /// &lt;= <see cref="CurvatureKinkZeroTolerance"/>, the direction is ignored and this returns RhinoMath.UnsetValue.
+    /// </param>
+    /// <returns>True if the calculation is successful.</returns>
     /// <since>9.0</since>
     public bool ComputeCurvatureRadiusRatio(Vector3d curvatureFromBelow, Vector3d curvatureFromAbove, 
       out double radiusOfCurvatureRatio, out double curvatureVectorAngleDegrees)
@@ -7364,14 +7390,15 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// True if the angle between curvature_from_below and curvature_from_above is &gt; <see cref="KinkAngleDegrees"/>
-    /// or the ratio min/max &lt; <see cref="CurvatureKinkRadiusRatio"/>, where
-    /// min and max are the minimum and maximum lengths of curvatureFromBelow and v.
-    /// Both of these tests are scale independent.
-    /// If an input curvature vector has length &lt;= <see cref="CurvatureKinkZeroTolerance"/>, then that
-    /// curvature is treated as zero. When is <see cref="CurvatureKinkZeroTolerance"/> &gt; 0, the
-    /// test is scale dependent. The default value is chosen to work reasonably well
-    /// for most models at most scales.
+    /// True if the ratio min/max &lt;= <see cref="CurvatureKinkRadiusRatio"/>, where min and max are the
+    /// minimum and maximum lengths of curvatureFromBelow and curvatureFromAbove,
+    /// or if the angle between curvatureFromBelow and curvatureFromAbove is &gt; <see cref="KinkAngleDegrees"/>.
+    /// If a curvature vector has length &lt;= <see cref="CurvatureKinkZeroTolerance"/>, it is treated as flat:
+    /// its length is treated as <see cref="CurvatureKinkZeroTolerance"/> in the ratio and its direction is
+    /// ignored, so the angle test is only done when both lengths are &gt; <see cref="CurvatureKinkZeroTolerance"/>.
+    /// Two flat curvatures are never a kink.
+    /// When <see cref="CurvatureKinkZeroTolerance"/> = 0, both tests are scale independent.
+    /// When <see cref="CurvatureKinkZeroTolerance"/> &gt; 0, the test is scale dependent.
     /// </summary>
     /// <param name="curvatureFromBelow"></param>
     /// <param name="curvatureFromAbove"></param>

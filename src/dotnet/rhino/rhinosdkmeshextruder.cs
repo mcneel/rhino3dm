@@ -28,6 +28,7 @@ namespace Rhino.Geometry
             }
 
             m_ptr = UnsafeNativeMethods.RHC_RhinoMeshExtruder_New(inputMesh.ConstPointer(), ComponentIndices.NonConstPointer());
+            GC.KeepAlive(inputMesh);
           GC.KeepAlive(this);
         }
         /// <summary>

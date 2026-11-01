@@ -25,79 +25,11 @@ EMSCRIPTEN_BINDINGS(rhino3dm) {
 #endif
 
   ON::Begin();
-  initFileUtilitiesBindings(m);
-  initDefines(m);
-  initIntersectBindings(m);
-  initPolylineBindings(m);
-  initPlaneBindings(m);
-  initObjectBindings(m);
-  initModelComponentBindings(m);
-  init3dmSettingsBindings(m);
-  init3dmAttributesBindings(m);
-  initBitmapBindings(m);
-  initDimensionStyleBindings(m);
-  initLayerBindings(m);
-  initMaterialBindings(m);
-  initEmbeddedFileBindings(m);
-  initSkylightBindings(m);
-  initGroundPlaneBindings(m);
-  initSafeFrameBindings(m);
-  initDitheringBindings(m);
-  initLinearWorkflowBindings(m);
-  initRenderEnvironmentsBindings(m);
-  initRenderChannelsBindings(m);
-  initRenderContentBindings(m);
-  initSunBindings(m);
-  initPostEffectBindings(m);
-  initDecalBindings(m);
-  initMeshModifierBindings(m);
-  initEnvironmentBindings(m);
-  initTextureBindings(m);
-  initTextureMappingBindings(m);
-  initPointBindings(m);
-  initXformBindings(m);
-  initArcBindings(m);
-  initBoundingBoxBindings(m);
-  initBoxBindings(m);
-  initGeometryBindings(m);
-  initAnnotationBaseBindings(m);
-  initInstanceBindings(m);
-  initHatchBindings(m);
-  initPointCloudBindings(m);
-  initPointGeometryBindings(m);
-  initPointGridBindings(m);
-  initCurveBindings(m);
-  initCurveProxyBindings(m);
-  initNurbsCurveBindings(m);
-  initMeshBindings(m);
-  initCircleBindings(m);
-  initConeBindings(m);
-  initCylinderBindings(m);
-  initEllipseBindings(m);
-  initFontBindings(m);
-  initArcCurveBindings(m);
-  initBezierBindings(m);
-  initLineCurveBindings(m);
-  initPolyCurveBindings(m);
-  initPolylineCurveBindings(m);
-  initSurfaceBindings(m);
-  initRevSurfaceBindings(m);
-  initSubDBindings(m);
-  initSurfaceProxyBindings(m);
-  initPlaneSurfaceBindings(m);
-  initBrepBindings(m);
-  initExtrusionBindings(m);
-  initNurbsSurfaceBindings(m);
-  initLightBindings(m);
-  initSphereBindings(m);
-  initViewportBindings(m);
-  initGroupBindings(m);
-  initExtensionsBindings(m);
-  initDracoBindings(m);
-  initRTreeBindings(m);
-  initLinetypeBindings(m);
-#if defined(RHINOCORE_BINDINGS)
-  initRhinoDocBindings(m);
+  // every class, enum and hand-maintained member: tools/generate/bnd_gen.py (bnd_init_gen.cpp)
+#if defined(ON_PYTHON_COMPILE)
+  { extern void initGeneratedBindings(rh3dmpymodule& m); initGeneratedBindings(m); }
+#else
+  { extern void initGeneratedBindings(void); initGeneratedBindings(); (void)m; }
 #endif
 }
 

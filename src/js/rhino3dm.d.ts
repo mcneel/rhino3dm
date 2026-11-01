@@ -4769,6 +4769,7 @@ declare module 'rhino3dm' {
 		 * @param {Mesh[]} meshes The array of Rhino meshes.
 		 * @param {boolean} rotateYUp Whether or not to orient the result to Y up.
 		 * @returns {object} A Three.js bufferGeometry.
+		 * @deprecated Since 9.2; will be removed. Append the meshes into one and use toThreejsBuffers.
 		 */
 		static toThreejsJSONMerged(meshes: Mesh[], rotateYUp: boolean ): object;
 		/**
@@ -4854,14 +4855,16 @@ declare module 'rhino3dm' {
 		/**
 		 * @description Creates a Three.js bufferGeometry from a Rhino mesh.
 		 * @returns {object} A Three.js bufferGeometry.
+		 * @deprecated Since 9.2; will be removed. Use toThreejsBuffers(false).
 		 */
 		toThreejsJSON(): object;
 		/**
 		 * @description Creates a Three.js bufferGeometry from a Rhino mesh. 
 		 * @param {boolean} rotateToYUp Rotate the result to Y up.
 		 * @returns {object} A Three.js bufferGeometry.
+		 * @deprecated Since 9.2; will be removed. Use toThreejsBuffers(rotateToYUp).
 		 */
-		toThreejsJSON(rotateToYUp: boolean): object;
+		toThreejsJSONRotate(rotateToYUp: boolean): object;
 		/**
 		 * @description Exports the mesh as zero-copy typed arrays for Three.js BufferAttributes.
 		 * Faster than toThreejsJSON for large meshes: each attribute is bulk-copied out of the
@@ -4871,9 +4874,17 @@ declare module 'rhino3dm' {
 		 */
 		toThreejsBuffers(rotateToYUp: boolean): object;
 		/**
+		 * @description Creates a Rhino mesh from three.js buffers, the inverse of toThreejsBuffers.
+		 * @param {object} buffers { position, index?, normal?, uv?, color? }: typed or plain arrays of numbers
+		 * @param {boolean} rotateFromYUp Undo toThreejsBuffers(true)'s rotation to Y up.
+		 * @returns {Mesh}
+		 */
+		static createFromThreejsBuffers(buffers: object, rotateFromYUp: boolean): Mesh;
+		/**
 		 * @description Creates a Rhino mesh from a Three.js buffer geometry.
 		 * @param {object} object A js object in the form of { data: bufferGeometry }
 		 * @returns {Mesh}
+		 * @deprecated Since 9.2; will be removed. Use createFromThreejsBuffers(buffers, true).
 		 */
 		static createFromThreejsJSON( object: object ): Mesh;
 	}
@@ -6211,10 +6222,24 @@ declare module 'rhino3dm' {
 		/**
 		 * @description Converts a Rhino point cloud to a Three.js bufferGeometry
 		 * @returns {object} A Three.js bufferGeometry.
+		 * @deprecated Since 9.2; will be removed. Use toThreejsBuffers(false).
 		 */
 		toThreejsJSON(): object;
-		/** ... */
+		/** @deprecated Since 9.2; will be removed. Use createFromThreejsBuffers(buffers, false). */
 		static createFromThreejsJSON(json: object): PointCloud;
+		/**
+		 * @description Exports the point cloud as typed arrays for three.js BufferAttributes.
+		 * @param {boolean} rotateToYUp Rotate the result to Y up.
+		 * @returns {object} { position: Float32Array, pointCount: number, color?: Float32Array, normal?: Float32Array }
+		 */
+		toThreejsBuffers(rotateToYUp: boolean): object;
+		/**
+		 * @description Creates a point cloud from three.js buffers, the inverse of toThreejsBuffers.
+		 * @param {object} buffers { position, normal?, color? }: typed or plain arrays of numbers
+		 * @param {boolean} rotateFromYUp Undo toThreejsBuffers(true)'s rotation to Y up.
+		 * @returns {PointCloud}
+		 */
+		static createFromThreejsBuffers(buffers: object, rotateFromYUp: boolean): PointCloud;
 	}
 
 	class PointCloudItem {

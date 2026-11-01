@@ -249,6 +249,7 @@ namespace Rhino.Render
                                  m_rhino_doc_serial, ConstPointer(), (ulong)flags, lw.CppPointer);
 
       GC.KeepAlive(this);
+      GC.KeepAlive(lw);
       return ret;
     }
 #endif

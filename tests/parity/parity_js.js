@@ -3,7 +3,7 @@
 //   node tests/parity/parity_js.js <path/to/rhino3dm.js>
 //
 // Generated value types are plain {X, Y, Z} objects; behavior is
-// rhino.Point3dX.distanceTo(p, q) (camelCase: G106), mutators return the new value. Cases that
+// rhino.Point3d.distanceTo(p, q) (camelCase: G106), mutators return the new value. Cases that
 // expect an exception are skipped: the wasm build has C++ exceptions off
 // (a tracked JS policy question), so a throw would abort the module. The old
 // JS bindings are not compared -- their Point3d is a bare array with no
@@ -40,7 +40,7 @@ function decode(rhino, v) {
   if (v !== null && typeof v === 'object' && 'new' in v) {
     // {"new": T, "args": [...]}: a value type through its RhinoCommon constructor (`create`), a
     // class (G113: a DimensionStyle argument) through `new`
-    const C = rhino[v.new + 'X'], a = v.args.map(x => decode(rhino, x));
+    const C = rhino[v.new], a = v.args.map(x => decode(rhino, x));
     return typeof C.create === 'function' ? C.create(...a) : new C(...a);
   }
   if (v !== null && typeof v === 'object') {
@@ -50,7 +50,7 @@ function decode(rhino, v) {
     if (k === 'static') {
       const [tn, mn] = x.split('.');
       if (tn === 'RhinoMath' && mn === 'UnsetValue') return UNSET;
-      const sv = rhino[tn + 'X'][jsVt(mn)];      // a static property is a getter (G101); camelCase (G106)
+      const sv = rhino[tn][jsVt(mn)];      // a static property is a getter (G101); camelCase (G106)
       return typeof sv === 'function' ? sv() : sv;
     }
     const o = {};
@@ -75,7 +75,7 @@ function encodeLike(want, got, rhino) {
   }
   if (want && typeof want === 'object' && 'class' in want) {
     const n = got && got.$$ && got.$$.ptrType && got.$$.ptrType.registeredClass.name;
-    return { class: n ? n.replace(/X$/, '') : String(got) };
+    return { class: n ? n : String(got) };
   }
   if (want && typeof want === 'object' && 'enum' in want) {
     for (const en of ENUMS) for (const [k, v] of Object.entries(rhino[en] || {}))
@@ -89,7 +89,7 @@ function encodeLike(want, got, rhino) {
     return { enum: String(got) };
   }
   if (want && typeof want === 'object' && 'Plane' in want)
-    return got.Origin   // generated PlaneX value object vs old JS SimplePlane
+    return got.Origin   // generated Plane value object vs old JS SimplePlane
       ? { Plane: [got.Origin.X, got.Origin.Y, got.Origin.Z, got.XAxis.X, got.XAxis.Y, got.XAxis.Z, got.YAxis.X, got.YAxis.Y, got.YAxis.Z] }
       : { Plane: [...got.origin, ...got.xAxis, ...got.yAxis] };
   if (want && typeof want === 'object' && 'Color' in want)
@@ -128,25 +128,17 @@ function same(a, b) {
   return false;
 }
 
-const ALIAS = { ViewportInfoX: 'ViewportX' };
 const camel = s => s[0].toLowerCase() + s.slice(1);
 
-// class cases: the object is the oracle's serialized FIXTURE, decoded with the
-// old JS API and wrapped into the generated class (bridge-free classes are
-// default-constructed, matching the oracle's default object)
+// class cases: the object is the oracle's serialized FIXTURE, decoded by the generated class
+// (CommonObject.decode; M3: no bridge from the old API)
 function fixtureObject(rhino, c, fixtures) {
-  const name = ALIAS[c.type + 'X'] || (c.type + 'X');
-  const Gen = rhino[name];
-  if (!Gen) throw new Error('missing class ' + name);
+  const name = c.type;
+  if (!rhino[name]) throw new Error('missing class ' + name);
   const fx = fixtures[c.self];
-  let hand;
-  if (fx.Transform) {
-    hand = new rhino.Transform(1.0);
-    fx.Transform.forEach((m, i) => { hand['m' + Math.floor(i / 4) + (i % 4)] = m; });
-  } else {
-    hand = rhino.CommonObject.decode(fx);
-  }
-  try { return new Gen(hand); } catch (e) { return new Gen(); }
+  if (fx.Transform)        // a value type: a plain {M00..M33} object
+    return Object.fromEntries(fx.Transform.map((m, i) => ['M' + Math.floor(i / 4) + (i % 4), m]));
+  return rhino.CommonObject.decode(fx);
 }
 
 // `"own": true` (G108): the case's object is built with the GENERATED classes from its recipe -- a class
@@ -157,16 +149,25 @@ function ownRecipe(rhino, v, recipes) {
     : (a && typeof a === 'object' && 'Point3dList' in a) ? a.Point3dList.map(p => ({ X: p[0], Y: p[1], Z: p[2] }))
     : decode(rhino, a);
   const args = (v.args || []).map(arg);
-  if ('new' in v) return new rhino[v.new + 'X'](...args);
-  if ('on' in v) return ownRecipe(rhino, v.on, recipes)[camel(v.call)](...args);
+  if ('new' in v) return VALUE_TYPES.has(v.new) ? rhino[v.new].create(...args)   // a plain value: `create` (G106)
+                                         : new rhino[v.new](...args);
+  if ('on' in v) {
+    const on = typeof v.on === 'string' ? recipes[v.on] : v.on;
+    const obj = ownRecipe(rhino, v.on, recipes);
+    if (on.new && VALUE_TYPES.has(on.new))     // a method of a value: the class function taking it
+      return rhino[on.new][camel(v.call)](obj, ...args);
+    return obj[camel(v.call)](...args);
+  }
   const dot = v.call.lastIndexOf('.');
-  const T = rhino[v.call.slice(0, dot) + 'X'];
+  const T = rhino[v.call.slice(0, dot)];
   return T[camel(v.call.slice(dot + 1))](...args);
 }
 
 function evaluateClass(rhino, c, fixtures, recipes) {
   if (c.own) {
     const self = ownRecipe(rhino, c.self, recipes);
+    if (VALUE_TYPES.has(c.type))     // a value: its members are class functions taking it
+      return evaluate(rhino, Object.assign({}, c, { self: undefined }), self);
     const own = a => (a && typeof a === 'object' && !Array.isArray(a) && ('call' in a || 'new' in a)) ? ownRecipe(rhino, a, recipes) : decode(rhino, a);
     const mem = self[camel(c.member)];
     if (mem === undefined) throw new Error('missing ' + c.member);
@@ -174,7 +175,7 @@ function evaluateClass(rhino, c, fixtures, recipes) {
   }
   if (c.self === undefined) {
     // a static member (Intersection.LineLine): call it on the class
-    const cls = rhino[(ALIAS[c.type + 'X'] || (c.type + 'X'))];
+    const cls = rhino[c.type];
     const fn = cls && cls[camel(c.member)];
     if (!fn) throw new Error('missing ' + c.member);
     return fn(...(c.args || []).map(x => decode(rhino, x)));
@@ -219,13 +220,13 @@ function evaluateClass(rhino, c, fixtures, recipes) {
 }
 
 function evaluate(rhino, c, prebuilt) {
-  const NS = rhino[c.type + 'X'];
+  const NS = rhino[c.type];
   let self = prebuilt || null;
   if (c.self !== undefined)
     self = Array.isArray(c.self)
       ? Object.fromEntries(FIELDS[c.type].map((f, i) => [f, decode(rhino, c.self[i])]))
       : c.self.new
-        ? rhino[c.self.new + 'X'].create(...c.self.args.map(x => decode(rhino, x)))   // RhinoCommon ctor
+        ? rhino[c.self.new].create(...c.self.args.map(x => decode(rhino, x)))   // RhinoCommon ctor
         : (typeof NS[jsVt(c.self.static)] === 'function' ? NS[jsVt(c.self.static)]() : NS[jsVt(c.self.static)]);
   if (c.op) {
     const a = c.args.map(x => decode(rhino, x));
@@ -233,7 +234,7 @@ function evaluate(rhino, c, prebuilt) {
     // the operator lives on the C# type that declares it: try every operand type
     const owners = [c.type, ...c.args.map(x => (x && typeof x === 'object') ? Object.keys(x)[0] : null)];
     for (const t of owners) {
-      const T = t && rhino[t + 'X'];
+      const T = t && rhino[t];
       if (T && DERIVED_OPS[name] && typeof T.compareTo === 'function') {
         try { return DERIVED_OPS[name](T, ...a); } catch (e) { if (!/argument|parameter|expected/i.test(String(e))) throw e; }
       }
@@ -275,9 +276,10 @@ async function main() {
       if (!(c.id in golden)) { pending.push(c.id); continue; }   // the oracle has not run it yet
       const want = golden[c.id];
       if (want && want.throws) { skipped++; continue; }
-      if (c.construct) { skipped++; continue; }     // construction tests the old API: python only
+      // a construct case builds its object with the generated classes (G108's own recipes), as Python's
+      const cc = c.construct ? Object.assign({}, c, { own: true }) : c;
       let got;
-      try { got = encodeLike(want, doc.recipes ? evaluateClass(rhino, c, fixtures, doc.recipes) : evaluate(rhino, c), rhino); }
+      try { got = encodeLike(want, doc.recipes ? evaluateClass(rhino, cc, fixtures, doc.recipes) : evaluate(rhino, cc), rhino); }
       catch (e) {
         if (/^Error: missing/.test(String(e))) { missing.push(c.id + ' (' + String(e).slice(7) + ')'); continue; }
         got = { error: String(e) };
@@ -288,7 +290,7 @@ async function main() {
       else { fail++; console.log('  GENERATED MISMATCH', c.id, JSON.stringify(want), JSON.stringify(got)); }
     }
   }
-  console.log(`parity vs .NET (js): generated ${pass}/${pass + fail} match, ${skipped} skipped (throw / construction cases), ${missing.length} not reachable in JS`);
+  console.log(`parity vs .NET (js): generated ${pass}/${pass + fail} match, ${skipped} skipped (throw cases), ${missing.length} not reachable in JS`);
   for (const m of missing) console.log('  not reachable:', m);
   if (pending.length) console.log('  pending (no golden yet; run the oracle):', pending.join(', '));
   process.exit(fail ? 1 : 0);

@@ -1,0 +1,316 @@
+{
+ "about": "The old (8.x hand) JS bindings' three.js JSON family, frozen at the switch-over (M3, 2026-10-31); the oracle of tests/generated/js test_threejs_json_family_deprecated_g133. meshJSON / meshJSONRotate: Mesh.toThreejsJSON() / toThreejsJSONRotate(true) of the quad + triangle mesh (5 vertices, colors (255, 50*i, 0)); mergedRotate: Mesh.toThreejsJSONMerged([the uncolored quad, the triangle (5,0)-(6,0)-(5,1)], true); createFromNewJSONPosition: Mesh.createFromThreejsJSON(the generated mesh's toThreejsJSON()).toThreejsBuffers(false).position; pcJSON: PointCloud.toThreejsJSON() of the two-point cloud; pcFromRGBAColors: PointCloud.createFromThreejsJSON(one RGBA point)'s colors (r, g, b, a).",
+ "meshJSON": {
+  "data": {
+   "index": {
+    "type": "Uint16Array",
+    "array": [
+     0,
+     1,
+     2,
+     2,
+     3,
+     0,
+     1,
+     4,
+     2
+    ]
+   },
+   "attributes": {
+    "position": {
+     "itemSize": 3,
+     "type": "Float32Array",
+     "array": [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      2,
+      0,
+      0
+     ]
+    },
+    "normal": {
+     "itemSize": 3,
+     "type": "Float32Array",
+     "array": [
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1
+     ]
+    },
+    "color": {
+     "itemSize": 3,
+     "type": "Float32Array",
+     "array": [
+      1,
+      0,
+      0,
+      1,
+      0.19607843137254902,
+      0,
+      1,
+      0.39215686274509803,
+      0,
+      1,
+      0.5882352941176471,
+      0,
+      1,
+      0.7843137254901961,
+      0
+     ]
+    }
+   }
+  }
+ },
+ "meshJSONRotate": {
+  "data": {
+   "index": {
+    "type": "Uint16Array",
+    "array": [
+     0,
+     1,
+     2,
+     2,
+     3,
+     0,
+     1,
+     4,
+     2
+    ]
+   },
+   "attributes": {
+    "position": {
+     "itemSize": 3,
+     "type": "Float32Array",
+     "array": [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      -1,
+      0,
+      0,
+      -1,
+      2,
+      0,
+      0
+     ]
+    },
+    "normal": {
+     "itemSize": 3,
+     "type": "Float32Array",
+     "array": [
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0
+     ]
+    },
+    "color": {
+     "itemSize": 3,
+     "type": "Float32Array",
+     "array": [
+      1,
+      0,
+      0,
+      1,
+      0.19607843137254902,
+      0,
+      1,
+      0.39215686274509803,
+      0,
+      1,
+      0.5882352941176471,
+      0,
+      1,
+      0.7843137254901961,
+      0
+     ]
+    }
+   }
+  }
+ },
+ "mergedRotate": {
+  "data": {
+   "index": {
+    "type": "Uint16Array",
+    "array": [
+     0,
+     1,
+     2,
+     2,
+     3,
+     0,
+     5,
+     6,
+     7
+    ]
+   },
+   "attributes": {
+    "position": {
+     "itemSize": 3,
+     "type": "Float32Array",
+     "array": [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      -1,
+      0,
+      0,
+      -1,
+      2,
+      0,
+      0,
+      5,
+      0,
+      0,
+      6,
+      0,
+      0,
+      5,
+      0,
+      -1
+     ]
+    },
+    "normal": {
+     "itemSize": 3,
+     "type": "Float32Array",
+     "array": [
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0
+     ]
+    }
+   }
+  }
+ },
+ "createFromNewJSONPosition": [
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  1,
+  0,
+  1,
+  0,
+  0,
+  1,
+  2,
+  0,
+  0
+ ],
+ "pcJSON": {
+  "data": {
+   "attributes": {
+    "position": {
+     "itemSize": 3,
+     "type": "Float32Array",
+     "array": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ]
+    },
+    "color": {
+     "itemSize": 3,
+     "type": "Float32Array",
+     "array": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+     ]
+    },
+    "normal": {
+     "itemSize": 3,
+     "type": "Float32Array",
+     "array": [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0
+     ]
+    }
+   }
+  }
+ },
+ "pcFromRGBAColors": [
+  [
+   255,
+   0,
+   0,
+   127
+  ]
+ ]
+}

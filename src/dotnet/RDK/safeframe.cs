@@ -98,6 +98,8 @@ namespace Rhino.Render
     public override void CopyFrom(FreeFloatingBase src)
     {
       UnsafeNativeMethods.ON_SafeFrame_CopyFrom(CppPointer, src.CppPointer);
+      GC.KeepAlive(this);
+      GC.KeepAlive(src);
     }
 
     internal override void DeleteCpp()

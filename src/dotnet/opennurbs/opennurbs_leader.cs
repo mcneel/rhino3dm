@@ -32,6 +32,22 @@ namespace Rhino.Geometry
     /// <summary> Type of arrowhead used by annotation </summary>
     /// <since>6.0</since>
     public DimensionStyle.ArrowType ArrowType { get; }
+
+    /// <summary>
+    /// Gets the outline points of a built-in arrowhead shape at size 1, in the arrowhead's
+    /// own coordinates (the triangle shapes have their tip at the origin).
+    /// </summary>
+    /// <param name="arrowType">The arrowhead shape.</param>
+    /// <returns>The outline points; empty for <see cref="DimensionStyle.ArrowType.None"/> and <see cref="DimensionStyle.ArrowType.UserBlock"/>.</returns>
+    /// <since>9.2</since>
+    public static Point2d[] GetPoints(DimensionStyle.ArrowType arrowType)
+    {
+      using (var points = new SimpleArrayPoint2d())
+      {
+        UnsafeNativeMethods.ON_Arrowhead_GetPoints(arrowType, points.NonConstPointer());
+        return points.ToArray();
+      }
+    }
   }
 
 
@@ -125,6 +141,24 @@ namespace Rhino.Geometry
       }
     }
    
+    /// <summary>
+    /// Gets the point, in the leader's plane coordinates, where the text attaches to the leader.
+    /// </summary>
+    /// <param name="dimstyle">The dimension style that sets the text gap and landing.</param>
+    /// <param name="leaderScale">The scale applied to the dimension style's lengths.</param>
+    /// <returns>The text point, or <see cref="Point2d.Unset"/> if it cannot be computed.</returns>
+    /// <since>9.2</since>
+    public Point2d GetTextPoint2d(DimensionStyle dimstyle, double leaderScale)
+    {
+      if (dimstyle == null)
+        throw new ArgumentNullException(nameof(dimstyle));
+      Point2d point = Point2d.Unset;
+      bool rc = UnsafeNativeMethods.ON_V6_Leader_GetTextPoint2d(ConstPointer(), dimstyle.ConstPointer(), leaderScale, ref point);
+      GC.KeepAlive(this);
+      GC.KeepAlive(dimstyle);
+      return rc ? point : Point2d.Unset;
+    }
+
     /// <summary>
     /// Get or set the 2d points defining the curve used by this leader
     /// </summary>

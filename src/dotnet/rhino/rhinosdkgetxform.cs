@@ -326,6 +326,7 @@ namespace Rhino.Input.Custom
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_list = list.ConstPointer();
       UnsafeNativeMethods.CRhinoGetXform_AppendObjects( ptr_this, const_ptr_list );
+      GC.KeepAlive(list);
     }
     //void AppendObjects( const CRhinoGetObject& get );
     //void AppendObjects( CRhinoObjectIterator& it );

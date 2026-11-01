@@ -6,7 +6,7 @@ everything class-specific into CLASSES, the wrapper-type registry:
     C# type <-> ON_* type <-> hand BND class (copy source) <-> generated class
 
 One generated file defines every class (in registry order, so cross-class
-returns like Surface.IsoCurve -> CurveX see a complete type) and registers
+returns like Surface.IsoCurve -> Curve see a complete type) and registers
 them all through a single initGeneratedBindings entry point.
 
 Everything else is unchanged from v2: C# signatures shape the API, Calls[]
@@ -37,7 +37,7 @@ def _derives(d, base):
 
 
 def scope_pass(per_class, manifest, c_by_name, skipped):
-    """G77: a scoped child view (BrepLoopListX: the brep's loops, or one face's) plans
+    """G77: a scoped child view (BrepLoopList: the brep's loops, or one face's) plans
     its members a second time from the bodies specialized for the scoping constructor;
     a member whose body reads the scope field dispatches on m_scope (scope_plan), or
     refuses at run time on a scoped view when that variant is not generated."""
@@ -89,7 +89,7 @@ def data_marker_pass(vt, per_class, manifest, skipped):
         m['Decl'], m['Def'], m['Ret'] = d, f, rt
         for q, x in zip(m.get('Params') or [], pts):
             q['Type'] = x[0]
-        m['ClassDeps'] = sorted({g[4:] for g in re.findall(r'\bBND_\w+X\b', f + d)} & {c['reg'] for c in CLASSES})
+        m['ClassDeps'] = sorted({g[4:] for g in re.findall(r'\bBND_\w+\b', f + d)} & {c['reg'] for c in CLASSES})
     while dropped:
         more = set()
         for m in vt['members']:
@@ -336,7 +336,7 @@ def js_post_script():
       Object.defineProperty(proto, ks[1], { get: g, set: function (v) { s.call(this, v); keep(this, '__rh3dm_set_' + ks[1], v); },
                                             enumerable: d.enumerable, configurable: true });
     });
-    // G124: JS-only names calling another method (File3dmX.destroy -> embind's delete)
+    // G124: JS-only names calling another method (File3dm.destroy -> embind's delete)
     ALIASES.forEach(function (a) {
       var C = M[a[0]], proto = C && C.prototype;
       if (!proto || typeof proto[a[2]] !== 'function') { missing.push('alias ' + a[0] + '.' + a[1]); return; }
@@ -399,12 +399,51 @@ def js_post_script():
 
 def hand_chain(cls):
     """cls and its bases: JS re-registers a base's class functions on each derived class (G123:
-    CommonObjectX.decode on every class), so a class file includes its bases' hand headers"""
+    CommonObject.decode on every class), so a class file includes its bases' hand headers"""
     out, c = [], cls
     while c:
         out.append(c['reg'])
         c = BY_REG.get(c.get('base') or '')
     return out
+
+
+def gen_stem(cs):
+    """the generated file stem for RhinoCommon type `cs` (M3 layout): bnd_mesh_gen"""
+    return 'bnd_%s_gen' % cs.lower()
+
+
+# the generated files that are not one type's
+GEN_FIXED_NAMES = {'gen_common.h': 'bnd_common_gen.h', 'gen_vt_common.h': 'bnd_values_gen.h',
+                   'gen_init.cpp': 'bnd_init_gen.cpp', 'gen_wrap.cpp': 'bnd_wrap_gen.cpp',
+                   'gen_pre.js': 'bnd_pre_gen.js', 'gen_post.js': 'bnd_post_gen.js',
+                   'clayer_sources.cmake': 'clayer_sources_gen.cmake'}
+
+
+def gen_layout(files, vt_types):
+    """the M3 layout (Luis 2026-11-01): {emitted name: content} -> {bnd_<cs>_gen.*: content}, the
+    includes between them rewritten, and `../bindings/x.h` (a hand file, same directory) as `x.h`.
+    The emitters keep their working names (gen_meshx.h); this is the one place that maps them"""
+    stems = {'gen_%s' % c['reg'].lower(): c['cs'] for c in CLASSES}
+    stems.update((vt_file(t), t['Cs']) for t in vt_types)
+    ren = {}
+    for name in files:
+        stem, ext = os.path.splitext(name)
+        if name in GEN_FIXED_NAMES:
+            ren[name] = GEN_FIXED_NAMES[name]
+        elif stem in stems:
+            ren[name] = gen_stem(stems[stem]) + ext
+        else:
+            raise SystemExit('layout: no RhinoCommon type for the generated file %s' % name)
+    if len(set(ren.values())) != len(ren):
+        dup = sorted(v for v in set(ren.values()) if list(ren.values()).count(v) > 1)
+        raise SystemExit('layout: two generated files map to %s' % dup)
+
+    def include(m):
+        p = m.group(1)
+        if p.startswith('../bindings/'):
+            p = p[len('../bindings/'):]
+        return '#include "%s"' % ren.get(p, p)
+    return {ren[n]: re.sub(r'#include "([^"]+)"', include, c) for n, c in files.items()}
 
 
 def main():
@@ -478,7 +517,7 @@ def main():
         cnt = next((p for p in plans if p['m']['Name'] == 'Count' and p['m']['Kind'] == 'property'), None)
         named = ENUM_NAMED.get('ModelComponentType') or {}
         if inst is not None and 'NumOf' in named:
-            cls['table'] = {'item': BY_REG['ModelComponentX'], 'count': cnt['cpp'] if cnt else None, 'find': None,
+            cls['table'] = {'item': BY_REG['ModelComponent'], 'count': cnt['cpp'] if cnt else None, 'find': None,
                             'types': [str(v) for v in range(1, int(str(named['NumOf']), 0))],
                             'dispatch': inst['cpp'], 'per_type': True,
                             'fns': [C_BY_NAME[n] for n in ('ONX_ModelComponentIterator_New',
@@ -530,6 +569,13 @@ def main():
     bare_enums = sorted({t for f in sig_fns for t in
                          ([f['returns']] + [q['type'] for q in f['params']])
                          if t in c_enum_defs})
+    # classes defined only inside a C .cpp (draco.cpp's BND_Draco) that planned signatures pass by
+    # pointer: opaque-declared (M3: before, the old bnd_draco.h declared them)
+    c_class_defs = set()
+    for f in glob.glob(os.path.join(ROOT, 'src', 'librhino3dm_native', '*.cpp')):
+        c_class_defs |= set(re.findall(r'^(?:class|struct)\s+(\w+)\s*$', open(f, errors='replace').read(), re.M))
+    opaque_classes = sorted({n for f in sig_fns for t in ([f['returns']] + [q['type'] for q in f['params']])
+                             for n in re.findall(r'\b(\w+)\s*\*', t) if n in c_class_defs})
 
     # C# enums the plans use that no hand binding registers: define an
     # RH3DM_-prefixed enum class from the manifest's Values and register it
@@ -599,17 +645,8 @@ def main():
             gen_enum_py_nested.append('  py::enum_<%s>(m.attr("%s"), "%s")\n%s;'
                                       % (cpp, BY_CS[owner]['reg'], ename.split('.')[1], vals))
         else:
-            gen_enum_py.append('  py::enum_<%s>(m, "%s")\n%s;' % (cpp, ename, vals))
+            gen_enum_py.append('  py::enum_<%s>(m, "%s")\n%s;' % (cpp, CS_ENUMS[ename].get('py', ename), vals))
         gen_enum_js.append('  enum_<%s>("%s")\n%s;' % (cpp, CS_ENUMS[ename].get('js', ename), vals))
-    # a nested enum the old bindings register (DimensionStyle.Field, at module level or in the
-    # old class): the generated owner exposes that type under its nested name, as RhinoCommon
-    # nests it (D18) -- pybind11 cannot register a C++ type twice (and type::of takes classes only:
-    # the type of a cast value). M3 moves the registration
-    for ename in sorted(e for e, c in CS_ENUMS.items() if c.get('owner') and not c['gen']):
-        owner = CS_ENUMS[ename]['owner']
-        if owner in BY_CS:
-            gen_enum_py_nested.append('  m.attr("%s").attr("%s") = py::cast(%s()).get_type();'
-                                      % (BY_CS[owner]['reg'], ename.split('.')[1], CS_ENUMS[ename]['cpp']))
     vt_path = (os.environ.get('RH3DM_VALUETYPES') or os.path.join(ROOT, 'api', 'valuetypes.json'))
     if os.path.exists(vt_path):
         vt = json.load(open(vt_path))
@@ -816,7 +853,7 @@ def main():
                 and x['Delegates'].split('.')[0] in BY_CS):
             BRIDGE_CANDIDATES.setdefault(tcs, []).append(x)
     if os.path.exists(vt_path):
-        vt_regs = [t['Cs'] + 'X' for t in vt['types'] if not t['IsStaticClass']]
+        vt_regs = [t['Cs'] for t in vt['types'] if not t['IsStaticClass']]
         data_marker_pass(vt, per_class, manifest, skipped)
         files.update(emit_valuetypes(vt, emit_valuetype_bindings(vt, skipped)))
     else:
@@ -832,7 +869,7 @@ def main():
     vt_includes = ''.join('#include "%s.h"\n' % vt_file(t) for t in vt['types']
                           if all(f['Type'] for f in t['Fields'])) if os.path.exists(vt_path) else ''
     files['gen_common.h'] = BANNER + '''#pragma once
-#include "../bindings/bindings.h"   // relative: hand bindings include gen headers too (G90)
+#include "bindings.h"
 #include <stdexcept>
 #include <new>
 #include <type_traits>
@@ -861,9 +898,9 @@ ON_Plane FromPlaneStruct(const ON_PLANE_STRUCT& ps);
 // generated value types (translated RhinoCommon bodies) and the conversions
 // from the C layer's opennurbs values; field-wise, so independent of which
 // C# constructors translated
-''' + vt_includes + vt_pub + '''inline BND_Point3dX RH3DM_P(const ON_3dPoint& p) { BND_Point3dX r; r.m_x = p.x; r.m_y = p.y; r.m_z = p.z; return r; }
-inline BND_Vector3dX RH3DM_V(const ON_3dVector& v) { BND_Vector3dX r; r.m_x = v.x; r.m_y = v.y; r.m_z = v.z; return r; }
-inline BND_IntervalX RH3DM_I(const ON_Interval& i) { BND_IntervalX r; r.m_t0 = i.m_t[0]; r.m_t1 = i.m_t[1]; return r; }
+''' + vt_includes + vt_pub + '''inline BND_Point3d RH3DM_P(const ON_3dPoint& p) { BND_Point3d r; r.m_x = p.x; r.m_y = p.y; r.m_z = p.z; return r; }
+inline BND_Vector3d RH3DM_V(const ON_3dVector& v) { BND_Vector3d r; r.m_x = v.x; r.m_y = v.y; r.m_z = v.z; return r; }
+inline BND_Interval RH3DM_I(const ON_Interval& i) { BND_Interval r; r.m_t0 = i.m_t[0]; r.m_t1 = i.m_t[1]; return r; }
 
 // a tuple result C# may return as null (`if (count < 1) return null;`): BND_TUPLE
 // is py::tuple, which cannot hold None -- the old NullTuple() raises TypeError
@@ -890,7 +927,7 @@ template <class T> inline emscripten::val RH3DM_JsArray(const std::vector<T*>& v
   for (size_t i = 0; i < v.size(); i++) a.call<void>("push", v[i] ? emscripten::val(v[i], emscripten::allow_raw_pointers()) : emscripten::val::null());
   return a; }
 // a sequence argument (G82/G83): a JS array, or a list object with toArray()
-// (Point3dListX, PolylineX: decision 4 of option 4) -- anything else throws
+// (Point3dList, Polyline: decision 4 of option 4) -- anything else throws
 inline bool RH3DM_JsIsSeq(const emscripten::val& v) {
   return v.isArray() || (v.typeOf().as<std::string>() == "object" && !v.isNull()
                          && v["toArray"].typeOf().as<std::string>() == "function"); }
@@ -916,20 +953,20 @@ struct RH3DM_Points
 {
   ON_3dPointArray a;
   RH3DM_Points() {}
-  explicit RH3DM_Points(const std::vector<BND_Point3dX>& v)
+  explicit RH3DM_Points(const std::vector<BND_Point3d>& v)
   {
     a.Reserve((int)v.size());
-    for (const BND_Point3dX& p : v) a.Append(ON_3dPoint(p.m_x, p.m_y, p.m_z));
+    for (const BND_Point3d& p : v) a.Append(ON_3dPoint(p.m_x, p.m_y, p.m_z));
   }
   int Count() const { return a.Count(); }
   void* ConstPointer() const { return (void*)&a; }
   void* NonConstPointer() { return (void*)&a; }
   // SimpleArrayPoint3d.ToArray() (G84): the points, as Point3d[]
-  std::vector<BND_Point3dX> ToArray() const
+  std::vector<BND_Point3d> ToArray() const
   {
-    std::vector<BND_Point3dX> v;
+    std::vector<BND_Point3d> v;
     v.reserve((size_t)a.Count());
-    for (int i = 0; i < a.Count(); i++) { BND_Point3dX p; p.m_x = a[i].x; p.m_y = a[i].y; p.m_z = a[i].z; v.push_back(p); }
+    for (int i = 0; i < a.Count(); i++) { BND_Point3d p; p.m_x = a[i].x; p.m_y = a[i].y; p.m_z = a[i].z; v.push_back(p); }
     return v;
   }
 };
@@ -941,11 +978,11 @@ struct RH3DM_Points2d
   int Count() const { return a.Count(); }
   void* ConstPointer() const { return (void*)&a; }
   void* NonConstPointer() { return (void*)&a; }
-  std::vector<BND_Point2dX> ToArray() const
+  std::vector<BND_Point2d> ToArray() const
   {
-    std::vector<BND_Point2dX> v;
+    std::vector<BND_Point2d> v;
     v.reserve((size_t)a.Count());
-    for (int i = 0; i < a.Count(); i++) { BND_Point2dX p; p.m_x = a[i].x; p.m_y = a[i].y; v.push_back(p); }
+    for (int i = 0; i < a.Count(); i++) { BND_Point2d p; p.m_x = a[i].x; p.m_y = a[i].y; v.push_back(p); }
     return v;
   }
 };
@@ -1086,8 +1123,8 @@ struct RH3DM_Guids
 
 // RhinoCommon's RDK Variant (G89, D40): `IConvertible` out and `object` in as a language
 // value, converted by the variant's runtime type -- scalars native, an id a uuid.UUID (JS
-// a string), 2/3/4 doubles a tuple (JS an array), a color a Color4fX, a matrix a
-// TransformX, a buffer bytes (JS a Uint8Array); a time is refused (no faithful mapping)
+// a string), 2/3/4 doubles a tuple (JS an array), a color a Color4f, a matrix a
+// Transform, a buffer bytes (JS a Uint8Array); a time is refused (no faithful mapping)
 #if defined(ON_PYTHON_COMPILE)
 // a sequence of new class objects (G89: SubDVertex.Edges): Python owns each, and each
 // keeps the object it came from alive (a list cannot be a keep_alive nurse)
@@ -1187,8 +1224,8 @@ struct RH3DM_Variant
     if (py::isinstance<py::float_>(x)) { v.SetValue(x.cast<double>()); return; }
     if (py::isinstance<py::str>(x)) { v.SetValue(ON_wString(x.cast<std::wstring>().c_str())); return; }
     if (py::isinstance(x, py::module_::import("uuid").attr("UUID"))) { v.SetValue(Binding_to_ON_UUID(x)); return; }
-    if (py::isinstance<BND_Color4fX>(x)) { BND_Color4fX c = x.cast<BND_Color4fX>(); v.SetValue(ON_4fColor(c.m_r, c.m_g, c.m_b, c.m_a)); return; }
-    if (py::isinstance<BND_TransformX>(x)) { BND_TransformX t = x.cast<BND_TransformX>(); ON_Xform xf = RH3DM_Val(t); v.SetValue(xf); return; }
+    if (py::isinstance<BND_Color4f>(x)) { BND_Color4f c = x.cast<BND_Color4f>(); v.SetValue(ON_4fColor(c.m_r, c.m_g, c.m_b, c.m_a)); return; }
+    if (py::isinstance<BND_Transform>(x)) { BND_Transform t = x.cast<BND_Transform>(); ON_Xform xf = RH3DM_Val(t); v.SetValue(xf); return; }
     if (py::isinstance<py::bytes>(x) || py::isinstance<py::bytearray>(x)) { std::string b = x.cast<std::string>(); v.SetValue(b.data(), b.size()); return; }
     if (py::isinstance(x, py::module_::import("datetime").attr("datetime"))) { v.SetValue((time_t)RH3DM_DateTimeIn(x).t); return; }   // G97
     if (py::isinstance<py::tuple>(x) || py::isinstance<py::list>(x)) {
@@ -1246,8 +1283,8 @@ struct RH3DM_Variant
     case ON_XMLVariant::Types::DoubleArray2: { ON_2dPoint p = v.As2dPoint(); return py::make_tuple(p.x, p.y); }
     case ON_XMLVariant::Types::DoubleArray3: { ON_3dPoint p = v.As3dPoint(); return py::make_tuple(p.x, p.y, p.z); }
     case ON_XMLVariant::Types::DoubleArray4: { ON_4dPoint p = v.As4dPoint(); return py::make_tuple(p.x, p.y, p.z, p.w); }
-    case ON_XMLVariant::Types::DoubleColor4: { ON_4fColor c = v.AsColor(); BND_Color4fX r; r.m_r = c.Red(); r.m_g = c.Green(); r.m_b = c.Blue(); r.m_a = c.Alpha(); return py::cast(r); }
-    case ON_XMLVariant::Types::Matrix: { ON_Xform xf = v.AsXform(); BND_TransformX t = RH3DM_Val(xf); return py::cast(t); }
+    case ON_XMLVariant::Types::DoubleColor4: { ON_4fColor c = v.AsColor(); BND_Color4f r; r.m_r = c.Red(); r.m_g = c.Green(); r.m_b = c.Blue(); r.m_a = c.Alpha(); return py::cast(r); }
+    case ON_XMLVariant::Types::Matrix: { ON_Xform xf = v.AsXform(); BND_Transform t = RH3DM_Val(xf); return py::cast(t); }
     case ON_XMLVariant::Types::Buffer: { ON_Buffer b = v.AsBuffer(); std::string s((size_t)b.Size(), '\0'); b.SeekFromStart(0); b.Read((ON__UINT64)s.size(), &s[0]); return py::bytes(s); }
 #else
     case ON_XMLVariant::Types::Bool: return emscripten::val(v.AsBool());
@@ -1259,8 +1296,8 @@ struct RH3DM_Variant
     case ON_XMLVariant::Types::DoubleArray2: { ON_2dPoint p = v.As2dPoint(); emscripten::val a = emscripten::val::array(); a.call<void>("push", p.x); a.call<void>("push", p.y); return a; }
     case ON_XMLVariant::Types::DoubleArray3: { ON_3dPoint p = v.As3dPoint(); emscripten::val a = emscripten::val::array(); a.call<void>("push", p.x); a.call<void>("push", p.y); a.call<void>("push", p.z); return a; }
     case ON_XMLVariant::Types::DoubleArray4: { ON_4dPoint p = v.As4dPoint(); emscripten::val a = emscripten::val::array(); a.call<void>("push", p.x); a.call<void>("push", p.y); a.call<void>("push", p.z); a.call<void>("push", p.w); return a; }
-    case ON_XMLVariant::Types::DoubleColor4: { ON_4fColor c = v.AsColor(); BND_Color4fX r; r.m_r = c.Red(); r.m_g = c.Green(); r.m_b = c.Blue(); r.m_a = c.Alpha(); return emscripten::val(r); }
-    case ON_XMLVariant::Types::Matrix: { ON_Xform xf = v.AsXform(); BND_TransformX t = RH3DM_Val(xf); return emscripten::val(t); }
+    case ON_XMLVariant::Types::DoubleColor4: { ON_4fColor c = v.AsColor(); BND_Color4f r; r.m_r = c.Red(); r.m_g = c.Green(); r.m_b = c.Blue(); r.m_a = c.Alpha(); return emscripten::val(r); }
+    case ON_XMLVariant::Types::Matrix: { ON_Xform xf = v.AsXform(); BND_Transform t = RH3DM_Val(xf); return emscripten::val(t); }
     case ON_XMLVariant::Types::Buffer: { ON_Buffer b = v.AsBuffer(); std::vector<unsigned char> s((size_t)b.Size()); b.SeekFromStart(0); if (!s.empty()) b.Read((ON__UINT64)s.size(), s.data()); return emscripten::val::global("Uint8Array").new_(emscripten::typed_memory_view(s.size(), s.data())); }
 #endif
     default: break;
@@ -1568,7 +1605,7 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
 
 ''' + '\n'.join(['enum %s : int;' % e for e in enum_decls]
             + ['enum %s%s : %s;' % ('class ' if c_enum_defs[e][0] else '', e, c_enum_defs[e][1])
-               for e in bare_enums] + gen_enum_defs
+               for e in bare_enums] + ['class %s;' % c for c in opaque_classes] + gen_enum_defs
                 + ['']) \
         + '\n'.join(sorted(decls)) + '\n\n' \
         + '\n'.join('class %s;' % cls['gen'] for cls in CLASSES) + '\n\n' \
@@ -1633,14 +1670,14 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
                        | ({cls['proxy']['Owner']} if (cls.get('proxy') or {}).get('Origin') == 'parent' else set())
                        # classes a translated body names (G74)
                        | {m for p in plans if p['shape'][0] in ('translated', 'translatedout')
-                          for m in re.findall(r'\bBND_(\w+X)\b', p['shape'][1] + ' ' + p['shape'][2] + ' ' + ' '.join(t for t, _ in p['bind_args']))
+                          for m in re.findall(r'\bBND_(\w+)\b', p['shape'][1] + ' ' + p['shape'][2] + ' ' + ' '.join(t for t, _ in p['bind_args']))
                           if m in BY_REG}
                        | arg_classes) - {cls['reg']})
         # data classes (G64): returned by a bridge, or taken as arguments (dereferenced here)
-        data_deps = sorted({p['shape'][1] + 'X' for p in plans if p['shape'][0] in ('datafrom', 'datafill', 'holderdata')}
-                           | {cs + 'X' for p in plans for t, _ in p['bind_args'] for cs, cpp in DATA_CPP.items()
+        data_deps = sorted({p['shape'][1] for p in plans if p['shape'][0] in ('datafrom', 'datafill', 'holderdata')}
+                           | {cs for p in plans for t, _ in p['bind_args'] for cs, cpp in DATA_CPP.items()
                               if t in ('const %s*' % cpp, 'const %s&' % cpp)}
-                           | {cs + 'X' for p in plans for l in p.get('locals') or [] for cs, cpp in DATA_CPP.items()
+                           | {cs for p in plans for l in p.get('locals') or [] for cs, cpp in DATA_CPP.items()
                               if re.match(r'^%s\b' % re.escape(cpp), l)})
         dep_includes = ''.join('#include "gen_%s.h"\n' % d.lower() for d in deps + data_deps) \
             + ''.join('#include "../%s"\n' % h for h in sorted({x['header'] for r in hand_chain(cls) for x in HAND_MEMBERS.get(r, []) if 'header' in x}
@@ -1660,18 +1697,14 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
 
         py_block, js_block = reg_blocks[cls['reg']]
         if cls['mode'] == 'abstract':
-            hand_inc, ctor = '', ''
+            ctor = ''
         else:
-            bridged = cls.get('bridge', True)
-            hand_inc = ('#include "%s"\n' % cls['hand_header']) if bridged else ''
             basecls = BY_REG.get(cls.get('base', ''))
             if basecls and basecls['mode'] != 'abstract':
                 member = basecls['gen']       # forward to the owning base
             else:
                 member = 'm_ptr' if cls['mode'] == 'pointer' else 'm_val'
-            ctor = ('\n{gen}::{gen}(const {hand}& source)\n  : {member}({copy}) {{}}\n'.format(
-                gen=cls['gen'], hand=cls['hand'], member=member,
-                copy=cls['copy']) if bridged else '')
+            ctor = ''
             # a value-mode class copies the created object in and frees it (G74)
             body = ('\n  : {member}({expr}) {{}}\n' if cls['mode'] != 'value'
                     else '\n{{ {on}* rh3dm_p = {expr}; m_val = *rh3dm_p; delete rh3dm_p; }}\n')
@@ -1683,7 +1716,7 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
                     gen=cls['gen'], member=member, on=cls['on'], expr=p['ctor_call'],
                     sig=', '.join('%s %s' % a for a in p['bind_args']))
         files[fname(cls) + '.cpp'] = BANNER + '''#include "{hdr}.h"
-{dep_includes}{hand_inc}{ctor}
+{dep_includes}{ctor}
 {defs}
 
 #if defined(ON_PYTHON_COMPILE)
@@ -1700,7 +1733,7 @@ void initGen{reg}(void)
 {js_block}
 }}
 #endif
-'''.format(hdr=fname(cls), dep_includes=dep_includes, hand_inc=hand_inc,
+'''.format(hdr=fname(cls), dep_includes=dep_includes,
            ctor=ctor, defs=defs, reg=cls['reg'],
            py_block=py_block, js_block=js_block)
 
@@ -1928,9 +1961,12 @@ void initGeneratedBindings(void)
         % (len(used), len(tus), ''.join('  "${CMAKE_CURRENT_SOURCE_DIR}/librhino3dm_native/%s"\n' % t
                                         for t in tus)))
 
-    # RH3DM_GEN_OUT: dry-run elsewhere (e.g. while a build reads src/generated)
+    # M3 layout (Luis 2026-11-01): the generated files sit beside the hand-maintained ones in
+    # src/bindings, named bnd_<RhinoCommon name>_gen.*
+    files = gen_layout(files, vt['types'] if os.path.exists(vt_path) else [])
+    # RH3DM_GEN_OUT: dry-run elsewhere (e.g. while a build reads src/bindings)
     dry_run = bool(os.environ.get('RH3DM_GEN_OUT'))
-    out_dir = os.environ.get('RH3DM_GEN_OUT') or os.path.join(ROOT, 'src', 'generated')
+    out_dir = os.environ.get('RH3DM_GEN_OUT') or os.path.join(ROOT, 'src', 'bindings')
     # the surface lock: a member that disappears or changes is a regression
     # unless accepted explicitly (RH3DM_ACCEPT=1); nothing is written then
     import surface_lock
@@ -1940,7 +1976,7 @@ void initGeneratedBindings(void)
         for l in lost:
             print('  - ' + l)
     if not ok:
-        print('refusing to write src/generated: rerun with RH3DM_ACCEPT=1 if intended')
+        print('refusing to write the generated files: rerun with RH3DM_ACCEPT=1 if intended')
         return 1
     if gained:
         print('surface lock: +%d registration(s)' % len(gained))
@@ -1955,18 +1991,19 @@ void initGeneratedBindings(void)
             f.write(content)
         wrote += 1
     # output hygiene: a generated file this run did not produce is STALE and
-    # would compile silently -- remove anything unexpected (old layouts too)
+    # would compile silently -- remove it. Only *_gen.* files: the hand-maintained
+    # files share the directory
     removed = []
     for name in sorted(os.listdir(out_dir)):
-        if name.endswith(('.cpp', '.h', '.cmake')) and name not in files:
+        if re.search(r'_gen\.(cpp|h|js|cmake)$', name) and name not in files:
             os.remove(os.path.join(out_dir, name))
             removed.append(name)
 
     for cls, plans in per_class:
         props = sum(1 for p in plans if p['m']['Kind'] == 'property')
         print('  %-10s %d members (%d properties) -> %s.{h,cpp}'
-              % (cls['reg'], len(plans), props, fname(cls)))
-    print('src/generated/: %d members, %d files (%d written, %d unchanged%s)'
+              % (cls['reg'], len(plans), props, gen_stem(cls['cs'])))
+    print('src/bindings/*_gen.*: %d members, %d files (%d written, %d unchanged%s)'
           % (len(all_plans), len(files), wrote, kept,
              ', removed stale: ' + ', '.join(removed) if removed else ''))
     if js_pruned:

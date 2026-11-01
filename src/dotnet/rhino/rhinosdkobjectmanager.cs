@@ -2525,6 +2525,7 @@ namespace Rhino.ObjectManager
       if (o is ObjectManagerNodeNative nativeNode)
       {
         var docId = UnsafeNativeMethods.RhinoObjectManager_INode_Document(nativeNode.CppPointer);
+        GC.KeepAlive(nativeNode);
         if (docId < 1) return null;
 
         return RhinoDoc.FromRuntimeSerialNumber(docId);
@@ -2545,6 +2546,7 @@ namespace Rhino.ObjectManager
       if (o is ObjectManagerNodeNative nativeNode)
       {
         IntPtr p = UnsafeNativeMethods.RhinoObjectManager_INode_Object(nativeNode.CppPointer);
+        GC.KeepAlive(nativeNode);
         if (p == IntPtr.Zero) return null;
 
         return Rhino.Runtime.Interop.RhinoObjectFromPointer(p);
@@ -2567,7 +2569,9 @@ namespace Rhino.ObjectManager
         Guid idBlock = Guid.Empty;
         uint idDoc = 0;
 
-        if (!UnsafeNativeMethods.RhinoObjectManager_INode_BlockDefinition(nativeNode.CppPointer, ref idDoc, ref idBlock))
+        bool rc = UnsafeNativeMethods.RhinoObjectManager_INode_BlockDefinition(nativeNode.CppPointer, ref idDoc, ref idBlock);
+        GC.KeepAlive(nativeNode);
+        if (!rc)
           return null;
 
         var doc = RhinoDoc.FromRuntimeSerialNumber(idDoc);

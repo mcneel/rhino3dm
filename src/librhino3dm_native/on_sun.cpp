@@ -245,3 +245,18 @@ RH_C_FUNCTION void DecimalHoursToHMSWithDate(double hours, int* hour, int* min, 
     ON_DecimalHoursToHMS(hours, *hour, *min, *sec, *year, *month, *day);
   }
 }
+
+RH_C_FUNCTION int ON_Sun_MinYear()
+{
+  return ON_Sun::MinYear();
+}
+
+RH_C_FUNCTION int ON_Sun_MaxYear()
+{
+  return ON_Sun::MaxYear();
+}
+
+RH_C_FUNCTION bool ON_Sun_IsValid(const ON_Sun* sun)
+{
+  return sun ? sun->IsValid() : false;
+}

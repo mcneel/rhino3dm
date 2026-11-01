@@ -4666,24 +4666,10 @@ RH_C_FUNCTION int ON_Mesh_GetIntersections(
     )
     return 0;
 
-  ON_SimpleArray<const ON_Mesh*> meshes;
-  meshes.Append(pMesh);
-
-  ON_MeshIntersectionCache mx_cache;
-  ON_MeshIntersectionCache* pMxCache = (pCache) ? pCache : &mx_cache;
-
-  const ON_BoundingBox bbox = pMesh->BoundingBox();
+  ON_SimpleArray<ON_Plane> planes;
   for (int i = 0; i < plane_count; i++)
-  {
-    ON_Plane plane = FromPlaneStruct(pPlanes[i]);
-    ON_PlaneSurface plane_surface;
-    if (plane_surface.CreatePlaneThroughBox(plane, bbox))
-    {
-      ON_Mesh plane_mesh;
-      if (plane_surface.CreateMesh(&plane_mesh))
-        plane_mesh.GetIntersections(meshes, pMxCache, tolerance, pOutPoints, overlaps ? pOutPoints : nullptr, nullptr, nullptr, nullptr, nullptr);
-    }
-  }
+    planes.Append(FromPlaneStruct(pPlanes[i]));
+  pMesh->IntersectPlanes(planes, tolerance, pOutPoints, overlaps ? pOutPoints : nullptr, pCache);
 
   return pOutPoints->Count();
 }

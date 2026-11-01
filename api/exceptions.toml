@@ -129,13 +129,13 @@ reason = "three.js interop; inverse of toThreejsJSON"
 [[hand_kept]]
 class = "Bitmap"
 decided = "Luis, 2026-10-15"
-vnext = "src/bindings/bnd_bitmapx.* (BitmapX), with the review fixes (G90)"
+vnext = "src/bindings/bnd_bitmapx.* (Bitmap), with the review fixes (G90)"
 reason = "RhinoCommon's BitmapEntry has no working member for a File3dm (its pointer throws NotImplementedException; FileName/Save are RHINO_SDK only: pilot #37); the old ON_Bitmap wrapper is the only bitmap access"
 
 [[hand_kept]]
 class = "File3dmBitmapTable"
 decided = "Luis, 2026-10-15"
-vnext = "src/bindings/bnd_bitmapx.* (File3dmBitmapTableX), with the review fixes (G90)"
+vnext = "src/bindings/bnd_bitmapx.* (File3dmBitmapTable), with the review fixes (G90)"
 reason = "RhinoCommon's BitmapTable is RHINO_SDK only; File3dmManifestTable yields BitmapEntry for images (pilot #37)"
 
 # ---- Rhino-only in RhinoCommon (Luis 2026-10-16): kept until upstream makes them portable
@@ -144,14 +144,14 @@ reason = "RhinoCommon's BitmapTable is RHINO_SDK only; File3dmManifestTable yiel
 class = "EmbeddedFile"
 members = ["fromByteArray"]
 decided = "Luis, 2026-10-18"
-vnext = "File3dmEmbeddedFileX.fromByteArray (hand member, JS only, G124)"
+vnext = "File3dmEmbeddedFile.fromByteArray (hand member, JS only, G124)"
 reason = "JS only: builds an embedded file from bytes (WASM has no host file system to read the file from); RhinoCommon's File3dmEmbeddedFile has no such factory"
 
 [[hand_kept]]
 class = "File3dm"
 members = ["destroy", "getEmbeddedFileAsBase64Strict"]
 decided = "Luis, 2026-10-18"
-vnext = "File3dmX.destroy = embind's delete() (hand alias, JS only, G124: the old one freed the model twice); File3dmX.getEmbeddedFileAsBase64Strict (G123)"
+vnext = "File3dm.destroy = embind's delete() (hand alias, JS only, G124: the old one freed the model twice); File3dm.getEmbeddedFileAsBase64Strict (G123)"
 reason = "JS only: destroy() frees the model's contents explicitly (embind objects are not collected promptly); getEmbeddedFileAsBase64Strict returns an embedded file's bytes as base64 (no host file system in WASM). No RhinoCommon counterparts"
 
 
@@ -266,14 +266,14 @@ reason = "F3 RdkXml: the model's RDK document data as XML; F4 GetEmbeddedFileAsB
 class = "File3dmRdkDocumentData"
 members = ["RdkXml"]
 decided = "Luis, 2026-10-28"
-vnext = "File3dmPlugInDataX.RdkXml (hand member, G123): the plug-in data entry the old class was"
+vnext = "File3dmPlugInData.RdkXml (hand member, G123): the plug-in data entry the old class was"
 reason = "F3: the RDK document data as XML; kept after review"
 
 [[hand_kept]]
 class = "File3dmRenderContentTable"
 members = ["Add"]
 decided = "Luis, 2026-10-28 (upstream); hand-kept for 9.2, 2026-10-29"
-vnext = "File3dmRenderMaterialsX.Add / File3dmRenderEnvironmentsX.Add / File3dmRenderTexturesX.Add (hand members, G124): on the kind's collection, where FindId went (H1)"
+vnext = "File3dmRenderMaterials.Add / File3dmRenderEnvironments.Add / File3dmRenderTextures.Add (hand members, G124): on the kind's collection, where FindId went (H1)"
 upstream = "RhinoCommon has no way to add render content to a File3dm (File3dmRenderMaterial() is commented out since 2022)"
 reason = "copies a render content (e.g. from another model) into the model"
 
@@ -281,7 +281,7 @@ reason = "copies a render content (e.g. from another model) into the model"
 class = "PointCloud"
 members = ["addPointValue", "insertPointValue", "addRangePointsValues"]
 decided = "Luis, 2026-10-30"
-vnext = "PointCloudX: Python Add(point, value) / Insert(index, point, value) / AddRange(points, values) overloads, JS addPointValue / insertPointValue / addRangePointsValues (hand members, G126); every channel stays aligned (pilot #64)"
+vnext = "PointCloud: Python Add(point, value) / Insert(index, point, value) / AddRange(points, values) overloads, JS addPointValue / insertPointValue / addRangePointsValues (hand members, G126); every channel stays aligned (pilot #64)"
 upstream = "U38: RhinoCommon PointCloud.Add(Point3d, double), Insert(int, Point3d, double), AddRange(IEnumerable<Point3d>, IEnumerable<double>)"
 reason = "a point with a value but no normal or color; RhinoCommon carries a value only with both"
 
@@ -289,7 +289,7 @@ reason = "a point with a value but no normal or color; RhinoCommon carries a val
 class = "File3dmGroupTable"
 members = ["deleteId"]
 decided = "Luis, 2026-10-30"
-vnext = "File3dmGroupTableX: Python Delete(id) overload, JS deleteId (hand member, G126)"
+vnext = "File3dmGroupTable: Python Delete(id) overload, JS deleteId (hand member, G126)"
 upstream = "U38: RhinoCommon File3dmGroupTable / File3dmCommonComponentTable Delete(Guid)"
 reason = "delete a group by id; RhinoCommon deletes by group or by index"
 
@@ -297,49 +297,49 @@ reason = "delete a group by id; RhinoCommon deletes by group or by index"
 class = "SubDFace"
 members = ["Edges", "Vertices"]
 decided = "Luis, 2026-10-30 (option B: neighbouring components, Pierre)"
-vnext = "SubDFaceX.Edges / Vertices (hand properties, G129): lists of the generated components, as RhinoCommon's vertex.Edges (Luis 2026-10-30, option 1). JS: an array property (`face.edges`), the old one a function returning an iterator (`face.edges()`)"
+vnext = "SubDFace.Edges / Vertices (hand properties, G129): lists of the generated components, as RhinoCommon's vertex.Edges (Luis 2026-10-30, option 1). JS: an array property (`face.edges`), the old one a function returning an iterator (`face.edges()`)"
 reason = "a component's neighbours in one call; RhinoCommon has only EdgeAt(i) / VertexAt(i)"
 
 [[hand_kept]]
 class = "SubDEdge"
 members = ["Faces", "Vertices"]
 decided = "Luis, 2026-10-30 (option B)"
-vnext = "SubDEdgeX.Faces / Vertices (hand properties, G129)"
+vnext = "SubDEdge.Faces / Vertices (hand properties, G129)"
 reason = "as SubDFace.Edges"
 
 [[hand_kept]]
 class = "SubDVertex"
 members = ["Faces"]
 decided = "Luis, 2026-10-30 (option B)"
-vnext = "SubDVertexX.Faces (hand property, G129); vertex.Edges is RhinoCommon's (generated)"
+vnext = "SubDVertex.Faces (hand property, G129); vertex.Edges is RhinoCommon's (generated)"
 reason = "as SubDFace.Edges"
 
 [[hand_kept]]
 class = "Mesh"
 members = ["toThreejsBuffers"]
 decided = "Luis, 2026-10-08 (three.js interop; again 2026-10-28)"
-vnext = "MeshX.toThreejsBuffers + its inverse createFromThreejsBuffers (hand members, JS only, G131); the old one computed normals on the caller's mesh, this one on a copy"
+vnext = "Mesh.toThreejsBuffers + its inverse createFromThreejsBuffers (hand members, JS only, G131); the old one computed normals on the caller's mesh, this one on a copy"
 reason = "three.js BufferGeometry typed arrays (3DMLoader's fast path)"
 
 [[hand_kept]]
 class = "PointCloud"
 members = ["toThreejsBuffers"]
 decided = "Luis, 2026-10-08 (three.js interop)"
-vnext = "PointCloudX.toThreejsBuffers + createFromThreejsBuffers (hand members, JS only, G131)"
+vnext = "PointCloud.toThreejsBuffers + createFromThreejsBuffers (hand members, JS only, G131)"
 reason = "as Mesh.toThreejsBuffers"
 
 [[hand_kept]]
 class = "Mesh"
 members = ["toThreejsJSON", "toThreejsJSONRotate", "toThreejsJSONMerged", "createFromThreejsJSON"]
 decided = "Luis, 2026-10-31 (ship deprecated in 9.2, remove later)"
-vnext = "MeshX hand members, JS only (G133): 8.x's output and decoding, each warning once (console.warn) that toThreejsBuffers / createFromThreejsBuffers replace it; normals computed on a copy, an out-of-range face index throws"
+vnext = "Mesh hand members, JS only (G133): 8.x's output and decoding, each warning once (console.warn) that toThreejsBuffers / createFromThreejsBuffers replace it; normals computed on a copy, an out-of-range face index throws"
 reason = "deprecated: 3DMLoader's JSON fallback, for callers not yet on the buffers"
 
 [[hand_kept]]
 class = "PointCloud"
 members = ["toThreejsJSON", "createFromThreejsJSON"]
 decided = "Luis, 2026-10-31 (ship deprecated in 9.2, remove later)"
-vnext = "PointCloudX hand members, JS only (G133), deprecated as Mesh's"
+vnext = "PointCloud hand members, JS only (G133), deprecated as Mesh's"
 reason = "as Mesh.toThreejsJSON"
 
 [[hand_kept]]

@@ -3,7 +3,7 @@
 # /work = logs + built module (host-visible), /build = build tree + node cache
 # (a named volume: container-local disk, see tools/dev/round.sh).
 #   wasm.sh build   full build (WASM64)
-#   wasm.sh test    smoke + parity (+ the points micro-benchmark)
+#   wasm.sh test    parity + the generated JS tests
 #   wasm.sh all     build, test
 # Node 24 is fetched: the image's node is too old for WASM64
 # (memory: rhino3dm-wasm-build-gotchas).
@@ -33,13 +33,9 @@ node24() {
 
 test_() {
   node24
-  $NODE /src/tools/dev/wasm_smoke.js $B/rhino3dm.js 2>&1 | grep -v "^    at " | tail -6
   $NODE /src/tests/parity/parity_js.js $B/rhino3dm.js 2>&1 | tail -20
-  $NODE /src/tools/dev/js_points_bench.js $B/rhino3dm.js 2>&1 | tail -5
   # the JS port of tests/generated (same contracts, compiled module)
   $NODE --expose-gc /src/tests/generated/js/run.js $B/rhino3dm.js 2>&1 | grep -E "^(FAIL|SKIP|JS TESTS|FAILED)" | tail -40
-  # the JS surface for old_coverage.py (JS-only old members; round.sh reruns the report)
-  $NODE /src/tools/dev/dump_js_members.js $B/rhino3dm.js /work/js_members.json 2>&1 | tail -1
 }
 
 case "${1:-all}" in

@@ -42,7 +42,15 @@ namespace Rhino.Render
     OcsMapping = UnsafeNativeMethods.TextureMappingType.OcsMapping,
 
     /// <summary>Some sort of false color mapping used to set per vertex colors</summary>
-    FalseColors = UnsafeNativeMethods.TextureMappingType.FalseColors
+    FalseColors = UnsafeNativeMethods.TextureMappingType.FalseColors,
+
+    /// <summary>World coordinate system (WCS) projection.</summary>
+    /// <since>9.2</since>
+    WcsProjection = UnsafeNativeMethods.TextureMappingType.WcsProjection,
+
+    /// <summary>World coordinate system (WCS) box projection.</summary>
+    /// <since>9.2</since>
+    WcsBoxProjection = UnsafeNativeMethods.TextureMappingType.WcsBoxProjection
   }
 
   /// <summary>
@@ -167,6 +175,10 @@ namespace Rhino.Render
             return TextureMappingType.OcsMapping;
           case UnsafeNativeMethods.TextureMappingType.FalseColors:
             return TextureMappingType.FalseColors;
+          case UnsafeNativeMethods.TextureMappingType.WcsProjection:
+            return TextureMappingType.WcsProjection;
+          case UnsafeNativeMethods.TextureMappingType.WcsBoxProjection:
+            return TextureMappingType.WcsBoxProjection;
         }
         GC.KeepAlive(this);
         throw new Exception("Unknown TextureMappingType");

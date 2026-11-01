@@ -339,6 +339,7 @@ namespace Rhino.Display
       IntPtr pMaterial = NonConstMaterialPointer(front);
       IntPtr pTexture = texture.ConstPointer();
       bool rc = UnsafeNativeMethods.ON_Material_SetTexture(pMaterial, pTexture, (int)which);
+      GC.KeepAlive(texture);
       GC.KeepAlive(this);
       return rc;
     }

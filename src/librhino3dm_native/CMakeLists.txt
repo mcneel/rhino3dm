@@ -15,6 +15,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Android")
 endif()
 
 file(GLOB bindings_SRC "./*.h" "./*.cpp")
+# draco.cpp (synced from RhinoCommon's c/draco.cpp): the Draco encode/decode subset rhino3dm compiles,
+# not all of Draco (../draco_sources.cmake, written by tools/dev/draco_subset.py)
+include("${CMAKE_CURRENT_SOURCE_DIR}/../draco_sources.cmake")
+include_directories(${draco_subset_INCLUDE})
+list(APPEND bindings_SRC ${draco_subset_SRC})
 file(GLOB zlib_SRC "../lib/opennurbs/zlib/*.h" "../lib/opennurbs/zlib/*.c")
 
 # temporarily rename the 3 cpp files that we don't want to compile on OSX

@@ -2403,6 +2403,7 @@ namespace Rhino
 
       flags = (RenderMeshProvider.Flags)f;
       GC.KeepAlive(vp);
+      GC.KeepAlive(attrs);
       return ret;
     }
 
@@ -2448,6 +2449,7 @@ namespace Rhino
 
       flags = (RenderMeshProvider.Flags)f;
       GC.KeepAlive(vp);
+      GC.KeepAlive(attrs);
       return outList.ToArray();
     }
 
@@ -2499,6 +2501,7 @@ namespace Rhino
 
       flags = (RenderMeshProvider.Flags)f;
       GC.KeepAlive(vp);
+      GC.KeepAlive(attrs);
       return boundingBox.IsValid;
     }
 
@@ -2580,7 +2583,7 @@ namespace Rhino
     public bool Audit(TextLog textLog, bool attemptRepair)
     {
       IntPtr ptr_textlog = IntPtr.Zero;
-      TextLog privateLog;
+      TextLog privateLog = null;
       if (null == textLog)
       {
         privateLog = new TextLog();
@@ -2590,7 +2593,10 @@ namespace Rhino
       {
         ptr_textlog = textLog.NonConstPointer();
       }
-      return UnsafeNativeMethods.CRhinoDoc_Audit(RuntimeSerialNumber, ptr_textlog, attemptRepair);
+      bool rc = UnsafeNativeMethods.CRhinoDoc_Audit(RuntimeSerialNumber, ptr_textlog, attemptRepair);
+      GC.KeepAlive(textLog);
+      privateLog?.Dispose();
+      return rc;
     }
 
     /// <summary>
@@ -2771,6 +2777,42 @@ namespace Rhino
     public uint CurrentUndoRecordSerialNumber
     {
       get { return UnsafeNativeMethods.CRhinoDoc_CurrentUndoRecordSerialNumber(RuntimeSerialNumber); }
+    }
+
+    /// <summary>
+    /// The description of the undo record currently being recorded, as shown
+    /// in Undo, Redo, and UndoMultiple. If no description has been set, this
+    /// is the name of the command that owns the record. Null if undo recording
+    /// is not active.
+    /// </summary>
+    /// <since>9.0</since>
+    public string CurrentUndoRecordDescription
+    {
+      get
+      {
+        using (StringHolder sh = new StringHolder())
+        {
+          IntPtr ptr_string = sh.NonConstPointer();
+          if (!UnsafeNativeMethods.CRhinoDoc_CurrentUndoRecordDescription(RuntimeSerialNumber, ptr_string))
+            return null;
+          return sh.ToString();
+        }
+      }
+    }
+
+    /// <summary>
+    /// Sets the description of the undo record currently being recorded.
+    /// Use this to give the undo record of a running command, such as
+    /// RunPythonScript, a meaningful name in Undo, Redo, and UndoMultiple.
+    /// </summary>
+    /// <param name="description">
+    /// The new description. Cannot be null, empty, or only white space.
+    /// </param>
+    /// <returns>true if an undo record is active and its description was set.</returns>
+    /// <since>9.0</since>
+    public bool SetCurrentUndoRecordDescription(string description)
+    {
+      return UnsafeNativeMethods.CRhinoDoc_SetCurrentUndoRecordDescription(RuntimeSerialNumber, description);
     }
 
     /// <summary> Undo the last action </summary>
@@ -3010,15 +3052,16 @@ namespace Rhino
     /// <since>7.20</since>
     public void SelectRenderContentInEditor(Rhino.Render.RenderContentCollection collection, bool append)
     {
-      SimpleArrayGuid guids = new SimpleArrayGuid();
-
-      foreach(Rhino.Render.RenderContent content in collection)
+      using (SimpleArrayGuid guids = new SimpleArrayGuid())
       {
-        guids.Append(content.Id);
-      }
+        foreach(Rhino.Render.RenderContent content in collection)
+        {
+          guids.Append(content.Id);
+        }
 
-      var pointer_to_id_list = guids.ConstPointer();
-      UnsafeNativeMethods.RdkSelectContentsInEditor(RuntimeSerialNumber, pointer_to_id_list, append);
+        var pointer_to_id_list = guids.ConstPointer();
+        UnsafeNativeMethods.RdkSelectContentsInEditor(RuntimeSerialNumber, pointer_to_id_list, append);
+      }
     }
 
 #pragma warning disable 0618
@@ -7129,6 +7172,7 @@ namespace Rhino.DocObjects.Tables
         AddCustomObjectForTracking(serial_number, rhinoObject, pRhinoObject);
         IntPtr ptrHistory = (history!=null) ? history.Handle : IntPtr.Zero;
         UnsafeNativeMethods.CRhinoDoc_AddRhinoObject(m_doc.RuntimeSerialNumber, pRhinoObject, ptrHistory);
+        GC.KeepAlive(history);
       }
     }
 
@@ -7400,6 +7444,7 @@ namespace Rhino.DocObjects.Tables
       IntPtr const_ptr_attributes = (attributes == null) ? IntPtr.Zero : attributes.ConstPointer();
       IntPtr ptr_history = (history == null) ? IntPtr.Zero : history.Handle;
       Guid rc = UnsafeNativeMethods.CRhinoDoc_AddPoint2(m_doc.RuntimeSerialNumber, const_ptr_pt, const_ptr_attributes, ptr_history, reference);
+      GC.KeepAlive(point);
       GC.KeepAlive(attributes);
       GC.KeepAlive(history);
       return rc;
@@ -12183,6 +12228,19 @@ namespace Rhino.DocObjects
     public bool IncludePhantoms { get; set; }
 
     /// <summary>
+    /// Markup content objects are skipped by default. Set this to true to include them along with all other objects.
+    /// </summary>
+    /// <since>9.0</since>
+    public bool IncludeMarkups { get; set; }
+
+    /// <summary>
+    /// When <see cref="IncludeMarkups"/> is true, includes only the content of the markup with this id; other objects are unaffected.
+    /// <see cref="Guid.Empty"/>, the default, includes the content of every markup.
+    /// </summary>
+    /// <since>9.0</since>
+    public Guid MarkupIdFilter { get; set; }
+
+    /// <summary>
     /// The default object enumerator settings ignore the selected state of objects.
     /// If you want the iterator to limit itself to selected objects, then set this property to true.
     /// </summary>
@@ -12380,7 +12438,9 @@ namespace Rhino.DocObjects
         s.MaterialIndexFilter,
         const_ptr_viewport,
         (byte)s.SpaceFilter,
-        s.UseFastSelection);
+        s.UseFastSelection,
+        s.IncludeMarkups,
+        s.MarkupIdFilter);
     }
 
     ~ObjectIdIterator()
@@ -12497,7 +12557,9 @@ namespace Rhino.DocObjects
         s.MaterialIndexFilter,
         const_ptr_viewport,
         (byte)s.SpaceFilter,
-        s.UseFastSelection);
+        s.UseFastSelection,
+        s.IncludeMarkups,
+        s.MarkupIdFilter);
     }
 
     ~ObjectIterator()

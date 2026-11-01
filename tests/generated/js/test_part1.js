@@ -12,7 +12,7 @@ module.exports = (t, ctx) => {
   // --- marshalling shapes ---------------------------------------------------
 
   t('test_guard_raises_like_rhinocommon', () => {
-    const x = new r.CurveX(ctx.curve());
+    const x = ctx.curve();
     // in range the call works (the guard is only on the bad index)
     const d = x.spanDomain(0);
     assert.strictEqual(typeof d.T0, 'number');
@@ -22,61 +22,61 @@ module.exports = (t, ctx) => {
   t('test_holder_array_return', () => {
     const c = ctx.curve();
     const dom = val(c.domain);
-    assert.deepStrictEqual(new r.CurveX(c).spanVector(), [dom[0], dom[1]]);
+    assert.deepStrictEqual(c.spanVector(), [dom.T0, dom.T1]);
   });
 
   t('test_enum_parameters_are_type_checked', () => {
-    const x = new r.CurveX(ctx.curve());
+    const x = ctx.curve();
     assert.strictEqual(x.isContinuous(r.Continuity.C2_continuous, 0.5), true);
     // pilot #47 / G101: enum arguments are checked (Python raises TypeError; JS a TypeError too)
     ctx.raises(() => x.isContinuous(3, 0.5), /expected a .*Continuity value, got number/);
     ctx.raises(() => x.isContinuous('C1', 0.5), /got string/);
     ctx.raises(() => x.isContinuous({}, 0.5), /got object/);
     // a property setter goes through the same conversion
-    const ds = new r.DimensionStyleX();
+    const ds = new r.DimensionStyle();
     ds.arrowType1 = r.DimensionStyleArrowType.Dot;
     ctx.raises(() => { ds.arrowType1 = 3; }, /got number/);
     assert.strictEqual(ds.arrowType1, r.DimensionStyleArrowType.Dot);
   });
 
   t('test_string_argument_roundtrip', () => {
-    assert.strictEqual(r.ModelComponentX.isValidComponentName('Layer 01'), true);
-    assert.strictEqual(r.ModelComponentX.isValidComponentName(''), false);
+    assert.strictEqual(r.ModelComponent.isValidComponentName('Layer 01'), true);
+    assert.strictEqual(r.ModelComponent.isValidComponentName(''), false);
   });
 
   // --- classes --------------------------------------------------------------
 
   t('test_abstract_bases_are_not_constructible', () => {
     // no constructor is registered for the abstract bases (the surface lock has none)
-    assert.strictEqual(r.GeometryBaseX.prototype.constructor, r.GeometryBaseX);
-    ctx.raises(() => new r.GeometryBaseX(), /GeometryBaseX has no accessible constructor/);
-    ctx.raises(() => new r.ModelComponentX(), /ModelComponentX has no accessible constructor/);
+    assert.strictEqual(r.GeometryBase.prototype.constructor, r.GeometryBase);
+    ctx.raises(() => new r.GeometryBase(), /GeometryBase has no accessible constructor/);
+    ctx.raises(() => new r.ModelComponent(), /ModelComponent has no accessible constructor/);
   });
 
   t('test_inheritance_reaches_base_members', () => {
-    const pc = new r.PolyCurveX();
-    pc.append(new r.LineCurveX(P(0, 0, 0), P(2, 0, 0)));
-    assert(pc instanceof r.CurveX && pc instanceof r.GeometryBaseX);
-    assert.deepStrictEqual(pc.pointAt(1.0), P(1, 0, 0));      // declared on CurveX
+    const pc = new r.PolyCurve();
+    pc.append(new r.LineCurve(P(0, 0, 0), P(2, 0, 0)));
+    assert(pc instanceof r.Curve && pc instanceof r.GeometryBase);
+    assert.deepStrictEqual(pc.pointAt(1.0), P(1, 0, 0));      // declared on Curve
   });
 
   t('test_bridge_free_classes_reject_old_binding_objects', () => {
-    ctx.raises(() => new r.ViewportX(new r.ViewportInfo()), /Expected null or instance of ViewportX/);
-    const v = new r.ViewportX();
+    // (the old ViewportInfo was refused here: "Expected null or instance of ViewportInfo" -- old-binding only, M3)
+    const v = new r.ViewportInfo();
     assert.strictEqual(v.setCameraLocation(P(7, 8, 9)), true);
     assert.deepStrictEqual(v.cameraLocation, P(7, 8, 9));
   });
 
   t('test_subclass_aware_wrapping', () => {
-    const srf = new r.SurfaceX(new r.Sphere([0, 0, 0], 5).toNurbsSurface());
+    const srf = r.Sphere.toNurbsSurface(r.Sphere.create(P(0, 0, 0), 5));
     const iso = srf.isoCurve(r.IsoStatus.X, 0.5);
-    assert(iso instanceof r.NurbsCurveX, 'isoCurve did not downcast');
-    assert.strictEqual(iso.constructor.name, 'NurbsCurveX');
+    assert(iso instanceof r.NurbsCurve, 'isoCurve did not downcast');
+    assert.strictEqual(iso.constructor.name, 'NurbsCurve');
   });
 
   t('test_class_argument_is_copied_not_adopted', () => {
-    const pc = new r.PolyCurveX();
-    const seg = new r.LineCurveX(P(0, 0, 0), P(1, 0, 0));
+    const pc = new r.PolyCurve();
+    const seg = new r.LineCurve(P(0, 0, 0), P(1, 0, 0));
     assert.strictEqual(pc.append(seg), true);
     seg.delete();                                     // the C layer duplicated it
     assert.strictEqual(pc.segmentCount, 1);
@@ -84,9 +84,9 @@ module.exports = (t, ctx) => {
   });
 
   t('test_rhinocommon_copy_constructor_is_deep', () => {
-    const a = new r.LinetypeX();
+    const a = new r.Linetype();
     a.appendSegment(1.5, true);
-    const b = new r.LinetypeX(a);
+    const b = new r.Linetype(a);
     b.appendSegment(2.0, false);
     assert.deepStrictEqual([val(a.patternLength), val(b.patternLength)], [1.5, 3.5]);
   });
@@ -98,41 +98,39 @@ module.exports = (t, ctx) => {
   // --- found bugs -----------------------------------------------------------
 
   t('test_finding_01_linetype_double_free', () => {
-    const lt = new r.Linetype();
-    lt.delete();                                      // double-freed before the fix
-    const lx = new r.LinetypeX();
-    lx.delete();
+    const lx = new r.Linetype();
+    lx.delete();                                      // the old Linetype double-freed before the fix
   });
 
   t('test_ref_of_by_value_transform_uses_the_argument', () => {
-    const c = new r.LineCurveX(P(0, 0, 0), P(1, 0, 0));
-    const xf = r.TransformX.translation({ X: 0, Y: 0, Z: 5 });
+    const c = new r.LineCurve(P(0, 0, 0), P(1, 0, 0));
+    const xf = r.Transform.translation({ X: 0, Y: 0, Z: 5 });
     assert.strictEqual(c.transform(xf), true);
     assert.deepStrictEqual(c.pointAtStart, P(0, 0, 5));
   });
 
   t('test_finding_14_rhinocommon_value_semantics', () => {
     const q = P(4, 6, 3);
-    assert.strictEqual(r.Point3dX.distanceTo(r.Point3dX.unset, q), 0.0);
+    assert.strictEqual(r.Point3d.distanceTo(r.Point3d.unset, q), 0.0);
   });
 
   t('test_same_arity_constructor_overloads_both_reachable', () => {
-    const a = new r.LineCurveX(P(1, 2, 3), P(4, 5, 6)).line;
-    const b = new r.LineCurveX({ X: 1, Y: 2 }, { X: 4, Y: 5 }).line;
+    const a = new r.LineCurve(P(1, 2, 3), P(4, 5, 6)).line;
+    const b = new r.LineCurve({ X: 1, Y: 2 }, { X: 4, Y: 5 }).line;
     assert.deepStrictEqual([a.To.Z, b.To.Z], [6.0, 0.0]);
     assert.deepStrictEqual([a.To.X, a.To.Y, b.To.X, b.To.Y], [4, 5, 4, 5]);
   });
 
   t('test_property_setters_write_through', () => {
-    const c = new r.LineCurveX(P(0, 0, 0), P(2, 0, 0));
+    const c = new r.LineCurve(P(0, 0, 0), P(2, 0, 0));
     c.domain = { T0: 1, T1: 5 };                       // value type through `ref value`
     assert.deepStrictEqual([c.domain.T0, c.domain.T1], [1.0, 5.0]);
-    const ds = new r.DimensionStyleX();
+    const ds = new r.DimensionStyle();
     ds.arrowLength = 0.75;                             // inlined private helper + selector
     assert.strictEqual(ds.arrowLength, 0.75);
     // read-only in RhinoCommon stays read-only: embind registers no setter
     const desc = (() => {
-      for (let p = r.CurveX.prototype; p; p = Object.getPrototypeOf(p)) {
+      for (let p = r.Curve.prototype; p; p = Object.getPrototypeOf(p)) {
         const d = Object.getOwnPropertyDescriptor(p, 'pointAtStart');
         if (d) return d;
       }
@@ -147,8 +145,8 @@ module.exports = (t, ctx) => {
   // dropping every JS reference to the parent and letting GC run must leave the view usable.
   // An explicit .delete() of the parent is still immediate (embind) and is not tested here.
   t('test_file3dm_table_view_keeps_the_file_alive', async () => {
-    const objs = (() => new r.File3dmX().objects)();
-    assert(objs.__rh3dm_parent instanceof r.File3dmX);
+    const objs = (() => new r.File3dm().objects)();
+    assert(objs.__rh3dm_parent instanceof r.File3dm);
     await ctx.gcSettle();                              // the view must keep the model alive
     objs.addPoint(P(1, 2, 3), null);
     objs.addPoint(P(-1, 0, 5), null);
@@ -157,7 +155,7 @@ module.exports = (t, ctx) => {
   });
 
   t('test_file3dm_settings_view_writes_through', () => {
-    const f = new r.File3dmX();
+    const f = new r.File3dm();
     f.settings.modelAbsoluteTolerance = 0.25;
     assert.strictEqual(f.settings.modelAbsoluteTolerance, 0.25);
   });
@@ -172,15 +170,15 @@ module.exports = (t, ctx) => {
     // three independent contracts: run each so one failure does not hide the others
     const bad = [];
     const check = (what, fn) => { try { fn(); } catch (e) { bad.push(what + ': ' + String(e).split('\n')[0]); } };
-    check('PolyCurveX.append(null) is false', () => {
-      assert.strictEqual(new r.PolyCurveX().append(null), false);   // `if (null == curve) return false;`
+    check('PolyCurve.append(null) is false', () => {
+      assert.strictEqual(new r.PolyCurve().append(null), false);   // `if (null == curve) return false;`
     });
-    check('new ArcCurveX(null)', () => {
-      assert(new r.ArcCurveX(null) instanceof r.ArcCurveX);          // `new ArcCurve(null)`: ON_ArcCurve_New(nullptr)
+    check('new ArcCurve(null)', () => {
+      assert(new r.ArcCurve(null) instanceof r.ArcCurve);          // `new ArcCurve(null)`: ON_ArcCurve_New(nullptr)
     });
     check('transform(Identity) is true', () => {
-      const c = new r.LineCurveX(P(0, 0, 0), P(1, 0, 0));
-      assert.strictEqual(c.transform(r.TransformX.identity), true);   // `if (xform.IsIdentity) return true;`
+      const c = new r.LineCurve(P(0, 0, 0), P(1, 0, 0));
+      assert.strictEqual(c.transform(r.Transform.identity), true);   // `if (xform.IsIdentity) return true;`
     });
     assert.strictEqual(bad.length, 0, bad.join(' ; '));
   });
@@ -188,7 +186,7 @@ module.exports = (t, ctx) => {
   // --- G29: File3dm tables --------------------------------------------------
 
   t('test_file3dm_layer_table_basics', () => {
-    const f = new r.File3dmX();
+    const f = new r.File3dm();
     const layers = f.allLayers;
     assert.strictEqual(layers.count, 0);
     const i0 = layers.addLayer('a', { r: 255, g: 0, b: 0, a: 255 });
@@ -202,7 +200,7 @@ module.exports = (t, ctx) => {
 
   t('test_file3dm_table_items_are_live_proxies', async () => {
     const layer = (() => {
-      const f = new r.File3dmX();
+      const f = new r.File3dm();
       f.allLayers.addLayer('before', BLACK);
       const l = f.allLayers.findIndex(0);
       l.name = 'after';
@@ -214,8 +212,8 @@ module.exports = (t, ctx) => {
   });
 
   t('test_file3dm_table_add_copies_and_delete_by_item', () => {
-    const f = new r.File3dmX();
-    const mine = new r.LayerX();
+    const f = new r.File3dm();
+    const mine = new r.Layer();
     mine.name = 'mine';
     f.allLayers.add(mine);                             // ONX_Model_AddModelComponent copies
     mine.name = 'changed later';
@@ -225,7 +223,7 @@ module.exports = (t, ctx) => {
   });
 
   t('test_file3dm_table_find_name', () => {
-    const f = new r.File3dmX();
+    const f = new r.File3dm();
     f.allLayers.addLayer('walls', BLACK);
     assert.strictEqual(f.allLayers.findName('walls', ZERO_ID).name, 'walls');
     assert.strictEqual(f.allLayers.findName('nope', ZERO_ID), null);
@@ -235,19 +233,19 @@ module.exports = (t, ctx) => {
     // JS has no nested enums: DimensionStyle.ArrowType is r.DimensionStyleArrowType
     const E = r.DimensionStyleArrowType;
     assert(E && E.Dot, 'DimensionStyleArrowType.Dot missing');
-    const ds = new r.DimensionStyleX();
+    const ds = new r.DimensionStyle();
     ds.arrowType1 = E.Dot;
     assert.strictEqual(ds.arrowType1, E.Dot);
   });
 
   t('test_instance_definition_object_ids_holder', () => {
-    assert.deepStrictEqual(new r.InstanceDefinitionGeometryX().getObjectIds(), []);
+    assert.deepStrictEqual(new r.InstanceDefinitionGeometry().getObjectIds(), []);
   });
 
   // --- G39: table protocols -------------------------------------------------
 
   t('test_table_iteration_survives_a_delete', () => {
-    const f = new r.File3dmX();
+    const f = new r.File3dm();
     const tb = f.allLayers;
     for (const n of 'abc') tb.addLayer(n, BLACK);
     assert.strictEqual(tb.delete(tb.findIndex(1)), true);
@@ -261,7 +259,7 @@ module.exports = (t, ctx) => {
   });
 
   t('test_table_getitem_is_the_manifest_index', () => {
-    const f = new r.File3dmX();
+    const f = new r.File3dm();
     const tb = f.allLayers;
     for (const n of 'abc') tb.addLayer(n, BLACK);
     tb.delete(tb.findIndex(1));
@@ -276,7 +274,7 @@ module.exports = (t, ctx) => {
 
   t('test_table_iteration_keeps_the_file_alive', async () => {
     const it = (() => {
-      const f = new r.File3dmX();
+      const f = new r.File3dm();
       f.allLayers.addLayer('only', BLACK);
       return f.allLayers.iterator();
     })();
@@ -291,7 +289,7 @@ module.exports = (t, ctx) => {
   // --- G40: File3dmObject ---------------------------------------------------
 
   const fileWithLine = () => {
-    const f = new r.File3dmX();
+    const f = new r.File3dm();
     f.objects.addLine(P(0, 0, 0), P(1, 0, 0), null);
     return f;
   };
@@ -303,9 +301,9 @@ module.exports = (t, ctx) => {
     const objs = list(f.objects);
     assert.strictEqual(f.objects.count, 2);
     assert.strictEqual(objs.length, 2);
-    assert(objs[0] instanceof r.File3dmObjectX);
-    assert(objs[0].geometry instanceof r.LineCurveX, 'geometry 0: ' + objs[0].geometry.constructor.name);
-    assert(objs[1].geometry instanceof r.PointX, 'geometry 1: ' + objs[1].geometry.constructor.name);
+    assert(objs[0] instanceof r.File3dmObject);
+    assert(objs[0].geometry instanceof r.LineCurve, 'geometry 0: ' + objs[0].geometry.constructor.name);
+    assert(objs[1].geometry instanceof r.Point, 'geometry 1: ' + objs[1].geometry.constructor.name);
   });
 
   t('test_geometry_is_copy_on_write_as_in_rhinocommon', () => {
@@ -313,7 +311,7 @@ module.exports = (t, ctx) => {
     const obj = first(f.objects);
     const g = obj.geometry;
     assert.strictEqual(g.pointAtStart.X, 0.0);
-    assert.strictEqual(g.transform(r.TransformX.translation({ X: 10, Y: 0, Z: 0 })), true);
+    assert.strictEqual(g.transform(r.Transform.translation({ X: 10, Y: 0, Z: 0 })), true);
     assert.strictEqual(g.pointAtStart.X, 10.0);        // the private copy moved ...
     assert.strictEqual(obj.geometry.pointAtStart.X, 0.0);   // ... the file did not
     f.objects.delete(obj.id);
@@ -343,7 +341,7 @@ module.exports = (t, ctx) => {
   // --- G41: RenderSettings --------------------------------------------------
 
   t('test_render_settings_setters_commit_into_the_file', () => {
-    const f = new r.File3dmX();
+    const f = new r.File3dm();
     const rs = f.settings.renderSettings;
     const before = rs.scaleBackgroundToFit;
     rs.scaleBackgroundToFit = !before;
@@ -354,27 +352,18 @@ module.exports = (t, ctx) => {
   });
 
   t('test_render_settings_same_file_result_as_the_old_in_place_bindings', () => {
-    const nw = new r.File3dmX();
+    // vNext copies and commits where the old bindings wrote in place: the file carries the values (the
+    // same file the old bindings wrote: checked against them before the switch-over, M3)
+    const nw = new r.File3dm();
     nw.settings.renderSettings.shadowmapLevel = 2;
     nw.settings.renderSettings.transparentBackground = true;
-    const old = new r.File3dm();
-    old.settings().renderSettings().shadowMapLevel = 2;   // the old binding's spelling
-    old.settings().renderSettings().transparentBackground = true;
-    const back = r.File3dm.fromByteArray(old.toByteArray());
-    assert.strictEqual(back.settings().renderSettings().shadowMapLevel, 2);
-    assert.strictEqual(back.settings().renderSettings().transparentBackground, true);
-    // the generated file through the OLD reader: write to the module's in-memory file system
-    if (!r.FS) return;                                  // FS not exported: the old half is the check
-    const pn = '/tmp_part1_new.3dm';
-    assert.strictEqual(nw.write(pn, 8), true);
-    const back2 = r.File3dm.fromByteArray(r.FS.readFile(pn));
-    r.FS.unlink(pn);
-    assert.strictEqual(back2.settings().renderSettings().shadowMapLevel, 2);
-    assert.strictEqual(back2.settings().renderSettings().transparentBackground, true);
+    const back = r.File3dm.fromByteArray(nw.toByteArray()).settings.renderSettings;
+    assert.strictEqual(back.shadowmapLevel, 2);
+    assert.strictEqual(back.transparentBackground, true);
   });
 
   t('test_render_settings_view_keeps_the_file_alive', () => {
-    const f = new r.File3dmX();
+    const f = new r.File3dm();
     const rs = f.settings.renderSettings;
     f.delete();
     rs.shadowmapLevel = 1;
@@ -384,7 +373,7 @@ module.exports = (t, ctx) => {
   // --- G42: RDK settings ----------------------------------------------------
 
   t('test_ground_plane_writes_through_into_the_file', () => {
-    const f = new r.File3dmX();
+    const f = new r.File3dm();
     const gp = f.settings.renderSettings.groundPlane;
     gp.enabled = true;
     gp.altitude = 2.5;
@@ -396,17 +385,17 @@ module.exports = (t, ctx) => {
   });
 
   t('test_free_floating_settings_own_their_object', () => {
-    const gp = new r.GroundPlaneX();
+    const gp = new r.GroundPlane();
     gp.altitude = 7.0;
     assert.strictEqual(gp.altitude, 7.0);
-    const rs = new r.RenderSettingsX();
+    const rs = new r.RenderSettings();
     const inner = rs.groundPlane;                       // a pointer INTO them, not a copy
     inner.altitude = 3.0;
     assert.strictEqual(rs.groundPlane.altitude, 3.0);
   });
 
   t('test_sun_and_safe_frame_round_trip', () => {
-    const f = new r.File3dmX();
+    const f = new r.File3dm();
     const rs = f.settings.renderSettings;
     rs.sun.enabled = true;
     rs.safeFrame.enabled = true;
@@ -416,7 +405,7 @@ module.exports = (t, ctx) => {
 
   // --- G43: components ------------------------------------------------------
 
-  const boxBrep = () => r.BrepX.createFromBox(r.BoundingBoxX.create(0, 0, 0, 1, 2, 3));
+  const boxBrep = () => r.Brep.createFromBox(r.BoundingBox.create(0, 0, 0, 1, 2, 3));
 
   t('test_brep_faces_are_components_of_the_brep', () => {
     const b = boxBrep();
@@ -424,7 +413,7 @@ module.exports = (t, ctx) => {
     assert.strictEqual(faces.count, 6);
     assert.deepStrictEqual(seq(faces).map(f => f.faceIndex), [0, 1, 2, 3, 4, 5]);
     const f = faces.get(2);
-    assert(f instanceof r.SurfaceProxyX && f instanceof r.SurfaceX);
+    assert(f instanceof r.SurfaceProxy && f instanceof r.Surface);
     assert(f.isSurface && f.isPlanar(1e-9));
     ctx.raises(() => faces.get(6), /out_of_range/);
     const was = f.orientationIsReversed;
@@ -443,7 +432,7 @@ module.exports = (t, ctx) => {
     const srfs0 = boxBrep().surfaces;
     assert.strictEqual(srfs0.count, 6);
     const items = [...srfs0];
-    assert(items.length === 6 && items.every(s => s instanceof r.SurfaceX && s.isPlanar()));
+    assert(items.length === 6 && items.every(s => s instanceof r.Surface && s.isPlanar()));
     ctx.raises(() => srfs0.get(6), /out_of_range/);
     const s0 = (() => boxBrep().surfaces.get(0))();
     await ctx.gcSettle();
@@ -461,7 +450,7 @@ module.exports = (t, ctx) => {
     assert.strictEqual(b.edges.count, 12);
     assert.strictEqual(b.vertices.count, 8);
     const e = b.edges.get(3);
-    assert(e.edgeIndex === 3 && e instanceof r.CurveProxyX && e instanceof r.CurveX);
+    assert(e.edgeIndex === 3 && e instanceof r.CurveProxy && e instanceof r.Curve);
     assert.strictEqual(b.vertices.get(7).vertexIndex, 7);
   });
 
@@ -469,7 +458,7 @@ module.exports = (t, ctx) => {
     const f = ctx.readModel('subdBox.3dm');
     for (const o of list(f.objects)) {
       const g = o.geometry;
-      if (g instanceof r.SubDX) return [f, g];
+      if (g instanceof r.SubD) return [f, g];
     }
     skip('no SubD in subdBox.3dm');
   };
@@ -497,23 +486,22 @@ module.exports = (t, ctx) => {
   });
 
   t('test_point_cloud_items_and_knot_lists', () => {
-    const pc = new r.PointCloud();
-    for (let i = 0; i < 4; i++) pc.add([i, 2 * i, 0]);
-    const cloud = new r.PointCloudX(pc);
+    const cloud = new r.PointCloud();
+    for (let i = 0; i < 4; i++) cloud.add(P(i, 2 * i, 0));
     const item = cloud.get(2);
     assert.strictEqual(item.index, 2);
     assert.deepStrictEqual([item.location.X, item.location.Y], [2, 4]);
     item.location = P(9, 9, 9);
     assert.strictEqual(cloud.get(2).location.Z, 9);
     ctx.raises(() => cloud.get(4), /out_of_range,index must be smaller than the Number of points/);
-    const ns = r.NurbsSurfaceX.createFromSphere(r.SphereX.create(P(0, 0, 0), 2.0));
+    const ns = r.NurbsSurface.createFromSphere(r.Sphere.create(P(0, 0, 0), 2.0));
     const ku = ns.knotsU;
     assert(ku.count > 0 && typeof ku.clampedAtStart === 'boolean');
     assert(ns.knotsV.count > 0);
   });
 
   t('test_physically_based_material_is_a_conditional_child', () => {
-    const m = new r.MaterialX();
+    const m = new r.Material();
     assert.strictEqual(m.physicallyBased, null);       // `IsPhysicallyBased ? new T(this) : null`
     m.toPhysicallyBased();
     const pbr = m.physicallyBased;

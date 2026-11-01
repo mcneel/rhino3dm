@@ -109,7 +109,7 @@ def plan(member, cfn, cls):
     # const, so cast -- legal, m_val's storage is never actually const, and
     # mutating members (ref this) keep working through it. Abstract bases
     # reach self through their pure-virtual getter; a class deriving a
-    # CONCRETE base (PolyCurveX : CurveX) reuses the base's m_ptr, whose
+    # CONCRETE base (PolyCurve : Curve) reuses the base's m_ptr, whose
     # static type is the base's ON type, so its own members downcast.
     basecls = BY_REG.get(cls.get('base', ''))
     concrete_base = basecls if basecls and basecls['mode'] != 'abstract' else None
@@ -479,10 +479,10 @@ def plan(member, cfn, cls):
                 if ctype == CS_ENUMS[cstype]['cpp']:
                     call_exprs.append(name)            # the C layer takes the public type itself
                     continue
-                if re.match(r'^ON(?:_\w+)?::\w+$', ctype):
-                    # an opennurbs scoped enum (G99: Font(.., FontWeight weight, ..) -> ON_Font::Weight):
-                    # P/Invoke passes the value -- the same cast (the G91 rule for translated bodies)
-                    call_exprs.append('(%s)(int)(%s)' % (ctype, name))
+                if on_enum_type(ctype):
+                    # an opennurbs enum (G99: Font(.., FontWeight weight, ..) -> ON_Font::Weight; M3:
+                    # ON_SubDEdgeTag): P/Invoke passes the value -- the same cast (the G91 rule)
+                    call_exprs.append('(%s)(int)(%s)' % (on_enum_type(ctype), name))
                     continue
                 if ctype not in ('int', 'unsigned int') and not ctype.startswith('enum '):
                     return None, 'enum param %s -> %s unsupported' % (name, ctype)
@@ -724,7 +724,7 @@ def plan(member, cfn, cls):
             if sig_ret in CS_RET_DIRECT and cret == CS_RET_DIRECT[sig_ret]:
                 shape = ('tuple', ('result', cret, '{c}'), ret_outs)
             elif sig_ret in CS_ENUMS and (cret in ('int', 'unsigned int') or cret.startswith('enum ')
-                                          or cret == CS_ENUMS[sig_ret]['cpp']):
+                                          or cret == CS_ENUMS[sig_ret]['cpp'] or on_enum_type(cret)):
                 cpp = CS_ENUMS[sig_ret]['cpp']
                 expr = '(%s)({c})' % cpp
                 if member.get('ResultGuard'):
@@ -842,7 +842,7 @@ def plan(member, cfn, cls):
         # an opennurbs enum (`ON::AnnotationType`): RhinoCommon's P/Invoke receives
         # its integer as the C# enum, so the explicit cast is the same (G53)
         if (cret not in ('int', 'unsigned int') and not cret.startswith('enum ') and cret != CS_ENUMS[sig_ret]['cpp']
-                and not re.match(r'^ON(_\w+)?::\w+$', cret)):
+                and not on_enum_type(cret)):
             return None, 'enum return %s vs C %s' % (sig_ret, cret)
         shape = ('enumret', sig_ret)
     elif (member.get('SubView') and sig_ret in BY_CS and BY_CS[sig_ret]['mode'] in ('pointer', 'abstract')
@@ -992,7 +992,7 @@ def plan(member, cfn, cls):
             return None, 'success form vs shape'
         fb = success['Fallback']
         if fb != success['Out']:
-            known = local_value(fb)                # Interval.Unset -> BND_IntervalX::Unset()
+            known = local_value(fb)                # Interval.Unset -> BND_Interval::Unset()
             # `if (!F(ptr, ref d)) d = 0;`: a literal suits a plain C value return
             literal_ok = known is not None and known[1] is None and sig_ret in CS_RET_DIRECT
             if known is None or (known[1] != sig_ret and not literal_ok):
@@ -1284,7 +1284,7 @@ def factory_shape(fac, cls, sig_ret, cret, out_by_name, out_const=None, guid_par
     else:
         return 'factory id %s' % idl
     # the File3dm the proxy refers to: the table's own (its pointer is the model)
-    if parent != 'm_parent' or cls.get('parent') != 'File3dmX' or cls['on'] != 'ONX_Model':
+    if parent != 'm_parent' or cls.get('parent') != 'File3dm' or cls['on'] != 'ONX_Model':
         return 'factory parent %s' % parent
     return ('proxywrap', target, idl)
 
@@ -1383,6 +1383,14 @@ def nullable_class_param(tp, name, body, arg_uses):
         return tp, body
     body = _optional_idiom(name).sub(lambda m: '((%s == nullptr) ? nullptr : %s(%s))' % (name, m.group(1), name), body)
     return tp.strip()[:-1].strip() + '*', body
+
+
+def on_enum_type(ctype):
+    """the opennurbs enum a C signature spells for a C# enum (`ON_Font::Weight`, `ON::LengthUnitSystem`,
+    `const ON_SubDEdgeTag`), without const; None for anything else. Generated enums are distinct C++
+    types (M3), so the value crosses by an explicit cast, as P/Invoke passes it"""
+    t = re.sub(r'^const\s+', '', ctype.strip())
+    return t if re.match(r'^ON(_\w+)?::\w+$|^ON_\w+$', t) else None
 
 
 def namespace_enum_named(key):
@@ -2548,7 +2556,7 @@ def plan_class(cls, manifest, c_by_name, skipped):
         if not (target and (target.get('proxy') or {}).get('NoId') and x.get('ChildArgKinds') == ['file']
                 and cs_unqualify(x.get('Returns') or '') == target['cs']):
             continue
-        if not (cls['mode'] == 'child' and cls.get('parent') == 'File3dmX'):
+        if not (cls['mode'] == 'child' and cls.get('parent') == 'File3dm'):
             skipped['fileview: owner has no model'] = skipped.get('fileview: owner has no model', 0) + 1
             continue
         plans.append({'m': x, 'fn': None, 'cls': cls, 'static': False,
@@ -2989,8 +2997,8 @@ VARIANT_TYPES = {
     'int':      ('int', None),
     'float':    ('float', None),          # LinearWorkflow.PreProcessGamma (G78)
     'Guid':     ('BND_UUID', None),
-    'Vector2d': ('BND_Vector2dX', 'Vector2d'),
-    'Vector3d': ('BND_Vector3dX', 'Vector3d'),
+    'Vector2d': ('BND_Vector2d', 'Vector2d'),
+    'Vector3d': ('BND_Vector3d', 'Vector3d'),
 }
 
 
@@ -3061,7 +3069,7 @@ def table_protocol(cls, manifest, plans):
     Returns {item, type_value, count, find} or None."""
     filt = False                      # an `is T` enumerator: yields only the item type (G87)
     find_id = None                    # `Find(Guid g)` through the enumerator's find-by-id (G89)
-    if cls['mode'] != 'child' or cls.get('parent') != 'File3dmX' or cls['on'] != 'ONX_Model':
+    if cls['mode'] != 'child' or cls.get('parent') != 'File3dm' or cls['on'] != 'ONX_Model':
         return None
     item = None
     enumer = False
@@ -3656,10 +3664,10 @@ def resolve_markers(text, cls, per_reg, manifest):
             out.append(arg)
             continue
         if kind == 'filefield':
-            # a File3dm field (G92): a table's file is its own pointer (a child of File3dmX); a
+            # a File3dm field (G92): a table's file is its own pointer (a child of File3dm); a
             # File3dm proxy's (Layer.m_onx_model) the model it resolves in
             fp = (TYPE_RECS.get(storage_owner(cls)['type']) or {}).get('FileProxy') or {} if cls else {}
-            if cls is not None and cls['mode'] == 'child' and cls.get('parent') == 'File3dmX':
+            if cls is not None and cls['mode'] == 'child' and cls.get('parent') == 'File3dm':
                 out.append('((void*)(%s))' % self_access(cls, self_expr_of(cls), 'ConstPointer'))
             elif cls is not None and (storage_owner(cls).get('proxy') or {}).get('Origin') == 'file' and fp.get('FileField') == arg:
                 out.append('m_model')
@@ -3679,11 +3687,11 @@ def resolve_markers(text, cls, per_reg, manifest):
             continue
         if kind == 'ftable':
             # `file.AllLayers` (G92): the File3dm property's table, made from the model
-            f3 = BY_REG.get('File3dmX')
-            hit = [p for p in per_reg.get('File3dmX', []) if p['m']['Name'] == arg and p['m']['Kind'] == 'property'
+            f3 = BY_REG.get('File3dm')
+            hit = [p for p in per_reg.get('File3dm', []) if p['m']['Name'] == arg and p['m']['Kind'] == 'property'
                    and p['shape'][0] == 'child'] if f3 else []
             tc = hit[0]['shape'][1] if hit else None
-            if tc is None or tc.get('parent') != 'File3dmX' or tc['on'] != 'ONX_Model':
+            if tc is None or tc.get('parent') != 'File3dm' or tc['on'] != 'ONX_Model':
                 return None, 'ftable %s' % arg, None
             out.append(tc['gen'])
             continue

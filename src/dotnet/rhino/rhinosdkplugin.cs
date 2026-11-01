@@ -2137,7 +2137,7 @@ namespace Rhino.PlugIns
         // and the plug-in hasn't officially been registered with Rhino.
         for (int i = 0; i < m_plugins.Count; i++)
         {
-          if (string.Compare(m_plugins[i].Assembly.Location, pluginPath, true) == 0)
+          if (string.Compare(m_plugins[i].Assembly.Location, pluginPath, true) == 0 || string.Equals(m_plugins[i].Assembly.Location, pluginPath, StringComparison.OrdinalIgnoreCase))
           {
             rc = m_plugins[i].Id;
             break;
@@ -2189,7 +2189,7 @@ namespace Rhino.PlugIns
         // and the plug-in hasn't officially been registered with Rhino.
         for (int i = 0; i < m_plugins.Count; i++)
         {
-          if (string.Compare(m_plugins[i].Name, pluginName, true) == 0)
+          if (string.Compare(m_plugins[i].Name, pluginName, true) == 0 || string.Equals(m_plugins[i].Name, pluginName, StringComparison.OrdinalIgnoreCase))
           {
             rc = m_plugins[i].Id;
             break;
@@ -3033,36 +3033,52 @@ namespace Rhino.PlugIns
 
       // fail if one or more of the dlls failed
       bool result = true;
+      bool checked_all = true;
       var output = new StringBuilder();
       foreach (var t in results)
       {
-        if (!t.Success)
+        if (!t.Checked)
+          checked_all = false;
+        if (!t.Success || !t.Checked)
         {
-          result = false;
+          result &= t.Success;
           reasons |= t.Reasons;
           output.AppendLine(t.Output);
           output.AppendLine();
         }
       }
 
-      if (!result)
+      if (!result || !checked_all)
       {
-        HostUtils.DebugString($"Compatibility test for {Path.GetFileNameWithoutExtension(path)} failed in {time.TotalSeconds:0.00}s");
+        if (!result)
+        {
+          HostUtils.DebugString($"Compatibility test for {Path.GetFileNameWithoutExtension(path)} failed in {time.TotalSeconds:0.00}s");
 
-        detailsFile = WriteCompatibilityReport(path, output.ToString());
+          detailsFile = WriteCompatibilityReport(path, output.ToString());
+          try
+          {
+            File.WriteAllText(report_cache, output.ToString());
+          }
+          catch { }
+        }
+        else
+        {
+          RhinoApp.WriteLine(LOC.STR("Compatibility test for {0} could not run, loading it anyway"), Path.GetFileNameWithoutExtension(path));
+          var file = WriteCompatibilityReport(path, output.ToString());
+          if (file != null)
+            RhinoApp.WriteLine(LOC.STR("  Details written to {0}"), file);
+        }
+      }
+
+      // cache result, unless the checker itself couldn't run so it is retried next time
+      if (checked_all)
+      {
         try
         {
-          File.WriteAllText(report_cache, output.ToString());
+          File.WriteAllText(hash_cache, (result ? "true" : "false") + "\n" + (int)reasons);
         }
         catch { }
       }
-
-      // cache result
-      try
-      {
-        File.WriteAllText(hash_cache, (result ? "true" : "false") + "\n" + (int)reasons);
-      }
-      catch { }
 
       return result;
     }
@@ -3150,6 +3166,7 @@ namespace Rhino.PlugIns
     struct CompatResult
     {
       public bool Success;
+      public bool Checked;
       public string Output;
       public CompatFailures Reasons;
     }
@@ -3274,7 +3291,7 @@ namespace Rhino.PlugIns
           || proc.ExitCode == 128 // don't fail for no assembly name (possibly obfuscated)
           || proc.ExitCode == 114 // don't fail if there's only warnings
           )
-          return new CompatResult { Success = true, Output = output };
+          return new CompatResult { Success = true, Checked = true, Output = output };
 
         // write error stream if needed
         var errout = sbError.ToString();
@@ -3284,12 +3301,17 @@ namespace Rhino.PlugIns
           output += "\n\n" + errout;
         }
 
+        // Any other exit code means Compat itself didn't run (e.g. its .NET runtime is missing),
+        // which says nothing about the plug-in so don't block it.
+        if (proc.ExitCode != 0 && (proc.ExitCode < 100 || proc.ExitCode > 128))
+          return new CompatResult { Success = true, Checked = false, Output = $"{Path.GetFileName(path)}: Compat exited with code {proc.ExitCode}\n{output}" };
+
         if (proc.ExitCode == 112)
           System.Diagnostics.Debug.Write(output);
 
         bool result = proc.ExitCode == 0;
 
-        return new CompatResult { Success = result, Output = output, Reasons = ParseCompatReasons(output) };
+        return new CompatResult { Success = result, Checked = true, Output = output, Reasons = ParseCompatReasons(output) };
       }
     }
 
@@ -3520,7 +3542,9 @@ namespace Rhino.PlugIns
     /// <since>8.6</since>
     public virtual bool IsTextureSupported(RenderTexture texture)
     {
-      return UnsafeNativeMethods.Rdk_PlugIn_BaseClassIsTextureSupported(NonConstPointer(), texture.ConstPointer());
+      bool rc = UnsafeNativeMethods.Rdk_PlugIn_BaseClassIsTextureSupported(NonConstPointer(), texture.ConstPointer());
+      GC.KeepAlive(texture);
+      return rc;
     }
   }
 

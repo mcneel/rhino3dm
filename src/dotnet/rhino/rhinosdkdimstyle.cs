@@ -619,6 +619,7 @@ namespace Rhino.DocObjects
       {
         IntPtr const_ptr_scale = value.ConstPointer();
         UnsafeNativeMethods.ON_Dimstyle_SetDimScaleValue(NonConstPointer(), const_ptr_scale);
+        GC.KeepAlive(value);
         GC.KeepAlive(this);
       }
     }

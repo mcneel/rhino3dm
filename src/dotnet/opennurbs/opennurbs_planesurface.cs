@@ -221,6 +221,7 @@ namespace Rhino.Geometry
     {
       IntPtr ptr = UnsafeNativeMethods.ON_ClippingPlaneSurface_New_FromPLaneSurface(planeSurface.ConstPointer());
       GC.KeepAlive(this);
+      GC.KeepAlive(planeSurface);
       ConstructNonConstObject(ptr);
     }
     internal ClippingPlaneSurface(IntPtr ptr, object parent)

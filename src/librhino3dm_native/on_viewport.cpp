@@ -7,6 +7,12 @@ RH_C_FUNCTION ON_Viewport* ON_Viewport_New(const ON_Viewport* pVP)
   return new ON_Viewport();
 }
 
+// A copy of ON_Viewport::DefaultPerspectiveViewZUp or ON_Viewport::DefaultTopViewYUp.
+RH_C_FUNCTION ON_Viewport* ON_Viewport_NewDefault(bool perspective)
+{
+  return new ON_Viewport(perspective ? ON_Viewport::DefaultPerspectiveViewZUp : ON_Viewport::DefaultTopViewYUp);
+}
+
 RH_C_FUNCTION bool ON_Viewport_GetBool(const ON_Viewport* pConstViewport, int which)
 {
   const int idxIsValidCamera = 0;
@@ -19,6 +25,7 @@ RH_C_FUNCTION bool ON_Viewport_GetBool(const ON_Viewport* pConstViewport, int wh
   const int idxIsCameraUpLocked = 7;
   const int idxIsFrustumLeftRightSymmetric = 8;
   const int idxIsFrustumTopBottomSymmetric = 9;
+  const int idxIsValidCameraFrame = 10;
   bool rc = false;
   if( pConstViewport )
   {
@@ -53,6 +60,9 @@ RH_C_FUNCTION bool ON_Viewport_GetBool(const ON_Viewport* pConstViewport, int wh
       break;
     case idxIsFrustumTopBottomSymmetric:
       rc = pConstViewport->FrustumIsTopBottomSymmetric();
+      break;
+    case idxIsValidCameraFrame:
+      rc = pConstViewport->IsValidCameraFrame();
       break;
     default:
       break;

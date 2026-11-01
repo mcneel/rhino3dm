@@ -7,9 +7,8 @@ One set of cases, one oracle, one runner per language.
 | `cases/*.json` | Inputs: a type, an object (constructor args or a static like `Unset`), and a member, operator, or index. Chosen to hit behavior and edge cases (unset, NaN, overflow guards, signed lengths, mutators), not to enumerate members. |
 | `oracle/` | .NET console app. Evaluates every case with RhinoCommon as rhino3dm's .NET build compiles it, writes `golden/*.json`. |
 | `golden/*.json` | Committed expected results. Change only by rerunning the oracle, and review the diff. |
-| `test_parity.py` | Python runner. Generated bindings must match **bitwise**. The old bindings run as a temporary informational column. |
+| `test_parity.py` | Python runner. The bindings must match **bitwise**: fixtures through `CommonObject.Decode`, recipes built with the bindings' own classes. |
 | `parity_js.js` | JS runner for the generated wasm bindings. Cases expecting an exception are skipped (wasm builds without C++ exceptions). |
-| `known_old_divergences.json` | Temporary: each case where the old bindings compute something different from .NET, with the reason. Missing members are counted, not listed. Delete with the old bindings. |
 
 ```sh
 bash tests/parity/oracle/run_linux.sh  # regenerate goldens (see the script: docker, fresh native build)

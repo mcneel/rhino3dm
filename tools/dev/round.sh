@@ -1,11 +1,11 @@
 #!/bin/bash
 # Build and validate the vNext generated bindings in Docker (Linux), from the host.
 #
-#   tools/dev/round.sh check    fast: compile only src/generated/*.cpp (Python toolchain)
+#   tools/dev/round.sh check    fast: compile only src/bindings/*.cpp (Python toolchain)
 #   tools/dev/round.sh build    Python + WASM builds and their tests, in parallel
 #   tools/dev/round.sh oracle   regenerate the .NET parity goldens (tests/parity/oracle/run_linux.sh)
 #   tools/dev/round.sh test     tests only, against the last builds (no rebuild)
-#   tools/dev/round.sh all      oracle, then build + tests, then the coverage reports
+#   tools/dev/round.sh all      oracle, then build + tests
 #
 # Regenerate first (python3 tools/generate/bnd_gen.py); the generated sources are
 # read from this checkout. Logs and the built modules land in $RH3DM_DEV_WORK
@@ -54,7 +54,6 @@ case "${1:-}" in
   build)  both all all ;;
   oracle) oracle ;;
   test)   both test test ;;
-  # the report again once both are done: it reads the JS surface the wasm run just dumped
-  all)    echo "== oracle"; oracle; both all all; py report | sed 's/^/report: /' ;;
+  all)    echo "== oracle"; oracle; both all all ;;
   *) sed -n '2,17p' "$0"; exit 2 ;;
 esac

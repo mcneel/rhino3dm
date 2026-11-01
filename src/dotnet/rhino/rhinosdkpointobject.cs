@@ -424,6 +424,7 @@ namespace Rhino.DocObjects.Custom
       Guid type_id = GetType().GUID;
       IntPtr const_ptr_this = point.ConstPointer();
       m_pRhinoObject = UnsafeNativeMethods.CRhinoCustomObject_New2(type_id, const_ptr_this);
+      GC.KeepAlive(point);
     }
 
     ~CustomPointObject() { Dispose(false); }

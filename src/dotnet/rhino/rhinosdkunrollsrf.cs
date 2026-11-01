@@ -216,14 +216,6 @@ namespace Rhino.Geometry
       var rc = new Brep[0];
       if (0 == UnsafeNativeMethods.CRhinoUnroll_PrepareFaces(ptr_unroller))
       {
-        if (m_curves.Count > 0)
-        {
-          using (var crvs = new Runtime.InteropWrappers.SimpleArrayCurvePointer(m_curves))
-          {
-            IntPtr const_ptr_curves = crvs.ConstPointer();
-            UnsafeNativeMethods.CRhinoUnroll_PrepareCurves(ptr_unroller, const_ptr_curves);
-          }
-        }
         if (m_points.Count > 0)
         {
           Point3d[] pts =  m_points.ToArray();
@@ -235,6 +227,14 @@ namespace Rhino.Geometry
           {
             IntPtr const_ptr_dots = dots.ConstPointer();
             UnsafeNativeMethods.CRhinoUnroll_PrepareDots(ptr_unroller, const_ptr_dots);
+          }
+        }
+        if (m_curves.Count > 0)
+        {
+          using (var crvs = new Runtime.InteropWrappers.SimpleArrayCurvePointer(m_curves))
+          {
+            IntPtr const_ptr_curves = crvs.ConstPointer();
+            UnsafeNativeMethods.CRhinoUnroll_PrepareCurves(ptr_unroller, const_ptr_curves);
           }
         }
 

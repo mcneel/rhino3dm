@@ -4,10 +4,10 @@ One line per registration the generated code makes -- what a Python or JS
 user can call -- parsed from the generated sources themselves (so value
 types, dispatchers and bridges are covered alike):
 
-    py  CurveX.PointAt(t)                      method / static / property
-    py  CurveX.Domain [property rw]
-    py  PlaneSurfaceX.__init__(BND_PlaneX, BND_IntervalX, BND_IntervalX)
-    js  CurveX.pointAt [function]
+    py  Curve.PointAt(t)                      method / static / property
+    py  Curve.Domain [property rw]
+    py  PlaneSurface.__init__(BND_Plane, BND_Interval, BND_Interval)
+    js  Curve.pointAt [function]
 
 A regeneration that ADDS lines updates the lock. One that REMOVES or CHANGES
 a line fails, listing them, unless RH3DM_ACCEPT=1 -- a member silently
@@ -19,11 +19,11 @@ import os
 import re
 
 PY_CLASS = re.compile(r'py::class_<[^>]*>\(m, "(\w+)"')
-# `class_<BND_SurfaceX, base<BND_GeometryBaseX>>("SurfaceX")`: the template
+# `class_<BND_Surface, base<BND_GeometryBase>>("Surface")`: the template
 # arguments nest, so match lazily up to `>("` (`[^>]*` missed every derived class)
 JS_CLASS = re.compile(r'\bclass_<.*?>\("(\w+)"\)')
 PY_DEF = re.compile(r'\.(def|def_static|def_property|def_property_readonly|def_property_readonly_static|def_readwrite)\("(\w+)"(.*)')
-# `py::init<const std::vector<BND_Point3dX>&>()`: template arguments nest (G82)
+# `py::init<const std::vector<BND_Point3d>&>()`: template arguments nest (G82)
 PY_INIT = re.compile(r'\.def\(py::init<(.*?)>\(\)')
 JS_DEF = re.compile(r'\.(function|class_function|property)\("(\w+)"')
 JS_CTOR = re.compile(r'\.constructor(<.*?>)?\(')

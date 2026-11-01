@@ -1,6 +1,4 @@
-"""Python parity runner: the generated bindings must reproduce the .NET
-goldens exactly; the old (hand) bindings run as a temporary, informational
-column whose differences must be listed in known_old_divergences.json.
+"""Python parity runner: the bindings must reproduce the .NET goldens exactly.
 
     python3 tests/parity/test_parity.py <module_dir>     # report + exit code
     pytest tests/parity/test_parity.py                   # RH3DM_MODULE_DIR=...
@@ -30,17 +28,14 @@ def load_module(module_dir):
 class Surface:
     """One binding surface: how type names map to classes."""
 
-    def __init__(self, r, suffix):
-        self.r, self.suffix = r, suffix
+    def __init__(self, r):
+        self.r = r
         self.recipes = {}
         self.fixtures = {}
-        self.old = None          # the generated surface builds class objects via the old API
-
-    ALIAS = {'ViewportInfoX': 'ViewportX'}      # registered generated names
+        self.standalone = True   # own recipes, its own fixture decoding (M3)
 
     def cls(self, name):
-        n = name + self.suffix
-        return getattr(self.r, self.ALIAS.get(n, n))
+        return getattr(self.r, name)
 
     def decode(self, v):
         if isinstance(v, str):
@@ -92,46 +87,25 @@ class Surface:
     def from_fixture(self, fx):
         """the object exactly as .NET built it (archive round-trip)"""
         if 'Transform' in fx:
-            x = self.cls('Transform')(1.0)      # old Transform / generated TransformX
+            x = self.cls('Transform')(1.0)      # old Transform / generated Transform
             for i, m in enumerate(fx['Transform']):
                 setattr(x, 'M%d%d' % (i // 4, i % 4), float(m))
             return x
-        return self.r.CommonObject.Decode(fx)
+        return self.cls('CommonObject').Decode(fx)      # old CommonObject / generated CommonObject
 
     def make_self(self, case):
-        self.own = bool(case.get('own'))      # G108: each surface builds the recipe with its own classes
+        # G108: each surface builds the recipe with its own classes; the generated surface always does
+        # (M3: no bridge from the old API, fixtures through CommonObject.Decode)
+        self.own = bool(case.get('own')) or self.standalone
+        self.construct = bool(case.get('construct'))     # this case's, never the previous one's
         s = case.get('self')
         if s is None:
             return None
         if case['type'] in VALUE_TYPES and isinstance(s, dict) and 'new' in s:
             return self.recipe(s)      # value types: each binding's OWN constructors
-        if case['type'] in VALUE_TYPES and isinstance(s, str):
-            # a value type from a class-case recipe (Transform.Rotation):
-            # the fixture's numbers, or (construct) each binding's own API
-            self.construct = bool(case.get('construct'))
-            return self.recipe(s)
-        if self.own and (isinstance(s, str) or (isinstance(s, dict) and ('new' in s or 'call' in s))):
-            return self.recipe(s)
         if isinstance(s, str) or (isinstance(s, dict) and ('new' in s or 'call' in s)):
-            if self.old is None:
-                self.construct = bool(case.get('construct'))
-                return self.recipe(s)
-            # generated: wrap an object the old API built (the bridge), or,
-            # for bridge-free classes, construct the generated class directly
-            gen_cls = self.cls(case['type'])
-            spec = self.old.recipes[s] if isinstance(s, str) else s
-            self.old.construct = bool(case.get('construct'))
-            try:
-                return gen_cls(self.old.recipe(s))
-            except TypeError:
-                if 'new' in spec and not spec.get('args'):
-                    return gen_cls()
-                if 'new' in spec:
-                    # the old API cannot hand over this type (its Decode
-                    # wraps a PlaneSurface as a bare Surface: pilot-findings
-                    # #20): build it with the generated class's own constructor
-                    return gen_cls(*[self.decode(a) for a in spec['args']])
-                raise
+            # a recipe: the fixture's object (archive round-trip), or (construct) built with this API
+            return self.recipe(s)
         if isinstance(s, dict):
             return getattr(self.cls(case['type']), s['static'])
         return self.cls(case['type'])(*[float(self.decode(a)) for a in s])
@@ -181,7 +155,7 @@ def encode(v):
     if isinstance(v, float):
         return 'NaN' if math.isnan(v) else 'Inf' if v == math.inf else '-Inf' if v == -math.inf else v
     name = type(v).__name__
-    base = name[:-1] if name.endswith('X') else name
+    base = name
     if base in ('Point3d', 'Vector3d', 'Point3f', 'Vector3f'):
         return {base: [encode(v.X), encode(v.Y), encode(v.Z)]}
     if base in ('Point2d', 'Point2f'):
@@ -236,65 +210,47 @@ pending = []
 
 def run(module_dir):
     r = load_module(module_dir)
-    gen, old = Surface(r, 'X'), Surface(r, '')
-    gen.old = old
-    known = json.load(open(os.path.join(HERE, 'known_old_divergences.json')))
-    failures, unknown_old, rows, gaps = [], [], [], []
+    gen = Surface(r)
+    failures, rows, gaps = [], [], []
     global pending
     pending = []
     for fname in sorted(os.listdir(os.path.join(HERE, 'cases'))):
         doc = json.load(open(os.path.join(HERE, 'cases', fname)))
         cases = doc['cases']
-        gen.recipes = old.recipes = doc.get('recipes', {})
+        gen.recipes = doc.get('recipes', {})
         golden = json.load(open(os.path.join(HERE, 'golden', fname)))
-        gen.fixtures = old.fixtures = golden.get('__fixtures__', {})
+        gen.fixtures = golden.get('__fixtures__', {})
         for c in cases:
             if c['id'] not in golden:
                 pending.append(c['id'])       # a case the oracle has not run yet
                 continue
             want = golden[c['id']]
-            o = run_case(old, c)
-            if c.get('construct'):
-                g, g_ok = None, True          # construction through the old API only
-            else:
-                g = run_case(gen, c)
-                g_ok = same(g, want)
-                if not g_ok and isinstance(g, dict) and 'missing' in g:
-                    gaps.append((c['id'], g['missing']))
-                    g_ok = True
-            o_state = 'ok' if same(o, want) else ('missing' if isinstance(o, dict) and 'missing' in o else 'differs')
+            g = run_case(gen, c)
+            g_ok = same(g, want)
+            if not g_ok and isinstance(g, dict) and 'missing' in g:
+                gaps.append((c['id'], g['missing']))
+                g_ok = True
             if not g_ok:
                 failures.append((c['id'], want, g))
-            # a MISSING member is coverage (reported as a count); only a
-            # member that exists and computes something else needs a reason
-            if o_state == 'differs' and c['id'] not in known:
-                unknown_old.append((c['id'], o_state, want, o))
-            if o_state == 'ok' and c['id'] in known:
-                unknown_old.append((c['id'], 'stale known-divergence entry (now matches)', want, o))
-            rows.append((c['id'], g_ok, o_state))
-    return rows, failures, unknown_old, gaps
+            rows.append((c['id'], g_ok))
+    return rows, failures, gaps
 
 
 def main(argv):
-    rows, failures, unknown_old, gaps = run(argv[1])
+    rows, failures, gaps = run(argv[1])
     if pending:
         print('  pending (no golden yet; run the oracle): %s' % ', '.join(pending))
     n = len(rows)
-    old_ok = sum(1 for _, _, o in rows if o == 'ok')
-    old_missing = sum(1 for _, _, o in rows if o == 'missing')
-    print('parity vs .NET: generated %d/%d | old bindings %d/%d match, %d differ, %d missing'
-          % (n - len(failures), n, old_ok, n, n - old_ok - old_missing, old_missing))
+    print('parity vs .NET: %d/%d' % (n - len(failures), n))
     for cid, why in gaps:
         print('  generated gap (member/overload not generated) %s: %s' % (cid, why[:70]))
     for cid, want, got in failures:
         print('  GENERATED MISMATCH %s: want %s got %s' % (cid, want, got))
-    for cid, state, want, got in unknown_old:
-        print('  old binding %s (unlisted) %s: want %s got %s' % (state, cid, want, got))
     return 1 if failures else 0
 
 
 def test_generated_matches_dotnet():
-    rows, failures, _, _ = run(os.environ['RH3DM_MODULE_DIR'])
+    rows, failures, _ = run(os.environ['RH3DM_MODULE_DIR'])
     assert not failures, failures
 
 

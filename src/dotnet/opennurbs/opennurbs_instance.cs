@@ -348,6 +348,20 @@ namespace Rhino.Geometry
       }
     }
 
+    /// <summary>
+    /// Determines whether an id is in this instance definition's geometry id list.
+    /// </summary>
+    /// <param name="id">The id to look for.</param>
+    /// <returns>true if <paramref name="id"/> is in the list returned by <see cref="GetObjectIds"/>.</returns>
+    /// <since>9.2</since>
+    [ConstOperation]
+    public bool IsInstanceGeometryId(Guid id)
+    {
+      bool rc = UnsafeNativeMethods.ON_InstanceDefinition_IsInstanceGeometryId(ConstPointer(), id);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
     #region user strings
     /// <summary>
     /// Attach a user string (key,value combination) to this geometry.
