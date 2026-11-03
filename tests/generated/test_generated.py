@@ -106,6 +106,28 @@ def test_zero_copy_point_buffer():
     assert a[7].tolist() == [7.0, 14.0, 3.0]
 
 
+
+def test_nurbs_list_buffers_pilot84():
+    # pilot #84: 8.x's zero-copy buffer protocol on the NURBS knot and point lists, restored
+    np = pytest.importorskip('numpy')
+    pts = [r.Point3d(i, i * i, 0) for i in range(5)]
+    c = r.NurbsCurve.Create(False, 3, pts)
+    cv = np.asarray(c.Points)
+    assert cv.shape == (c.Points.Count, 3) and not cv.flags.owndata    # non-rational: x, y, z
+    assert cv[2].tolist() == [2.0, 4.0, 0.0]
+    cv[2, 2] = 7.0                                                      # writes land in the curve
+    assert c.Points[2].Location.Z == 7.0
+    kn = np.asarray(c.Knots)
+    assert kn.shape == (c.Knots.Count,) and kn.tolist() == [c.Knots[i] for i in range(c.Knots.Count)]
+    assert c.Points.MakeRational() and np.asarray(c.Points).shape == (c.Points.Count, 4)   # homogeneous
+    ns = r.NurbsSurface.Create(3, False, 2, 2, 3, 2)
+    sp = np.asarray(ns.Points)
+    assert sp.shape == (3, 2, 3) and not sp.flags.owndata
+    assert np.asarray(ns.KnotsU).shape == (ns.KnotsU.Count,)
+    assert np.asarray(ns.KnotsV).shape == (ns.KnotsV.Count,)
+    assert memoryview(c.Knots).format == 'd'
+
+
 # --- found bugs ------------------------------------------------------------
 
 def test_finding_01_linetype_double_free():

@@ -138,7 +138,12 @@ void BND_NurbsCurvePointList::Gen_set_this(int index, BND_ControlPoint value) {
 #if defined(ON_PYTHON_COMPILE)
 void initGenNurbsCurvePointList(rh3dmpymodule& m)
 {
-  py::class_<BND_NurbsCurvePointList>(m, "NurbsCurvePointList")
+  py::class_<BND_NurbsCurvePointList>(m, "NurbsCurvePointList", py::buffer_protocol())
+      .def_buffer([](BND_NurbsCurvePointList& c) -> py::buffer_info {
+        return py::buffer_info((double*)c.m_ptr->m_cv, sizeof(double),
+          py::format_descriptor<double>::format(), 2,
+          {(py::ssize_t)(c.m_ptr->CVCount()), (py::ssize_t)(c.m_ptr->CVSize())},
+          {(py::ssize_t)(c.m_ptr->m_cv_stride * sizeof(double)), (py::ssize_t)(sizeof(double))}); })
       .def("ChangeEndWeights", &BND_NurbsCurvePointList::Gen_ChangeEndWeights, py::arg("w0"), py::arg("w1"))
       .def_property_readonly("ControlPolygonLength", &BND_NurbsCurvePointList::Gen_ControlPolygonLength)
       .def_property_readonly("Count", &BND_NurbsCurvePointList::Gen_Count)

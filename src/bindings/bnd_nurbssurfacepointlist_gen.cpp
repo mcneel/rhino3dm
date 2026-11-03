@@ -135,7 +135,12 @@ BND_ControlPoint BND_NurbsSurfacePointList::Gen_GetControlPoint(int u, int v) co
 #if defined(ON_PYTHON_COMPILE)
 void initGenNurbsSurfacePointList(rh3dmpymodule& m)
 {
-  py::class_<BND_NurbsSurfacePointList>(m, "NurbsSurfacePointList")
+  py::class_<BND_NurbsSurfacePointList>(m, "NurbsSurfacePointList", py::buffer_protocol())
+      .def_buffer([](BND_NurbsSurfacePointList& c) -> py::buffer_info {
+        return py::buffer_info((double*)c.m_ptr->m_cv, sizeof(double),
+          py::format_descriptor<double>::format(), 3,
+          {(py::ssize_t)(c.m_ptr->CVCount(0)), (py::ssize_t)(c.m_ptr->CVCount(1)), (py::ssize_t)(c.m_ptr->CVSize())},
+          {(py::ssize_t)(c.m_ptr->m_cv_stride[0] * sizeof(double)), (py::ssize_t)(c.m_ptr->m_cv_stride[1] * sizeof(double)), (py::ssize_t)(sizeof(double))}); })
       .def_property_readonly("CountU", &BND_NurbsSurfacePointList::Gen_CountU)
       .def_property_readonly("CountV", &BND_NurbsSurfacePointList::Gen_CountV)
       .def("GetGrevillePoint", &BND_NurbsSurfacePointList::Gen_GetGrevillePoint, py::arg("u"), py::arg("v"))

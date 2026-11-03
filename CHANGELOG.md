@@ -4,11 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [9.2.0-beta] - unreleased
+## [9.2.0-beta.0] - unreleased
 
 rhino3dm vNext: the Python and JavaScript bindings are generated from RhinoCommon, so their API is RhinoCommon's (names, signatures, return shapes). The migration guide (from `docs/vnext/deviations.md` and `api/retired.toml`) ships with the beta; the plan is `docs/vnext/SHIP-9.2.md`.
 
-diff: https://github.com/mcneel/rhino3dm/compare/9.0.0-beta...9.2.0-beta
+diff: https://github.com/mcneel/rhino3dm/compare/9.0.0-beta...9.2.0-beta.0
 
 ### Changed
 

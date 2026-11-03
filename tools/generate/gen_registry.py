@@ -72,7 +72,8 @@ CLASSES = [
      'gen': 'BND_PointCloud', 'reg': 'PointCloud', 'base': 'GeometryBase',
      # bulk tier: Python buffer protocol over the contiguous ON_3dPoint storage
      # (3 doubles each) -> numpy.asarray(cloud) is an (N, 3) zero-copy view
-     'buffer': 'm_ptr->m_P'},
+     'buffer': {'ptr': 'c.m_ptr->m_P.Array()', 'shape': ['c.m_ptr->m_P.Count()', '3'],
+                'strides': ['sizeof(ON_3dPoint)', 'sizeof(double)']}},
     # G99 (Luis 2026-10-16, option A): RhinoCommon's Font holds a MANAGED font -- an entry of
     # opennurbs' process-wide list (ON_Font::GetManagedFont): shared, immutable, never freed. Font
     # does the same (`managed`: a borrowed pointer, never deleted)
@@ -493,13 +494,23 @@ CLASSES = [
      'gen': 'BND_BrepSurfaceList', 'reg': 'BrepSurfaceList'},
     {'type': 'Rhino.Geometry.Collections.NurbsCurvePointList', 'cs': 'NurbsCurvePointList', 'on': 'ON_NurbsCurve',
      'mode': 'child', 'parent': 'NurbsCurve',
-     'gen': 'BND_NurbsCurvePointList', 'reg': 'NurbsCurvePointList'},
+     'gen': 'BND_NurbsCurvePointList', 'reg': 'NurbsCurvePointList',
+     # pilot #84: 8.x's zero-copy view of the control points, (CVCount, CVSize) -- CVSize is
+     # dim + 1 for a rational curve (homogeneous coordinates, as stored)
+     'buffer': {'ptr': 'c.m_ptr->m_cv', 'shape': ['c.m_ptr->CVCount()', 'c.m_ptr->CVSize()'],
+                'strides': ['c.m_ptr->m_cv_stride * sizeof(double)', 'sizeof(double)']}},
     {'type': 'Rhino.Geometry.Collections.NurbsCurveKnotList', 'cs': 'NurbsCurveKnotList', 'on': 'ON_NurbsCurve',
      'mode': 'child', 'parent': 'NurbsCurve',
-     'gen': 'BND_NurbsCurveKnotList', 'reg': 'NurbsCurveKnotList'},
+     'gen': 'BND_NurbsCurveKnotList', 'reg': 'NurbsCurveKnotList',
+     'buffer': {'ptr': 'c.m_ptr->m_knot', 'shape': ['c.m_ptr->KnotCount()'],      # pilot #84
+                'strides': ['sizeof(double)']}},
     {'type': 'Rhino.Geometry.Collections.NurbsSurfacePointList', 'cs': 'NurbsSurfacePointList', 'on': 'ON_NurbsSurface',
      'mode': 'child', 'parent': 'NurbsSurface',
-     'gen': 'BND_NurbsSurfacePointList', 'reg': 'NurbsSurfacePointList'},
+     'gen': 'BND_NurbsSurfacePointList', 'reg': 'NurbsSurfacePointList',
+     # pilot #84: (CountU, CountV, CVSize), the surface's own strides
+     'buffer': {'ptr': 'c.m_ptr->m_cv', 'shape': ['c.m_ptr->CVCount(0)', 'c.m_ptr->CVCount(1)', 'c.m_ptr->CVSize()'],
+                'strides': ['c.m_ptr->m_cv_stride[0] * sizeof(double)', 'c.m_ptr->m_cv_stride[1] * sizeof(double)',
+                            'sizeof(double)']}},
     # -- batch 1 (G43): lists of components, and children with a key
     # (`new NurbsSurfaceKnotList(this, 0)`, `new PointCloudItem(this, index)`)
     {'type': 'Rhino.Geometry.Collections.SubDFaceList', 'cs': 'SubDFaceList', 'on': 'ON_SubD',
@@ -513,7 +524,10 @@ CLASSES = [
      'gen': 'BND_SubDVertexList', 'reg': 'SubDVertexList'},
     {'type': 'Rhino.Geometry.Collections.NurbsSurfaceKnotList', 'cs': 'NurbsSurfaceKnotList', 'on': 'ON_NurbsSurface',
      'mode': 'child', 'parent': 'NurbsSurface',
-     'gen': 'BND_NurbsSurfaceKnotList', 'reg': 'NurbsSurfaceKnotList'},
+     'gen': 'BND_NurbsSurfaceKnotList', 'reg': 'NurbsSurfaceKnotList',
+     # pilot #84: the knots of direction m_key (RhinoCommon `new NurbsSurfaceKnotList(this, 0|1)`)
+     'buffer': {'ptr': 'c.m_ptr->m_knot[c.m_key]', 'shape': ['c.m_ptr->KnotCount(c.m_key)'],
+                'strides': ['sizeof(double)']}},
     {'type': 'Rhino.Geometry.PointCloudItem', 'cs': 'PointCloudItem', 'on': 'ON_PointCloud',
      'mode': 'child', 'parent': 'PointCloud',
      'gen': 'BND_PointCloudItem', 'reg': 'PointCloudItem'},

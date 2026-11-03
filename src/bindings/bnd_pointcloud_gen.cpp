@@ -313,11 +313,10 @@ void initGenPointCloud(rh3dmpymodule& m)
       .def(py::init<const std::vector<BND_Point3d>&>(), py::arg("points"))
       .def(py::init<const BND_PointCloud&>(), py::arg("other"))
       .def_buffer([](BND_PointCloud& c) -> py::buffer_info {
-        ON_3dPointArray& a = c.m_ptr->m_P;
-        return py::buffer_info(a.Array(), sizeof(double),
+        return py::buffer_info((double*)c.m_ptr->m_P.Array(), sizeof(double),
           py::format_descriptor<double>::format(), 2,
-          {(py::ssize_t)a.Count(), (py::ssize_t)3},
-          {(py::ssize_t)sizeof(ON_3dPoint), (py::ssize_t)sizeof(double)}); })
+          {(py::ssize_t)(c.m_ptr->m_P.Count()), (py::ssize_t)(3)},
+          {(py::ssize_t)(sizeof(ON_3dPoint)), (py::ssize_t)(sizeof(double))}); })
       .def("Add", &BND_PointCloud::Gen_Add, py::arg("point"))
       .def("Add", &BND_PointCloud::Gen_Add_2, py::arg("point"), py::arg("color"))
       .def("Add", &BND_PointCloud::Gen_Add_3, py::arg("point"), py::arg("normal"))

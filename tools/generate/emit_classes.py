@@ -1955,14 +1955,20 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             js += ['      .function("%s", &%s::Gen_FindId, allow_raw_pointers())' % (camel(tp['find_id']), g)]
     py_buf, py_bufdef = '', ''
     if cls.get('buffer'):
+        # Python's buffer protocol over native double storage (registry `buffer`: pointer, shape,
+        # byte strides, as expressions over the binding instance `c`): a zero-copy view, as 8.x had
+        # (pilot #84). nanobind (M2): the same data feeds nb::type_slots(Py_bf_getbuffer)
+        b = cls['buffer']
+        assert len(b['shape']) == len(b['strides']), cls['reg']
         py_buf = ', py::buffer_protocol()'
         py_bufdef = ('      .def_buffer([]({gen}& c) -> py::buffer_info {{\n'
-                     '        ON_3dPointArray& a = c.{expr};\n'
-                     '        return py::buffer_info(a.Array(), sizeof(double),\n'
-                     '          py::format_descriptor<double>::format(), 2,\n'
-                     '          {{(py::ssize_t)a.Count(), (py::ssize_t)3}},\n'
-                     '          {{(py::ssize_t)sizeof(ON_3dPoint), (py::ssize_t)sizeof(double)}}); }})\n'
-                     ).format(gen=cls['gen'], expr=cls['buffer'])
+                     '        return py::buffer_info((double*){ptr}, sizeof(double),\n'
+                     '          py::format_descriptor<double>::format(), {n},\n'
+                     '          {{{shape}}},\n'
+                     '          {{{strides}}}); }})\n'
+                     ).format(gen=cls['gen'], ptr=b['ptr'], n=len(b['shape']),
+                              shape=', '.join('(py::ssize_t)(%s)' % e for e in b['shape']),
+                              strides=', '.join('(py::ssize_t)(%s)' % e for e in b['strides']))
     py_block = ('  py::class_<{gen}{py_base}>(m, "{reg}"{py_buf})\n{py_dctor}{py_bufdef}'
                 '{defs};').format(gen=cls['gen'], py_base=py_base,
                                   reg=cls['reg'],

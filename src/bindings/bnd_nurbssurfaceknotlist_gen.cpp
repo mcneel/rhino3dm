@@ -58,7 +58,12 @@ bool BND_NurbsSurfaceKnotList::Gen_InsertKnot_2(double value) const {
 #if defined(ON_PYTHON_COMPILE)
 void initGenNurbsSurfaceKnotList(rh3dmpymodule& m)
 {
-  py::class_<BND_NurbsSurfaceKnotList>(m, "NurbsSurfaceKnotList")
+  py::class_<BND_NurbsSurfaceKnotList>(m, "NurbsSurfaceKnotList", py::buffer_protocol())
+      .def_buffer([](BND_NurbsSurfaceKnotList& c) -> py::buffer_info {
+        return py::buffer_info((double*)c.m_ptr->m_knot[c.m_key], sizeof(double),
+          py::format_descriptor<double>::format(), 1,
+          {(py::ssize_t)(c.m_ptr->KnotCount(c.m_key))},
+          {(py::ssize_t)(sizeof(double))}); })
       .def_property_readonly("ClampedAtEnd", &BND_NurbsSurfaceKnotList::Gen_ClampedAtEnd)
       .def_property_readonly("ClampedAtStart", &BND_NurbsSurfaceKnotList::Gen_ClampedAtStart)
       .def_property_readonly("Count", &BND_NurbsSurfaceKnotList::Gen_Count)

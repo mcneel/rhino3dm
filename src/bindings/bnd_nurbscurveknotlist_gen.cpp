@@ -72,7 +72,12 @@ bool BND_NurbsCurveKnotList::Gen_ClampEnd(RH3DM_CurveEnd end) {
 #if defined(ON_PYTHON_COMPILE)
 void initGenNurbsCurveKnotList(rh3dmpymodule& m)
 {
-  py::class_<BND_NurbsCurveKnotList>(m, "NurbsCurveKnotList")
+  py::class_<BND_NurbsCurveKnotList>(m, "NurbsCurveKnotList", py::buffer_protocol())
+      .def_buffer([](BND_NurbsCurveKnotList& c) -> py::buffer_info {
+        return py::buffer_info((double*)c.m_ptr->m_knot, sizeof(double),
+          py::format_descriptor<double>::format(), 1,
+          {(py::ssize_t)(c.m_ptr->KnotCount())},
+          {(py::ssize_t)(sizeof(double))}); })
       .def_property_readonly("Count", &BND_NurbsCurveKnotList::Gen_Count)
       .def("CreatePeriodicKnots", &BND_NurbsCurveKnotList::Gen_CreatePeriodicKnots, py::arg("knotSpacing"))
       .def("CreateUniformKnots", &BND_NurbsCurveKnotList::Gen_CreateUniformKnots, py::arg("knotSpacing"))
