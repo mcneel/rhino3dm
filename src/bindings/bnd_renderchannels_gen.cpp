@@ -57,8 +57,8 @@ void initGenRenderChannels(rh3dmpymodule& m)
 {
   py::class_<BND_RenderChannels>(m, "RenderChannels")
       .def(py::init<>())
-      .def_property_readonly("CustomList", &BND_RenderChannels::Gen_CustomList)
-      .def_property("Mode", &BND_RenderChannels::Gen_Mode, &BND_RenderChannels::Gen_set_Mode);
+      .def_prop_ro("CustomList", &BND_RenderChannels::Gen_CustomList)
+      .def_prop_rw("Mode", &BND_RenderChannels::Gen_Mode, &BND_RenderChannels::Gen_set_Mode, py::for_setter(py::arg("value").noconvert()));
 }
 #endif
 

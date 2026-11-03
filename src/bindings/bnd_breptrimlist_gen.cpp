@@ -69,7 +69,7 @@ void initGenBrepTrimList(rh3dmpymodule& m)
 {
   py::class_<BND_BrepTrimList>(m, "BrepTrimList")
       .def("Add", &BND_BrepTrimList::Gen_Add, py::keep_alive<0, 1>(), py::arg("curve2dIndex"))
-      .def_property_readonly("Count", &BND_BrepTrimList::Gen_Count)
+      .def_prop_ro("Count", &BND_BrepTrimList::Gen_Count)
       .def("MatchEnds", &BND_BrepTrimList::Gen_MatchEnds)
       .def("__getitem__", &BND_BrepTrimList::Gen_this, py::keep_alive<0, 1>())
       .def("__len__", &BND_BrepTrimList::Gen_Count)

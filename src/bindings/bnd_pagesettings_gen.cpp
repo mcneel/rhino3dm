@@ -125,14 +125,14 @@ void initGenPageSettings(rh3dmpymodule& m)
 {
   py::class_<BND_PageSettings>(m, "PageSettings")
       .def(py::init<>())
-      .def_property("PageNumber", [](const BND_PageSettings& s) { return s.PageNumber(); }, [](BND_PageSettings& s, int v) { s.set_PageNumber(v); })
-      .def_property("WidthMillimeters", [](const BND_PageSettings& s) { return s.WidthMillimeters(); }, [](BND_PageSettings& s, double v) { s.set_WidthMillimeters(v); })
-      .def_property("HeightMillimeters", [](const BND_PageSettings& s) { return s.HeightMillimeters(); }, [](BND_PageSettings& s, double v) { s.set_HeightMillimeters(v); })
-      .def_property("LeftMarginMillimeters", [](const BND_PageSettings& s) { return s.LeftMarginMillimeters(); }, [](BND_PageSettings& s, double v) { s.set_LeftMarginMillimeters(v); })
-      .def_property("RightMarginMillimeters", [](const BND_PageSettings& s) { return s.RightMarginMillimeters(); }, [](BND_PageSettings& s, double v) { s.set_RightMarginMillimeters(v); })
-      .def_property("TopMarginMillimeters", [](const BND_PageSettings& s) { return s.TopMarginMillimeters(); }, [](BND_PageSettings& s, double v) { s.set_TopMarginMillimeters(v); })
-      .def_property("BottomMarginMillimeters", [](const BND_PageSettings& s) { return s.BottomMarginMillimeters(); }, [](BND_PageSettings& s, double v) { s.set_BottomMarginMillimeters(v); })
-      .def_property("PrinterName", [](const BND_PageSettings& s) { return s.PrinterName(); }, [](BND_PageSettings& s, std::wstring v) { s.set_PrinterName(v); });
+      .def_prop_rw("PageNumber", [](const BND_PageSettings& s) { return s.PageNumber(); }, [](BND_PageSettings& s, int v) { s.set_PageNumber(v); })
+      .def_prop_rw("WidthMillimeters", [](const BND_PageSettings& s) { return s.WidthMillimeters(); }, [](BND_PageSettings& s, double v) { s.set_WidthMillimeters(v); })
+      .def_prop_rw("HeightMillimeters", [](const BND_PageSettings& s) { return s.HeightMillimeters(); }, [](BND_PageSettings& s, double v) { s.set_HeightMillimeters(v); })
+      .def_prop_rw("LeftMarginMillimeters", [](const BND_PageSettings& s) { return s.LeftMarginMillimeters(); }, [](BND_PageSettings& s, double v) { s.set_LeftMarginMillimeters(v); })
+      .def_prop_rw("RightMarginMillimeters", [](const BND_PageSettings& s) { return s.RightMarginMillimeters(); }, [](BND_PageSettings& s, double v) { s.set_RightMarginMillimeters(v); })
+      .def_prop_rw("TopMarginMillimeters", [](const BND_PageSettings& s) { return s.TopMarginMillimeters(); }, [](BND_PageSettings& s, double v) { s.set_TopMarginMillimeters(v); })
+      .def_prop_rw("BottomMarginMillimeters", [](const BND_PageSettings& s) { return s.BottomMarginMillimeters(); }, [](BND_PageSettings& s, double v) { s.set_BottomMarginMillimeters(v); })
+      .def_prop_rw("PrinterName", [](const BND_PageSettings& s) { return s.PrinterName(); }, [](BND_PageSettings& s, std::wstring v) { s.set_PrinterName(v); });
 }
 #endif
 

@@ -4,6 +4,7 @@
 #include "bnd_point3d_gen.h"
 #include "bnd_geometrybase_gen.h"
 #include <set>
+#include <mutex>
 
 #if defined(ON_PYTHON_COMPILE)
 
@@ -13,12 +14,18 @@ void RH3DM_ThrowKeyError(const char* key) { throw py::key_error(key); }
 
 void RH3DM_Deprecated(const char* member, const char* instead)
 {
+  // free-threaded Python (M2): the set is shared by every thread, so its insert is locked; the
+  // warning itself is raised outside the lock (it runs Python code)
   static std::set<std::string> warned;
-  if (!warned.insert(member).second)
-    return;
+  static std::mutex warned_lock;
+  {
+    std::lock_guard<std::mutex> g(warned_lock);
+    if (!warned.insert(member).second)
+      return;
+  }
   const std::string msg = std::string("rhino3dm: ") + member + " is deprecated and will be removed; use " + instead;
   if (PyErr_WarnEx(PyExc_DeprecationWarning, msg.c_str(), 2) < 0)
-    throw py::error_already_set();   // warnings raised as errors
+    throw py::python_error();   // warnings raised as errors
 }
 
 std::vector<std::string> RH3DM_DictKeys(const BND_DICT& d)
@@ -31,13 +38,13 @@ std::vector<std::string> RH3DM_DictKeys(const BND_DICT& d)
 
 void RH3DM_DictSetOwned(BND_DICT& d, const char* key, BND_CommonObject* owned)
 {
-  d[key] = py::cast(owned, py::return_value_policy::take_ownership);
+  d[key] = py::cast(owned, py::rv_policy::take_ownership);
 }
 
 void RH3DM_DictSetOwnedList(BND_DICT& d, const char* key, const std::vector<BND_CommonObject*>& owned)
 {
   py::list l;
-  for (BND_CommonObject* p : owned) l.append(py::cast(p, py::return_value_policy::take_ownership));
+  for (BND_CommonObject* p : owned) l.append(py::cast(p, py::rv_policy::take_ownership));
   d[key] = l;
 }
 

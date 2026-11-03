@@ -184,10 +184,10 @@ void initGenComponentIndex(rh3dmpymodule& m)
 {
   py::class_<BND_ComponentIndex>(m, "ComponentIndex")
       .def(py::init<>())
-      .def(py::init([](RH3DM_ComponentIndexType type, int index) { return BND_ComponentIndex((RH3DM_ComponentIndexType)(int)type, index); }), py::arg("type"), py::arg("index"))
-      .def_property_readonly("ComponentIndexType", [](BND_ComponentIndex& s) { return RH3DM_Pub(s.ComponentIndexType()); })
-      .def_property_readonly("Index", [](BND_ComponentIndex& s) { return s.Index(); })
-      .def_property_readonly("IsSet", [](BND_ComponentIndex& s) { return s.IsSet(); })
+      .def("__init__", [](BND_ComponentIndex* rh3dm_self, RH3DM_ComponentIndexType type, int index) { new (rh3dm_self) BND_ComponentIndex(([](RH3DM_ComponentIndexType type, int index) { return BND_ComponentIndex((RH3DM_ComponentIndexType)(int)type, index); })(type, index)); }, py::arg("type"), py::arg("index"))
+      .def_prop_ro("ComponentIndexType", [](BND_ComponentIndex& s) { return RH3DM_Pub(s.ComponentIndexType()); })
+      .def_prop_ro("Index", [](BND_ComponentIndex& s) { return s.Index(); })
+      .def_prop_ro("IsSet", [](BND_ComponentIndex& s) { return s.IsSet(); })
       .def("IsUnset", [](BND_ComponentIndex& self) { return self.IsUnset(); })
       .def("Equals", [](BND_ComponentIndex& self, BND_ComponentIndex other) { return self.Equals(other); }, py::arg("other"))
       .def("CompareTo", [](BND_ComponentIndex& self, BND_ComponentIndex other) { return self.CompareTo(other); }, py::arg("other"))
@@ -197,7 +197,7 @@ void initGenComponentIndex(rh3dmpymodule& m)
       .def("__gt__", [](BND_ComponentIndex a, BND_ComponentIndex b) { return a > b; }, py::is_operator())
       .def("__le__", [](BND_ComponentIndex a, BND_ComponentIndex b) { return a <= b; }, py::is_operator())
       .def("__ge__", [](BND_ComponentIndex a, BND_ComponentIndex b) { return a >= b; }, py::is_operator())
-      .def_property_readonly_static("Unset", [](py::object) { return BND_ComponentIndex::Unset(); })
+      .def_prop_ro_static("Unset", [](py::object) { return BND_ComponentIndex::Unset(); })
       .def("__repr__", [](const BND_ComponentIndex& v) { return py::str("ComponentIndex({}, {})").format(v.m_type, v.m_index); });
 }
 #endif

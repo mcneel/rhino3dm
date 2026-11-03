@@ -38,7 +38,7 @@ BND_DecalsIter* BND_Decals::Gen_iter() const
 void initGenDecals(rh3dmpymodule& m)
 {
   py::class_<BND_Decals>(m, "Decals")
-      .def("Remove", &BND_Decals::Gen_Remove, py::arg("decal"))
+      .def("Remove", &BND_Decals::Gen_Remove, py::arg("decal").none())
       .def("RemoveAllDecals", &BND_Decals::Gen_RemoveAllDecals)
       .def("Clear", &BND_Decals::Gen_Clear)
       .def("__iter__", &BND_Decals::Gen_iter, py::keep_alive<0, 1>());

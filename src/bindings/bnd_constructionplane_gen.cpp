@@ -180,16 +180,16 @@ void initGenConstructionPlane(rh3dmpymodule& m)
 {
   py::class_<BND_ConstructionPlane>(m, "ConstructionPlane")
       .def(py::init<>())
-      .def_property("Plane", [](const BND_ConstructionPlane& s) { return s.Plane(); }, [](BND_ConstructionPlane& s, BND_Plane v) { s.set_Plane(v); })
-      .def_property("GridSpacing", [](const BND_ConstructionPlane& s) { return s.GridSpacing(); }, [](BND_ConstructionPlane& s, double v) { s.set_GridSpacing(v); })
-      .def_property("SnapSpacing", [](const BND_ConstructionPlane& s) { return s.SnapSpacing(); }, [](BND_ConstructionPlane& s, double v) { s.set_SnapSpacing(v); })
-      .def_property("GridLineCount", [](const BND_ConstructionPlane& s) { return s.GridLineCount(); }, [](BND_ConstructionPlane& s, int v) { s.set_GridLineCount(v); })
-      .def_property("ThickLineFrequency", [](const BND_ConstructionPlane& s) { return s.ThickLineFrequency(); }, [](BND_ConstructionPlane& s, int v) { s.set_ThickLineFrequency(v); })
-      .def_property("DepthBuffered", [](const BND_ConstructionPlane& s) { return s.DepthBuffered(); }, [](BND_ConstructionPlane& s, bool v) { s.set_DepthBuffered(v); })
-      .def_property("Name", [](const BND_ConstructionPlane& s) { return s.Name(); }, [](BND_ConstructionPlane& s, std::wstring v) { s.set_Name(v); })
-      .def_property("ShowGrid", [](const BND_ConstructionPlane& s) { return s.ShowGrid(); }, [](BND_ConstructionPlane& s, bool v) { s.set_ShowGrid(v); })
-      .def_property("ShowAxes", [](const BND_ConstructionPlane& s) { return s.ShowAxes(); }, [](BND_ConstructionPlane& s, bool v) { s.set_ShowAxes(v); })
-      .def_property("ShowZAxis", [](const BND_ConstructionPlane& s) { return s.ShowZAxis(); }, [](BND_ConstructionPlane& s, bool v) { s.set_ShowZAxis(v); });
+      .def_prop_rw("Plane", [](const BND_ConstructionPlane& s) { return s.Plane(); }, [](BND_ConstructionPlane& s, BND_Plane v) { s.set_Plane(v); })
+      .def_prop_rw("GridSpacing", [](const BND_ConstructionPlane& s) { return s.GridSpacing(); }, [](BND_ConstructionPlane& s, double v) { s.set_GridSpacing(v); })
+      .def_prop_rw("SnapSpacing", [](const BND_ConstructionPlane& s) { return s.SnapSpacing(); }, [](BND_ConstructionPlane& s, double v) { s.set_SnapSpacing(v); })
+      .def_prop_rw("GridLineCount", [](const BND_ConstructionPlane& s) { return s.GridLineCount(); }, [](BND_ConstructionPlane& s, int v) { s.set_GridLineCount(v); })
+      .def_prop_rw("ThickLineFrequency", [](const BND_ConstructionPlane& s) { return s.ThickLineFrequency(); }, [](BND_ConstructionPlane& s, int v) { s.set_ThickLineFrequency(v); })
+      .def_prop_rw("DepthBuffered", [](const BND_ConstructionPlane& s) { return s.DepthBuffered(); }, [](BND_ConstructionPlane& s, bool v) { s.set_DepthBuffered(v); })
+      .def_prop_rw("Name", [](const BND_ConstructionPlane& s) { return s.Name(); }, [](BND_ConstructionPlane& s, std::wstring v) { s.set_Name(v); })
+      .def_prop_rw("ShowGrid", [](const BND_ConstructionPlane& s) { return s.ShowGrid(); }, [](BND_ConstructionPlane& s, bool v) { s.set_ShowGrid(v); })
+      .def_prop_rw("ShowAxes", [](const BND_ConstructionPlane& s) { return s.ShowAxes(); }, [](BND_ConstructionPlane& s, bool v) { s.set_ShowAxes(v); })
+      .def_prop_rw("ShowZAxis", [](const BND_ConstructionPlane& s) { return s.ShowZAxis(); }, [](BND_ConstructionPlane& s, bool v) { s.set_ShowZAxis(v); });
 }
 #endif
 

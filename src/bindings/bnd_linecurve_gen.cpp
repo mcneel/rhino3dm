@@ -44,10 +44,10 @@ void initGenLineCurve(rh3dmpymodule& m)
       .def(py::init<>())
       .def(py::init<BND_Line>(), py::arg("line"))
       .def(py::init<BND_Line, double, double>(), py::arg("line"), py::arg("t0"), py::arg("t1"))
-      .def(py::init<const BND_LineCurve*>(), py::arg("other"))
+      .def(py::init<const BND_LineCurve*>(), py::arg("other").none())
       .def(py::init<BND_Point2d, BND_Point2d>(), py::arg("from"), py::arg("to"))
       .def(py::init<BND_Point3d, BND_Point3d>(), py::arg("from"), py::arg("to"))
-      .def_property("Line", &BND_LineCurve::Gen_Line, &BND_LineCurve::Gen_set_Line);
+      .def_prop_rw("Line", &BND_LineCurve::Gen_Line, &BND_LineCurve::Gen_set_Line);
 }
 #endif
 

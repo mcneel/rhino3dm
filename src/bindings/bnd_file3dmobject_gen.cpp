@@ -43,10 +43,10 @@ void initGenFile3dmObject(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmObject, BND_ModelComponent>(m, "File3dmObject")
       .def("GetTextureMapping", &BND_File3dmObject::Gen_GetTextureMapping, py::arg("mappingChannelId"))
-      .def_property_readonly("Attributes", py::cpp_function(&BND_File3dmObject::Gen_Attributes, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
-      .def_property_readonly("Geometry", py::cpp_function(&BND_File3dmObject::Gen_Geometry, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
-      .def_property("Name", &BND_File3dmObject::Gen_Name, &BND_File3dmObject::Gen_set_Name)
-      .def_property_readonly("ComponentType", &BND_File3dmObject::Gen_ComponentType);
+      .def_prop_ro("Attributes", &BND_File3dmObject::Gen_Attributes, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
+      .def_prop_ro("Geometry", &BND_File3dmObject::Gen_Geometry, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
+      .def_prop_rw("Name", &BND_File3dmObject::Gen_Name, &BND_File3dmObject::Gen_set_Name)
+      .def_prop_ro("ComponentType", &BND_File3dmObject::Gen_ComponentType);
 }
 #endif
 

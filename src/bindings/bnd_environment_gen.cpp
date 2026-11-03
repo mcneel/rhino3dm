@@ -31,9 +31,9 @@ void initGenEnvironment(rh3dmpymodule& m)
 {
   py::class_<BND_Environment, BND_CommonObject>(m, "Environment")
       .def(py::init<>())
-      .def_property_readonly("BackgroundColor", &BND_Environment::Gen_BackgroundColor)
-      .def_property_readonly("BackgroundImage", py::cpp_function(&BND_Environment::Gen_BackgroundImage, py::return_value_policy::take_ownership))
-      .def_property_readonly("BackgroundProjection", &BND_Environment::Gen_BackgroundProjection);
+      .def_prop_ro("BackgroundColor", &BND_Environment::Gen_BackgroundColor)
+      .def_prop_ro("BackgroundImage", &BND_Environment::Gen_BackgroundImage, py::rv_policy::take_ownership)
+      .def_prop_ro("BackgroundProjection", &BND_Environment::Gen_BackgroundProjection);
 }
 #endif
 

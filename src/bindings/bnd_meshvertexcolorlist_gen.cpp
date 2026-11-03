@@ -109,9 +109,9 @@ int BND_MeshVertexColorList::Gen_Add_2(int red, int green, int blue) const {
 void initGenMeshVertexColorList(rh3dmpymodule& m)
 {
   py::class_<BND_MeshVertexColorList>(m, "MeshVertexColorList")
-      .def_property("Capacity", &BND_MeshVertexColorList::Gen_Capacity, &BND_MeshVertexColorList::Gen_set_Capacity)
+      .def_prop_rw("Capacity", &BND_MeshVertexColorList::Gen_Capacity, &BND_MeshVertexColorList::Gen_set_Capacity)
       .def("Clear", &BND_MeshVertexColorList::Gen_Clear)
-      .def_property("Count", &BND_MeshVertexColorList::Gen_Count, &BND_MeshVertexColorList::Gen_set_Count)
+      .def_prop_rw("Count", &BND_MeshVertexColorList::Gen_Count, &BND_MeshVertexColorList::Gen_set_Count)
       .def("Destroy", &BND_MeshVertexColorList::Gen_Destroy)
       .def("SetColor", &BND_MeshVertexColorList::Gen_SetColor, py::arg("index"), py::arg("color"))
       .def("ToARGBArray", &BND_MeshVertexColorList::Gen_ToARGBArray)

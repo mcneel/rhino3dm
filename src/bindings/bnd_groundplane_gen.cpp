@@ -252,17 +252,17 @@ void initGenGroundPlane(rh3dmpymodule& m)
   py::class_<BND_GroundPlane>(m, "GroundPlane")
       .def(py::init<>())
       .def(py::init<const BND_GroundPlane&>(), py::arg("g"))
-      .def_property("Altitude", &BND_GroundPlane::Gen_Altitude, &BND_GroundPlane::Gen_set_Altitude)
-      .def_property("AutoAltitude", &BND_GroundPlane::Gen_AutoAltitude, &BND_GroundPlane::Gen_set_AutoAltitude)
-      .def_property("Enabled", &BND_GroundPlane::Gen_Enabled, &BND_GroundPlane::Gen_set_Enabled)
-      .def_property("MaterialInstanceId", &BND_GroundPlane::Gen_MaterialInstanceId, &BND_GroundPlane::Gen_set_MaterialInstanceId)
-      .def_property("ShadowOnly", &BND_GroundPlane::Gen_ShadowOnly, &BND_GroundPlane::Gen_set_ShadowOnly)
-      .def_property("ShowUnderside", &BND_GroundPlane::Gen_ShowUnderside, &BND_GroundPlane::Gen_set_ShowUnderside)
-      .def_property("TextureOffset", &BND_GroundPlane::Gen_TextureOffset, &BND_GroundPlane::Gen_set_TextureOffset)
-      .def_property("TextureOffsetLocked", &BND_GroundPlane::Gen_TextureOffsetLocked, &BND_GroundPlane::Gen_set_TextureOffsetLocked)
-      .def_property("TextureRotation", &BND_GroundPlane::Gen_TextureRotation, &BND_GroundPlane::Gen_set_TextureRotation)
-      .def_property("TextureSize", &BND_GroundPlane::Gen_TextureSize, &BND_GroundPlane::Gen_set_TextureSize)
-      .def_property("TextureSizeLocked", &BND_GroundPlane::Gen_TextureSizeLocked, &BND_GroundPlane::Gen_set_TextureSizeLocked);
+      .def_prop_rw("Altitude", &BND_GroundPlane::Gen_Altitude, &BND_GroundPlane::Gen_set_Altitude)
+      .def_prop_rw("AutoAltitude", &BND_GroundPlane::Gen_AutoAltitude, &BND_GroundPlane::Gen_set_AutoAltitude)
+      .def_prop_rw("Enabled", &BND_GroundPlane::Gen_Enabled, &BND_GroundPlane::Gen_set_Enabled)
+      .def_prop_rw("MaterialInstanceId", &BND_GroundPlane::Gen_MaterialInstanceId, &BND_GroundPlane::Gen_set_MaterialInstanceId)
+      .def_prop_rw("ShadowOnly", &BND_GroundPlane::Gen_ShadowOnly, &BND_GroundPlane::Gen_set_ShadowOnly)
+      .def_prop_rw("ShowUnderside", &BND_GroundPlane::Gen_ShowUnderside, &BND_GroundPlane::Gen_set_ShowUnderside)
+      .def_prop_rw("TextureOffset", &BND_GroundPlane::Gen_TextureOffset, &BND_GroundPlane::Gen_set_TextureOffset)
+      .def_prop_rw("TextureOffsetLocked", &BND_GroundPlane::Gen_TextureOffsetLocked, &BND_GroundPlane::Gen_set_TextureOffsetLocked)
+      .def_prop_rw("TextureRotation", &BND_GroundPlane::Gen_TextureRotation, &BND_GroundPlane::Gen_set_TextureRotation)
+      .def_prop_rw("TextureSize", &BND_GroundPlane::Gen_TextureSize, &BND_GroundPlane::Gen_set_TextureSize)
+      .def_prop_rw("TextureSizeLocked", &BND_GroundPlane::Gen_TextureSizeLocked, &BND_GroundPlane::Gen_set_TextureSizeLocked);
 }
 #endif
 

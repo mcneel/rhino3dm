@@ -81,9 +81,9 @@ void initGenCommonObject(rh3dmpymodule& m)
       .def_static("Decode", &BND_CommonObject_Decode, py::arg("jsonObject"))
       .def("RdkXml", &BND_CommonObject_RdkXml)
       .def_static("ComputeMemoryEstimate", &BND_CommonObject::Gen_ComputeMemoryEstimate, py::arg("obj"))
-      .def_property_readonly("IsValid", &BND_CommonObject::Gen_IsValid)
+      .def_prop_ro("IsValid", &BND_CommonObject::Gen_IsValid)
       .def("IsValidWithLog", &BND_CommonObject::Gen_IsValidWithLog)
-      .def_property_readonly("HasUserData", &BND_CommonObject::Gen_HasUserData);
+      .def_prop_ro("HasUserData", &BND_CommonObject::Gen_HasUserData);
 }
 #endif
 

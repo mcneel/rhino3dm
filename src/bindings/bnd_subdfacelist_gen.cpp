@@ -46,9 +46,9 @@ void initGenSubDFaceList(rh3dmpymodule& m)
 {
   py::class_<BND_SubDFaceList>(m, "SubDFaceList")
       .def("ClearPerFaceColors", &BND_SubDFaceList::Gen_ClearPerFaceColors)
-      .def_property_readonly("Count", &BND_SubDFaceList::Gen_Count)
+      .def_prop_ro("Count", &BND_SubDFaceList::Gen_Count)
       .def("Find", &BND_SubDFaceList::Gen_Find, py::keep_alive<0, 1>(), py::arg("id"))
-      .def_property_readonly("HasPerFaceColors", &BND_SubDFaceList::Gen_HasPerFaceColors)
+      .def_prop_ro("HasPerFaceColors", &BND_SubDFaceList::Gen_HasPerFaceColors)
       .def("Find", &BND_SubDFaceList::Gen_Find_2, py::arg("id"))
       .def("__len__", &BND_SubDFaceList::Gen_Count)
       .def("__iter__", &BND_SubDFaceList::Gen_iter, py::keep_alive<0, 1>());

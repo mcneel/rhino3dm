@@ -60,8 +60,8 @@ template <class T>
 void RH3DM_DictSetTuple(BND_DICT& d, const char* key, const std::vector<T>& values)
 {
 #if defined(ON_PYTHON_COMPILE)
-  py::tuple t(values.size());
-  for (size_t i = 0; i < values.size(); i++) t[i] = values[i];
+  BND_TUPLE t = CreateTuple((int)values.size());
+  for (size_t i = 0; i < values.size(); i++) SetTuple(t, (int)i, values[i]);
   d[key] = t;
 #else
   RH3DM_DictSetList(d, key, values);

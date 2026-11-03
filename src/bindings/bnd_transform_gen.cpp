@@ -1097,9 +1097,9 @@ void initGenTransform(rh3dmpymodule& m)
       .def(py::init<>())
       .def(py::init<double>(), py::arg("diagonalValue"))
       .def(py::init<const BND_Transform&>())
-      .def_property_readonly_static("Identity", [](py::object) { return BND_Transform::Identity(); })
-      .def_property_readonly_static("ZeroTransformation", [](py::object) { return BND_Transform::ZeroTransformation(); })
-      .def_property_readonly_static("Unset", [](py::object) { return BND_Transform::Unset(); })
+      .def_prop_ro_static("Identity", [](py::object) { return BND_Transform::Identity(); })
+      .def_prop_ro_static("ZeroTransformation", [](py::object) { return BND_Transform::ZeroTransformation(); })
+      .def_prop_ro_static("Unset", [](py::object) { return BND_Transform::Unset(); })
       .def_static("RotationZYX", [](double yaw, double pitch, double roll) { return BND_Transform::RotationZYX(yaw, pitch, roll); }, py::arg("yaw"), py::arg("pitch"), py::arg("roll"))
       .def_static("RotationZYZ", [](double alpha, double beta, double gamma) { return BND_Transform::RotationZYZ(alpha, beta, gamma); }, py::arg("alpha"), py::arg("beta"), py::arg("gamma"))
       .def_static("Translation", [](BND_Vector3d motion) { return BND_Transform::Translation(motion); }, py::arg("motion"))
@@ -1128,50 +1128,50 @@ void initGenTransform(rh3dmpymodule& m)
       .def("__mul__", [](BND_Transform a, BND_Point3d b) { return a * b; }, py::is_operator())
       .def("__mul__", [](BND_Transform a, BND_Vector3d b) { return a * b; }, py::is_operator())
       .def_static("Multiply", [](BND_Transform a, BND_Transform b) { return BND_Transform::Multiply(a, b); }, py::arg("a"), py::arg("b"))
-      .def_property("M00", [](BND_Transform& s) { return s.M00(); }, [](BND_Transform& s, double v) { s.set_M00(v); })
-      .def_property("M01", [](BND_Transform& s) { return s.M01(); }, [](BND_Transform& s, double v) { s.set_M01(v); })
-      .def_property("M02", [](BND_Transform& s) { return s.M02(); }, [](BND_Transform& s, double v) { s.set_M02(v); })
-      .def_property("M03", [](BND_Transform& s) { return s.M03(); }, [](BND_Transform& s, double v) { s.set_M03(v); })
-      .def_property("M10", [](BND_Transform& s) { return s.M10(); }, [](BND_Transform& s, double v) { s.set_M10(v); })
-      .def_property("M11", [](BND_Transform& s) { return s.M11(); }, [](BND_Transform& s, double v) { s.set_M11(v); })
-      .def_property("M12", [](BND_Transform& s) { return s.M12(); }, [](BND_Transform& s, double v) { s.set_M12(v); })
-      .def_property("M13", [](BND_Transform& s) { return s.M13(); }, [](BND_Transform& s, double v) { s.set_M13(v); })
-      .def_property("M20", [](BND_Transform& s) { return s.M20(); }, [](BND_Transform& s, double v) { s.set_M20(v); })
-      .def_property("M21", [](BND_Transform& s) { return s.M21(); }, [](BND_Transform& s, double v) { s.set_M21(v); })
-      .def_property("M22", [](BND_Transform& s) { return s.M22(); }, [](BND_Transform& s, double v) { s.set_M22(v); })
-      .def_property("M23", [](BND_Transform& s) { return s.M23(); }, [](BND_Transform& s, double v) { s.set_M23(v); })
-      .def_property("M30", [](BND_Transform& s) { return s.M30(); }, [](BND_Transform& s, double v) { s.set_M30(v); })
-      .def_property("M31", [](BND_Transform& s) { return s.M31(); }, [](BND_Transform& s, double v) { s.set_M31(v); })
-      .def_property("M32", [](BND_Transform& s) { return s.M32(); }, [](BND_Transform& s, double v) { s.set_M32(v); })
-      .def_property("M33", [](BND_Transform& s) { return s.M33(); }, [](BND_Transform& s, double v) { s.set_M33(v); })
+      .def_prop_rw("M00", [](BND_Transform& s) { return s.M00(); }, [](BND_Transform& s, double v) { s.set_M00(v); })
+      .def_prop_rw("M01", [](BND_Transform& s) { return s.M01(); }, [](BND_Transform& s, double v) { s.set_M01(v); })
+      .def_prop_rw("M02", [](BND_Transform& s) { return s.M02(); }, [](BND_Transform& s, double v) { s.set_M02(v); })
+      .def_prop_rw("M03", [](BND_Transform& s) { return s.M03(); }, [](BND_Transform& s, double v) { s.set_M03(v); })
+      .def_prop_rw("M10", [](BND_Transform& s) { return s.M10(); }, [](BND_Transform& s, double v) { s.set_M10(v); })
+      .def_prop_rw("M11", [](BND_Transform& s) { return s.M11(); }, [](BND_Transform& s, double v) { s.set_M11(v); })
+      .def_prop_rw("M12", [](BND_Transform& s) { return s.M12(); }, [](BND_Transform& s, double v) { s.set_M12(v); })
+      .def_prop_rw("M13", [](BND_Transform& s) { return s.M13(); }, [](BND_Transform& s, double v) { s.set_M13(v); })
+      .def_prop_rw("M20", [](BND_Transform& s) { return s.M20(); }, [](BND_Transform& s, double v) { s.set_M20(v); })
+      .def_prop_rw("M21", [](BND_Transform& s) { return s.M21(); }, [](BND_Transform& s, double v) { s.set_M21(v); })
+      .def_prop_rw("M22", [](BND_Transform& s) { return s.M22(); }, [](BND_Transform& s, double v) { s.set_M22(v); })
+      .def_prop_rw("M23", [](BND_Transform& s) { return s.M23(); }, [](BND_Transform& s, double v) { s.set_M23(v); })
+      .def_prop_rw("M30", [](BND_Transform& s) { return s.M30(); }, [](BND_Transform& s, double v) { s.set_M30(v); })
+      .def_prop_rw("M31", [](BND_Transform& s) { return s.M31(); }, [](BND_Transform& s, double v) { s.set_M31(v); })
+      .def_prop_rw("M32", [](BND_Transform& s) { return s.M32(); }, [](BND_Transform& s, double v) { s.set_M32(v); })
+      .def_prop_rw("M33", [](BND_Transform& s) { return s.M33(); }, [](BND_Transform& s, double v) { s.set_M33(v); })
       .def("__getitem__", [](BND_Transform& s, std::pair<int, int> ij) { return s.get_Item(ij.first, ij.second); })
       .def("__setitem__", [](BND_Transform& s, std::pair<int, int> ij, double value) { s.set_Item(ij.first, ij.second, value); })
-      .def_property_readonly("IsIdentity", [](BND_Transform& s) { return s.IsIdentity(); })
-      .def_property_readonly("IsValid", [](BND_Transform& s) { return s.IsValid(); })
-      .def_property_readonly("IsZero", [](BND_Transform& s) { return s.IsZero(); })
-      .def_property_readonly("IsZero4x4", [](BND_Transform& s) { return s.IsZero4x4(); })
-      .def_property_readonly("IsZeroTransformation", [](BND_Transform& s) { return s.IsZeroTransformation(); })
+      .def_prop_ro("IsIdentity", [](BND_Transform& s) { return s.IsIdentity(); })
+      .def_prop_ro("IsValid", [](BND_Transform& s) { return s.IsValid(); })
+      .def_prop_ro("IsZero", [](BND_Transform& s) { return s.IsZero(); })
+      .def_prop_ro("IsZero4x4", [](BND_Transform& s) { return s.IsZero4x4(); })
+      .def_prop_ro("IsZeroTransformation", [](BND_Transform& s) { return s.IsZeroTransformation(); })
       .def("IsZeroTransformaton", [](BND_Transform& self, double zeroTolerance) { return self.IsZeroTransformaton(zeroTolerance); }, py::arg("zeroTolerance"))
       .def("IsZeroTransformationWithTolerance", [](BND_Transform& self, double zeroTolerance) { return self.IsZeroTransformationWithTolerance(zeroTolerance); }, py::arg("zeroTolerance"))
       .def("IsUniformlyScaled", [](BND_Transform& self) { return self.IsUniformlyScaled(); })
-      .def_property_readonly("SimilarityType", [](BND_Transform& s) { return RH3DM_Pub(s.SimilarityType()); })
+      .def_prop_ro("SimilarityType", [](BND_Transform& s) { return RH3DM_Pub(s.SimilarityType()); })
       .def("IsSimilarity", [](BND_Transform& self, double tolerance) { return RH3DM_Pub(self.IsSimilarity(tolerance)); }, py::arg("tolerance"))
       .def("DecomposeSimilarity", [](BND_Transform& self, double tolerance) { BND_Vector3d translation{}; double dilation{}; BND_Transform rotation{}; auto r = RH3DM_Pub(self.DecomposeSimilarity(translation, dilation, rotation, tolerance)); return py::make_tuple(r, translation, dilation, rotation); }, py::arg("tolerance"))
       .def("DecomposeTextureMapping", [](BND_Transform& self) { BND_Vector3d offset{}; BND_Vector3d repeat{}; BND_Vector3d rotation{}; self.DecomposeTextureMapping(offset, repeat, rotation); return py::make_tuple(offset, repeat, rotation); })
-      .def_property_readonly("RigidType", [](BND_Transform& s) { return RH3DM_Pub(s.RigidType()); })
+      .def_prop_ro("RigidType", [](BND_Transform& s) { return RH3DM_Pub(s.RigidType()); })
       .def("IsRigid", [](BND_Transform& self, double tolerance) { return RH3DM_Pub(self.IsRigid(tolerance)); }, py::arg("tolerance"))
       .def("DecomposeRigid", [](BND_Transform& self, double tolerance) { BND_Vector3d translation{}; BND_Transform rotation{}; auto r = RH3DM_Pub(self.DecomposeRigid(translation, rotation, tolerance)); return py::make_tuple(r, translation, rotation); }, py::arg("tolerance"))
-      .def_property_readonly("IsAffine", [](BND_Transform& s) { return s.IsAffine(); })
-      .def_property_readonly("IsLinear", [](BND_Transform& s) { return s.IsLinear(); })
+      .def_prop_ro("IsAffine", [](BND_Transform& s) { return s.IsAffine(); })
+      .def_prop_ro("IsLinear", [](BND_Transform& s) { return s.IsLinear(); })
       .def("DecomposeAffine", [](BND_Transform& self) { BND_Transform linear{}; BND_Vector3d translation{}; auto r = self.DecomposeAffine(linear, translation); return py::make_tuple(r, linear, translation); })
       .def("DecomposeAffine", [](BND_Transform& self) { BND_Vector3d translation{}; BND_Transform linear{}; auto r = self.DecomposeAffine(translation, linear); return py::make_tuple(r, translation, linear); })
       .def("DecomposeAffine", [](BND_Transform& self) { BND_Vector3d translation{}; BND_Transform rotation{}; BND_Transform orthogonal{}; BND_Vector3d diagonal{}; auto r = self.DecomposeAffine(translation, rotation, orthogonal, diagonal); return py::make_tuple(r, translation, rotation, orthogonal, diagonal); })
-      .def_property_readonly("IsRotation", [](BND_Transform& s) { return s.IsRotation(); })
+      .def_prop_ro("IsRotation", [](BND_Transform& s) { return s.IsRotation(); })
       .def("Affineize", [](BND_Transform& self) { return self.Affineize(); })
       .def("Linearize", [](BND_Transform& self) { return self.Linearize(); })
       .def("Orthogonalize", [](BND_Transform& self, double tolerance) { return self.Orthogonalize(tolerance); }, py::arg("tolerance"))
       .def("DecomposeSymmetric", [](BND_Transform& self) { BND_Transform matrix{}; BND_Vector3d diagonal{}; auto r = self.DecomposeSymmetric(matrix, diagonal); return py::make_tuple(r, matrix, diagonal); })
-      .def_property_readonly("Determinant", [](BND_Transform& s) { return s.Determinant(); })
+      .def_prop_ro("Determinant", [](BND_Transform& s) { return s.Determinant(); })
       .def("GetYawPitchRoll", [](BND_Transform& self) { double yaw{}; double pitch{}; double roll{}; auto r = self.GetYawPitchRoll(yaw, pitch, roll); return py::make_tuple(r, yaw, pitch, roll); })
       .def("GetEulerZYZ", [](BND_Transform& self) { double alpha{}; double beta{}; double gamma{}; auto r = self.GetEulerZYZ(alpha, beta, gamma); return py::make_tuple(r, alpha, beta, gamma); })
       .def("TransformBoundingBox", [](BND_Transform& self, BND_BoundingBox bbox) { return self.TransformBoundingBox(bbox); }, py::arg("bbox"))
@@ -1186,26 +1186,26 @@ void initGenTransform(rh3dmpymodule& m)
       .def("ToDoubleArray", [](BND_Transform& self, bool rowDominant) { return (self.ToDoubleArray(rowDominant)); }, py::arg("rowDominant"))
       .def("Clone", [](BND_Transform& self) { return self.Clone(); })
       .def("CompareTo", [](BND_Transform& self, BND_Transform other) { return self.CompareTo(other); }, py::arg("other"))
-      .def(py::init([](py::sequence s) {
+      .def("__init__", [](BND_Transform* rh3dm_self, py::sequence s) { new (rh3dm_self) BND_Transform(([](py::sequence s) {
         if (py::len(s) != 16) throw py::value_error("Transform needs 16 values");
         BND_Transform v;
-        v.m_00 = s[0].cast<double>();
-        v.m_01 = s[1].cast<double>();
-        v.m_02 = s[2].cast<double>();
-        v.m_03 = s[3].cast<double>();
-        v.m_10 = s[4].cast<double>();
-        v.m_11 = s[5].cast<double>();
-        v.m_12 = s[6].cast<double>();
-        v.m_13 = s[7].cast<double>();
-        v.m_20 = s[8].cast<double>();
-        v.m_21 = s[9].cast<double>();
-        v.m_22 = s[10].cast<double>();
-        v.m_23 = s[11].cast<double>();
-        v.m_30 = s[12].cast<double>();
-        v.m_31 = s[13].cast<double>();
-        v.m_32 = s[14].cast<double>();
-        v.m_33 = s[15].cast<double>();
-        return v; }))
+        v.m_00 = py::cast<double>(s[0]);
+        v.m_01 = py::cast<double>(s[1]);
+        v.m_02 = py::cast<double>(s[2]);
+        v.m_03 = py::cast<double>(s[3]);
+        v.m_10 = py::cast<double>(s[4]);
+        v.m_11 = py::cast<double>(s[5]);
+        v.m_12 = py::cast<double>(s[6]);
+        v.m_13 = py::cast<double>(s[7]);
+        v.m_20 = py::cast<double>(s[8]);
+        v.m_21 = py::cast<double>(s[9]);
+        v.m_22 = py::cast<double>(s[10]);
+        v.m_23 = py::cast<double>(s[11]);
+        v.m_30 = py::cast<double>(s[12]);
+        v.m_31 = py::cast<double>(s[13]);
+        v.m_32 = py::cast<double>(s[14]);
+        v.m_33 = py::cast<double>(s[15]);
+        return v; })(s)); })
       .def("__repr__", [](const BND_Transform& v) { return py::str("Transform({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})").format(v.m_00, v.m_01, v.m_02, v.m_03, v.m_10, v.m_11, v.m_12, v.m_13, v.m_20, v.m_21, v.m_22, v.m_23, v.m_30, v.m_31, v.m_32, v.m_33); });
   py::implicitly_convertible<py::tuple, BND_Transform>();
   py::implicitly_convertible<py::list, BND_Transform>();

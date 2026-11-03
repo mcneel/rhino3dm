@@ -144,9 +144,9 @@ int BND_MeshTextureCoordinateList::Gen_Add_4(double s, double t) {
 void initGenMeshTextureCoordinateList(rh3dmpymodule& m)
 {
   py::class_<BND_MeshTextureCoordinateList>(m, "MeshTextureCoordinateList")
-      .def_property("Capacity", &BND_MeshTextureCoordinateList::Gen_Capacity, &BND_MeshTextureCoordinateList::Gen_set_Capacity)
+      .def_prop_rw("Capacity", &BND_MeshTextureCoordinateList::Gen_Capacity, &BND_MeshTextureCoordinateList::Gen_set_Capacity)
       .def("Clear", &BND_MeshTextureCoordinateList::Gen_Clear)
-      .def_property("Count", &BND_MeshTextureCoordinateList::Gen_Count, &BND_MeshTextureCoordinateList::Gen_set_Count)
+      .def_prop_rw("Count", &BND_MeshTextureCoordinateList::Gen_Count, &BND_MeshTextureCoordinateList::Gen_set_Count)
       .def("Destroy", &BND_MeshTextureCoordinateList::Gen_Destroy)
       .def("NormalizeTextureCoordinates", &BND_MeshTextureCoordinateList::Gen_NormalizeTextureCoordinates)
       .def("ReverseTextureCoordinates", &BND_MeshTextureCoordinateList::Gen_ReverseTextureCoordinates, py::arg("direction"))

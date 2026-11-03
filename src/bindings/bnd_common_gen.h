@@ -85,9 +85,59 @@ inline BND_Interval RH3DM_I(const ON_Interval& i) { BND_Interval r; r.m_t0 = i.m
 // value types' and hand members' arrays and 8.x); BND_TUPLE stays for real tuples
 // (out-parameter results, Rectangle)
 #if defined(ON_PYTHON_COMPILE)
+// Python-side helpers the translated bodies call (`py` is nanobind; bindings.h)
+inline py::object RH3DM_PyImport(const char* name) { return py::module_::import_(name); }
+inline bool RH3DM_PyIsInstance(py::handle o, py::handle type) {
+  int r = PyObject_IsInstance(o.ptr(), type.ptr());
+  if (r < 0) throw py::python_error();
+  return r == 1; }
+// `nurse` keeps `patient` alive
+inline void RH3DM_PyKeepAlive(py::handle nurse, py::handle patient) {
+  py::detail::keep_alive(nurse.ptr(), patient.ptr()); }
+inline py::bytes RH3DM_PyBytes(const char* p, size_t n) { return py::bytes(p, n); }
+// the buffer protocol by hand (nanobind has no def_buffer; pilot #84, docs/vnext/nanobind-port.md):
+// a writable view of `ndim` doubles with byte `strides`. The shape and strides live in view->internal
+// until RH3DM_ReleaseBuffer. A consumer that does not take strides gets the view only when the data
+// is C-contiguous (a NURBS cv stride can be wider than its point)
+struct RH3DM_BufShape { Py_ssize_t shape[3]; Py_ssize_t strides[3]; };
+inline int RH3DM_FillBuffer(PyObject* o, Py_buffer* view, int flags, double* p, int ndim,
+                            const Py_ssize_t* shape, const Py_ssize_t* strides) {
+  Py_ssize_t count = 1, expect = (Py_ssize_t)sizeof(double);
+  bool contiguous = true;
+  for (int i = ndim - 1; i >= 0; i--) {
+    if (shape[i] > 1 && strides[i] != expect) contiguous = false;
+    expect *= shape[i];
+    count *= shape[i];
+  }
+  if (!contiguous && (flags & PyBUF_STRIDES) != PyBUF_STRIDES) {
+    PyErr_SetString(PyExc_BufferError, "rhino3dm: this buffer is strided; request strides (numpy.asarray does)");
+    view->obj = nullptr;
+    return -1;
+  }
+  RH3DM_BufShape* sh = new RH3DM_BufShape();
+  for (int i = 0; i < ndim; i++) { sh->shape[i] = shape[i]; sh->strides[i] = strides[i]; }
+  view->obj = o; Py_INCREF(o);
+  view->buf = p;
+  view->len = count * (Py_ssize_t)sizeof(double);
+  view->itemsize = (Py_ssize_t)sizeof(double);
+  view->readonly = 0;
+  view->ndim = ndim;
+  view->format = (flags & PyBUF_FORMAT) == PyBUF_FORMAT ? (char*)"d" : nullptr;
+  view->shape = (flags & PyBUF_ND) == PyBUF_ND ? sh->shape : nullptr;
+  view->strides = (flags & PyBUF_STRIDES) == PyBUF_STRIDES ? sh->strides : nullptr;
+  view->suboffsets = nullptr;
+  view->internal = sh;
+  return 0; }
+inline void RH3DM_ReleaseBuffer(Py_buffer* view) { delete (RH3DM_BufShape*)view->internal; view->internal = nullptr; }
+#endif
+
+#if defined(ON_PYTHON_COMPILE)
 typedef py::list RH3DM_ARR;
-inline RH3DM_ARR RH3DM_NewArr(int n) { return py::list(n); }
-template <class T> inline void RH3DM_SetArr(RH3DM_ARR& a, int i, const T& v) { a[i] = v; }
+// nanobind's list has no size constructor; PyList_New leaves NULL slots, which only the C API fills
+// (an item accessor reads the old item first)
+inline RH3DM_ARR RH3DM_NewArr(int n) { return py::steal<py::list>(PyList_New(n)); }
+template <class T> inline void RH3DM_SetArr(RH3DM_ARR& a, int i, const T& v) {
+  if (PyList_SetItem(a.ptr(), i, py::cast(v).release().ptr()) != 0) throw py::python_error(); }
 #else
 typedef emscripten::val RH3DM_ARR;
 inline RH3DM_ARR RH3DM_NewArr(int n) { return CreateTuple(n); }
@@ -103,7 +153,7 @@ inline RH3DM_NTUPLE RH3DM_NoneTuple() { return py::none(); }
 // a DateTime result (File3dm.Created; G68): a naive datetime.datetime; DateTime.MinValue is datetime.min
 typedef py::object RH3DM_DATETIME;
 inline RH3DM_DATETIME RH3DM_DateTime(int y, int mo, int d, int h, int mi, int s) {
-  return py::module_::import("datetime").attr("datetime")(y, mo, d, h, mi, s); }
+  return RH3DM_PyImport("datetime").attr("datetime")(y, mo, d, h, mi, s); }
 inline RH3DM_DATETIME RH3DM_DateTimeMin() { return RH3DM_DateTime(1, 1, 1, 0, 0, 0); }
 #else
 typedef emscripten::val RH3DM_NTUPLE;
@@ -224,17 +274,19 @@ struct RH3DM_ByteVec { std::vector<unsigned char> v;
   const std::vector<unsigned char>* ConstPointer() const { return &v; }
   RH3DM_Bytes ToArray() const { RH3DM_Bytes b; b.v = v; return b; } };
 #if defined(ON_PYTHON_COMPILE)
-namespace pybind11 { namespace detail {
+// byte[] <-> bytes (any buffer in, bytes out); PyObject_GetBuffer is in the limited API (abi3)
+namespace nanobind { namespace detail {
 template <> struct type_caster<RH3DM_Bytes> {
-  PYBIND11_TYPE_CASTER(RH3DM_Bytes, const_name("bytes"));
-  bool load(handle src, bool) {
-    if (!PyObject_CheckBuffer(src.ptr())) return false;
-    buffer_info info = reinterpret_borrow<buffer>(src).request();
-    const unsigned char* p = (const unsigned char*)info.ptr;
-    value.v.assign(p, p + info.size * info.itemsize);
+  NB_TYPE_CASTER(RH3DM_Bytes, const_name("bytes"))
+  bool from_python(handle src, uint8_t, cleanup_list*) noexcept {
+    Py_buffer view;
+    if (PyObject_GetBuffer(src.ptr(), &view, PyBUF_SIMPLE) != 0) { PyErr_Clear(); return false; }
+    const unsigned char* p = (const unsigned char*)view.buf;
+    value.v.assign(p, p + view.len);
+    PyBuffer_Release(&view);
     return true; }
-  static handle cast(const RH3DM_Bytes& b, return_value_policy, handle) {
-    return pybind11::bytes((const char*)b.v.data(), b.v.size()).release(); }
+  static handle from_cpp(const RH3DM_Bytes& b, rv_policy, cleanup_list*) noexcept {
+    return PyBytes_FromStringAndSize((const char*)b.v.data(), (Py_ssize_t)b.v.size()); }
 }; } }
 #else
 inline RH3DM_Bytes RH3DM_JsBytes(const emscripten::val& v) {
@@ -274,7 +326,7 @@ inline int RH3DM_RectBottom(const BND_TUPLE& t) { return RH3DM_RectY(t) + RH3DM_
 // a translated member's out object (G86): the tuple's caller owns it
 template <class T> inline void RH3DM_SetTupleOwned(BND_TUPLE& t, int i, T* p) {
 #if defined(ON_PYTHON_COMPILE)
-  t[i] = p ? py::cast(p, py::return_value_policy::take_ownership) : py::none();
+  RH3DM_TupleSetObj(t, i, p ? py::cast(p, py::rv_policy::take_ownership) : py::none());
 #else
   t.set(i, p ? emscripten::val(p, emscripten::allow_raw_pointers()) : emscripten::val::null());
 #endif
@@ -323,8 +375,8 @@ struct RH3DM_Guids
 template <class T> inline py::list RH3DM_PyOwnedList(const std::vector<T*>& v, py::handle owner) {
   py::list l;
   for (T* e : v) {
-    py::object o = py::cast(e, py::return_value_policy::take_ownership);
-    if (e) py::detail::keep_alive_impl(o, owner);
+    py::object o = py::cast(e, py::rv_policy::take_ownership);
+    if (e) RH3DM_PyKeepAlive(o, owner);
     l.append(o);
   }
   return l; }
@@ -371,7 +423,7 @@ inline RH3DM_DateTimeObj RH3DM_DateTimeOut(const RH3DM_Time& d)
 {
   struct tm r = d.Local();
 #if defined(ON_PYTHON_COMPILE)
-  return py::module_::import("datetime").attr("datetime")(r.tm_year + 1900, r.tm_mon + 1, r.tm_mday, r.tm_hour, r.tm_min, r.tm_sec);
+  return RH3DM_PyImport("datetime").attr("datetime")(r.tm_year + 1900, r.tm_mon + 1, r.tm_mday, r.tm_hour, r.tm_min, r.tm_sec);
 #else
   (void)r;
   return emscripten::val::global("Date").new_((double)d.t * 1000.0);
@@ -381,18 +433,18 @@ inline RH3DM_Time::operator RH3DM_DateTimeObj() const { return RH3DM_DateTimeOut
 inline RH3DM_Time RH3DM_DateTimeIn(const RH3DM_DateTimeObj& o)
 {
 #if defined(ON_PYTHON_COMPILE)
-  py::object dt = py::module_::import("datetime").attr("datetime");
-  if (!py::isinstance(o, dt)) throw py::type_error("a datetime.datetime is required");
+  py::object dt = RH3DM_PyImport("datetime").attr("datetime");
+  if (!RH3DM_PyIsInstance(o, dt)) throw py::type_error("a datetime.datetime is required");
   if (!o.attr("tzinfo").is_none())
-    return RH3DM_Time((long long)o.attr("timestamp")().cast<double>());   // an aware datetime: its instant
+    return RH3DM_Time((long long)py::cast<double>(o.attr("timestamp")()));   // an aware datetime: its instant
   struct tm r;
   memset(&r, 0, sizeof(r));
-  r.tm_year = o.attr("year").cast<int>() - 1900;
-  r.tm_mon = o.attr("month").cast<int>() - 1;
-  r.tm_mday = o.attr("day").cast<int>();
-  r.tm_hour = o.attr("hour").cast<int>();
-  r.tm_min = o.attr("minute").cast<int>();
-  r.tm_sec = o.attr("second").cast<int>();
+  r.tm_year = py::cast<int>(o.attr("year")) - 1900;
+  r.tm_mon = py::cast<int>(o.attr("month")) - 1;
+  r.tm_mday = py::cast<int>(o.attr("day"));
+  r.tm_hour = py::cast<int>(o.attr("hour"));
+  r.tm_min = py::cast<int>(o.attr("minute"));
+  r.tm_sec = py::cast<int>(o.attr("second"));
   r.tm_isdst = -1;                       // local time: the zone's rule decides (as .NET's ToUniversalTime)
   return RH3DM_Time((long long)mktime(&r));
 #else
@@ -411,21 +463,21 @@ struct RH3DM_Variant
   {
 #if defined(ON_PYTHON_COMPILE)
     if (x.is_none()) { v.SetNull(); return; }
-    if (py::isinstance<py::bool_>(x)) { v.SetValue(x.cast<bool>()); return; }
-    if (py::isinstance<py::int_>(x)) { v.SetValue(x.cast<int>()); return; }
-    if (py::isinstance<py::float_>(x)) { v.SetValue(x.cast<double>()); return; }
-    if (py::isinstance<py::str>(x)) { v.SetValue(ON_wString(x.cast<std::wstring>().c_str())); return; }
-    if (py::isinstance(x, py::module_::import("uuid").attr("UUID"))) { v.SetValue(Binding_to_ON_UUID(x)); return; }
-    if (py::isinstance<BND_Color4f>(x)) { BND_Color4f c = x.cast<BND_Color4f>(); v.SetValue(ON_4fColor(c.m_r, c.m_g, c.m_b, c.m_a)); return; }
-    if (py::isinstance<BND_Transform>(x)) { BND_Transform t = x.cast<BND_Transform>(); ON_Xform xf = RH3DM_Val(t); v.SetValue(xf); return; }
-    if (py::isinstance<py::bytes>(x) || py::isinstance<py::bytearray>(x)) { std::string b = x.cast<std::string>(); v.SetValue(b.data(), b.size()); return; }
-    if (py::isinstance(x, py::module_::import("datetime").attr("datetime"))) { v.SetValue((time_t)RH3DM_DateTimeIn(x).t); return; }   // G97
+    if (py::isinstance<py::bool_>(x)) { v.SetValue(py::cast<bool>(x)); return; }
+    if (py::isinstance<py::int_>(x)) { v.SetValue(py::cast<int>(x)); return; }
+    if (py::isinstance<py::float_>(x)) { v.SetValue(py::cast<double>(x)); return; }
+    if (py::isinstance<py::str>(x)) { v.SetValue(ON_wString(py::cast<std::wstring>(x).c_str())); return; }
+    if (RH3DM_PyIsInstance(x, RH3DM_PyImport("uuid").attr("UUID"))) { v.SetValue(Binding_to_ON_UUID(x)); return; }
+    if (py::isinstance<BND_Color4f>(x)) { BND_Color4f c = py::cast<BND_Color4f>(x); v.SetValue(ON_4fColor(c.m_r, c.m_g, c.m_b, c.m_a)); return; }
+    if (py::isinstance<BND_Transform>(x)) { BND_Transform t = py::cast<BND_Transform>(x); ON_Xform xf = RH3DM_Val(t); v.SetValue(xf); return; }
+    if (py::isinstance<py::bytes>(x) || py::isinstance<py::bytearray>(x)) { std::string b = py::cast<std::string>(x); v.SetValue(b.data(), b.size()); return; }
+    if (RH3DM_PyIsInstance(x, RH3DM_PyImport("datetime").attr("datetime"))) { v.SetValue((time_t)RH3DM_DateTimeIn(x).t); return; }   // G97
     if (py::isinstance<py::tuple>(x) || py::isinstance<py::list>(x)) {
-      py::sequence q = x.cast<py::sequence>();
+      py::sequence q = py::cast<py::sequence>(x);
       size_t n = (size_t)py::len(q);
       if (n >= 2 && n <= 4) {
         double d[4] = {0, 0, 0, 0};
-        for (size_t i = 0; i < n; i++) d[i] = q[i].cast<double>();
+        for (size_t i = 0; i < n; i++) d[i] = py::cast<double>(q[i]);
         v.SetValue(d, n == 2 ? ON_XMLVariant::ArrayTypes::Array2 : n == 3 ? ON_XMLVariant::ArrayTypes::Array3 : ON_XMLVariant::ArrayTypes::Array4);
         return;
       }
@@ -477,7 +529,7 @@ struct RH3DM_Variant
     case ON_XMLVariant::Types::DoubleArray4: { ON_4dPoint p = v.As4dPoint(); return py::make_tuple(p.x, p.y, p.z, p.w); }
     case ON_XMLVariant::Types::DoubleColor4: { ON_4fColor c = v.AsColor(); BND_Color4f r; r.m_r = c.Red(); r.m_g = c.Green(); r.m_b = c.Blue(); r.m_a = c.Alpha(); return py::cast(r); }
     case ON_XMLVariant::Types::Matrix: { ON_Xform xf = v.AsXform(); BND_Transform t = RH3DM_Val(xf); return py::cast(t); }
-    case ON_XMLVariant::Types::Buffer: { ON_Buffer b = v.AsBuffer(); std::string s((size_t)b.Size(), '\0'); b.SeekFromStart(0); b.Read((ON__UINT64)s.size(), &s[0]); return py::bytes(s); }
+    case ON_XMLVariant::Types::Buffer: { ON_Buffer b = v.AsBuffer(); std::string s((size_t)b.Size(), '\0'); b.SeekFromStart(0); b.Read((ON__UINT64)s.size(), &s[0]); return RH3DM_PyBytes(s.data(), s.size()); }
 #else
     case ON_XMLVariant::Types::Bool: return emscripten::val(v.AsBool());
     case ON_XMLVariant::Types::Integer: return emscripten::val(v.AsInteger());

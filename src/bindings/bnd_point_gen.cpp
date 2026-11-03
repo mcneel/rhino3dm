@@ -27,7 +27,7 @@ void initGenPoint(rh3dmpymodule& m)
 {
   py::class_<BND_Point, BND_GeometryBase>(m, "Point")
       .def(py::init<BND_Point3d>(), py::arg("location"))
-      .def_property("Location", &BND_Point::Gen_Location, &BND_Point::Gen_set_Location);
+      .def_prop_rw("Location", &BND_Point::Gen_Location, &BND_Point::Gen_set_Location);
 }
 #endif
 

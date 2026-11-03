@@ -7,6 +7,7 @@
 #   tools/dev/round.sh test     tests only, against the last builds (no rebuild)
 #   tools/dev/round.sh dotnet   tests/dotnet against src/dotnet + a fresh native library (.NET 10 SDK)
 #   tools/dev/round.sh all      oracle, then build + tests, then dotnet
+#   tools/dev/round.sh ft [check|build|test|all]   the Python build against free-threaded CPython 3.14t
 #   tools/dev/round.sh sdist    the Python sdist round-trip: package, unpack, build from the package
 #
 # Regenerate first (python3 tools/generate/bnd_gen.py); the generated sources are
@@ -58,7 +59,9 @@ case "${1:-}" in
   oracle) oracle ;;
   test)   both test test ;;
   dotnet) dotnet_tests ;;
+  ft)     docker run --rm -v "$REPO":/src -v "$WORK":/work -v "$VOLUME":/build -e PY_FT=1 $PY_IMAGE \
+            bash /src/tools/dev/container/python.sh "${2:-all}" ;;
   all)    echo "== oracle"; oracle; both all all; dotnet_tests ;;
   sdist)  docker run --rm -v "$REPO":/src:ro -v "$WORK":/work python:3.12-bookworm bash /src/tools/dev/container/sdist.sh "${2:-}" ;;
-  *) sed -n '2,18p' "$0"; exit 2 ;;
+  *) sed -n '2,19p' "$0"; exit 2 ;;
 esac

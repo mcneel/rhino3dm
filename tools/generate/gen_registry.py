@@ -1540,8 +1540,8 @@ HAND_BINDINGS = [
 # Hand members (G90; binding-agnostic since G123): rhino3dm-only members of a generated class
 # or value type (api/exceptions.toml [[hand_kept]]), written ONCE as plain C++ free functions
 # over it -- no binding headers: dictionaries etc. go through src/bindings/bnd_common.h -- and
-# registered by the generator in every binding (emit_hand.hand_registrations: pybind11 and
-# embind now; nanobind in M2 by porting that one function). The files holding them are checked
+# registered by the generator in every binding (emit_hand.hand_registrations: nanobind and
+# embind). The files holding them are checked
 # to be binding-free. M3 layout (Luis 2026-11-01): a class's hand members live in
 # src/bindings/bnd_<class>.h/.cpp, beside its generated bnd_<class>_gen.*, named BND_<Class>_<Member>.
 # Keys:
@@ -1555,6 +1555,7 @@ HAND_BINDINGS = [
 #   py       False: not registered in Python
 #   keep_alive  the result refers to self (a view): Python keeps self alive while it lives
 #   op       a Python operator (`__eq__`): an argument of another type gives NotImplemented, not TypeError
+#   none     argument names whose (pointer) parameter takes None -- nanobind refuses None unless told
 # On a value type JS has no instances (values are plain objects, G38): a method is the class
 # function `rhino.BoundingBox.encode(box)`, as the generated value-type members are.
 def _hm(name, kind, fn, header, **kw):
@@ -1661,10 +1662,10 @@ HAND_MEMBERS['SubDVertex'] = [_hm('Faces', 'property', 'BND_SubDVertex_Faces', _
 # D25 (Luis 2026-11-03): RhinoCommon's SubDComponent equality -- pure C# over the managed parent
 # reference, so not generated; Python also gets the operators and __hash__ (sets, dict keys)
 HAND_MEMBERS['SubDComponent'] = [
-    _hm('Equals', 'method', 'BND_SubDComponent_Equals', _SD, args=['other']),
+    _hm('Equals', 'method', 'BND_SubDComponent_Equals', _SD, args=['other'], none=['other']),
     _hm('GetHashCode', 'method', 'BND_SubDComponent_GetHashCode', _SD),
-    _hm('__eq__', 'method', 'BND_SubDComponent_Equals', _SD, args=['other'], js=None, op=True),
-    _hm('__ne__', 'method', 'BND_SubDComponent_NotEquals', _SD, args=['other'], js=None, op=True),
+    _hm('__eq__', 'method', 'BND_SubDComponent_Equals', _SD, args=['other'], js=None, op=True, none=['other']),
+    _hm('__ne__', 'method', 'BND_SubDComponent_NotEquals', _SD, args=['other'], js=None, op=True, none=['other']),
     _hm('__hash__', 'method', 'BND_SubDComponent_GetHashCode', _SD, js=None)]
 
 
@@ -1677,7 +1678,7 @@ for _reg, _es in HAND_MEMBERS.items():
 
 def hand_class_names():
     return {c if isinstance(c, str) else c['name'] for c in HAND_CLASSES}
-HAND_MEMBER_KEYS = {'name', 'kind', 'fn', 'header', 'args', 'js', 'py', 'keep_alive', 'set', 'of', 'overload', 'list', 'op'}
+HAND_MEMBER_KEYS = {'name', 'kind', 'fn', 'header', 'args', 'js', 'py', 'keep_alive', 'set', 'of', 'overload', 'list', 'op', 'none'}
 # the one hand file allowed to name a binding: the neutral types' implementation
 HAND_SHIM = {'bindings/bnd_common.h', 'bindings/bnd_common.cpp'}
 HAND_BINDING_WORDS = re.compile(r'\bpy::|\bnb::|\bemscripten\b|\bON_PYTHON_COMPILE\b|\bON_WASM_COMPILE\b|\bNANOBIND\b')

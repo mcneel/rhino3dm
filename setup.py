@@ -65,10 +65,8 @@ class CMakeBuild(build_ext):
         print("extdir = " + extdir)
         print("sourcedir" + ext.sourcedir)
 
-        # pybind11 3.0 defaults toward CMake's modern FindPython; opt into it explicitly so the
-        # exact interpreter running setup.py is used (classic FindPythonLibs is unreliable for 3.14+).
-        cmake_args = ['cmake', f'-DPYBIND11_FINDPYTHON=ON', f'-DPython_EXECUTABLE:FILEPATH={pyexec}', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
-        #cmake_args = ['cmake', f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}', f'-DPYTHON_BINDING_LIB=NANOBIND', f'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
+        # nanobind (M2) finds Python with CMake's FindPython: point it at the interpreter running setup.py
+        cmake_args = ['cmake', f'-DPython_EXECUTABLE:FILEPATH={pyexec}', f'-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON']
 
         cfg = 'Debug' if self.debug else 'Release'
         #cfg = 'Debug'
@@ -120,9 +118,7 @@ class CMakeBuild(build_ext):
 
             command = ['cmake', '-A',
                         f"{osplatform}",
-                        f'-DPYBIND11_FINDPYTHON=ON',
                         f'-DPython_EXECUTABLE:FILEPATH={pyexec}',
-                        f'-DPYTHON_EXECUTABLE:FILEPATH={pyexec}',
                         ext.sourcedir+"/src"]
             system(command, cwd=build_temp_dir)
             if bitness == 64:

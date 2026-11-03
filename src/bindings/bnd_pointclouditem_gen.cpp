@@ -90,15 +90,15 @@ double BND_PointCloudItem::Gen_Z() const {
 void initGenPointCloudItem(rh3dmpymodule& m)
 {
   py::class_<BND_PointCloudItem>(m, "PointCloudItem")
-      .def_property("Color", &BND_PointCloudItem::Gen_Color, &BND_PointCloudItem::Gen_set_Color)
-      .def_property("Hidden", &BND_PointCloudItem::Gen_Hidden, &BND_PointCloudItem::Gen_set_Hidden)
-      .def_property("Location", &BND_PointCloudItem::Gen_Location, &BND_PointCloudItem::Gen_set_Location)
-      .def_property("Normal", &BND_PointCloudItem::Gen_Normal, &BND_PointCloudItem::Gen_set_Normal)
-      .def_property("PointValue", &BND_PointCloudItem::Gen_PointValue, &BND_PointCloudItem::Gen_set_PointValue)
-      .def_property_readonly("Index", &BND_PointCloudItem::Gen_Index)
-      .def_property("X", &BND_PointCloudItem::Gen_X, &BND_PointCloudItem::Gen_set_X)
-      .def_property("Y", &BND_PointCloudItem::Gen_Y, &BND_PointCloudItem::Gen_set_Y)
-      .def_property("Z", &BND_PointCloudItem::Gen_Z, &BND_PointCloudItem::Gen_set_Z);
+      .def_prop_rw("Color", &BND_PointCloudItem::Gen_Color, &BND_PointCloudItem::Gen_set_Color)
+      .def_prop_rw("Hidden", &BND_PointCloudItem::Gen_Hidden, &BND_PointCloudItem::Gen_set_Hidden)
+      .def_prop_rw("Location", &BND_PointCloudItem::Gen_Location, &BND_PointCloudItem::Gen_set_Location)
+      .def_prop_rw("Normal", &BND_PointCloudItem::Gen_Normal, &BND_PointCloudItem::Gen_set_Normal)
+      .def_prop_rw("PointValue", &BND_PointCloudItem::Gen_PointValue, &BND_PointCloudItem::Gen_set_PointValue)
+      .def_prop_ro("Index", &BND_PointCloudItem::Gen_Index)
+      .def_prop_rw("X", &BND_PointCloudItem::Gen_X, &BND_PointCloudItem::Gen_set_X)
+      .def_prop_rw("Y", &BND_PointCloudItem::Gen_Y, &BND_PointCloudItem::Gen_set_Y)
+      .def_prop_rw("Z", &BND_PointCloudItem::Gen_Z, &BND_PointCloudItem::Gen_set_Z);
 }
 #endif
 

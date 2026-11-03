@@ -44,12 +44,7 @@ std::string ToStdString(const py::str& str)
 BND_TUPLE CreateTuple(int count)
 {
 #if defined(ON_PYTHON_COMPILE)
-
-#if defined(NANOBIND)
-  BND_TUPLE rc = py::tuple();
-#else
-  BND_TUPLE rc = py::tuple(count);
-#endif
+  BND_TUPLE rc = py::steal<py::tuple>(PyTuple_New(count));   // filled by SetTuple / RH3DM_TupleSetObj
 #else
   emscripten::val rc(emscripten::val::array());
 #endif
@@ -59,11 +54,7 @@ BND_TUPLE CreateTuple(int count)
 BND_TUPLE NullTuple()
 {
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
   return py::tuple();
-#else
-  return py::none();
-#endif
 #else
   return emscripten::val::null();
 #endif
@@ -82,37 +73,9 @@ BND_LIST CreateList()
 BND_LIST NullList()
 {
 #if defined(ON_PYTHON_COMPILE)
-#if defined(NANOBIND)
   return py::list();
-#else
-  return py::none();
-#endif
 #else
   return emscripten::val::null();
 #endif
 }
 
-BND_DateTime CreateDateTime(struct tm t)
-{
-#if defined(ON_PYTHON_COMPILE)
-  if (!PyDateTimeAPI) {
-    PyDateTime_IMPORT;
-  }
-  return PyDateTime_FromDateAndTime(t.tm_year + 1900,
-                                    t.tm_mon + 1,
-                                    t.tm_mday,
-                                    t.tm_hour,
-                                    t.tm_min,
-                                    t.tm_sec,
-                                    0);
-#else
-  emscripten::val Date = emscripten::val::global("Date");
-  return Date.new_(t.tm_year + 1900,
-                   t.tm_mon,
-                   t.tm_mday,
-                   t.tm_hour,
-                   t.tm_min,
-                   t.tm_sec,
-                   0);
-#endif
-}

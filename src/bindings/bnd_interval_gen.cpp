@@ -413,21 +413,21 @@ void initGenInterval(rh3dmpymodule& m)
       .def("__le__", [](BND_Interval a, BND_Interval b) { return a <= b; }, py::is_operator())
       .def("__gt__", [](BND_Interval a, BND_Interval b) { return a > b; }, py::is_operator())
       .def("__ge__", [](BND_Interval a, BND_Interval b) { return a >= b; }, py::is_operator())
-      .def_property_readonly_static("Unset", [](py::object) { return BND_Interval::Unset(); })
-      .def_property_readonly_static("ZeroToOne", [](py::object) { return BND_Interval::ZeroToOne(); })
-      .def_property_readonly_static("ZeroToTwoPi", [](py::object) { return BND_Interval::ZeroToTwoPi(); })
-      .def_property("T0", [](BND_Interval& s) { return s.T0(); }, [](BND_Interval& s, double v) { s.set_T0(v); })
-      .def_property("T1", [](BND_Interval& s) { return s.T1(); }, [](BND_Interval& s, double v) { s.set_T1(v); })
+      .def_prop_ro_static("Unset", [](py::object) { return BND_Interval::Unset(); })
+      .def_prop_ro_static("ZeroToOne", [](py::object) { return BND_Interval::ZeroToOne(); })
+      .def_prop_ro_static("ZeroToTwoPi", [](py::object) { return BND_Interval::ZeroToTwoPi(); })
+      .def_prop_rw("T0", [](BND_Interval& s) { return s.T0(); }, [](BND_Interval& s, double v) { s.set_T0(v); })
+      .def_prop_rw("T1", [](BND_Interval& s) { return s.T1(); }, [](BND_Interval& s, double v) { s.set_T1(v); })
       .def("__getitem__", [](BND_Interval& s, int index) { return s.get_Item(index); })
       .def("__setitem__", [](BND_Interval& s, int index, double value) { s.set_Item(index, value); })
-      .def_property_readonly("Min", [](BND_Interval& s) { return s.Min(); })
-      .def_property_readonly("Max", [](BND_Interval& s) { return s.Max(); })
-      .def_property_readonly("Mid", [](BND_Interval& s) { return s.Mid(); })
-      .def_property_readonly("Length", [](BND_Interval& s) { return s.Length(); })
-      .def_property_readonly("IsValid", [](BND_Interval& s) { return s.IsValid(); })
-      .def_property_readonly("IsSingleton", [](BND_Interval& s) { return s.IsSingleton(); })
-      .def_property_readonly("IsIncreasing", [](BND_Interval& s) { return s.IsIncreasing(); })
-      .def_property_readonly("IsDecreasing", [](BND_Interval& s) { return s.IsDecreasing(); })
+      .def_prop_ro("Min", [](BND_Interval& s) { return s.Min(); })
+      .def_prop_ro("Max", [](BND_Interval& s) { return s.Max(); })
+      .def_prop_ro("Mid", [](BND_Interval& s) { return s.Mid(); })
+      .def_prop_ro("Length", [](BND_Interval& s) { return s.Length(); })
+      .def_prop_ro("IsValid", [](BND_Interval& s) { return s.IsValid(); })
+      .def_prop_ro("IsSingleton", [](BND_Interval& s) { return s.IsSingleton(); })
+      .def_prop_ro("IsIncreasing", [](BND_Interval& s) { return s.IsIncreasing(); })
+      .def_prop_ro("IsDecreasing", [](BND_Interval& s) { return s.IsDecreasing(); })
       .def("Equals", [](BND_Interval& self, BND_Interval other) { return self.Equals(other); }, py::arg("other"))
       .def("CompareTo", [](BND_Interval& self, BND_Interval other) { return self.CompareTo(other); }, py::arg("other"))
       .def("ToString", [](BND_Interval& self) { return self.ToString(); })
@@ -448,12 +448,12 @@ void initGenInterval(rh3dmpymodule& m)
       .def_static("FromIntersection", [](BND_Interval a, BND_Interval b) { return BND_Interval::FromIntersection(a, b); }, py::arg("a"), py::arg("b"))
       .def_static("FromUnion", [](BND_Interval a, BND_Interval b) { return BND_Interval::FromUnion(a, b); }, py::arg("a"), py::arg("b"))
       .def("EpsilonEquals", [](BND_Interval& self, BND_Interval other, double epsilon) { return self.EpsilonEquals(other, epsilon); }, py::arg("other"), py::arg("epsilon"))
-      .def(py::init([](py::sequence s) {
+      .def("__init__", [](BND_Interval* rh3dm_self, py::sequence s) { new (rh3dm_self) BND_Interval(([](py::sequence s) {
         if (py::len(s) != 2) throw py::value_error("Interval needs 2 values");
         BND_Interval v;
-        v.m_t0 = s[0].cast<double>();
-        v.m_t1 = s[1].cast<double>();
-        return v; }))
+        v.m_t0 = py::cast<double>(s[0]);
+        v.m_t1 = py::cast<double>(s[1]);
+        return v; })(s)); })
       .def("__repr__", [](const BND_Interval& v) { return py::str("Interval({}, {})").format(v.m_t0, v.m_t1); });
   py::implicitly_convertible<py::tuple, BND_Interval>();
   py::implicitly_convertible<py::list, BND_Interval>();

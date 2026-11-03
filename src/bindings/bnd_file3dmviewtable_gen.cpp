@@ -46,7 +46,7 @@ void initGenFile3dmViewTable(rh3dmpymodule& m)
   py::class_<BND_File3dmViewTable>(m, "File3dmViewTable")
       .def("Add", &BND_File3dmViewTable::Gen_Add, py::arg("item"))
       .def("Clear", &BND_File3dmViewTable::Gen_Clear)
-      .def_property_readonly("Count", &BND_File3dmViewTable::Gen_Count)
+      .def_prop_ro("Count", &BND_File3dmViewTable::Gen_Count)
       .def("Delete", &BND_File3dmViewTable::Gen_Delete, py::arg("index"))
       .def("__getitem__", &BND_File3dmViewTable::Gen_this, py::keep_alive<0, 1>())
       .def("__len__", &BND_File3dmViewTable::Gen_Count);

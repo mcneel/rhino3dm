@@ -55,13 +55,13 @@ BND_BrepLoop* BND_BrepLoopList::Gen_AddPlanarFaceLoop(int faceIndex, RH3DM_BrepL
 void initGenBrepLoopList(rh3dmpymodule& m)
 {
   py::class_<BND_BrepLoopList>(m, "BrepLoopList")
-      .def("Add", &BND_BrepLoopList::Gen_Add, py::keep_alive<0, 1>(), py::arg("loopType"))
+      .def("Add", &BND_BrepLoopList::Gen_Add, py::keep_alive<0, 1>(), py::arg("loopType").noconvert())
       .def("AddOuterLoop", &BND_BrepLoopList::Gen_AddOuterLoop, py::keep_alive<0, 1>(), py::arg("faceIndex"))
-      .def_property_readonly("Count", &BND_BrepLoopList::Gen_Count)
+      .def_prop_ro("Count", &BND_BrepLoopList::Gen_Count)
       .def("__getitem__", &BND_BrepLoopList::Gen_this, py::keep_alive<0, 1>())
       .def("__len__", &BND_BrepLoopList::Gen_Count)
-      .def("Add", &BND_BrepLoopList::Gen_Add_2, py::arg("loopType"), py::arg("face"))
-      .def("AddPlanarFaceLoop", &BND_BrepLoopList::Gen_AddPlanarFaceLoop, py::arg("faceIndex"), py::arg("loopType"), py::arg("boundaryCurves"));
+      .def("Add", &BND_BrepLoopList::Gen_Add_2, py::arg("loopType").noconvert(), py::arg("face"))
+      .def("AddPlanarFaceLoop", &BND_BrepLoopList::Gen_AddPlanarFaceLoop, py::arg("faceIndex"), py::arg("loopType"), py::arg("boundaryCurves").none());
 }
 #endif
 

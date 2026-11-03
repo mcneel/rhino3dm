@@ -72,12 +72,12 @@ BND_GeometryBase* BND_Hatch::Gen_DuplicateShallowHelper() const {
 void initGenHatch(rh3dmpymodule& m)
 {
   py::class_<BND_Hatch, BND_GeometryBase>(m, "Hatch")
-      .def_property("BasePoint", &BND_Hatch::Gen_BasePoint, &BND_Hatch::Gen_set_BasePoint)
+      .def_prop_rw("BasePoint", &BND_Hatch::Gen_BasePoint, &BND_Hatch::Gen_set_BasePoint)
       .def_static("CreateFromBrep", &BND_Hatch::Gen_CreateFromBrep, py::arg("brep"), py::arg("brepFaceIndex"), py::arg("hatchPatternIndex"), py::arg("rotationRadians"), py::arg("scale"), py::arg("basePoint"))
-      .def_property("PatternIndex", &BND_Hatch::Gen_PatternIndex, &BND_Hatch::Gen_set_PatternIndex)
-      .def_property("PatternRotation", &BND_Hatch::Gen_PatternRotation, &BND_Hatch::Gen_set_PatternRotation)
-      .def_property("PatternScale", &BND_Hatch::Gen_PatternScale, &BND_Hatch::Gen_set_PatternScale)
-      .def_property("Plane", &BND_Hatch::Gen_Plane, &BND_Hatch::Gen_set_Plane)
+      .def_prop_rw("PatternIndex", &BND_Hatch::Gen_PatternIndex, &BND_Hatch::Gen_set_PatternIndex)
+      .def_prop_rw("PatternRotation", &BND_Hatch::Gen_PatternRotation, &BND_Hatch::Gen_set_PatternRotation)
+      .def_prop_rw("PatternScale", &BND_Hatch::Gen_PatternScale, &BND_Hatch::Gen_set_PatternScale)
+      .def_prop_rw("Plane", &BND_Hatch::Gen_Plane, &BND_Hatch::Gen_set_Plane)
       .def("ScalePattern", &BND_Hatch::Gen_ScalePattern, py::arg("xform"))
       .def("ToBrep", &BND_Hatch::Gen_ToBrep);
 }

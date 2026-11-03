@@ -142,13 +142,13 @@ void initGenConstructionPlaneGridDefaults(rh3dmpymodule& m)
 {
   py::class_<BND_ConstructionPlaneGridDefaults>(m, "ConstructionPlaneGridDefaults")
       .def(py::init<>())
-      .def_property("GridSpacing", [](const BND_ConstructionPlaneGridDefaults& s) { return s.GridSpacing(); }, [](BND_ConstructionPlaneGridDefaults& s, double v) { s.set_GridSpacing(v); })
-      .def_property("SnapSpacing", [](const BND_ConstructionPlaneGridDefaults& s) { return s.SnapSpacing(); }, [](BND_ConstructionPlaneGridDefaults& s, double v) { s.set_SnapSpacing(v); })
-      .def_property("GridLineCount", [](const BND_ConstructionPlaneGridDefaults& s) { return s.GridLineCount(); }, [](BND_ConstructionPlaneGridDefaults& s, int v) { s.set_GridLineCount(v); })
-      .def_property("GridThickFrequency", [](const BND_ConstructionPlaneGridDefaults& s) { return s.GridThickFrequency(); }, [](BND_ConstructionPlaneGridDefaults& s, int v) { s.set_GridThickFrequency(v); })
-      .def_property("ShowGrid", [](const BND_ConstructionPlaneGridDefaults& s) { return s.ShowGrid(); }, [](BND_ConstructionPlaneGridDefaults& s, bool v) { s.set_ShowGrid(v); })
-      .def_property("ShowGridAxes", [](const BND_ConstructionPlaneGridDefaults& s) { return s.ShowGridAxes(); }, [](BND_ConstructionPlaneGridDefaults& s, bool v) { s.set_ShowGridAxes(v); })
-      .def_property("ShowWorldAxes", [](const BND_ConstructionPlaneGridDefaults& s) { return s.ShowWorldAxes(); }, [](BND_ConstructionPlaneGridDefaults& s, bool v) { s.set_ShowWorldAxes(v); });
+      .def_prop_rw("GridSpacing", [](const BND_ConstructionPlaneGridDefaults& s) { return s.GridSpacing(); }, [](BND_ConstructionPlaneGridDefaults& s, double v) { s.set_GridSpacing(v); })
+      .def_prop_rw("SnapSpacing", [](const BND_ConstructionPlaneGridDefaults& s) { return s.SnapSpacing(); }, [](BND_ConstructionPlaneGridDefaults& s, double v) { s.set_SnapSpacing(v); })
+      .def_prop_rw("GridLineCount", [](const BND_ConstructionPlaneGridDefaults& s) { return s.GridLineCount(); }, [](BND_ConstructionPlaneGridDefaults& s, int v) { s.set_GridLineCount(v); })
+      .def_prop_rw("GridThickFrequency", [](const BND_ConstructionPlaneGridDefaults& s) { return s.GridThickFrequency(); }, [](BND_ConstructionPlaneGridDefaults& s, int v) { s.set_GridThickFrequency(v); })
+      .def_prop_rw("ShowGrid", [](const BND_ConstructionPlaneGridDefaults& s) { return s.ShowGrid(); }, [](BND_ConstructionPlaneGridDefaults& s, bool v) { s.set_ShowGrid(v); })
+      .def_prop_rw("ShowGridAxes", [](const BND_ConstructionPlaneGridDefaults& s) { return s.ShowGridAxes(); }, [](BND_ConstructionPlaneGridDefaults& s, bool v) { s.set_ShowGridAxes(v); })
+      .def_prop_rw("ShowWorldAxes", [](const BND_ConstructionPlaneGridDefaults& s) { return s.ShowWorldAxes(); }, [](BND_ConstructionPlaneGridDefaults& s, bool v) { s.set_ShowWorldAxes(v); });
 }
 #endif
 

@@ -510,8 +510,8 @@ void initGenPoint3d(rh3dmpymodule& m)
       .def(py::init<BND_Point3f>(), py::arg("point"))
       .def(py::init<const BND_Point3d&>())
       .def(py::init<BND_Point4d>(), py::arg("point"))
-      .def_property_readonly_static("Origin", [](py::object) { return BND_Point3d::Origin(); })
-      .def_property_readonly_static("Unset", [](py::object) { return BND_Point3d::Unset(); })
+      .def_prop_ro_static("Origin", [](py::object) { return BND_Point3d::Origin(); })
+      .def_prop_ro_static("Unset", [](py::object) { return BND_Point3d::Unset(); })
       .def("__mul__", [](BND_Point3d a, double b) { return a * b; }, py::is_operator())
       .def_static("Multiply", [](BND_Point3d point, double t) { return BND_Point3d::Multiply(point, t); }, py::arg("point"), py::arg("t"))
       .def("__rmul__", [](BND_Point3d b, double a) { return a * b; }, py::is_operator())
@@ -539,14 +539,14 @@ void initGenPoint3d(rh3dmpymodule& m)
       .def("__le__", [](BND_Point3d a, BND_Point3d b) { return a <= b; }, py::is_operator())
       .def("__gt__", [](BND_Point3d a, BND_Point3d b) { return a > b; }, py::is_operator())
       .def("__ge__", [](BND_Point3d a, BND_Point3d b) { return a >= b; }, py::is_operator())
-      .def_property("X", [](BND_Point3d& s) { return s.X(); }, [](BND_Point3d& s, double v) { s.set_X(v); })
-      .def_property("Y", [](BND_Point3d& s) { return s.Y(); }, [](BND_Point3d& s, double v) { s.set_Y(v); })
-      .def_property("Z", [](BND_Point3d& s) { return s.Z(); }, [](BND_Point3d& s, double v) { s.set_Z(v); })
+      .def_prop_rw("X", [](BND_Point3d& s) { return s.X(); }, [](BND_Point3d& s, double v) { s.set_X(v); })
+      .def_prop_rw("Y", [](BND_Point3d& s) { return s.Y(); }, [](BND_Point3d& s, double v) { s.set_Y(v); })
+      .def_prop_rw("Z", [](BND_Point3d& s) { return s.Z(); }, [](BND_Point3d& s, double v) { s.set_Z(v); })
       .def("__getitem__", [](BND_Point3d& s, int index) { return s.get_Item(index); })
       .def("__setitem__", [](BND_Point3d& s, int index, double value) { s.set_Item(index, value); })
-      .def_property_readonly("IsValid", [](BND_Point3d& s) { return s.IsValid(); })
-      .def_property_readonly("MinimumCoordinate", [](BND_Point3d& s) { return s.MinimumCoordinate(); })
-      .def_property_readonly("MaximumCoordinate", [](BND_Point3d& s) { return s.MaximumCoordinate(); })
+      .def_prop_ro("IsValid", [](BND_Point3d& s) { return s.IsValid(); })
+      .def_prop_ro("MinimumCoordinate", [](BND_Point3d& s) { return s.MinimumCoordinate(); })
+      .def_prop_ro("MaximumCoordinate", [](BND_Point3d& s) { return s.MaximumCoordinate(); })
       .def("EpsilonEquals", [](BND_Point3d& self, BND_Point3d other, double epsilon) { return self.EpsilonEquals(other, epsilon); }, py::arg("other"), py::arg("epsilon"))
       .def("CompareTo", [](BND_Point3d& self, BND_Point3d other) { return self.CompareTo(other); }, py::arg("other"))
       .def("Equals", [](BND_Point3d& self, BND_Point3d point) { return self.Equals(point); }, py::arg("point"))
@@ -556,13 +556,13 @@ void initGenPoint3d(rh3dmpymodule& m)
       .def("DistanceTo", [](BND_Point3d& self, BND_Point3d other) { return self.DistanceTo(other); }, py::arg("other"))
       .def("DistanceToSquared", [](BND_Point3d& self, BND_Point3d other) { return self.DistanceToSquared(other); }, py::arg("other"))
       .def("Transform", [](BND_Point3d& self, BND_Transform xform) { return self.Transform(xform); }, py::arg("xform"))
-      .def(py::init([](py::sequence s) {
+      .def("__init__", [](BND_Point3d* rh3dm_self, py::sequence s) { new (rh3dm_self) BND_Point3d(([](py::sequence s) {
         if (py::len(s) != 3) throw py::value_error("Point3d needs 3 values");
         BND_Point3d v;
-        v.m_x = s[0].cast<double>();
-        v.m_y = s[1].cast<double>();
-        v.m_z = s[2].cast<double>();
-        return v; }))
+        v.m_x = py::cast<double>(s[0]);
+        v.m_y = py::cast<double>(s[1]);
+        v.m_z = py::cast<double>(s[2]);
+        return v; })(s)); })
       .def("Encode", &BND_Point3d_Encode)
       .def("__repr__", [](const BND_Point3d& v) { return py::str("Point3d({}, {}, {})").format(v.m_x, v.m_y, v.m_z); });
   py::implicitly_convertible<py::tuple, BND_Point3d>();

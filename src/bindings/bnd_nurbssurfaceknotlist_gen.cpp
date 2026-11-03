@@ -58,20 +58,27 @@ bool BND_NurbsSurfaceKnotList::Gen_InsertKnot_2(double value) const {
 #if defined(ON_PYTHON_COMPILE)
 void initGenNurbsSurfaceKnotList(rh3dmpymodule& m)
 {
-  py::class_<BND_NurbsSurfaceKnotList>(m, "NurbsSurfaceKnotList", py::buffer_protocol())
-      .def_buffer([](BND_NurbsSurfaceKnotList& c) -> py::buffer_info {
-        return py::buffer_info((double*)c.m_ptr->m_knot[c.m_key], sizeof(double),
-          py::format_descriptor<double>::format(), 1,
-          {(py::ssize_t)(c.m_ptr->KnotCount(c.m_key))},
-          {(py::ssize_t)(sizeof(double))}); })
-      .def_property_readonly("ClampedAtEnd", &BND_NurbsSurfaceKnotList::Gen_ClampedAtEnd)
-      .def_property_readonly("ClampedAtStart", &BND_NurbsSurfaceKnotList::Gen_ClampedAtStart)
-      .def_property_readonly("Count", &BND_NurbsSurfaceKnotList::Gen_Count)
+  static PyType_Slot rh3dm_buffer_slots[] = {
+    {Py_bf_getbuffer, (void*)+[](PyObject* o, Py_buffer* view, int flags) -> int {
+      try {
+        BND_NurbsSurfaceKnotList& c = *py::inst_ptr<BND_NurbsSurfaceKnotList>(o);
+        const Py_ssize_t shape[] = {(Py_ssize_t)(c.m_ptr->KnotCount(c.m_key))};
+        const Py_ssize_t strides[] = {(Py_ssize_t)(sizeof(double))};
+        return RH3DM_FillBuffer(o, view, flags, (double*)c.m_ptr->m_knot[c.m_key], 1, shape, strides);
+      } catch (const std::exception& e) {
+        PyErr_SetString(PyExc_BufferError, e.what()); view->obj = nullptr; return -1;
+      } }},
+    {Py_bf_releasebuffer, (void*)+[](PyObject*, Py_buffer* view) { RH3DM_ReleaseBuffer(view); }},
+    {0, nullptr}};
+  py::class_<BND_NurbsSurfaceKnotList>(m, "NurbsSurfaceKnotList", py::type_slots(rh3dm_buffer_slots))
+      .def_prop_ro("ClampedAtEnd", &BND_NurbsSurfaceKnotList::Gen_ClampedAtEnd)
+      .def_prop_ro("ClampedAtStart", &BND_NurbsSurfaceKnotList::Gen_ClampedAtStart)
+      .def_prop_ro("Count", &BND_NurbsSurfaceKnotList::Gen_Count)
       .def("CreatePeriodicKnots", &BND_NurbsSurfaceKnotList::Gen_CreatePeriodicKnots, py::arg("knotSpacing"))
       .def("CreateUniformKnots", &BND_NurbsSurfaceKnotList::Gen_CreateUniformKnots, py::arg("knotSpacing"))
       .def("InsertKnot", &BND_NurbsSurfaceKnotList::Gen_InsertKnot, py::arg("value"), py::arg("multiplicity"))
       .def("KnotMultiplicity", &BND_NurbsSurfaceKnotList::Gen_KnotMultiplicity, py::arg("index"))
-      .def_property_readonly("KnotStyle", &BND_NurbsSurfaceKnotList::Gen_KnotStyle)
+      .def_prop_ro("KnotStyle", &BND_NurbsSurfaceKnotList::Gen_KnotStyle)
       .def("SuperfluousKnot", &BND_NurbsSurfaceKnotList::Gen_SuperfluousKnot, py::arg("start"))
       .def("__getitem__", &BND_NurbsSurfaceKnotList::Gen_this)
       .def("__setitem__", &BND_NurbsSurfaceKnotList::Gen_set_this)

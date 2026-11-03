@@ -95,9 +95,9 @@ void initGenDithering(rh3dmpymodule& m)
   py::class_<BND_Dithering>(m, "Dithering")
       .def(py::init<>())
       .def(py::init<const BND_Dithering&>(), py::arg("d"))
-      .def_property("Enabled", &BND_Dithering::Gen_Enabled, &BND_Dithering::Gen_set_Enabled)
-      .def_property("Method", &BND_Dithering::Gen_Method, &BND_Dithering::Gen_set_Method)
-      .def_property("On", &BND_Dithering::Gen_On, &BND_Dithering::Gen_set_On);
+      .def_prop_rw("Enabled", &BND_Dithering::Gen_Enabled, &BND_Dithering::Gen_set_Enabled)
+      .def_prop_rw("Method", &BND_Dithering::Gen_Method, &BND_Dithering::Gen_set_Method, py::for_setter(py::arg("value").noconvert()))
+      .def_prop_rw("On", &BND_Dithering::Gen_On, &BND_Dithering::Gen_set_On);
 }
 #endif
 

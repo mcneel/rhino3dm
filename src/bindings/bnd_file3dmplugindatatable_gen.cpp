@@ -38,7 +38,7 @@ void initGenFile3dmPlugInDataTable(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmPlugInDataTable>(m, "File3dmPlugInDataTable")
       .def("Clear", &BND_File3dmPlugInDataTable::Gen_Clear)
-      .def_property_readonly("Count", &BND_File3dmPlugInDataTable::Gen_Count)
+      .def_prop_ro("Count", &BND_File3dmPlugInDataTable::Gen_Count)
       .def("Dump", &BND_File3dmPlugInDataTable::Gen_Dump)
       .def("__getitem__", &BND_File3dmPlugInDataTable::Gen_this, py::keep_alive<0, 1>())
       .def("__len__", &BND_File3dmPlugInDataTable::Gen_Count);

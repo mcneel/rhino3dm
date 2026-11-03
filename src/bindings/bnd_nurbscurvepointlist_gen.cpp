@@ -138,20 +138,27 @@ void BND_NurbsCurvePointList::Gen_set_this(int index, BND_ControlPoint value) {
 #if defined(ON_PYTHON_COMPILE)
 void initGenNurbsCurvePointList(rh3dmpymodule& m)
 {
-  py::class_<BND_NurbsCurvePointList>(m, "NurbsCurvePointList", py::buffer_protocol())
-      .def_buffer([](BND_NurbsCurvePointList& c) -> py::buffer_info {
-        return py::buffer_info((double*)c.m_ptr->m_cv, sizeof(double),
-          py::format_descriptor<double>::format(), 2,
-          {(py::ssize_t)(c.m_ptr->CVCount()), (py::ssize_t)(c.m_ptr->CVSize())},
-          {(py::ssize_t)(c.m_ptr->m_cv_stride * sizeof(double)), (py::ssize_t)(sizeof(double))}); })
+  static PyType_Slot rh3dm_buffer_slots[] = {
+    {Py_bf_getbuffer, (void*)+[](PyObject* o, Py_buffer* view, int flags) -> int {
+      try {
+        BND_NurbsCurvePointList& c = *py::inst_ptr<BND_NurbsCurvePointList>(o);
+        const Py_ssize_t shape[] = {(Py_ssize_t)(c.m_ptr->CVCount()), (Py_ssize_t)(c.m_ptr->CVSize())};
+        const Py_ssize_t strides[] = {(Py_ssize_t)(c.m_ptr->m_cv_stride * sizeof(double)), (Py_ssize_t)(sizeof(double))};
+        return RH3DM_FillBuffer(o, view, flags, (double*)c.m_ptr->m_cv, 2, shape, strides);
+      } catch (const std::exception& e) {
+        PyErr_SetString(PyExc_BufferError, e.what()); view->obj = nullptr; return -1;
+      } }},
+    {Py_bf_releasebuffer, (void*)+[](PyObject*, Py_buffer* view) { RH3DM_ReleaseBuffer(view); }},
+    {0, nullptr}};
+  py::class_<BND_NurbsCurvePointList>(m, "NurbsCurvePointList", py::type_slots(rh3dm_buffer_slots))
       .def("ChangeEndWeights", &BND_NurbsCurvePointList::Gen_ChangeEndWeights, py::arg("w0"), py::arg("w1"))
-      .def_property_readonly("ControlPolygonLength", &BND_NurbsCurvePointList::Gen_ControlPolygonLength)
-      .def_property_readonly("Count", &BND_NurbsCurvePointList::Gen_Count)
+      .def_prop_ro("ControlPolygonLength", &BND_NurbsCurvePointList::Gen_ControlPolygonLength)
+      .def_prop_ro("Count", &BND_NurbsCurvePointList::Gen_Count)
       .def("GetPoint", &BND_NurbsCurvePointList::Gen_GetPoint, py::arg("index"))
       .def("GetWeight", &BND_NurbsCurvePointList::Gen_GetWeight, py::arg("index"))
       .def("MakeNonRational", &BND_NurbsCurvePointList::Gen_MakeNonRational)
       .def("MakeRational", &BND_NurbsCurvePointList::Gen_MakeRational)
-      .def_property_readonly("PointSize", &BND_NurbsCurvePointList::Gen_PointSize)
+      .def_prop_ro("PointSize", &BND_NurbsCurvePointList::Gen_PointSize)
       .def("SetPoint", &BND_NurbsCurvePointList::Gen_SetPoint, py::arg("index"), py::arg("point"))
       .def("SetPoint", &BND_NurbsCurvePointList::Gen_SetPoint_2, py::arg("index"), py::arg("point"))
       .def("SetWeight", &BND_NurbsCurvePointList::Gen_SetWeight, py::arg("index"), py::arg("weight"))

@@ -148,7 +148,7 @@ def encode(v):
         return {k: encode(x) for k, x in v.items()}
     if isinstance(v, (tuple, list)):
         return [encode(x) for x in v]
-    if hasattr(type(v), '__members__') and hasattr(v, 'name'):     # pybind11 enum
+    if hasattr(type(v), '__members__') and hasattr(v, 'name'):     # a bound enum
         return {'enum': v.name}
     if isinstance(v, (bool, int, str)) or v is None:
         return v

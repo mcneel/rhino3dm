@@ -72,12 +72,12 @@ std::wstring BND_File3dmStringTable::Gen_SetString_2(std::wstring section, std::
 void initGenFile3dmStringTable(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmStringTable>(m, "File3dmStringTable")
-      .def_property_readonly("Count", &BND_File3dmStringTable::Gen_Count)
+      .def_prop_ro("Count", &BND_File3dmStringTable::Gen_Count)
       .def("Delete", &BND_File3dmStringTable::Gen_Delete, py::arg("key"))
       .def("GetKey", &BND_File3dmStringTable::Gen_GetKey, py::arg("i"))
       .def("GetValue", &BND_File3dmStringTable::Gen_GetValue, py::arg("i"))
       .def("GetValue", &BND_File3dmStringTable::Gen_GetValue_2, py::arg("key"))
-      .def_property_readonly("DocumentUserTextCount", &BND_File3dmStringTable::Gen_DocumentUserTextCount)
+      .def_prop_ro("DocumentUserTextCount", &BND_File3dmStringTable::Gen_DocumentUserTextCount)
       .def("GetValue", &BND_File3dmStringTable::Gen_GetValue_3, py::arg("section"), py::arg("entry"))
       .def("SetString", &BND_File3dmStringTable::Gen_SetString, py::arg("key"), py::arg("value"))
       .def("SetString", &BND_File3dmStringTable::Gen_SetString_2, py::arg("section"), py::arg("entry"), py::arg("value"));

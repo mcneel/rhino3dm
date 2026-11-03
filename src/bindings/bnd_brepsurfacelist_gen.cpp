@@ -26,7 +26,7 @@ class BND_Surface* BND_BrepSurfaceList::Gen_this(int index) const {
 void initGenBrepSurfaceList(rh3dmpymodule& m)
 {
   py::class_<BND_BrepSurfaceList>(m, "BrepSurfaceList")
-      .def_property_readonly("Count", &BND_BrepSurfaceList::Gen_Count)
+      .def_prop_ro("Count", &BND_BrepSurfaceList::Gen_Count)
       .def("__getitem__", &BND_BrepSurfaceList::Gen_this, py::keep_alive<0, 1>())
       .def("__len__", &BND_BrepSurfaceList::Gen_Count);
 }

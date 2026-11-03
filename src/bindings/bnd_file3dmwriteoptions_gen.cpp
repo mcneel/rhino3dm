@@ -124,12 +124,12 @@ void initGenFile3dmWriteOptions(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmWriteOptions>(m, "File3dmWriteOptions")
       .def(py::init<>())
-      .def_property("Version", [](const BND_File3dmWriteOptions& s) { return s.Version(); }, [](BND_File3dmWriteOptions& s, int v) { s.set_Version(v); })
-      .def_property("SaveRenderMeshes", [](const BND_File3dmWriteOptions& s) { return s.SaveRenderMeshes(); }, [](BND_File3dmWriteOptions& s, bool v) { s.set_SaveRenderMeshes(v); })
+      .def_prop_rw("Version", [](const BND_File3dmWriteOptions& s) { return s.Version(); }, [](BND_File3dmWriteOptions& s, int v) { s.set_Version(v); })
+      .def_prop_rw("SaveRenderMeshes", [](const BND_File3dmWriteOptions& s) { return s.SaveRenderMeshes(); }, [](BND_File3dmWriteOptions& s, bool v) { s.set_SaveRenderMeshes(v); })
       .def("EnableRenderMeshes", [](BND_File3dmWriteOptions& s, RH3DM_ObjectType objectType, bool enable) { s.EnableRenderMeshes((RH3DM_ObjectType)(int)objectType, enable); }, py::arg("objectType"), py::arg("enable"))
-      .def_property("SaveAnalysisMeshes", [](const BND_File3dmWriteOptions& s) { return s.SaveAnalysisMeshes(); }, [](BND_File3dmWriteOptions& s, bool v) { s.set_SaveAnalysisMeshes(v); })
+      .def_prop_rw("SaveAnalysisMeshes", [](const BND_File3dmWriteOptions& s) { return s.SaveAnalysisMeshes(); }, [](BND_File3dmWriteOptions& s, bool v) { s.set_SaveAnalysisMeshes(v); })
       .def("EnableAnalysisMeshes", [](BND_File3dmWriteOptions& s, RH3DM_ObjectType objectType, bool enable) { s.EnableAnalysisMeshes((RH3DM_ObjectType)(int)objectType, enable); }, py::arg("objectType"), py::arg("enable"))
-      .def_property("SaveUserData", [](const BND_File3dmWriteOptions& s) { return s.SaveUserData(); }, [](BND_File3dmWriteOptions& s, bool v) { s.set_SaveUserData(v); });
+      .def_prop_rw("SaveUserData", [](const BND_File3dmWriteOptions& s) { return s.SaveUserData(); }, [](BND_File3dmWriteOptions& s, bool v) { s.set_SaveUserData(v); });
 }
 #endif
 

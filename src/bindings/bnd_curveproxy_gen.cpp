@@ -12,7 +12,7 @@ bool BND_CurveProxy::Gen_ProxyCurveIsReversed() const {
 void initGenCurveProxy(rh3dmpymodule& m)
 {
   py::class_<BND_CurveProxy, BND_Curve>(m, "CurveProxy")
-      .def_property_readonly("ProxyCurveIsReversed", &BND_CurveProxy::Gen_ProxyCurveIsReversed);
+      .def_prop_ro("ProxyCurveIsReversed", &BND_CurveProxy::Gen_ProxyCurveIsReversed);
 }
 #endif
 

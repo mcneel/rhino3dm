@@ -122,10 +122,10 @@ void initGenSkylight(rh3dmpymodule& m)
   py::class_<BND_Skylight>(m, "Skylight")
       .def(py::init<>())
       .def(py::init<const BND_Skylight&>(), py::arg("src"))
-      .def_property("CustomEnvironment", &BND_Skylight::Gen_CustomEnvironment, &BND_Skylight::Gen_set_CustomEnvironment)
-      .def_property("CustomEnvironmentOn", &BND_Skylight::Gen_CustomEnvironmentOn, &BND_Skylight::Gen_set_CustomEnvironmentOn)
-      .def_property("Enabled", &BND_Skylight::Gen_Enabled, &BND_Skylight::Gen_set_Enabled)
-      .def_property("ShadowIntensity", &BND_Skylight::Gen_ShadowIntensity, &BND_Skylight::Gen_set_ShadowIntensity);
+      .def_prop_rw("CustomEnvironment", &BND_Skylight::Gen_CustomEnvironment, &BND_Skylight::Gen_set_CustomEnvironment)
+      .def_prop_rw("CustomEnvironmentOn", &BND_Skylight::Gen_CustomEnvironmentOn, &BND_Skylight::Gen_set_CustomEnvironmentOn)
+      .def_prop_rw("Enabled", &BND_Skylight::Gen_Enabled, &BND_Skylight::Gen_set_Enabled)
+      .def_prop_rw("ShadowIntensity", &BND_Skylight::Gen_ShadowIntensity, &BND_Skylight::Gen_set_ShadowIntensity);
 }
 #endif
 

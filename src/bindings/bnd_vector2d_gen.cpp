@@ -297,9 +297,9 @@ void initGenVector2d(rh3dmpymodule& m)
   py::class_<BND_Vector2d>(m, "Vector2d")
       .def(py::init<>())
       .def(py::init<double, double>(), py::arg("x"), py::arg("y"))
-      .def_property("X", [](BND_Vector2d& s) { return s.X(); }, [](BND_Vector2d& s, double v) { s.set_X(v); })
-      .def_property("Y", [](BND_Vector2d& s) { return s.Y(); }, [](BND_Vector2d& s, double v) { s.set_Y(v); })
-      .def_property_readonly("Length", [](BND_Vector2d& s) { return s.Length(); })
+      .def_prop_rw("X", [](BND_Vector2d& s) { return s.X(); }, [](BND_Vector2d& s, double v) { s.set_X(v); })
+      .def_prop_rw("Y", [](BND_Vector2d& s) { return s.Y(); }, [](BND_Vector2d& s, double v) { s.set_Y(v); })
+      .def_prop_ro("Length", [](BND_Vector2d& s) { return s.Length(); })
       .def("__mul__", [](BND_Vector2d a, double b) { return a * b; }, py::is_operator())
       .def("__rmul__", [](BND_Vector2d b, double a) { return a * b; }, py::is_operator())
       .def_static("Multiply", [](BND_Vector2d vector, double t) { return BND_Vector2d::Multiply(vector, t); }, py::arg("vector"), py::arg("t"))
@@ -325,20 +325,20 @@ void initGenVector2d(rh3dmpymodule& m)
       .def("CompareTo", [](BND_Vector2d& self, BND_Vector2d other) { return self.CompareTo(other); }, py::arg("other"))
       .def("ToString", [](BND_Vector2d& self) { return self.ToString(); })
       .def("__str__", [](BND_Vector2d& self) { return self.ToString(); })
-      .def_property_readonly_static("Zero", [](py::object) { return BND_Vector2d::Zero(); })
-      .def_property_readonly_static("Unset", [](py::object) { return BND_Vector2d::Unset(); })
-      .def_property_readonly("IsValid", [](BND_Vector2d& s) { return s.IsValid(); })
-      .def_property_readonly("SquareLength", [](BND_Vector2d& s) { return s.SquareLength(); })
+      .def_prop_ro_static("Zero", [](py::object) { return BND_Vector2d::Zero(); })
+      .def_prop_ro_static("Unset", [](py::object) { return BND_Vector2d::Unset(); })
+      .def_prop_ro("IsValid", [](BND_Vector2d& s) { return s.IsValid(); })
+      .def_prop_ro("SquareLength", [](BND_Vector2d& s) { return s.SquareLength(); })
       .def("IsTiny", [](BND_Vector2d& self, double tolerance) { return self.IsTiny(tolerance); }, py::arg("tolerance"))
       .def("IsTiny", [](BND_Vector2d& self) { return self.IsTiny(); })
       .def("Unitize", [](BND_Vector2d& self) { return self.Unitize(); })
       .def("Rotate", [](BND_Vector2d& self, double angleRadians) { return self.Rotate(angleRadians); }, py::arg("angleRadians"))
-      .def(py::init([](py::sequence s) {
+      .def("__init__", [](BND_Vector2d* rh3dm_self, py::sequence s) { new (rh3dm_self) BND_Vector2d(([](py::sequence s) {
         if (py::len(s) != 2) throw py::value_error("Vector2d needs 2 values");
         BND_Vector2d v;
-        v.m_x = s[0].cast<double>();
-        v.m_y = s[1].cast<double>();
-        return v; }))
+        v.m_x = py::cast<double>(s[0]);
+        v.m_y = py::cast<double>(s[1]);
+        return v; })(s)); })
       .def("Encode", &BND_Vector2d_Encode)
       .def("__repr__", [](const BND_Vector2d& v) { return py::str("Vector2d({}, {})").format(v.m_x, v.m_y); });
   py::implicitly_convertible<py::tuple, BND_Vector2d>();

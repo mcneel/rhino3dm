@@ -47,11 +47,11 @@ void BND_File3dmThickening::Gen_set_Solid(bool value) {
 void initGenFile3dmThickening(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmThickening>(m, "File3dmThickening")
-      .def_property("BothSides", &BND_File3dmThickening::Gen_BothSides, &BND_File3dmThickening::Gen_set_BothSides)
-      .def_property("Distance", &BND_File3dmThickening::Gen_Distance, &BND_File3dmThickening::Gen_set_Distance)
-      .def_property("OffsetOnly", &BND_File3dmThickening::Gen_OffsetOnly, &BND_File3dmThickening::Gen_set_OffsetOnly)
-      .def_property("On", &BND_File3dmThickening::Gen_On, &BND_File3dmThickening::Gen_set_On)
-      .def_property("Solid", &BND_File3dmThickening::Gen_Solid, &BND_File3dmThickening::Gen_set_Solid);
+      .def_prop_rw("BothSides", &BND_File3dmThickening::Gen_BothSides, &BND_File3dmThickening::Gen_set_BothSides)
+      .def_prop_rw("Distance", &BND_File3dmThickening::Gen_Distance, &BND_File3dmThickening::Gen_set_Distance)
+      .def_prop_rw("OffsetOnly", &BND_File3dmThickening::Gen_OffsetOnly, &BND_File3dmThickening::Gen_set_OffsetOnly)
+      .def_prop_rw("On", &BND_File3dmThickening::Gen_On, &BND_File3dmThickening::Gen_set_On)
+      .def_prop_rw("Solid", &BND_File3dmThickening::Gen_Solid, &BND_File3dmThickening::Gen_set_Solid);
 }
 #endif
 

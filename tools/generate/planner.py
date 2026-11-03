@@ -2817,7 +2817,7 @@ def plan_class(cls, manifest, c_by_name, skipped):
         plans.append(c)
 
     # overloads: every plan gets a unique C++ method name; registration puts
-    # them all under the one RhinoCommon name (pybind dispatches by type, the
+    # them all under the one RhinoCommon name (nanobind dispatches by type, the
     # JS side keeps one per arity -- embind dispatches on argument count).
     # An overload whose binding-side argument types duplicate an earlier one
     # (all-out members like DecomposeAffine collapse to zero args) is
@@ -2906,7 +2906,7 @@ def plan_class(cls, manifest, c_by_name, skipped):
         p['guards'] = [dict(g) for g in p['guards']]
         for g in p['guards']:
             # a pure null-check on a by-value marshaled param is enforced by
-            # the binding boundary (pybind/embind reject None before the body)
+            # the binding boundary (nanobind/embind reject None before the body)
             if g.get('NullCheckOf') and g['NullCheckOf'] in argnames and g.get('Exception'):
                 continue
             kept.append(g)

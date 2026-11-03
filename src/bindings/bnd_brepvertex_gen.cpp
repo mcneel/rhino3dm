@@ -27,8 +27,8 @@ void initGenBrepVertex(rh3dmpymodule& m)
 {
   py::class_<BND_BrepVertex, BND_Point>(m, "BrepVertex")
       .def("EdgeIndices", &BND_BrepVertex::Gen_EdgeIndices)
-      .def_property_readonly("Tolerance", &BND_BrepVertex::Gen_Tolerance)
-      .def_property_readonly("VertexIndex", &BND_BrepVertex::Gen_VertexIndex);
+      .def_prop_ro("Tolerance", &BND_BrepVertex::Gen_Tolerance)
+      .def_prop_ro("VertexIndex", &BND_BrepVertex::Gen_VertexIndex);
 }
 #endif
 

@@ -17,7 +17,7 @@ tar -C /src --exclude=./build --exclude=./dist --exclude=./.venv --exclude='*/no
 cd /tmp/repo && python3 setup.py -q sdist -d /tmp/dist > /work/sdist.log 2>&1 \
   || { echo "SDIST FAIL"; tail -8 /work/sdist.log; exit 1; }
 tar -xzf /tmp/dist/*.tar.gz -C /tmp/x && cd /tmp/x/* && mkdir b && cd b
-cmake -DPYBIND11_FINDPYTHON=ON -DCMAKE_BUILD_TYPE=Release ../src > /work/sdist_cfg.log 2>&1
+cmake -DCMAKE_BUILD_TYPE=Release ../src > /work/sdist_cfg.log 2>&1
 ec=$?; echo "SDIST CONFIGURE EXIT = $ec"
 [ $ec -ne 0 ] && { grep -A4 "CMake Error" /work/sdist_cfg.log | head -12; exit 1; }
 [ "${1:-}" = configure ] && exit 0

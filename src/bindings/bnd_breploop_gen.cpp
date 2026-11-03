@@ -44,13 +44,13 @@ int BND_BrepLoop::Gen_LoopIndex() const {
 void initGenBrepLoop(rh3dmpymodule& m)
 {
   py::class_<BND_BrepLoop, BND_GeometryBase>(m, "BrepLoop")
-      .def_property_readonly("Face", py::cpp_function(&BND_BrepLoop::Gen_Face, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
-      .def_property_readonly("IsSurfaceBoundary", &BND_BrepLoop::Gen_IsSurfaceBoundary)
-      .def_property_readonly("LoopType", &BND_BrepLoop::Gen_LoopType)
+      .def_prop_ro("Face", &BND_BrepLoop::Gen_Face, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
+      .def_prop_ro("IsSurfaceBoundary", &BND_BrepLoop::Gen_IsSurfaceBoundary)
+      .def_prop_ro("LoopType", &BND_BrepLoop::Gen_LoopType)
       .def("To2dCurve", &BND_BrepLoop::Gen_To2dCurve)
       .def("To3dCurve", &BND_BrepLoop::Gen_To3dCurve)
-      .def_property_readonly("Trims", py::cpp_function(&BND_BrepLoop::Gen_Trims, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
-      .def_property_readonly("LoopIndex", &BND_BrepLoop::Gen_LoopIndex);
+      .def_prop_ro("Trims", &BND_BrepLoop::Gen_Trims, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
+      .def_prop_ro("LoopIndex", &BND_BrepLoop::Gen_LoopIndex);
 }
 #endif
 

@@ -64,7 +64,7 @@ void initGenPlaneSurface(rh3dmpymodule& m)
       .def_static("CreateThroughBox", &BND_PlaneSurface::Gen_CreateThroughBox, py::arg("lineInPlane"), py::arg("vectorInPlane"), py::arg("box"))
       .def_static("CreateThroughBox", &BND_PlaneSurface::Gen_CreateThroughBox_2, py::arg("plane"), py::arg("box"))
       .def("GetExtents", &BND_PlaneSurface::Gen_GetExtents, py::arg("direction"))
-      .def_property("Plane", &BND_PlaneSurface::Gen_Plane, &BND_PlaneSurface::Gen_set_Plane)
+      .def_prop_rw("Plane", &BND_PlaneSurface::Gen_Plane, &BND_PlaneSurface::Gen_set_Plane)
       .def("SetExtents", &BND_PlaneSurface::Gen_SetExtents, py::arg("direction"), py::arg("extents"), py::arg("syncDomain"))
       .def("ToMesh", &BND_PlaneSurface::Gen_ToMesh);
 }

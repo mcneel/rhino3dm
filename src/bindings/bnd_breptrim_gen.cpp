@@ -82,18 +82,18 @@ int BND_BrepTrim::Gen_TrimIndex() const {
 void initGenBrepTrim(rh3dmpymodule& m)
 {
   py::class_<BND_BrepTrim, BND_CurveProxy>(m, "BrepTrim")
-      .def_property_readonly("Edge", py::cpp_function(&BND_BrepTrim::Gen_Edge, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
-      .def_property_readonly("EndVertex", py::cpp_function(&BND_BrepTrim::Gen_EndVertex, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
-      .def_property_readonly("Face", py::cpp_function(&BND_BrepTrim::Gen_Face, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
+      .def_prop_ro("Edge", &BND_BrepTrim::Gen_Edge, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
+      .def_prop_ro("EndVertex", &BND_BrepTrim::Gen_EndVertex, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
+      .def_prop_ro("Face", &BND_BrepTrim::Gen_Face, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
       .def("IsReversed", &BND_BrepTrim::Gen_IsReversed)
-      .def_property("IsoStatus", &BND_BrepTrim::Gen_IsoStatus, &BND_BrepTrim::Gen_set_IsoStatus)
-      .def_property_readonly("Loop", py::cpp_function(&BND_BrepTrim::Gen_Loop, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
+      .def_prop_rw("IsoStatus", &BND_BrepTrim::Gen_IsoStatus, &BND_BrepTrim::Gen_set_IsoStatus, py::for_setter(py::arg("value").noconvert()))
+      .def_prop_ro("Loop", &BND_BrepTrim::Gen_Loop, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
       .def("SetTrimCurve", &BND_BrepTrim::Gen_SetTrimCurve, py::arg("curve2dIndex"), py::arg("subDomain"))
-      .def_property_readonly("StartVertex", py::cpp_function(&BND_BrepTrim::Gen_StartVertex, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
-      .def_property_readonly("TrimCurveIndex", &BND_BrepTrim::Gen_TrimCurveIndex)
-      .def_property("TrimType", &BND_BrepTrim::Gen_TrimType, &BND_BrepTrim::Gen_set_TrimType)
+      .def_prop_ro("StartVertex", &BND_BrepTrim::Gen_StartVertex, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
+      .def_prop_ro("TrimCurveIndex", &BND_BrepTrim::Gen_TrimCurveIndex)
+      .def_prop_rw("TrimType", &BND_BrepTrim::Gen_TrimType, &BND_BrepTrim::Gen_set_TrimType, py::for_setter(py::arg("value").noconvert()))
       .def("SetTolerances", &BND_BrepTrim::Gen_SetTolerances, py::arg("toleranceU"), py::arg("toleranceV"))
-      .def_property_readonly("TrimIndex", &BND_BrepTrim::Gen_TrimIndex);
+      .def_prop_ro("TrimIndex", &BND_BrepTrim::Gen_TrimIndex);
 }
 #endif
 

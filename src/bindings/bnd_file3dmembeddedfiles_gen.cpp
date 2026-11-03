@@ -49,8 +49,8 @@ void initGenFile3dmEmbeddedFiles(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmEmbeddedFiles>(m, "File3dmEmbeddedFiles")
       .def("Add", &BND_File3dmEmbeddedFiles::Gen_Add, py::arg("filename"))
-      .def_property_readonly("Count", &BND_File3dmEmbeddedFiles::Gen_Count)
-      .def("FindIndex", &BND_File3dmEmbeddedFiles::Gen_FindIndex, py::return_value_policy::take_ownership, py::keep_alive<0, 1>(), py::arg("index"))
+      .def_prop_ro("Count", &BND_File3dmEmbeddedFiles::Gen_Count)
+      .def("FindIndex", &BND_File3dmEmbeddedFiles::Gen_FindIndex, py::rv_policy::take_ownership, py::keep_alive<0, 1>(), py::arg("index"))
       .def("__len__", &BND_File3dmEmbeddedFiles::Gen_Count)
       .def("__iter__", &BND_File3dmEmbeddedFiles::Gen_iter, py::keep_alive<0, 1>());
   py::class_<BND_File3dmEmbeddedFilesIter>(m, "File3dmEmbeddedFilesIter")

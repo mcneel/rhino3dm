@@ -35,8 +35,8 @@ def test_every_kind_in_both_bindings(members):
     py, js = H.hand_registrations('FooX')
     assert py == ['      .def("Encode", &F_Encode)',
                   '      .def_static("Decode", &F_Decode, py::arg("jsonObject"))',
-                  '      .def_property_readonly("Items", py::cpp_function(&F_Items, py::keep_alive<0, 1>()))',
-                  '      .def_property("Size", py::cpp_function(&F_Size), &F_SetSize)']
+                  '      .def_prop_ro("Items", py::cpp_function(&F_Items, py::keep_alive<0, 1>()))',
+                  '      .def_prop_rw("Size", py::cpp_function(&F_Size), &F_SetSize)']
     assert js == ['      .function("encode", &F_Encode, allow_raw_pointers())',
                   '      .class_function("decode", &F_Decode, allow_raw_pointers())',
                   '      .property("items", &F_Items, allow_raw_pointers())',
@@ -144,7 +144,7 @@ def test_alias_is_a_js_post_script_entry(members, monkeypatch, tmp_path):
 
 def test_overload_is_python_after_the_generated_and_js_by_its_own_name(members, tmp_path):
     # G126: an overload RhinoCommon lacks (PointCloud.Add(point, value)): Python joins the generated
-    # member's overloads AFTER them (pybind11 tries in order; a py::object Guid accepts anything);
+    # member's overloads AFTER them (nanobind tries in order; a py::object Guid accepts anything);
     # JS needs its own name (embind keeps one function per arity)
     members['FooX'] = [{'name': 'Add', 'kind': 'method', 'fn': 'F_AddV', 'header': 'bindings/x.h',
                         'args': ['point', 'value'], 'overload': True, 'js': 'addPointValue'}]

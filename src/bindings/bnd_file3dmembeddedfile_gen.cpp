@@ -47,10 +47,10 @@ void initGenFile3dmEmbeddedFile(rh3dmpymodule& m)
       .def(py::init<>())
       .def_static("Read", &BND_File3dmEmbeddedFile_Read, py::arg("fileName"))
       .def("Clear", &BND_File3dmEmbeddedFile::Gen_Clear)
-      .def_property_readonly("Filename", &BND_File3dmEmbeddedFile::Gen_Filename)
-      .def_property_readonly("ComponentType", &BND_File3dmEmbeddedFile::Gen_ComponentType)
-      .def_property_readonly("CompressedLength", &BND_File3dmEmbeddedFile::Gen_CompressedLength)
-      .def_property_readonly("Length", &BND_File3dmEmbeddedFile::Gen_Length)
+      .def_prop_ro("Filename", &BND_File3dmEmbeddedFile::Gen_Filename)
+      .def_prop_ro("ComponentType", &BND_File3dmEmbeddedFile::Gen_ComponentType)
+      .def_prop_ro("CompressedLength", &BND_File3dmEmbeddedFile::Gen_CompressedLength)
+      .def_prop_ro("Length", &BND_File3dmEmbeddedFile::Gen_Length)
       .def("SaveToFile", &BND_File3dmEmbeddedFile::Gen_SaveToFile, py::arg("filename"));
 }
 #endif

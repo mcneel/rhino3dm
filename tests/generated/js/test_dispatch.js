@@ -1,6 +1,6 @@
 // JS overload dispatch (Luis 2026-10-16: PointCloud.add(point, color) shadowed add(point, normal)
 // -- an unbraced `return`, a color checked as `true`). Each case calls the overload a shape check
-// must pick and verifies the effect that only that overload has. Not in the Python suite: pybind
+// must pick and verifies the effect that only that overload has. Not in the Python suite: nanobind
 // dispatches overloads natively.
 module.exports = (t, ctx) => {
   const { r, assert } = ctx;

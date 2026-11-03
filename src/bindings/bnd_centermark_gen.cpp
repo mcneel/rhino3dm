@@ -59,7 +59,7 @@ void initGenCentermark(rh3dmpymodule& m)
   py::class_<BND_Centermark, BND_Dimension>(m, "Centermark")
       .def(py::init<>())
       .def("AdjustFromPoints", &BND_Centermark::Gen_AdjustFromPoints, py::arg("plane"), py::arg("centerPoint"))
-      .def_property("Radius", &BND_Centermark::Gen_Radius, &BND_Centermark::Gen_set_Radius)
+      .def_prop_rw("Radius", &BND_Centermark::Gen_Radius, &BND_Centermark::Gen_set_Radius)
       .def("GetDisplayLines", &BND_Centermark::Gen_GetDisplayLines, py::arg("style"), py::arg("scale"));
 }
 #endif

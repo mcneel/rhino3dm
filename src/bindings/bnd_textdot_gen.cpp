@@ -65,11 +65,11 @@ void initGenTextDot(rh3dmpymodule& m)
 {
   py::class_<BND_TextDot, BND_GeometryBase>(m, "TextDot")
       .def(py::init<std::wstring, BND_Point3d>(), py::arg("text"), py::arg("location"))
-      .def_property("FontFace", &BND_TextDot::Gen_FontFace, &BND_TextDot::Gen_set_FontFace)
-      .def_property("FontHeight", &BND_TextDot::Gen_FontHeight, &BND_TextDot::Gen_set_FontHeight)
-      .def_property("Point", &BND_TextDot::Gen_Point, &BND_TextDot::Gen_set_Point)
-      .def_property("SecondaryText", &BND_TextDot::Gen_SecondaryText, &BND_TextDot::Gen_set_SecondaryText)
-      .def_property("Text", &BND_TextDot::Gen_Text, &BND_TextDot::Gen_set_Text);
+      .def_prop_rw("FontFace", &BND_TextDot::Gen_FontFace, &BND_TextDot::Gen_set_FontFace)
+      .def_prop_rw("FontHeight", &BND_TextDot::Gen_FontHeight, &BND_TextDot::Gen_set_FontHeight)
+      .def_prop_rw("Point", &BND_TextDot::Gen_Point, &BND_TextDot::Gen_set_Point)
+      .def_prop_rw("SecondaryText", &BND_TextDot::Gen_SecondaryText, &BND_TextDot::Gen_set_SecondaryText)
+      .def_prop_rw("Text", &BND_TextDot::Gen_Text, &BND_TextDot::Gen_set_Text);
 }
 #endif
 

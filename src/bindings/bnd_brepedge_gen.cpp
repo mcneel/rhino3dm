@@ -88,15 +88,15 @@ void initGenBrepEdge(rh3dmpymodule& m)
 {
   py::class_<BND_BrepEdge, BND_CurveProxy>(m, "BrepEdge")
       .def("AdjacentFaces", &BND_BrepEdge::Gen_AdjacentFaces)
-      .def_property_readonly("EdgeCurveIndex", &BND_BrepEdge::Gen_EdgeCurveIndex)
-      .def_property_readonly("EndVertex", py::cpp_function(&BND_BrepEdge::Gen_EndVertex, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
+      .def_prop_ro("EdgeCurveIndex", &BND_BrepEdge::Gen_EdgeCurveIndex)
+      .def_prop_ro("EndVertex", &BND_BrepEdge::Gen_EndVertex, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
       .def("SetEdgeCurve", &BND_BrepEdge::Gen_SetEdgeCurve, py::arg("curve3dIndex"), py::arg("subDomain"))
-      .def_property_readonly("StartVertex", py::cpp_function(&BND_BrepEdge::Gen_StartVertex, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
-      .def_property("Tolerance", &BND_BrepEdge::Gen_Tolerance, &BND_BrepEdge::Gen_set_Tolerance)
-      .def_property_readonly("TrimCount", &BND_BrepEdge::Gen_TrimCount)
+      .def_prop_ro("StartVertex", &BND_BrepEdge::Gen_StartVertex, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
+      .def_prop_rw("Tolerance", &BND_BrepEdge::Gen_Tolerance, &BND_BrepEdge::Gen_set_Tolerance)
+      .def_prop_ro("TrimCount", &BND_BrepEdge::Gen_TrimCount)
       .def("TrimIndices", &BND_BrepEdge::Gen_TrimIndices)
-      .def_property_readonly("EdgeIndex", &BND_BrepEdge::Gen_EdgeIndex)
-      .def_property_readonly("Valence", &BND_BrepEdge::Gen_Valence);
+      .def_prop_ro("EdgeIndex", &BND_BrepEdge::Gen_EdgeIndex)
+      .def_prop_ro("Valence", &BND_BrepEdge::Gen_Valence);
 }
 #endif
 

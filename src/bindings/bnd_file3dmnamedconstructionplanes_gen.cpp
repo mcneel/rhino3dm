@@ -36,7 +36,7 @@ void initGenFile3dmNamedConstructionPlanes(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmNamedConstructionPlanes>(m, "File3dmNamedConstructionPlanes")
       .def("Clear", &BND_File3dmNamedConstructionPlanes::Gen_Clear)
-      .def_property_readonly("Count", &BND_File3dmNamedConstructionPlanes::Gen_Count)
+      .def_prop_ro("Count", &BND_File3dmNamedConstructionPlanes::Gen_Count)
       .def("Delete", &BND_File3dmNamedConstructionPlanes::Gen_Delete, py::arg("index"))
       .def("__getitem__", &BND_File3dmNamedConstructionPlanes::Gen_this)
       .def("__len__", &BND_File3dmNamedConstructionPlanes::Gen_Count)

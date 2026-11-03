@@ -42,18 +42,18 @@ bool BND_SubDComponent::Gen_GetComponentStatusBool(int which) const {
 void initGenSubDComponent(rh3dmpymodule& m)
 {
   py::class_<BND_SubDComponent>(m, "SubDComponent")
-      .def("Equals", &BND_SubDComponent_Equals, py::arg("other"))
+      .def("Equals", &BND_SubDComponent_Equals, py::arg("other").none())
       .def("GetHashCode", &BND_SubDComponent_GetHashCode)
-      .def("__eq__", &BND_SubDComponent_Equals, py::is_operator(), py::arg("other"))
-      .def("__ne__", &BND_SubDComponent_NotEquals, py::is_operator(), py::arg("other"))
+      .def("__eq__", &BND_SubDComponent_Equals, py::is_operator(), py::arg("other").none())
+      .def("__ne__", &BND_SubDComponent_NotEquals, py::is_operator(), py::arg("other").none())
       .def("__hash__", &BND_SubDComponent_GetHashCode)
-      .def_property_readonly("IsDamaged", &BND_SubDComponent::Gen_IsDamaged)
-      .def_property_readonly("IsDeleted", &BND_SubDComponent::Gen_IsDeleted)
-      .def_property_readonly("IsHidden", &BND_SubDComponent::Gen_IsHidden)
-      .def_property_readonly("IsHighlighted", &BND_SubDComponent::Gen_IsHighlighted)
-      .def_property_readonly("IsLocked", &BND_SubDComponent::Gen_IsLocked)
-      .def_property_readonly("IsSelected", &BND_SubDComponent::Gen_IsSelected)
-      .def_property_readonly("Id", &BND_SubDComponent::Gen_Id);
+      .def_prop_ro("IsDamaged", &BND_SubDComponent::Gen_IsDamaged)
+      .def_prop_ro("IsDeleted", &BND_SubDComponent::Gen_IsDeleted)
+      .def_prop_ro("IsHidden", &BND_SubDComponent::Gen_IsHidden)
+      .def_prop_ro("IsHighlighted", &BND_SubDComponent::Gen_IsHighlighted)
+      .def_prop_ro("IsLocked", &BND_SubDComponent::Gen_IsLocked)
+      .def_prop_ro("IsSelected", &BND_SubDComponent::Gen_IsSelected)
+      .def_prop_ro("Id", &BND_SubDComponent::Gen_Id);
 }
 #endif
 

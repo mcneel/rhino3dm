@@ -37,7 +37,7 @@ BND_SubDEdgeListIter* BND_SubDEdgeList::Gen_iter() const
 void initGenSubDEdgeList(rh3dmpymodule& m)
 {
   py::class_<BND_SubDEdgeList>(m, "SubDEdgeList")
-      .def_property_readonly("Count", &BND_SubDEdgeList::Gen_Count)
+      .def_prop_ro("Count", &BND_SubDEdgeList::Gen_Count)
       .def("Find", &BND_SubDEdgeList::Gen_Find, py::keep_alive<0, 1>(), py::arg("id"))
       .def("Find", &BND_SubDEdgeList::Gen_Find_2, py::arg("id"))
       .def("__len__", &BND_SubDEdgeList::Gen_Count)

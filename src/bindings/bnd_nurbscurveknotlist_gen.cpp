@@ -72,20 +72,27 @@ bool BND_NurbsCurveKnotList::Gen_ClampEnd(RH3DM_CurveEnd end) {
 #if defined(ON_PYTHON_COMPILE)
 void initGenNurbsCurveKnotList(rh3dmpymodule& m)
 {
-  py::class_<BND_NurbsCurveKnotList>(m, "NurbsCurveKnotList", py::buffer_protocol())
-      .def_buffer([](BND_NurbsCurveKnotList& c) -> py::buffer_info {
-        return py::buffer_info((double*)c.m_ptr->m_knot, sizeof(double),
-          py::format_descriptor<double>::format(), 1,
-          {(py::ssize_t)(c.m_ptr->KnotCount())},
-          {(py::ssize_t)(sizeof(double))}); })
-      .def_property_readonly("Count", &BND_NurbsCurveKnotList::Gen_Count)
+  static PyType_Slot rh3dm_buffer_slots[] = {
+    {Py_bf_getbuffer, (void*)+[](PyObject* o, Py_buffer* view, int flags) -> int {
+      try {
+        BND_NurbsCurveKnotList& c = *py::inst_ptr<BND_NurbsCurveKnotList>(o);
+        const Py_ssize_t shape[] = {(Py_ssize_t)(c.m_ptr->KnotCount())};
+        const Py_ssize_t strides[] = {(Py_ssize_t)(sizeof(double))};
+        return RH3DM_FillBuffer(o, view, flags, (double*)c.m_ptr->m_knot, 1, shape, strides);
+      } catch (const std::exception& e) {
+        PyErr_SetString(PyExc_BufferError, e.what()); view->obj = nullptr; return -1;
+      } }},
+    {Py_bf_releasebuffer, (void*)+[](PyObject*, Py_buffer* view) { RH3DM_ReleaseBuffer(view); }},
+    {0, nullptr}};
+  py::class_<BND_NurbsCurveKnotList>(m, "NurbsCurveKnotList", py::type_slots(rh3dm_buffer_slots))
+      .def_prop_ro("Count", &BND_NurbsCurveKnotList::Gen_Count)
       .def("CreatePeriodicKnots", &BND_NurbsCurveKnotList::Gen_CreatePeriodicKnots, py::arg("knotSpacing"))
       .def("CreateUniformKnots", &BND_NurbsCurveKnotList::Gen_CreateUniformKnots, py::arg("knotSpacing"))
       .def("InsertKnot", &BND_NurbsCurveKnotList::Gen_InsertKnot, py::arg("value"), py::arg("multiplicity"))
-      .def_property_readonly("IsClampedEnd", &BND_NurbsCurveKnotList::Gen_IsClampedEnd)
-      .def_property_readonly("IsClampedStart", &BND_NurbsCurveKnotList::Gen_IsClampedStart)
+      .def_prop_ro("IsClampedEnd", &BND_NurbsCurveKnotList::Gen_IsClampedEnd)
+      .def_prop_ro("IsClampedStart", &BND_NurbsCurveKnotList::Gen_IsClampedStart)
       .def("KnotMultiplicity", &BND_NurbsCurveKnotList::Gen_KnotMultiplicity, py::arg("index"))
-      .def_property_readonly("KnotStyle", &BND_NurbsCurveKnotList::Gen_KnotStyle)
+      .def_prop_ro("KnotStyle", &BND_NurbsCurveKnotList::Gen_KnotStyle)
       .def("SuperfluousKnot", &BND_NurbsCurveKnotList::Gen_SuperfluousKnot, py::arg("start"))
       .def("__getitem__", &BND_NurbsCurveKnotList::Gen_this)
       .def("__setitem__", &BND_NurbsCurveKnotList::Gen_set_this)

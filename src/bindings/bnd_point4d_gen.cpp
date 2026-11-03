@@ -262,10 +262,10 @@ void initGenPoint4d(rh3dmpymodule& m)
       .def(py::init<double, double, double, double>(), py::arg("x"), py::arg("y"), py::arg("z"), py::arg("w"))
       .def(py::init<BND_Point3d>(), py::arg("point"))
       .def(py::init<const BND_Point4d&>())
-      .def_property("X", [](BND_Point4d& s) { return s.X(); }, [](BND_Point4d& s, double v) { s.set_X(v); })
-      .def_property("Y", [](BND_Point4d& s) { return s.Y(); }, [](BND_Point4d& s, double v) { s.set_Y(v); })
-      .def_property("Z", [](BND_Point4d& s) { return s.Z(); }, [](BND_Point4d& s, double v) { s.set_Z(v); })
-      .def_property("W", [](BND_Point4d& s) { return s.W(); }, [](BND_Point4d& s, double v) { s.set_W(v); })
+      .def_prop_rw("X", [](BND_Point4d& s) { return s.X(); }, [](BND_Point4d& s, double v) { s.set_X(v); })
+      .def_prop_rw("Y", [](BND_Point4d& s) { return s.Y(); }, [](BND_Point4d& s, double v) { s.set_Y(v); })
+      .def_prop_rw("Z", [](BND_Point4d& s) { return s.Z(); }, [](BND_Point4d& s, double v) { s.set_Z(v); })
+      .def_prop_rw("W", [](BND_Point4d& s) { return s.W(); }, [](BND_Point4d& s, double v) { s.set_W(v); })
       .def("__add__", [](BND_Point4d a, BND_Point4d b) { return a + b; }, py::is_operator())
       .def_static("Add", [](BND_Point4d point1, BND_Point4d point2) { return BND_Point4d::Add(point1, point2); }, py::arg("point1"), py::arg("point2"))
       .def("__sub__", [](BND_Point4d a, BND_Point4d b) { return a - b; }, py::is_operator())
@@ -277,19 +277,19 @@ void initGenPoint4d(rh3dmpymodule& m)
       .def("__ne__", [](BND_Point4d a, BND_Point4d b) { return a != b; }, py::is_operator())
       .def("Equals", [](BND_Point4d& self, BND_Point4d point) { return self.Equals(point); }, py::arg("point"))
       .def("EpsilonEquals", [](BND_Point4d& self, BND_Point4d other, double epsilon) { return self.EpsilonEquals(other, epsilon); }, py::arg("other"), py::arg("epsilon"))
-      .def_property_readonly_static("Unset", [](py::object) { return BND_Point4d::Unset(); })
+      .def_prop_ro_static("Unset", [](py::object) { return BND_Point4d::Unset(); })
       .def("Transform", [](BND_Point4d& self, BND_Transform xform) { return self.Transform(xform); }, py::arg("xform"))
-      .def_property_readonly("IsValid", [](BND_Point4d& s) { return s.IsValid(); })
+      .def_prop_ro("IsValid", [](BND_Point4d& s) { return s.IsValid(); })
       .def("ToString", [](BND_Point4d& self) { return self.ToString(); })
       .def("__str__", [](BND_Point4d& self) { return self.ToString(); })
-      .def(py::init([](py::sequence s) {
+      .def("__init__", [](BND_Point4d* rh3dm_self, py::sequence s) { new (rh3dm_self) BND_Point4d(([](py::sequence s) {
         if (py::len(s) != 4) throw py::value_error("Point4d needs 4 values");
         BND_Point4d v;
-        v.m_x = s[0].cast<double>();
-        v.m_y = s[1].cast<double>();
-        v.m_z = s[2].cast<double>();
-        v.m_w = s[3].cast<double>();
-        return v; }))
+        v.m_x = py::cast<double>(s[0]);
+        v.m_y = py::cast<double>(s[1]);
+        v.m_z = py::cast<double>(s[2]);
+        v.m_w = py::cast<double>(s[3]);
+        return v; })(s)); })
       .def("Encode", &BND_Point4d_Encode)
       .def("__repr__", [](const BND_Point4d& v) { return py::str("Point4d({}, {}, {}, {})").format(v.m_x, v.m_y, v.m_z, v.m_w); });
   py::implicitly_convertible<py::tuple, BND_Point4d>();

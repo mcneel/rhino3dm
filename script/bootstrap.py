@@ -36,7 +36,7 @@ from sys import platform as _platform
 
 xcode_logging = False
 valid_platform_args = ["windows", "linux", "macos", "ios", "android", "js", "python", "generator"]
-submodules = ["opennurbs", "draco", "pybind11"]
+submodules = ["opennurbs", "draco", "nanobind"]
 script_folder = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
 lib_folder = os.path.abspath(os.path.join(src_folder, "lib"))

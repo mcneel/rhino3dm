@@ -21,7 +21,7 @@ class BND_Texture* BND_File3dmRenderTexture::Gen_ToTexture() const {
 void initGenFile3dmRenderTexture(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmRenderTexture, BND_File3dmRenderContent>(m, "File3dmRenderTexture")
-      .def_property_readonly("Filename", &BND_File3dmRenderTexture::Gen_Filename)
+      .def_prop_ro("Filename", &BND_File3dmRenderTexture::Gen_Filename)
       .def("ToTexture", &BND_File3dmRenderTexture::Gen_ToTexture);
 }
 #endif

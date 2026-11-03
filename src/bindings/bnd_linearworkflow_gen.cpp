@@ -195,16 +195,16 @@ void initGenLinearWorkflow(rh3dmpymodule& m)
   py::class_<BND_LinearWorkflow>(m, "LinearWorkflow")
       .def(py::init<>())
       .def(py::init<const BND_LinearWorkflow&>(), py::arg("src"))
-      .def_property_readonly("Hash", &BND_LinearWorkflow::Gen_Hash)
-      .def_property("PostProcessFrameBuffer", &BND_LinearWorkflow::Gen_PostProcessFrameBuffer, &BND_LinearWorkflow::Gen_set_PostProcessFrameBuffer)
-      .def_property("PostProcessGamma", &BND_LinearWorkflow::Gen_PostProcessGamma, &BND_LinearWorkflow::Gen_set_PostProcessGamma)
-      .def_property("PostProcessGammaOn", &BND_LinearWorkflow::Gen_PostProcessGammaOn, &BND_LinearWorkflow::Gen_set_PostProcessGammaOn)
-      .def_property("PreProcessColors", &BND_LinearWorkflow::Gen_PreProcessColors, &BND_LinearWorkflow::Gen_set_PreProcessColors)
-      .def_property("PreProcessGamma", &BND_LinearWorkflow::Gen_PreProcessGamma, &BND_LinearWorkflow::Gen_set_PreProcessGamma)
-      .def_property("PreProcessGammaOn", &BND_LinearWorkflow::Gen_PreProcessGammaOn, &BND_LinearWorkflow::Gen_set_PreProcessGammaOn)
-      .def_property("PreProcessTextures", &BND_LinearWorkflow::Gen_PreProcessTextures, &BND_LinearWorkflow::Gen_set_PreProcessTextures)
+      .def_prop_ro("Hash", &BND_LinearWorkflow::Gen_Hash)
+      .def_prop_rw("PostProcessFrameBuffer", &BND_LinearWorkflow::Gen_PostProcessFrameBuffer, &BND_LinearWorkflow::Gen_set_PostProcessFrameBuffer)
+      .def_prop_rw("PostProcessGamma", &BND_LinearWorkflow::Gen_PostProcessGamma, &BND_LinearWorkflow::Gen_set_PostProcessGamma)
+      .def_prop_rw("PostProcessGammaOn", &BND_LinearWorkflow::Gen_PostProcessGammaOn, &BND_LinearWorkflow::Gen_set_PostProcessGammaOn)
+      .def_prop_rw("PreProcessColors", &BND_LinearWorkflow::Gen_PreProcessColors, &BND_LinearWorkflow::Gen_set_PreProcessColors)
+      .def_prop_rw("PreProcessGamma", &BND_LinearWorkflow::Gen_PreProcessGamma, &BND_LinearWorkflow::Gen_set_PreProcessGamma)
+      .def_prop_rw("PreProcessGammaOn", &BND_LinearWorkflow::Gen_PreProcessGammaOn, &BND_LinearWorkflow::Gen_set_PreProcessGammaOn)
+      .def_prop_rw("PreProcessTextures", &BND_LinearWorkflow::Gen_PreProcessTextures, &BND_LinearWorkflow::Gen_set_PreProcessTextures)
       .def("GetHashCode", &BND_LinearWorkflow::Gen_GetHashCode)
-      .def_property_readonly("PostProcessGammaReciprocal", &BND_LinearWorkflow::Gen_PostProcessGammaReciprocal);
+      .def_prop_ro("PostProcessGammaReciprocal", &BND_LinearWorkflow::Gen_PostProcessGammaReciprocal);
 }
 #endif
 

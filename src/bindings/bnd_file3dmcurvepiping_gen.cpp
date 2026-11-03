@@ -55,12 +55,12 @@ void BND_File3dmCurvePiping::Gen_set_Segments(int value) {
 void initGenFile3dmCurvePiping(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmCurvePiping>(m, "File3dmCurvePiping")
-      .def_property("Accuracy", &BND_File3dmCurvePiping::Gen_Accuracy, &BND_File3dmCurvePiping::Gen_set_Accuracy)
-      .def_property("CapType", &BND_File3dmCurvePiping::Gen_CapType, &BND_File3dmCurvePiping::Gen_set_CapType)
-      .def_property("Faceted", &BND_File3dmCurvePiping::Gen_Faceted, &BND_File3dmCurvePiping::Gen_set_Faceted)
-      .def_property("On", &BND_File3dmCurvePiping::Gen_On, &BND_File3dmCurvePiping::Gen_set_On)
-      .def_property("Radius", &BND_File3dmCurvePiping::Gen_Radius, &BND_File3dmCurvePiping::Gen_set_Radius)
-      .def_property("Segments", &BND_File3dmCurvePiping::Gen_Segments, &BND_File3dmCurvePiping::Gen_set_Segments);
+      .def_prop_rw("Accuracy", &BND_File3dmCurvePiping::Gen_Accuracy, &BND_File3dmCurvePiping::Gen_set_Accuracy)
+      .def_prop_rw("CapType", &BND_File3dmCurvePiping::Gen_CapType, &BND_File3dmCurvePiping::Gen_set_CapType, py::for_setter(py::arg("value").noconvert()))
+      .def_prop_rw("Faceted", &BND_File3dmCurvePiping::Gen_Faceted, &BND_File3dmCurvePiping::Gen_set_Faceted)
+      .def_prop_rw("On", &BND_File3dmCurvePiping::Gen_On, &BND_File3dmCurvePiping::Gen_set_On)
+      .def_prop_rw("Radius", &BND_File3dmCurvePiping::Gen_Radius, &BND_File3dmCurvePiping::Gen_set_Radius)
+      .def_prop_rw("Segments", &BND_File3dmCurvePiping::Gen_Segments, &BND_File3dmCurvePiping::Gen_set_Segments);
 }
 #endif
 

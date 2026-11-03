@@ -51,10 +51,10 @@ void initGenFileReference(rh3dmpymodule& m)
   py::class_<BND_FileReference>(m, "FileReference")
       .def_static("CreateFromFullAndRelativePaths", &BND_FileReference::Gen_CreateFromFullAndRelativePaths, py::arg("fullPath"), py::arg("relativePath"))
       .def_static("CreateFromFullPath", &BND_FileReference::Gen_CreateFromFullPath, py::arg("fullPath"))
-      .def_property_readonly("FullPath", &BND_FileReference::Gen_FullPath)
-      .def_property_readonly("FullPathStatus", &BND_FileReference::Gen_FullPathStatus)
-      .def_property_readonly("IsSet", &BND_FileReference::Gen_IsSet)
-      .def_property_readonly("RelativePath", &BND_FileReference::Gen_RelativePath);
+      .def_prop_ro("FullPath", &BND_FileReference::Gen_FullPath)
+      .def_prop_ro("FullPathStatus", &BND_FileReference::Gen_FullPathStatus)
+      .def_prop_ro("IsSet", &BND_FileReference::Gen_IsSet)
+      .def_prop_ro("RelativePath", &BND_FileReference::Gen_RelativePath);
 }
 #endif
 

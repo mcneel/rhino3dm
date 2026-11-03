@@ -24,7 +24,7 @@ def hand_registrations(reg, value=False, overloads=False):
     chains. `value`: reg is a value type -- JS registers members on its function holder
     (values are plain objects), taking the value first. Python overloads of a generated member
     (`overload`, G126) are left out unless `overloads` -- then they are ALL that is returned (Python
-    only): the class appends them after its generated overloads, which pybind11 tries first"""
+    only): the class appends them after its generated overloads, which nanobind tries first"""
     py, js = [], []
     for e in HAND_MEMBERS.get(reg, []):
         if bool(e.get('overload')) != overloads:
@@ -36,7 +36,9 @@ def hand_registrations(reg, value=False, overloads=False):
             continue                      # no C++: installed by the JS post-script (hand_js_aliases)
         kind, fn = e['kind'], e['fn']
         ka = ', py::keep_alive<0, 1>()' if e.get('keep_alive') else ''
-        args = ''.join(', py::arg("%s")' % a for a in e.get('args') or [])
+        # `none`: the arguments a pointer parameter takes None for (nanobind asks for it: .none())
+        args = ''.join(', py::arg("%s")%s' % (a, '.none()' if a in (e.get('none') or []) else '')
+                       for a in e.get('args') or [])
         if e.get('py', True):
             if kind == 'method':
                 op = ', py::is_operator()' if e.get('op') else ''
@@ -45,11 +47,11 @@ def hand_registrations(reg, value=False, overloads=False):
                 py.append('      .def_static("%s", &%s%s)' % (e['name'], fn, args))
             elif e.get('list'):
                 # new objects as a list (G129): RH3DM_ListOf (bnd_common.h), as generated sequences
-                py.append('      .def_property_readonly("%s", &RH3DM_ListOf<&%s, BND_%s>)' % (e['name'], fn, reg))
+                py.append('      .def_prop_ro("%s", &RH3DM_ListOf<&%s, BND_%s>)' % (e['name'], fn, reg))
             elif e.get('set'):
-                py.append('      .def_property("%s", py::cpp_function(&%s%s), &%s)' % (e['name'], fn, ka, e['set']))
+                py.append('      .def_prop_rw("%s", py::cpp_function(&%s%s), &%s)' % (e['name'], fn, ka, e['set']))
             else:
-                py.append('      .def_property_readonly("%s", py::cpp_function(&%s%s))' % (e['name'], fn, ka))
+                py.append('      .def_prop_ro("%s", py::cpp_function(&%s%s))' % (e['name'], fn, ka))
         jn = e.get('js', camel(e['name']))
         if jn is None or overloads:
             continue

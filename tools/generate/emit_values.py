@@ -1,5 +1,5 @@
 """Value types: translated RhinoCommon bodies (api/valuetypes.json) ->
-C++ structs, plus their pybind11 / embind registrations."""
+C++ structs, plus their nanobind / embind registrations."""
 
 from gen_registry import *
 from emit_classes import emit_decl_def, js_class_shape
@@ -276,7 +276,7 @@ def pub(m, expr):
 
 
 def emit_valuetype_bindings(vt, skipped):
-    """Python: real classes (pybind objects are garbage-collected), RhinoCommon
+    """Python: real classes (nanobind objects are garbage-collected), RhinoCommon
     members only, plus language protocols -- operators from the C# operators,
     repr, a sequence constructor and implicit conversion from tuple/list.
     JS: embind value_object, so a value is a plain garbage-collected
@@ -358,8 +358,8 @@ def emit_valuetype_bindings(vt, skipped):
                 skipped['value-type enum param'] = skipped.get('value-type enum param', 0) + 1
                 continue
             if k == 'method' and m['Static'] and n in instance_names:
-                # Python cannot overload one name as static AND instance (pybind11 and
-                # nanobind both refuse): the static goes in as `_static_<Name>`, and
+                # Python cannot overload one name as static AND instance (nanobind refuses,
+                # as pybind11 did): the static goes in as `_static_<Name>`, and
                 # rhino3dm/__init__.py joins the two behind one descriptor (G132:
                 # BoundingBox.Union(a, b) and bbox.Union(other)); JS keeps both
                 pyl.append('      .def_static("_static_%s", [](%s) { return %s; }%s)'
@@ -439,17 +439,17 @@ def emit_valuetype_bindings(vt, skipped):
                 else:
                     js_fn(n, types, 'return %s;' % pub(m, call))
             elif k in ('property', 'static-field') and m['Static']:
-                pyl.append('      .def_property_readonly_static("%s", [](py::object) { return %s::%s(); })'
+                pyl.append('      .def_prop_ro_static("%s", [](py::object) { return %s::%s(); })'
                            % (n, T, m['Getter']))
                 js_fn(n, [], 'return %s::%s();' % (T, m['Getter']))
                 JS_POST['static_props'].append((reg, js_vt_name(n)))      # a getter in JS (G101), as in C#/Python
             elif k == 'property':
                 get = '[](%s& s) { return %s; }' % (T, pub(m, 's.%s()' % m['Getter']))
                 if m.get('Setter'):
-                    pyl.append('      .def_property("%s", %s, [](%s& s, %s v) { s.%s(v); })'
+                    pyl.append('      .def_prop_rw("%s", %s, [](%s& s, %s v) { s.%s(v); })'
                                % (n, get, T, m['Ret'], m['Setter']))
                 else:
-                    pyl.append('      .def_property_readonly("%s", %s)' % (n, get))
+                    pyl.append('      .def_prop_ro("%s", %s)' % (n, get))
                 if n not in field_of.values():          # field-backed: a plain JS field
                     js_fn(n, [T], 'return %s;' % pub(m, 'a0.%s()' % m['Getter']))
             elif k == 'indexer' and len(m['Params']) == 2:
@@ -574,7 +574,7 @@ def emit_valuetype_bindings(vt, skipped):
         if all_double: pyl.append('      .def(py::init([](py::sequence s) {\n'
                    '        if (py::len(s) != %d) throw py::value_error("%s needs %d values");\n'
                    '        %s v;\n%s        return v; }))'
-                   % (nf, reg, nf, T, ''.join('        v.%s = s[%d].cast<double>();\n' % (f, i)
+                   % (nf, reg, nf, T, ''.join('        v.%s = py::cast<double>(s[%d]);\n' % (f, i)
                                               for i, f in enumerate(fields))))
         # hand members (G123): JS takes the value first, as the generated members above do
         clash = hand_names(reg, strict=True)[0] & {m['Name'] for m in mine}
@@ -775,7 +775,7 @@ def emit_data_bindings(t, vt, skipped):
             continue
         if k == 'field' and not m.get('Static') and m.get('Ret') and fields_ok(m):
             # a public FIELD of a data class (G107: DracoCompressionOptions.IncludeNormals): read/write as is
-            pyl.append('      .def_readwrite("%s", &%s::%s)' % (n, T, n))
+            pyl.append('      .def_rw("%s", &%s::%s)' % (n, T, n))
             jsl.append('      .property("%s", &%s::%s)' % (camel(n), T, n))
             continue
         if not bindable(m):
@@ -787,13 +787,13 @@ def emit_data_bindings(t, vt, skipped):
                 getter = '[](%s& s) { return s.%s(); }' % (T, m['Getter'])
             if m.get('Setter'):
                 setter = '[](%s& s, %s v) { s.%s(%s); }' % (T, pub_t(m['Ret']), m['Setter'], priv(m['Ret'], 'v'))
-                pyl.append('      .def_property("%s", %s, %s)' % (n, getter, setter))
+                pyl.append('      .def_prop_rw("%s", %s, %s)' % (n, getter, setter))
                 if m['Ret'] not in VT_ENUMS:
                     jsl.append('      .property("%s", &%s::%s, &%s::%s)' % (camel(n), T, m['Getter'], T, m['Setter']))
                 else:
                     skipped['js data-class enum property'] = skipped.get('js data-class enum property', 0) + 1
             else:
-                pyl.append('      .def_property_readonly("%s", %s)' % (n, getter))
+                pyl.append('      .def_prop_ro("%s", %s)' % (n, getter))
                 if m['Ret'].startswith('std::vector<'):
                     jsl.append('      .function("%s", optional_override([](%s& s) { return RH3DM_JsArray(s.%s()); }))' % (camel(n), T, m['Getter']))
                 elif m['Ret'] not in VT_ENUMS:
@@ -821,7 +821,7 @@ def emit_data_bindings(t, vt, skipped):
             pyl.append('      .%s("%s", [](%s%s) { %s }%s%s)'
                        % ('def_static' if st else 'def', n, self_p, sig, pybody,
                           ''.join(', py::arg("%s")' % q['Name'] for q in ps),
-                          ', py::return_value_policy::take_ownership' if r.endswith('*') else ''))
+                          ', py::rv_policy::take_ownership' if r.endswith('*') else ''))
             # JS: sequences in as arrays, out as arrays
             jps, conv = [], []
             for q in ps:

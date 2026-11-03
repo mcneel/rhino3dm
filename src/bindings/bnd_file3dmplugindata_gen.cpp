@@ -13,7 +13,7 @@ void initGenFile3dmPlugInData(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmPlugInData>(m, "File3dmPlugInData")
       .def("RdkXml", &BND_File3dmPlugInData_RdkXml)
-      .def_property_readonly("PlugInId", &BND_File3dmPlugInData::Gen_PlugInId);
+      .def_prop_ro("PlugInId", &BND_File3dmPlugInData::Gen_PlugInId);
 }
 #endif
 

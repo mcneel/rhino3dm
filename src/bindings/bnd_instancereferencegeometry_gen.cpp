@@ -27,8 +27,8 @@ void initGenInstanceReferenceGeometry(rh3dmpymodule& m)
 {
   py::class_<BND_InstanceReferenceGeometry, BND_GeometryBase>(m, "InstanceReferenceGeometry")
       .def(py::init<BND_UUID, BND_Transform>(), py::arg("instanceDefinitionId"), py::arg("transform"))
-      .def_property_readonly("ParentIdefId", &BND_InstanceReferenceGeometry::Gen_ParentIdefId)
-      .def_property_readonly("Xform", &BND_InstanceReferenceGeometry::Gen_Xform);
+      .def_prop_ro("ParentIdefId", &BND_InstanceReferenceGeometry::Gen_ParentIdefId)
+      .def_prop_ro("Xform", &BND_InstanceReferenceGeometry::Gen_Xform);
 }
 #endif
 

@@ -15,6 +15,7 @@ diff: https://github.com/mcneel/rhino3dm/compare/9.0.0-beta...9.2.0-beta.0
 - openNURBS submodule to 9.2 (`c87c7200`); rhino3dm takes the openNURBS minor version.
 - (py, js) Bindings generated from RhinoCommon (rhino 9.x `db884416462`); the hand-written bindings are gone, except members RhinoCommon lacks (`api/exceptions.toml`).
 - (py, js) The typings (`__init__.pyi`, `rhino3dm.d.ts`) still describe the 8.x API; they are regenerated before the beta ships.
+- (py) The Python module is built with nanobind 2.7 instead of pybind11 (the `src/lib/pybind11` submodule is gone). On Python 3.12+ it is one stable-ABI (`abi3`) module, and it supports free-threaded CPython (3.14t) without re-enabling the GIL. Enums are integer-like (`int(e)`, `e == 2` work); passing a plain int where an enum is expected is still a `TypeError`. Buffers (`PointCloud`, NURBS control points and knots) are zero-copy views via the buffer protocol, as in 8.x.
 
 ## [9.0.0-beta] - 2026.10.07
 

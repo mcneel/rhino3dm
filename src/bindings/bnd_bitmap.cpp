@@ -116,19 +116,19 @@ void initBitmapBindings(rh3dmpymodule& m)
     // user strings, as the old Bitmap had them (D62): RhinoCommon's internal CommonObject members
     .def("SetUserString", &BND_Bitmap::Gen__SetUserString, py::arg("key"), py::arg("value"))
     .def("GetUserString", &BND_Bitmap::Gen__GetUserString, py::arg("key"))
-    .def_property_readonly("UserStringCount", &BND_Bitmap::Gen__UserStringCount)
+    .def_prop_ro("UserStringCount", &BND_Bitmap::Gen__UserStringCount)
     .def("GetUserStrings", [](const BND_Bitmap& s) { return RH3DM_UserStrings(s.RH3DM_ObjPtr()); })
-    .def_property_readonly("Width", &BND_Bitmap::Width)
-    .def_property_readonly("Height", &BND_Bitmap::Height)
-    .def_property_readonly("BitsPerPixel", &BND_Bitmap::BitsPerPixel)
-    .def_property_readonly("SizeOfScan", &BND_Bitmap::SizeOfScan)
-    .def_property_readonly("SizeOfImage", &BND_Bitmap::SizeOfImage)
-    .def_property("FileFullPath", &BND_Bitmap::FileFullPath, &BND_Bitmap::SetFileFullPath)
+    .def_prop_ro("Width", &BND_Bitmap::Width)
+    .def_prop_ro("Height", &BND_Bitmap::Height)
+    .def_prop_ro("BitsPerPixel", &BND_Bitmap::BitsPerPixel)
+    .def_prop_ro("SizeOfScan", &BND_Bitmap::SizeOfScan)
+    .def_prop_ro("SizeOfImage", &BND_Bitmap::SizeOfImage)
+    .def_prop_rw("FileFullPath", &BND_Bitmap::FileFullPath, &BND_Bitmap::SetFileFullPath)
     ;
 
   py::class_<BND_File3dmBitmapTable>(m, "File3dmBitmapTable")
     .def("__len__", &BND_File3dmBitmapTable::Count)
-    .def_property_readonly("Count", &BND_File3dmBitmapTable::Count)
+    .def_prop_ro("Count", &BND_File3dmBitmapTable::Count)
     .def("__getitem__", [](const BND_File3dmBitmapTable& t, int index) {
         try { return t.GetItem(index); }
         catch (const std::out_of_range&) { throw py::index_error(); }

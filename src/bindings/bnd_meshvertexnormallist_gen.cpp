@@ -128,10 +128,10 @@ int BND_MeshVertexNormalList::Gen_Add_4(BND_Vector3d normal) const {
 void initGenMeshVertexNormalList(rh3dmpymodule& m)
 {
   py::class_<BND_MeshVertexNormalList>(m, "MeshVertexNormalList")
-      .def_property("Capacity", &BND_MeshVertexNormalList::Gen_Capacity, &BND_MeshVertexNormalList::Gen_set_Capacity)
+      .def_prop_rw("Capacity", &BND_MeshVertexNormalList::Gen_Capacity, &BND_MeshVertexNormalList::Gen_set_Capacity)
       .def("Clear", &BND_MeshVertexNormalList::Gen_Clear)
       .def("ComputeNormals", &BND_MeshVertexNormalList::Gen_ComputeNormals)
-      .def_property("Count", &BND_MeshVertexNormalList::Gen_Count, &BND_MeshVertexNormalList::Gen_set_Count)
+      .def_prop_rw("Count", &BND_MeshVertexNormalList::Gen_Count, &BND_MeshVertexNormalList::Gen_set_Count)
       .def("Destroy", &BND_MeshVertexNormalList::Gen_Destroy)
       .def("Flip", &BND_MeshVertexNormalList::Gen_Flip)
       .def("SetNormal", &BND_MeshVertexNormalList::Gen_SetNormal, py::arg("index"), py::arg("normal"))

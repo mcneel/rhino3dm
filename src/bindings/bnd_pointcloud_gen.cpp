@@ -308,15 +308,22 @@ BND_PointCloudItem* BND_PointCloud::Gen_InsertNew(int index) const {
 #if defined(ON_PYTHON_COMPILE)
 void initGenPointCloud(rh3dmpymodule& m)
 {
-  py::class_<BND_PointCloud, BND_GeometryBase>(m, "PointCloud", py::buffer_protocol())
+  static PyType_Slot rh3dm_buffer_slots[] = {
+    {Py_bf_getbuffer, (void*)+[](PyObject* o, Py_buffer* view, int flags) -> int {
+      try {
+        BND_PointCloud& c = *py::inst_ptr<BND_PointCloud>(o);
+        const Py_ssize_t shape[] = {(Py_ssize_t)(c.m_ptr->m_P.Count()), (Py_ssize_t)(3)};
+        const Py_ssize_t strides[] = {(Py_ssize_t)(sizeof(ON_3dPoint)), (Py_ssize_t)(sizeof(double))};
+        return RH3DM_FillBuffer(o, view, flags, (double*)c.m_ptr->m_P.Array(), 2, shape, strides);
+      } catch (const std::exception& e) {
+        PyErr_SetString(PyExc_BufferError, e.what()); view->obj = nullptr; return -1;
+      } }},
+    {Py_bf_releasebuffer, (void*)+[](PyObject*, Py_buffer* view) { RH3DM_ReleaseBuffer(view); }},
+    {0, nullptr}};
+  py::class_<BND_PointCloud, BND_GeometryBase>(m, "PointCloud", py::type_slots(rh3dm_buffer_slots))
       .def(py::init<>())
       .def(py::init<const std::vector<BND_Point3d>&>(), py::arg("points"))
       .def(py::init<const BND_PointCloud&>(), py::arg("other"))
-      .def_buffer([](BND_PointCloud& c) -> py::buffer_info {
-        return py::buffer_info((double*)c.m_ptr->m_P.Array(), sizeof(double),
-          py::format_descriptor<double>::format(), 2,
-          {(py::ssize_t)(c.m_ptr->m_P.Count()), (py::ssize_t)(3)},
-          {(py::ssize_t)(sizeof(ON_3dPoint)), (py::ssize_t)(sizeof(double))}); })
       .def("Add", &BND_PointCloud::Gen_Add, py::arg("point"))
       .def("Add", &BND_PointCloud::Gen_Add_2, py::arg("point"), py::arg("color"))
       .def("Add", &BND_PointCloud::Gen_Add_3, py::arg("point"), py::arg("normal"))
@@ -329,13 +336,13 @@ void initGenPointCloud(rh3dmpymodule& m)
       .def("ClearNormals", &BND_PointCloud::Gen_ClearNormals)
       .def("ClearPointValues", &BND_PointCloud::Gen_ClearPointValues)
       .def("ClosestPoint", &BND_PointCloud::Gen_ClosestPoint, py::arg("testPoint"))
-      .def_property_readonly("ContainsColors", &BND_PointCloud::Gen_ContainsColors)
-      .def_property_readonly("ContainsHiddenFlags", &BND_PointCloud::Gen_ContainsHiddenFlags)
-      .def_property_readonly("ContainsNormals", &BND_PointCloud::Gen_ContainsNormals)
-      .def_property_readonly("ContainsPointValues", &BND_PointCloud::Gen_ContainsPointValues)
-      .def_property_readonly("Count", &BND_PointCloud::Gen_Count)
+      .def_prop_ro("ContainsColors", &BND_PointCloud::Gen_ContainsColors)
+      .def_prop_ro("ContainsHiddenFlags", &BND_PointCloud::Gen_ContainsHiddenFlags)
+      .def_prop_ro("ContainsNormals", &BND_PointCloud::Gen_ContainsNormals)
+      .def_prop_ro("ContainsPointValues", &BND_PointCloud::Gen_ContainsPointValues)
+      .def_prop_ro("Count", &BND_PointCloud::Gen_Count)
       .def("GetRandomSubsample", &BND_PointCloud::Gen_GetRandomSubsample, py::arg("numberOfPoints"))
-      .def_property_readonly("HiddenPointCount", &BND_PointCloud::Gen_HiddenPointCount)
+      .def_prop_ro("HiddenPointCount", &BND_PointCloud::Gen_HiddenPointCount)
       .def("Insert", &BND_PointCloud::Gen_Insert, py::arg("index"), py::arg("point"))
       .def("Insert", &BND_PointCloud::Gen_Insert_2, py::arg("index"), py::arg("point"), py::arg("color"))
       .def("Insert", &BND_PointCloud::Gen_Insert_3, py::arg("index"), py::arg("point"), py::arg("normal"))

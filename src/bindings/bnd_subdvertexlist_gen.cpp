@@ -43,9 +43,9 @@ BND_SubDVertexListIter* BND_SubDVertexList::Gen_iter() const
 void initGenSubDVertexList(rh3dmpymodule& m)
 {
   py::class_<BND_SubDVertexList>(m, "SubDVertexList")
-      .def_property_readonly("Count", &BND_SubDVertexList::Gen_Count)
+      .def_prop_ro("Count", &BND_SubDVertexList::Gen_Count)
       .def("Find", &BND_SubDVertexList::Gen_Find, py::keep_alive<0, 1>(), py::arg("id"))
-      .def_property_readonly("First", py::cpp_function(&BND_SubDVertexList::Gen_First, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
+      .def_prop_ro("First", &BND_SubDVertexList::Gen_First, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
       .def("Find", &BND_SubDVertexList::Gen_Find_2, py::arg("id"))
       .def("__len__", &BND_SubDVertexList::Gen_Count)
       .def("__iter__", &BND_SubDVertexList::Gen_iter, py::keep_alive<0, 1>());

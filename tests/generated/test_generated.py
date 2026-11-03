@@ -152,7 +152,7 @@ def test_finding_14_rhinocommon_value_semantics():
 
 
 def test_same_arity_constructor_overloads_both_reachable():
-    # LineCurve(Point2d, Point2d) and (Point3d, Point3d): pybind dispatches on
+    # LineCurve(Point2d, Point2d) and (Point3d, Point3d): nanobind dispatches on
     # type, embind through a generated shape dispatcher -- neither may shadow
     # the other (generator-log G11: JS once kept only the Point2d one)
     a = r.LineCurve(r.Point3d(1, 2, 3), r.Point3d(4, 5, 6)).Line
@@ -2737,7 +2737,7 @@ def test_user_strings_kept_where_rhino3dm_had_them_d62():
 # RhinoCommon replacement on the same fixture
 
 def _num(v):
-    """pybind enums (old and generated) compare by value; tuples (colors) as tuples"""
+    """enums (old and generated) compare by value; tuples (colors) as tuples"""
     if isinstance(v, (bool, int, float, str)) or v is None:
         return v
     if isinstance(v, tuple):
@@ -3954,7 +3954,7 @@ def test_point_cloud_add_range_colors_keeps_opacity_u40():
 
 def test_static_and_instance_method_one_name_g132():
     # RhinoCommon's BoundingBox.Union(a, b) (static, a new box) and bbox.Union(other) (instance, in place):
-    # pybind11 and nanobind cannot overload one name across the two; the module joins them (G132)
+    # nanobind (as pybind11) cannot overload one name across the two; the module joins them (G132)
     a, b = r.BoundingBox(0, 0, 0, 1, 1, 1), r.BoundingBox(2, 2, 2, 3, 3, 3)
     u = r.BoundingBox.Union(a, b)
     box = lambda x: (x.Min.X, x.Min.Y, x.Min.Z, x.Max.X, x.Max.Y, x.Max.Z)

@@ -135,18 +135,25 @@ BND_ControlPoint BND_NurbsSurfacePointList::Gen_GetControlPoint(int u, int v) co
 #if defined(ON_PYTHON_COMPILE)
 void initGenNurbsSurfacePointList(rh3dmpymodule& m)
 {
-  py::class_<BND_NurbsSurfacePointList>(m, "NurbsSurfacePointList", py::buffer_protocol())
-      .def_buffer([](BND_NurbsSurfacePointList& c) -> py::buffer_info {
-        return py::buffer_info((double*)c.m_ptr->m_cv, sizeof(double),
-          py::format_descriptor<double>::format(), 3,
-          {(py::ssize_t)(c.m_ptr->CVCount(0)), (py::ssize_t)(c.m_ptr->CVCount(1)), (py::ssize_t)(c.m_ptr->CVSize())},
-          {(py::ssize_t)(c.m_ptr->m_cv_stride[0] * sizeof(double)), (py::ssize_t)(c.m_ptr->m_cv_stride[1] * sizeof(double)), (py::ssize_t)(sizeof(double))}); })
-      .def_property_readonly("CountU", &BND_NurbsSurfacePointList::Gen_CountU)
-      .def_property_readonly("CountV", &BND_NurbsSurfacePointList::Gen_CountV)
+  static PyType_Slot rh3dm_buffer_slots[] = {
+    {Py_bf_getbuffer, (void*)+[](PyObject* o, Py_buffer* view, int flags) -> int {
+      try {
+        BND_NurbsSurfacePointList& c = *py::inst_ptr<BND_NurbsSurfacePointList>(o);
+        const Py_ssize_t shape[] = {(Py_ssize_t)(c.m_ptr->CVCount(0)), (Py_ssize_t)(c.m_ptr->CVCount(1)), (Py_ssize_t)(c.m_ptr->CVSize())};
+        const Py_ssize_t strides[] = {(Py_ssize_t)(c.m_ptr->m_cv_stride[0] * sizeof(double)), (Py_ssize_t)(c.m_ptr->m_cv_stride[1] * sizeof(double)), (Py_ssize_t)(sizeof(double))};
+        return RH3DM_FillBuffer(o, view, flags, (double*)c.m_ptr->m_cv, 3, shape, strides);
+      } catch (const std::exception& e) {
+        PyErr_SetString(PyExc_BufferError, e.what()); view->obj = nullptr; return -1;
+      } }},
+    {Py_bf_releasebuffer, (void*)+[](PyObject*, Py_buffer* view) { RH3DM_ReleaseBuffer(view); }},
+    {0, nullptr}};
+  py::class_<BND_NurbsSurfacePointList>(m, "NurbsSurfacePointList", py::type_slots(rh3dm_buffer_slots))
+      .def_prop_ro("CountU", &BND_NurbsSurfacePointList::Gen_CountU)
+      .def_prop_ro("CountV", &BND_NurbsSurfacePointList::Gen_CountV)
       .def("GetGrevillePoint", &BND_NurbsSurfacePointList::Gen_GetGrevillePoint, py::arg("u"), py::arg("v"))
       .def("GetPoint", &BND_NurbsSurfacePointList::Gen_GetPoint, py::arg("u"), py::arg("v"))
       .def("GetWeight", &BND_NurbsSurfacePointList::Gen_GetWeight, py::arg("u"), py::arg("v"))
-      .def_property_readonly("PointSize", &BND_NurbsSurfacePointList::Gen_PointSize)
+      .def_prop_ro("PointSize", &BND_NurbsSurfacePointList::Gen_PointSize)
       .def("SetPoint", &BND_NurbsSurfacePointList::Gen_SetPoint, py::arg("u"), py::arg("v"), py::arg("point"))
       .def("SetPoint", &BND_NurbsSurfacePointList::Gen_SetPoint_2, py::arg("u"), py::arg("v"), py::arg("point"))
       .def("SetWeight", &BND_NurbsSurfacePointList::Gen_SetWeight, py::arg("u"), py::arg("v"), py::arg("weight"))

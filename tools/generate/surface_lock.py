@@ -18,13 +18,18 @@ regression this exists to catch.
 import os
 import re
 
-PY_CLASS = re.compile(r'py::class_<[^>]*>\(m, "(\w+)"')
+# nanobind registrations, as `py::` (the generated code's alias) or `nb::`
+PY_NS = r'(?:py|nb)::'
+PY_CLASS = re.compile(PY_NS + r'class_<[^>]*>\(m, "(\w+)"')
 # `class_<BND_Surface, base<BND_GeometryBase>>("Surface")`: the template
 # arguments nest, so match lazily up to `>("` (`[^>]*` missed every derived class)
 JS_CLASS = re.compile(r'\bclass_<.*?>\("(\w+)"\)')
-PY_DEF = re.compile(r'\.(def|def_static|def_property|def_property_readonly|def_property_readonly_static|def_readwrite)\("(\w+)"(.*)')
+PY_DEF = re.compile(r'\.(def|def_static|def_prop_rw|def_prop_ro|def_prop_ro_static|def_prop_rw_static|def_rw)\("(\w+)"(.*)')
+# property spellings -> (rw|ro, static)
+PY_PROP = {'def_prop_rw': ('rw', False), 'def_rw': ('rw', False), 'def_prop_ro': ('ro', False),
+           'def_prop_ro_static': ('ro', True), 'def_prop_rw_static': ('rw', True)}
 # `py::init<const std::vector<BND_Point3d>&>()`: template arguments nest (G82)
-PY_INIT = re.compile(r'\.def\(py::init<(.*?)>\(\)')
+PY_INIT = re.compile(r'\.def\(' + PY_NS + r'init<(.*?)>\(\)')
 JS_DEF = re.compile(r'\.(function|class_function|property)\("(\w+)"')
 JS_CTOR = re.compile(r'\.constructor(<.*?>)?\(')
 
@@ -42,7 +47,7 @@ def surface(files):
             if m:
                 py_cls = m.group(1)
             m = JS_CLASS.search(line)
-            if m and 'py::' not in line:
+            if m and not re.search(PY_NS, line):
                 js_cls = m.group(1)
             if line.startswith('.def') and py_cls:
                 mi = PY_INIT.search(line)
@@ -50,14 +55,15 @@ def surface(files):
                     out.add('py  %s.__init__(%s)' % (py_cls, mi.group(1)))
                     continue
                 md = PY_DEF.match(line)
+                if md and md.group(2) == '__init__':
+                    continue            # a factory constructor (8.x: py::init(lambda)): unlisted, as before
                 if md:
                     kind, member, rest = md.groups()
-                    if kind.startswith('def_property') or kind == 'def_readwrite':   # a field: rw (G107)
-                        rw = 'rw' if kind in ('def_property', 'def_readwrite') else 'ro'
-                        out.add('py  %s.%s [property %s%s]'
-                                % (py_cls, member, rw, ' static' if kind.endswith('static') else ''))
+                    if kind in PY_PROP:                                   # a field: rw (G107)
+                        rw, static = PY_PROP[kind]
+                        out.add('py  %s.%s [property %s%s]' % (py_cls, member, rw, ' static' if static else ''))
                     else:
-                        args = re.findall(r'py::arg\("(\w+)"\)', rest)
+                        args = re.findall(PY_NS + r'arg\("(\w+)"\)', rest)
                         out.add('py  %s.%s(%s)%s' % (py_cls, member, ', '.join(args),
                                                      ' [static]' if kind == 'def_static' else ''))
             elif js_cls and line.startswith('.'):

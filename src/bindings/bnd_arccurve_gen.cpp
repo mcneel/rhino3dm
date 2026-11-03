@@ -56,14 +56,14 @@ void initGenArcCurve(rh3dmpymodule& m)
       .def(py::init<>())
       .def(py::init<BND_Arc>(), py::arg("arc"))
       .def(py::init<BND_Arc, double, double>(), py::arg("arc"), py::arg("t0"), py::arg("t1"))
-      .def(py::init<const BND_ArcCurve*>(), py::arg("other"))
+      .def(py::init<const BND_ArcCurve*>(), py::arg("other").none())
       .def(py::init<BND_Circle>(), py::arg("circle"))
       .def(py::init<BND_Circle, double, double>(), py::arg("circle"), py::arg("t0"), py::arg("t1"))
-      .def_property_readonly("AngleDegrees", &BND_ArcCurve::Gen_AngleDegrees)
-      .def_property_readonly("AngleRadians", &BND_ArcCurve::Gen_AngleRadians)
-      .def_property_readonly("Arc", &BND_ArcCurve::Gen_Arc)
-      .def_property_readonly("IsCompleteCircle", &BND_ArcCurve::Gen_IsCompleteCircle)
-      .def_property_readonly("Radius", &BND_ArcCurve::Gen_Radius);
+      .def_prop_ro("AngleDegrees", &BND_ArcCurve::Gen_AngleDegrees)
+      .def_prop_ro("AngleRadians", &BND_ArcCurve::Gen_AngleRadians)
+      .def_prop_ro("Arc", &BND_ArcCurve::Gen_Arc)
+      .def_prop_ro("IsCompleteCircle", &BND_ArcCurve::Gen_IsCompleteCircle)
+      .def_prop_ro("Radius", &BND_ArcCurve::Gen_Radius);
 }
 #endif
 

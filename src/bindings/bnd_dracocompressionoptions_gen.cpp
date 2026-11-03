@@ -89,14 +89,14 @@ void initGenDracoCompressionOptions(rh3dmpymodule& m)
 {
   py::class_<BND_DracoCompressionOptions>(m, "DracoCompressionOptions")
       .def(py::init<>())
-      .def_property("CompressionLevel", [](const BND_DracoCompressionOptions& s) { return s.CompressionLevel(); }, [](BND_DracoCompressionOptions& s, int v) { s.set_CompressionLevel(v); })
-      .def_property("PositionQuantizationBits", [](const BND_DracoCompressionOptions& s) { return s.PositionQuantizationBits(); }, [](BND_DracoCompressionOptions& s, int v) { s.set_PositionQuantizationBits(v); })
-      .def_property("TextureCoordintateQuantizationBits", [](const BND_DracoCompressionOptions& s) { return s.TextureCoordintateQuantizationBits(); }, [](BND_DracoCompressionOptions& s, int v) { s.set_TextureCoordintateQuantizationBits(v); })
-      .def_property("NormalQuantizationBits", [](const BND_DracoCompressionOptions& s) { return s.NormalQuantizationBits(); }, [](BND_DracoCompressionOptions& s, int v) { s.set_NormalQuantizationBits(v); })
-      .def_readwrite("IncludeNormals", &BND_DracoCompressionOptions::IncludeNormals)
-      .def_readwrite("IncludeTextureCoordinates", &BND_DracoCompressionOptions::IncludeTextureCoordinates)
-      .def_readwrite("IncludeVertexColors", &BND_DracoCompressionOptions::IncludeVertexColors)
-      .def_readwrite("VertexColorFormat", &BND_DracoCompressionOptions::VertexColorFormat);
+      .def_prop_rw("CompressionLevel", [](const BND_DracoCompressionOptions& s) { return s.CompressionLevel(); }, [](BND_DracoCompressionOptions& s, int v) { s.set_CompressionLevel(v); })
+      .def_prop_rw("PositionQuantizationBits", [](const BND_DracoCompressionOptions& s) { return s.PositionQuantizationBits(); }, [](BND_DracoCompressionOptions& s, int v) { s.set_PositionQuantizationBits(v); })
+      .def_prop_rw("TextureCoordintateQuantizationBits", [](const BND_DracoCompressionOptions& s) { return s.TextureCoordintateQuantizationBits(); }, [](BND_DracoCompressionOptions& s, int v) { s.set_TextureCoordintateQuantizationBits(v); })
+      .def_prop_rw("NormalQuantizationBits", [](const BND_DracoCompressionOptions& s) { return s.NormalQuantizationBits(); }, [](BND_DracoCompressionOptions& s, int v) { s.set_NormalQuantizationBits(v); })
+      .def_rw("IncludeNormals", &BND_DracoCompressionOptions::IncludeNormals)
+      .def_rw("IncludeTextureCoordinates", &BND_DracoCompressionOptions::IncludeTextureCoordinates)
+      .def_rw("IncludeVertexColors", &BND_DracoCompressionOptions::IncludeVertexColors)
+      .def_rw("VertexColorFormat", &BND_DracoCompressionOptions::VertexColorFormat);
 }
 #endif
 

@@ -67,11 +67,11 @@ void initGenFile3dmMeshModifiers(rh3dmpymodule& m)
       .def("CreateEdgeSoftening", &BND_File3dmMeshModifiers::Gen_CreateEdgeSoftening, py::keep_alive<0, 1>())
       .def("CreateShutLining", &BND_File3dmMeshModifiers::Gen_CreateShutLining, py::keep_alive<0, 1>())
       .def("CreateThickening", &BND_File3dmMeshModifiers::Gen_CreateThickening, py::keep_alive<0, 1>())
-      .def_property_readonly("CurvePiping", py::cpp_function(&BND_File3dmMeshModifiers::Gen_CurvePiping, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
-      .def_property_readonly("Displacement", py::cpp_function(&BND_File3dmMeshModifiers::Gen_Displacement, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
-      .def_property_readonly("EdgeSoftening", py::cpp_function(&BND_File3dmMeshModifiers::Gen_EdgeSoftening, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
-      .def_property_readonly("ShutLining", py::cpp_function(&BND_File3dmMeshModifiers::Gen_ShutLining, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))
-      .def_property_readonly("Thickening", py::cpp_function(&BND_File3dmMeshModifiers::Gen_Thickening, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()));
+      .def_prop_ro("CurvePiping", &BND_File3dmMeshModifiers::Gen_CurvePiping, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
+      .def_prop_ro("Displacement", &BND_File3dmMeshModifiers::Gen_Displacement, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
+      .def_prop_ro("EdgeSoftening", &BND_File3dmMeshModifiers::Gen_EdgeSoftening, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
+      .def_prop_ro("ShutLining", &BND_File3dmMeshModifiers::Gen_ShutLining, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
+      .def_prop_ro("Thickening", &BND_File3dmMeshModifiers::Gen_Thickening, py::rv_policy::take_ownership, py::keep_alive<0, 1>());
 }
 #endif
 

@@ -33,8 +33,8 @@ void initGenGroup(rh3dmpymodule& m)
       .def("DeleteAllUserStrings", &BND_Group::Gen_DeleteAllUserStrings)
       .def("GetUserString", &BND_Group::Gen_GetUserString, py::arg("key"))
       .def("SetUserString", &BND_Group::Gen_SetUserString, py::arg("key"), py::arg("value"))
-      .def_property_readonly("UserStringCount", &BND_Group::Gen_UserStringCount)
-      .def_property_readonly("ComponentType", &BND_Group::Gen_ComponentType)
+      .def_prop_ro("UserStringCount", &BND_Group::Gen_UserStringCount)
+      .def_prop_ro("ComponentType", &BND_Group::Gen_ComponentType)
       .def("GetUserStrings", [](const BND_Group& s) { return RH3DM_UserStrings(s.RH3DM_ObjPtr()); });
 }
 #endif

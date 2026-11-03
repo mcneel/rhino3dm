@@ -81,13 +81,13 @@ void initGenPostEffectData(rh3dmpymodule& m)
 {
   py::class_<BND_PostEffectData>(m, "PostEffectData")
       .def("DataCRC", &BND_PostEffectData::Gen_DataCRC, py::arg("current_remainder"))
-      .def_property_readonly("Id", &BND_PostEffectData::Gen_Id)
-      .def_property_readonly("LocalName", &BND_PostEffectData::Gen_LocalName)
-      .def_property("On", &BND_PostEffectData::Gen_On, &BND_PostEffectData::Gen_set_On)
-      .def_property("Shown", &BND_PostEffectData::Gen_Shown, &BND_PostEffectData::Gen_set_Shown)
+      .def_prop_ro("Id", &BND_PostEffectData::Gen_Id)
+      .def_prop_ro("LocalName", &BND_PostEffectData::Gen_LocalName)
+      .def_prop_rw("On", &BND_PostEffectData::Gen_On, &BND_PostEffectData::Gen_set_On)
+      .def_prop_rw("Shown", &BND_PostEffectData::Gen_Shown, &BND_PostEffectData::Gen_set_Shown)
       .def("GetParameter", &BND_PostEffectData::Gen_GetParameter, py::arg("param_name"))
       .def("SetParameter", &BND_PostEffectData::Gen_SetParameter, py::arg("param_name"), py::arg("param_value"))
-      .def_property_readonly("Type", &BND_PostEffectData::Gen_Type);
+      .def_prop_ro("Type", &BND_PostEffectData::Gen_Type);
 }
 #endif
 

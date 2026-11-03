@@ -379,8 +379,8 @@ void initGenPoint2d(rh3dmpymodule& m)
 {
   py::class_<BND_Point2d>(m, "Point2d")
       .def(py::init<>())
-      .def_property("X", [](BND_Point2d& s) { return s.X(); }, [](BND_Point2d& s, double v) { s.set_X(v); })
-      .def_property("Y", [](BND_Point2d& s) { return s.Y(); }, [](BND_Point2d& s, double v) { s.set_Y(v); })
+      .def_prop_rw("X", [](BND_Point2d& s) { return s.X(); }, [](BND_Point2d& s, double v) { s.set_X(v); })
+      .def_prop_rw("Y", [](BND_Point2d& s) { return s.Y(); }, [](BND_Point2d& s, double v) { s.set_Y(v); })
       .def(py::init<double, double>(), py::arg("x"), py::arg("y"))
       .def(py::init<BND_Vector2d>(), py::arg("vector"))
       .def(py::init<const BND_Point2d&>())
@@ -416,20 +416,20 @@ void initGenPoint2d(rh3dmpymodule& m)
       .def("__str__", [](BND_Point2d& self) { return self.ToString(); })
       .def("__getitem__", [](BND_Point2d& s, int index) { return s.get_Item(index); })
       .def("__setitem__", [](BND_Point2d& s, int index, double value) { s.set_Item(index, value); })
-      .def_property_readonly("IsValid", [](BND_Point2d& s) { return s.IsValid(); })
-      .def_property_readonly("MinimumCoordinate", [](BND_Point2d& s) { return s.MinimumCoordinate(); })
-      .def_property_readonly("MaximumCoordinate", [](BND_Point2d& s) { return s.MaximumCoordinate(); })
-      .def_property_readonly_static("Origin", [](py::object) { return BND_Point2d::Origin(); })
-      .def_property_readonly_static("Unset", [](py::object) { return BND_Point2d::Unset(); })
+      .def_prop_ro("IsValid", [](BND_Point2d& s) { return s.IsValid(); })
+      .def_prop_ro("MinimumCoordinate", [](BND_Point2d& s) { return s.MinimumCoordinate(); })
+      .def_prop_ro("MaximumCoordinate", [](BND_Point2d& s) { return s.MaximumCoordinate(); })
+      .def_prop_ro_static("Origin", [](py::object) { return BND_Point2d::Origin(); })
+      .def_prop_ro_static("Unset", [](py::object) { return BND_Point2d::Unset(); })
       .def("DistanceTo", [](BND_Point2d& self, BND_Point2d other) { return self.DistanceTo(other); }, py::arg("other"))
       .def("DistanceToSquared", [](BND_Point2d& self, BND_Point2d other) { return self.DistanceToSquared(other); }, py::arg("other"))
       .def("Transform", [](BND_Point2d& self, BND_Transform xform) { return self.Transform(xform); }, py::arg("xform"))
-      .def(py::init([](py::sequence s) {
+      .def("__init__", [](BND_Point2d* rh3dm_self, py::sequence s) { new (rh3dm_self) BND_Point2d(([](py::sequence s) {
         if (py::len(s) != 2) throw py::value_error("Point2d needs 2 values");
         BND_Point2d v;
-        v.m_x = s[0].cast<double>();
-        v.m_y = s[1].cast<double>();
-        return v; }))
+        v.m_x = py::cast<double>(s[0]);
+        v.m_y = py::cast<double>(s[1]);
+        return v; })(s)); })
       .def("Encode", &BND_Point2d_Encode)
       .def("__repr__", [](const BND_Point2d& v) { return py::str("Point2d({}, {})").format(v.m_x, v.m_y); });
   py::implicitly_convertible<py::tuple, BND_Point2d>();

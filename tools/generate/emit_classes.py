@@ -1,9 +1,17 @@
 """Class emission: plans -> C++ class declarations/definitions and the
-pybind11 / embind registrations."""
+nanobind / embind registrations."""
 
 from gen_registry import *
 from emit_hand import hand_names, hand_registrations
 
+
+
+def py_arg(ctype, name):
+    """`py::arg("name")`; a pointer parameter also takes None (`.none()`): nanobind refuses None
+    for a raw pointer unless asked (M2)"""
+    if '*' in (ctype or ''):
+        return 'py::arg("%s").none()' % name
+    return 'py::arg("%s")' % name
 
 def failthrow_line(ft, call, m):
     """`if (!CALL) throw E(msg);`, `if (!CALL) { if (COND) throw E(msg); }`, or
@@ -563,7 +571,7 @@ def emit(p):
             L.append('    return rc ? new %s((%s*)rc) : nullptr;' % (target['gen'], target['on']))
         else:
             # most-derived generated class (an ON_Curve* may be a NURBS curve);
-            # pybind11/embind then downcast the polymorphic result automatically
+            # nanobind/embind then downcast the polymorphic result automatically
             L.append('    return rc ? RH3DM_Wrap_%s(rc) : nullptr;' % target['reg'])
     elif shape[0] == 'holder':
         hp = HOLDERS[shape[1]]
@@ -1518,16 +1526,16 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         if p.get('override_of') and not p['override_of'].get('hidden') and p['m']['Kind'] == 'method':
             # a virtual override (G115/G116): the base's registration reaches it through the virtual
             # call; registering it again hides the base's other overloads -- embind keeps the derived
-            # name only, and pybind11 does not chain a derived def to the base's overloads
+            # name only, and nanobind does not chain a derived def to the base's overloads
             # (AnnotationBase.GetBoundingBox(True) / getBoundingBox(plane) were unreachable)
             continue
         n, g = p['m']['Name'], p['cpp']
-        pyargs = ''.join(', py::arg("%s")' % a for _, a in p['bind_args'])
+        pyargs = ''.join(', ' + py_arg(t, a) for t, a in p['bind_args'])
         # G112: arguments a borrowing setter stored (keep_args): the result keeps each alive --
-        # pybind11 numbers a static function's arguments from 1, a method's from 2 (1 is self)
+        # keep_alive numbers a static function's arguments from 1, a method's from 2 (1 is self)
         pyargs = ''.join(', py::keep_alive<0, %d>()' % (i + (1 if p['static'] else 2)) for i in p.get('keep_args') or []) + pyargs
         if p['static'] and n in instance_names:
-            # Python: one name cannot be static AND instance (pybind11 and nanobind both refuse):
+            # Python: one name cannot be static AND instance (nanobind refuses, as pybind11 did):
             # `_static_<Name>`, joined to the instance form by rhino3dm/__init__.py (G132)
             if p['m']['Kind'] != 'property':
                 py.append('      .def_static("_static_%s", &%s::%s%s)' % (n, cls['gen'], g, pyargs))
@@ -1540,22 +1548,22 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                 # 2026-10-16): `MeshingParameters.Default`, not `MeshingParameters.Default()`
                 sp = p.get('setter')
                 if sp is not None and id(sp) in live:
-                    py.append('      .def_property_static("%s", [](py::object) { return %s::%s(); }, [](py::object, %s v) { %s::%s(v); })'
+                    py.append('      .def_prop_rw_static("%s", [](py::object) { return %s::%s(); }, [](py::object, %s v) { %s::%s(v); })'
                               % (n, cls['gen'], g, sp['bind_args'][0][0], cls['gen'], sp['cpp']))
                 elif _ret_cpp(p, cls).endswith('*'):
                     # a NEW object (SubD.Empty): Python owns it -- a property getter's default
                     # policy (reference_internal) would leak it
-                    py.append('      .def_property_readonly_static("%s", py::cpp_function([](py::object) { return %s::%s(); }, py::return_value_policy::take_ownership))'
+                    py.append('      .def_prop_ro_static("%s", py::cpp_function([](py::object) { return %s::%s(); }, py::rv_policy::take_ownership))'
                               % (n, cls['gen'], g))
                 else:
-                    py.append('      .def_property_readonly_static("%s", [](py::object) { return %s::%s(); })' % (n, cls['gen'], g))
+                    py.append('      .def_prop_ro_static("%s", [](py::object) { return %s::%s(); })' % (n, cls['gen'], g))
             else:
                 py.append('      .def_static("%s", &%s::%s%s%s)' % (n, cls['gen'], g, ka, pyargs))
         elif p['shape'][0] in ('child', 'constview', 'fileview', 'settingsview') \
                 or (p['shape'][0] in ('construct', 'via') and p['m']['Kind'] == 'property'):
             # a view onto this object: Python owns the view and keeps the parent alive
-            # def_property* cannot take keep_alive itself: wrap the getter
-            py.append('      .def_property_readonly("%s", py::cpp_function(&%s::%s, py::return_value_policy::take_ownership, py::keep_alive<0, 1>()))'
+            # a property cannot take keep_alive itself: wrap the getter (the pass hands it to for_getter)
+            py.append('      .def_prop_ro("%s", py::cpp_function(&%s::%s, py::rv_policy::take_ownership, py::keep_alive<0, 1>()))'
                       % (n, cls['gen'], g))
             js.append('      .property("%s", &%s::%s, allow_raw_pointers())' % (camel(n), cls['gen'], g))
             continue
@@ -1592,37 +1600,37 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             # the modeled field (G88): the stored object -- never owned by the wrapper the
             # getter hands out (the annotation keeps it); the setter keeps its argument alive
             sp = p.get('setter')
-            getter = 'py::cpp_function(&%s::%s, py::return_value_policy::reference_internal)' % (cls['gen'], g)
+            getter = 'py::cpp_function(&%s::%s, py::rv_policy::reference_internal)' % (cls['gen'], g)
             if sp is not None and id(sp) in live:
-                py.append('      .def_property("%s", %s, py::cpp_function(&%s::%s, py::keep_alive<1, 2>()))'
+                py.append('      .def_prop_rw("%s", %s, py::cpp_function(&%s::%s, py::keep_alive<1, 2>()))'
                           % (n, getter, cls['gen'], sp['cpp']))
                 js.append('      .property("%s", &%s::%s, &%s::%s, allow_raw_pointers(), return_value_policy::reference())'
                           % (camel(n), cls['gen'], g, cls['gen'], sp['cpp']))
             else:
-                py.append('      .def_property_readonly("%s", %s)' % (n, getter))
+                py.append('      .def_prop_ro("%s", %s)' % (n, getter))
                 js.append('      .property("%s", &%s::%s, allow_raw_pointers(), return_value_policy::reference())' % (camel(n), cls['gen'], g))
             continue
         elif p['m']['Kind'] == 'property' and final_shape(p) in ('wrap', 'fill', 'newobj', 'valadopt', 'datafrom', 'datafill', 'holderdata'):
             # a getter returning a NEW object: Python owns it (a property's default
             # policy, reference_internal, would leak it); JS gets the raw pointer
             sp = p.get('setter')
-            getter = 'py::cpp_function(&%s::%s, py::return_value_policy::take_ownership)' % (cls['gen'], g)
+            getter = 'py::cpp_function(&%s::%s, py::rv_policy::take_ownership)' % (cls['gen'], g)
             if sp is not None and id(sp) in live:
-                py.append('      .def_property("%s", %s, &%s::%s)' % (n, getter, cls['gen'], sp['cpp']))
+                py.append('      .def_prop_rw("%s", %s, &%s::%s)' % (n, getter, cls['gen'], sp['cpp']))
                 js.append('      .property("%s", &%s::%s, &%s::%s, allow_raw_pointers())' % (camel(n), cls['gen'], g, cls['gen'], sp['cpp']))
             else:
-                py.append('      .def_property_readonly("%s", %s)' % (n, getter))
+                py.append('      .def_prop_ro("%s", %s)' % (n, getter))
                 js.append('      .property("%s", &%s::%s, allow_raw_pointers())' % (camel(n), cls['gen'], g))
             continue
         elif p['m']['Kind'] == 'property' and p['shape'][0] == 'cachedview':
             # the view this object holds (G89): borrowed, keeping this object alive
-            py.append('      .def_property_readonly("%s", py::cpp_function(&%s::%s, py::return_value_policy::reference_internal))' % (n, cls['gen'], g))
+            py.append('      .def_prop_ro("%s", py::cpp_function(&%s::%s, py::rv_policy::reference_internal))' % (n, cls['gen'], g))
             js.append('      .property("%s", &%s::%s, allow_raw_pointers(), return_value_policy::reference())' % (camel(n), cls['gen'], g))
             continue
         elif p['m']['Kind'] == 'property' and re.match(r'std::vector<.*\*>$', _ret_cpp(p, cls)) and not p.get('setter'):
             # a sequence of new class objects (G89: SubDVertex.Edges, an iterator body): each
             # owned by the caller and keeping this object alive
-            py.append('      .def_property_readonly("%s", [](const %s& self) { return RH3DM_PyOwnedList(self.%s(), py::cast(&self)); })' % (n, cls['gen'], g))
+            py.append('      .def_prop_ro("%s", [](const %s& self) { return RH3DM_PyOwnedList(self.%s(), py::cast(&self)); })' % (n, cls['gen'], g))
             js.append('      .property("%s", optional_override([](const %s& self) { return RH3DM_JsArray(self.%s()); }))' % (camel(n), cls['gen'], g))
             continue
         elif p['m']['Kind'] == 'property' and p['shape'][0] == 'translated' and p['shape'][1].endswith('*'):
@@ -1632,16 +1640,16 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             sp = p.get('setter')
             sp = sp if sp is not None and id(sp) in live else None
             if p.get('ret_borrowed'):
-                getter = 'py::cpp_function(&%s::%s, py::return_value_policy::reference_internal)' % (cls['gen'], g)
+                getter = 'py::cpp_function(&%s::%s, py::rv_policy::reference_internal)' % (cls['gen'], g)
                 jpol = ', allow_raw_pointers(), return_value_policy::reference()'
             else:
-                getter = 'py::cpp_function(&%s::%s, py::return_value_policy::take_ownership, py::keep_alive<0, 1>())' % (cls['gen'], g)
+                getter = 'py::cpp_function(&%s::%s, py::rv_policy::take_ownership, py::keep_alive<0, 1>())' % (cls['gen'], g)
                 jpol = ', allow_raw_pointers()'
             if sp is not None:
-                py.append('      .def_property("%s", %s, &%s::%s)' % (n, getter, cls['gen'], sp['cpp']))
+                py.append('      .def_prop_rw("%s", %s, &%s::%s)' % (n, getter, cls['gen'], sp['cpp']))
                 js.append('      .property("%s", &%s::%s, &%s::%s%s)' % (camel(n), cls['gen'], g, cls['gen'], sp['cpp'], jpol))
             else:
-                py.append('      .def_property_readonly("%s", %s)' % (n, getter))
+                py.append('      .def_prop_ro("%s", %s)' % (n, getter))
                 js.append('      .property("%s", &%s::%s%s)' % (camel(n), cls['gen'], g, jpol))
             continue
         elif p['m']['Kind'] == 'property' and re.match(r'^std::vector<[^*]*>$', _ret_cpp(p, cls)):
@@ -1652,22 +1660,22 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             sp = sp if sp is not None and id(sp) in live else None
             jget = 'optional_override([](const %s& s) { return RH3DM_JsArray(s.%s()); })' % (cls['gen'], g)
             if sp is not None:
-                py.append('      .def_property("%s", &%s::%s, &%s::%s)' % (n, cls['gen'], g, cls['gen'], sp['cpp']))
+                py.append('      .def_prop_rw("%s", &%s::%s, &%s::%s)' % (n, cls['gen'], g, cls['gen'], sp['cpp']))
                 js.append('      .property("%s", %s, optional_override([](%s& s, emscripten::val v) { s.%s(RH3DM_JsSeq<%s>(v)); }))'
                           % (camel(n), jget, cls['gen'], sp['cpp'], elem))
             else:
-                py.append('      .def_property_readonly("%s", &%s::%s)' % (n, cls['gen'], g))
+                py.append('      .def_prop_ro("%s", &%s::%s)' % (n, cls['gen'], g))
                 js.append('      .property("%s", %s)' % (camel(n), jget))
             continue
         elif p['m']['Kind'] == 'property':
             sp = p.get('setter')
             if sp is not None and id(sp) in live:
-                py.append('      .def_property("%s", &%s::%s, &%s::%s)'
+                py.append('      .def_prop_rw("%s", &%s::%s, &%s::%s)'
                           % (n, cls['gen'], g, cls['gen'], sp['cpp']))
                 js.append('      .property("%s", &%s::%s, &%s::%s)'
                           % (camel(n), cls['gen'], g, cls['gen'], sp['cpp']))
             else:
-                py.append('      .def_property_readonly("%s", &%s::%s)' % (n, cls['gen'], g))
+                py.append('      .def_prop_ro("%s", &%s::%s)' % (n, cls['gen'], g))
                 js.append('      .property("%s", &%s::%s)' % (camel(n), cls['gen'], g))
             continue
         elif final_shape(p) in ('proxywrap', 'construct', 'via', 'subview') or (
@@ -1685,8 +1693,8 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                 or (cls['mode'] == 'child' and cls.get('parent') == 'File3dm')):
             # a class value from a translated body (G89): borrowed (reference_internal), or a
             # new File3dm proxy (FindChild) that keeps this one -- and so the file -- alive
-            py.append('      .def("%s", &%s::%s, %s%s)' % (n, cls['gen'], g, 'py::return_value_policy::reference_internal' if p.get('ret_borrowed')
-                                                         else 'py::return_value_policy::take_ownership, py::keep_alive<0, 1>()', pyargs))
+            py.append('      .def("%s", &%s::%s, %s%s)' % (n, cls['gen'], g, 'py::rv_policy::reference_internal' if p.get('ret_borrowed')
+                                                         else 'py::rv_policy::take_ownership, py::keep_alive<0, 1>()', pyargs))
         elif p.get('adopt'):
             # the argument is now a view of this object's mesh: it keeps this object alive
             pos = [n2 for _, n2 in p['bind_args']].index(p['adopt']['param']) + 2
@@ -1697,7 +1705,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                 py.append('      .def("__str__", &%s::%s)' % (cls['gen'], g))   # G136: str() is RhinoCommon's ToString
         js_methods.setdefault((camel(n), len(p['bind_args']), p['static']), []).append(p)
 
-    # G126: Python overloads the generated member lacks, after its own (pybind11 tries in order)
+    # G126: Python overloads the generated member lacks, after its own (nanobind tries in order)
     py += hand_registrations(cls['reg'], overloads=True)[0]
     # embind keeps ONE function per name+arity. Same-arity overloads get a
     # generated C++ dispatcher on argument shape (isoCurve(int, t) vs
@@ -1818,7 +1826,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         g = cls['gen']
         py += ['      .def("SetUserString", &%s::Gen__SetUserString, py::arg("key"), py::arg("value"))' % g,
                '      .def("GetUserString", &%s::Gen__GetUserString, py::arg("key"))' % g,
-               '      .def_property_readonly("UserStringCount", &%s::Gen__UserStringCount)' % g]
+               '      .def_prop_ro("UserStringCount", &%s::Gen__UserStringCount)' % g]
         js += ['      .function("setUserString", &%s::Gen__SetUserString)' % g,
                '      .function("getUserString", &%s::Gen__GetUserString)' % g,
                '      .property("userStringCount", &%s::Gen__UserStringCount)' % g]
@@ -1837,7 +1845,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         if ('keep_alive<0, 1>' in e or 'reference_internal' in e) and '_static' not in e:
             jn = {'__getitem__': 'get', '__iter__': 'iterator'}.get(n, camel(n))
             JS_POST['keep'].append((cls['reg'], jn))
-        if '.def_property_readonly_static(' in e:
+        if '.def_prop_ro_static(' in e:
             jn = camel(n) if camel(n) in jsnames else n
             JS_POST['static_props'].append((cls['reg'], jn))
         # G112: a result keeping an ARGUMENT alive (keep_alive<0, N>, N past self), and a borrowing
@@ -1847,7 +1855,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
             ai = int(kn) - (1 if static_e else 2)
             if ai >= 0:
                 JS_POST['keep_args'].append((cls['reg'], camel(n), ai, static_e))
-        if e.lstrip().startswith('.def_property(') and 'keep_alive<1, 2>' in e:
+        if e.lstrip().startswith('.def_prop_rw(') and 'keep_alive<1, 2>' in e:
             JS_POST['keep_set'].append((cls['reg'], camel(n)))
     if cls.get('table') or cls.get('liter'):
         JS_POST['iters'].append(cls['reg'] + 'Iter')
@@ -1891,7 +1899,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
     for p in arg_ctors:
         types = ', '.join(t for t, _ in p['bind_args'])
         py_dctor += '      .def(py::init<%s>()%s)\n' % (
-            types, ''.join(', py::arg("%s")' % n for _, n in p['bind_args']))
+            types, ''.join(', ' + py_arg(t, n) for t, n in p['bind_args']))
         if len(p['bind_args']) in js_arity:
             js_pruned.append('%s.constructor/%d' % (cls['reg'], len(p['bind_args'])))
         else:
@@ -1953,26 +1961,35 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         if tp.get('find_id'):
             py += ['      .def("%s", &%s::Gen_FindId, py::keep_alive<0, 1>(), py::arg("g"))' % (tp['find_id'], g)]
             js += ['      .function("%s", &%s::Gen_FindId, allow_raw_pointers())' % (camel(tp['find_id']), g)]
-    py_buf, py_bufdef = '', ''
+    py_buf, slots = '', ''
     if cls.get('buffer'):
         # Python's buffer protocol over native double storage (registry `buffer`: pointer, shape,
         # byte strides, as expressions over the binding instance `c`): a zero-copy view, as 8.x had
-        # (pilot #84). nanobind (M2): the same data feeds nb::type_slots(Py_bf_getbuffer)
+        # (pilot #84). nanobind has no def_buffer: the type's own buffer slots (Py_bf_getbuffer /
+        # Py_bf_releasebuffer, in the limited API since 3.11), filled by RH3DM_FillBuffer
+        # (bnd_common_gen.h). Captureless lambdas, so they convert to the slot's function pointers
         b = cls['buffer']
         assert len(b['shape']) == len(b['strides']), cls['reg']
-        py_buf = ', py::buffer_protocol()'
-        py_bufdef = ('      .def_buffer([]({gen}& c) -> py::buffer_info {{\n'
-                     '        return py::buffer_info((double*){ptr}, sizeof(double),\n'
-                     '          py::format_descriptor<double>::format(), {n},\n'
-                     '          {{{shape}}},\n'
-                     '          {{{strides}}}); }})\n'
-                     ).format(gen=cls['gen'], ptr=b['ptr'], n=len(b['shape']),
-                              shape=', '.join('(py::ssize_t)(%s)' % e for e in b['shape']),
-                              strides=', '.join('(py::ssize_t)(%s)' % e for e in b['strides']))
-    py_block = ('  py::class_<{gen}{py_base}>(m, "{reg}"{py_buf})\n{py_dctor}{py_bufdef}'
-                '{defs};').format(gen=cls['gen'], py_base=py_base,
+        slots = ('  static PyType_Slot rh3dm_buffer_slots[] = {{\n'
+                 '    {{Py_bf_getbuffer, (void*)+[](PyObject* o, Py_buffer* view, int flags) -> int {{\n'
+                 '      try {{\n'
+                 '        {gen}& c = *py::inst_ptr<{gen}>(o);\n'
+                 '        const Py_ssize_t shape[] = {{{shape}}};\n'
+                 '        const Py_ssize_t strides[] = {{{strides}}};\n'
+                 '        return RH3DM_FillBuffer(o, view, flags, (double*){ptr}, {n}, shape, strides);\n'
+                 '      }} catch (const std::exception& e) {{\n'
+                 '        PyErr_SetString(PyExc_BufferError, e.what()); view->obj = nullptr; return -1;\n'
+                 '      }} }}}},\n'
+                 '    {{Py_bf_releasebuffer, (void*)+[](PyObject*, Py_buffer* view) {{ RH3DM_ReleaseBuffer(view); }}}},\n'
+                 '    {{0, nullptr}}}};\n'
+                 ).format(gen=cls['gen'], ptr=b['ptr'], n=len(b['shape']),
+                          shape=', '.join('(Py_ssize_t)(%s)' % e for e in b['shape']),
+                          strides=', '.join('(Py_ssize_t)(%s)' % e for e in b['strides']))
+        py_buf = ', py::type_slots(rh3dm_buffer_slots)'
+    py_block = ('{slots}  py::class_<{gen}{py_base}>(m, "{reg}"{py_buf})\n{py_dctor}'
+                '{defs};').format(slots=slots if cls.get('buffer') else '', gen=cls['gen'], py_base=py_base,
                                   reg=cls['reg'],
-                                  py_dctor=py_dctor, py_buf=py_buf, py_bufdef=py_bufdef,
+                                  py_dctor=py_dctor, py_buf=py_buf,
                                   defs='\n'.join(py))
     js_block = ('  class_{js_base}("{reg}")\n{js_dctor}'
                 '{defs};').format(js_base=js_base, reg=cls['reg'],

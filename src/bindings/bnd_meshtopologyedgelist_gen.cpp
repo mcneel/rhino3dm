@@ -48,7 +48,7 @@ void initGenMeshTopologyEdgeList(rh3dmpymodule& m)
 {
   py::class_<BND_MeshTopologyEdgeList>(m, "MeshTopologyEdgeList")
       .def("CollapseEdge", &BND_MeshTopologyEdgeList::Gen_CollapseEdge, py::arg("topologyEdgeIndex"))
-      .def_property_readonly("Count", &BND_MeshTopologyEdgeList::Gen_Count)
+      .def_prop_ro("Count", &BND_MeshTopologyEdgeList::Gen_Count)
       .def("EdgeLine", &BND_MeshTopologyEdgeList::Gen_EdgeLine, py::arg("topologyEdgeIndex"))
       .def("GetEdgeIndex", &BND_MeshTopologyEdgeList::Gen_GetEdgeIndex, py::arg("topologyVertex1"), py::arg("topologyVertex2"))
       .def("IsHidden", &BND_MeshTopologyEdgeList::Gen_IsHidden, py::arg("topologyEdgeIndex"))

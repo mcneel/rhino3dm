@@ -55,12 +55,12 @@ void BND_File3dmEdgeSoftening::Gen_set_Softening(double value) {
 void initGenFile3dmEdgeSoftening(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmEdgeSoftening>(m, "File3dmEdgeSoftening")
-      .def_property("Chamfer", &BND_File3dmEdgeSoftening::Gen_Chamfer, &BND_File3dmEdgeSoftening::Gen_set_Chamfer)
-      .def_property("EdgeAngleThreshold", &BND_File3dmEdgeSoftening::Gen_EdgeAngleThreshold, &BND_File3dmEdgeSoftening::Gen_set_EdgeAngleThreshold)
-      .def_property("Faceted", &BND_File3dmEdgeSoftening::Gen_Faceted, &BND_File3dmEdgeSoftening::Gen_set_Faceted)
-      .def_property("ForceSoftening", &BND_File3dmEdgeSoftening::Gen_ForceSoftening, &BND_File3dmEdgeSoftening::Gen_set_ForceSoftening)
-      .def_property("On", &BND_File3dmEdgeSoftening::Gen_On, &BND_File3dmEdgeSoftening::Gen_set_On)
-      .def_property("Softening", &BND_File3dmEdgeSoftening::Gen_Softening, &BND_File3dmEdgeSoftening::Gen_set_Softening);
+      .def_prop_rw("Chamfer", &BND_File3dmEdgeSoftening::Gen_Chamfer, &BND_File3dmEdgeSoftening::Gen_set_Chamfer)
+      .def_prop_rw("EdgeAngleThreshold", &BND_File3dmEdgeSoftening::Gen_EdgeAngleThreshold, &BND_File3dmEdgeSoftening::Gen_set_EdgeAngleThreshold)
+      .def_prop_rw("Faceted", &BND_File3dmEdgeSoftening::Gen_Faceted, &BND_File3dmEdgeSoftening::Gen_set_Faceted)
+      .def_prop_rw("ForceSoftening", &BND_File3dmEdgeSoftening::Gen_ForceSoftening, &BND_File3dmEdgeSoftening::Gen_set_ForceSoftening)
+      .def_prop_rw("On", &BND_File3dmEdgeSoftening::Gen_On, &BND_File3dmEdgeSoftening::Gen_set_On)
+      .def_prop_rw("Softening", &BND_File3dmEdgeSoftening::Gen_Softening, &BND_File3dmEdgeSoftening::Gen_set_Softening);
 }
 #endif
 
