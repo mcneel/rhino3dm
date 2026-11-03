@@ -1624,6 +1624,18 @@ def default_ctor_call(cls, manifest, c_by_name):
                 expr = '%s(%s)' % (call['Name'],
                                    ', '.join(['nullptr'] * len(call['Args'])))
                 return expr, fn
+    # a ref-holder default ctor (SubD(): `ON_SubDRef_New()`, then `ON_SubDRef_NewSubD(ref)` and the
+    # serial number .NET keeps): the ref is .NET's lifetime handle; the generated class owns the
+    # object itself, so the creation is a plain `new` (pilot #74)
+    for x in manifest['members']:
+        if (x['Type'] == cls['type'] and x['Kind'] == 'constructor' and not x.get('Params')
+                and x['Variant'] in ('portable', 'rhino3dm-only') and x['Body'] in ('trivial', 'pattern')
+                and len(x.get('Calls') or []) >= 2 and cls['mode'] == 'pointer'):
+            ref, new = (c_by_name.get(c['Name']) for c in x['Calls'][:2])
+            if (ref and new and not ref['params'] and ref['returns'].endswith('Ref*')
+                    and new['returns'] == '%s*' % cls['on'] and len(new['params']) == 1
+                    and new['params'][0]['type'] == ref['returns']):
+                return 'new %s()' % cls['on'], new
     return None
 
 
@@ -1665,6 +1677,10 @@ def arg_ctor_plans(cls, manifest, c_by_name, skipped):
         if fn is None or (fn['returns'] != '%s*' % cls['on'] and not managed_ctor):
             skip('creation fn'); continue
         m2 = dict(x, Kind='method', Static=True, Name='__ctor', Returns=cls['cs'])
+        if cls['mode'] == 'value':
+            # `m_ptr = UNM.ON_MeshParameters_New2(..)` on a class stored by value: the
+            # created object is adopted -- copied in, then freed -- as `new T(ptr)` (valadopt; #77)
+            m2['WrapArity'] = 1
         p, why = plan(m2, fn, cls)
         if p is None:
             skip(why); continue
@@ -1674,7 +1690,57 @@ def arg_ctor_plans(cls, manifest, c_by_name, skipped):
         if managed_ctor:
             p['ctor_call'] = 'const_cast<%s*>(%s)' % (cls['on'], p['ctor_call'])   # shared, never written through
         out.append(p)
+    cp = copy_ctor_plan(cls, manifest, c_by_name)
+    if isinstance(cp, str):
+        skip(cp)
+    elif cp is not None:
+        out.append(cp)
     return out
+
+
+def copy_ctor_plan(cls, manifest, c_by_name):
+    """RhinoCommon's public `T(T src)` (specgen CopyCtor; pilot #77): T's default
+    construction, then `Via(src)` -- CopyFrom (MeshingParameters, the RDK classes
+    through FreeFloatingBase(src)) or Merge (PointCloud). bnd_gen emits
+    `T(const T& src) : T() { <Via>(src); }`, calling the class's generated Via
+    member or, when that is not generated (CopyFrom(FreeFloatingBase)), Via's one
+    native on the two pointers. None: no such constructor; a string: refused."""
+    x = next((x for x in manifest['members']
+              if x['Type'] == cls['type'] and x['Kind'] == 'constructor' and x['Variant'] in ('portable', 'rhino3dm-only')
+              and [cs_unqualify(q['Type']) for q in x.get('Params') or []] == [cls['cs']]), None)
+    info = (TYPE_RECS.get(cls['type']) or {}).get('CopyCtor')
+    if x is None or not info or not info.get('Public'):
+        return None
+    t, seen = cls['type'], set()
+    while info and info.get('Base') and t not in seen:
+        seen.add(t)
+        bases = (TYPE_RECS.get(t) or {}).get('Bases') or []
+        cands = SIMPLE_TYPES.get(cs_unqualify(bases[0]), []) if bases else []
+        t = cands[0] if len(cands) == 1 else None
+        info = (TYPE_RECS.get(t) or {}).get('CopyCtor') if t else None
+    if not info or not info.get('Via'):
+        return 'copy: no base CopyCtor'
+    via = [m for m in manifest['members'] if m['Type'] == cls['type'] and m['Name'] == info['Via']
+           and m['Kind'] == 'method' and not m.get('Static') and len(m.get('Params') or []) == 1]
+    if len(via) != 1:
+        return 'copy: %s' % info['Via']
+    vm = via[0]
+    calls = vm.get('Calls') or []
+    native = None
+    if vm['Body'] == 'trivial' and len(calls) == 1 and len(calls[0]['Args']) == 2 and cls['mode'] == 'pointer':
+        a0, a1 = calls[0]['Args']
+        pn = vm['Params'][0]['Name']
+        if (a0['Text'] in ('CppPointer', 'ptr_this', 'NonConstPointer()') and
+                (a1['Kind'] == 'paramptr' and a1['Text'] == pn or a1['Text'] == pn + '.CppPointer')):
+            native = c_by_name.get(calls[0]['Name'])
+    fn = native or (c_by_name.get(calls[0]['Name']) if calls else None)
+    if fn is None:
+        return 'copy: %s native' % info['Via']
+    pname = x['Params'][0]['Name']
+    return {'m': x, 'fn': fn, 'bind_args': [('const %s&' % cls['gen'], pname)], 'locals': [], 'extra_fns': [],
+            'shape': ('copyctor',), 'call_exprs': [], 'guards': [],
+            'copy': {'via': info['Via'], 'native': native and native['name'], 'param': pname,
+                     'ptypes': native and [q['type'] for q in native['params']]}}
 
 
 def cond_ctor_plan(x, cls, c_by_name):

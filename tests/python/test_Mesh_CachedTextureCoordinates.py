@@ -53,18 +53,18 @@ class TestMeshCachedTextureCoordinates(unittest.TestCase):
         object_id = file3dm.Objects.AddMesh(mesh, attributes)
 
         # Should run without throwing regardless of whether coordinates get cached.
-        result = mesh.SetCachedTextureCoordinatesFromMaterial(file3dm, object_id, material)
-        self.assertIn(result, (True, False))
+        # D65: RhinoCommon's setter returns nothing
+        self.assertIsNone(mesh.SetCachedTextureCoordinatesFromMaterial(file3dm, object_id, material))
 
         texture = material.GetBitmapTexture()
         self.assertIsNotNone(texture)
 
-        tc = mesh.GetCachedTextureCoordinatesFromTexture(file3dm, object_id, texture)
+        tc = mesh.GetCachedTextureCoordinates(file3dm, object_id, texture)
         # Without object-level texture mappings there is nothing to cache -> None.
         # If something was cached it must be a well-formed set over all vertices.
         if tc is not None:
             self.assertEqual(len(tc), len(mesh.Vertices))
-            self.assertIn(tc.Dimension, (2, 3))
+            self.assertIn(tc.Dim, (2, 3))
 
     def test_get_with_unrelated_texture_returns_none(self):
         file3dm = rhino3dm.File3dm()
@@ -73,7 +73,7 @@ class TestMeshCachedTextureCoordinates(unittest.TestCase):
 
         unrelated = rhino3dm.Texture()
         unrelated.FileName = "unrelated.png"
-        tc = mesh.GetCachedTextureCoordinatesFromTexture(file3dm, object_id, unrelated)
+        tc = mesh.GetCachedTextureCoordinates(file3dm, object_id, unrelated)
         self.assertIsNone(tc)
 
     @unittest.skipIf(_fixture_path() is None, "meshWithTexture.3dm fixture not present")
@@ -94,12 +94,12 @@ class TestMeshCachedTextureCoordinates(unittest.TestCase):
             if texture is None:
                 continue
 
-            geometry.SetCachedTextureCoordinatesFromMaterial(file3dm, obj.Attributes.Id, material)
-            tc = geometry.GetCachedTextureCoordinatesFromTexture(file3dm, obj.Attributes.Id, texture)
+            geometry.SetCachedTextureCoordinatesFromMaterial(file3dm, obj.Attributes.ObjectId, material)
+            tc = geometry.GetCachedTextureCoordinates(file3dm, obj.Attributes.ObjectId, texture)
             if tc is not None:
                 found = True
                 self.assertEqual(len(tc), len(geometry.Vertices))
-                self.assertIn(tc.Dimension, (2, 3))
+                self.assertIn(tc.Dim, (2, 3))
                 success, u, v, w = tc.TryGetAt(0)
                 self.assertTrue(success)
                 self.assertTrue(all(isinstance(c, float) for c in (u, v, w)))

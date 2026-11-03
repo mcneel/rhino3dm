@@ -20,7 +20,7 @@ class TestPolyCurve(unittest.TestCase):
     #objective: 
     def test_Explode(self):
 
-        explodedCurves = self.pc.Explode2()
+        explodedCurves = self.pc.Explode()
         self.assertTrue( len(explodedCurves) > 0 )
         self.assertTrue( type(explodedCurves) == list )
         self.assertTrue( type(explodedCurves[0]) == rhino3dm.LineCurve )

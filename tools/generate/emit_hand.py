@@ -39,7 +39,8 @@ def hand_registrations(reg, value=False, overloads=False):
         args = ''.join(', py::arg("%s")' % a for a in e.get('args') or [])
         if e.get('py', True):
             if kind == 'method':
-                py.append('      .def("%s", &%s%s%s)' % (e['name'], fn, ka, args))
+                op = ', py::is_operator()' if e.get('op') else ''
+                py.append('      .def("%s", &%s%s%s%s)' % (e['name'], fn, ka, op, args))
             elif kind == 'static':
                 py.append('      .def_static("%s", &%s%s)' % (e['name'], fn, args))
             elif e.get('list'):

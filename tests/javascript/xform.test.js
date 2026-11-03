@@ -8,8 +8,8 @@ beforeAll(async () => {
 
 test('toFloatArray', async () => {
 
-    const xform = rhino.Transform.identity()
-    const fa = xform.toFloatArray(false)
+    const xform = rhino.Transform.identity
+    const fa = rhino.Transform.toFloatArray(xform, false)
 
     expect(fa.length === 16).toBe(true)
     expect(Array.isArray(fa)).toBe(true)

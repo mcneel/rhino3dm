@@ -15,9 +15,10 @@ class TestFile3dmStringTable(unittest.TestCase):
         value = 'someValue'
 
         #insert key value pair
-        file3dm.Strings[key] = value
+        # RhinoCommon's File3dmStringTable: SetString, then GetKey(i) / GetValue(i)
+        file3dm.Strings.SetString(key, value)
 
-        result = file3dm.Strings[0]
+        result = (file3dm.Strings.GetKey(0), file3dm.Strings.GetValue(0))
         self.assertTrue(len(result) == 2)
         self.assertTrue(type(result[0]) == str and type(result[1]) == str)
         self.assertTrue(result[0] == key and result[1] == value)

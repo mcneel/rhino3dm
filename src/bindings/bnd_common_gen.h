@@ -81,6 +81,19 @@ inline BND_Point3d RH3DM_P(const ON_3dPoint& p) { BND_Point3d r; r.m_x = p.x; r.
 inline BND_Vector3d RH3DM_V(const ON_3dVector& v) { BND_Vector3d r; r.m_x = v.x; r.m_y = v.y; r.m_z = v.z; return r; }
 inline BND_Interval RH3DM_I(const ON_Interval& i) { BND_Interval r; r.m_t0 = i.m_t[0]; r.m_t1 = i.m_t[1]; return r; }
 
+// an ARRAY result (C# T[]): a Python list, a JS array (D87: lists everywhere, as the
+// value types' and hand members' arrays and 8.x); BND_TUPLE stays for real tuples
+// (out-parameter results, Rectangle)
+#if defined(ON_PYTHON_COMPILE)
+typedef py::list RH3DM_ARR;
+inline RH3DM_ARR RH3DM_NewArr(int n) { return py::list(n); }
+template <class T> inline void RH3DM_SetArr(RH3DM_ARR& a, int i, const T& v) { a[i] = v; }
+#else
+typedef emscripten::val RH3DM_ARR;
+inline RH3DM_ARR RH3DM_NewArr(int n) { return CreateTuple(n); }
+template <class T> inline void RH3DM_SetArr(RH3DM_ARR& a, int i, const T& v) { SetTuple(a, i, v); }
+#endif
+
 // a tuple result C# may return as null (`if (count < 1) return null;`): BND_TUPLE
 // is py::tuple, which cannot hold None -- the old NullTuple() raises TypeError
 // in Python (pilot-findings #29) -- so these return an object (G54)
@@ -177,17 +190,17 @@ struct RH3DM_Bytes { std::vector<unsigned char> v;
   const unsigned char* data() const { return v.data(); }
   size_t size() const { return v.size(); } };
 // GetUserStrings() as rhino3dm returns it (D62; RhinoCommon's NameValueCollection is generated nowhere):
-// a tuple of (key, value) pairs, Python and JS alike
-inline BND_TUPLE RH3DM_UserStrings(const ON_Object* o) {
+// a list of [key, value] lists, Python and JS alike (D87; 8.x's shape)
+inline RH3DM_ARR RH3DM_UserStrings(const ON_Object* o) {
   ON_ClassArray<ON_wString> keys;
   if (o) o->GetUserStringKeys(keys);
-  BND_TUPLE rc = CreateTuple(keys.Count());
+  RH3DM_ARR rc = RH3DM_NewArr(keys.Count());
   for (int i = 0; i < keys.Count(); i++) {
     ON_wString v; o->GetUserString(keys[i].Array(), v);
-    BND_TUPLE kv = CreateTuple(2);
-    SetTuple(kv, 0, std::wstring(keys[i].Array()));
-    SetTuple(kv, 1, std::wstring(v.Array()));
-    SetTuple(rc, i, kv); }
+    RH3DM_ARR kv = RH3DM_NewArr(2);
+    RH3DM_SetArr(kv, 0, std::wstring(keys[i].Array()));
+    RH3DM_SetArr(kv, 1, std::wstring(v.Array()));
+    RH3DM_SetArr(rc, i, kv); }
   return rc; }
 // a class argument for a pointer-taking setter in a translated body (G112: `rc.ParentDimensionStyle =
 // dimStyle`, a const& parameter): its address; a pointer or null passes through
@@ -464,7 +477,7 @@ struct RH3DM_Variant
     case ON_XMLVariant::Types::DoubleArray4: { ON_4dPoint p = v.As4dPoint(); return py::make_tuple(p.x, p.y, p.z, p.w); }
     case ON_XMLVariant::Types::DoubleColor4: { ON_4fColor c = v.AsColor(); BND_Color4f r; r.m_r = c.Red(); r.m_g = c.Green(); r.m_b = c.Blue(); r.m_a = c.Alpha(); return py::cast(r); }
     case ON_XMLVariant::Types::Matrix: { ON_Xform xf = v.AsXform(); BND_Transform t = RH3DM_Val(xf); return py::cast(t); }
-    case ON_XMLVariant::Types::Buffer: { ON_Buffer b = v.AsBuffer(); std::string s((size_t)b.Size(), ' '); b.SeekFromStart(0); b.Read((ON__UINT64)s.size(), &s[0]); return py::bytes(s); }
+    case ON_XMLVariant::Types::Buffer: { ON_Buffer b = v.AsBuffer(); std::string s((size_t)b.Size(), '\0'); b.SeekFromStart(0); b.Read((ON__UINT64)s.size(), &s[0]); return py::bytes(s); }
 #else
     case ON_XMLVariant::Types::Bool: return emscripten::val(v.AsBool());
     case ON_XMLVariant::Types::Integer: return emscripten::val(v.AsInteger());
@@ -1081,6 +1094,7 @@ extern "C" ON_MeshParameters* ON_3dmObjectAttributes_CustomRenderMeshParameters(
 extern "C" ON_MeshParameters* ON_MeshParameters_DefaultAnalysisMesh();
 extern "C" ON_MeshParameters* ON_MeshParameters_FastRenderMesh();
 extern "C" ON_MeshParameters* ON_MeshParameters_New();
+extern "C" ON_MeshParameters* ON_MeshParameters_New2(double density, double min_edge_length);
 extern "C" ON_MeshParameters* ON_MeshParameters_QualityRenderMesh();
 extern "C" ON_ModelComponent* ONX_ModelComponentIterator_GetNext(ONX_ModelComponentIterator* modelIterator, int* outIndex, ON_ModelComponent::Type* outType, ON_UUID* outId);
 extern "C" ON_NurbsCurve* ON_BezierCurve_GetNurbForm(const ON_BezierCurve* pConstBezierCurve);
@@ -1103,6 +1117,7 @@ extern "C" ON_PlaneSurface* ON_PlaneSurface_New2(const ON_PLANE_STRUCT* plane);
 extern "C" ON_PlaneSurface* ON_PlaneSurface_New3();
 extern "C" ON_Point* ON_Point_New(ON_3DPOINT_STRUCT loc);
 extern "C" ON_PointCloud* ON_PointCloud_New();
+extern "C" ON_PointCloud* ON_PointCloud_New1(int count, const ON_3dPoint* points);
 extern "C" ON_PointCloud* ON_PointCloud_RandomSubsample(const ON_PointCloud* pConstPointCloud, unsigned int points_to_keep, ON_Terminator* pTerminator, int progress);
 extern "C" ON_PolyCurve* ON_PolyCurve_New(ON_PolyCurve* pOther);
 extern "C" ON_PolylineCurve* ON_PolylineCurve_New(ON_PolylineCurve* pOther);
@@ -1119,6 +1134,7 @@ extern "C" ON_SafeFrame* ON_SafeFrame_New();
 extern "C" ON_SimpleArray<ON_Object*>* ON_ObjectArray_New();
 extern "C" ON_SimpleArray<const ON_3dmObjectAttributes*>* ON_SimpleArray_3dmObjectAttributes_New();
 extern "C" ON_Skylight* ON_Skylight_New();
+extern "C" ON_SubD* ON_SubDRef_NewSubD(ON_SubDRef* ptrSubDRef);
 extern "C" ON_SubD* ON_SubD_CreateCylinder(const ON_Cylinder* pConstCylinder, unsigned int circumference_face_count, unsigned int height_face_count, ON_SubDEndCapStyle end_cap_style, ON_SubDEdgeTag end_cap_edge_tag, ON_SubDComponentLocation radius_location);
 extern "C" ON_SubD* ON_SubD_Empty();
 extern "C" ON_SubDEdgeTag ON_SubDEdge_GetEdgeTag(const ON_SubDEdge* constEdgePtr);
@@ -2415,6 +2431,7 @@ extern "C" void ON_Dim_SetDimRadialTextLocation(ON_Dimension* dim, const ON_DimS
 extern "C" void ON_Dim_SetDimRadialTextOrientation(ON_Dimension* dim, const ON_DimStyle* parent_style, ON::TextOrientation orientation);
 extern "C" void ON_Dim_SetDimTextOrientation(ON_Dimension* dim, const ON_DimStyle* parent_style, ON::TextOrientation orientation);
 extern "C" void ON_Dimstyle_SetUnitSystem(ON_DimStyle* pDimStyle, ON::LengthUnitSystem unitSystem);
+extern "C" void ON_Dithering_CopyFrom(ON_Dithering* target, const ON_Dithering* source);
 extern "C" void ON_Dithering_Delete(ON_Dithering* p);
 extern "C" void ON_Dithering_GetValue(const ON_Dithering* dit, DitheringSetting which, ON_XMLVariant* v);
 extern "C" void ON_Dithering_SetValue(ON_Dithering* dit, DitheringSetting which, const ON_XMLVariant* v);
@@ -2444,6 +2461,7 @@ extern "C" void ON_Font_RichTextFontName(const ON_Font* constFont, ON_wString* p
 extern "C" void ON_Font_WindowsLogfontName(const ON_Font* constFont, ON_wString* pString);
 extern "C" void ON_Geometry_BoundingBox(const ON_Geometry* ptr, ON_BoundingBox* bbox);
 extern "C" void ON_Geometry_ComponentIndex(const ON_Geometry* ptr, ON_COMPONENT_INDEX* ci);
+extern "C" void ON_GroundPlane_CopyFrom(ON_GroundPlane* target, const ON_GroundPlane* source);
 extern "C" void ON_GroundPlane_Delete(ON_GroundPlane* p);
 extern "C" void ON_GroundPlane_GetValue(const ON_GroundPlane* gp, GroundPlaneSetting which, ON_XMLVariant* v);
 extern "C" void ON_GroundPlane_SetValue(ON_GroundPlane* gp, GroundPlaneSetting which, const ON_XMLVariant* v);
@@ -2497,6 +2515,7 @@ extern "C" void ON_Light_SetModelObjectId(ON_Light* pConstLight, ON_UUID uuid);
 extern "C" void ON_Light_SetName(ON_Light* pLight, const RHMONO_STRING* pString);
 extern "C" void ON_Light_SetVector(ON_Light* pLight, ON_3DVECTOR_STRUCT v, int which);
 extern "C" void ON_LineCurve_GetSetLine(ON_LineCurve* pCurve, bool set, ON_Line* line);
+extern "C" void ON_LinearWorkflow_CopyFrom(ON_LinearWorkflow* target, const ON_LinearWorkflow* source);
 extern "C" void ON_LinearWorkflow_Delete(ON_LinearWorkflow* p);
 extern "C" void ON_LinearWorkflow_GetValue(const ON_LinearWorkflow* lw, LinearWorkflowSetting which, ON_XMLVariant* v);
 extern "C" void ON_LinearWorkflow_SetValue(ON_LinearWorkflow* lw, LinearWorkflowSetting which, const ON_XMLVariant* v);
@@ -2612,6 +2631,7 @@ extern "C" void ON_PostEffect_GetId(const ON_PostEffect* pep, ON_UUID* id);
 extern "C" void ON_PostEffect_GetLocalName(const ON_PostEffect* pep, CRhCmnStringHolder* string);
 extern "C" void ON_PostEffect_SetOn(ON_PostEffect* pep, bool b);
 extern "C" void ON_PostEffect_SetShown(ON_PostEffect* pep, bool b);
+extern "C" void ON_PostEffects_CopyFrom(ON_PostEffects* target, const ON_PostEffects* source);
 extern "C" void ON_PostEffects_Delete(ON_PostEffects* p);
 extern "C" void ON_PostEffects_SetSelectedPostEffect(ON_PostEffects* peps, int type, ON_UUID* id);
 extern "C" void ON_RenderChannels_Delete(ON_RenderChannels* p);
@@ -2625,11 +2645,13 @@ extern "C" void ON_RenderContent_TypeName(const ON_RenderContent* rc, ON_wString
 extern "C" void ON_RenderContent_XML(const ON_RenderContent* rc, bool recursive, ON_wString* string);
 extern "C" void ON_RevSurface_Angle(const ON_RevSurface* pConstSurface, ON_Interval* pAngle);
 extern "C" void ON_RevSurface_Axis(const ON_RevSurface* pConstSurface, ON_Line* pLine);
+extern "C" void ON_SafeFrame_CopyFrom(ON_SafeFrame* target, const ON_SafeFrame* source);
 extern "C" void ON_SafeFrame_Delete(ON_SafeFrame* p);
 extern "C" void ON_SafeFrame_GetValue(const ON_SafeFrame* sf, SafeFrameSetting which, ON_XMLVariant* v);
 extern "C" void ON_SafeFrame_SetValue(ON_SafeFrame* sf, SafeFrameSetting which, const ON_XMLVariant* v);
 extern "C" void ON_SimpleArray_3dmObjectAttributes_Add(ON_SimpleArray<const ON_3dmObjectAttributes*>* pArray, const ON_3dmObjectAttributes* pAttributes);
 extern "C" void ON_SimpleArray_3dmObjectAttributes_Delete(ON_SimpleArray<const ON_3dmObjectAttributes*>* pArray);
+extern "C" void ON_Skylight_CopyFrom(ON_Skylight* target, const ON_Skylight* source);
 extern "C" void ON_Skylight_Delete(ON_Skylight* p);
 extern "C" void ON_Skylight_GetValue(const ON_Skylight* sl, SkylightSetting which, ON_XMLVariant* v);
 extern "C" void ON_Skylight_SetValue(ON_Skylight* sl, SkylightSetting which, const ON_XMLVariant* v);

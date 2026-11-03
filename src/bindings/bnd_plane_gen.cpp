@@ -260,10 +260,10 @@ bool BND_Plane::ExtendThroughBox(BND_Box box, BND_Interval& s, BND_Interval& t)
 
 bool BND_Plane::ExtendThroughPoints(const std::vector<BND_Point3d>& pts, BND_Interval& s, BND_Interval& t) const
 {
-  double s0 = std::numeric_limits<double>::max();
-  double s1 = std::numeric_limits<double>::lowest();
-  double t0 = std::numeric_limits<double>::max();
-  double t1 = std::numeric_limits<double>::lowest();
+  double s0 = (std::numeric_limits<double>::max)();
+  double s1 = (std::numeric_limits<double>::lowest)();
+  double t0 = (std::numeric_limits<double>::max)();
+  double t1 = (std::numeric_limits<double>::lowest)();
   bool valid = false;
   for (BND_Point3d pt : pts)
   {

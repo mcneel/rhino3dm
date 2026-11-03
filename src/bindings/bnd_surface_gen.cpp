@@ -262,8 +262,8 @@ RH3DM_NTUPLE BND_Surface::Gen_GetSpanVector(int direction) const {
   if (count < 1) return RH3DM_NoneTuple();
   std::vector<double> rc(count);
   if (!(ON_Surface_GetSpanVector(RH3DM_Const(), direction, rc.data()))) return RH3DM_NoneTuple();
-  BND_TUPLE rh3dm_tuple = CreateTuple(count);
-  for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) SetTuple(rh3dm_tuple, rh3dm_i, rc[rh3dm_i]);
+  RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(count);
+  for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) RH3DM_SetArr(rh3dm_tuple, rh3dm_i, rc[rh3dm_i]);
   return rh3dm_tuple;
 }
 

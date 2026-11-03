@@ -17,12 +17,12 @@ std::wstring BND_InstanceDefinitionGeometry::Gen_Description() const {
   return RH3DM_W(holder_out);
 }
 
-BND_TUPLE BND_InstanceDefinitionGeometry::Gen_GetObjectIds() const {
+RH3DM_ARR BND_InstanceDefinitionGeometry::Gen_GetObjectIds() const {
   ON_SimpleArray<ON_UUID> holder_out;
   ON_InstanceDefinition_GetObjectIds(RH3DM_Const(), &holder_out);
-  BND_TUPLE rc = CreateTuple(holder_out.Count());
+  RH3DM_ARR rc = RH3DM_NewArr(holder_out.Count());
   for (int i = 0; i < holder_out.Count(); i++)
-    SetTuple(rc, i, ON_UUID_to_Binding(holder_out[i]));
+    RH3DM_SetArr(rc, i, ON_UUID_to_Binding(holder_out[i]));
   return rc;
 }
 

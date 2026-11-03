@@ -35,9 +35,9 @@ class TestIntersection(unittest.TestCase):
 
     def test_intersectPlaneResults(self):
 
-        planeA = rhino3dm.Plane.WorldXY()
-        planeB = rhino3dm.Plane.WorldYZ()
-        planeC = rhino3dm.Plane.WorldZX()
+        planeA = rhino3dm.Plane.WorldXY
+        planeB = rhino3dm.Plane.WorldYZ
+        planeC = rhino3dm.Plane.WorldZX
         line = rhino3dm.LineCurve(rhino3dm.Point3d(0, 0, -10), rhino3dm.Point3d(10, 10, 10)).Line
         sphere = rhino3dm.Sphere(rhino3dm.Point3d(0, 0, 0), 5)
 
@@ -88,7 +88,7 @@ class TestIntersection(unittest.TestCase):
         circle = rhino3dm.Circle(rhino3dm.Point3d(0, 0, 0), 5)
         sphere = rhino3dm.Sphere(rhino3dm.Point3d(0, 0, 0), 5)
         cylinder = rhino3dm.Cylinder(circle, 5)
-        box = sphere.ToBrep().GetBoundingBox()
+        box = sphere.ToBrep().GetBoundingBox(False)
 
         with self.subTest(msg="LineCircle"):
             resultLineCircle = rhino3dm.Intersection.LineCircle(line, circle)

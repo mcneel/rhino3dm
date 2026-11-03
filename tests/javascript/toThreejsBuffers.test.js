@@ -8,9 +8,9 @@ beforeAll(async () => {
 
 function quadMesh(rhino) {
     const m = new rhino.Mesh()
-    const v = m.vertices()
+    const v = m.vertices
     v.add(0, 0, 0); v.add(1, 0, 0); v.add(1, 1, 0); v.add(0, 1, 0)
-    m.faces().addQuadFace(0, 1, 2, 3)
+    m.faces.addFace(0, 1, 2, 3)
     return m
 }
 
@@ -47,7 +47,7 @@ test('toThreejsBuffers returns typed arrays matching toThreejsJSON', async () =>
 
 test('toThreejsBuffers includes uv when texture coordinates are present', async () => {
     const mesh = quadMesh(rhino)
-    const tc = mesh.textureCoordinates()
+    const tc = mesh.textureCoordinates
     tc.add(0, 0); tc.add(1, 0); tc.add(1, 1); tc.add(0, 1)
 
     const buf = mesh.toThreejsBuffers(false)
@@ -69,16 +69,16 @@ test('toThreejsBuffers(true) rotates to Y-up like toThreejsJSONRotate(true)', as
 // builds a G x G grid of quads -> (G+1)^2 vertices, G^2 quads
 function gridMesh(rhino, G) {
     const m = new rhino.Mesh()
-    const v = m.vertices()
+    const v = m.vertices
     for (let y = 0; y <= G; y++)
         for (let x = 0; x <= G; x++)
             v.add(x, y, Math.sin(x * 0.1) * Math.cos(y * 0.1))
-    const f = m.faces()
+    const f = m.faces
     const stride = G + 1
     for (let y = 0; y < G; y++) {
         for (let x = 0; x < G; x++) {
             const a = y * stride + x
-            f.addQuadFace(a, a + 1, a + stride + 1, a + stride)
+            f.addFace(a, a + 1, a + stride + 1, a + stride)
         }
     }
     return m

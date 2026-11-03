@@ -17,19 +17,21 @@ test('read3dmTables', async () => {
 
   expect(doc !== null).toBe(true)
 
-  const objectTableCnt = doc.objects().count
-  const layerTableCnt = doc.layers().count
-  const materialsTableCnt = doc.materials().count
-  const linetypeTableCnt = doc.linetypes().count
-  const bitmapsTableCnt = doc.bitmaps().count
-  const groupTableCnt = doc.groups().count
-  const idTableCnt = doc.instanceDefinitions().count
-  const viewTableCnt = doc.views().count
-  const namedViewsTableCnt = doc.namedViews().count
-  const pluginDataTableCnt = doc.plugInData().count
-  const stringTableCnt = doc.strings().count
-  const embeddedFileTableCnt = doc.embeddedFiles().count
-  const renderContentTableCnt = doc.renderContent().count
+  const objectTableCnt = doc.objects.count
+  const layerTableCnt = doc.layers.count
+  const materialsTableCnt = doc.materials.count
+  const linetypeTableCnt = doc.linetypes.count
+  const bitmapsTableCnt = doc.bitmaps.count
+  // groups -> allGroups
+  const groupTableCnt = doc.allGroups.count
+  const idTableCnt = doc.instanceDefinitions.count
+  const viewTableCnt = doc.views.count
+  const namedViewsTableCnt = doc.namedViews.count
+  const pluginDataTableCnt = doc.plugInData.count
+  const stringTableCnt = doc.strings.count
+  const embeddedFileTableCnt = doc.embeddedFiles.count
+  // renderContent -> one collection per kind (iteration only)
+  const renderContentTableCnt = [...doc.renderMaterials].length + [...doc.renderEnvironments].length + [...doc.renderTextures].length
 
   expect(objectTableCnt === 22).toBe(true)
   expect(layerTableCnt === 6).toBe(true)
@@ -58,7 +60,8 @@ test('embeddedFilePaths', async () => {
 
   expect(doc !== null).toBe(true)
 
-  const ef = doc.embeddedFilePaths()
+  // D69: embeddedFilePaths -> embeddedFiles / .filename
+  const ef = [...doc.embeddedFiles].map(f => f.filename)
 
   expect(Array.isArray(ef)).toBe(true)
   expect(typeof ef[0] === 'string').toBe(true)

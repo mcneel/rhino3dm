@@ -3,6 +3,9 @@
 // constants and guards baked from the C# call sites (api/manifest.json).
 #include "bnd_skylight_gen.h"
 
+BND_Skylight::BND_Skylight(const BND_Skylight& src)
+  : BND_Skylight() { ON_Skylight_CopyFrom((ON_Skylight*)RH3DM_NonConst(), (const ON_Skylight*)src.RH3DM_Const()); }
+
 BND_UUID BND_Skylight::Gen_CustomEnvironment() const {
   ON_XMLVariant* v = ON_XMLVariant_New();
   ON_Skylight_GetValue(RH3DM_Const(), (SkylightSetting)2, v);
@@ -118,6 +121,7 @@ void initGenSkylight(rh3dmpymodule& m)
 {
   py::class_<BND_Skylight>(m, "Skylight")
       .def(py::init<>())
+      .def(py::init<const BND_Skylight&>(), py::arg("src"))
       .def_property("CustomEnvironment", &BND_Skylight::Gen_CustomEnvironment, &BND_Skylight::Gen_set_CustomEnvironment)
       .def_property("CustomEnvironmentOn", &BND_Skylight::Gen_CustomEnvironmentOn, &BND_Skylight::Gen_set_CustomEnvironmentOn)
       .def_property("Enabled", &BND_Skylight::Gen_Enabled, &BND_Skylight::Gen_set_Enabled)
@@ -131,6 +135,7 @@ void initGenSkylight(void)
 {
   class_<BND_Skylight>("Skylight")
       .constructor<>()
+      .constructor<const BND_Skylight&>()
       .property("customEnvironment", &BND_Skylight::Gen_CustomEnvironment, &BND_Skylight::Gen_set_CustomEnvironment)
       .property("customEnvironmentOn", &BND_Skylight::Gen_CustomEnvironmentOn, &BND_Skylight::Gen_set_CustomEnvironmentOn)
       .property("enabled", &BND_Skylight::Gen_Enabled, &BND_Skylight::Gen_set_Enabled)

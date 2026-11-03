@@ -47,12 +47,12 @@ bool BND_File3dmShutLining::Gen_ForceUpdate() const {
   return ON_3dmObjectAttributes_ShutLining_GetForceUpdate(m_ptr);
 }
 
-BND_TUPLE BND_File3dmShutLining::Gen_GetCurves() const {
+RH3DM_ARR BND_File3dmShutLining::Gen_GetCurves() const {
   ON_SimpleArray<ON_UUID> holder_out;
   ON_3dmObjectAttributes_ShutLining_GetCurves(m_ptr, &holder_out);
-  BND_TUPLE rc = CreateTuple(holder_out.Count());
+  RH3DM_ARR rc = RH3DM_NewArr(holder_out.Count());
   for (int i = 0; i < holder_out.Count(); i++)
-    SetTuple(rc, i, ON_UUID_to_Binding(holder_out[i]));
+    RH3DM_SetArr(rc, i, ON_UUID_to_Binding(holder_out[i]));
   return rc;
 }
 

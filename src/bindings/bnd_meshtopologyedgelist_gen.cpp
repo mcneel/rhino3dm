@@ -33,13 +33,13 @@ bool BND_MeshTopologyEdgeList::Gen_SwapEdge(int topologyEdgeIndex) const {
   return ON_Mesh_IndexOpBool(m_ptr, (MeshIndexOpBoolConst)2, topologyEdgeIndex);
 }
 
-BND_TUPLE BND_MeshTopologyEdgeList::Gen_GetConnectedFaces(int topologyEdgeIndex) const {
+RH3DM_ARR BND_MeshTopologyEdgeList::Gen_GetConnectedFaces(int topologyEdgeIndex) const {
   int count = ON_MeshTopologyEdge_TopfCount(m_ptr, topologyEdgeIndex);
-  if (count <= 0) return CreateTuple(0);
+  if (count <= 0) return RH3DM_NewArr(0);
   std::vector<int> rc(count);
   ON_MeshTopologyEdge_TopfList(m_ptr, topologyEdgeIndex, count, rc.data());
-  BND_TUPLE rh3dm_tuple = CreateTuple(count);
-  for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) SetTuple(rh3dm_tuple, rh3dm_i, rc[rh3dm_i]);
+  RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(count);
+  for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) RH3DM_SetArr(rh3dm_tuple, rh3dm_i, rc[rh3dm_i]);
   return rh3dm_tuple;
 }
 

@@ -13,14 +13,15 @@ class TestFile3dmTables(unittest.TestCase):
         materialsTableCnt = len(file3dm.Materials)
         linetypeTableCnt = len(file3dm.Linetypes)
         bitmapsTableCnt = len(file3dm.Bitmaps)
-        groupTableCnt = len(file3dm.Groups)
+        groupTableCnt = len(file3dm.AllGroups)
         idTableCnt = len(file3dm.InstanceDefinitions)
         viewTableCnt = len(file3dm.Views)
         namedViewsTableCnt = len(file3dm.NamedViews)
         pluginDataTableCnt = len(file3dm.PlugInData)
-        stringTableCnt = len(file3dm.Strings)
+        stringTableCnt = file3dm.Strings.Count       # RhinoCommon's string table: Count, no indexer
         embeddedFileTableCnt = len(file3dm.EmbeddedFiles)
-        renderContentTableCnt = len(file3dm.RenderContent)
+        # triage H1: one collection per kind of render content
+        renderContentTableCnt = sum(len(list(c)) for c in (file3dm.RenderMaterials, file3dm.RenderEnvironments, file3dm.RenderTextures))   # iteration only, as in .NET
 
         self.assertTrue(objectTableCnt          == 22)
         self.assertTrue(layerTableCnt           == 6)
@@ -38,7 +39,8 @@ class TestFile3dmTables(unittest.TestCase):
 
     def test_file3dmEmbeddedFilePaths(self):
         file3dm = rhino3dm.File3dm.Read('../models/file3dm_stuff.3dm')
-        embeddedFiles = file3dm.EmbeddedFilePaths2()
+        # D69: the old EmbeddedFilePaths2() -> RhinoCommon's EmbeddedFiles (File3dmEmbeddedFile.Filename)
+        embeddedFiles = [f.Filename for f in file3dm.EmbeddedFiles]
         #print(embeddedFiles)
 
         self.assertTrue(type(embeddedFiles) == list)

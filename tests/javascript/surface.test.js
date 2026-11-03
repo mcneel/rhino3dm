@@ -5,12 +5,13 @@ let surface
 
 beforeAll(async () => {
     rhino = await rhino3dm()
-    surface = new rhino.Sphere([0, 0, 0], 5).toBrep().surfaces().get(0)
+    surface = rhino.Sphere.toBrep(rhino.Sphere.create({ X: 0, Y: 0, Z: 0 }, 5)).surfaces.get(0)
 })
 
 test('toNurbsSurface', async () => {
 
-    const result = surface.toNurbsSurfaceTolerance(0.0)
+    // toNurbsSurfaceTolerance -> toNurbsSurface(tolerance)
+    const result = surface.toNurbsSurface(0.0)
     expect(Array.isArray(result)).toBe(true)
     expect(result.length).toBe(2)
     expect(result[0]).toBeInstanceOf(rhino.NurbsSurface)
@@ -27,10 +28,11 @@ test('frameAt', async () => {
     expect(typeof result[0] === 'boolean').toBe(true)
     expect(typeof result[1] === 'object').toBe(true)
     expect(result[0]).toBe(true)
-    expect(result[1].origin).toBeDefined()
-    expect(result[1].xAxis).toBeDefined()
-    expect(result[1].yAxis).toBeDefined()
-    expect(result[1].zAxis).toBeDefined()
+    // D11: plain object with RhinoCommon's field names
+    expect(result[1].Origin).toBeDefined()
+    expect(result[1].XAxis).toBeDefined()
+    expect(result[1].YAxis).toBeDefined()
+    expect(result[1].ZAxis).toBeDefined()
 
 })
 

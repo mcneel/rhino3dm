@@ -6,42 +6,42 @@ beforeAll(async () => {
 })
 
 function boxBrep(rhino) {
-    const sphere = new rhino.Sphere([0, 0, 0], 5)
-    const bbox = sphere.toBrep().getBoundingBox()
-    return rhino.Brep.createFromBoundingBox(bbox)
+    const sphere = rhino.Sphere.create({ X: 0, Y: 0, Z: 0 }, 5)
+    const bbox = rhino.Sphere.toBrep(sphere).getBoundingBox(false)
+    return rhino.Brep.createFromBox(bbox)
 }
 
 // RH3DM #713 follow-up: Brep loop/trim topology traversal (Py + JS parity).
 test('faceLoopsAndTrims', async () => {
     const brep = boxBrep(rhino)
-    const face = brep.faces().get(0)
+    const face = brep.faces.get(0)
 
     const loops = face.loops
     expect(loops.count).toBe(1)
 
     const loop = loops.get(0)
     expect(loop.loopType).toBe(rhino.BrepLoopType.Outer)
-    expect(loop.trimCount).toBe(4)
+    expect(loop.trims.count).toBe(4)
 
     const trims = loop.trims
     expect(trims.count).toBe(4)
 
     const trim = trims.get(0)
-    expect(typeof trim.edgeIndex === 'number').toBe(true)
-    expect(trim.edgeIndex).toBeGreaterThanOrEqual(0)
-    expect(typeof trim.isReversed === 'boolean').toBe(true)
-    expect(typeof trim.startVertexIndex === 'number').toBe(true)
-    expect(typeof trim.endVertexIndex === 'number').toBe(true)
+    expect(typeof trim.edge.edgeIndex === 'number').toBe(true)
+    expect(trim.edge.edgeIndex).toBeGreaterThanOrEqual(0)
+    expect(typeof trim.isReversed() === 'boolean').toBe(true)
+    expect(typeof trim.startVertex.vertexIndex === 'number').toBe(true)
+    expect(typeof trim.endVertex.vertexIndex === 'number').toBe(true)
 })
 
 test('outerLoop', async () => {
     const brep = boxBrep(rhino)
-    const face = brep.faces().get(0)
+    const face = brep.faces.get(0)
 
-    const outer = face.outerLoop()
+    const outer = face.outerLoop
     expect(outer).not.toBeNull()
     expect(outer.loopType).toBe(rhino.BrepLoopType.Outer)
-    expect(outer.trimCount).toBe(4)
+    expect(outer.trims.count).toBe(4)
 })
 
 test('loopTypeEnum', async () => {

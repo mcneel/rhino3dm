@@ -11,12 +11,13 @@ beforeAll(async () => {
 function makeCloud(rhino, n, { withColor = false, withNormal = false } = {}) {
     const pc = new rhino.PointCloud()
     for (let i = 0; i < n; i++) {
-        const p = [ (i % 512) * 0.25 - 64, ((i * 3) % 512) * 0.25 - 64, Math.sin(i * 0.05) * 10 ]
+        const p = { X: (i % 512) * 0.25 - 64, Y: ((i * 3) % 512) * 0.25 - 64, Z: Math.sin(i * 0.05) * 10 }
         const color = { r: i % 256, g: 0, b: 255 - (i % 256), a: 0 }
-        const normal = [ 0, 0, 1 ]
-        if (withColor && withNormal) pc.addPointNormalColor(p, normal, color)
-        else if (withColor) pc.addPointColor(p, color)
-        else if (withNormal) pc.addPointNormal(p, normal)
+        const normal = { X: 0, Y: 0, Z: 1 }
+        // addPointNormalColor / addPointColor / addPointNormal -> add overloads
+        if (withColor && withNormal) pc.add(p, normal, color)
+        else if (withColor) pc.add(p, color)
+        else if (withNormal) pc.add(p, normal)
         else pc.add(p)
     }
     return pc
@@ -71,7 +72,7 @@ test('toThreejsBuffers includes normal when present', async () => {
 
 test('toThreejsBuffers(true) rotates Z-up to Y-up', async () => {
     const pc = new rhino.PointCloud()
-    pc.add([ 1, 2, 3 ])
+    pc.add({ X: 1, Y: 2, Z: 3 })
     const buf = pc.toThreejsBuffers(true)
     // Rhino is Z-up, three.js is Y-up: (x, y, z) -> (x, z, -y)
     expect(buf.position[0]).toBeCloseTo(1, 4)

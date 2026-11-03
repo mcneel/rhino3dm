@@ -3,6 +3,9 @@
 // constants and guards baked from the C# call sites (api/manifest.json).
 #include "bnd_linearworkflow_gen.h"
 
+BND_LinearWorkflow::BND_LinearWorkflow(const BND_LinearWorkflow& src)
+  : BND_LinearWorkflow() { ON_LinearWorkflow_CopyFrom((ON_LinearWorkflow*)RH3DM_NonConst(), (const ON_LinearWorkflow*)src.RH3DM_Const()); }
+
 unsigned int BND_LinearWorkflow::Gen_Hash() const {
   return ON_LinearWorkflow_ComputeCRC(RH3DM_Const());
 }
@@ -191,6 +194,7 @@ void initGenLinearWorkflow(rh3dmpymodule& m)
 {
   py::class_<BND_LinearWorkflow>(m, "LinearWorkflow")
       .def(py::init<>())
+      .def(py::init<const BND_LinearWorkflow&>(), py::arg("src"))
       .def_property_readonly("Hash", &BND_LinearWorkflow::Gen_Hash)
       .def_property("PostProcessFrameBuffer", &BND_LinearWorkflow::Gen_PostProcessFrameBuffer, &BND_LinearWorkflow::Gen_set_PostProcessFrameBuffer)
       .def_property("PostProcessGamma", &BND_LinearWorkflow::Gen_PostProcessGamma, &BND_LinearWorkflow::Gen_set_PostProcessGamma)
@@ -210,6 +214,7 @@ void initGenLinearWorkflow(void)
 {
   class_<BND_LinearWorkflow>("LinearWorkflow")
       .constructor<>()
+      .constructor<const BND_LinearWorkflow&>()
       .property("hash", &BND_LinearWorkflow::Gen_Hash)
       .property("postProcessFrameBuffer", &BND_LinearWorkflow::Gen_PostProcessFrameBuffer, &BND_LinearWorkflow::Gen_set_PostProcessFrameBuffer)
       .property("postProcessGamma", &BND_LinearWorkflow::Gen_PostProcessGamma, &BND_LinearWorkflow::Gen_set_PostProcessGamma)

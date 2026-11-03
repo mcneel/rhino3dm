@@ -19,9 +19,8 @@ class TestFile3dmBitmapTable(unittest.TestCase):
 
         qtyDimStyles1 = len(file3dm.DimStyles)
 
-        id1 = file3dm.DimStyles[0].Id
-
-        file3dm.DimStyles.Delete(id1)
+        # D14: RhinoCommon's Delete(item) / Delete(index); the id form was rhino3dm-only
+        file3dm.DimStyles.Delete(file3dm.DimStyles[0])
 
         qtyDimStyles2 = len(file3dm.DimStyles)
 

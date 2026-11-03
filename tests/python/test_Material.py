@@ -27,8 +27,8 @@ class TestMaterial(unittest.TestCase):
         mat = rhino3dm.Material()
         tex = rhino3dm.Texture()
         tex.FileName = 'roughness.png'
-        tex.TextureType = int(rhino3dm.TextureType.PBR_Roughness)
-        mat.SetTexture(tex)
+        tex.TextureType = rhino3dm.TextureType.PBR_Roughness
+        mat.SetTexture(tex, tex.TextureType)     # RhinoCommon names the channel explicitly
 
         roughness = mat.GetTexture(rhino3dm.TextureType.PBR_Roughness)
         self.assertIsNotNone(roughness)

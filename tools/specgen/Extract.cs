@@ -979,6 +979,7 @@ record MemberRecord
     public ScopingCtor[] ScopingCtors { get; init; }  // Kind=="type": constructors storing a component in a field another nulls (G77)
     public bool Borrowed { get; init; }      // Kind=="type": `(IntPtr p) { ConstructNonConstObject(p); DoNotDestructOnDispose(); }` -- a pointer into another object
     public string InternalNew { get; init; }
+    public CopyCtorInfo CopyCtor { get; init; }  // Kind=="type": `T(T src)` as default construction + `Via(src)` (see DetectCopyCtor; pilot #77)
     public string InternalCopy { get; init; }   // Kind=="type": an INTERNAL copy constructor's native (`PolyCurve(PolyCurve other)` -> ON_PolyCurve_New(other)) (G69) // Kind=="type": a non-public `T() { ConstructNonConstObject(UNM.ON_T_New()); }` -- its native creation call
     public string PtrCtor { get; init; }     // Kind=="type": what `T(IntPtr p)` does with p (see DetectPtrCtor); "|own-if-true": T(IntPtr p, bool f) adopts p when f (G122)
     public SharedHandleInfo SharedHandle { get; init; } // Kind=="type": a shared_ptr handle (see DetectSharedHandle)
@@ -1247,6 +1248,16 @@ record FailThrowInfo
     // `if (!CALL) { if (C1) throw ...; if (C2) throw ...; }` (PointCloud.PointAt):
     // the throws after the first, in order; none firing falls through (G49)
     public GuardInfo[] More { get; init; }
+}
+
+// `T(T src)` (DetectCopyCtor): Via = the member called on src after default
+// construction (NullOk: only when src != null), or Base = `: base(src)`
+record CopyCtorInfo
+{
+    public string Via { get; init; }
+    public bool NullOk { get; init; }
+    public bool Base { get; init; }
+    public bool Public { get; init; }
 }
 
 // A model component a File3dm table hands out is a PROXY (`new Layer(id, file)`):
@@ -1687,6 +1698,7 @@ class Walker : CSharpSyntaxWalker
         var scopingCtors = DetectScopingCtors(node, nullingCtors);
         var internalNew = DetectInternalNew(node);
         var internalCopy = DetectInternalCopy(node);
+        var copyCtor = DetectCopyCtor(node);
         var ptrCtor = DetectPtrCtor(node);
         if (DetectFlagPtrCtor(node)) ptrCtor = (ptrCtor ?? "") + "|own-if-true";
         // CachedTextureCoordinates: a pointer INTO another object, never deleted
@@ -1742,6 +1754,7 @@ class Walker : CSharpSyntaxWalker
                 Borrowed = _portable && borrowed,
                 InternalNew = _portable ? internalNew : null,
                 InternalCopy = _portable ? internalCopy : null,
+                CopyCtor = _portable ? copyCtor : null,
                 PtrCtor = _portable ? ptrCtor : null,
                 ParentFields = parentFields,
                 CtorStore = ctorStore,
@@ -1800,6 +1813,48 @@ class Walker : CSharpSyntaxWalker
     // pOther = other.ConstPointer(); IntPtr ptr = UNM.ON_PolyCurve_New(pOther);
     // ConstructNonConstObject(ptr); }`: an internal COPY constructor -- its native, taking
     // the other's const pointer (G69). `new T(this)` in a member is that copy.
+    // `T(T src) { <T()'s body>; Via(src); }` -- optionally `if (src != null) Via(src);`,
+    // ignoring GC hints -- (MeshingParameters: `m_ptr = New(); CopyFrom(source);`,
+    // PointCloud: `... if (other != null) Merge(other);`), or `T(T src) : base(src) { }`
+    // (Dithering -> DocumentOrFreeFloatingBase -> FreeFloatingBase, whose own is
+    // `m_cpp_ptr = DefaultCppConstructor(); m_bAutoDelete = true; CopyFrom(src);`).
+    // Any visibility: a base's internal one is reached through the public derived one.
+    static CopyCtorInfo DetectCopyCtor(TypeDeclarationSyntax node)
+    {
+        var own = node.Identifier.Text;
+        static List<StatementSyntax> Plain(BlockSyntax b) => b.Statements.Where(st => !(st is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax ki }
+            && CalleeName(ki) is "KeepAlive" or "ApplyMemoryPressure")).ToList();
+        var dflt = node.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault(c => c.ParameterList.Parameters.Count == 0 && c.Body != null
+            && !c.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword))
+            && (c.Initializer == null || c.Initializer is { RawKind: (int)SyntaxKind.BaseConstructorInitializer, ArgumentList.Arguments.Count: 0 }));
+        foreach (var c in node.Members.OfType<ConstructorDeclarationSyntax>())
+        {
+            if (c.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword)) || c.ParameterList.Parameters is not [var sp]
+                || sp.Type?.ToString() != own || c.Body == null)
+                continue;
+            var src = sp.Identifier.Text;
+            bool pub = c.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword));
+            if (c.Initializer is { RawKind: (int)SyntaxKind.BaseConstructorInitializer, ArgumentList.Arguments: [var ba] }
+                && ba.Expression.ToString() == src && c.Body.Statements.Count == 0)
+                return new CopyCtorInfo { Base = true, Public = pub };
+            if (dflt == null || !(c.Initializer == null || c.Initializer is { RawKind: (int)SyntaxKind.BaseConstructorInitializer, ArgumentList.Arguments.Count: 0 })
+                || dflt.Initializer?.ToString() != c.Initializer?.ToString())
+                continue;
+            var d = Plain(dflt.Body).Select(Flat).ToList();
+            var sts = Plain(c.Body);
+            if (sts.Count != d.Count + 1 || !sts.Take(d.Count).Select(Flat).SequenceEqual(d)) continue;
+            var last = sts[^1];
+            bool nullOk = false;
+            if (last is IfStatementSyntax { Else: null } lf
+                && (Flat(lf.Condition) == src + "!=null" || Flat(lf.Condition) == "null!=" + src))
+            { last = lf.Statement is BlockSyntax { Statements: [var one] } ? one : lf.Statement; nullOk = true; }
+            if (last is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: IdentifierNameSyntax vn, ArgumentList.Arguments: [var va] } }
+                && va.Expression.ToString() == src)
+                return new CopyCtorInfo { Via = vn.Identifier.Text, NullOk = nullOk, Public = pub };
+        }
+        return null;
+    }
+
     static string DetectInternalCopy(TypeDeclarationSyntax node)
     {
         var own = node.Identifier.Text;
@@ -6920,6 +6975,10 @@ class Walker : CSharpSyntaxWalker
     // guard condition. Calls[0] is the COND arm.
     AccessorInfo CondCtor(SyntaxNode body, ISet<string> paramNames)
     {
+        // a trailing `ApplyMemoryPressure();` is a GC hint (G73): PointCloud(points), pilot #76
+        if (body is BlockSyntax { Statements: [.., ExpressionStatementSyntax { Expression: InvocationExpressionSyntax amp }] } bb
+            && CalleeName(amp) == "ApplyMemoryPressure" && amp.ArgumentList.Arguments.Count == 0)
+            body = bb.WithStatements(SyntaxFactory.List(bb.Statements.Take(bb.Statements.Count - 1)));
         if (body is not BlockSyntax { Statements: [LocalDeclarationStatementSyntax pd, IfStatementSyntax { Else: { } el } f, ExpressionStatementSyntax { Expression: InvocationExpressionSyntax cn }] }
             || pd.Declaration is not { Variables: [var pv] } || pd.Declaration.Type.ToString() != "IntPtr"
             || pv.Initializer != null && pv.Initializer.Value.ToString() != "IntPtr.Zero"

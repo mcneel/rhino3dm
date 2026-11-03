@@ -18,10 +18,11 @@ test('GetScreenPort', async () => {
     expect(Number.isInteger(screenPort[2])).toBe(true)
     expect(Number.isInteger(screenPort[3])).toBe(true)
 
+    // D58: RhinoCommon reads a new viewport's default port (8.x read [0, 0, 0, 0])
     expect(screenPort[0] === 0).toBe(true)
     expect(screenPort[1] === 0).toBe(true)
-    expect(screenPort[2] === 0).toBe(true)
-    expect(screenPort[3] === 0).toBe(true)
+    expect(screenPort[2] === 1000).toBe(true)
+    expect(screenPort[3] === 1000).toBe(true)
 
     viewport.screenPort = [0, 0, 100, 100]
 

@@ -3,6 +3,9 @@
 // constants and guards baked from the C# call sites (api/manifest.json).
 #include "bnd_groundplane_gen.h"
 
+BND_GroundPlane::BND_GroundPlane(const BND_GroundPlane& g)
+  : BND_GroundPlane() { ON_GroundPlane_CopyFrom((ON_GroundPlane*)RH3DM_NonConst(), (const ON_GroundPlane*)g.RH3DM_Const()); }
+
 double BND_GroundPlane::Gen_Altitude() const {
   ON_XMLVariant* v = ON_XMLVariant_New();
   ON_GroundPlane_GetValue(RH3DM_Const(), (GroundPlaneSetting)3, v);
@@ -248,6 +251,7 @@ void initGenGroundPlane(rh3dmpymodule& m)
 {
   py::class_<BND_GroundPlane>(m, "GroundPlane")
       .def(py::init<>())
+      .def(py::init<const BND_GroundPlane&>(), py::arg("g"))
       .def_property("Altitude", &BND_GroundPlane::Gen_Altitude, &BND_GroundPlane::Gen_set_Altitude)
       .def_property("AutoAltitude", &BND_GroundPlane::Gen_AutoAltitude, &BND_GroundPlane::Gen_set_AutoAltitude)
       .def_property("Enabled", &BND_GroundPlane::Gen_Enabled, &BND_GroundPlane::Gen_set_Enabled)
@@ -268,6 +272,7 @@ void initGenGroundPlane(void)
 {
   class_<BND_GroundPlane>("GroundPlane")
       .constructor<>()
+      .constructor<const BND_GroundPlane&>()
       .property("altitude", &BND_GroundPlane::Gen_Altitude, &BND_GroundPlane::Gen_set_Altitude)
       .property("autoAltitude", &BND_GroundPlane::Gen_AutoAltitude, &BND_GroundPlane::Gen_set_AutoAltitude)
       .property("enabled", &BND_GroundPlane::Gen_Enabled, &BND_GroundPlane::Gen_set_Enabled)

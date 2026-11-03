@@ -28,7 +28,7 @@ public:
   BND_Interval Gen_SegmentDomain(int segmentIndex) const;
   int Gen_SegmentIndex(double polycurveParameter) const;
   BND_TUPLE Gen_SegmentIndexes(BND_Interval subdomain) const;
-  BND_TUPLE Gen_Explode() const;
+  RH3DM_ARR Gen_Explode() const;
   class BND_PolyCurve* Gen_DuplicatePolyCurve() const;
   class BND_PolyCurve* Gen_Duplicate() const override;
   BND_GeometryBase* Gen_DuplicateShallowHelper() const;

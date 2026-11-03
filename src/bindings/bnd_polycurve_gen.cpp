@@ -83,15 +83,15 @@ BND_TUPLE BND_PolyCurve::Gen_SegmentIndexes(BND_Interval subdomain) const {
   return rc;
 }
 
-BND_TUPLE BND_PolyCurve::Gen_Explode() const {
+RH3DM_ARR BND_PolyCurve::Gen_Explode() const {
   ON_SimpleArray<ON_Curve*> holder_out;
   ON_PolyCurve_SegmentCurves(static_cast<ON_PolyCurve*>(RH3DM_Const()), &holder_out);
   int rh3dm_n = ON_CurveArray_Count(&holder_out);
-  BND_TUPLE rh3dm_tuple = CreateTuple(rh3dm_n);
+  RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(rh3dm_n);
   for (int rh3dm_i = 0; rh3dm_i < rh3dm_n; rh3dm_i++) {
     ON_Curve* rh3dm_p = ON_CurveArray_Get(&holder_out, rh3dm_i);
     if (rh3dm_p) rh3dm_p = ON_Curve_DuplicateCurve(rh3dm_p);
-    SetTuple(rh3dm_tuple, rh3dm_i, rh3dm_p ? RH3DM_Wrap_Curve(rh3dm_p) : (BND_Curve*)nullptr);
+    RH3DM_SetArr(rh3dm_tuple, rh3dm_i, rh3dm_p ? RH3DM_Wrap_Curve(rh3dm_p) : (BND_Curve*)nullptr);
   }
   return rh3dm_tuple;
 }

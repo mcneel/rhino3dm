@@ -6,18 +6,19 @@ beforeAll(async () => {
   rhino = await rhino3dm()
 
   pc = new rhino.PolyCurve()
-  const line = new rhino.LineCurve([0, 0, 0], [1, 1, 1]).line
+  const line = new rhino.LineCurve({ X: 0, Y: 0, Z: 0 }, { X: 1, Y: 1, Z: 1 }).line
   const pointArray = []
-  pointArray.push([1, 1, 1])
-  pointArray.push([2, 2, 2])
-  pointArray.push([3, -2, 1])
-  pointArray.push([4, 2, 1])
-  pointArray.push([5, -2, 1])
+  pointArray.push({ X: 1, Y: 1, Z: 1 })
+  pointArray.push({ X: 2, Y: 2, Z: 2 })
+  pointArray.push({ X: 3, Y: -2, Z: 1 })
+  pointArray.push({ X: 4, Y: 2, Z: 1 })
+  pointArray.push({ X: 5, Y: -2, Z: 1 })
 
   const curve = rhino.Curve.createControlPointCurve(pointArray, 3)
 
-  pc.appendLine(line)
-  pc.appendCurve(curve)
+  // appendLine / appendCurve -> append
+  pc.append(line)
+  pc.append(curve)
 
 })
 

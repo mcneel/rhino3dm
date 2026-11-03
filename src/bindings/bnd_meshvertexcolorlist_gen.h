@@ -15,7 +15,7 @@ public:
   int Gen_Count() const;
   void Gen_Destroy() const;
   bool Gen_SetColor(int index, BND_Color color) const;
-  BND_TUPLE Gen_ToARGBArray() const;
+  RH3DM_ARR Gen_ToARGBArray() const;
   void Gen_set_Capacity(int value);
   void Gen_set_Count(int value);
   bool Gen_SetColorsHelper(std::vector<BND_Color> colors, bool append);

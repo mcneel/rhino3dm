@@ -1,3 +1,8 @@
+// STALE (rhino3dm 9.2 vNext, M3 step 5, 2026-11-03): these declarations describe the rhino3dm 8.x
+// API. The 9.2 module is generated from RhinoCommon (docs/vnext/SHIP-9.2.md) and its names,
+// signatures and return shapes differ (docs/vnext/deviations.md). Regenerated from
+// api/manifest.json in M5; until then TypeScript reports errors this package does not have, and
+// misses ones it does.
 declare module 'rhino3dm' {
 
 	/**

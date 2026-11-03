@@ -21,7 +21,7 @@ public:
   void Gen_DeleteAllCurves() const;
   bool Gen_Faceted() const;
   bool Gen_ForceUpdate() const;
-  BND_TUPLE Gen_GetCurves() const;
+  RH3DM_ARR Gen_GetCurves() const;
   bool Gen_On() const;
   void Gen_SetCurveEnabled(BND_UUID curve_id, bool enabled) const;
   void Gen_SetCurveIsBump(BND_UUID curve_id, bool b) const;

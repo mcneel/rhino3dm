@@ -53,7 +53,7 @@ class TestSurface(unittest.TestCase):
 
     def test_surfaceGetSpanVector(self):
 
-        result = self.surface.GetSpanVector2(0)
+        result = self.surface.GetSpanVector(0)
 
         self.assertTrue(type(result) == list)
         self.assertTrue(len(result) > 0)

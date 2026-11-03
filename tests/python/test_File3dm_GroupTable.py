@@ -8,7 +8,7 @@ class TestFile3dmGroupTable(unittest.TestCase):
 
         file3dm = rhino3dm.File3dm.Read('../models/groups.3dm')
 
-        members = file3dm.Groups.GroupMembers2(0)
+        members = file3dm.AllGroups.GroupMembers(0)
 
         self.assertTrue(type(members) == list)
         self.assertTrue(type(members[0]) == rhino3dm.File3dmObject)

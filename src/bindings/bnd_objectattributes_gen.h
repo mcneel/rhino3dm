@@ -71,7 +71,7 @@ public:
   bool Gen_EnableCustomMeshingParameters() const;
   class BND_Linetype* Gen_GetCustomLinetype() const;
   BND_UUID Gen_GetDisplayModeOverride(BND_UUID viewportId) const;
-  BND_TUPLE Gen_GetHideInDetailOverrides() const;
+  RH3DM_ARR Gen_GetHideInDetailOverrides() const;
   std::wstring Gen_GetUserString(std::wstring key) const;
   int Gen_GroupCount() const;
   BND_TUPLE Gen_HasActiveInViewportOverride(BND_UUID viewportId) const;

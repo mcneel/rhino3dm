@@ -82,12 +82,12 @@ BND_UUID BND_ObjectAttributes::Gen_GetDisplayModeOverride(BND_UUID viewportId) c
   return ON_UUID_to_Binding(ON_3dmObjectAttributes_GetDisplayModeOverride(RH3DM_Const(), Binding_to_ON_UUID(viewportId)));
 }
 
-BND_TUPLE BND_ObjectAttributes::Gen_GetHideInDetailOverrides() const {
+RH3DM_ARR BND_ObjectAttributes::Gen_GetHideInDetailOverrides() const {
   ON_SimpleArray<ON_UUID> holder_out;
   ON_3dmObjectAttributes_GetHideInDetailIds(RH3DM_Const(), &holder_out);
-  BND_TUPLE rc = CreateTuple(holder_out.Count());
+  RH3DM_ARR rc = RH3DM_NewArr(holder_out.Count());
   for (int i = 0; i < holder_out.Count(); i++)
-    SetTuple(rc, i, ON_UUID_to_Binding(holder_out[i]));
+    RH3DM_SetArr(rc, i, ON_UUID_to_Binding(holder_out[i]));
   return rc;
 }
 
@@ -299,8 +299,8 @@ RH3DM_NTUPLE BND_ObjectAttributes::Gen_GetGroupList() const {
   if (count < 1) return RH3DM_NoneTuple();
   std::vector<int> rc(count);
   ON_3dmObjectAttributes_GroupList(RH3DM_Const(), rc.data());
-  BND_TUPLE rh3dm_tuple = CreateTuple(count);
-  for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) SetTuple(rh3dm_tuple, rh3dm_i, rc[rh3dm_i]);
+  RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(count);
+  for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) RH3DM_SetArr(rh3dm_tuple, rh3dm_i, rc[rh3dm_i]);
   return rh3dm_tuple;
 }
 

@@ -299,7 +299,7 @@ double BND_Polyline::ClosestParameter(BND_Point3d testPoint) const
   }
   int s_min = 0;
   double t_min = 0.0;
-  double d_min = std::numeric_limits<double>::max();
+  double d_min = (std::numeric_limits<double>::max)();
   for (int i = 0; i < count - 1; i++)
   {
     BND_Line seg = BND_Line(get_Item(i), get_Item(i + 1));

@@ -92,7 +92,7 @@ public:
   bool Gen_SetStartPoint(BND_Point3d point) const;
   int Gen_SpanCount() const;
   BND_Interval Gen_SpanDomain(int spanIndex) const;
-  BND_TUPLE Gen_SpanVector() const;
+  RH3DM_ARR Gen_SpanVector() const;
   BND_Vector3d Gen_TangentAt(double t) const;
   class BND_NurbsCurve* Gen_ToNurbsCurve() const;
   class BND_NurbsCurve* Gen_ToNurbsCurve_2(BND_Interval subdomain) const;

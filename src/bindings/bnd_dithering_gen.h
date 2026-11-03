@@ -14,8 +14,8 @@ public:
   BND_Dithering(ON_Dithering* p, bool owned) : m_ptr(p), m_owned(owned) {}
   explicit BND_Dithering(ONX_Model* model) : m_model(model) {}
   BND_Dithering() : m_ptr(ON_Dithering_New()), m_owned(true) {}
+  BND_Dithering(const BND_Dithering& d);
   ~BND_Dithering() { if (m_owned && m_ptr) ON_Dithering_Delete(m_ptr); }
-  BND_Dithering(const BND_Dithering&) = delete;
   // CppPointer: the file's object (resolved each time) or this one's
   ON_Dithering* RH3DM_Const() const {
     if (m_ptr) return m_ptr;

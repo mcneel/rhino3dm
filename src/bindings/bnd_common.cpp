@@ -92,7 +92,10 @@ std::vector<const ON_Geometry*> RH3DM_DictGeometryList(const BND_DICT& d, const 
 BND_DICT RH3DM_DictNew() { return emscripten::val::object(); }
 bool RH3DM_DictHas(const BND_DICT& d, const char* key)
 {
-  return !d.isNull() && !d.isUndefined() && d.typeOf().as<std::string>() == "object" && d.hasOwnProperty(key);
+  // a key holding null / undefined counts as absent (three.js writes `index: null` for non-indexed
+  // geometry; 8.x tested `!= undefined`; pilot #78)
+  return !d.isNull() && !d.isUndefined() && d.typeOf().as<std::string>() == "object" && d.hasOwnProperty(key)
+         && !d[key].isNull() && !d[key].isUndefined();
 }
 void RH3DM_ThrowKeyError(const char* key) { throw std::invalid_argument(std::string("missing key: ") + key); }
 

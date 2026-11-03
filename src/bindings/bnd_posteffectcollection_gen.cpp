@@ -4,6 +4,9 @@
 #include "bnd_posteffectcollection_gen.h"
 #include "bnd_posteffectdata_gen.h"
 
+BND_PostEffectCollection::BND_PostEffectCollection(const BND_PostEffectCollection& c)
+  : BND_PostEffectCollection() { ON_PostEffects_CopyFrom((ON_PostEffects*)RH3DM_NonConst(), (const ON_PostEffects*)c.RH3DM_Const()); }
+
 BND_TUPLE BND_PostEffectCollection::Gen_GetSelectedPostEffect(RH3DM_PostEffectType type) const {
   ON_UUID id = ON_nil_uuid;
   bool success = ON_PostEffects_GetSelectedPostEffect(RH3DM_Const(), (int)type, &id);
@@ -67,6 +70,7 @@ void initGenPostEffectCollection(rh3dmpymodule& m)
 {
   py::class_<BND_PostEffectCollection>(m, "PostEffectCollection")
       .def(py::init<>())
+      .def(py::init<const BND_PostEffectCollection&>(), py::arg("c"))
       .def("GetSelectedPostEffect", &BND_PostEffectCollection::Gen_GetSelectedPostEffect, py::arg("type"))
       .def("PostEffectDataFromId", &BND_PostEffectCollection::Gen_PostEffectDataFromId, py::keep_alive<0, 1>(), py::arg("id"))
       .def("MovePostEffectBefore", &BND_PostEffectCollection::Gen_MovePostEffectBefore, py::arg("id_move"), py::arg("id_before"))
@@ -88,6 +92,7 @@ void initGenPostEffectCollection(void)
 {
   class_<BND_PostEffectCollection>("PostEffectCollection")
       .constructor<>()
+      .constructor<const BND_PostEffectCollection&>()
       .function("getSelectedPostEffect", &BND_PostEffectCollection::Gen_GetSelectedPostEffect)
       .function("postEffectDataFromId", &BND_PostEffectCollection::Gen_PostEffectDataFromId, allow_raw_pointers())
       .function("movePostEffectBefore", &BND_PostEffectCollection::Gen_MovePostEffectBefore)

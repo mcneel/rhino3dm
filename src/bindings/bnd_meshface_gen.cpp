@@ -56,7 +56,7 @@ BND_MeshFace::BND_MeshFace(int a, int b, int c, int d)
 
 BND_MeshFace BND_MeshFace::Unset()
 {
-  return BND_MeshFace(std::numeric_limits<int>::min(), std::numeric_limits<int>::min(), std::numeric_limits<int>::min());
+  return BND_MeshFace((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::min)(), (std::numeric_limits<int>::min)());
 }
 
 std::wstring BND_MeshFace::DebuggerDisplayUtil() const

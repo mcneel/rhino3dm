@@ -4,6 +4,7 @@
 #include "bnd_subdvertex_gen.h"
 #include "bnd_subdedge_gen.h"
 #include "bnd_subdface_gen.h"
+#include "bnd_subdcomponent.h"
 #include "bnd_subdvertex.h"
 
 void BND_SubDVertex::Gen_ClearSavedSubdivisionPoints(bool clearNeighborhood) const {

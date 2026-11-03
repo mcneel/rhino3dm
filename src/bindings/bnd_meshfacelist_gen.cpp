@@ -201,7 +201,7 @@ std::vector<int> BND_MeshFaceList::Gen_ToIntArray(bool asTriangles) const {
 
 BND_MeshFace BND_MeshFaceList::Gen_this(int index) const {
   auto face = Gen_GetFace(index);
-  if ((face).A() == std::numeric_limits<int>::min() && (index < 0 || index >= Gen_Count()))
+  if ((face).A() == (std::numeric_limits<int>::min)() && (index < 0 || index >= Gen_Count()))
   {
     throw std::out_of_range("Specified argument was out of the range of valid values. (Parameter 'index')");
   }

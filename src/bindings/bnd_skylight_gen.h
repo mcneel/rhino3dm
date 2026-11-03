@@ -14,8 +14,8 @@ public:
   BND_Skylight(ON_Skylight* p, bool owned) : m_ptr(p), m_owned(owned) {}
   explicit BND_Skylight(ONX_Model* model) : m_model(model) {}
   BND_Skylight() : m_ptr(ON_Skylight_New()), m_owned(true) {}
+  BND_Skylight(const BND_Skylight& src);
   ~BND_Skylight() { if (m_owned && m_ptr) ON_Skylight_Delete(m_ptr); }
-  BND_Skylight(const BND_Skylight&) = delete;
   // CppPointer: the file's object (resolved each time) or this one's
   ON_Skylight* RH3DM_Const() const {
     if (m_ptr) return m_ptr;

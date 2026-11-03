@@ -12,6 +12,9 @@
 #include "bnd_subdvertexlist_gen.h"
 #include "bnd_commonobject.h"
 
+BND_SubD::BND_SubD()
+  : m_ptr(new ON_SubD()) {}
+
 unsigned int BND_SubD::Gen_ClearEdgeSharpness() const {
   return ON_SubD_ClearEdgeSharpness(RH3DM_NonConst());
 }
@@ -124,6 +127,7 @@ unsigned int BND_SubD::Gen_SharpEdgeCount_2() const {
 void initGenSubD(rh3dmpymodule& m)
 {
   py::class_<BND_SubD, BND_GeometryBase>(m, "SubD")
+      .def(py::init<>())
       .def("ClearEdgeSharpness", &BND_SubD::Gen_ClearEdgeSharpness)
       .def("ClearEvaluationCache", &BND_SubD::Gen_ClearEvaluationCache)
       .def_static("CreateFromCylinder", &BND_SubD::Gen_CreateFromCylinder, py::arg("cylinder"), py::arg("circumferenceFaceCount"), py::arg("heightFaceCount"), py::arg("endCapStyle"), py::arg("endCapEdgeTag"), py::arg("radiusLocation"))
@@ -147,6 +151,7 @@ using namespace emscripten;
 void initGenSubD(void)
 {
   class_<BND_SubD, base<BND_GeometryBase>>("SubD")
+      .constructor<>()
       .property("isSolid", &BND_SubD::Gen_IsSolid)
       .property("textureCoordinateType", &BND_SubD::Gen_TextureCoordinateType)
       .property("edges", &BND_SubD::Gen_Edges, allow_raw_pointers())

@@ -7,14 +7,14 @@ class TestExtrusion(unittest.TestCase):
 
         circle1 = rhino3dm.Circle( 1 )
         extrusion1 = rhino3dm.Extrusion.Create(circle1.ToNurbsCurve(), 10, True)
-        plane = rhino3dm.Plane.WorldXY()
+        plane = rhino3dm.Plane.WorldXY
         plane.Origin = rhino3dm.Point3d(10, 10, 10)
         circle2 = rhino3dm.Circle( 1 )
         circle2.Plane = plane
-        extrusion2 = rhino3dm.Extrusion.CreateWithPlane(circle2.ToNurbsCurve(), plane, 10, True)
+        extrusion2 = rhino3dm.Extrusion.Create(circle2.ToNurbsCurve(), plane, 10, True)   # 8.x: CreateWithPlane (triage M1)
 
-        bb1 = extrusion1.GetBoundingBox()
-        bb2 = extrusion2.GetBoundingBox()
+        bb1 = extrusion1.GetBoundingBox(False)
+        bb2 = extrusion2.GetBoundingBox(False)
 
         self.assertAlmostEqual( bb1.Volume, bb2.Volume, 5 )
         self.assertFalse( bb1.Center == bb2.Center )

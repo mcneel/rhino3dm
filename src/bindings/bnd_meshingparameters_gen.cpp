@@ -7,6 +7,15 @@
 BND_MeshingParameters::BND_MeshingParameters()
 { ON_MeshParameters* rh3dm_p = ON_MeshParameters_New(); m_val = *rh3dm_p; delete rh3dm_p; }
 
+BND_MeshingParameters::BND_MeshingParameters(double density)
+{ ON_MeshParameters* rh3dm_p = ON_MeshParameters_New2(density, -1.23432101234321e+308); m_val = *rh3dm_p; delete rh3dm_p; }
+
+BND_MeshingParameters::BND_MeshingParameters(double density, double minimumEdgeLength)
+{ ON_MeshParameters* rh3dm_p = ON_MeshParameters_New2(density, minimumEdgeLength); m_val = *rh3dm_p; delete rh3dm_p; }
+
+BND_MeshingParameters::BND_MeshingParameters(const BND_MeshingParameters& source)
+  : BND_MeshingParameters() { Gen_CopyFrom(source); }
+
 bool BND_MeshingParameters::Gen_ClosedObjectPostProcess() const {
   return ON_MeshParameters_GetBool(const_cast<ON_MeshParameters*>(&m_val), (MeshParametersBoolConst)4);
 }
@@ -248,6 +257,9 @@ void initGenMeshingParameters(rh3dmpymodule& m)
 {
   py::class_<BND_MeshingParameters>(m, "MeshingParameters")
       .def(py::init<>())
+      .def(py::init<double>(), py::arg("density"))
+      .def(py::init<double, double>(), py::arg("density"), py::arg("minimumEdgeLength"))
+      .def(py::init<const BND_MeshingParameters&>(), py::arg("source"))
       .def("Encode", &BND_MeshingParameters_Encode)
       .def_static("Decode", &BND_MeshingParameters_Decode, py::arg("jsonObject"))
       .def_property("ClosedObjectPostProcess", &BND_MeshingParameters::Gen_ClosedObjectPostProcess, &BND_MeshingParameters::Gen_set_ClosedObjectPostProcess)
@@ -286,6 +298,11 @@ void initGenMeshingParameters(void)
 {
   class_<BND_MeshingParameters>("MeshingParameters")
       .constructor<>()
+      .constructor(optional_override([](emscripten::val v0) -> BND_MeshingParameters* {
+        if (v0.isNumber()) return new BND_MeshingParameters(v0.as<double>());
+        if (v0.instanceof(emscripten::val::module_property("MeshingParameters"))) return new BND_MeshingParameters(*v0.as<BND_MeshingParameters*>(emscripten::allow_raw_pointers()));
+        throw std::invalid_argument("MeshingParameters: no constructor matches the arguments"); }), allow_raw_pointers())
+      .constructor<double, double>()
       .function("encode", &BND_MeshingParameters_Encode, allow_raw_pointers())
       .class_function("decode", &BND_MeshingParameters_Decode, allow_raw_pointers())
       .function("toJSON", &BND_MeshingParameters_ToJSON, allow_raw_pointers())

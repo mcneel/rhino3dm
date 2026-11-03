@@ -7,7 +7,7 @@ beforeEach( async() => {
 
 test('bezierSplit', async () => {
 
-    const pointArray = [ [ 0, 0, 0 ], [ 1, 1, 0 ], [ 2, 0, 0 ], [ 3, -1, 0 ], [ 4, 0, 0 ] ]
+    const pointArray = [{ X: 0, Y: 0, Z: 0 }, { X: 1, Y: 1, Z: 0 }, { X: 2, Y: 0, Z: 0 }, { X: 3, Y: -1, Z: 0 }, { X: 4, Y: 0, Z: 0 }]
 
     const ncurve = rhino.NurbsCurve.create(true, 3, pointArray)
 

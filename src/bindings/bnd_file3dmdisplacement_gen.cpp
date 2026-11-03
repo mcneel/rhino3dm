@@ -35,12 +35,12 @@ bool BND_File3dmDisplacement::Gen_FinalMaxFacesOn() const {
   return ON_3dmObjectAttributes_Displacement_GetFinalMaxFacesOn(m_ptr);
 }
 
-BND_TUPLE BND_File3dmDisplacement::Gen_GetSubItemFaceIndexes() const {
+RH3DM_ARR BND_File3dmDisplacement::Gen_GetSubItemFaceIndexes() const {
   ON_SimpleArray<int> holder_out;
   ON_3dmObjectAttributes_Displacement_GetSubItems(m_ptr, &holder_out);
-  BND_TUPLE rc = CreateTuple(holder_out.Count());
+  RH3DM_ARR rc = RH3DM_NewArr(holder_out.Count());
   for (int i = 0; i < holder_out.Count(); i++)
-    SetTuple(rc, i, holder_out[i]);
+    RH3DM_SetArr(rc, i, holder_out[i]);
   return rc;
 }
 

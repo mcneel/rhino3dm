@@ -18,7 +18,7 @@ public:
   bool Gen_FairingOn() const;
   int Gen_FinalMaxFaces() const;
   bool Gen_FinalMaxFacesOn() const;
-  BND_TUPLE Gen_GetSubItemFaceIndexes() const;
+  RH3DM_ARR Gen_GetSubItemFaceIndexes() const;
   int Gen_InitialQuality() const;
   int Gen_MappingChannel() const;
   int Gen_MeshMemoryLimit() const;

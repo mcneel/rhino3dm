@@ -7,13 +7,13 @@ class TestNurbsSurface(unittest.TestCase):
 
     def test_NurbsSurfaceKnotList_ToList(self):
 
-        knotsU = self.ns.KnotsU.ToList2()
+        knotsU = list(self.ns.KnotsU)
 
         self.assertTrue( type(knotsU) == list)
         self.assertTrue( type(knotsU[0]) == float)
         self.assertTrue( len(knotsU) == len(self.ns.KnotsU))
 
-        knotsV = self.ns.KnotsV.ToList2()
+        knotsV = list(self.ns.KnotsV)
 
         self.assertTrue( type(knotsV) == list)
         self.assertTrue( type(knotsV[0]) == float)

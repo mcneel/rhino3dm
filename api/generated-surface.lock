@@ -698,6 +698,7 @@ js  DimensionStyle.useKerning [property]
 js  DimensionStyle.userStringCount [property]
 js  DimensionStyle.zeroSuppress [property]
 js  Dithering.constructor<>
+js  Dithering.constructor<const BND_Dithering&>
 js  Dithering.enabled [property]
 js  Dithering.method [property]
 js  Dithering.on [property]
@@ -1265,6 +1266,7 @@ js  GeometryBase.userStringCount [property]
 js  GroundPlane.altitude [property]
 js  GroundPlane.autoAltitude [property]
 js  GroundPlane.constructor<>
+js  GroundPlane.constructor<const BND_GroundPlane&>
 js  GroundPlane.enabled [property]
 js  GroundPlane.materialInstanceId [property]
 js  GroundPlane.shadowOnly [property]
@@ -1570,6 +1572,7 @@ js  LinearDimension.getTextRectangle [function]
 js  LinearDimension.plainTextToRtf [class_function]
 js  LinearDimension.setLocations [function]
 js  LinearWorkflow.constructor<>
+js  LinearWorkflow.constructor<const BND_LinearWorkflow&>
 js  LinearWorkflow.getHashCode [function]
 js  LinearWorkflow.hash [property]
 js  LinearWorkflow.postProcessFrameBuffer [property]
@@ -1858,7 +1861,9 @@ js  MeshVertexNormalList.unitizeNormals [function]
 js  MeshingParameters.closedObjectPostProcess [property]
 js  MeshingParameters.coarse [class_function]
 js  MeshingParameters.computeCurvature [property]
+js  MeshingParameters.constructor(dispatched)
 js  MeshingParameters.constructor<>
+js  MeshingParameters.constructor<double, double>
 js  MeshingParameters.copyFrom [function]
 js  MeshingParameters.decode [class_function]
 js  MeshingParameters.default [class_function]
@@ -2299,6 +2304,7 @@ js  PointCloud.clearNormals [function]
 js  PointCloud.clearPointValues [function]
 js  PointCloud.closestPoint [function]
 js  PointCloud.computeMemoryEstimate [class_function]
+js  PointCloud.constructor(dispatched)
 js  PointCloud.constructor<>
 js  PointCloud.containsColors [property]
 js  PointCloud.containsHiddenFlags [property]
@@ -2390,6 +2396,7 @@ js  PolylineCurve.setParameter [function]
 js  PolylineCurve.setPoint [function]
 js  PolylineCurve.toPolyline [function]
 js  PostEffectCollection.constructor<>
+js  PostEffectCollection.constructor<const BND_PostEffectCollection&>
 js  PostEffectCollection.getSelectedPostEffect [function]
 js  PostEffectCollection.iterator [function]
 js  PostEffectCollection.movePostEffectBefore [function]
@@ -2492,6 +2499,7 @@ js  SafeFrame.actionFrameOn [property]
 js  SafeFrame.actionFrameXScale [property]
 js  SafeFrame.actionFrameYScale [property]
 js  SafeFrame.constructor<>
+js  SafeFrame.constructor<const BND_SafeFrame&>
 js  SafeFrame.enabled [property]
 js  SafeFrame.fieldsOn [property]
 js  SafeFrame.liveFrameOn [property]
@@ -2501,6 +2509,7 @@ js  SafeFrame.titleFrameOn [property]
 js  SafeFrame.titleFrameXScale [property]
 js  SafeFrame.titleFrameYScale [property]
 js  Skylight.constructor<>
+js  Skylight.constructor<const BND_Skylight&>
 js  Skylight.customEnvironment [property]
 js  Skylight.customEnvironmentOn [property]
 js  Skylight.enabled [property]
@@ -2533,6 +2542,7 @@ js  Sphere.unset [class_function]
 js  SubD.clearEdgeSharpness [function]
 js  SubD.clearEvaluationCache [function]
 js  SubD.computeMemoryEstimate [class_function]
+js  SubD.constructor<>
 js  SubD.createFromCylinder [class_function]
 js  SubD.decode [class_function]
 js  SubD.edges [property]
@@ -2546,6 +2556,8 @@ js  SubD.subdivide [function]
 js  SubD.textureCoordinateType [property]
 js  SubD.updateAllTagsAndSectorCoefficients [function]
 js  SubD.vertices [property]
+js  SubDComponent.equals [function]
+js  SubDComponent.getHashCode [function]
 js  SubDComponent.id [property]
 js  SubDComponent.isDamaged [property]
 js  SubDComponent.isDeleted [property]
@@ -3882,6 +3894,7 @@ py  Dithering.Enabled [property rw]
 py  Dithering.Method [property rw]
 py  Dithering.On [property rw]
 py  Dithering.__init__()
+py  Dithering.__init__(const BND_Dithering&)
 py  DracoCompression.Compress(mesh) [static]
 py  DracoCompression.Compress(mesh, options) [static]
 py  DracoCompression.Compress(pointCloud) [static]
@@ -4497,6 +4510,7 @@ py  GroundPlane.TextureRotation [property rw]
 py  GroundPlane.TextureSize [property rw]
 py  GroundPlane.TextureSizeLocked [property rw]
 py  GroundPlane.__init__()
+py  GroundPlane.__init__(const BND_GroundPlane&)
 py  Group.ComponentType [property ro]
 py  Group.DeleteAllUserStrings()
 py  Group.GetUserString(key)
@@ -4796,6 +4810,7 @@ py  LinearWorkflow.PreProcessGamma [property rw]
 py  LinearWorkflow.PreProcessGammaOn [property rw]
 py  LinearWorkflow.PreProcessTextures [property rw]
 py  LinearWorkflow.__init__()
+py  LinearWorkflow.__init__(const BND_LinearWorkflow&)
 py  Linetype.AddShape(shapeCurve, offset)
 py  Linetype.AddShape(text, offset)
 py  Linetype.AlwaysModelDistances [property rw]
@@ -5131,6 +5146,9 @@ py  MeshingParameters.Smooth [property ro static]
 py  MeshingParameters.TextureRange [property rw]
 py  MeshingParameters.Tolerance [property rw]
 py  MeshingParameters.__init__()
+py  MeshingParameters.__init__(const BND_MeshingParameters&)
+py  MeshingParameters.__init__(double)
+py  MeshingParameters.__init__(double, double)
 py  ModelComponent.ClearId()
 py  ModelComponent.ClearIndex()
 py  ModelComponent.ClearName()
@@ -5714,6 +5732,8 @@ py  PointCloud.PointAt(index)
 py  PointCloud.RemoveAt(index)
 py  PointCloud.__getitem__()
 py  PointCloud.__init__()
+py  PointCloud.__init__(const BND_PointCloud&)
+py  PointCloud.__init__(const std::vector<BND_Point3d>&)
 py  PointCloud.__len__()
 py  PointCloudItem.Color [property rw]
 py  PointCloudItem.Hidden [property rw]
@@ -5783,6 +5803,7 @@ py  PostEffectCollection.MovePostEffectBefore(id_move, id_before)
 py  PostEffectCollection.PostEffectDataFromId(id)
 py  PostEffectCollection.SetSelectedPostEffect(type, id)
 py  PostEffectCollection.__init__()
+py  PostEffectCollection.__init__(const BND_PostEffectCollection&)
 py  PostEffectCollection.__iter__()
 py  PostEffectCollectionIter.__iter__()
 py  PostEffectCollectionIter.__next__()
@@ -5886,11 +5907,13 @@ py  SafeFrame.TitleFrameOn [property rw]
 py  SafeFrame.TitleFrameXScale [property rw]
 py  SafeFrame.TitleFrameYScale [property rw]
 py  SafeFrame.__init__()
+py  SafeFrame.__init__(const BND_SafeFrame&)
 py  Skylight.CustomEnvironment [property rw]
 py  Skylight.CustomEnvironmentOn [property rw]
 py  Skylight.Enabled [property rw]
 py  Skylight.ShadowIntensity [property rw]
 py  Skylight.__init__()
+py  Skylight.__init__(const BND_Skylight&)
 py  Sphere.BoundingBox [property ro]
 py  Sphere.Center [property rw]
 py  Sphere.ClosestParameter(testPoint)
@@ -5940,6 +5963,9 @@ py  SubD.Subdivide(count)
 py  SubD.TextureCoordinateType [property ro]
 py  SubD.UpdateAllTagsAndSectorCoefficients()
 py  SubD.Vertices [property ro]
+py  SubD.__init__()
+py  SubDComponent.Equals(other)
+py  SubDComponent.GetHashCode()
 py  SubDComponent.Id [property ro]
 py  SubDComponent.IsDamaged [property ro]
 py  SubDComponent.IsDeleted [property ro]
@@ -5947,6 +5973,9 @@ py  SubDComponent.IsHidden [property ro]
 py  SubDComponent.IsHighlighted [property ro]
 py  SubDComponent.IsLocked [property ro]
 py  SubDComponent.IsSelected [property ro]
+py  SubDComponent.__eq__(other)
+py  SubDComponent.__hash__()
+py  SubDComponent.__ne__(other)
 py  SubDEdge.ClearSavedSubdivisionPoints(clearNeighborhood)
 py  SubDEdge.ComponentIndex()
 py  SubDEdge.ControlNetCenterNormal(edgeFaceIndex)

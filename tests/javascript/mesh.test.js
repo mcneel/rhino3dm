@@ -16,8 +16,10 @@ beforeAll(async () => {
 
     expect(file3dm !== null).toBe(true)
 
-    m = file3dm.objects().get(0).geometry()
-    a = file3dm.objects().get(0).attributes()
+    // D17: no index on the object table; iterate
+    const obj = [...file3dm.objects][0]
+    m = obj.geometry
+    a = obj.attributes
 
 
 })
@@ -45,9 +47,9 @@ test('createFromThreejsJSON', async () => {
     let mesh = rhino.Mesh.createFromThreejsJSON({ data: geometry })
 
     expect(mesh instanceof rhino.Mesh).toBe(true)
-    expect(mesh.vertices().count === geometry.attributes.position.count).toBe(true)
-    expect(mesh.normals().count === geometry.attributes.normal.count).toBe(true)
-    expect(mesh.vertexColors().count === geometry.attributes.color.count).toBe(true)
+    expect(mesh.vertices.count === geometry.attributes.position.count).toBe(true)
+    expect(mesh.normals.count === geometry.attributes.normal.count).toBe(true)
+    expect(mesh.vertexColors.count === geometry.attributes.color.count).toBe(true)
 
     //assign random color to verts
     for (let i = 0; i < count; i++) {
@@ -66,9 +68,9 @@ test('createFromThreejsJSON', async () => {
     mesh = rhino.Mesh.createFromThreejsJSON({ data: geometry })
 
     expect(mesh instanceof rhino.Mesh).toBe(true)
-    expect(mesh.vertices().count === geometry.attributes.position.count).toBe(true)
-    expect(mesh.normals().count === geometry.attributes.normal.count).toBe(true)
-    expect(mesh.vertexColors().count === geometry.attributes.color.count).toBe(true)
+    expect(mesh.vertices.count === geometry.attributes.position.count).toBe(true)
+    expect(mesh.normals.count === geometry.attributes.normal.count).toBe(true)
+    expect(mesh.vertexColors.count === geometry.attributes.color.count).toBe(true)
 
     const r = geometry.attributes.color.array[0]
     const g = geometry.attributes.color.array[1]
@@ -80,10 +82,10 @@ test('createFromThreejsJSON', async () => {
     const bn = b * 255
     const an = a * 255
 
-    expect(mesh.vertexColors().get(0).r === ~~rn).toBe(true)
-    expect(mesh.vertexColors().get(0).g === ~~gn).toBe(true)
-    expect(mesh.vertexColors().get(0).b === ~~bn).toBe(true)
-    expect(mesh.vertexColors().get(0).a === ~~an).toBe(true)
+    expect(mesh.vertexColors.get(0).r === ~~rn).toBe(true)
+    expect(mesh.vertexColors.get(0).g === ~~gn).toBe(true)
+    expect(mesh.vertexColors.get(0).b === ~~bn).toBe(true)
+    expect(mesh.vertexColors.get(0).a === ~~an).toBe(true)
 
 })
 
@@ -105,27 +107,25 @@ test('isManifold', async () => {
 
 test('getFace', async () => {
 
-    const face = m.faces().get(0)
+    const face = m.faces.get(0)
 
-    expect(Array.isArray(face)).toBe(true)
-    expect(face.length === 4).toBe(true)
-    expect(Number.isInteger(face[0])).toBe(true)
-    expect(Number.isInteger(face[1])).toBe(true)
-    expect(Number.isInteger(face[2])).toBe(true)
-    expect(Number.isInteger(face[3])).toBe(true)
+    // D11: a MeshFace is a plain object {A, B, C, D}
+    expect(Object.keys(face)).toEqual(['A', 'B', 'C', 'D'])
+    expect(Number.isInteger(face.A)).toBe(true)
+    expect(Number.isInteger(face.B)).toBe(true)
+    expect(Number.isInteger(face.C)).toBe(true)
+    expect(Number.isInteger(face.D)).toBe(true)
 
 })
 
 test('getFaceVertices', async () => {
 
-    const faceVertices = m.faces().getFaceVertices(0)
+    const faceVertices = m.faces.getFaceVertices(0)
 
     expect(Array.isArray(faceVertices)).toBe(true)
     expect(faceVertices.length === 5).toBe(true)
     expect(typeof faceVertices[0] === 'boolean').toBe(true)
-    expect(Array.isArray(faceVertices[1])).toBe(true)
-    expect(Array.isArray(faceVertices[2])).toBe(true)
-    expect(Array.isArray(faceVertices[3])).toBe(true)
-    expect(Array.isArray(faceVertices[4])).toBe(true)
+    // D11: points are {X, Y, Z} objects
+    for (let i = 1; i <= 4; i++) expect(Object.keys(faceVertices[i])).toEqual(['X', 'Y', 'Z'])
 
 })

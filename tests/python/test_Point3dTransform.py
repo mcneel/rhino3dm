@@ -3,6 +3,7 @@ import rhino3dm
 
 # GitHub #695: Point3d.Transform is documented (and behaves in RhinoCommon) as an in-place
 # transform, but used to return a transformed copy and leave the point untouched.
+# D86: like RhinoCommon's `void Transform`, it returns None.
 class TestPoint3dTransform(unittest.TestCase):
 
     def test_point3dTransformIsInPlace(self):
@@ -10,8 +11,7 @@ class TestPoint3dTransform(unittest.TestCase):
         xform = rhino3dm.Transform.Translation(1, 2, 3)
         rc = p.Transform(xform)
         self.assertEqual(p, rhino3dm.Point3d(1, 2, 3))
-        # the point is also returned, so pre-#695 code using the return value keeps working
-        self.assertEqual(rc, rhino3dm.Point3d(1, 2, 3))
+        self.assertIsNone(rc)
 
     def test_vector3dTransformIsInPlace(self):
         v = rhino3dm.Vector3d(1, 0, 0)
@@ -24,7 +24,7 @@ class TestPoint3dTransform(unittest.TestCase):
         rc = v.Transform(rot)
         self.assertAlmostEqual(v.X, 0.0)
         self.assertAlmostEqual(v.Y, 1.0)
-        self.assertAlmostEqual(rc.Y, 1.0)
+        self.assertIsNone(rc)
 
 
 if __name__ == '__main__':

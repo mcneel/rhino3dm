@@ -8,9 +8,9 @@ beforeAll(async () => {
 
 test('append', async () => {
 
-    const sphere = new rhino.Sphere([0, 0, 0], 5)
+    const sphere = rhino.Sphere.create({ X: 0, Y: 0, Z: 0 }, 5)
 
-    const result = sphere.closestParameter([0, 0, 5])
+    const result = rhino.Sphere.closestParameter(sphere, { X: 0, Y: 0, Z: 5 })
 
     expect(Array.isArray(result)).toBe(true)
     expect(result.length === 3).toBe(true)

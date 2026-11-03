@@ -16,14 +16,14 @@ public:
   ON_Brep* RH3DM_Owner() const { return (ON_Brep*)m_comp_owner; }
   int RH3DM_Key() const { return m_comp_key; }
 
-  BND_TUPLE Gen_AdjacentFaces() const;
+  RH3DM_ARR Gen_AdjacentFaces() const;
   int Gen_EdgeCurveIndex() const;
   class BND_BrepVertex* Gen_EndVertex() const;
   bool Gen_SetEdgeCurve(int curve3dIndex, BND_Interval subDomain) const;
   class BND_BrepVertex* Gen_StartVertex() const;
   double Gen_Tolerance() const;
   int Gen_TrimCount() const;
-  BND_TUPLE Gen_TrimIndices() const;
+  RH3DM_ARR Gen_TrimIndices() const;
   void Gen_set_Tolerance(double value);
   int Gen_EdgeIndex() const;
   RH3DM_EdgeAdjacency Gen_Valence() const;

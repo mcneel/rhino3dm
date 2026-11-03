@@ -20,7 +20,7 @@ class TestNurbsCurve(unittest.TestCase):
 
     def test_toList(self):
         
-        knotsList = self.curveFromList.Knots.ToList2()
+        knotsList = list(self.curveFromList.Knots)
 
         self.assertTrue( type(knotsList) == list)
         self.assertTrue( type(knotsList[0]) == float)

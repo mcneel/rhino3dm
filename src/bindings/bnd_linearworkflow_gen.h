@@ -14,8 +14,8 @@ public:
   BND_LinearWorkflow(ON_LinearWorkflow* p, bool owned) : m_ptr(p), m_owned(owned) {}
   explicit BND_LinearWorkflow(ONX_Model* model) : m_model(model) {}
   BND_LinearWorkflow() : m_ptr(ON_LinearWorkflow_New()), m_owned(true) {}
+  BND_LinearWorkflow(const BND_LinearWorkflow& src);
   ~BND_LinearWorkflow() { if (m_owned && m_ptr) ON_LinearWorkflow_Delete(m_ptr); }
-  BND_LinearWorkflow(const BND_LinearWorkflow&) = delete;
   // CppPointer: the file's object (resolved each time) or this one's
   ON_LinearWorkflow* RH3DM_Const() const {
     if (m_ptr) return m_ptr;

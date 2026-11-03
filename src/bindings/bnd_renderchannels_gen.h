@@ -25,7 +25,7 @@ public:
   }
   ON_RenderChannels* RH3DM_NonConst() const { return RH3DM_Const(); }
 
-  BND_TUPLE Gen_CustomList() const;
+  RH3DM_ARR Gen_CustomList() const;
   RH3DM_RenderChannels_Modes Gen_Mode() const;
   void* Gen_DefaultCppConstructor() const;
   void* Gen_CppFromFile3dm(ONX_Model* f) const;

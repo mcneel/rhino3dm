@@ -14,8 +14,8 @@ public:
   BND_SafeFrame(ON_SafeFrame* p, bool owned) : m_ptr(p), m_owned(owned) {}
   explicit BND_SafeFrame(ONX_Model* model) : m_model(model) {}
   BND_SafeFrame() : m_ptr(ON_SafeFrame_New()), m_owned(true) {}
+  BND_SafeFrame(const BND_SafeFrame& sf);
   ~BND_SafeFrame() { if (m_owned && m_ptr) ON_SafeFrame_Delete(m_ptr); }
-  BND_SafeFrame(const BND_SafeFrame&) = delete;
   // CppPointer: the file's object (resolved each time) or this one's
   ON_SafeFrame* RH3DM_Const() const {
     if (m_ptr) return m_ptr;

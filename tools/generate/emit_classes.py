@@ -219,16 +219,16 @@ def emit(p):
             L += ['    %s;' % c for c in shape[1]]
     elif shape[0] == 'arrayfill' and shape[1]['form'] == 'loop':
         # `int count = Count; for (i < count) { var e = new E(); UNM.F(..., i, ref e);
-        # rc[i] = e; } return rc;` -- one native call per element, as a tuple (G72)
+        # rc[i] = e; } return rc;` -- one native call per element, as a list (G72; D87)
         af = shape[1]
-        L.append('  %sBND_TUPLE %s(%s)%s {' % (st, name, sig, cq))
+        L.append('  %sRH3DM_ARR %s(%s)%s {' % (st, name, sig, cq))
         L += guard_lines
         L.append('    int %s = %s;' % (af['count'], af['count_expr']))
-        L.append('    BND_TUPLE rh3dm_tuple = CreateTuple(%s);' % af['count'])
+        L.append('    RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(%s);' % af['count'])
         L.append('    for (int rh3dm_i = 0; rh3dm_i < %s; rh3dm_i++) {' % af['count'])
         L += ['      %s' % x for x in p['locals']]             # the element local, fresh per iteration as in C#
         L.append('      %s;' % call)
-        L.append('      SetTuple(rh3dm_tuple, rh3dm_i, %s);' % af['item'].format(n=af['elem_local']))
+        L.append('      RH3DM_SetArr(rh3dm_tuple, rh3dm_i, %s);' % af['item'].format(n=af['elem_local']))
         L.append('    }')
         L.append('    return rh3dm_tuple;')
     elif shape[0] == 'wraptuple':
@@ -242,9 +242,9 @@ def emit(p):
             L += ['    %s' % x for x in p['locals']]
             L.append('    bool rh3dm_ok = %s;' % call)
             L.append('    if (!rh3dm_ok) { %s return RH3DM_NoneTuple(); }' % ' '.join(wt['fail']))
-            L.append('    BND_TUPLE rh3dm_tuple = CreateTuple(%d);' % len(wt['items']))
+            L.append('    RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(%d);' % len(wt['items']))   # C# T[]: a list (D87)
             for j, n in enumerate(wt['items']):
-                L.append('    SetTuple(rh3dm_tuple, %d, %s);' % (j, wt['item'].format(p=n)))
+                L.append('    RH3DM_SetArr(rh3dm_tuple, %d, %s);' % (j, wt['item'].format(p=n)))
             L.append('    return rh3dm_tuple;')
         elif wt['form'] == 'newptr':
             # `bool F(out T left, out T right)`: (success, left, right), the objects
@@ -261,42 +261,42 @@ def emit(p):
                 L.append('    SetTuple(rh3dm_tuple, %d, %s);' % (j + 1, wt['item'].format(p=n)))
             L.append('    return rh3dm_tuple;')
         else:
-            # ptrloop: the holder's elements read back one by one (duplicated when C# does)
-            L.append('  %sBND_TUPLE %s(%s)%s {' % (st, name, sig, cq))
+            # ptrloop: the holder's elements read back one by one (duplicated when C# does), as a list (D87)
+            L.append('  %sRH3DM_ARR %s(%s)%s {' % (st, name, sig, cq))
             L += guard_lines
             L += ['    %s' % x for x in p['locals']]
             L.append('    %s;' % call)
             L.append('    int rh3dm_n = %s(&holder_out);' % wt['count'])
-            L.append('    BND_TUPLE rh3dm_tuple = CreateTuple(rh3dm_n);')
+            L.append('    RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(rh3dm_n);')
             L.append('    for (int rh3dm_i = 0; rh3dm_i < rh3dm_n; rh3dm_i++) {')
             L.append('      %s* rh3dm_p = %s(&holder_out, rh3dm_i);' % (wt['ptr'], wt['get']))
             if wt.get('dup'):
                 L.append('      if (rh3dm_p) rh3dm_p = %s(rh3dm_p);' % wt['dup'])
-            L.append('      SetTuple(rh3dm_tuple, rh3dm_i, %s);' % wt['item'].format(p='rh3dm_p'))
+            L.append('      RH3DM_SetArr(rh3dm_tuple, rh3dm_i, %s);' % wt['item'].format(p='rh3dm_p'))
             L.append('    }')
             L.append('    return rh3dm_tuple;')
     elif shape[0] == 'arrayfill':
         # `int count = ...; if (count < 1) return ...; T[] a = new T[count];
-        # UNM.Fill(..., a); return a;` -- the vector the native fills, as a tuple (G54)
+        # UNM.Fill(..., a); return a;` -- the vector the native fills, as a list (G54; D87)
         af = shape[1]
         nullable = af['empty'] == 'null' or af['form'] == 'success'
-        L.append('  %s%s %s(%s)%s {' % (st, 'RH3DM_NTUPLE' if nullable else 'BND_TUPLE', name, sig, cq))
+        L.append('  %s%s %s(%s)%s {' % (st, 'RH3DM_NTUPLE' if nullable else 'RH3DM_ARR', name, sig, cq))
         L += guard_lines
         L += ['    %s' % x for x in p['locals']]
         L.append('    int %s = %s;' % (af['count'], af['count_expr']))
         if af['empty_cond']:
-            L.append('    if (%s) return %s;' % (af['empty_cond'], 'CreateTuple(0)' if af['empty'] == 'empty' else 'RH3DM_NoneTuple()'))
+            L.append('    if (%s) return %s;' % (af['empty_cond'], 'RH3DM_NewArr(0)' if af['empty'] == 'empty' else 'RH3DM_NoneTuple()'))
         L.append('    std::vector<%s> %s(%s);' % (af['elem'], af['local'], af['count']))
         if af['form'] == 'success':
             L.append('    if (!(%s)) return RH3DM_NoneTuple();' % call)
         else:
             L.append('    %s;' % call)
         # (C# names the array `rc` often: the tuple takes a reserved name)
-        L.append('    BND_TUPLE rh3dm_tuple = CreateTuple(%s);' % af['count'])
+        L.append('    RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(%s);' % af['count'])
         item = '%s[rh3dm_i]' % af['local']
         if af.get('conv'):
             item = af['conv'] % item                  # Color.FromArgb(rc[i]) (G54)
-        L.append('    for (int rh3dm_i = 0; rh3dm_i < %s; rh3dm_i++) SetTuple(rh3dm_tuple, rh3dm_i, %s);' % (af['count'], item))
+        L.append('    for (int rh3dm_i = 0; rh3dm_i < %s; rh3dm_i++) RH3DM_SetArr(rh3dm_tuple, rh3dm_i, %s);' % (af['count'], item))
         L.append('    return rh3dm_tuple;')
     elif shape[0] == 'fromoutconv':
         # `int argb = 0; F(..., ref argb); return Color.FromArgb(argb);` (G53)
@@ -576,19 +576,19 @@ def emit(p):
             L += ['    %s' % x for x in p['locals']]
             L.append(call_line)
             L.append('    return %s;' % hp['conv'].format(n='holder_out'))
-        else:                                 # array -> tuple of elements
-            L.append('  %sBND_TUPLE %s(%s)%s {' % (st, name, sig, cq))
+        else:                                 # array -> list of elements (D87)
+            L.append('  %sRH3DM_ARR %s(%s)%s {' % (st, name, sig, cq))
             L += guard_lines
             L += ['    %s' % x for x in p['locals']]
             if len(shape) > 2:
                 # `return rc == 0 ? new int[0] : h.ToArray();`: empty when the result says so (G73)
                 L.append('    %s rh3dm_rc = %s;' % (p['fn']['returns'], call))
-                L.append('    if (rh3dm_rc %s) return CreateTuple(0);' % shape[2])
+                L.append('    if (rh3dm_rc %s) return RH3DM_NewArr(0);' % shape[2])
             else:
                 L.append(call_line)
-            L.append('    BND_TUPLE rc = CreateTuple(holder_out.Count());')
+            L.append('    RH3DM_ARR rc = RH3DM_NewArr(holder_out.Count());')
             L.append('    for (int i = 0; i < holder_out.Count(); i++)')
-            L.append('      SetTuple(rc, i, %s);' % hp['elem'].format(n='holder_out'))
+            L.append('      RH3DM_SetArr(rc, i, %s);' % hp['elem'].format(n='holder_out'))
             L.append('    return rc;')
     elif shape[0] == 'holdertuple':           # bool X(out string log)
         hp = HOLDERS[shape[1]]
@@ -959,9 +959,8 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
   explicit {gen}({on}* owned) : m_ptr(owned), m_owned(true) {{}}
   {gen}({on}* p, bool owned) : m_ptr(p), m_owned(owned) {{}}
   explicit {gen}(ONX_Model* model) : m_model(model) {{}}
-  {gen}() : m_ptr(''' + ff['New'] + '''()), m_owned(true) {{}}
-  ~{gen}() {{ if (m_owned && m_ptr) ''' + ff['Delete'] + '''(m_ptr); }}
-  {gen}(const {gen}&) = delete;
+  {gen}() : m_ptr(''' + ff['New'] + '''()), m_owned(true) {{}}{dctor}
+  ~{gen}() {{ if (m_owned && m_ptr) ''' + ff['Delete'] + '''(m_ptr); }}{nocopy}
   // CppPointer: the file's object (resolved each time) or this one's
   {on}* RH3DM_Const() const {{
     if (m_ptr) return m_ptr;''' + ('''
@@ -995,11 +994,18 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
     if (!p) throw std::runtime_error("{cs_full}: the object is no longer in its %(parent)s");
     return p;
   }}
-  // NonConstPointer: copy on write (NonConstOperation -> _InternalDuplicate)
+%(nonconst)s{override}''') % {'nonconst': '''  // NonConstPointer: through the owner's non-const pointer -- edits reach the owner
+  // (rhino3dm's ViewportInfo.NonConstPointer override; api/exceptions.toml spec_patch)
+  {on}* RH3DM_NonConst() const {{
+    if (m_ptr) return m_ptr;
+    return ({on}*)%(res)s(const_cast<%(oarg_nc)s>(RH3DM_PvOwner(m_pv_owner))%(idx)s);
+  }}''' % {'res': pr['Resolver'], 'oarg_nc': rfn['params'][0]['type'].replace('const ', ''),
+           'idx': '' if pr.get('NoIndex') else ', m_pv_index'} if pr['NonConst'] == 'through' else '''  // NonConstPointer: copy on write (NonConstOperation -> _InternalDuplicate)
   {on}* RH3DM_NonConst() const {{
     if (!m_ptr) m_ptr = ({on}*){dup}(({dup_arg}*)RH3DM_Const());   // first write: a private copy, as in .NET
     return m_ptr;
-  }}{override}''') % {'ogen': own['gen'], 'field': pr['Field'], 'oarg': rfn['params'][0]['type'],
+  }}''',
+                       'ogen': own['gen'], 'field': pr['Field'], 'oarg': rfn['params'][0]['type'],
                        'res': pr['Resolver'], 'parent': pr['Parent'], 'idx': '' if pr.get('NoIndex') else ', m_pv_index'}
     elif cls['mode'] == 'pointer' and cls.get('proxy'):
         # RhinoCommon's two CommonObject states: an owned pointer, or a VIEW of

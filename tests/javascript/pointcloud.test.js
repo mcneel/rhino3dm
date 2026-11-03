@@ -12,17 +12,18 @@ test('ctor', async () => {
     const pointList = new rhino.Point3dList(15)
 
     for (let i = 0; i < 15; i++) {
-        pointArray.push([i, i, 0])
+        pointArray.push({ X: i, Y: i, Z: 0 })
         pointList.add(i, i, 0)
     }
 
     const pcFromArray = new rhino.PointCloud(pointArray)
     const pcFromList = new rhino.PointCloud(pointList)
 
-    const r1 = pcFromArray.closestPoint([0, 0, 0])
-    const r2 = pcFromList.closestPoint([0, 0, 0])
+    // closestPoint returns the index of the closest point
+    const r1 = pcFromArray.closestPoint({ X: 0, Y: 0, Z: 0 })
+    const r2 = pcFromList.closestPoint({ X: 0, Y: 0, Z: 0 })
 
-    const result = r1[0] === r2[0] && r1[1] === r2[1] && r1[2] === r2[2]
+    const result = r1 === r2
 
     expect(result).toBe(true)
 
@@ -102,20 +103,22 @@ test('members', async () => {
 
     const pc = new rhino.PointCloud()
 
-    pc.addPointNormalColorValue([0, 0, 0], [0, 1, 1], { 'r': 255, 'g': 0, 'b': 0, 'a': 0 }, 1.234)
-    pc.addPointNormalColorValue([0, 0, 0], [0, 1, 2], { 'r': 10, 'g': 0, 'b': 27, 'a': 0 }, 1.999)
-    pc.addPointNormalColorValue([0, 0, 0], [0, 13, 1], { 'r': 255, 'g': 90, 'b': 0, 'a': 0 }, 1.333)
-    pc.addPointNormalColorValue([0, 0, 0], [0, 1, 4], { 'r': 44, 'g': 0, 'b': 0, 'a': 0 }, 1.111)
+    // addPointNormalColorValue -> add(point, normal, color, value)
+    pc.add({ X: 0, Y: 0, Z: 0 }, { X: 0, Y: 1, Z: 1 }, { 'r': 255, 'g': 0, 'b': 0, 'a': 0 }, 1.234)
+    pc.add({ X: 0, Y: 0, Z: 0 }, { X: 0, Y: 1, Z: 2 }, { 'r': 10, 'g': 0, 'b': 27, 'a': 0 }, 1.999)
+    pc.add({ X: 0, Y: 0, Z: 0 }, { X: 0, Y: 13, Z: 1 }, { 'r': 255, 'g': 90, 'b': 0, 'a': 0 }, 1.333)
+    pc.add({ X: 0, Y: 0, Z: 0 }, { X: 0, Y: 1, Z: 4 }, { 'r': 44, 'g': 0, 'b': 0, 'a': 0 }, 1.111)
 
+    // D11: points and normals are {X, Y, Z} objects
     const pts = pc.getPoints()
     expect(pts.length > 0).toBe(true)
     expect(Array.isArray(pts)).toBe(true)
-    expect(Array.isArray(pts[0])).toBe(true)
+    expect(Object.keys(pts[0])).toEqual(['X', 'Y', 'Z'])
 
     const nrmls = pc.getNormals()
     expect(nrmls.length > 0).toBe(true)
     expect(Array.isArray(nrmls)).toBe(true)
-    expect(Array.isArray(nrmls[0])).toBe(true)
+    expect(Object.keys(nrmls[0])).toEqual(['X', 'Y', 'Z'])
 
     const cols = pc.getColors()
     expect(cols.length > 0).toBe(true)
@@ -130,7 +133,8 @@ test('members', async () => {
     expect(Number.isInteger(cols[0].b)).toBe(true)
     expect(Number.isInteger(cols[0].a)).toBe(true)
 
-    const vals = pc.getValues()
+    // getValues -> getPointValues
+    const vals = pc.getPointValues()
     expect(vals.length > 0).toBe(true)
     expect(Array.isArray(vals)).toBe(true)
     expect(typeof vals[0] === 'number').toBe(true)

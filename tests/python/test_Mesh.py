@@ -4,8 +4,8 @@ import rhino3dm
 class TestMesh(unittest.TestCase):
 
     file3dm = rhino3dm.File3dm.Read('../models/mesh.3dm')
-    mesh = file3dm.Objects[0].Geometry
-    attr = file3dm.Objects[0].Attributes
+    mesh = list(file3dm.Objects)[0].Geometry
+    attr = list(file3dm.Objects)[0].Attributes
 
     def test_meshIsManifold(self):
 
@@ -23,14 +23,11 @@ class TestMesh(unittest.TestCase):
 
     def test_meshGetFace(self):
 
+        # RhinoCommon's face list yields MeshFace (A, B, C, D); 8.x gave a 4-tuple
         face = self.mesh.Faces[0]
 
-        self.assertTrue(type(face) == tuple)
-        self.assertTrue(len(face) == 4)
-        self.assertTrue(type(face[0]) == int)
-        self.assertTrue(type(face[1]) == int)
-        self.assertTrue(type(face[2]) == int)
-        self.assertTrue(type(face[3]) == int)
+        self.assertTrue(type(face) == rhino3dm.MeshFace)
+        self.assertTrue(all(type(i) == int for i in (face.A, face.B, face.C, face.D)))
 
     def test_meshGetFaceVertices(self):
 

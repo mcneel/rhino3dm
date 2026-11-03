@@ -5,8 +5,8 @@ class TestXform(unittest.TestCase):
 
     def test_xformToFloatArray(self):
 
-        xform = rhino3dm.Transform.Identity()
-        fa = xform.ToFloatArray2(False)
+        xform = rhino3dm.Transform.Identity
+        fa = xform.ToFloatArray(False)
 
         self.assertEqual(len(fa), 16)
         self.assertTrue( type(fa) == list )

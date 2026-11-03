@@ -18,7 +18,8 @@ test('createExtrusion', async () => {
 
   expect(doc !== null).toBe(true)
 
-  const members = doc.groups().groupMembers(0)
+  // groups -> allGroups
+  const members = doc.allGroups.groupMembers(0)
 
   expect(Array.isArray(members)).toBe(true)
   expect(members[0].constructor.name).toBe('File3dmObject')

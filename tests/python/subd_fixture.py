@@ -76,9 +76,14 @@ def vertex_name(vertex):
     return spec.vertex_name_at(_xyz(vertex.ControlNetPoint))
 
 
+def edge_vertex(edge, i):
+    """End ``i`` (0 or 1) of a SubDEdge. 8.x: edge.Vertex(i)."""
+    return edge.VertexFrom if i == 0 else edge.VertexTo
+
+
 def edge_name(edge):
     """Canonical spec key of a SubDEdge, e.g. "AD", or None if it is not ours."""
-    ends = (vertex_name(edge.Vertex(0)), vertex_name(edge.Vertex(1)))
+    ends = (vertex_name(edge.VertexFrom), vertex_name(edge.VertexTo))   # 8.x: edge.Vertex(0/1)
     if None in ends:
         return None
     return spec.edge_key(*ends)
@@ -86,7 +91,7 @@ def edge_name(edge):
 
 def face_key(face):
     """Unordered set of spec vertex names bounding a SubDFace."""
-    return frozenset(vertex_name(face.Vertex(i))
+    return frozenset(vertex_name(face.VertexAt(i))     # 8.x: face.Vertex(i)
                      for i in range(face.VertexCount))
 
 

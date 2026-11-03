@@ -24,12 +24,12 @@ bool BND_MeshVertexColorList::Gen_SetColor(int index, BND_Color color) const {
   return ON_Mesh_SetColor(m_ptr, index, RH3DM_ColorToArgb(color));
 }
 
-BND_TUPLE BND_MeshVertexColorList::Gen_ToARGBArray() const {
+RH3DM_ARR BND_MeshVertexColorList::Gen_ToARGBArray() const {
   int colorCount = ON_Mesh_GetInt(m_ptr, (MeshIntConst)8);
   std::vector<int> rc(colorCount);
   ON_Mesh_GetVertexColorsAsArgb(m_ptr, colorCount, rc.data());
-  BND_TUPLE rh3dm_tuple = CreateTuple(colorCount);
-  for (int rh3dm_i = 0; rh3dm_i < colorCount; rh3dm_i++) SetTuple(rh3dm_tuple, rh3dm_i, rc[rh3dm_i]);
+  RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(colorCount);
+  for (int rh3dm_i = 0; rh3dm_i < colorCount; rh3dm_i++) RH3DM_SetArr(rh3dm_tuple, rh3dm_i, rc[rh3dm_i]);
   return rh3dm_tuple;
 }
 

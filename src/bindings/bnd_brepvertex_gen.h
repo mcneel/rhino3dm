@@ -16,7 +16,7 @@ public:
   ON_Brep* RH3DM_Owner() const { return (ON_Brep*)m_comp_owner; }
   int RH3DM_Key() const { return m_comp_key; }
 
-  BND_TUPLE Gen_EdgeIndices() const;
+  RH3DM_ARR Gen_EdgeIndices() const;
   double Gen_Tolerance() const;
   int Gen_VertexIndex() const;
 };

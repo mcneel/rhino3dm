@@ -25,8 +25,8 @@ public:
   void Gen_Hide(int vertexIndex) const;
   void Gen_HideAll() const;
   void Gen_Show(int vertexIndex) const;
-  BND_TUPLE Gen_ToPoint3dArray() const;
-  BND_TUPLE Gen_ToPoint3fArray() const;
+  RH3DM_ARR Gen_ToPoint3dArray() const;
+  RH3DM_ARR Gen_ToPoint3fArray() const;
   void Gen_set_Capacity(int value);
   void Gen_set_UseDoublePrecisionVertices(bool value);
   bool Gen_SetVertex_3(int index, BND_Point3d vertex) const;

@@ -1143,6 +1143,7 @@ def index_types(manifest):
                         prev[k] = v
         elif x['Kind'] == 'property' and x.get('Const') and x['Variant'] in ('portable', 'rhino3dm-only'):
             CONST_PROPS[(x['Type'], x['Name'])] = (x['Const'], x.get('ConstValue'))
+    apply_spec_patches()
     # VIEWS: a registry class gets a second storage state -- (ONX_Model*, id),
     # resolved on every access -- when RhinoCommon constructs it that way:
     #  - the File3dm proxy idiom (specgen FileProxy: `new Layer(id, file)`), or
@@ -1247,8 +1248,15 @@ def index_types(manifest):
         # `new ViewportInfo(viewInfo)` (G89): a view of the owner's sub-object -- the type's
         # const resolver is one native on the owner's own const pointer (ViewInfo's
         # ConstViewportPointer), no NonConstPointer branch, so writes copy
+        # A NonConstPointer branch that resolves the same native on the owner's non-const
+        # pointer (rhino3dm's ViewportInfo override; pilot #75) writes THROUGH instead
+        def writes_through(pv):
+            nc = pv.get('NonConstNative')
+            return (nc is not None and nc['Name'] == pv['ConstNative']['Name']
+                    and [a.get('Value') for a in nc['Args']] == ['NonConstPointer'])
         own_sub = [pv for pv in (TYPE_RECS.get(c['type']) or {}).get('ParentViews') or []
-                   if not pv.get('IndexNative') and pv.get('ConstNative') and not pv.get('NonConst')]
+                   if not pv.get('IndexNative') and pv.get('ConstNative')
+                   and (not pv.get('NonConst') or writes_through(pv))]
         if own_sub and dup and len(own_sub) == 1:
             pv = own_sub[0]
             owner = BY_CS.get(pv['ParentType'])
@@ -1256,7 +1264,8 @@ def index_types(manifest):
             if (owner and owner['mode'] in ('pointer', 'value') and not owner.get('proxy') and fn and fn.get('variant') != 'rhino-only'
                     and len(fn['params']) == 1 and [a.get('Value') for a in pv['ConstNative']['Args']] == ['ConstPointer']
                     and fn['params'][0]['type'].replace('const ', '').rstrip('*').strip() == owner['on']):
-                c['proxy'] = {'Resolver': pv['ConstNative']['Name'], 'NonConst': 'cow', 'Dup': dup, 'Origin': 'parent',
+                c['proxy'] = {'Resolver': pv['ConstNative']['Name'], 'NonConst': 'through' if pv.get('NonConst') else 'cow',
+                              'Dup': dup, 'Origin': 'parent',
                               'Parent': pv['ParentType'], 'Owner': owner['reg'], 'Field': None, 'NoIndex': True}
                 continue
         for pv in all_pvs:
@@ -1281,6 +1290,29 @@ def index_types(manifest):
     index_ctor_keys()
     index_scopes()
     index_child_state()
+
+
+def apply_spec_patches():
+    """api/exceptions.toml [[spec_patch]]: a ParentViews NonConstPointer branch rhino3dm's
+    own .NET copy carries (a [[line_exception]]) and upstream lacks -- supplied as the
+    record specgen would extract from it (pilot #75). Refused once upstream has it."""
+    import tomllib
+    for sp in tomllib.load(open(os.path.join(ROOT, 'api', 'exceptions.toml'), 'rb')).get('spec_patch') or []:
+        if sp['type'] not in TYPE_RECS:
+            continue                          # a test manifest without the type
+        pvs = [pv for pv in (TYPE_RECS.get(sp['type']) or {}).get('ParentViews') or []
+               if pv['ParentType'] == sp['parent_view'] and pv.get('ConstNative')]
+        if len(pvs) != 1:
+            sys.exit('exceptions.toml spec_patch %s: no ParentViews entry for %s' % (sp['type'], sp['parent_view']))
+        pv = pvs[0]
+        if pv.get('NonConst'):
+            sys.exit('exceptions.toml spec_patch %s: upstream now has the NonConstPointer branch -- delete the patch'
+                     % sp['type'])
+        if sp['nonconst_native'] != pv['ConstNative']['Name']:
+            sys.exit('exceptions.toml spec_patch %s: the const and non-const natives differ' % sp['type'])
+        pv['NonConst'] = sp['nonconst']
+        pv['NonConstNative'] = {'Name': sp['nonconst_native'],
+                                'Args': [dict(a, Text='ptr_this', Value='NonConstPointer') for a in pv['ConstNative']['Args']]}
 
 
 def index_child_state():
@@ -1508,6 +1540,7 @@ HAND_BINDINGS = [
 #   js       the JS name (default: camelCase of name); None: not registered in JS
 #   py       False: not registered in Python
 #   keep_alive  the result refers to self (a view): Python keeps self alive while it lives
+#   op       a Python operator (`__eq__`): an argument of another type gives NotImplemented, not TypeError
 # On a value type JS has no instances (values are plain objects, G38): a method is the class
 # function `rhino.BoundingBox.encode(box)`, as the generated value-type members are.
 def _hm(name, kind, fn, header, **kw):
@@ -1611,6 +1644,14 @@ HAND_MEMBERS['SubDFace'] = [_hm('Edges', 'property', 'BND_SubDFace_Edges', _SD, 
 HAND_MEMBERS['SubDEdge'] = [_hm('Faces', 'property', 'BND_SubDEdge_Faces', _SD, list=True),
                              _hm('Vertices', 'property', 'BND_SubDEdge_Vertices', _SD, list=True)]
 HAND_MEMBERS['SubDVertex'] = [_hm('Faces', 'property', 'BND_SubDVertex_Faces', _SD, list=True)]
+# D25 (Luis 2026-11-03): RhinoCommon's SubDComponent equality -- pure C# over the managed parent
+# reference, so not generated; Python also gets the operators and __hash__ (sets, dict keys)
+HAND_MEMBERS['SubDComponent'] = [
+    _hm('Equals', 'method', 'BND_SubDComponent_Equals', _SD, args=['other']),
+    _hm('GetHashCode', 'method', 'BND_SubDComponent_GetHashCode', _SD),
+    _hm('__eq__', 'method', 'BND_SubDComponent_Equals', _SD, args=['other'], js=None, op=True),
+    _hm('__ne__', 'method', 'BND_SubDComponent_NotEquals', _SD, args=['other'], js=None, op=True),
+    _hm('__hash__', 'method', 'BND_SubDComponent_GetHashCode', _SD, js=None)]
 
 
 # a hand member's header defaults to its class's hand file (M3 layout): bindings/bnd_<class>.h
@@ -1622,7 +1663,7 @@ for _reg, _es in HAND_MEMBERS.items():
 
 def hand_class_names():
     return {c if isinstance(c, str) else c['name'] for c in HAND_CLASSES}
-HAND_MEMBER_KEYS = {'name', 'kind', 'fn', 'header', 'args', 'js', 'py', 'keep_alive', 'set', 'of', 'overload', 'list'}
+HAND_MEMBER_KEYS = {'name', 'kind', 'fn', 'header', 'args', 'js', 'py', 'keep_alive', 'set', 'of', 'overload', 'list', 'op'}
 # the one hand file allowed to name a binding: the neutral types' implementation
 HAND_SHIM = {'bindings/bnd_common.h', 'bindings/bnd_common.cpp'}
 HAND_BINDING_WORDS = re.compile(r'\bpy::|\bnb::|\bemscripten\b|\bON_PYTHON_COMPILE\b|\bON_WASM_COMPILE\b|\bNANOBIND\b')

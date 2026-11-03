@@ -17,7 +17,7 @@ test('getObjectIDs', async () => {
 
   expect(file3dm !== null).toBe(true)
 
-  const instanceDefinition = file3dm.instanceDefinitions().get(0)
+  const instanceDefinition = file3dm.instanceDefinitions.get(0)
   const ids = instanceDefinition.getObjectIds()
 
   expect(Array.isArray(ids)).toBe(true)

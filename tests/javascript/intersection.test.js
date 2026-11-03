@@ -7,8 +7,8 @@ beforeAll(async () => {
 
 test('intersectLineLine', async () => {
 
-  const lineA = new rhino.LineCurve([0, 0, 0], [10, 10, 0]).line
-  const lineB = new rhino.LineCurve([10, 0, 0], [0, 10, 0]).line
+  const lineA = new rhino.LineCurve({ X: 0, Y: 0, Z: 0 }, { X: 10, Y: 10, Z: 0 }).line
+  const lineB = new rhino.LineCurve({ X: 10, Y: 0, Z: 0 }, { X: 0, Y: 10, Z: 0 }).line
 
   const resultLineLine = rhino.Intersection.lineLine(lineA, lineB)
 
@@ -21,7 +21,8 @@ test('intersectLineLine', async () => {
   expect(resultLineLine[1] === 0.5).toBe(true)
   expect(resultLineLine[2] === 0.5).toBe(true)
 
-  const resultLineLine2 = rhino.Intersection.lineLineTolerance(lineA, lineB, 0.0, false)
+  // lineLineTolerance -> lineLine(a, b, tolerance, finiteSegments)
+  const resultLineLine2 = rhino.Intersection.lineLine(lineA, lineB, 0.0, false)
 
   expect(Array.isArray(resultLineLine2)).toBe(true)
   expect(typeof resultLineLine2[0] === 'boolean').toBe(true)
@@ -35,11 +36,12 @@ test('intersectLineLine', async () => {
 
 test('intersectPlanes', async () => {
 
-  const planeA = rhino.Plane.worldXY()
-  const planeB = rhino.Plane.worldYZ()
-  const planeC = rhino.Plane.worldZX()
-  const line = new rhino.LineCurve([0, 0, -10], [10, 10, 10]).line
-  const sphere = new rhino.Sphere([0, 0, 0], 5)
+  // D51: static properties are getters
+  const planeA = rhino.Plane.worldXY
+  const planeB = rhino.Plane.worldYZ
+  const planeC = rhino.Plane.worldZX
+  const line = new rhino.LineCurve({ X: 0, Y: 0, Z: -10 }, { X: 10, Y: 10, Z: 10 }).line
+  const sphere = rhino.Sphere.create({ X: 0, Y: 0, Z: 0 }, 5)
 
   // line-plane
   const resultLinePlane = rhino.Intersection.linePlane(line, planeA)
@@ -58,9 +60,10 @@ test('intersectPlanes', async () => {
   expect(resultPlanePlane.length === 2).toBe(true)
   expect(Array.isArray(resultPlanePlane)).toBe(true)
   expect(typeof resultPlanePlane[0] === 'boolean').toBe(true)
-  expect(resultPlanePlane[1].constructor.name === 'Line').toBe(true)
+  // D11: a Line is a plain object {From, To}
+  expect(Object.keys(resultPlanePlane[1])).toEqual(['From', 'To'])
   expect(resultPlanePlane[0]).toBe(true)
-  expect(resultPlanePlane[1].isValid).toBe(true)
+  expect(rhino.Line.isValid(resultPlanePlane[1])).toBe(true)
 
   // sphere plane
 
@@ -69,8 +72,9 @@ test('intersectPlanes', async () => {
   expect(resultSpherePlane.length === 2).toBe(true)
   expect(Array.isArray(resultSpherePlane)).toBe(true)
   expect(resultSpherePlane[0] === rhino.PlaneSphereIntersection.Circle).toBe(true)
-  expect(resultSpherePlane[1].constructor.name === 'Circle').toBe(true)
-  expect(resultSpherePlane[1].isValid).toBe(true)
+  // D11: a Circle is a plain object {Plane, Radius}
+  expect(Object.keys(resultSpherePlane[1])).toEqual(['Plane', 'Radius'])
+  expect(rhino.Circle.isValid(resultSpherePlane[1])).toBe(true)
 
   // plane plane plane
 
@@ -79,21 +83,22 @@ test('intersectPlanes', async () => {
   expect(resultPlanePlanePlane.length === 2).toBe(true)
   expect(Array.isArray(resultLinePlane)).toBe(true)
   expect(typeof resultPlanePlanePlane[0] === 'boolean').toBe(true)
-  expect(Array.isArray(resultPlanePlanePlane[1])).toBe(true)
+  // D11: a point is {X, Y, Z}
+  expect(Object.keys(resultPlanePlanePlane[1])).toEqual(['X', 'Y', 'Z'])
   expect(resultPlanePlanePlane[0] === true)
-  expect(resultPlanePlanePlane[1][0] === 0)
-  expect(resultPlanePlanePlane[1][1] === 0)
-  expect(resultPlanePlanePlane[1][2] === 0)
+  expect(resultPlanePlanePlane[1].X === 0)
+  expect(resultPlanePlanePlane[1].Y === 0)
+  expect(resultPlanePlanePlane[1].Z === 0)
 
 })
 
 test('intersectLines', async () => {
 
-  const line = new rhino.LineCurve([0, 0, 0], [10, 10, 0]).line
-  const circle = new rhino.Circle([0, 0, 0], 5)
-  const sphere = new rhino.Sphere([0, 0, 0], 5)
-  const cylinder = new rhino.Cylinder(circle, 5)
-  const box = sphere.toBrep().getBoundingBox()
+  const line = new rhino.LineCurve({ X: 0, Y: 0, Z: 0 }, { X: 10, Y: 10, Z: 0 }).line
+  const circle = rhino.Circle.create({ X: 0, Y: 0, Z: 0 }, 5)
+  const sphere = rhino.Sphere.create({ X: 0, Y: 0, Z: 0 }, 5)
+  const cylinder = rhino.Cylinder.create(circle, 5)
+  const box = rhino.Sphere.toBrep(sphere).getBoundingBox(false)
 
   // line circle
 
@@ -103,7 +108,8 @@ test('intersectLines', async () => {
   expect(Array.isArray(resultLineCircle)).toBe(true)
   expect(resultLineCircle[0] === rhino.LineCircleIntersection.Multiple).toBe(true)
   expect(typeof resultLineCircle[1] === 'number').toBe(true)
-  expect(Array.isArray(resultLineCircle[2])).toBe(true)
+  // D11: points are {X, Y, Z}
+  expect(Object.keys(resultLineCircle[2])).toEqual(['X', 'Y', 'Z'])
   expect(typeof resultLineCircle[3] === 'number').toBe(true)
 
   // line sphere
@@ -113,8 +119,8 @@ test('intersectLines', async () => {
   expect(resultLineSphere.length === 3).toBe(true)
   expect(Array.isArray(resultLineSphere)).toBe(true)
   expect(resultLineSphere[0] === rhino.LineSphereIntersection.Multiple).toBe(true)
-  expect(Array.isArray(resultLineSphere[1])).toBe(true)
-  expect(Array.isArray(resultLineSphere[1])).toBe(true)
+  expect(Object.keys(resultLineSphere[1])).toEqual(['X', 'Y', 'Z'])
+  expect(Object.keys(resultLineSphere[2])).toEqual(['X', 'Y', 'Z'])
 
   // line cylinder
 
@@ -123,8 +129,8 @@ test('intersectLines', async () => {
   expect(resultLineCylinder.length === 3).toBe(true)
   expect(Array.isArray(resultLineCylinder)).toBe(true)
   expect(resultLineCylinder[0] === rhino.LineCylinderIntersection.Multiple).toBe(true)
-  expect(Array.isArray(resultLineCylinder[1])).toBe(true)
-  expect(Array.isArray(resultLineCylinder[2])).toBe(true)
+  expect(Object.keys(resultLineCylinder[1])).toEqual(['X', 'Y', 'Z'])
+  expect(Object.keys(resultLineCylinder[2])).toEqual(['X', 'Y', 'Z'])
 
   // line box
 
@@ -133,22 +139,24 @@ test('intersectLines', async () => {
   expect(resultLineBox.length === 2).toBe(true)
   expect(Array.isArray(resultLineBox)).toBe(true)
   expect(typeof resultLineBox[0] === 'boolean').toBe(true)
-  expect(Array.isArray(resultLineBox[1])).toBe(true)
+  // D11: an Interval is {T0, T1}
+  expect(Object.keys(resultLineBox[1])).toEqual(['T0', 'T1'])
 
 })
 
 test('intersectSphereSphere', async () => {
 
-  const sphereA = new rhino.Sphere([0, 0, 0], 5)
-  const sphereB = new rhino.Sphere([2.5, 0, 0], 5)
+  const sphereA = rhino.Sphere.create({ X: 0, Y: 0, Z: 0 }, 5)
+  const sphereB = rhino.Sphere.create({ X: 2.5, Y: 0, Z: 0 }, 5)
 
   const resultSphereSphere = rhino.Intersection.sphereSphere(sphereA, sphereB)
 
   expect(resultSphereSphere.length === 2).toBe(true)
   expect(Array.isArray(resultSphereSphere)).toBe(true)
   expect(resultSphereSphere[0] === rhino.SphereSphereIntersection.Circle).toBe(true)
-  expect(resultSphereSphere[1].constructor.name === 'Circle').toBe(true)
-  expect(resultSphereSphere[1].isValid).toBe(true)
-  expect(resultSphereSphere[1].radius < sphereA.radius).toBe(true)
+  // D11: plain objects {Plane, Radius}
+  expect(Object.keys(resultSphereSphere[1])).toEqual(['Plane', 'Radius'])
+  expect(rhino.Circle.isValid(resultSphereSphere[1])).toBe(true)
+  expect(resultSphereSphere[1].Radius < sphereA.Radius).toBe(true)
 
 })

@@ -3,12 +3,12 @@
 // constants and guards baked from the C# call sites (api/manifest.json).
 #include "bnd_renderchannels_gen.h"
 
-BND_TUPLE BND_RenderChannels::Gen_CustomList() const {
+RH3DM_ARR BND_RenderChannels::Gen_CustomList() const {
   ON_SimpleArray<ON_UUID> holder_out;
   ON_RenderChannels_GetCustomList(RH3DM_Const(), &holder_out);
-  BND_TUPLE rc = CreateTuple(holder_out.Count());
+  RH3DM_ARR rc = RH3DM_NewArr(holder_out.Count());
   for (int i = 0; i < holder_out.Count(); i++)
-    SetTuple(rc, i, ON_UUID_to_Binding(holder_out[i]));
+    RH3DM_SetArr(rc, i, ON_UUID_to_Binding(holder_out[i]));
   return rc;
 }
 

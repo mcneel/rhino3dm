@@ -7,8 +7,8 @@ class TestBrep(unittest.TestCase):
     def test_brepBrepVertex_GetEdgeIndices(self):
         
         sphere = rhino3dm.Sphere( rhino3dm.Point3d(0,0,0), 5)
-        bbox = sphere.ToBrep().GetBoundingBox()
-        brep = rhino3dm.Brep.CreateFromBoundingBox(bbox)
+        bbox = sphere.ToBrep().GetBoundingBox(False)
+        brep = rhino3dm.Brep.CreateFromBox(bbox)
         vertex = brep.Vertices[0]
         get_edge_indices = vertex.EdgeIndices()
 

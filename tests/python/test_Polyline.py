@@ -13,8 +13,9 @@ class TestPolyline(unittest.TestCase):
         pointList.Add(point.X, point.Y, point.Z)
         pointArray.append(point)
 
-    polyline1.Append(pointArray)
-    polyline2.Append(pointList)
+    # 8.x's Append(points) -> RhinoCommon's AddRange (Point3dList.Add for one point; triage L1)
+    polyline1.AddRange(pointArray)
+    polyline2.AddRange(pointList)
 
     #objective: to test that passing a list of points or a Point3dList to the Polyline.Append method returns the same info
     def test_append(self):
@@ -31,10 +32,11 @@ class TestPolyline(unittest.TestCase):
 
     def test_explode(self):
 
-        explodedCurves = self.polyline1.GetSegments2()
+        # 8.x's GetSegments2() (LineCurve objects) -> RhinoCommon's GetSegments(): Line values
+        explodedCurves = self.polyline1.GetSegments()
         self.assertTrue( len(explodedCurves) > 0 )
         self.assertTrue( type(explodedCurves) == list )
-        self.assertTrue( type(explodedCurves[0]) == rhino3dm.LineCurve )
+        self.assertTrue( type(explodedCurves[0]) == rhino3dm.Line )
 
 
 if __name__ == '__main__':

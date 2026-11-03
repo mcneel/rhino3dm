@@ -22,8 +22,10 @@ class TestCurve(unittest.TestCase):
 
         #FrameAt
         with self.subTest(msg="FrameAt"):
-            #NOTE: FrameAt(0.5) passes on macos-14, but fails on windows, and macos-13
-            frameResult = self.curveFromArray.FrameAt(0)
+            # a bent curve: curveFromArray is a straight line, which has no frame (D3 changed its
+            # parametrization; 8.x's FrameAt(0) succeeded on it only by rounding)
+            bent = rhino3dm.Curve.CreateControlPointCurve([rhino3dm.Point3d(0, 0, 0), rhino3dm.Point3d(1, 2, 0), rhino3dm.Point3d(4, 1, 0), rhino3dm.Point3d(6, -2, 0)], 3)
+            frameResult = bent.FrameAt(0)
             self.assertTrue( len(frameResult) == 2 )
             self.assertTrue( type(frameResult[0]) == bool )
             self.assertTrue( type(frameResult[1]) == rhino3dm.Plane )
@@ -50,24 +52,25 @@ class TestCurve(unittest.TestCase):
             self.assertTrue( type(curveSplitResult[1]) == rhino3dm.NurbsCurve )
 
     def test_curveDerivativeAt2(self):
+        # RhinoCommon's DerivativeAt returns Vector3d[] (the point first, as a vector); 8.x gave Point3d
 
         with self.subTest(msg="DerivativeAt3"):
             result = self.curveFromArray.DerivativeAt(0.5, 2)
 
             self.assertTrue( type(result) == list )
-            self.assertTrue( type(result[0]) == rhino3dm.Point3d )
+            self.assertTrue( type(result[0]) == rhino3dm.Vector3d )
 
         with self.subTest(msg="DerivativeAt4"):
             result2 = self.curveFromArray.DerivativeAt(0.5, 2, rhino3dm.CurveEvaluationSide.Below)
 
             self.assertTrue( type(result2) == list )
-            self.assertTrue( type(result2[0]) == rhino3dm.Point3d )
+            self.assertTrue( type(result2[0]) == rhino3dm.Vector3d )
 
         with self.subTest(msg="DerivativeAt4"):
             result3 = self.curveFromArray.DerivativeAt(0.5, 2, rhino3dm.CurveEvaluationSide.Above)
 
             self.assertTrue( type(result3) == list )
-            self.assertTrue( type(result3[0]) == rhino3dm.Point3d )
+            self.assertTrue( type(result3[0]) == rhino3dm.Vector3d )
 
 if __name__ == '__main__':
     print("running tests")

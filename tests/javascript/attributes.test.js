@@ -17,11 +17,10 @@ test('attributesGroupList', async () => {
 
     expect(doc !== null).toBe(true)
 
-    const objects = doc.objects()
+    // D17: no index on the object table; iterate
+    const obj = [...doc.objects][0]
 
-    const obj = objects.get(0)
-
-    groupList = obj.attributes().getGroupList()
+    groupList = obj.attributes.getGroupList()
 
     expect(Array.isArray(groupList)).toBe(true)
     expect(typeof groupList[0] === "number").toBe(true)

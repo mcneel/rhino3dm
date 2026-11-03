@@ -4,13 +4,13 @@
 #include "bnd_brepvertex_gen.h"
 #include "bnd_commonobject.h"
 
-BND_TUPLE BND_BrepVertex::Gen_EdgeIndices() const {
+RH3DM_ARR BND_BrepVertex::Gen_EdgeIndices() const {
   ON_SimpleArray<int> holder_out;
   int rh3dm_rc = ON_BrepVertex_EdgeIndices(RH3DM_Owner(), (int)RH3DM_Key(), &holder_out);
-  if (rh3dm_rc == 0) return CreateTuple(0);
-  BND_TUPLE rc = CreateTuple(holder_out.Count());
+  if (rh3dm_rc == 0) return RH3DM_NewArr(0);
+  RH3DM_ARR rc = RH3DM_NewArr(holder_out.Count());
   for (int i = 0; i < holder_out.Count(); i++)
-    SetTuple(rc, i, holder_out[i]);
+    RH3DM_SetArr(rc, i, holder_out[i]);
   return rc;
 }
 

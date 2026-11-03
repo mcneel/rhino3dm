@@ -64,12 +64,12 @@ BND_Box::BND_Box(BND_Plane basePlane, const std::vector<BND_Point3d>& points)
   {
     return;
   }
-  double x0 = std::numeric_limits<double>::max();
-  double x1 = std::numeric_limits<double>::lowest();
-  double y0 = std::numeric_limits<double>::max();
-  double y1 = std::numeric_limits<double>::lowest();
-  double z0 = std::numeric_limits<double>::max();
-  double z1 = std::numeric_limits<double>::lowest();
+  double x0 = (std::numeric_limits<double>::max)();
+  double x1 = (std::numeric_limits<double>::lowest)();
+  double y0 = (std::numeric_limits<double>::max)();
+  double y1 = (std::numeric_limits<double>::lowest)();
+  double z0 = (std::numeric_limits<double>::max)();
+  double z1 = (std::numeric_limits<double>::lowest)();
   int point_count = 0;
   for (BND_Point3d pt : points)
   {

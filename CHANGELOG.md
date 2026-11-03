@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.2.0-beta] - unreleased
+
+rhino3dm vNext: the Python and JavaScript bindings are generated from RhinoCommon, so their API is RhinoCommon's (names, signatures, return shapes). The migration guide (from `docs/vnext/deviations.md` and `api/retired.toml`) ships with the beta; the plan is `docs/vnext/SHIP-9.2.md`.
+
+diff: https://github.com/mcneel/rhino3dm/compare/9.0.0-beta...9.2.0-beta
+
+### Changed
+
+- openNURBS submodule to 9.2 (`c87c7200`); rhino3dm takes the openNURBS minor version.
+- (py, js) Bindings generated from RhinoCommon (rhino 9.x `db884416462`); the hand-written bindings are gone, except members RhinoCommon lacks (`api/exceptions.toml`).
+- (py, js) The typings (`__init__.pyi`, `rhino3dm.d.ts`) still describe the 8.x API; they are regenerated before the beta ships.
+
 ## [9.0.0-beta] - 2026.10.07
 
 First 9.x pre-release. Rebases rhino3dm on Rhino 9: the .NET and native C layers are re-synced from the Rhino 9.x branch, openNURBS moves to 9.1, and the sync is now checked by CI.

@@ -7,7 +7,7 @@ beforeAll(async () => {
 
 test('getSegments', async () => {
 
-  const lt = rhino.Linetype.dashed()
+  const lt = rhino.Linetype.dashed
 
   const segment = lt.getSegment(0)
 

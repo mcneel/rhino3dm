@@ -10,6 +10,9 @@ public:
   ON_MeshParameters m_val;
   explicit BND_MeshingParameters(const ON_MeshParameters& v) : m_val(v) {}
   BND_MeshingParameters();
+  BND_MeshingParameters(double density);
+  BND_MeshingParameters(double density, double minimumEdgeLength);
+  BND_MeshingParameters(const BND_MeshingParameters& source);
 
   bool Gen_ClosedObjectPostProcess() const;
   bool Gen_ComputeCurvature() const;

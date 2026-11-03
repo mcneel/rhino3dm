@@ -17,5 +17,5 @@ public:
   bool Gen_IsHidden(int topologyEdgeIndex) const;
   bool Gen_IsSwappableEdge(int topologyEdgeIndex) const;
   bool Gen_SwapEdge(int topologyEdgeIndex) const;
-  BND_TUPLE Gen_GetConnectedFaces(int topologyEdgeIndex) const;
+  RH3DM_ARR Gen_GetConnectedFaces(int topologyEdgeIndex) const;
 };

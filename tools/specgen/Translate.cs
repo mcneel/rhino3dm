@@ -2534,9 +2534,10 @@ class Tx
 
     static string Limits(string ty, string member) => member switch
     {
-        "MaxValue" => $"std::numeric_limits<{ty}>::max()",
-        "MinValue" => ty is "double" or "float" ? $"std::numeric_limits<{ty}>::lowest()"
-                                                : $"std::numeric_limits<{ty}>::min()",
+        // (f)() so windows.h's min / max macros cannot expand it (MSVC C2589; pilot #80)
+        "MaxValue" => $"(std::numeric_limits<{ty}>::max)()",
+        "MinValue" => ty is "double" or "float" ? $"(std::numeric_limits<{ty}>::lowest)()"
+                                                : $"(std::numeric_limits<{ty}>::min)()",
         "Epsilon" => $"std::numeric_limits<{ty}>::denorm_min()",
         "NaN" => $"std::numeric_limits<{ty}>::quiet_NaN()",
         "PositiveInfinity" => $"std::numeric_limits<{ty}>::infinity()",

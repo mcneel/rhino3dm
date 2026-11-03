@@ -13,6 +13,7 @@ public:
   ON_UUID m_id = ON_nil_uuid;     // ... and the id it resolves
   explicit BND_SubD(ON_SubD* owned) : m_ptr(owned) {}
   BND_SubD(ONX_Model* model, ON_UUID id) : m_model(model), m_id(id) {}
+  BND_SubD();
   // a COMPONENT of an owner (BrepFace of a Brep; G43), or a view inside another
   // object (PolyCurve.SegmentCurve; G58): resolved through the owner on every access
   mutable ON_Object* (*m_comp)(void*, int, bool) = nullptr;

@@ -32,9 +32,10 @@ test('setTextureHonorsTextureType', async () => {
   const material = new rhino.Material()
   const texture = new rhino.Texture()
   texture.fileName = 'roughness.png'
-  // the textureType setter is bound as int, so assign the enum's numeric .value
-  texture.textureType = rhino.TextureType.PBR_Roughness.value
-  material.setTexture(texture)
+  // D55: enum arguments take the enum object
+  texture.textureType = rhino.TextureType.PBR_Roughness
+  // setTexture(texture) -> setTexture(texture, texture.textureType)
+  material.setTexture(texture, texture.textureType)
 
   const roughness = material.getTexture(rhino.TextureType.PBR_Roughness)
 

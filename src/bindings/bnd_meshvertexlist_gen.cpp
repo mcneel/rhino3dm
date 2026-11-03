@@ -71,24 +71,24 @@ void BND_MeshVertexList::Gen_Show(int vertexIndex) const {
   ON_Mesh_HiddenVertexOp(m_ptr, vertexIndex, (MeshHiddenVertexOpConst)1);
 }
 
-BND_TUPLE BND_MeshVertexList::Gen_ToPoint3dArray() const {
+RH3DM_ARR BND_MeshVertexList::Gen_ToPoint3dArray() const {
   int count = Gen_Count();
-  BND_TUPLE rh3dm_tuple = CreateTuple(count);
+  RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(count);
   for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) {
     BND_Point3d pt;
     ON_Mesh_Vertex(m_ptr, rh3dm_i, RH3DM_Ptr(&pt));
-    SetTuple(rh3dm_tuple, rh3dm_i, pt);
+    RH3DM_SetArr(rh3dm_tuple, rh3dm_i, pt);
   }
   return rh3dm_tuple;
 }
 
-BND_TUPLE BND_MeshVertexList::Gen_ToPoint3fArray() const {
+RH3DM_ARR BND_MeshVertexList::Gen_ToPoint3fArray() const {
   int count = Gen_Count();
-  BND_TUPLE rh3dm_tuple = CreateTuple(count);
+  RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(count);
   for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) {
     BND_Point3d pt;
     ON_Mesh_Vertex(m_ptr, rh3dm_i, RH3DM_Ptr(&pt));
-    SetTuple(rh3dm_tuple, rh3dm_i, BND_Point3f((float)pt.m_x, (float)pt.m_y, (float)pt.m_z));
+    RH3DM_SetArr(rh3dm_tuple, rh3dm_i, BND_Point3f((float)pt.m_x, (float)pt.m_y, (float)pt.m_z));
   }
   return rh3dm_tuple;
 }

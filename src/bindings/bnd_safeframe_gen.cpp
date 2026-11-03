@@ -3,6 +3,9 @@
 // constants and guards baked from the C# call sites (api/manifest.json).
 #include "bnd_safeframe_gen.h"
 
+BND_SafeFrame::BND_SafeFrame(const BND_SafeFrame& sf)
+  : BND_SafeFrame() { ON_SafeFrame_CopyFrom((ON_SafeFrame*)RH3DM_NonConst(), (const ON_SafeFrame*)sf.RH3DM_Const()); }
+
 bool BND_SafeFrame::Gen_ActionFrameLinked() const {
   ON_XMLVariant* v = ON_XMLVariant_New();
   ON_SafeFrame_GetValue(RH3DM_Const(), (SafeFrameSetting)5, v);
@@ -262,6 +265,7 @@ void initGenSafeFrame(rh3dmpymodule& m)
 {
   py::class_<BND_SafeFrame>(m, "SafeFrame")
       .def(py::init<>())
+      .def(py::init<const BND_SafeFrame&>(), py::arg("sf"))
       .def_property("ActionFrameLinked", &BND_SafeFrame::Gen_ActionFrameLinked, &BND_SafeFrame::Gen_set_ActionFrameLinked)
       .def_property("ActionFrameOn", &BND_SafeFrame::Gen_ActionFrameOn, &BND_SafeFrame::Gen_set_ActionFrameOn)
       .def_property("ActionFrameXScale", &BND_SafeFrame::Gen_ActionFrameXScale, &BND_SafeFrame::Gen_set_ActionFrameXScale)
@@ -283,6 +287,7 @@ void initGenSafeFrame(void)
 {
   class_<BND_SafeFrame>("SafeFrame")
       .constructor<>()
+      .constructor<const BND_SafeFrame&>()
       .property("actionFrameLinked", &BND_SafeFrame::Gen_ActionFrameLinked, &BND_SafeFrame::Gen_set_ActionFrameLinked)
       .property("actionFrameOn", &BND_SafeFrame::Gen_ActionFrameOn, &BND_SafeFrame::Gen_set_ActionFrameOn)
       .property("actionFrameXScale", &BND_SafeFrame::Gen_ActionFrameXScale, &BND_SafeFrame::Gen_set_ActionFrameXScale)

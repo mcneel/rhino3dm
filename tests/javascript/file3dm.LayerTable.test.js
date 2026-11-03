@@ -15,16 +15,16 @@ test('CreateFileWithLayers', async () => {
 
   //create layers
   const layer1 = new rhino.Layer()
-  layer1.Name = 'layer1'
-  layer1.Color = { r: 255, g: 0, b: 255, a: 255 }
+  layer1.name = 'layer1'
+  layer1.color = { r: 255, g: 0, b: 255, a: 255 }
 
   const layer2 = new rhino.Layer()
-  layer2.Name = 'layer2'
+  layer2.name = 'layer2'
 
-  file3dm.layers().add(layer1)
-  file3dm.layers().add(layer2)
+  file3dm.layers.add(layer1)
+  file3dm.layers.add(layer2)
 
-  const qtyLayers = file3dm.layers().count
+  const qtyLayers = file3dm.layers.count
 
   const bufferWrite = file3dm.toByteArray()
   fs.writeFileSync('test_createFileWithLayers.3dm', bufferWrite)
@@ -33,7 +33,7 @@ test('CreateFileWithLayers', async () => {
   const arr = new Uint8Array(bufferRead)
   const file3dmRead = rhino.File3dm.fromByteArray(arr)
 
-  const qtyLayers2 = file3dmRead.layers().count
+  const qtyLayers2 = file3dmRead.layers.count
 
   expect(qtyLayers === 2 && qtyLayers2 === 2).toBe(true)
 
@@ -48,22 +48,24 @@ test('DeleteLayer', async () => {
 
   //create layers
   const layer1 = new rhino.Layer()
-  layer1.Name = 'layer1'
-  layer1.Color = { r: 255, g: 0, b: 255, a: 255 }
+  layer1.name = 'layer1'
+  layer1.color = { r: 255, g: 0, b: 255, a: 255 }
 
   const layer2 = new rhino.Layer()
-  layer2.Name = 'layer2'
+  layer2.name = 'layer2'
 
-  const index1 = file3dm.layers().add(layer1)
-  const index2 = file3dm.layers().add(layer2)
+  // add returns nothing; read the item back
+  file3dm.layers.add(layer1)
+  file3dm.layers.add(layer2)
 
-  const qtyLayers = file3dm.layers().count
+  const qtyLayers = file3dm.layers.count
 
-  const id1 = file3dm.layers().findIndex(index1).id
+  const item1 = file3dm.layers.findIndex(0)
 
-  file3dm.layers().delete(id1)
+  // D14: delete(item), the id form is gone
+  file3dm.layers.delete(item1)
 
-  const qtyLayers2 = file3dm.layers().count
+  const qtyLayers2 = file3dm.layers.count
 
   expect(qtyLayers === 2 && qtyLayers2 === 1).toBe(true)
 
@@ -78,18 +80,20 @@ test('LayerIndex', async () => {
 
   //create layers
   const layer1 = new rhino.Layer()
-  layer1.Name = 'layer1'
-  layer1.Color = { r: 255, g: 0, b: 255, a: 255 }
+  layer1.name = 'layer1'
+  layer1.color = { r: 255, g: 0, b: 255, a: 255 }
 
   const layer2 = new rhino.Layer()
-  layer2.Name = 'layer2'
+  layer2.name = 'layer2'
 
-  const index1 = file3dm.layers().add(layer1)
-  file3dm.layers().add(layer2)
+  // add returns nothing; read the items back
+  file3dm.layers.add(layer1)
+  file3dm.layers.add(layer2)
 
-  const _index1 = file3dm.layers().findIndex(index1).index
+  const _index1 = file3dm.layers.findIndex(0).layerIndex
+  const _index2 = file3dm.layers.findIndex(1).layerIndex
 
-  expect(index1 === _index1).toBe(true)
+  expect(_index1 === 0 && _index2 === 1).toBe(true)
 
 })
 
@@ -104,6 +108,6 @@ test('readFileWithLayers', async () => {
 
   expect(doc !== null).toBe(true)
 
-  expect(doc.layers().count === 6).toBe(true)
+  expect(doc.layers.count === 6).toBe(true)
 
 })

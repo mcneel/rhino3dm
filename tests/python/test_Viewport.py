@@ -15,10 +15,9 @@ class TestViewport(unittest.TestCase):
         self.assertTrue(type(screenPort[2]) == int)
         self.assertTrue(type(screenPort[3]) == int)
 
-        self.assertTrue(screenPort[0] == 0)
-        self.assertTrue(screenPort[1] == 0)
-        self.assertTrue(screenPort[2] == 0)
-        self.assertTrue(screenPort[3] == 0)
+        # D58: RhinoCommon reads the port whether or not opennurbs marks it valid -- a new
+        # viewport's default port (8.x read (0, 0, 0, 0))
+        self.assertEqual(screenPort, (0, 0, 1000, 1000))
 
         viewport.SetScreenPort((0, 0, 100, 100))
 

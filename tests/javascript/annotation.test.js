@@ -17,13 +17,12 @@ test('createAnnotation', async () => {
 
     expect(doc !== null).toBe(true)
 
-    const objects = doc.objects()
-
     const testArray = ["Hello World!", "Hello Cruel World!", "Hi there!", "WTF"]
 
-    for ( let i = 0; i < objects.count; i ++ ) {
+    // D17: iterate the object table
+    for ( const obj of doc.objects ) {
 
-        const geometry = objects.get(i).geometry()
+        const geometry = obj.geometry
 
         switch(geometry.objectType){
             case rhino.ObjectType.Annotation:
@@ -51,14 +50,14 @@ test('annotationEffectiveStyle', async () => {
 
     expect(doc !== null).toBe(true)
 
-    const objects = doc.objects()
-    const dimStyles = doc.dimstyles()
+    const dimStyles = doc.dimStyles
 
     let annotationCount = 0
 
-    for ( let i = 0; i < objects.count; i ++ ) {
+    // D17: iterate the object table
+    for ( const obj of doc.objects ) {
 
-        const geometry = objects.get(i).geometry()
+        const geometry = obj.geometry
 
         if ( geometry.objectType !== rhino.ObjectType.Annotation )
             continue
@@ -74,19 +73,22 @@ test('annotationEffectiveStyle', async () => {
         const effective = geometry.getDimensionStyle( parent )
         expect( effective !== null ).toBe( true )
 
-        // Per-object effective values that previously were not exposed
-        expect( geometry.getTextHeight( parent ) ).toBeGreaterThan( 0 )
-        expect( geometry.getDimensionScale( parent ) ).toBeGreaterThan( 0 )
+        // Per-object effective values. D67: set the annotation's own style as
+        // parentDimensionStyle, then read the property
+        geometry.parentDimensionStyle = parent
+        expect( geometry.textHeight ).toBeGreaterThan( 0 )
+        expect( geometry.dimensionScale ).toBeGreaterThan( 0 )
 
         // hasPropertyOverrides should be a boolean
         expect( typeof geometry.hasPropertyOverrides ).toBe( 'boolean' )
 
-        // A valid bounding box now requires the parent dimension style
-        const bbox = geometry.getBoundingBox( parent )
-        expect( bbox.isValid ).toBe( true )
+        // The bounding box is measured with parentDimensionStyle (D67), but
+        // WASM has no font engine, so the text is unmeasured and the box is
+        // empty (D90; 8.x returned a degenerate zero-width box)
+        const bbox = geometry.getBoundingBox( true )
+        expect( rhino.BoundingBox.isValid( bbox ) ).toBe( false )
 
         effective.delete()
-        bbox.delete()
         parent.delete()
     }
 

@@ -14,8 +14,8 @@ public:
   BND_GroundPlane(ON_GroundPlane* p, bool owned) : m_ptr(p), m_owned(owned) {}
   explicit BND_GroundPlane(ONX_Model* model) : m_model(model) {}
   BND_GroundPlane() : m_ptr(ON_GroundPlane_New()), m_owned(true) {}
+  BND_GroundPlane(const BND_GroundPlane& g);
   ~BND_GroundPlane() { if (m_owned && m_ptr) ON_GroundPlane_Delete(m_ptr); }
-  BND_GroundPlane(const BND_GroundPlane&) = delete;
   // CppPointer: the file's object (resolved each time) or this one's
   ON_GroundPlane* RH3DM_Const() const {
     if (m_ptr) return m_ptr;

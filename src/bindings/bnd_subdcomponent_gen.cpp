@@ -2,6 +2,7 @@
 // Shaped by RhinoCommon signatures, calling the flat C layer with
 // constants and guards baked from the C# call sites (api/manifest.json).
 #include "bnd_subdcomponent_gen.h"
+#include "bnd_subdcomponent.h"
 
 bool BND_SubDComponent::Gen_IsDamaged() const {
   return ON_SubD_ComponentStatusBool(RH3DM_SubDCompPtr(), 5);
@@ -41,6 +42,11 @@ bool BND_SubDComponent::Gen_GetComponentStatusBool(int which) const {
 void initGenSubDComponent(rh3dmpymodule& m)
 {
   py::class_<BND_SubDComponent>(m, "SubDComponent")
+      .def("Equals", &BND_SubDComponent_Equals, py::arg("other"))
+      .def("GetHashCode", &BND_SubDComponent_GetHashCode)
+      .def("__eq__", &BND_SubDComponent_Equals, py::is_operator(), py::arg("other"))
+      .def("__ne__", &BND_SubDComponent_NotEquals, py::is_operator(), py::arg("other"))
+      .def("__hash__", &BND_SubDComponent_GetHashCode)
       .def_property_readonly("IsDamaged", &BND_SubDComponent::Gen_IsDamaged)
       .def_property_readonly("IsDeleted", &BND_SubDComponent::Gen_IsDeleted)
       .def_property_readonly("IsHidden", &BND_SubDComponent::Gen_IsHidden)
@@ -56,6 +62,8 @@ using namespace emscripten;
 void initGenSubDComponent(void)
 {
   class_<BND_SubDComponent>("SubDComponent")
+      .function("equals", &BND_SubDComponent_Equals, allow_raw_pointers())
+      .function("getHashCode", &BND_SubDComponent_GetHashCode, allow_raw_pointers())
       .property("isDamaged", &BND_SubDComponent::Gen_IsDamaged)
       .property("isDeleted", &BND_SubDComponent::Gen_IsDeleted)
       .property("isHidden", &BND_SubDComponent::Gen_IsHidden)

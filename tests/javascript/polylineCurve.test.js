@@ -11,7 +11,7 @@ test('ctor', async () => {
     const pointList = new rhino.Point3dList(15)
 
     for (let i = 0; i < 15; i++) {
-        pointArray.push([i, i, 0])
+        pointArray.push({ X: i, Y: i, Z: 0 })
         pointList.add(i, i, 0)
     }
 
@@ -21,7 +21,7 @@ test('ctor', async () => {
     const r1 = polyline1.point(3)
     const r2 = polyline2.point(3)
 
-    const result = r1[0] === r2[0] && r1[1] === r2[1] && r1[2] === r2[2]
+    const result = r1.X === r2.X && r1.Y === r2.Y && r1.Z === r2.Z
 
     expect(result).toBe(true)
 

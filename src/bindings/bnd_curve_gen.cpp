@@ -186,12 +186,12 @@ BND_Interval BND_Curve::Gen_SpanDomain(int spanIndex) const {
   return BND_Interval::Unset();
 }
 
-BND_TUPLE BND_Curve::Gen_SpanVector() const {
+RH3DM_ARR BND_Curve::Gen_SpanVector() const {
   ON_SimpleArray<double> holder_out;
   ONC_SpanVector(RH3DM_Const(), &holder_out);
-  BND_TUPLE rc = CreateTuple(holder_out.Count());
+  RH3DM_ARR rc = RH3DM_NewArr(holder_out.Count());
   for (int i = 0; i < holder_out.Count(); i++)
-    SetTuple(rc, i, holder_out[i]);
+    RH3DM_SetArr(rc, i, holder_out[i]);
   return rc;
 }
 
@@ -281,9 +281,9 @@ RH3DM_NTUPLE BND_Curve::Gen_Split(double t) const {
   ON_Curve* rightptr = nullptr;
   bool rh3dm_ok = ON_Curve_Split(RH3DM_Const(), t, &leftptr, &rightptr);
   if (!rh3dm_ok) { delete leftptr; delete rightptr; return RH3DM_NoneTuple(); }
-  BND_TUPLE rh3dm_tuple = CreateTuple(2);
-  SetTuple(rh3dm_tuple, 0, leftptr ? RH3DM_Wrap_Curve(leftptr) : (BND_Curve*)nullptr);
-  SetTuple(rh3dm_tuple, 1, rightptr ? RH3DM_Wrap_Curve(rightptr) : (BND_Curve*)nullptr);
+  RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(2);
+  RH3DM_SetArr(rh3dm_tuple, 0, leftptr ? RH3DM_Wrap_Curve(leftptr) : (BND_Curve*)nullptr);
+  RH3DM_SetArr(rh3dm_tuple, 1, rightptr ? RH3DM_Wrap_Curve(rightptr) : (BND_Curve*)nullptr);
   return rh3dm_tuple;
 }
 

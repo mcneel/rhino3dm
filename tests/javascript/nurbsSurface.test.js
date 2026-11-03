@@ -5,22 +5,23 @@ let ns
 beforeAll(async () => {
   rhino = await rhino3dm()
 
-  ns = new rhino.Sphere([0, 0, 0], 5).toNurbsSurface()
+  ns = rhino.Sphere.toNurbsSurface(rhino.Sphere.create({ X: 0, Y: 0, Z: 0 }, 5))
 
 })
 
 test('knotsToList', async () => {
 
-  const knotsU = ns.knotsU().toList()
+  // toList -> iteration
+  const knotsU = [...ns.knotsU]
 
   expect(Array.isArray(knotsU)).toBe(true)
   expect(typeof knotsU[0] === 'number').toBe(true)
-  expect(knotsU.length == ns.knotsU().count).toBe(true)
+  expect(knotsU.length == ns.knotsU.count).toBe(true)
 
-  const knotsV = ns.knotsV().toList()
+  const knotsV = [...ns.knotsV]
 
   expect(Array.isArray(knotsV)).toBe(true)
   expect(typeof knotsV[0] === 'number').toBe(true)
-  expect(knotsV.length == ns.knotsV().count).toBe(true)
+  expect(knotsV.length == ns.knotsV.count).toBe(true)
 
 })

@@ -907,6 +907,19 @@ ON_Plane FromPlaneStruct(const ON_PLANE_STRUCT& ps);
 inline BND_Vector3d RH3DM_V(const ON_3dVector& v) { BND_Vector3d r; r.m_x = v.x; r.m_y = v.y; r.m_z = v.z; return r; }
 inline BND_Interval RH3DM_I(const ON_Interval& i) { BND_Interval r; r.m_t0 = i.m_t[0]; r.m_t1 = i.m_t[1]; return r; }
 
+// an ARRAY result (C# T[]): a Python list, a JS array (D87: lists everywhere, as the
+// value types' and hand members' arrays and 8.x); BND_TUPLE stays for real tuples
+// (out-parameter results, Rectangle)
+#if defined(ON_PYTHON_COMPILE)
+typedef py::list RH3DM_ARR;
+inline RH3DM_ARR RH3DM_NewArr(int n) { return py::list(n); }
+template <class T> inline void RH3DM_SetArr(RH3DM_ARR& a, int i, const T& v) { a[i] = v; }
+#else
+typedef emscripten::val RH3DM_ARR;
+inline RH3DM_ARR RH3DM_NewArr(int n) { return CreateTuple(n); }
+template <class T> inline void RH3DM_SetArr(RH3DM_ARR& a, int i, const T& v) { SetTuple(a, i, v); }
+#endif
+
 // a tuple result C# may return as null (`if (count < 1) return null;`): BND_TUPLE
 // is py::tuple, which cannot hold None -- the old NullTuple() raises TypeError
 // in Python (pilot-findings #29) -- so these return an object (G54)
@@ -1003,17 +1016,17 @@ struct RH3DM_Bytes { std::vector<unsigned char> v;
   const unsigned char* data() const { return v.data(); }
   size_t size() const { return v.size(); } };
 // GetUserStrings() as rhino3dm returns it (D62; RhinoCommon's NameValueCollection is generated nowhere):
-// a tuple of (key, value) pairs, Python and JS alike
-inline BND_TUPLE RH3DM_UserStrings(const ON_Object* o) {
+// a list of [key, value] lists, Python and JS alike (D87; 8.x's shape)
+inline RH3DM_ARR RH3DM_UserStrings(const ON_Object* o) {
   ON_ClassArray<ON_wString> keys;
   if (o) o->GetUserStringKeys(keys);
-  BND_TUPLE rc = CreateTuple(keys.Count());
+  RH3DM_ARR rc = RH3DM_NewArr(keys.Count());
   for (int i = 0; i < keys.Count(); i++) {
     ON_wString v; o->GetUserString(keys[i].Array(), v);
-    BND_TUPLE kv = CreateTuple(2);
-    SetTuple(kv, 0, std::wstring(keys[i].Array()));
-    SetTuple(kv, 1, std::wstring(v.Array()));
-    SetTuple(rc, i, kv); }
+    RH3DM_ARR kv = RH3DM_NewArr(2);
+    RH3DM_SetArr(kv, 0, std::wstring(keys[i].Array()));
+    RH3DM_SetArr(kv, 1, std::wstring(v.Array()));
+    RH3DM_SetArr(rc, i, kv); }
   return rc; }
 // a class argument for a pointer-taking setter in a translated body (G112: `rc.ParentDimensionStyle =
 // dimStyle`, a const& parameter): its address; a pointer or null passes through
@@ -1290,7 +1303,7 @@ struct RH3DM_Variant
     case ON_XMLVariant::Types::DoubleArray4: { ON_4dPoint p = v.As4dPoint(); return py::make_tuple(p.x, p.y, p.z, p.w); }
     case ON_XMLVariant::Types::DoubleColor4: { ON_4fColor c = v.AsColor(); BND_Color4f r; r.m_r = c.Red(); r.m_g = c.Green(); r.m_b = c.Blue(); r.m_a = c.Alpha(); return py::cast(r); }
     case ON_XMLVariant::Types::Matrix: { ON_Xform xf = v.AsXform(); BND_Transform t = RH3DM_Val(xf); return py::cast(t); }
-    case ON_XMLVariant::Types::Buffer: { ON_Buffer b = v.AsBuffer(); std::string s((size_t)b.Size(), '\0'); b.SeekFromStart(0); b.Read((ON__UINT64)s.size(), &s[0]); return py::bytes(s); }
+    case ON_XMLVariant::Types::Buffer: { ON_Buffer b = v.AsBuffer(); std::string s((size_t)b.Size(), '\\0'); b.SeekFromStart(0); b.Read((ON__UINT64)s.size(), &s[0]); return py::bytes(s); }
 #else
     case ON_XMLVariant::Types::Bool: return emscripten::val(v.AsBool());
     case ON_XMLVariant::Types::Integer: return emscripten::val(v.AsInteger());
@@ -1720,6 +1733,21 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
                 ctor += ('\n{gen}::{gen}()' + body).format(
                     gen=cls['gen'], member=member, on=cls['on'], expr=ctors[cls['reg']][0])
             for p in argctors[cls['reg']]:
+                if p.get('copy'):
+                    # RhinoCommon `T(T src)`: default construction, then Via(src) (pilot #77)
+                    cp = p['copy']
+                    gp = [q for q in plans if q['m']['Name'] == cp['via'] and q['m']['Kind'] == 'method'
+                          and [t for t, _ in q['bind_args']] == ['const %s&' % cls['gen']]]
+                    if gp:
+                        stmt = '%s(%s);' % (gp[0]['cpp'], cp['param'])
+                    elif cp['native']:
+                        stmt = '%s((%s)RH3DM_NonConst(), (%s)%s.RH3DM_Const());' % (
+                            cp['native'], cp['ptypes'][0], cp['ptypes'][1], cp['param'])
+                    else:
+                        raise SystemExit('%s(%s): no %s to copy with' % (cls['reg'], cls['reg'], cp['via']))
+                    ctor += '\n{gen}::{gen}(const {gen}& {pn})\n  : {gen}() {{ {stmt} }}\n'.format(
+                        gen=cls['gen'], pn=cp['param'], stmt=stmt)
+                    continue
                 ctor += ('\n{gen}::{gen}({sig})' + body).format(
                     gen=cls['gen'], member=member, on=cls['on'], expr=p['ctor_call'],
                     sig=', '.join('%s %s' % a for a in p['bind_args']))

@@ -23,10 +23,11 @@ public:
     if (!p) throw std::runtime_error("Rhino.DocObjects.ViewportInfo: the object is no longer in its ViewInfo");
     return p;
   }
-  // NonConstPointer: copy on write (NonConstOperation -> _InternalDuplicate)
+  // NonConstPointer: through the owner's non-const pointer -- edits reach the owner
+  // (rhino3dm's ViewportInfo.NonConstPointer override; api/exceptions.toml spec_patch)
   ON_Viewport* RH3DM_NonConst() const {
-    if (!m_ptr) m_ptr = (ON_Viewport*)ON_Viewport_New((ON_Viewport*)RH3DM_Const());   // first write: a private copy, as in .NET
-    return m_ptr;
+    if (m_ptr) return m_ptr;
+    return (ON_Viewport*)ON_3dmView_ViewportPointer(const_cast<ON_3dmView*>(RH3DM_PvOwner(m_pv_owner)));
   }
   ON_Object* RH3DM_ObjPtr() const override { return RH3DM_Const(); }
   ON_Object* RH3DM_ObjPtrNC() const override { return RH3DM_NonConst(); }

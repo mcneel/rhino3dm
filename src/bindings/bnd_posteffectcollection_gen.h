@@ -14,8 +14,8 @@ public:
   BND_PostEffectCollection(ON_PostEffects* p, bool owned) : m_ptr(p), m_owned(owned) {}
   explicit BND_PostEffectCollection(ONX_Model* model) : m_model(model) {}
   BND_PostEffectCollection() : m_ptr(ON_PostEffects_New()), m_owned(true) {}
+  BND_PostEffectCollection(const BND_PostEffectCollection& c);
   ~BND_PostEffectCollection() { if (m_owned && m_ptr) ON_PostEffects_Delete(m_ptr); }
-  BND_PostEffectCollection(const BND_PostEffectCollection&) = delete;
   // CppPointer: the file's object (resolved each time) or this one's
   ON_PostEffects* RH3DM_Const() const {
     if (m_ptr) return m_ptr;

@@ -265,7 +265,7 @@ BND_Point3d BND_BoundingBox::ClosestPoint(BND_Point3d point, bool includeInterio
     faces.push_back(BND_Plane(C[0], C[3], C[4]));
     faces.push_back(BND_Plane(C[1], C[2], C[5]));
   }
-  double min_d = std::numeric_limits<double>::max();
+  double min_d = (std::numeric_limits<double>::max)();
   BND_Point3d min_p = BND_Point3d(x, y, z);
   for (BND_Plane face : faces)
   {

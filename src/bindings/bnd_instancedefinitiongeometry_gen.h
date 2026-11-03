@@ -35,7 +35,7 @@ public:
 
   void Gen_DeleteAllUserStrings() const;
   std::wstring Gen_Description() const;
-  BND_TUPLE Gen_GetObjectIds() const;
+  RH3DM_ARR Gen_GetObjectIds() const;
   std::wstring Gen_GetUserString(std::wstring key) const;
   bool Gen_IsInstanceGeometryId(BND_UUID id) const;
   bool Gen_SetUserString(std::wstring key, std::wstring value) const;

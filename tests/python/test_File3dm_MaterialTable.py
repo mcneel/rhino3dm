@@ -14,14 +14,13 @@ class TestFile3dmMaterialTable(unittest.TestCase):
         mat1 = rhino3dm.Material()
         mat2 = rhino3dm.Material()
 
-        index1 = file3dm.Materials.Add(mat1)
-        index2 = file3dm.Materials.Add(mat2)
+        # RhinoCommon's table Add returns nothing; Delete takes the item or its index (D14)
+        file3dm.Materials.Add(mat1)
+        file3dm.Materials.Add(mat2)
 
         qtyMaterials1 = len(file3dm.Materials)
 
-        id1 = file3dm.Materials[index1].Id
-
-        file3dm.Materials.Delete(id1)
+        file3dm.Materials.Delete(file3dm.Materials[0])
 
         qtyMaterials2 = len(file3dm.Materials)
 

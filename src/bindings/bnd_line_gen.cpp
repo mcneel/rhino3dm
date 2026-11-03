@@ -369,8 +369,8 @@ bool BND_Line::ExtendThroughPointSet(const std::vector<BND_Point3d>& pts, double
   {
     return false;
   }
-  double t0 = std::numeric_limits<double>::max();
-  double t1 = std::numeric_limits<double>::lowest();
+  double t0 = (std::numeric_limits<double>::max)();
+  double t1 = (std::numeric_limits<double>::lowest)();
   for (BND_Point3d pt : pts)
   {
     double t = ClosestParameter(pt);

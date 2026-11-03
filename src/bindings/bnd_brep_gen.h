@@ -84,7 +84,7 @@ public:
   bool Gen_CullUnusedTrims() const;
   bool Gen_CullUnusedVertices() const;
   class BND_Brep* Gen_Duplicate() const;
-  BND_TUPLE Gen_DuplicateVertices() const;
+  RH3DM_ARR Gen_DuplicateVertices() const;
   void Gen_Flip() const;
   bool Gen_IsDuplicate(const BND_Brep& other, double tolerance) const;
   bool Gen_IsManifold() const;

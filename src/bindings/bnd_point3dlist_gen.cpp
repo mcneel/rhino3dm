@@ -72,12 +72,12 @@ BND_BoundingBox BND_Point3dList::BoundingBox() const
   {
     return BND_BoundingBox::Empty();
   }
-  double x0 = std::numeric_limits<double>::max();
-  double x1 = std::numeric_limits<double>::lowest();
-  double y0 = std::numeric_limits<double>::max();
-  double y1 = std::numeric_limits<double>::lowest();
-  double z0 = std::numeric_limits<double>::max();
-  double z1 = std::numeric_limits<double>::lowest();
+  double x0 = (std::numeric_limits<double>::max)();
+  double x1 = (std::numeric_limits<double>::lowest)();
+  double y0 = (std::numeric_limits<double>::max)();
+  double y1 = (std::numeric_limits<double>::lowest)();
+  double z0 = (std::numeric_limits<double>::max)();
+  double z1 = (std::numeric_limits<double>::lowest)();
   for (int i = 0; i < m_size; i++)
   {
     x0 = RH3DM_Min(x0, (m_items[i]).X());
@@ -138,7 +138,7 @@ int BND_Point3dList::ClosestIndexInList(const std::vector<BND_Point3d>& list, BN
   {
     return -1;
   }
-  double min_d = std::numeric_limits<double>::max();
+  double min_d = (std::numeric_limits<double>::max)();
   int min_i = -1;
   int count = ((int)list.size());
   for (int i = 0; i < count; i++)

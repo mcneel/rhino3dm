@@ -16,8 +16,8 @@ public:
   ON_Brep* RH3DM_Owner() const { return (ON_Brep*)m_comp_owner; }
   int RH3DM_Key() const { return m_comp_key; }
 
-  BND_TUPLE Gen_AdjacentEdges() const;
-  BND_TUPLE Gen_AdjacentFaces() const;
+  RH3DM_ARR Gen_AdjacentEdges() const;
+  RH3DM_ARR Gen_AdjacentFaces() const;
   void Gen_ClearMaterialChannelIndex() const;
   class BND_Brep* Gen_CreateExtrusion(const BND_Curve& pathCurve, bool cap) const;
   class BND_Brep* Gen_DuplicateFace(bool duplicateMeshes) const;

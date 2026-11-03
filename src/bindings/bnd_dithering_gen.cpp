@@ -3,6 +3,9 @@
 // constants and guards baked from the C# call sites (api/manifest.json).
 #include "bnd_dithering_gen.h"
 
+BND_Dithering::BND_Dithering(const BND_Dithering& d)
+  : BND_Dithering() { ON_Dithering_CopyFrom((ON_Dithering*)RH3DM_NonConst(), (const ON_Dithering*)d.RH3DM_Const()); }
+
 bool BND_Dithering::Gen_Enabled() const {
   ON_XMLVariant* v = ON_XMLVariant_New();
   ON_Dithering_GetValue(RH3DM_Const(), (DitheringSetting)0, v);
@@ -91,6 +94,7 @@ void initGenDithering(rh3dmpymodule& m)
 {
   py::class_<BND_Dithering>(m, "Dithering")
       .def(py::init<>())
+      .def(py::init<const BND_Dithering&>(), py::arg("d"))
       .def_property("Enabled", &BND_Dithering::Gen_Enabled, &BND_Dithering::Gen_set_Enabled)
       .def_property("Method", &BND_Dithering::Gen_Method, &BND_Dithering::Gen_set_Method)
       .def_property("On", &BND_Dithering::Gen_On, &BND_Dithering::Gen_set_On);
@@ -103,6 +107,7 @@ void initGenDithering(void)
 {
   class_<BND_Dithering>("Dithering")
       .constructor<>()
+      .constructor<const BND_Dithering&>()
       .property("enabled", &BND_Dithering::Gen_Enabled, &BND_Dithering::Gen_set_Enabled)
       .property("method", &BND_Dithering::Gen_Method, &BND_Dithering::Gen_set_Method)
       .property("on", &BND_Dithering::Gen_On, &BND_Dithering::Gen_set_On);

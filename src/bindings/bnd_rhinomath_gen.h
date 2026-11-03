@@ -18,7 +18,7 @@ struct RH3DM_RhinoMath
   static constexpr double DefaultAngleTolerance = PI / 180.0;
   static constexpr double DefaultDistanceToleranceMillimeters = 0.01;
   static constexpr float UnsetSingle = -1.234321e+38f;
-  static constexpr int UnsetIntIndex = std::numeric_limits<int>::min() + 1;
+  static constexpr int UnsetIntIndex = (std::numeric_limits<int>::min)() + 1;
   static constexpr double InfiniteRadius = 1e300;
   static constexpr double TwoPI = Tau;
   static double ToRadians(double degrees);

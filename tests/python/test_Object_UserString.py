@@ -17,11 +17,11 @@ class TestObject(unittest.TestCase):
 
         file3dm.Objects.AddCircle(circle, oa)
 
-        file3dm.Write("test_Object_UserString.3dm")
+        file3dm.Write("test_Object_UserString.3dm", 0)
 
         file3dmRead = rhino3dm.File3dm.Read("test_Object_UserString.3dm")
 
-        obj = file3dmRead.Objects[0]
+        obj = list(file3dmRead.Objects)[0]
         valueRead = obj.Attributes.GetUserString(key)
 
         self.assertTrue( value == valueRead )

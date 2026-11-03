@@ -24,7 +24,7 @@ class TestFile3dmLayerTable(unittest.TestCase):
 
         qtyLayers = len(file3dm.Layers)
 
-        file3dm.Write('test_createFileWithLayers.3dm')
+        file3dm.Write('test_createFileWithLayers.3dm', 0)
 
         file = rhino3dm.File3dm.Read('test_createFileWithLayers.3dm')
         qtyLayers2 = len(file.Layers)
@@ -46,18 +46,13 @@ class TestFile3dmLayerTable(unittest.TestCase):
         layer2 = rhino3dm.Layer()
         layer2.Name = 'layer2'
 
-        index1 = file3dm.Layers.Add(layer1)
-        index2 = file3dm.Layers.Add(layer2)
+        # RhinoCommon's table Add returns nothing; Delete takes the item or its index (D14)
+        file3dm.Layers.Add(layer1)
+        file3dm.Layers.Add(layer2)
 
         qtyLayers = len(file3dm.Layers)
 
-        id1 = file3dm.Layers[index1].Id
-
-        #print(id1)
-        #print(type(id1))
-        #print(str(id1))
-
-        file3dm.Layers.Delete(id1)
+        file3dm.Layers.Delete(file3dm.Layers[0])
 
         qtyLayers2 = len(file3dm.Layers)
 
@@ -73,10 +68,10 @@ class TestFile3dmLayerTable(unittest.TestCase):
 
         # create layer
         layer_index_0 = rhino3dm.Layer()
-        # add the layer to the table the update the index accordingly
-        index = file3dm.Layers.Add(layer_index_0)
+        # add the layer to the table the update the index accordingly (RhinoCommon's Add returns nothing)
+        file3dm.Layers.Add(layer_index_0)
 
-        l0 = file3dm.Layers.FindIndex(index)
+        l0 = file3dm.Layers.FindIndex(0)
 
         self.assertEqual(l0.Index, 0)
 
@@ -120,9 +115,9 @@ class TestFile3dmLayerTable(unittest.TestCase):
         layer_0 = rhino3dm.Layer()
         layer_0.Name = "my_new_layer"
         layer_0.Color = (10, 20, 30, 255)
-        layer_0_index = file3dm.Layers.Add(layer_0)
+        file3dm.Layers.Add(layer_0)
 
-        retrieved_layer_0 = file3dm.Layers.FindIndex(layer_0_index)
+        retrieved_layer_0 = file3dm.Layers.FindIndex(0)
 
         with self.subTest(msg="Successful FindIndex - check return type"):
             self.assertIsInstance(retrieved_layer_0, rhino3dm.Layer)
@@ -133,8 +128,11 @@ class TestFile3dmLayerTable(unittest.TestCase):
         with self.subTest(msg="Successful FindIndex - check layer color"):
             self.assertEqual(retrieved_layer_0.Color, (10, 20, 30, 255))
 
-        with self.assertRaises(IndexError, msg="Unsuccessful FindIndex - check raise IndexError"):
-            file3dm.Layers.FindIndex(1)
+        # D7: RhinoCommon's FindIndex returns None for a missing index; table[i] still raises
+        with self.subTest(msg="Unsuccessful FindIndex - check return None"):
+            self.assertIsNone(file3dm.Layers.FindIndex(1))
+        with self.assertRaises(IndexError, msg="Unsuccessful index - check raise IndexError"):
+            file3dm.Layers[1]
 
     def test_FindName(self) -> None:
         """Tests for the `FindName` method.

@@ -121,12 +121,12 @@ class BND_Brep* BND_Brep::Gen_Duplicate() const {
   return rc ? RH3DM_Wrap_Brep(rc) : nullptr;
 }
 
-BND_TUPLE BND_Brep::Gen_DuplicateVertices() const {
+RH3DM_ARR BND_Brep::Gen_DuplicateVertices() const {
   ON_3dPointArray holder_out;
   ON_Brep_DuplicateVertices(RH3DM_Const(), &holder_out);
-  BND_TUPLE rc = CreateTuple(holder_out.Count());
+  RH3DM_ARR rc = RH3DM_NewArr(holder_out.Count());
   for (int i = 0; i < holder_out.Count(); i++)
-    SetTuple(rc, i, RH3DM_P(holder_out[i]));
+    RH3DM_SetArr(rc, i, RH3DM_P(holder_out[i]));
   return rc;
 }
 

@@ -32,6 +32,15 @@ module.exports = (t, ctx) => {
     ctx.skip('no SubD in subdBox.3dm');
   };
 
+  t('test_annotation_rich_text_pilot83', () => {
+    // pilot #83: richText rebuilds the RTF from the text runs in the platform's rich text style,
+    // and WASM has none; it falls back to the RTF stored with the annotation, as 8.x did
+    const f = ctx.readModel('textEntities_r8.3dm');
+    const texts = objs(f).map(o => o.geometry).filter(g => g instanceof r.TextEntity);
+    assert(texts.length > 0);
+    for (const g of texts) assert(g.richText.startsWith('{\\rtf'), g.richText.slice(0, 40));
+  });
+
   t('test_annotation_bounding_box_overrides_geometry_base', () => {
     if (!r.AnnotationBase || !r.AnnotationBase.prototype.getBoundingBox) ctx.skip('G89');
     const f = ctx.readModel('textEntities_r8.3dm');
@@ -43,7 +52,7 @@ module.exports = (t, ctx) => {
     assert.deepStrictEqual(r.GeometryBase.prototype.getBoundingBox.call(ann, I()), bb);
     // WASM has no font glyph metrics: a text's box is empty -- in the old binding too (both of this
     // file's annotations had an invalid box there: frozen, M3)
-    if (!r.BoundingBox.isValid(bb)) ctx.skip('WASM: text bounding boxes are empty without font metrics (the old binding\'s too); the virtual-dispatch part passed');
+    if (!r.BoundingBox.isValid(bb)) ctx.skip('WASM: text bounding boxes are empty without font metrics (8.x measured nothing either, but fell back to a degenerate box; pilot #79, D90); the virtual-dispatch part passed');
     assert.strictEqual(r.BoundingBox.isValid(bb), true);
     const moved = ann.getBoundingBox(r.Transform.translation({ X: 10, Y: 0, Z: 0 }));
     approx(moved.Min.X - bb.Min.X, 10, 1e-9, 'min.x');
@@ -113,6 +122,24 @@ module.exports = (t, ctx) => {
     await ctx.gcSettle();
     assert.strictEqual(kid.parent.id, pid);                    // the file is kept alive
     assert(kid.name !== null && kid.name !== undefined);
+  });
+
+  t('test_subd_component_equality_d25', () => {
+    // D25 (Luis 2026-11-03): RhinoCommon's SubDComponent.Equals / GetHashCode (hand members): same
+    // component type, id and owning SubD; JS has no == overloading, so equals(other)
+    const [f, s] = subdFromFile();
+    const faces = list(s.faces);
+    const face = faces[0];
+    assert(face.equals(s.faces.find(face.id)) && !face.equals(faces[1]));
+    const edge = face.edges[0];
+    assert(edge.equals(s.edges.find(edge.id)));
+    assert.strictEqual(edge.getHashCode(), s.edges.find(edge.id).getHashCode());
+    assert(face.vertices[0].equals(s.vertices.find(face.vertices[0].id)));
+    assert(!face.equals(s.edges.find(face.id)));                // same id, another type
+    const dup = s.duplicate();
+    assert(!face.equals(dup.faces.find(face.id)));              // another SubD
+    assert(!face.equals(null));
+    dup.delete(); s.delete(); f.delete();
   });
 
   t('test_subd_vertex_edges_iterator', () => {
@@ -339,8 +366,10 @@ module.exports = (t, ctx) => {
     assert.strictEqual(top.childSlotAmount('rh3dm-no-such-slot'), 0.0);
     const other = tops.find(c => c.id !== top.id);
     assert.strictEqual(top.setChild(other, 'rh3dm-slot'), true);
-    assert.strictEqual([...top.children].length, n + 1);       // ids: pilot #50
-    assert(top.findChild('rh3dm-slot') !== null);
+    assert.strictEqual([...top.children].length, n + 1);
+    // pilot #50, fixed upstream (U39): the copy gets its own id
+    const kid = top.findChild('rh3dm-slot');
+    assert(kid !== null && kid.id !== other.id && kid.isChild && kid.childSlotName === 'rh3dm-slot');
   });
 
   t('test_draw_color_from_a_file_u5', () => {
@@ -1554,6 +1583,52 @@ module.exports = (t, ctx) => {
     approx(srf.Max.X, 2.216388375108776, 1e-12);
     ctx.raises(() => r.SubD.createFromCylinder(cyl, 8, 2, 1, r.SubDEdgeTag.Crease, L.ControlNet), /expected a SubDEndCapStyle value/);
     assert.strictEqual(make('None').textureCoordinateType, r.SubDTextureCoordinateType.Unset);
+  });
+
+  t('test_subd_default_constructor_pilot74', () => {
+    // pilot #74: RhinoCommon's SubD() goes through a ref holder, which neither constructor tier took; 8.x had it
+    const s = new r.SubD();
+    assert.deepStrictEqual([s.faces.count, s.edges.count, s.vertices.count], [0, 0, 0]);
+    s.clearEvaluationCache();
+    const f = new r.File3dm();
+    f.objects.addSubD(s);
+    assert.strictEqual(f.objects.count, 1);
+  });
+
+  t('test_viewinfo_viewport_writes_through_pilot75', () => {
+    // pilot #75: an edit of ViewInfo.viewport lands in the view (rhino3dm's NonConstPointer override)
+    const v = new r.ViewInfo();
+    v.viewport.setCameraLocation({ X: 50, Y: 50, Z: 100 });
+    assert.deepStrictEqual(v.viewport.cameraLocation, { X: 50, Y: 50, Z: 100 });
+    const f = new r.File3dm();
+    f.views.add(v);
+    assert.deepStrictEqual(f.views.get(0).viewport.cameraLocation, { X: 50, Y: 50, Z: 100 });
+    const g = r.File3dm.fromByteArray(f.toByteArray());
+    assert.deepStrictEqual(g.views.get(0).viewport.cameraLocation, { X: 50, Y: 50, Z: 100 });
+  });
+
+  t('test_constructors_pilot76_77', () => {
+    // pilot #76 PointCloud(points); #77 MeshingParameters(density[, min]) and the copy constructors
+    const pc = new r.PointCloud([{ X: 0, Y: 0, Z: 0 }, { X: 1, Y: 2, Z: 3 }]);
+    assert.strictEqual(pc.count, 2);
+    assert.deepStrictEqual(pc.pointAt(1), { X: 1, Y: 2, Z: 3 });
+    assert.strictEqual(new r.PointCloud([]).count, 0);
+    const cp = new r.PointCloud(pc);
+    pc.add({ X: 9, Y: 9, Z: 9 });
+    assert.deepStrictEqual([cp.count, pc.count], [2, 3]);
+    const mp2 = new r.MeshingParameters(0.5, 0.25);
+    assert.strictEqual(mp2.minimumEdgeLength, 0.25);
+    assert.strictEqual(typeof new r.MeshingParameters(0.5).minimumEdgeLength, 'number');
+    const mp3 = new r.MeshingParameters(mp2);
+    mp2.minimumEdgeLength = 1.0;
+    assert.strictEqual(mp3.minimumEdgeLength, 0.25);
+    for (const [C, k] of [[r.Dithering, 'enabled'], [r.GroundPlane, 'enabled'], [r.LinearWorkflow, 'preProcessColors'],
+                          [r.SafeFrame, 'enabled'], [r.Skylight, 'enabled']]) {
+      const a = new C();
+      a[k] = !a[k];
+      assert.strictEqual(new C(a)[k], a[k]);
+    }
+    ctx.raises(() => new r.PointCloud(7), /no constructor matches/);
   });
 
 };

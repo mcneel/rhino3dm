@@ -10,6 +10,12 @@
 BND_PointCloud::BND_PointCloud()
   : m_ptr(ON_PointCloud_New()) {}
 
+BND_PointCloud::BND_PointCloud(const std::vector<BND_Point3d>& points)
+  : m_ptr((((int)points.size()) < 1) ? ON_PointCloud_New() : ON_PointCloud_New1((int)points.size(), RH3DM_Ptr(points.data()))) {}
+
+BND_PointCloud::BND_PointCloud(const BND_PointCloud& other)
+  : BND_PointCloud() { Gen_Merge(other); }
+
 void BND_PointCloud::Gen_Add(BND_Point3d point) const {
   ON_PointCloud_AppendPoint1(RH3DM_NonConst(), RH3DM_Val(point));
 }
@@ -146,43 +152,43 @@ void BND_PointCloud::Gen_RemoveAt(int index) const {
   ON_PointCloud_RemovePoint(RH3DM_NonConst(), index);
 }
 
-BND_TUPLE BND_PointCloud::Gen_GetColors() const {
+RH3DM_ARR BND_PointCloud::Gen_GetColors() const {
   int count = ON_PointCloud_GetInt(RH3DM_Const(), 2);
-  if (count < 1) return CreateTuple(0);
+  if (count < 1) return RH3DM_NewArr(0);
   std::vector<int> rc(count);
   ON_PointCloud_GetColors(RH3DM_Const(), count, rc.data());
-  BND_TUPLE rh3dm_tuple = CreateTuple(count);
-  for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) SetTuple(rh3dm_tuple, rh3dm_i, RH3DM_ColorFromArgb(rc[rh3dm_i]));
+  RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(count);
+  for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) RH3DM_SetArr(rh3dm_tuple, rh3dm_i, RH3DM_ColorFromArgb(rc[rh3dm_i]));
   return rh3dm_tuple;
 }
 
-BND_TUPLE BND_PointCloud::Gen_GetNormals() const {
+RH3DM_ARR BND_PointCloud::Gen_GetNormals() const {
   int count = ON_PointCloud_GetInt(RH3DM_Const(), 1);
-  if (count < 1) return CreateTuple(0);
+  if (count < 1) return RH3DM_NewArr(0);
   std::vector<BND_Vector3d> rc(count);
   ON_PointCloud_GetNormals(RH3DM_Const(), count, RH3DM_Ptr(rc.data()));
-  BND_TUPLE rh3dm_tuple = CreateTuple(count);
-  for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) SetTuple(rh3dm_tuple, rh3dm_i, rc[rh3dm_i]);
+  RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(count);
+  for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) RH3DM_SetArr(rh3dm_tuple, rh3dm_i, rc[rh3dm_i]);
   return rh3dm_tuple;
 }
 
-BND_TUPLE BND_PointCloud::Gen_GetPointValues() const {
+RH3DM_ARR BND_PointCloud::Gen_GetPointValues() const {
   int count = ON_PointCloud_GetInt(RH3DM_Const(), 5);
-  if (count < 1) return CreateTuple(0);
+  if (count < 1) return RH3DM_NewArr(0);
   std::vector<double> rc(count);
   ON_PointCloud_GetExtras(RH3DM_Const(), count, rc.data());
-  BND_TUPLE rh3dm_tuple = CreateTuple(count);
-  for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) SetTuple(rh3dm_tuple, rh3dm_i, rc[rh3dm_i]);
+  RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(count);
+  for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) RH3DM_SetArr(rh3dm_tuple, rh3dm_i, rc[rh3dm_i]);
   return rh3dm_tuple;
 }
 
-BND_TUPLE BND_PointCloud::Gen_GetPoints() const {
+RH3DM_ARR BND_PointCloud::Gen_GetPoints() const {
   int count = ON_PointCloud_GetInt(RH3DM_Const(), 0);
-  if (count < 1) return CreateTuple(0);
+  if (count < 1) return RH3DM_NewArr(0);
   std::vector<BND_Point3d> rc(count);
   ON_PointCloud_GetPoints(RH3DM_Const(), count, RH3DM_Ptr(rc.data()));
-  BND_TUPLE rh3dm_tuple = CreateTuple(count);
-  for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) SetTuple(rh3dm_tuple, rh3dm_i, rc[rh3dm_i]);
+  RH3DM_ARR rh3dm_tuple = RH3DM_NewArr(count);
+  for (int rh3dm_i = 0; rh3dm_i < count; rh3dm_i++) RH3DM_SetArr(rh3dm_tuple, rh3dm_i, rc[rh3dm_i]);
   return rh3dm_tuple;
 }
 
@@ -304,6 +310,8 @@ void initGenPointCloud(rh3dmpymodule& m)
 {
   py::class_<BND_PointCloud, BND_GeometryBase>(m, "PointCloud", py::buffer_protocol())
       .def(py::init<>())
+      .def(py::init<const std::vector<BND_Point3d>&>(), py::arg("points"))
+      .def(py::init<const BND_PointCloud&>(), py::arg("other"))
       .def_buffer([](BND_PointCloud& c) -> py::buffer_info {
         ON_3dPointArray& a = c.m_ptr->m_P;
         return py::buffer_info(a.Array(), sizeof(double),
@@ -361,6 +369,10 @@ void initGenPointCloud(void)
 {
   class_<BND_PointCloud, base<BND_GeometryBase>>("PointCloud")
       .constructor<>()
+      .constructor(optional_override([](emscripten::val v0) -> BND_PointCloud* {
+        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (!RH3DM_JsSeqFirst(v0).isNull() && RH3DM_JsSeqFirst(v0).typeOf().as<std::string>() == "object" && RH3DM_JsSeqFirst(v0).hasOwnProperty("Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber())))) return new BND_PointCloud(RH3DM_JsSeq<BND_Point3d>(v0));
+        if (v0.instanceof(emscripten::val::module_property("PointCloud"))) return new BND_PointCloud(*v0.as<BND_PointCloud*>(emscripten::allow_raw_pointers()));
+        throw std::invalid_argument("PointCloud: no constructor matches the arguments"); }), allow_raw_pointers())
       .function("addPointValue", &BND_PointCloud_AddValue, allow_raw_pointers())
       .function("insertPointValue", &BND_PointCloud_InsertValue, allow_raw_pointers())
       .function("addRangePointsValues", &BND_PointCloud_AddRangeValues, allow_raw_pointers())

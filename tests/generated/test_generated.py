@@ -35,7 +35,7 @@ def test_guard_raises_like_rhinocommon():
 
 def test_holder_array_return():
     c = curve()
-    assert c.SpanVector() == (c.Domain.T0, c.Domain.T1)
+    assert c.SpanVector() == [c.Domain.T0, c.Domain.T1]
 
 
 def test_enum_parameters_are_type_checked():
@@ -251,7 +251,7 @@ def test_nested_enum_lives_in_its_owner_class():
 
 def test_instance_definition_object_ids_holder():
     # G36: SimpleArrayGuid -> tuple of UUIDs
-    assert r.InstanceDefinitionGeometry().GetObjectIds() == ()
+    assert r.InstanceDefinitionGeometry().GetObjectIds() == []
 
 
 # --- G39: File3dm table protocols (len / [i] / iteration) --------------------
@@ -491,6 +491,30 @@ def subd_from_file():
 
 
 @needs_comp
+def test_subd_component_equality_d25():
+    # D25 (Luis 2026-11-03): RhinoCommon's SubDComponent Equals / == / != / GetHashCode (hand members:
+    # pure C# over ParentSubD): same component type, Id and owning SubD
+    f, s = subd_from_file()
+    face = list(s.Faces)[0]
+    other = list(s.Faces)[1]
+    assert face == s.Faces.Find(face.Id) and face.Equals(s.Faces.Find(face.Id))
+    assert face != other and not face.Equals(other)
+    edge = face.Edges[0]
+    assert edge == s.Edges.Find(edge.Id) and hash(edge) == hash(s.Edges.Find(edge.Id))
+    assert edge.GetHashCode() == s.Edges.Find(edge.Id).GetHashCode()
+    vertex = face.Vertices[0]
+    assert vertex == s.Vertices.Find(vertex.Id)
+    assert len(set(s.Vertices)) == s.Vertices.Count and len(set(list(s.Vertices) * 2)) == s.Vertices.Count
+    # a face and an edge with the same Id are different components
+    e1 = s.Edges.Find(face.Id)
+    assert e1 is not None and face != e1
+    # another SubD's component with the same Id is a different component (RhinoCommon: ParentSubD)
+    dup = s.Duplicate()
+    assert dup.Faces.Find(face.Id) != face
+    # not a component: not equal (NotImplemented, not TypeError)
+    assert not face.Equals(None) and face != None and face != 5   # noqa: E711
+
+
 def test_subd_lists_iterate_like_foreach():
     f, s = subd_from_file()
     for lst in (s.Faces, s.Edges, s.Vertices):
@@ -778,12 +802,12 @@ def test_array_fills_return_what_the_native_wrote():
         cloud.Add(r.Point3d(i, 2 * i, 0))
     pts = cloud.GetPoints()
     assert [(p.X, p.Y) for p in pts] == [(0, 0), (1, 2), (2, 4)]
-    assert cloud.GetNormals() == ()                     # `if (count < 1) return new Vector3d[0];`
+    assert cloud.GetNormals() == []                     # `if (count < 1) return new Vector3d[0];`
     assert r.ObjectAttributes().GetGroupList() is None  # `if (count < 1) return null;`
     mx = quad_mesh()
-    assert mx.VertexColors.ToARGBArray() == ()
+    assert mx.VertexColors.ToARGBArray() == []
     faces = mx.TopologyEdges.GetConnectedFaces(0)
-    assert faces == (0,)
+    assert faces == [0]
     # `int count = SpanCount(direction) + 1; ... bool ok = GetSpanVector(...); if (ok) return rc; return null;`
     ns = r.NurbsSurface.CreateFromSphere(r.Sphere(r.Point3d(0, 0, 0), 2.0))
     sv = ns.GetSpanVector(0)
@@ -822,7 +846,7 @@ def test_converted_array_fill_and_result_select():
     # `res[i] = Color.FromArgb(rc[i])` over the filled ints
     pc = r.PointCloud()
     pc.Add(r.Point3d(0, 0, 0))
-    assert pc.GetColors() == ()          # no colors: `return new Color[0];`
+    assert pc.GetColors() == []          # no colors: `return new Color[0];`
     # `value == (int)TextureUvwWrapping.Clamp ? Clamp : Repeat`
     t = r.Texture()
     t.WrapU = r.TextureUvwWrapping.Clamp
@@ -1245,7 +1269,7 @@ def test_explode_duplicates_each_segment():
     segs = pc.Explode()
     assert len(segs) == 2 and all(isinstance(s, r.LineCurve) for s in segs)
     assert segs[1].PointAtEnd == r.Point3d(1, 1, 0)
-    assert r.PolyCurve().Explode() == ()
+    assert r.PolyCurve().Explode() == []
 
 
 @pytest.mark.skipif(not hasattr(r.MeshVertexList, 'ToPoint3dArray'), reason='G72 not generated')
@@ -1257,7 +1281,7 @@ def test_vertex_arrays_read_one_vertex_per_call():
     # ToPoint3fArray: the same vertices, `new Point3f((float)pt.X, (float)pt.Y, (float)pt.Z)`
     pf = mx.Vertices.ToPoint3fArray()
     assert all(isinstance(p, r.Point3f) for p in pf) and [(p.X, p.Y) for p in pf] == [(0, 0), (1, 0), (1, 1), (0, 1)]
-    assert r.Mesh().Vertices.ToPoint3dArray() == ()
+    assert r.Mesh().Vertices.ToPoint3dArray() == []
 
 
 # --- G73: holders empty on a status, tuples led by an object, discarded-out forwards,
@@ -2064,6 +2088,17 @@ def test_annotation_text_from_text_runs():
     assert ann.PlainText == 'single' and not ann.TextHasRtfFormatting
 
 
+def test_annotation_rich_text_pilot83():
+    # pilot #83: RichText rebuilds the RTF from the text runs in the platform's rich text style,
+    # and only Windows and Apple have one; elsewhere (Linux, WASM) it falls back to the RTF stored
+    # with the annotation, as 8.x's hand binding did
+    f = r.File3dm.Read(os.path.join(MODELS, 'textEntities_r8.3dm'))
+    texts = [o.Geometry for o in f.Objects if isinstance(o.Geometry, r.TextEntity)]
+    assert texts
+    for g in texts:
+        assert g.RichText.startswith('{\\rtf'), g.RichText[:40]
+
+
 @pytest.mark.skipif(not hasattr(r.Texture, 'ProjectionMode'), reason='G96 not generated')
 def test_texture_projection_mode_c_layer_enum():
     # G96: ON_Texture_GetProjectionMode returns the C layer's own enum (P/Invoke declares the C#
@@ -2646,10 +2681,9 @@ def test_render_content_child_slots_u4():
     assert btop.ChildSlotAmount(slot) == 42.0 and btop.FindChild('rh3dm-slot') is not None
 
 
-@pytest.mark.xfail(reason='pilot-findings #50: SetChild copies the child WITH its id (ON_RenderContent copies through XML), '
-                          'so a child set from a file content duplicates that id; FindChild then resolves the top-level one',
-                   strict=True)
 def test_render_content_set_child_gives_the_copy_its_own_id_u4():
+    # pilot #50, fixed upstream (U39, opennurbs c87c7200): SetChild gives the copy (and its
+    # children) new ids, so a child set from a file content does not duplicate its id
     f = r.File3dm.Read(os.path.join(MODELS, 'file3dm_stuff.3dm'))
     tops = list(f.RenderMaterials) + list(f.RenderEnvironments) + list(f.RenderTextures)
     top = next(c for c in tops if list(c.Children))
@@ -2662,19 +2696,19 @@ def test_render_content_set_child_gives_the_copy_its_own_id_u4():
 def test_user_strings_kept_where_rhino3dm_had_them_d62():
     # D62 (Luis 2026-10-20): TextureMapping / Viewport / RenderSettings / Bitmap keep the user strings
     # the old CommonObject gave them (RhinoCommon's own internal members); RenderSettings works (the
-    # old one segfaulted, pilot #49); GetUserStrings() is rhino3dm's tuple of (key, value) pairs
+    # old one segfaulted, pilot #49); GetUserStrings() is rhino3dm's list of [key, value] lists (D87)
     f = r.File3dm()
     objs = [r.ViewportInfo(), f.Settings.RenderSettings, r.Bitmap(),
             r.TextureMapping.CreatePlaneMapping(r.Plane.WorldXY, r.Interval(0, 1), r.Interval(0, 1), r.Interval(0, 1))]
     for o in objs:
-        assert o.UserStringCount == 0 and o.GetUserStrings() == ()
+        assert o.UserStringCount == 0 and o.GetUserStrings() == []
         assert o.SetUserString('k', 'v') and o.GetUserString('k') == 'v'
-        assert o.UserStringCount == 1 and o.GetUserStrings() == (('k', 'v'),)
+        assert o.UserStringCount == 1 and o.GetUserStrings() == [['k', 'v']]
     layer = r.Layer(); layer.SetUserString('a', '1'); layer.SetUserString('b', '2')
-    assert sorted(layer.GetUserStrings()) == [('a', '1'), ('b', '2')]
+    assert sorted(layer.GetUserStrings()) == [['a', '1'], ['b', '2']]
     f.Layers.Add(layer)
     back = r.File3dm.FromByteArray(f.ToByteArray(None))
-    assert sorted(back.Layers.FindIndex(0).GetUserStrings()) == [('a', '1'), ('b', '2')]
+    assert sorted(back.Layers.FindIndex(0).GetUserStrings()) == [['a', '1'], ['b', '2']]
 
 
 # ---- retirement batch 1 (triage C, E, G1, L1, M1; Luis 2026-10-28): every old member against its
@@ -3959,3 +3993,76 @@ def test_str_is_rhinocommons_to_string_g136():
     layer = r.Layer()
     layer.Name = 'Walls'
     assert str(layer) == layer.ToString() == 'Walls'                  # a class's ToString too (Layer: FullPath)
+
+
+def test_subd_default_constructor_pilot74():
+    # pilot #74: RhinoCommon's SubD() goes through a ref holder (ON_SubDRef_New + ON_SubDRef_NewSubD), which
+    # neither constructor tier took; 8.x had SubD(). An empty SubD that takes a SubD's members
+    s = r.SubD()
+    assert (s.Faces.Count, s.Edges.Count, s.Vertices.Count) == (0, 0, 0)
+    assert list(s.Faces) == [] and s.Vertices.First is None
+    s.ClearEvaluationCache()
+    f = r.File3dm()
+    f.Objects.AddSubD(s)            # owned by the binding, copied into the model
+    assert len(f.Objects) == 1
+
+
+def test_viewinfo_viewport_writes_through_pilot75():
+    # pilot #75: rhino3dm's ViewportInfo.NonConstPointer override (api/exceptions.toml spec_patch): an edit
+    # of ViewInfo.Viewport lands in the view, so it survives Views.Add and a write/read (8.x did; upstream copies)
+    v = r.ViewInfo()
+    v.Viewport.SetCameraLocation(r.Point3d(50, 50, 100))
+    vp = v.Viewport
+    assert vp.CameraLocation == r.Point3d(50, 50, 100)
+    f = r.File3dm()
+    f.Views.Add(v)
+    assert f.Views[0].Viewport.CameraLocation == r.Point3d(50, 50, 100)
+    g = r.File3dm.FromByteArray(f.ToByteArray())
+    assert g.Views[0].Viewport.CameraLocation == r.Point3d(50, 50, 100)
+    # a standalone ViewportInfo keeps its own pointer
+    s = r.ViewportInfo()
+    s.SetCameraLocation(r.Point3d(1, 2, 3))
+    assert s.CameraLocation == r.Point3d(1, 2, 3)
+
+
+def test_array_results_are_lists_d87():
+    # D87 (Luis 2026-11-02): every C# array result is a list -- class members as value types and 8.x
+    pts = [r.Point3d(0, 0, 0), r.Point3d(1, 0, 0), r.Point3d(1, 1, 0)]
+    pc = r.PointCloud(pts)
+    assert isinstance(pc.GetPoints(), list) and pc.GetPoints() == pts
+    pl = r.PolylineCurve(pts)
+    seg = r.PolyCurve()
+    seg.Append(pl)
+    assert isinstance(seg.Explode(), list) and len(seg.Explode()) == 1
+    assert r.ObjectAttributes().GetGroupList() is None          # `if (count < 1) return null;`
+    assert isinstance(r.Mesh().Vertices.ToPoint3dArray(), list)
+    assert isinstance(r.Layer().GetUserStrings(), list)
+
+
+def test_constructors_pilot76_77():
+    # pilot #76: PointCloud(points); #77: MeshingParameters(density[, minimumEdgeLength]) and the
+    # RhinoCommon copy constructors (default construction, then CopyFrom / Merge; specgen CopyCtor)
+    pts = [r.Point3d(0, 0, 0), r.Point3d(1, 2, 3)]
+    pc = r.PointCloud(pts)
+    assert pc.Count == 2 and pc.PointAt(1) == r.Point3d(1, 2, 3)
+    assert r.PointCloud([]).Count == 0                  # `count < 1`: ON_PointCloud_New()
+    cp = r.PointCloud(pc)                               # Merge(other): a deep copy
+    pc.Add(r.Point3d(9, 9, 9))
+    assert cp.Count == 2 and pc.Count == 3
+    assert r.MeshingParameters(0.5).MinimumEdgeLength == r.MeshingParameters(0.5, -1.23432101234321e+308).MinimumEdgeLength
+    mp2 = r.MeshingParameters(0.5, 0.25)
+    assert mp2.MinimumEdgeLength == 0.25
+    mp3 = r.MeshingParameters(mp2)                      # CopyFrom(source)
+    mp2.MinimumEdgeLength = 1.0
+    assert mp3.MinimumEdgeLength == 0.25
+    d = r.Dithering()
+    d.Enabled = not d.Enabled
+    d2 = r.Dithering(d)                                 # FreeFloatingBase(src): CopyFrom(src)
+    assert d2.Enabled == d.Enabled
+    d.Enabled = not d.Enabled
+    assert d2.Enabled != d.Enabled
+    for cls, prop in ((r.GroundPlane, 'Enabled'), (r.LinearWorkflow, 'PreProcessColors'),
+                      (r.SafeFrame, 'Enabled'), (r.Skylight, 'Enabled')):
+        a = cls()
+        setattr(a, prop, not getattr(a, prop))
+        assert getattr(cls(a), prop) == getattr(a, prop)

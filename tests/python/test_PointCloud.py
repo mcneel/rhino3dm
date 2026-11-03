@@ -39,25 +39,25 @@ class TestPointCloud(unittest.TestCase):
         pc.Add(rhino3dm.Point3d(0, 0, 0), rhino3dm.Vector3d(0, 1, 1), (255, 0, 0, 0), 1.234)
 
         with self.subTest("GetPoints"):
-            pts = pc.GetPoints2()
+            pts = pc.GetPoints()
             self.assertTrue(len(pts) > 0)
             self.assertTrue(type(pts) == list)
             self.assertTrue(type(pts[0]) == rhino3dm.Point3d)
 
         with self.subTest("GetNormals"):
-            nrmls = pc.GetNormals2()
+            nrmls = pc.GetNormals()
             self.assertTrue(len(nrmls) > 0)
             self.assertTrue(type(nrmls) == list)
             self.assertTrue(type(nrmls[0]) == rhino3dm.Vector3d)
 
         with self.subTest("GetColors"):
-            cols = pc.GetColors2()
+            cols = pc.GetColors()
             self.assertTrue(len(cols) > 0)
             self.assertTrue(type(cols) == list)
             self.assertTrue(type(cols[0]) == tuple)
 
         with self.subTest("GetValues"):
-            vals = pc.GetValues2()
+            vals = pc.GetPointValues()
             self.assertTrue(len(vals) > 0)
             self.assertTrue(type(vals) == list)
             self.assertTrue(type(vals[0]) == float)

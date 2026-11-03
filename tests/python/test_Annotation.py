@@ -46,15 +46,17 @@ class TestAnnotation(unittest.TestCase):
             effective = geo.GetDimensionStyle(parent)
             self.assertIsNotNone(effective, "GetDimensionStyle returned None")
 
-            # Per-object effective values that previously were not exposed
-            self.assertGreater(geo.GetTextHeight(parent), 0.0)
-            self.assertGreater(geo.GetDimensionScale(parent), 0.0)
+            # Per-object effective values. D67: RhinoCommon's form -- the annotation's OWN style as
+            # its parent, then the property (the explicit-parent getters are gone)
+            geo.ParentDimensionStyle = parent
+            self.assertGreater(geo.TextHeight, 0.0)
+            self.assertGreater(geo.DimensionScale, 0.0)
 
             # HasPropertyOverrides should be queryable (bool)
             self.assertIn(geo.HasPropertyOverrides, (True, False))
 
             # A valid bounding box now requires the parent dimension style
-            bbox = geo.GetBoundingBox(parent)
+            bbox = geo.GetBoundingBox(True)     # measured with ParentDimensionStyle (D67, G89)
             self.assertTrue(bbox.IsValid, "Annotation bounding box is not valid")
 
         self.assertGreater(annotationCount, 0, "No annotations found in test model")

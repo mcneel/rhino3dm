@@ -10,7 +10,7 @@ class TestDraco(unittest.TestCase):
 
         file3dm = rhino3dm.File3dm.Read('../models/mesh.3dm')
 
-        mesh = file3dm.Objects[0].Geometry
+        mesh = list(file3dm.Objects)[0].Geometry
 
         face_count = len(mesh.Faces)
         vertex_count = len(mesh.Vertices)
@@ -47,7 +47,7 @@ class TestDraco(unittest.TestCase):
 
         file = rhino3dm.File3dm()
         file.Objects.AddMesh(decompressed_b64_mesh)
-        file.Write('decompressed.3dm')
+        file.Write('decompressed.3dm', 0)
 
 
 if __name__ == '__main__':

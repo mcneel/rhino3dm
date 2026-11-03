@@ -5,7 +5,9 @@
 #   tools/dev/round.sh build    Python + WASM builds and their tests, in parallel
 #   tools/dev/round.sh oracle   regenerate the .NET parity goldens (tests/parity/oracle/run_linux.sh)
 #   tools/dev/round.sh test     tests only, against the last builds (no rebuild)
-#   tools/dev/round.sh all      oracle, then build + tests
+#   tools/dev/round.sh dotnet   tests/dotnet against src/dotnet + a fresh native library (.NET 10 SDK)
+#   tools/dev/round.sh all      oracle, then build + tests, then dotnet
+#   tools/dev/round.sh sdist    the Python sdist round-trip: package, unpack, build from the package
 #
 # Regenerate first (python3 tools/generate/bnd_gen.py); the generated sources are
 # read from this checkout. Logs and the built modules land in $RH3DM_DEV_WORK
@@ -33,6 +35,7 @@ run() {   # run <image> <script> <args...>
 
 py()   { run $PY_IMAGE /src/tools/dev/container/python.sh "$@"; }
 wasm() { run $WASM_IMAGE /src/tools/dev/container/wasm.sh "$@"; }
+dotnet_tests() { echo "== dotnet"; run $DOTNET_IMAGE /src/tools/dev/container/dotnet.sh; }
 
 oracle() {
   mkdir -p "$WORK/oracle"
@@ -54,6 +57,8 @@ case "${1:-}" in
   build)  both all all ;;
   oracle) oracle ;;
   test)   both test test ;;
-  all)    echo "== oracle"; oracle; both all all ;;
-  *) sed -n '2,17p' "$0"; exit 2 ;;
+  dotnet) dotnet_tests ;;
+  all)    echo "== oracle"; oracle; both all all; dotnet_tests ;;
+  sdist)  docker run --rm -v "$REPO":/src:ro -v "$WORK":/work python:3.12-bookworm bash /src/tools/dev/container/sdist.sh "${2:-}" ;;
+  *) sed -n '2,18p' "$0"; exit 2 ;;
 esac

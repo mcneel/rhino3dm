@@ -14,6 +14,8 @@ public:
   explicit BND_PointCloud(ON_PointCloud* owned) : m_ptr(owned) {}
   BND_PointCloud(ONX_Model* model, ON_UUID id) : m_model(model), m_id(id) {}
   BND_PointCloud();
+  BND_PointCloud(const std::vector<BND_Point3d>& points);
+  BND_PointCloud(const BND_PointCloud& other);
   // a COMPONENT of an owner (BrepFace of a Brep; G43), or a view inside another
   // object (PolyCurve.SegmentCurve; G58): resolved through the owner on every access
   mutable ON_Object* (*m_comp)(void*, int, bool) = nullptr;
@@ -29,7 +31,6 @@ public:
   bool RH3DM_IsView() const { return m_ptr == nullptr; }
   BND_PointCloud* RH3DM_ViewCopy() const { return m_comp ? new BND_PointCloud(m_comp, m_comp_owner, m_comp_key, m_comp_cow) : new BND_PointCloud(m_model, m_id); }
   ~BND_PointCloud() { delete m_ptr; }
-  BND_PointCloud(const BND_PointCloud&) = delete;
   // CommonObject.ConstPointer: a view whose object left the file throws
   ON_PointCloud* RH3DM_Const() const {
     if (m_ptr) return m_ptr;
@@ -89,10 +90,10 @@ public:
   void Gen_Merge(const BND_PointCloud& other) const;
   BND_Point3d Gen_PointAt(int index) const;
   void Gen_RemoveAt(int index) const;
-  BND_TUPLE Gen_GetColors() const;
-  BND_TUPLE Gen_GetNormals() const;
-  BND_TUPLE Gen_GetPointValues() const;
-  BND_TUPLE Gen_GetPoints() const;
+  RH3DM_ARR Gen_GetColors() const;
+  RH3DM_ARR Gen_GetNormals() const;
+  RH3DM_ARR Gen_GetPointValues() const;
+  RH3DM_ARR Gen_GetPoints() const;
   class BND_PointCloudItem* Gen_this(int index) const;
   BND_GeometryBase* Gen_DuplicateShallowHelper() const;
   void Gen_AddRange_3(std::vector<BND_Point3d> points, std::vector<BND_Color> colors);

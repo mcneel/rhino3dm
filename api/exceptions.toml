@@ -56,6 +56,22 @@ path = "src/dotnet/opennurbs/opennurbs_viewport.cs"
 edit = "local ViewportInfo.NonConstPointer() override"
 reason = "RH-83697 design divergence; rhino3dm viewports are not document-owned"
 
+[[line_exception]]
+path = "src/librhino3dm_native/on_text.cpp"
+edit = "ON_V6_Annotation_GetTextString: fall back to ON_Annotation::RichText() when PlatformRichTextFromRuns() is empty"
+reason = "only Windows and Apple have a rich text style (ON::RichTextStyleFromCurrentPlatform), so on Linux and WASM RichText was \"\" (pilot #83; 8.x's hand binding had the fallback). Sent upstream: delete once rhino carries it"
+
+# The same edit, for the generated JS/Python bindings: specgen reads upstream,
+# which lacks the override, so the record it would produce is supplied here
+# (tools/generate/gen_registry.py apply_spec_patches; pilot #75). The generator
+# refuses the patch once upstream carries the override -- then delete this.
+[[spec_patch]]
+type = "Rhino.DocObjects.ViewportInfo"
+parent_view = "ViewInfo"
+nonconst = "NonConstViewportPointer"
+nonconst_native = "ON_3dmView_ViewportPointer"
+reason = "ViewInfo.Viewport edits write through to the view (ViewportInfo.NonConstPointer -> vi.NonConstViewportPointer()); upstream copies on write, so a camera set before File3dm.Views.Add was lost (RH-83697, docs/vnext/RH-83697-viewport-fix-proposal.md)"
+
 # -----------------------------------------------------------------------------
 # Upstream portable surface deliberately not shipped. Kept summary-level here;
 # the per-function list is derivable (manifest portable set minus
@@ -313,6 +329,13 @@ members = ["Faces"]
 decided = "Luis, 2026-10-30 (option B)"
 vnext = "SubDVertex.Faces (hand property, G129); vertex.Edges is RhinoCommon's (generated)"
 reason = "as SubDFace.Edges"
+
+[[hand_kept]]
+class = "SubDComponent"
+members = ["Equals", "GetHashCode"]
+decided = "Luis, 2026-11-03 (D25: RhinoCommon has them, build them)"
+vnext = "SubDComponent.Equals / GetHashCode (hand methods; Python also ==, != and __hash__): same component type, Id and owning SubD, as RhinoCommon (its ComponentDirection test always holds: generated components are referenced forward). JS: equals(other), getHashCode()"
+reason = "RhinoCommon members (opennurbs_subd.cs, since 8.36) whose bodies are pure C# over the managed ParentSubD reference; the generator does not translate pure class bodies. Retire if it learns to"
 
 [[hand_kept]]
 class = "Mesh"

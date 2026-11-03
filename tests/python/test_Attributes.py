@@ -6,9 +6,9 @@ class TestAttributes(unittest.TestCase):
     def test_attributesGroupList(self):
         file3dm = rhino3dm.File3dm.Read('../models/groups.3dm')
 
-        obj = file3dm.Objects[0]
+        obj = list(file3dm.Objects)[0]
 
-        groupList = obj.Attributes.GetGroupList2()
+        groupList = obj.Attributes.GetGroupList()
 
         self.assertTrue(type(groupList) == list)
         self.assertTrue(type(groupList[0]) == int)

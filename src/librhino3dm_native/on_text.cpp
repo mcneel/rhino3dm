@@ -113,8 +113,10 @@ RH_C_FUNCTION void ON_V6_Annotation_GetTextString(const ON_Annotation* constAnno
         const ON_TextContent* text_content = constAnnotation->Text();
         if(nullptr != text_content)
           (*wstring) = text_content->PlatformRichTextFromRuns();
-        else
-          //to support retrieving RichText on Linux
+        // Only Windows and Apple have a rich text style
+        // (ON::RichTextStyleFromCurrentPlatform), so elsewhere the runs give "";
+        // use the RTF stored with the annotation
+        if (wstring->IsEmpty())
           (*wstring) = constAnnotation->RichText().Array();
       }
       else
