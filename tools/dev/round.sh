@@ -12,6 +12,8 @@
 #   tools/dev/round.sh typings  src/rhino3dm/__init__.pyi + src/js/rhino3dm.d.ts from the last Python
 #                               build's stub (tools/docs); tsc --strict on the .d.ts, mypy --strict +
 #                               stubtest (missing names) on the .pyi
+#   tools/dev/round.sh drift    the typings regenerated into build/dev/typings and compared with the
+#                               committed ones; fails when they differ (also the last step of build/all)
 #
 # Regenerate first (python3 tools/generate/bnd_gen.py); the generated sources are
 # read from this checkout. Logs and the built modules land in $RH3DM_DEV_WORK
@@ -57,15 +59,31 @@ both() {  # run python and wasm in parallel; print each when both are done
   echo "== wasm";   grep -vE "^\| " "$WORK/round_wasm.log"
 }
 
+drift() {  # the committed typings are what the last Python build generates
+  echo "== typings drift"
+  [ -f "$WORK/python/_rhino3dm.raw.pyi" ] || { echo "DRIFT: no $WORK/python/_rhino3dm.raw.pyi (build Python first)"; return 1; }
+  local d=$WORK/typings; mkdir -p "$d"
+  python3 "$REPO/tools/docs/pyi.py" "$WORK/python/_rhino3dm.raw.pyi" "$d/__init__.pyi" >/dev/null &&
+    python3 "$REPO/tools/docs/dts.py" "$d/__init__.pyi" "$d/rhino3dm.d.ts" >/dev/null || { echo "DRIFT: generation failed"; return 1; }
+  local bad=0 f
+  for f in src/rhino3dm/__init__.pyi:__init__.pyi src/js/rhino3dm.d.ts:rhino3dm.d.ts; do
+    diff -q "$REPO/${f%%:*}" "$d/${f##*:}" >/dev/null ||
+      { echo "DRIFT: ${f%%:*} differs from the build's (diff it with $d/${f##*:}; tools/dev/round.sh typings regenerates)"; bad=1; }
+  done
+  [ $bad = 0 ] && echo "TYPINGS OK: committed typings match the build"
+  return $bad
+}
+
 case "${1:-}" in
   check)  py check ;;
-  build)  both all all ;;
+  build)  both all all; drift ;;
   oracle) oracle ;;
   test)   both test test ;;
   dotnet) dotnet_tests ;;
   ft)     docker run --rm -v "$REPO":/src -v "$WORK":/work -v "$VOLUME":/build -e PY_FT=1 $PY_IMAGE \
             bash /src/tools/dev/container/python.sh "${2:-all}" ;;
-  all)    echo "== oracle"; oracle; both all all; dotnet_tests ;;
+  all)    echo "== oracle"; oracle; both all all; drift; dotnet_tests ;;
+  drift)  drift ;;
   typings) [ -f "$WORK/python/_rhino3dm.raw.pyi" ] || { echo "no $WORK/python/_rhino3dm.raw.pyi: build Python first"; exit 1; }
           python3 "$REPO/tools/docs/pyi.py" "$WORK/python/_rhino3dm.raw.pyi" && python3 "$REPO/tools/docs/dts.py" || exit 1
           mkdir -p "$WORK/tsc" && cp "$REPO/src/js/rhino3dm.d.ts" "$WORK/tsc/"
@@ -73,5 +91,5 @@ case "${1:-}" in
             'npm i -g typescript@5.6.3 >/dev/null 2>&1; tsc --noEmit --strict rhino3dm.d.ts && echo "TSC OK"'
           docker run --rm -v "$REPO":/src:ro -v "$WORK":/work $PY_IMAGE bash /src/tools/docs/check_pyi.sh ;;
   sdist)  docker run --rm -v "$REPO":/src:ro -v "$WORK":/work python:3.12-bookworm bash /src/tools/dev/container/sdist.sh "${2:-}" ;;
-  *) sed -n '2,21p' "$0"; exit 2 ;;
+  *) sed -n '2,23p' "$0"; exit 2 ;;
 esac
