@@ -155,6 +155,10 @@ typedef py::object RH3DM_DATETIME;
 inline RH3DM_DATETIME RH3DM_DateTime(int y, int mo, int d, int h, int mi, int s) {
   return RH3DM_PyImport("datetime").attr("datetime")(y, mo, d, h, mi, s); }
 inline RH3DM_DATETIME RH3DM_DateTimeMin() { return RH3DM_DateTime(1, 1, 1, 0, 0, 0); }
+// an array result C# returns as null (D35): the translated body returns the empty vector there,
+// and these members' other results are never empty (NULL_RESULT_NONEMPTY)
+template <class T> inline py::object RH3DM_NoneIfEmpty(const std::vector<T>& v) {
+  return v.empty() ? py::none() : py::cast(v); }
 #else
 typedef emscripten::val RH3DM_NTUPLE;
 inline RH3DM_NTUPLE RH3DM_NoneTuple() { return emscripten::val::null(); }
@@ -163,6 +167,9 @@ template <class T> inline emscripten::val RH3DM_JsArray(const std::vector<T>& v)
   emscripten::val a = emscripten::val::array();
   for (size_t i = 0; i < v.size(); i++) a.call<void>("push", emscripten::val(v[i]));
   return a; }
+// an array result C# returns as null (D35): null, not the empty array
+template <class T> inline emscripten::val RH3DM_JsArrayOrNull(const std::vector<T>& v) {
+  return v.empty() ? emscripten::val::null() : RH3DM_JsArray(v); }
 // a sequence of new class objects (G89: SubDVertex.Edges): the caller owns each
 template <class T> inline emscripten::val RH3DM_JsArray(const std::vector<T*>& v) {
   emscripten::val a = emscripten::val::array();

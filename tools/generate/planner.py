@@ -4324,6 +4324,23 @@ def hide_shadowed_out_overloads(per_class, skipped):
                         skipped['hidden: out overload shadowed by its plain form'] = skipped.get('hidden: out overload shadowed by its plain form', 0) + 1
 
 
+def rename_out_overloads(per_class, skipped):
+    """an overload Python and JS can never select (pilot #86: it differs from another only in its
+    `out` parameters) is registered under the name OVERLOAD_NAMES gives it (G143). The plan's member
+    record is a copy with the new Name; `CsName` keeps RhinoCommon's for the docs join"""
+    used = set()
+    for cls, plans in per_class:
+        for p in plans:
+            new = OVERLOAD_NAMES.get((p['m'].get('Type'), p['m'].get('Signature')))
+            if new and not p.get('setter_of'):
+                p['m'] = dict(p['m'], Name=new, CsName=p['m']['Name'])
+                used.add((p['m']['Type'], p['m']['Signature']))
+                skipped['renamed: unreachable out overload (G143)'] = skipped.get('renamed: unreachable out overload (G143)', 0) + 1
+    stale = set(OVERLOAD_NAMES) - used
+    if stale:
+        raise SystemExit('OVERLOAD_NAMES: no generated member for %s' % sorted(stale))
+
+
 def drop_setterless_overrides(per_class, skipped):
     """a derived class's property with no setter where a generated base has the same property
     WITH one (G92: Layer.Name overrides ModelComponent.Name): registering it would hide the base's

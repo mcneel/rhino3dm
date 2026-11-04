@@ -157,7 +157,7 @@ void initGenNurbsSurfacePointList(rh3dmpymodule& m)
       .def("SetPoint", &BND_NurbsSurfacePointList::Gen_SetPoint, py::arg("u"), py::arg("v"), py::arg("point"))
       .def("SetPoint", &BND_NurbsSurfacePointList::Gen_SetPoint_2, py::arg("u"), py::arg("v"), py::arg("point"))
       .def("SetWeight", &BND_NurbsSurfacePointList::Gen_SetWeight, py::arg("u"), py::arg("v"), py::arg("weight"))
-      .def("GetPoint", &BND_NurbsSurfacePointList::Gen_GetPoint_2, py::arg("u"), py::arg("v"))
+      .def("GetPoint4d", &BND_NurbsSurfacePointList::Gen_GetPoint_2, py::arg("u"), py::arg("v"))
       .def("SetControlPoint", &BND_NurbsSurfacePointList::Gen_SetControlPoint, py::arg("u"), py::arg("v"), py::arg("cp"))
       .def("SetControlPoint", &BND_NurbsSurfacePointList::Gen_SetControlPoint_2, py::arg("u"), py::arg("v"), py::arg("cp"))
       .def("SetPoint", &BND_NurbsSurfacePointList::Gen_SetPoint_3, py::arg("u"), py::arg("v"), py::arg("point"), py::arg("weight"))
@@ -186,6 +186,7 @@ void initGenNurbsSurfacePointList(void)
         if (v0.isNumber() && v1.isNumber() && (!v2.isNull() && v2.typeOf().as<std::string>() == "object" && v2.hasOwnProperty("Z") && v2["Z"].isNumber())) return self.Gen_SetPoint(v0.as<int>(), v1.as<int>(), v2.as<BND_Point3d>());
         throw std::invalid_argument("NurbsSurfacePointList.setPoint: no overload matches the arguments"); }), allow_raw_pointers())
       .function("setWeight", &BND_NurbsSurfacePointList::Gen_SetWeight)
+      .function("getPoint4d", &BND_NurbsSurfacePointList::Gen_GetPoint_2)
       .function("setControlPoint", optional_override([](BND_NurbsSurfacePointList& self, emscripten::val v0, emscripten::val v1, emscripten::val v2) -> bool {
         if (v0.isNumber() && v1.isNumber() && (!v2.isNull() && v2.typeOf().as<std::string>() == "object" && v2.hasOwnProperty("Z") && v2["Z"].isNumber())) return self.Gen_SetControlPoint_2(v0.as<int>(), v1.as<int>(), v2.as<BND_Point3d>());
         if (v0.isNumber() && v1.isNumber() && true) return self.Gen_SetControlPoint(v0.as<int>(), v1.as<int>(), v2.as<BND_ControlPoint>());

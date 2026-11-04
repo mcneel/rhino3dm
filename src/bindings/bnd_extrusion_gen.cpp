@@ -239,7 +239,8 @@ void initGenExtrusion(rh3dmpymodule& m)
       .def("ToBrep", &BND_Extrusion::Gen_ToBrep, py::arg("splitKinkyFaces"))
       .def("WallEdge", &BND_Extrusion::Gen_WallEdge, py::arg("ci"))
       .def("WallSurface", &BND_Extrusion::Gen_WallSurface, py::arg("ci"))
-      .def_static("CreateBoxExtrusion", &BND_Extrusion::Gen_CreateBoxExtrusion, py::arg("box"), py::arg("cap"));
+      .def_static("CreateBoxExtrusion", &BND_Extrusion::Gen_CreateBoxExtrusion, py::arg("box"), py::arg("cap"))
+      .def("ToBrep", &BND_Surface::Gen_ToBrep);
 }
 #endif
 

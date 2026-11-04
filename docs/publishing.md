@@ -13,7 +13,7 @@ python3 script/bump_version.py --check      # verify only; non-zero exit if out 
 
 | file | spelling | why |
 |---|---|---|
-| `src/version.txt` | `9.0.0-beta` | source of truth; also embedded into docgen at build time |
+| `src/version.txt` | `9.0.0-beta` | source of truth; also shown in the API reference (`tools/docs/make_docs.sh`) |
 | `package.json` | `9.0.0-beta` | npm |
 | `src/dotnet/Rhino3dm.csproj` | `9.0.0-beta` | NuGet package version |
 | `src/dotnet/Properties/AssemblyInfo.cs` | `9.0.0.0` | `AssemblyVersion` must be four numeric parts and cannot carry a pre-release suffix |
@@ -24,57 +24,27 @@ The version in `src/version.txt` is semver: `MAJOR.MINOR.PATCH` with an optional
 `-alpha` / `-beta` / `-rc` suffix, e.g. `9.0.0-beta` or `9.1.0-rc2`. The script fails
 rather than guessing if a file's version line is missing or ambiguous.
 
-## Updating Documentation with docgen
+## Updating the API documentation
 
-### automated (recommended)
+The typings and the API reference are generated (M5, `docs/vnext/M5-docs.md`): what exists comes from
+the built bindings, what it means from RhinoCommon's XML doc comments (read from `src/dotnet` into
+`api/docs.json`) and `api/hand-docs.toml` for the members rhino3dm adds.
 
-`src/docgen/make_docs.sh` runs the whole pipeline below (build + run docgen, sphinx for
-Python, typedoc for JavaScript) and copies the results into `docs/python/api` and
-`docs/javascript/api`. Run it from the repo root after bumping `src/version.txt` (the version
-shown in the docs is embedded from `version.txt` when docgen is built):
+1. Build Python (`tools/dev/round.sh build`, or `round.sh all`): the build also writes the module's raw
+   stub, `build/dev/python/_rhino3dm.raw.pyi`.
+2. `tools/dev/round.sh typings`: regenerates `src/rhino3dm/__init__.pyi` and `src/js/rhino3dm.d.ts`, then
+   checks them (`tsc --strict`, `mypy --strict`, stubtest).
+3. `tools/docs/make_docs.sh`: builds the Python reference (Sphinx + sphinx-autoapi over the `.pyi`) and the
+   JavaScript reference (typedoc over the `.d.ts`) into `build/dev/site`, in Docker.
+4. `tools/docs/make_docs.sh all --publish`: copies them into `docs/python/9.x/api` and
+   `docs/javascript/9.x/api`. The 8.x reference stays at `docs/python/api` and `docs/javascript/api` until
+   the 9.2 release, when the two swap.
+5. GitHub Pages serves the `docs/` folder of the `main` branch (`docs/python/9.x/api` →
+   `https://mcneel.github.io/rhino3dm/python/9.x/api/`), so nothing is live until the folders reach `main`.
+   Before the 9.x branch merges, that means a docs-only PR to `main` carrying just `docs/*/9.x/api`.
 
-```bash
-./src/docgen/make_docs.sh          # all: python + javascript
-./src/docgen/make_docs.sh python   # just the Python docs
-./src/docgen/make_docs.sh js       # just the JavaScript docs (typedoc)
-```
-
-It picks up `sphinx-build` from `.venv` if present (see requirements below), and runs
-`npm install` in `src/js/docs` on first use. Note: `src/js/rhino3dm.d.ts` is hand-maintained
-and is **not** regenerated — the JavaScript docs are produced by running typedoc against it.
-Then commit the changes and merge with `main`. The manual steps below are the reference the
-script automates.
-
-### requirements:
-
-- python - 
-  - sphinx: `python3 -m pip install sphinx`
-  - theme: `python3 -m pip install sphinx-rtd-theme`
-
-### building api docs
-
-1. change to docgen folder: `cd src/docgen`
-2. build docgen: `dotnet build docgen.csproj`
-3. run docgen: `cd bin/Debug && ./docgen`
-4. generate docs:
-    1. javascript: 
-        - New System: 
-          - change to `src/js/docs` directory
-          - install dependencies (only first time): `npm i`
-          - generate docs: `npm run docs`. This also handles copying to `docs/javscript/api`
-        - Old system: 
-          - istall dependencies: `npm i -g docdash jsdoc`
-          - `~/.npm-global/bin/jsdoc ./out/js_apidocs/rh3dm_temp.js README.md -c jsdoc.conf -t ~/.npm-global/lib/node_modules/docdash -d ../../docs/javascript/api`
-    2. python: 
-        - install dependencies in venv:
-          - change to rhino3dm root directory
-          - `python3 -m venv .venv`
-          - `source .venv/bin/activate`
-          - `pip install sphinx`
-          - `pip install sphinx-rtd-theme`
-        - `sphinx-build -M html src/docgen/out/py_apidocs src/docgen/out/py_apidocs/sphinxout`
-        - replace the docs in docs/python/api with the docs generated in src/docgen/out/py_apidocs/sphinxout/html
-5. commit these changes and merge with `main`
+After a RhinoCommon re-pin that changes doc comments, refresh `api/docs.json` first:
+`dotnet run -c Release --project tools/specgen -- docs src/dotnet api/docs.json`.
 
 ## JavaScript
 

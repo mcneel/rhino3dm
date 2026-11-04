@@ -16,7 +16,7 @@ We've been using CMake 16.6.2, but you might be able to get away with an older v
 
 ## Get the source code
 
-This repo uses [OpenNURBS](https://github.com/mcneel/opennurbs) and [pybind11](https://github.com/pybind/pybind11) as submodules. Make sure they're properly initialised and updated.
+This repo uses [OpenNURBS](https://github.com/mcneel/opennurbs) and [nanobind](https://github.com/wjakob/nanobind) as submodules. Make sure they're properly initialised and updated.
 
 ```commandline
 git clone --recurse-submodules https://github.com/mcneel/rhino3dm.git

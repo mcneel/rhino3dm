@@ -1502,6 +1502,9 @@ def js_shadowed(shape_lists):
 JS_STATICS = {}                 # reg -> [(JS name, registration)] of its class functions (inherited in JS)
 
 
+PY_DEFS = {}       # registry name -> its Python method registrations (G142; bases emit first)
+
+
 def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=()):
     if cls.get('internal'):
         return '', ''          # G96: an internal class is C++ only (bodies use it; no binding)
@@ -1707,6 +1710,29 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
 
     # G126: Python overloads the generated member lacks, after its own (nanobind tries in order)
     py += hand_registrations(cls['reg'], overloads=True)[0]
+    # G142: a derived class's own overload under a base method's name hides the base's overloads in
+    # Python (nanobind does not chain a derived def to the base's; Extrusion.ToBrep(splitKinkyFaces)
+    # made Surface.ToBrep() a TypeError on an Extrusion, TextEntity.Transform(xform, style) hid
+    # GeometryBase.Transform(xform)): the base's registrations of that name follow the class's own
+    # (a base member pointer takes the derived self). embind keeps base and derived arities apart.
+    def _defs(lines):
+        out = {}
+        for l in lines:
+            m = re.match(r'\s*\.def\("(\w+)", (.*)\)$', l)
+            if m and not m.group(1).startswith('__'):
+                out.setdefault(m.group(1), []).append((tuple(re.findall(r'py::arg\("(\w+)"\)', m.group(2))), l))
+        return out
+    own = _defs(py)
+    b = BY_REG.get(cls.get('base', ''))
+    while b is not None:
+        for name, entries in _defs(PY_DEFS.get(b['reg'], [])).items():
+            if name in own:
+                for args, line in entries:
+                    if args not in {a for a, _ in own[name]}:
+                        py.append(line)
+                        own[name].append((args, line))
+        b = BY_REG.get(b.get('base', ''))
+    PY_DEFS[cls['reg']] = [l for _, es in own.items() for _, l in es]
     # embind keeps ONE function per name+arity. Same-arity overloads get a
     # generated C++ dispatcher on argument shape (isoCurve(int, t) vs
     # isoCurve(IsoStatus, t)); overloads JS cannot tell apart collapse to the

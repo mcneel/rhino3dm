@@ -498,6 +498,7 @@ def main():
     refuse_overridden_count(per_class, skipped)
     drop_setterless_overrides(per_class, skipped)       # G92: never hide a base setter
     hide_shadowed_out_overloads(per_class, skipped)     # G105: GetScreenPort() over GetScreenPort(out, out)
+    rename_out_overloads(per_class, skipped)            # G143: GetPoint4d, not an unreachable GetPoint
     drop_orphaned_translations(per_class, skipped)
     all_plans = [p for _, plans in per_class for p in plans]
     # a scoped view's variants call natives of their own (G77): declared, not counted
@@ -861,6 +862,8 @@ def main():
         vt_regs = [t['Cs'] for t in vt['types'] if not t['IsStaticClass']]
         data_marker_pass(vt, per_class, manifest, skipped)
         files.update(emit_valuetypes(vt, emit_valuetype_bindings(vt, skipped)))
+        if set(VT_OVERLOAD_NAMES) - VT_RENAMED:
+            raise SystemExit('VT_OVERLOAD_NAMES: no generated member for %s' % sorted(set(VT_OVERLOAD_NAMES) - VT_RENAMED))
     else:
         vt_regs = []
     check_hand_members({c['reg'] for c in CLASSES} | set(vt_regs), os.path.join(ROOT, 'src'))   # G123
@@ -981,6 +984,10 @@ typedef py::object RH3DM_DATETIME;
 inline RH3DM_DATETIME RH3DM_DateTime(int y, int mo, int d, int h, int mi, int s) {
   return RH3DM_PyImport("datetime").attr("datetime")(y, mo, d, h, mi, s); }
 inline RH3DM_DATETIME RH3DM_DateTimeMin() { return RH3DM_DateTime(1, 1, 1, 0, 0, 0); }
+// an array result C# returns as null (D35): the translated body returns the empty vector there,
+// and these members' other results are never empty (NULL_RESULT_NONEMPTY)
+template <class T> inline py::object RH3DM_NoneIfEmpty(const std::vector<T>& v) {
+  return v.empty() ? py::none() : py::cast(v); }
 #else
 typedef emscripten::val RH3DM_NTUPLE;
 inline RH3DM_NTUPLE RH3DM_NoneTuple() { return emscripten::val::null(); }
@@ -989,6 +996,9 @@ template <class T> inline emscripten::val RH3DM_JsArray(const std::vector<T>& v)
   emscripten::val a = emscripten::val::array();
   for (size_t i = 0; i < v.size(); i++) a.call<void>("push", emscripten::val(v[i]));
   return a; }
+// an array result C# returns as null (D35): null, not the empty array
+template <class T> inline emscripten::val RH3DM_JsArrayOrNull(const std::vector<T>& v) {
+  return v.empty() ? emscripten::val::null() : RH3DM_JsArray(v); }
 // a sequence of new class objects (G89: SubDVertex.Edges): the caller owns each
 template <class T> inline emscripten::val RH3DM_JsArray(const std::vector<T*>& v) {
   emscripten::val a = emscripten::val::array();
@@ -1941,6 +1951,21 @@ for _cls in list(vars(_m).values()):
             _inst = vars(_cls).get(_attr[len('_static_'):])
             if _inst is not None:
                 setattr(_cls, _attr[len('_static_'):], _StaticOrInstance(_inst, getattr(_cls, _attr)))
+# M5 (Luis 2026-11-04): an enum value named `None` (RhinoCommon's) cannot be written `E.None` in
+# Python (a keyword): `E.None_` is the same member, and `None` stays its name (repr, E['None'])
+import enum as _enum
+def _none_alias(e):
+    if 'None' in e.__members__ and 'None_' not in e.__members__:
+        type.__setattr__(e, 'None_', e['None'])
+        e._member_map_['None_'] = e['None']
+for _v in list(vars(_m).values()):
+    if isinstance(_v, type):
+        if issubclass(_v, _enum.Enum):
+            _none_alias(_v)
+        else:
+            for _n in list(vars(_v).values()):
+                if isinstance(_n, type) and issubclass(_n, _enum.Enum):
+                    _none_alias(_n)
 )py", rh3dm_globals);
 '''
     files['gen_init.cpp'] = BANNER + '''#include "gen_common.h"

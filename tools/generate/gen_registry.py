@@ -1615,6 +1615,33 @@ HAND_MEMBERS['PointCloud'] = [
         js='addRangePointsValues')]
 HAND_MEMBERS['File3dmGroupTable'] = [
     _hm('Delete', 'method', 'BND_File3dmGroupTable_DeleteId', _PC, args=['id'], overload=True, js='deleteId')]
+# D31 (Luis 2026-11-04): a count on the enumerable-only Decals (len() in Python, `count` in JS)
+HAND_MEMBERS['Decals'] = [
+    _hm('__len__', 'method', 'BND_Decals_Count', 'bindings/bnd_decals.h', js=None),
+    _hm('Count', 'property', 'BND_Decals_Count', 'bindings/bnd_decals.h', py=False, js='count')]
+# D35 (Luis 2026-11-04): array results C# returns as null are None / null in Python / JS. Listed
+# after checking that each one's non-null result is never empty, so the binding's empty vector is
+# exactly C#'s null (the generator stops on an unlisted NullAsEmpty member):
+#   BoundingBox.GetCorners / GetEdges: null for an invalid box, else 8 corners / 12 edges
+#   Polyline.GetSegments: null below 2 points, else Count - 1 >= 1 segments
+#   Point3d.CullDuplicates: null for no points, else at least the first point (not generated yet)
+# Box.GetCorners returns Array.Empty for an invalid box, not null: unchanged
+NULL_RESULT_NONEMPTY = {('BoundingBox', 'GetCorners'), ('BoundingBox', 'GetEdges'),
+                        ('Polyline', 'GetSegments'), ('Point3d', 'CullDuplicates')}
+# G143 (pilot #86, Luis 2026-11-04): C# overloads that differ only in their `out` parameters bind to
+# one Python/JS signature, so only the first is reachable; these are registered under a name of their
+# own. (C# type, C# signature) -> the bound name (JS camel-cases it)
+OVERLOAD_NAMES = {
+    ('Rhino.Geometry.Collections.NurbsCurvePointList', 'bool GetPoint(int index, out Point4d point)'): 'GetPoint4d',
+    ('Rhino.Geometry.Collections.NurbsSurfacePointList', 'bool GetPoint(int u, int v, out Point4d point)'): 'GetPoint4d',
+    ('Rhino.Render.TextureMapping', 'bool TryGetMappingBox(out Plane plane, out Interval dx, out Interval dy, out Interval dz, out bool capped)'): 'TryGetMappingBoxCapped',
+    ('Rhino.Render.TextureMapping', 'bool TryGetMappingCylinder(out Cylinder cylinder, out bool capped)'): 'TryGetMappingCylinderCapped',
+    ('Rhino.Render.TextureMapping', 'bool TryGetMappingPlane(out Plane plane, out Interval dx, out Interval dy, out Interval dz, out bool capped)'): 'TryGetMappingPlaneCapped',
+}
+# the same for value-type members, keyed by their valuetypes.json key
+VT_OVERLOAD_NAMES = {
+    'Transform.DecomposeAffine(Vector3d,Transform,Transform,Vector3d)': 'DecomposeAffineFull',
+}
 # F2 on the value types: Encode everywhere, Decode where the old binding had it
 for _t, _dec in [('BoundingBox', True), ('Plane', True), ('Sphere', True), ('Circle', False),
                  ('Point2d', False), ('Point2f', False), ('Point3d', False), ('Point3f', False), ('Point4d', False),

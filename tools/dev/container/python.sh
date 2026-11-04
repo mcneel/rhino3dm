@@ -6,6 +6,7 @@
 #   python.sh build   full module build
 #   python.sh test    regression + parity + planner tests against the built module
 #   python.sh all     build, test
+#   python.sh stubs   the raw stub of the built module (build does it too) -> build/dev/python/_rhino3dm.raw.pyi
 # The system Python is 3.12, so this builds the abi3 module (M2). PY_FT=1: the same against a
 # free-threaded CPython (3.14t, installed with uv in the container; its own build tree), tested with
 # PYTHON_GIL=0 -- the module must load without re-enabling the GIL.
@@ -66,7 +67,13 @@ build() {
   ec=$?; echo "PY MAKE EXIT = $ec"
   [ $ec -ne 0 ] && { grep -E "error" $LOG/make.log | sed -E 's#^/src/src/##' | sort -u | head -20; exit 1; }
   publish
+  stubs
   return 0
+}
+
+stubs() {   # nanobind's stub of the built module: tools/docs/pyi.py's input (M5)
+  ( cd $B && $PY /src/src/lib/nanobind/src/stubgen.py -q -m _rhino3dm -o $LOG/_rhino3dm.raw.pyi ) \
+    || echo "STUBGEN FAIL"
 }
 
 test_() {
@@ -84,7 +91,8 @@ test_() {
 case "${1:-all}" in
   check)  check ;;
   build)  build ;;
+  stubs)  stubs ;;
   test)   test_ ;;
   all)    build && test_ ;;
-  *) echo "usage: [PY_FT=1] python.sh check|build|test|all"; exit 2 ;;
+  *) echo "usage: [PY_FT=1] python.sh check|build|test|all|stubs"; exit 2 ;;
 esac

@@ -3,12 +3,14 @@
 //   dotnet run --project tools/specgen -- extract   [--rhino3dm] <rhino-dotnet-dir> <members.json>
 //   dotnet run --project tools/specgen -- translate <rhino-dotnet-dir> <valuetypes.json>
 //   dotnet run --project tools/specgen -- all       <rhino-dotnet-dir> <members.json> <valuetypes.json>
+//   dotnet run --project tools/specgen -- docs      <dotnet-dir> <docs.json>
 //
 // extract    the public surface: signatures, native calls, body shapes
 //            (feeds api/manifest.json through tools/extract/manifest.py)
 // translate  value-type bodies (Point3d, Vector3d, Interval, RhinoMath) to
 //            C++ (api/valuetypes.json, consumed by tools/generate/bnd_gen.py)
 // all        both, from ONE parse of the ~490 sources
+// docs       the XML doc comments, keyed as the manifest's members (api/docs.json, from src/dotnet; M5)
 //
 // <rhino-dotnet-dir> defaults to ~/dev/rhino/src4/DotNetSDK/rhinocommon/dotnet.
 
@@ -35,13 +37,15 @@ switch (cmd)
         return ExtractCommand.Run(dir, pos.Length > 1 ? pos[1] : "members.json", rhino3dmOnly, src);
     case "translate":
         return TranslateCommand.Run(pos.Length > 1 ? pos[1] : "valuetypes.json", src);
+    case "docs":
+        return DocsCommand.Run(pos.Length > 1 ? pos[1] : "docs.json", src);
     case "all":
     {
         int rc = ExtractCommand.Run(dir, pos.Length > 1 ? pos[1] : "members.json", rhino3dmOnly, src);
         return rc != 0 ? rc : TranslateCommand.Run(pos.Length > 2 ? pos[2] : "valuetypes.json", src);
     }
     default:
-        Console.Error.WriteLine("usage: specgen extract|translate|all [--rhino3dm] <rhino-dotnet-dir> <out.json> [<valuetypes.json>]");
+        Console.Error.WriteLine("usage: specgen extract|translate|all|docs [--rhino3dm] <rhino-dotnet-dir> <out.json> [<valuetypes.json>]");
         return 2;
 }
 

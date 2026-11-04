@@ -514,6 +514,7 @@ js  Decal.vectorAcross [property]
 js  Decal.vectorUp [property]
 js  Decal.vertSweep [function]
 js  Decals.clear [function]
+js  Decals.count [property]
 js  Decals.iterator [function]
 js  Decals.remove [function]
 js  Decals.removeAllDecals [function]
@@ -1961,6 +1962,7 @@ js  NurbsCurvePointList.controlPolygonLength [property]
 js  NurbsCurvePointList.count [property]
 js  NurbsCurvePointList.get [function]
 js  NurbsCurvePointList.getPoint [function]
+js  NurbsCurvePointList.getPoint4d [function]
 js  NurbsCurvePointList.getWeight [function]
 js  NurbsCurvePointList.makeNonRational [function]
 js  NurbsCurvePointList.makeRational [function]
@@ -2005,6 +2007,7 @@ js  NurbsSurfacePointList.countV [property]
 js  NurbsSurfacePointList.getControlPoint [function]
 js  NurbsSurfacePointList.getGrevillePoint [function]
 js  NurbsSurfacePointList.getPoint [function]
+js  NurbsSurfacePointList.getPoint4d [function]
 js  NurbsSurfacePointList.getWeight [function]
 js  NurbsSurfacePointList.pointSize [property]
 js  NurbsSurfacePointList.setControlPoint [function]
@@ -2829,8 +2832,11 @@ js  TextureMapping.projection [property]
 js  TextureMapping.setUserString [function]
 js  TextureMapping.textureSpace [property]
 js  TextureMapping.tryGetMappingBox [function]
+js  TextureMapping.tryGetMappingBoxCapped [function]
 js  TextureMapping.tryGetMappingCylinder [function]
+js  TextureMapping.tryGetMappingCylinderCapped [function]
 js  TextureMapping.tryGetMappingPlane [function]
+js  TextureMapping.tryGetMappingPlaneCapped [function]
 js  TextureMapping.tryGetMappingSphere [function]
 js  TextureMapping.userStringCount [property]
 js  TextureMapping.uvwTransform [property]
@@ -2847,6 +2853,7 @@ js  Transform.changeBasis [class_function]
 js  Transform.compareTo [class_function]
 js  Transform.create [class_function]
 js  Transform.decomposeAffine [class_function]
+js  Transform.decomposeAffineFull [class_function]
 js  Transform.decomposeRigid [class_function]
 js  Transform.decomposeSimilarity [class_function]
 js  Transform.decomposeSymmetric [class_function]
@@ -3719,6 +3726,7 @@ py  Decals.Clear()
 py  Decals.Remove(decal)
 py  Decals.RemoveAllDecals()
 py  Decals.__iter__()
+py  Decals.__len__()
 py  DecalsIter.__iter__()
 py  DecalsIter.__next__()
 py  Dimension.AltLengthFactor [property rw]
@@ -3983,6 +3991,7 @@ py  Extrusion.ProfileIndex(profileParameter)
 py  Extrusion.SetMesh(mesh, meshType)
 py  Extrusion.SetOuterProfile(outerProfile, cap)
 py  Extrusion.SetPathAndUp(a, b, up)
+py  Extrusion.ToBrep()
 py  Extrusion.ToBrep(splitKinkyFaces)
 py  Extrusion.WallEdge(ci)
 py  Extrusion.WallSurface(ci)
@@ -5215,6 +5224,7 @@ py  NurbsCurvePointList.ChangeEndWeights(w0, w1)
 py  NurbsCurvePointList.ControlPolygonLength [property ro]
 py  NurbsCurvePointList.Count [property ro]
 py  NurbsCurvePointList.GetPoint(index)
+py  NurbsCurvePointList.GetPoint4d(index)
 py  NurbsCurvePointList.GetWeight(index)
 py  NurbsCurvePointList.MakeNonRational()
 py  NurbsCurvePointList.MakeRational()
@@ -5264,6 +5274,7 @@ py  NurbsSurfacePointList.CountV [property ro]
 py  NurbsSurfacePointList.GetControlPoint(u, v)
 py  NurbsSurfacePointList.GetGrevillePoint(u, v)
 py  NurbsSurfacePointList.GetPoint(u, v)
+py  NurbsSurfacePointList.GetPoint4d(u, v)
 py  NurbsSurfacePointList.GetWeight(u, v)
 py  NurbsSurfacePointList.PointSize [property ro]
 py  NurbsSurfacePointList.SetControlPoint(u, v, cp)
@@ -6210,6 +6221,7 @@ py  TextEntity.TextHorizontalAlignment [property rw]
 py  TextEntity.TextOrientation [property rw]
 py  TextEntity.TextVerticalAlignment [property rw]
 py  TextEntity.Transform(transform, style)
+py  TextEntity.Transform(xform)
 py  TextEntity.__init__()
 py  Texture.ApplyUvwTransform [property rw]
 py  Texture.Enabled [property rw]
@@ -6259,8 +6271,11 @@ py  TextureMapping.Projection [property rw]
 py  TextureMapping.SetUserString(key, value)
 py  TextureMapping.TextureSpace [property rw]
 py  TextureMapping.TryGetMappingBox()
+py  TextureMapping.TryGetMappingBoxCapped()
 py  TextureMapping.TryGetMappingCylinder()
+py  TextureMapping.TryGetMappingCylinderCapped()
 py  TextureMapping.TryGetMappingPlane()
+py  TextureMapping.TryGetMappingPlaneCapped()
 py  TextureMapping.TryGetMappingSphere()
 py  TextureMapping.UserStringCount [property ro]
 py  TextureMapping.UvwTransform [property rw]
@@ -6277,12 +6292,13 @@ py  Torus.__init__()
 py  Torus.__init__(BND_Plane, double, double)
 py  Torus.__repr__()
 py  Transform.Affineize()
-py  Transform.ChangeBasis(P0_cs, X0_cs, Y0_cs, Z0_cs, P1_cs, X1_cs, Y1_cs, Z1_cs) [static]
-py  Transform.ChangeBasis(X0_cs, Y0_cs, Z0_cs, X1_cs, Y1_cs, Z1_cs) [static]
+py  Transform.ChangeBasis(P0, X0, Y0, Z0, P1, X1, Y1, Z1) [static]
+py  Transform.ChangeBasis(X0, Y0, Z0, X1, Y1, Z1) [static]
 py  Transform.ChangeBasis(plane0, plane1) [static]
 py  Transform.Clone()
 py  Transform.CompareTo(other)
 py  Transform.DecomposeAffine()
+py  Transform.DecomposeAffineFull()
 py  Transform.DecomposeRigid(tolerance)
 py  Transform.DecomposeSimilarity(tolerance)
 py  Transform.DecomposeSymmetric()

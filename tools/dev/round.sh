@@ -9,6 +9,9 @@
 #   tools/dev/round.sh all      oracle, then build + tests, then dotnet
 #   tools/dev/round.sh ft [check|build|test|all]   the Python build against free-threaded CPython 3.14t
 #   tools/dev/round.sh sdist    the Python sdist round-trip: package, unpack, build from the package
+#   tools/dev/round.sh typings  src/rhino3dm/__init__.pyi + src/js/rhino3dm.d.ts from the last Python
+#                               build's stub (tools/docs); tsc --strict on the .d.ts, mypy --strict +
+#                               stubtest (missing names) on the .pyi
 #
 # Regenerate first (python3 tools/generate/bnd_gen.py); the generated sources are
 # read from this checkout. Logs and the built modules land in $RH3DM_DEV_WORK
@@ -28,6 +31,7 @@ mkdir -p "$WORK"
 PY_IMAGE=ubuntu:24.04
 WASM_IMAGE=emscripten/emsdk:5.0.7
 DOTNET_IMAGE=mcr.microsoft.com/dotnet/sdk:10.0
+NODE_IMAGE=node:24
 
 run() {   # run <image> <script> <args...>
   local image=$1; shift
@@ -62,6 +66,12 @@ case "${1:-}" in
   ft)     docker run --rm -v "$REPO":/src -v "$WORK":/work -v "$VOLUME":/build -e PY_FT=1 $PY_IMAGE \
             bash /src/tools/dev/container/python.sh "${2:-all}" ;;
   all)    echo "== oracle"; oracle; both all all; dotnet_tests ;;
+  typings) [ -f "$WORK/python/_rhino3dm.raw.pyi" ] || { echo "no $WORK/python/_rhino3dm.raw.pyi: build Python first"; exit 1; }
+          python3 "$REPO/tools/docs/pyi.py" "$WORK/python/_rhino3dm.raw.pyi" && python3 "$REPO/tools/docs/dts.py" || exit 1
+          mkdir -p "$WORK/tsc" && cp "$REPO/src/js/rhino3dm.d.ts" "$WORK/tsc/"
+          docker run --rm -v "$WORK/tsc":/w -w /w $NODE_IMAGE bash -c \
+            'npm i -g typescript@5.6.3 >/dev/null 2>&1; tsc --noEmit --strict rhino3dm.d.ts && echo "TSC OK"'
+          docker run --rm -v "$REPO":/src:ro -v "$WORK":/work $PY_IMAGE bash /src/tools/docs/check_pyi.sh ;;
   sdist)  docker run --rm -v "$REPO":/src:ro -v "$WORK":/work python:3.12-bookworm bash /src/tools/dev/container/sdist.sh "${2:-}" ;;
-  *) sed -n '2,19p' "$0"; exit 2 ;;
+  *) sed -n '2,21p' "$0"; exit 2 ;;
 esac

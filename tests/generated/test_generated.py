@@ -987,6 +987,7 @@ def test_decals_iterate_a_snapshot_of_copies():
     objs = list(f.Objects)
     decals = list(objs[0].Attributes.Decals)
     assert len(decals) == 2
+    assert len(objs[0].Attributes.Decals) == 2     # D31: the count iteration yields
     assert all(d.Mapping == r.DecalMapping.UV for d in decals)
     ids = [d.TextureInstanceId for d in decals]
     assert len(set(ids)) == 2
@@ -1000,6 +1001,7 @@ def test_decals_of_attributes_are_writable_with_rhinocommons_guards():
     # `new Decals(this, false, doc_sn)`: not read-only, so the m_read_only guards pass
     a = r.ObjectAttributes()
     assert list(a.Decals) == []
+    assert len(a.Decals) == 0                      # D31
     a.Decals.RemoveAllDecals()
     a.Decals.Clear()
     assert a.Decals.Remove(None) is False          # `if (decal == null) return false;`
@@ -1224,12 +1226,12 @@ def test_duplicate_returns_an_owned_most_derived_copy():
 @pytest.mark.skipif(not hasattr(r.BoundingBox, 'GetCorners'), reason='G70 not generated')
 def test_value_type_arrays_are_sequences():
     # G70: Point3d[] / IEnumerable<Point3d> are std::vector: lists in Python. C#'s
-    # null result is the empty list (D35)
+    # null result is None (D35, Luis 2026-11-04)
     import math
     bb = r.BoundingBox(r.Point3d(0, 0, 0), r.Point3d(1, 2, 3))
     corners = bb.GetCorners()
     assert len(corners) == 8 and corners[0] == r.Point3d(0, 0, 0) and corners[6] == r.Point3d(1, 2, 3)
-    assert r.BoundingBox.Unset.GetCorners() == []
+    assert r.BoundingBox.Unset.GetCorners() is None
     xf = r.Transform.Translation(r.Vector3d(1, 0, 0))
     moved = xf.TransformList([r.Point3d(0, 0, 0), r.Point3d(1, 1, 1)])
     assert moved == [r.Point3d(1, 0, 0), r.Point3d(2, 1, 1)]
@@ -4088,3 +4090,68 @@ def test_constructors_pilot76_77():
         a = cls()
         setattr(a, prop, not getattr(a, prop))
         assert getattr(cls(a), prop) == getattr(a, prop)
+
+
+def test_derived_overload_keeps_the_base_overloads_g142():
+    # a derived class's own overload under a base method's name hid the base's in Python (found by
+    # type-checking the generated typings, M5): Extrusion.ToBrep() raised TypeError
+    e = r.Extrusion.Create(r.Circle(r.Point3d(0, 0, 0), 1.0).ToNurbsCurve(), 2.0, True)
+    assert isinstance(e.ToBrep(), r.Brep) and isinstance(e.ToBrep(False), r.Brep)
+    t = r.TextEntity()
+    xf = r.Transform.Translation(r.Vector3d(1, 0, 0))
+    assert t.Transform(xf) == t.Transform(xf, None)
+
+
+def test_enum_value_none_has_a_writable_alias_m5():
+    # Luis 2026-11-04: RhinoCommon's `None` values cannot be written `E.None` in Python (a keyword);
+    # `E.None_` is the same member, and `None` stays its name
+    e = r.ActiveSpace
+    assert e.None_ is e['None'] is getattr(e, 'None') is e(0)
+    assert e.None_.name == 'None' and repr(e.None_) == 'ActiveSpace.None'
+    assert 'None_' not in [m.name for m in e]                      # iteration lists it once
+    assert r.DimensionStyle.LeaderCurveStyle.None_ is r.DimensionStyle.LeaderCurveStyle['None']   # nested
+
+
+def test_null_array_results_are_none_d35():
+    # D35 (Luis 2026-11-04): where RhinoCommon returns a null array, Python gets None
+    P = r.Point3d
+    assert r.BoundingBox.Unset.GetCorners() is None and r.BoundingBox.Unset.GetEdges() is None
+    bb = r.BoundingBox(P(0, 0, 0), P(1, 2, 3))
+    assert len(bb.GetCorners()) == 8 and len(bb.GetEdges()) == 12
+    assert r.Polyline([P(0, 0, 0)]).GetSegments() is None                 # fewer than 2 points
+    assert len(r.Polyline([P(0, 0, 0), P(1, 0, 0)]).GetSegments()) == 1
+    assert r.Box.Unset.GetCorners() == []                                  # C#: Array.Empty, not null
+
+
+def test_unreachable_out_overloads_have_names_of_their_own_g143():
+    # pilot #86 (Luis 2026-11-04): C# overloads that differ only in their out parameters bind to
+    # one Python signature; the one Python could never select is bound under a name of its own
+    P = r.Point3d
+    c = r.NurbsCurve.Create(False, 2, [P(0, 0, 0), P(1, 1, 0), P(2, 0, 0)])
+    pts = c.Points
+    pts.SetPoint(1, P(1, 2, 0), 2.0)
+    ok, p3 = pts.GetPoint(1)
+    ok4, p4 = pts.GetPoint4d(1)
+    assert ok and ok4 and isinstance(p3, r.Point3d) and isinstance(p4, r.Point4d)
+    assert p4.W == pts.GetWeight(1) == 2.0 and abs(p4.X / p4.W - p3.X) < 1e-12 and abs(p4.Y / p4.W - p3.Y) < 1e-12
+    sp = r.NurbsSurface.Create(3, False, 2, 2, 3, 2).Points
+    ok4, q4 = sp.GetPoint4d(0, 0)
+    assert ok4 and isinstance(q4, r.Point4d) and isinstance(sp.GetPoint(0, 0)[1], r.Point3d)
+
+    I, xy = r.Interval, r.Plane.WorldXY
+    for capped in (True, False):
+        box = r.TextureMapping.CreateBoxMapping(xy, I(0, 1), I(0, 2), I(0, 3), capped)
+        res = box.TryGetMappingBoxCapped()
+        assert len(res) == 6 and res[5] is capped and res[:5] == box.TryGetMappingBox()
+        cyl = r.TextureMapping.CreateCylinderMapping(r.Cylinder(r.Circle(xy, 1.0), 2.0), capped)
+        ok, cy, cap = cyl.TryGetMappingCylinderCapped()
+        assert ok and cap is capped and isinstance(cy, r.Cylinder) and cyl.TryGetMappingCylinder()[0]
+        pl = r.TextureMapping.CreatePlaneMapping(xy, I(0, 1), I(0, 2), I(0, 3), capped)
+        res = pl.TryGetMappingPlaneCapped()
+        assert len(res) == 6 and res[5] is capped and res[:5] == pl.TryGetMappingPlane()
+
+    xf = r.Transform.Scale(P(1, 2, 3), 2.0)
+    ok, t, rot, orth, diag = xf.DecomposeAffineFull()
+    assert ok and isinstance(rot, r.Transform) and isinstance(orth, r.Transform)
+    assert t == r.Vector3d(-1, -2, -3) and sorted(abs(v) for v in (diag.X, diag.Y, diag.Z)) == [2.0, 2.0, 2.0]
+    assert len(xf.DecomposeAffine()) == 3                                    # the 2-out form

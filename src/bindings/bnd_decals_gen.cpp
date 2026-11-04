@@ -3,6 +3,7 @@
 // constants and guards baked from the C# call sites (api/manifest.json).
 #include "bnd_decals_gen.h"
 #include "bnd_decal_gen.h"
+#include "bnd_decals.h"
 
 bool BND_Decals::Gen_Remove(const BND_Decal* decal) const {
   if (m_read_only) throw std::runtime_error("Can't modify read-only decal collection");
@@ -38,6 +39,7 @@ BND_DecalsIter* BND_Decals::Gen_iter() const
 void initGenDecals(rh3dmpymodule& m)
 {
   py::class_<BND_Decals>(m, "Decals")
+      .def("__len__", &BND_Decals_Count)
       .def("Remove", &BND_Decals::Gen_Remove, py::arg("decal").none())
       .def("RemoveAllDecals", &BND_Decals::Gen_RemoveAllDecals)
       .def("Clear", &BND_Decals::Gen_Clear)
@@ -57,6 +59,7 @@ using namespace emscripten;
 void initGenDecals(void)
 {
   class_<BND_Decals>("Decals")
+      .property("count", &BND_Decals_Count, allow_raw_pointers())
       .function("remove", &BND_Decals::Gen_Remove, allow_raw_pointers())
       .function("removeAllDecals", &BND_Decals::Gen_RemoveAllDecals)
       .function("clear", &BND_Decals::Gen_Clear)

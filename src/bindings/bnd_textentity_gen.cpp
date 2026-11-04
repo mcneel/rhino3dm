@@ -83,7 +83,8 @@ void initGenTextEntity(rh3dmpymodule& m)
       .def_prop_rw("TextVerticalAlignment", &BND_TextEntity::Gen_TextVerticalAlignment, &BND_TextEntity::Gen_set_TextVerticalAlignment, py::for_setter(py::arg("value").noconvert()))
       .def("Transform", &BND_TextEntity::Gen_Transform, py::arg("transform"), py::arg("style").none())
       .def_static("CreateWithRichText", &BND_TextEntity::Gen_CreateWithRichText, py::keep_alive<0, 3>(), py::arg("richTextString"), py::arg("plane"), py::arg("style"), py::arg("wrapped"), py::arg("rectWidth"), py::arg("rotationRadians"))
-      .def_static("Create", &BND_TextEntity::Gen_Create, py::keep_alive<0, 3>(), py::arg("text"), py::arg("plane"), py::arg("style"), py::arg("wrapped"), py::arg("rectWidth"), py::arg("rotationRadians"));
+      .def_static("Create", &BND_TextEntity::Gen_Create, py::keep_alive<0, 3>(), py::arg("text"), py::arg("plane"), py::arg("style"), py::arg("wrapped"), py::arg("rectWidth"), py::arg("rotationRadians"))
+      .def("Transform", &BND_GeometryBase::Gen_Transform, py::arg("xform"));
 }
 #endif
 

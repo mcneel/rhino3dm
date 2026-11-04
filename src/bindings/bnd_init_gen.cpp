@@ -1233,6 +1233,21 @@ for _cls in list(vars(_m).values()):
             _inst = vars(_cls).get(_attr[len('_static_'):])
             if _inst is not None:
                 setattr(_cls, _attr[len('_static_'):], _StaticOrInstance(_inst, getattr(_cls, _attr)))
+# M5 (Luis 2026-11-04): an enum value named `None` (RhinoCommon's) cannot be written `E.None` in
+# Python (a keyword): `E.None_` is the same member, and `None` stays its name (repr, E['None'])
+import enum as _enum
+def _none_alias(e):
+    if 'None' in e.__members__ and 'None_' not in e.__members__:
+        type.__setattr__(e, 'None_', e['None'])
+        e._member_map_['None_'] = e['None']
+for _v in list(vars(_m).values()):
+    if isinstance(_v, type):
+        if issubclass(_v, _enum.Enum):
+            _none_alias(_v)
+        else:
+            for _n in list(vars(_v).values()):
+                if isinstance(_n, type) and issubclass(_n, _enum.Enum):
+                    _none_alias(_n)
 )py", rh3dm_globals);
 
 }
