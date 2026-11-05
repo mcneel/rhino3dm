@@ -1387,7 +1387,6 @@ declare module 'rhino3dm' {
 	 * where xaxis and yaxis, (part of Circle.Plane) form an orthonormal frame of the plane containing the circle.
 	 */
 	class Arc {
-		private constructor();
 		/**
 		 * Gets the length of the arc. (Length = Radius * (subtended angle in radians)).
 		 */
@@ -1426,6 +1425,7 @@ declare module 'rhino3dm' {
 		 */
 		static closestPoint(arc: Arc, testPoint: Point3d): Point3d;
 		static create(): Arc;
+		constructor();
 		/**
 		 * Initializes a new instance of an arc from a base circle and an angle.
 		 * @param circle Circle to base arc upon.
@@ -1433,11 +1433,23 @@ declare module 'rhino3dm' {
 		 */
 		static create(circle: Circle, angleRadians: number): Arc;
 		/**
+		 * Initializes a new instance of an arc from a base circle and an angle.
+		 * @param circle Circle to base arc upon.
+		 * @param angleRadians Sweep angle of arc (in radians)
+		 */
+		constructor(circle: Circle, angleRadians: number);
+		/**
 		 * Initializes a new instance of an arc from a base circle and an interval of angles.
 		 * @param circle Circle to base arc upon.
 		 * @param angleIntervalRadians Increasing angle interval in radians with angleIntervalRadians.Length() <= 2.0*Math.PI.
 		 */
 		static create(circle: Circle, angleIntervalRadians: Interval): Arc;
+		/**
+		 * Initializes a new instance of an arc from a base circle and an interval of angles.
+		 * @param circle Circle to base arc upon.
+		 * @param angleIntervalRadians Increasing angle interval in radians with angleIntervalRadians.Length() <= 2.0*Math.PI.
+		 */
+		constructor(circle: Circle, angleIntervalRadians: Interval);
 		/**
 		 * Initializes a new arc from a base plane, a radius value and an angle.
 		 * @param plane The plane of the arc (arc center will be located at plane origin)
@@ -1446,12 +1458,26 @@ declare module 'rhino3dm' {
 		 */
 		static create(plane: Plane, radius: number, angleRadians: number): Arc;
 		/**
+		 * Initializes a new arc from a base plane, a radius value and an angle.
+		 * @param plane The plane of the arc (arc center will be located at plane origin)
+		 * @param radius Radius of arc.
+		 * @param angleRadians Sweep angle of arc (in radians)
+		 */
+		constructor(plane: Plane, radius: number, angleRadians: number);
+		/**
 		 * Initializes a new horizontal arc at the given center point, with a custom radius and angle.
 		 * @param center Center point of arc.
 		 * @param radius Radius of arc.
 		 * @param angleRadians Sweep angle of arc (in radians)
 		 */
 		static create(center: Point3d, radius: number, angleRadians: number): Arc;
+		/**
+		 * Initializes a new horizontal arc at the given center point, with a custom radius and angle.
+		 * @param center Center point of arc.
+		 * @param radius Radius of arc.
+		 * @param angleRadians Sweep angle of arc (in radians)
+		 */
+		constructor(center: Point3d, radius: number, angleRadians: number);
 		/**
 		 * Initializes a new aligned arc at the given center point, with a custom radius and angle.
 		 * @param plane Alignment plane for arc. The arc will be parallel to this plane.
@@ -1461,6 +1487,14 @@ declare module 'rhino3dm' {
 		 */
 		static create(plane: Plane, center: Point3d, radius: number, angleRadians: number): Arc;
 		/**
+		 * Initializes a new aligned arc at the given center point, with a custom radius and angle.
+		 * @param plane Alignment plane for arc. The arc will be parallel to this plane.
+		 * @param center Center point for arc.
+		 * @param radius Radius of arc.
+		 * @param angleRadians Sweep angle of arc (in radians)
+		 */
+		constructor(plane: Plane, center: Point3d, radius: number, angleRadians: number);
+		/**
 		 * Initializes a new arc through three points. If the points are coincident or co-linear, this will result in an Invalid arc.
 		 * @param startPoint Start point of arc.
 		 * @param pointOnInterior Point on arc interior.
@@ -1468,12 +1502,26 @@ declare module 'rhino3dm' {
 		 */
 		static create(startPoint: Point3d, pointOnInterior: Point3d, endPoint: Point3d): Arc;
 		/**
+		 * Initializes a new arc through three points. If the points are coincident or co-linear, this will result in an Invalid arc.
+		 * @param startPoint Start point of arc.
+		 * @param pointOnInterior Point on arc interior.
+		 * @param endPoint End point of arc.
+		 */
+		constructor(startPoint: Point3d, pointOnInterior: Point3d, endPoint: Point3d);
+		/**
 		 * Initializes a new arc from end points and a tangent vector. If the tangent is parallel with the line segment between the two endpoints this will result in an Invalid arc.
 		 * @param pointA Start point of arc.
 		 * @param tangentA Tangent at start of arc.
 		 * @param pointB End point of arc.
 		 */
 		static create(pointA: Point3d, tangentA: Vector3d, pointB: Point3d): Arc;
+		/**
+		 * Initializes a new arc from end points and a tangent vector. If the tangent is parallel with the line segment between the two endpoints this will result in an Invalid arc.
+		 * @param pointA Start point of arc.
+		 * @param tangentA Tangent at start of arc.
+		 * @param pointB End point of arc.
+		 */
+		constructor(pointA: Point3d, tangentA: Vector3d, pointB: Point3d);
 		/**
 		 * Gets or sets the Diameter of this arc.
 		 */
@@ -1866,7 +1914,6 @@ declare module 'rhino3dm' {
 	 * This box is therefore aligned to the world X, Y and Z axes.
 	 */
 	class BoundingBox {
-		private constructor();
 		/**
 		 * Constructs the string representation of this aligned bounding box.
 		 * @returns Text.
@@ -1932,12 +1979,19 @@ declare module 'rhino3dm' {
 		 */
 		static corner(boundingBox: BoundingBox, minX: boolean, minY: boolean, minZ: boolean): Point3d;
 		static create(): BoundingBox;
+		constructor();
 		/**
 		 * Constructs a new bounding box from two corner points.
 		 * @param min Point containing all the minimum coordinates.
 		 * @param max Point containing all the maximum coordinates.
 		 */
 		static create(min: Point3d, max: Point3d): BoundingBox;
+		/**
+		 * Constructs a new bounding box from two corner points.
+		 * @param min Point containing all the minimum coordinates.
+		 * @param max Point containing all the maximum coordinates.
+		 */
+		constructor(min: Point3d, max: Point3d);
 		/**
 		 * Constructs a bounding box from numeric extremes.
 		 * @param minX Lower extreme for box X size.
@@ -1949,6 +2003,16 @@ declare module 'rhino3dm' {
 		 */
 		static create(minX: number, minY: number, minZ: number, maxX: number, maxY: number, maxZ: number): BoundingBox;
 		/**
+		 * Constructs a bounding box from numeric extremes.
+		 * @param minX Lower extreme for box X size.
+		 * @param minY Lower extreme for box Y size.
+		 * @param minZ Lower extreme for box Z size.
+		 * @param maxX Upper extreme for box X size.
+		 * @param maxY Upper extreme for box Y size.
+		 * @param maxZ Upper extreme for box Z size.
+		 */
+		constructor(minX: number, minY: number, minZ: number, maxX: number, maxY: number, maxZ: number);
+		/**
 		 * Constructs a bounding box from a collection of points.
 		 * @param points Points to include in the bounding box.
 		 */
@@ -1956,9 +2020,20 @@ declare module 'rhino3dm' {
 		/**
 		 * Constructs a bounding box from a collection of points.
 		 * @param points Points to include in the bounding box.
+		 */
+		constructor(points: Point3d[]);
+		/**
+		 * Constructs a bounding box from a collection of points.
+		 * @param points Points to include in the bounding box.
 		 * @param xform Transformation.
 		 */
 		static create(points: Point3d[], xform: Transform): BoundingBox;
+		/**
+		 * Constructs a bounding box from a collection of points.
+		 * @param points Points to include in the bounding box.
+		 * @param xform Transformation.
+		 */
+		constructor(points: Point3d[], xform: Transform);
 		/**
 		 * The object a dict from `Encode` describes (rhino3dm only).
 		 * @param jsonObject A dict as `Encode` returns it.
@@ -2126,7 +2201,6 @@ declare module 'rhino3dm' {
 	 * Represents the value of a plane and three intervals in an orthogonal, oriented box that is not necessarily parallel to the world Y, X, Z axes.
 	 */
 	class Box {
-		private constructor();
 		/**
 		 * Gets the total surface area of this box, or `RhinoMath.UnsetValue` for an invalid box.
 		 */
@@ -2192,6 +2266,7 @@ declare module 'rhino3dm' {
 		 */
 		static contains(boxValue: Box, box: Box, strict: boolean): boolean;
 		static create(): Box;
+		constructor();
 		/**
 		 * Initializes a new Box that mimics a BoundingBox struct.
 		 *
@@ -2199,6 +2274,13 @@ declare module 'rhino3dm' {
 		 * @param bbox BoundingBox to mimic.
 		 */
 		static create(bbox: BoundingBox): Box;
+		/**
+		 * Initializes a new Box that mimics a BoundingBox struct.
+		 *
+		 * The orientation plane of the Box is coincident with the World XY plane.
+		 * @param bbox BoundingBox to mimic.
+		 */
+		constructor(bbox: BoundingBox);
 		/**
 		 * Initializes a new box from a base Plane and three Intervals.
 		 * @param basePlane Orientation plane of the box.
@@ -2208,11 +2290,25 @@ declare module 'rhino3dm' {
 		 */
 		static create(basePlane: Plane, xSize: Interval, ySize: Interval, zSize: Interval): Box;
 		/**
+		 * Initializes a new box from a base Plane and three Intervals.
+		 * @param basePlane Orientation plane of the box.
+		 * @param xSize Dimensions along the base plane X-Axis.
+		 * @param ySize Dimensions along the base plane Y-Axis.
+		 * @param zSize Dimensions along the base plane Z-Axis.
+		 */
+		constructor(basePlane: Plane, xSize: Interval, ySize: Interval, zSize: Interval);
+		/**
 		 * Initializes the smallest box that contains a set of points.
 		 * @param basePlane Orientation of the box.
 		 * @param points Points to include, Invalid points will be ignored.
 		 */
 		static create(basePlane: Plane, points: Point3d[]): Box;
+		/**
+		 * Initializes the smallest box that contains a set of points.
+		 * @param basePlane Orientation of the box.
+		 * @param points Points to include, Invalid points will be ignored.
+		 */
+		constructor(basePlane: Plane, points: Point3d[]);
 		/**
 		 * Initializes a box from a base plane and a world-aligned bounding box. The box will use basePlane for its Plane, and the X, Y, and Z intervals of boundingbox as its X, Y, and Z intervals.
 		 *
@@ -2221,6 +2317,14 @@ declare module 'rhino3dm' {
 		 * @param boundingbox Bounding Box in plane coordinates.
 		 */
 		static create(basePlane: Plane, boundingbox: BoundingBox): Box;
+		/**
+		 * Initializes a box from a base plane and a world-aligned bounding box. The box will use basePlane for its Plane, and the X, Y, and Z intervals of boundingbox as its X, Y, and Z intervals.
+		 *
+		 * The box might not contain boundingbox.
+		 * @param basePlane Base plane of bounding box.
+		 * @param boundingbox Bounding Box in plane coordinates.
+		 */
+		constructor(basePlane: Plane, boundingbox: BoundingBox);
 		/**
 		 * Empty Box. Empty boxes are considered to be invalid.
 		 */
@@ -3309,7 +3413,6 @@ declare module 'rhino3dm' {
 	 * >An IsValid circle has positive radius and an IsValid plane defining the frame.
 	 */
 	class Circle {
-		private constructor();
 		/**
 		 * Gets the circle's 3d axis aligned bounding box.
 		 * @returns 3d bounding box.
@@ -3336,11 +3439,17 @@ declare module 'rhino3dm' {
 		 */
 		static closestPoint(circle: Circle, testPoint: Point3d): Point3d;
 		static create(): Circle;
+		constructor();
 		/**
 		 * Initializes a circle with center (0,0,0) in the world XY plane.
 		 * @param radius Radius of circle, should be a positive number.
 		 */
 		static create(radius: number): Circle;
+		/**
+		 * Initializes a circle with center (0,0,0) in the world XY plane.
+		 * @param radius Radius of circle, should be a positive number.
+		 */
+		constructor(radius: number);
 		/**
 		 * Initializes a circle on a plane with a given radius.
 		 * @param plane Plane of circle. Plane origin defines the center of the circle.
@@ -3348,16 +3457,33 @@ declare module 'rhino3dm' {
 		 */
 		static create(plane: Plane, radius: number): Circle;
 		/**
+		 * Initializes a circle on a plane with a given radius.
+		 * @param plane Plane of circle. Plane origin defines the center of the circle.
+		 * @param radius Radius of circle (should be a positive value).
+		 */
+		constructor(plane: Plane, radius: number);
+		/**
 		 * Initializes a circle parallel to the world XY plane with given center and radius.
 		 * @param center Center of circle.
 		 * @param radius Radius of circle (should be a positive value).
 		 */
 		static create(center: Point3d, radius: number): Circle;
 		/**
+		 * Initializes a circle parallel to the world XY plane with given center and radius.
+		 * @param center Center of circle.
+		 * @param radius Radius of circle (should be a positive value).
+		 */
+		constructor(center: Point3d, radius: number);
+		/**
 		 * Initializes a circle from an arc.
 		 * @param arc Arc that defines the plane and radius.
 		 */
 		static create(arc: Arc): Circle;
+		/**
+		 * Initializes a circle from an arc.
+		 * @param arc Arc that defines the plane and radius.
+		 */
+		constructor(arc: Arc);
 		/**
 		 * Initializes a circle through three 3d points.
 		 * @param point1 The start/end of the circle is at point1.
@@ -3366,12 +3492,26 @@ declare module 'rhino3dm' {
 		 */
 		static create(point1: Point3d, point2: Point3d, point3: Point3d): Circle;
 		/**
+		 * Initializes a circle through three 3d points.
+		 * @param point1 The start/end of the circle is at point1.
+		 * @param point2 Second point on the circle.
+		 * @param point3 Third point on the circle.
+		 */
+		constructor(point1: Point3d, point2: Point3d, point3: Point3d);
+		/**
 		 * Initializes a circle parallel to a given plane with given center and radius.
 		 * @param plane Plane for circle.
 		 * @param center Center point override.
 		 * @param radius Radius of circle (should be a positive value).
 		 */
 		static create(plane: Plane, center: Point3d, radius: number): Circle;
+		/**
+		 * Initializes a circle parallel to a given plane with given center and radius.
+		 * @param plane Plane for circle.
+		 * @param center Center point override.
+		 * @param radius Radius of circle (should be a positive value).
+		 */
+		constructor(plane: Plane, center: Point3d, radius: number);
 		/**
 		 * Initializes a circle from two 3d points and a tangent at the first point. The start/end of the circle is at point "startPoint".
 		 *
@@ -3381,6 +3521,15 @@ declare module 'rhino3dm' {
 		 * @param pointOnCircle Point coincident with desired circle.
 		 */
 		static create(startPoint: Point3d, tangentAtP: Vector3d, pointOnCircle: Point3d): Circle;
+		/**
+		 * Initializes a circle from two 3d points and a tangent at the first point. The start/end of the circle is at point "startPoint".
+		 *
+		 * May create an Invalid circle
+		 * @param startPoint Start point of circle.
+		 * @param tangentAtP Tangent vector at start.
+		 * @param pointOnCircle Point coincident with desired circle.
+		 */
+		constructor(startPoint: Point3d, tangentAtP: Vector3d, pointOnCircle: Point3d);
 		/**
 		 * Determines the value of the Nth derivative at a parameter.
 		 * @param derivative Which order of derivative is wanted.
@@ -3499,13 +3648,15 @@ declare module 'rhino3dm' {
 	 * Color defined by 4 floating point values.
 	 */
 	class Color4f {
-		private constructor();
 		static applyGamma(col: Color4f, gamma: number): Color4f;
 		static readonly black: Color4f;
 		static blendTo(color4f: Color4f, t: number, col: Color4f): Color4f;
 		static create(): Color4f;
+		constructor();
 		static create(red: number, green: number, blue: number, alpha: number): Color4f;
+		constructor(red: number, green: number, blue: number, alpha: number);
 		static create(argb: number): Color4f;
+		constructor(argb: number);
 		static readonly empty: Color4f;
 		static equals(color4f: Color4f): boolean;
 		static fromArgb(a: number, r: number, g: number, b: number): Color4f;
@@ -3566,7 +3717,6 @@ declare module 'rhino3dm' {
 	 * Represents an index of an element contained in another object.
 	 */
 	class ComponentIndex {
-		private constructor();
 		/**
 		 * Compares this `ComponentIndex` with another `ComponentIndex`.
 		 * @param other The other `ComponentIndex` to use in comparison
@@ -3578,10 +3728,15 @@ declare module 'rhino3dm' {
 		 */
 		static componentIndexType(componentIndex: ComponentIndex): ComponentIndexType;
 		static create(): ComponentIndex;
+		constructor();
 		/**
 		 * Construct component index with a specific type/index combination
 		 */
 		static create(type: ComponentIndexType, index: number): ComponentIndex;
+		/**
+		 * Construct component index with a specific type/index combination
+		 */
+		constructor(type: ComponentIndexType, index: number);
 		/**
 		 * Determines whether the specified `ComponentIndex` is equal to the current `ComponentIndex`, comparing by value.
 		 * @param other The other `ComponentIndex` to compare with.
@@ -3612,7 +3767,6 @@ declare module 'rhino3dm' {
 	 * Represents the center plane, radius and height values in a right circular cone.
 	 */
 	class Cone {
-		private constructor();
 		/**
 		 * Computes the angle (in degrees) between the axis and the side of the cone. The angle and the height have the same sign.
 		 * @returns An angle in degrees.
@@ -3636,6 +3790,7 @@ declare module 'rhino3dm' {
 		 */
 		static basePoint(cone: Cone): Point3d;
 		static create(): Cone;
+		constructor();
 		/**
 		 * Initializes a new cone with a specified base plane, height and radius.
 		 * @param plane Base plane of cone. The apex of the cone is at the plane's origin.
@@ -3643,6 +3798,13 @@ declare module 'rhino3dm' {
 		 * @param radius Radius of cone.
 		 */
 		static create(plane: Plane, height: number, radius: number): Cone;
+		/**
+		 * Initializes a new cone with a specified base plane, height and radius.
+		 * @param plane Base plane of cone. The apex of the cone is at the plane's origin.
+		 * @param height Height of cone.
+		 * @param radius Radius of cone.
+		 */
+		constructor(plane: Plane, height: number, radius: number);
 		/**
 		 * Check that all values in other are within epsilon of the values in this
 		 */
@@ -3781,8 +3943,8 @@ declare module 'rhino3dm' {
 	 * Represents control point geometry with three-dimensional position and weight.
 	 */
 	class ControlPoint {
-		private constructor();
 		static create(): ControlPoint;
+		constructor();
 		/**
 		 * Constructs a new world 3-D, or Euclidean, control point. The 4-D representation is (x, y, z, 1.0).
 		 * @param x X coordinate of the control point.
@@ -3790,6 +3952,13 @@ declare module 'rhino3dm' {
 		 * @param z Z coordinate of the control point.
 		 */
 		static create(x: number, y: number, z: number): ControlPoint;
+		/**
+		 * Constructs a new world 3-D, or Euclidean, control point. The 4-D representation is (x, y, z, 1.0).
+		 * @param x X coordinate of the control point.
+		 * @param y Y coordinate of the control point.
+		 * @param z Z coordinate of the control point.
+		 */
+		constructor(x: number, y: number, z: number);
 		/**
 		 * Constructs a new homogeneous control point, where the 4-D representation is (x, y, z, w). The world 3-D, or Euclidean, representation is (x/w, y/w, z/w).
 		 *
@@ -3801,10 +3970,25 @@ declare module 'rhino3dm' {
 		 */
 		static create(x: number, y: number, z: number, weight: number): ControlPoint;
 		/**
+		 * Constructs a new homogeneous control point, where the 4-D representation is (x, y, z, w). The world 3-D, or Euclidean, representation is (x/w, y/w, z/w).
+		 *
+		 * For expert use only. If you do not understand homogeneous coordinates, then use an override that accepts world 3-D, or Euclidean, coordinates as input.
+		 * @param x X coordinate of the control point.
+		 * @param y Y coordinate of the control point.
+		 * @param z Z coordinate of the control point.
+		 * @param weight Weight factor of the control point. You should not use weights less than or equal to zero.
+		 */
+		constructor(x: number, y: number, z: number, weight: number);
+		/**
 		 * Constructs a new world 3-D, or Euclidean, control point. The 4-D representation of this is (x, y, z, 1.0).
 		 * @param pt Coordinates of the control point.
 		 */
 		static create(pt: Point3d): ControlPoint;
+		/**
+		 * Constructs a new world 3-D, or Euclidean, control point. The 4-D representation of this is (x, y, z, 1.0).
+		 * @param pt Coordinates of the control point.
+		 */
+		constructor(pt: Point3d);
 		/**
 		 * Constructs a control point from a world 3-D, or Euclidean, location and a weight. The world 3-D, or Euclidean, representation is (x/w, y/w, z/w).
 		 * @param euclideanPt Coordinates of the control point.
@@ -3812,10 +3996,21 @@ declare module 'rhino3dm' {
 		 */
 		static create(euclideanPt: Point3d, weight: number): ControlPoint;
 		/**
+		 * Constructs a control point from a world 3-D, or Euclidean, location and a weight. The world 3-D, or Euclidean, representation is (x/w, y/w, z/w).
+		 * @param euclideanPt Coordinates of the control point.
+		 * @param weight Weight factor of the control point. You should not use weights less than or equal to zero.
+		 */
+		constructor(euclideanPt: Point3d, weight: number);
+		/**
 		 * Constructs a new world 3-D, or Euclidean, control point. The 4-D representation of this is (x, y, z, 1.0).
 		 * @param pt Coordinates of the control point.
 		 */
 		static create(pt: Point4d): ControlPoint;
+		/**
+		 * Constructs a new world 3-D, or Euclidean, control point. The 4-D representation of this is (x, y, z, 1.0).
+		 * @param pt Coordinates of the control point.
+		 */
+		constructor(pt: Point4d);
 		/**
 		 * Check that all values in other are within epsilon of the values in this
 		 */
@@ -4365,7 +4560,6 @@ declare module 'rhino3dm' {
 	 * Represents the values of a plane, a radius and two heights -on top and beneath- that define a right circular cylinder.
 	 */
 	class Cylinder {
-		private constructor();
 		/**
 		 * Gets the axis direction of the cylinder.
 		 */
@@ -4384,17 +4578,29 @@ declare module 'rhino3dm' {
 		 */
 		static circleAt(cylinder: Cylinder, linearParameter: number): Circle;
 		static create(): Cylinder;
+		constructor();
 		/**
 		 * Constructs a new cylinder with infinite height.
 		 * @param baseCircle Base circle for infinite cylinder.
 		 */
 		static create(baseCircle: Circle): Cylinder;
 		/**
+		 * Constructs a new cylinder with infinite height.
+		 * @param baseCircle Base circle for infinite cylinder.
+		 */
+		constructor(baseCircle: Circle);
+		/**
 		 * Constructs a new cylinder with a finite height.
 		 * @param baseCircle Base circle for cylinder.
 		 * @param height Height of cylinder (zero for infinite cylinder).
 		 */
 		static create(baseCircle: Circle, height: number): Cylinder;
+		/**
+		 * Constructs a new cylinder with a finite height.
+		 * @param baseCircle Base circle for cylinder.
+		 * @param height Height of cylinder (zero for infinite cylinder).
+		 */
+		constructor(baseCircle: Circle, height: number);
 		/**
 		 * Check that all values in other are within epsilon of the values in this
 		 */
@@ -5174,12 +5380,12 @@ declare module 'rhino3dm' {
 	 * Represents the values of a plane and the two semi-axes radii in an ellipse.
 	 */
 	class Ellipse {
-		private constructor();
 		/**
 		 * Gets or sets the center of the ellipse.
 		 */
 		static center(ellipse: Ellipse): Point3d;
 		static create(): Ellipse;
+		constructor();
 		/**
 		 * Initializes a new ellipse from base plane and both principal radii.
 		 * @param plane Base plane of ellipse.
@@ -5188,12 +5394,26 @@ declare module 'rhino3dm' {
 		 */
 		static create(plane: Plane, radius1: number, radius2: number): Ellipse;
 		/**
+		 * Initializes a new ellipse from base plane and both principal radii.
+		 * @param plane Base plane of ellipse.
+		 * @param radius1 Ellipse radius along base plane X direction.
+		 * @param radius2 Ellipse radius along base plane Y direction.
+		 */
+		constructor(plane: Plane, radius1: number, radius2: number);
+		/**
 		 * Initializes a new ellipse from a center point and the two semi-axes intersections.
 		 * @param center A center for the ellipse. The average of the foci.
 		 * @param second The intersection of the ellipse X axis with the ellipse itself.
 		 * @param third A point that determines the radius along the Y semi-axis. If the point is at right angle with the (center - second point) vector, it will be the intersection of the ellipse Y axis with the ellipse itself.
 		 */
 		static create(center: Point3d, second: Point3d, third: Point3d): Ellipse;
+		/**
+		 * Initializes a new ellipse from a center point and the two semi-axes intersections.
+		 * @param center A center for the ellipse. The average of the foci.
+		 * @param second The intersection of the ellipse X axis with the ellipse itself.
+		 * @param third A point that determines the radius along the Y semi-axis. If the point is at right angle with the (center - second point) vector, it will be the intersection of the ellipse Y axis with the ellipse itself.
+		 */
+		constructor(center: Point3d, second: Point3d, third: Point3d);
 		/**
 		 * Check that all values in other are within epsilon of the values in this
 		 */
@@ -8871,7 +9091,6 @@ declare module 'rhino3dm' {
 	 * Represents an interval in one-dimensional space, that is defined as two extrema or bounds.
 	 */
 	class Interval {
-		private constructor();
 		/**
 		 * Gets the signed length of the numeric range. If the interval is decreasing, a negative length will be returned.
 		 */
@@ -8891,13 +9110,21 @@ declare module 'rhino3dm' {
 		 */
 		static compareTo(interval: Interval, other: Interval): number;
 		static create(): Interval;
+		constructor();
 		/**
 		 * Initializes a new instance of the Rhino.Geometry.Interval class.
 		 * @param t0 The first value.
 		 * @param t1 The second value.
 		 */
 		static create(t0: number, t1: number): Interval;
+		/**
+		 * Initializes a new instance of the Rhino.Geometry.Interval class.
+		 * @param t0 The first value.
+		 * @param t1 The second value.
+		 */
+		constructor(t0: number, t1: number);
 		static create(): Interval;
+		constructor();
 		/**
 		 * Check that all values in other are within epsilon of the values in this
 		 */
@@ -9602,7 +9829,6 @@ declare module 'rhino3dm' {
 	 * Represents the value of start and end points in a single line segment.
 	 */
 	class Line {
-		private constructor();
 		/**
 		 * Gets or sets the length of this line segment. Note that a negative length will invert the line segment without making the actual length negative. The line From point will remain fixed when a new Length is set.
 		 */
@@ -9631,6 +9857,7 @@ declare module 'rhino3dm' {
 		 */
 		static closestPoint(line: Line, testPoint: Point3d, limitToFiniteSegment: boolean): Point3d;
 		static create(): Line;
+		constructor();
 		/**
 		 * Constructs a new line segment between two points.
 		 * @param from Start point of line.
@@ -9638,11 +9865,23 @@ declare module 'rhino3dm' {
 		 */
 		static create(from: Point3d, to: Point3d): Line;
 		/**
+		 * Constructs a new line segment between two points.
+		 * @param from Start point of line.
+		 * @param to End point of line.
+		 */
+		constructor(from: Point3d, to: Point3d);
+		/**
 		 * Constructs a new line segment from start point and span vector.
 		 * @param start Start point of line segment.
 		 * @param span Direction and length of line segment.
 		 */
 		static create(start: Point3d, span: Vector3d): Line;
+		/**
+		 * Constructs a new line segment from start point and span vector.
+		 * @param start Start point of line segment.
+		 * @param span Direction and length of line segment.
+		 */
+		constructor(start: Point3d, span: Vector3d);
 		/**
 		 * Constructs a new line segment from start point, direction and length.
 		 * @param start Start point of line segment.
@@ -9650,6 +9889,13 @@ declare module 'rhino3dm' {
 		 * @param length Length of line segment.
 		 */
 		static create(start: Point3d, direction: Vector3d, length: number): Line;
+		/**
+		 * Constructs a new line segment from start point, direction and length.
+		 * @param start Start point of line segment.
+		 * @param direction Direction of line segment.
+		 * @param length Length of line segment.
+		 */
+		constructor(start: Point3d, direction: Vector3d, length: number);
 		/**
 		 * Constructs a new line segment between two points.
 		 * @param x0 The X coordinate of the first point.
@@ -9660,6 +9906,16 @@ declare module 'rhino3dm' {
 		 * @param z1 The Z coordinate of the second point.
 		 */
 		static create(x0: number, y0: number, z0: number, x1: number, y1: number, z1: number): Line;
+		/**
+		 * Constructs a new line segment between two points.
+		 * @param x0 The X coordinate of the first point.
+		 * @param y0 The Y coordinate of the first point.
+		 * @param z0 The Z coordinate of the first point.
+		 * @param x1 The X coordinate of the second point.
+		 * @param y1 The Y coordinate of the second point.
+		 * @param z1 The Z coordinate of the second point.
+		 */
+		constructor(x0: number, y0: number, z0: number, x1: number, y1: number, z1: number);
 		/**
 		 * Gets the direction of this line segment. The length of the direction vector equals the length of the line segment.
 		 */
@@ -10780,7 +11036,6 @@ declare module 'rhino3dm' {
 	 * If the third and fourth values are the same, this face represents a triangle.
 	 */
 	class MeshFace {
-		private constructor();
 		/**
 		 * Returns a string representation for this `MeshFace`. This is to provide a meaningful visualization of this structure and is subject to change in newer releases.
 		 * @returns The string representation.
@@ -10795,6 +11050,7 @@ declare module 'rhino3dm' {
 		 */
 		static compareTo(meshFace: MeshFace, other: MeshFace): number;
 		static create(): MeshFace;
+		constructor();
 		/**
 		 * Constructs a new triangular Mesh face.
 		 * @param a Index of first corner.
@@ -10803,6 +11059,13 @@ declare module 'rhino3dm' {
 		 */
 		static create(a: number, b: number, c: number): MeshFace;
 		/**
+		 * Constructs a new triangular Mesh face.
+		 * @param a Index of first corner.
+		 * @param b Index of second corner.
+		 * @param c Index of third corner.
+		 */
+		constructor(a: number, b: number, c: number);
+		/**
 		 * Constructs a new quadrangular Mesh face.
 		 * @param a Index of first corner.
 		 * @param b Index of second corner.
@@ -10810,6 +11073,14 @@ declare module 'rhino3dm' {
 		 * @param d Index of fourth corner.
 		 */
 		static create(a: number, b: number, c: number, d: number): MeshFace;
+		/**
+		 * Constructs a new quadrangular Mesh face.
+		 * @param a Index of first corner.
+		 * @param b Index of second corner.
+		 * @param c Index of third corner.
+		 * @param d Index of fourth corner.
+		 */
+		constructor(a: number, b: number, c: number, d: number);
 		/**
 		 * Returns a value indicating whether the other mesh face has precisely the same value as the current one.
 		 * @param other The other mesh face for comparison.
@@ -13080,7 +13351,6 @@ declare module 'rhino3dm' {
 	 * Represents the value of a center point and two axes in a plane in three dimensions.
 	 */
 	class Plane {
-		private constructor();
 		/**
 		 * Constructs the string representation of this plane.
 		 * @returns Text.
@@ -13099,12 +13369,19 @@ declare module 'rhino3dm' {
 		 */
 		static closestPoint(plane: Plane, testPoint: Point3d): Point3d;
 		static create(): Plane;
+		constructor();
 		/**
 		 * Constructs a plane from a point and a normal vector.
 		 * @param origin Origin point of the plane.
 		 * @param normal Non-zero normal to the plane.
 		 */
 		static create(origin: Point3d, normal: Vector3d): Plane;
+		/**
+		 * Constructs a plane from a point and a normal vector.
+		 * @param origin Origin point of the plane.
+		 * @param normal Non-zero normal to the plane.
+		 */
+		constructor(origin: Point3d, normal: Vector3d);
 		/**
 		 * Constructs a plane from a point and two vectors in the plane.
 		 * @param origin Origin point of the plane.
@@ -13113,6 +13390,13 @@ declare module 'rhino3dm' {
 		 */
 		static create(origin: Point3d, xDirection: Vector3d, yDirection: Vector3d): Plane;
 		/**
+		 * Constructs a plane from a point and two vectors in the plane.
+		 * @param origin Origin point of the plane.
+		 * @param xDirection Non-zero vector in the plane that determines the x-axis direction.
+		 * @param yDirection Non-zero vector not parallel to x_dir that is used to determine the y-axis direction. y_dir does not need to be perpendicular to x_dir.
+		 */
+		constructor(origin: Point3d, xDirection: Vector3d, yDirection: Vector3d);
+		/**
 		 * Initializes a plane from three non-collinear points.
 		 * @param origin Origin point of the plane.
 		 * @param xPoint Second point in the plane. The x-axis will be parallel to x_point-origin.
@@ -13120,9 +13404,20 @@ declare module 'rhino3dm' {
 		 */
 		static create(origin: Point3d, xPoint: Point3d, yPoint: Point3d): Plane;
 		/**
+		 * Initializes a plane from three non-collinear points.
+		 * @param origin Origin point of the plane.
+		 * @param xPoint Second point in the plane. The x-axis will be parallel to x_point-origin.
+		 * @param yPoint Third point on the plane that is not collinear with the first two points. taxis*(y_point-origin) will be > 0.
+		 */
+		constructor(origin: Point3d, xPoint: Point3d, yPoint: Point3d);
+		/**
 		 * Constructs a plane from an equation Ax+By+Cz+D=0.
 		 */
 		static create(a: number, b: number, c: number, d: number): Plane;
+		/**
+		 * Constructs a plane from an equation Ax+By+Cz+D=0.
+		 */
+		constructor(a: number, b: number, c: number, d: number);
 		/**
 		 * Constructs a plane from a point, and two vectors in the plane.
 		 * @param origin Point on the plane.
@@ -13420,7 +13715,6 @@ declare module 'rhino3dm' {
 	 * Represents the two coordinates of a point in two-dimensional space, using `double`-precision floating point numbers.
 	 */
 	class Point2d {
-		private constructor();
 		/**
 		 * Constructs the string representation for the current point.
 		 * @returns The point representation in the form X,Y.
@@ -13462,6 +13756,7 @@ declare module 'rhino3dm' {
 		 */
 		static compareTo(point2d: Point2d, other: Point2d): number;
 		static create(): Point2d;
+		constructor();
 		/**
 		 * Initializes a new instance of `Point2d` from coordinates.
 		 * @param x The X (first) coordinate.
@@ -13469,16 +13764,33 @@ declare module 'rhino3dm' {
 		 */
 		static create(x: number, y: number): Point2d;
 		/**
+		 * Initializes a new instance of `Point2d` from coordinates.
+		 * @param x The X (first) coordinate.
+		 * @param y The Y (second) coordinate.
+		 */
+		constructor(x: number, y: number);
+		/**
 		 * Initializes a new instance of `Point2d` by converting a vector.
 		 * @param vector The vector that will be copied.
 		 */
 		static create(vector: Vector2d): Point2d;
 		/**
+		 * Initializes a new instance of `Point2d` by converting a vector.
+		 * @param vector The vector that will be copied.
+		 */
+		constructor(vector: Vector2d);
+		/**
 		 * Initializes a new instance of `Point2d` by copying another `Point2d`.
 		 * @param point The point that will be copied.
 		 */
 		static create(point: Point3d): Point2d;
+		/**
+		 * Initializes a new instance of `Point2d` by copying another `Point2d`.
+		 * @param point The point that will be copied.
+		 */
+		constructor(point: Point3d);
 		static create(): Point2d;
+		constructor();
 		/**
 		 * Computes the distance between two points.
 		 * @param other Another point.
@@ -13599,7 +13911,6 @@ declare module 'rhino3dm' {
 	 * Represents the two coordinates of a point in two-dimensional space, using `Single`-precision floating point numbers.
 	 */
 	class Point2f {
-		private constructor();
 		/**
 		 * Constructs the string representation for the current point.
 		 * @returns The point representation in the form X,Y.
@@ -13614,6 +13925,7 @@ declare module 'rhino3dm' {
 		 */
 		static compareTo(point2f: Point2f, other: Point2f): number;
 		static create(): Point2f;
+		constructor();
 		/**
 		 * Initializes a new two-dimensional point from two double-precision floating point numbers as coordinates.
 		 *
@@ -13622,6 +13934,14 @@ declare module 'rhino3dm' {
 		 * @param y Y component of vector.
 		 */
 		static create(x: number, y: number): Point2f;
+		/**
+		 * Initializes a new two-dimensional point from two double-precision floating point numbers as coordinates.
+		 *
+		 * Coordinates will be internally converted to floating point numbers. This might cause precision loss.
+		 * @param x X component of vector.
+		 * @param y Y component of vector.
+		 */
+		constructor(x: number, y: number);
 		/**
 		 * Computes the distance between two points.
 		 * @param other Other point for distance measurement.
@@ -13698,7 +14018,6 @@ declare module 'rhino3dm' {
 	 * Represents the three coordinates of a point in three-dimensional space, using `double`-precision floating point values.
 	 */
 	class Point3d {
-		private constructor();
 		/**
 		 * Constructs the string representation for the current point.
 		 * @returns The point representation in the form X,Y,Z.
@@ -13749,6 +14068,7 @@ declare module 'rhino3dm' {
 		 */
 		static compareTo(point3d: Point3d, other: Point3d): number;
 		static create(): Point3d;
+		constructor();
 		/**
 		 * Initializes a new point by defining the X, Y and Z coordinates.
 		 * @param x The value of the X (first) coordinate.
@@ -13757,10 +14077,22 @@ declare module 'rhino3dm' {
 		 */
 		static create(x: number, y: number, z: number): Point3d;
 		/**
+		 * Initializes a new point by defining the X, Y and Z coordinates.
+		 * @param x The value of the X (first) coordinate.
+		 * @param y The value of the Y (second) coordinate.
+		 * @param z The value of the Z (third) coordinate.
+		 */
+		constructor(x: number, y: number, z: number);
+		/**
 		 * Initializes a new point by copying coordinates from the components of a vector.
 		 * @param vector A vector.
 		 */
 		static create(vector: Vector3d): Point3d;
+		/**
+		 * Initializes a new point by copying coordinates from the components of a vector.
+		 * @param vector A vector.
+		 */
+		constructor(vector: Vector3d);
 		/**
 		 * Initializes a new point by copying coordinates from another point.
 		 * @param point A point.
@@ -13770,8 +14102,19 @@ declare module 'rhino3dm' {
 		 * Initializes a new point by copying coordinates from another point.
 		 * @param point A point.
 		 */
+		constructor(point: Point3f);
+		/**
+		 * Initializes a new point by copying coordinates from another point.
+		 * @param point A point.
+		 */
 		static create(point: Point4d): Point3d;
+		/**
+		 * Initializes a new point by copying coordinates from another point.
+		 * @param point A point.
+		 */
+		constructor(point: Point4d);
 		static create(): Point3d;
+		constructor();
 		/**
 		 * Computes the distance between two points.
 		 * @param other Other point for distance measurement.
@@ -14129,7 +14472,6 @@ declare module 'rhino3dm' {
 	 * Represents the three coordinates of a point in three-dimensional space, using `Single`-precision floating point numbers.
 	 */
 	class Point3f {
-		private constructor();
 		/**
 		 * Constructs the string representation for the current point.
 		 * @returns The point representation in the form X,Y,Z.
@@ -14171,6 +14513,7 @@ declare module 'rhino3dm' {
 		 */
 		static compareTo(point3f: Point3f, other: Point3f): number;
 		static create(): Point3f;
+		constructor();
 		/**
 		 * Initializes a new two-dimensional vector from two components.
 		 * @param x X component of vector.
@@ -14178,6 +14521,13 @@ declare module 'rhino3dm' {
 		 * @param z Z component of vector.
 		 */
 		static create(x: number, y: number, z: number): Point3f;
+		/**
+		 * Initializes a new two-dimensional vector from two components.
+		 * @param x X component of vector.
+		 * @param y Y component of vector.
+		 * @param z Z component of vector.
+		 */
+		constructor(x: number, y: number, z: number);
 		/**
 		 * Computes the distance between two points.
 		 * @param other Other point for distance measurement.
@@ -14292,7 +14642,6 @@ declare module 'rhino3dm' {
 	 * The W (fourth) dimension is often considered the weight of the point as seen in 3D space.
 	 */
 	class Point4d {
-		private constructor();
 		static ToString(point4d: Point4d): string;
 		/**
 		 * Sums two `Point4d` together.
@@ -14304,6 +14653,7 @@ declare module 'rhino3dm' {
 		 */
 		static add(point1: Point4d, point2: Point4d): Point4d;
 		static create(): Point4d;
+		constructor();
 		/**
 		 * Initializes a new instance of the `Point4d` class based on coordinates.
 		 * @param x The X (first) dimension.
@@ -14313,11 +14663,25 @@ declare module 'rhino3dm' {
 		 */
 		static create(x: number, y: number, z: number, w: number): Point4d;
 		/**
+		 * Initializes a new instance of the `Point4d` class based on coordinates.
+		 * @param x The X (first) dimension.
+		 * @param y The Y (second) dimension.
+		 * @param z The Z (third) dimension.
+		 * @param w The W (fourth) dimension, or weight.
+		 */
+		constructor(x: number, y: number, z: number, w: number);
+		/**
 		 * Initializes a new instance of the `Point4d` class from the coordinates of a point.
 		 * @param point .
 		 */
 		static create(point: Point3d): Point4d;
+		/**
+		 * Initializes a new instance of the `Point4d` class from the coordinates of a point.
+		 * @param point .
+		 */
+		constructor(point: Point3d);
 		static create(): Point4d;
+		constructor();
 		/**
 		 * This object as a JSON-compatible dict (rhino3dm only; inverse: `Decode`).
 		 * @returns A dict of numbers and strings: geometry and other objects are stored as their 3dm archive, base64 encoded, with the archive version.
@@ -15635,7 +15999,6 @@ declare module 'rhino3dm' {
 	 * Represents the plane and radius values of a sphere.
 	 */
 	class Sphere {
-		private constructor();
 		/**
 		 * Gets the world aligned bounding box for this Sphere. If the Sphere is Invalid, an empty box is returned.
 		 */
@@ -15657,6 +16020,7 @@ declare module 'rhino3dm' {
 		 */
 		static closestPoint(sphere: Sphere, testPoint: Point3d): Point3d;
 		static create(): Sphere;
+		constructor();
 		/**
 		 * Initializes a new sphere given center point and radius.
 		 * @param center A center point.
@@ -15664,11 +16028,23 @@ declare module 'rhino3dm' {
 		 */
 		static create(center: Point3d, radius: number): Sphere;
 		/**
+		 * Initializes a new sphere given center point and radius.
+		 * @param center A center point.
+		 * @param radius A radius value.
+		 */
+		constructor(center: Point3d, radius: number);
+		/**
 		 * Initializes a new sphere given the plane of the equator circle and radius.
 		 * @param equatorialPlane A plane that will be intersecting the sphere at the same distance from both poles (parameterization singularities).
 		 * @param radius A radius value.
 		 */
 		static create(equatorialPlane: Plane, radius: number): Sphere;
+		/**
+		 * Initializes a new sphere given the plane of the equator circle and radius.
+		 * @param equatorialPlane A plane that will be intersecting the sphere at the same distance from both poles (parameterization singularities).
+		 * @param radius A radius value.
+		 */
+		constructor(equatorialPlane: Plane, radius: number);
 		/**
 		 * The object a dict from `Encode` describes (rhino3dm only).
 		 * @param jsonObject A dict as `Encode` returns it.
@@ -16104,7 +16480,6 @@ declare module 'rhino3dm' {
 	 * This is a value type wrapping two floats, and the default value is `Smooth`. It is passed to and from the unmanaged library by value.
 	 */
 	class SubDEdgeSharpness {
-		private constructor();
 		/**
 		 * Gets the average of the two end sharpness values.
 		 */
@@ -16114,6 +16489,7 @@ declare module 'rhino3dm' {
 		 */
 		static readonly crease: SubDEdgeSharpness;
 		static create(): SubDEdgeSharpness;
+		constructor();
 		/**
 		 * Creates a sharpness with the same value at both ends.
 		 *
@@ -16121,6 +16497,13 @@ declare module 'rhino3dm' {
 		 * @param sharpness Between 0.0 and `MaximumValue`, or `CreaseValue`.
 		 */
 		static create(sharpness: number): SubDEdgeSharpness;
+		/**
+		 * Creates a sharpness with the same value at both ends.
+		 *
+		 * If sharpness is not valid, the result is `Nan`.
+		 * @param sharpness Between 0.0 and `MaximumValue`, or `CreaseValue`.
+		 */
+		constructor(sharpness: number);
 		/**
 		 * Creates a sharpness that varies from one end of the edge to the other.
 		 *
@@ -16132,10 +16515,25 @@ declare module 'rhino3dm' {
 		/**
 		 * Creates a sharpness that varies from one end of the edge to the other.
 		 *
+		 * If either value is not valid, the result is `Nan`. Passing `CreaseValue` for both values gives `Crease`.
+		 * @param sharpness0 Sharpness at the start of the edge, between 0.0 and `MaximumValue`.
+		 * @param sharpness1 Sharpness at the end of the edge, between 0.0 and `MaximumValue`.
+		 */
+		constructor(sharpness0: number, sharpness1: number);
+		/**
+		 * Creates a sharpness that varies from one end of the edge to the other.
+		 *
 		 * If either value is not valid, the result is `Nan`.
 		 * @param sharpnessInterval Sharpness at the start and end of the edge. Both values must be between 0.0 and `MaximumValue`.
 		 */
 		static create(sharpnessInterval: Interval): SubDEdgeSharpness;
+		/**
+		 * Creates a sharpness that varies from one end of the edge to the other.
+		 *
+		 * If either value is not valid, the result is `Nan`.
+		 * @param sharpnessInterval Sharpness at the start and end of the edge. Both values must be between 0.0 and `MaximumValue`.
+		 */
+		constructor(sharpnessInterval: Interval);
 		/**
 		 * Gets `EndSharpness`EndSharpness(1) - EndSharpness(0), or NaN if this is neither valid nor a crease.
 		 */
@@ -17591,8 +17989,8 @@ declare module 'rhino3dm' {
 	 * Represents the value of a plane and two radii in a torus that is oriented in three-dimensional space.
 	 */
 	class Torus {
-		private constructor();
 		static create(): Torus;
+		constructor();
 		/**
 		 * Initializes a new Torus from base pane and two radii.
 		 * @param basePlane Base plane for major radius circle.
@@ -17600,6 +17998,13 @@ declare module 'rhino3dm' {
 		 * @param minorRadius Radius of torus section.
 		 */
 		static create(basePlane: Plane, majorRadius: number, minorRadius: number): Torus;
+		/**
+		 * Initializes a new Torus from base pane and two radii.
+		 * @param basePlane Base plane for major radius circle.
+		 * @param majorRadius Radius of circle that lies at the heart of the torus.
+		 * @param minorRadius Radius of torus section.
+		 */
+		constructor(basePlane: Plane, majorRadius: number, minorRadius: number);
 		/**
 		 * Check that all values in other are within epsilon of the values in this
 		 */
@@ -17654,7 +18059,6 @@ declare module 'rhino3dm' {
 	 * This is parallel to C++ ON_Xform.
 	 */
 	class Transform {
-		private constructor();
 		/**
 		 * Returns a string representation of this transform.
 		 * @returns A textual representation.
@@ -17710,12 +18114,19 @@ declare module 'rhino3dm' {
 		 */
 		static compareTo(transform: Transform, other: Transform): number;
 		static create(): Transform;
+		constructor();
 		/**
 		 * Initializes a new transform matrix with a specified value along the diagonal.
 		 * @param diagonalValue Value to assign to all diagonal cells except M33 which is set to 1.0.
 		 */
 		static create(diagonalValue: number): Transform;
+		/**
+		 * Initializes a new transform matrix with a specified value along the diagonal.
+		 * @param diagonalValue Value to assign to all diagonal cells except M33 which is set to 1.0.
+		 */
+		constructor(diagonalValue: number);
 		static create(): Transform;
+		constructor();
 		/**
 		 * Decomposes an affine transformation. A transformation is affine if it is valid and its last row is [0, 0, 0, 1]. An affine transformation can be broken into a linear transformation and a translation. Note, a perspective transformation is not affine.
 		 *
@@ -18060,7 +18471,6 @@ declare module 'rhino3dm' {
 	 * Represents the two components of a vector in two-dimensional space, using `double`-precision floating point numbers.
 	 */
 	class Vector2d {
-		private constructor();
 		/**
 		 * Computes the length (or magnitude, or size) of this vector. This is an application of Pythagoras' theorem.
 		 */
@@ -18088,13 +18498,21 @@ declare module 'rhino3dm' {
 		 */
 		static compareTo(vector2d: Vector2d, other: Vector2d): number;
 		static create(): Vector2d;
+		constructor();
 		/**
 		 * Initializes a new instance of the vector based on two, X and Y, components.
 		 * @param x The X (first) component.
 		 * @param y The Y (second) component.
 		 */
 		static create(x: number, y: number): Vector2d;
+		/**
+		 * Initializes a new instance of the vector based on two, X and Y, components.
+		 * @param x The X (first) component.
+		 * @param y The Y (second) component.
+		 */
+		constructor(x: number, y: number);
 		static create(): Vector2d;
+		constructor();
 		/**
 		 * Divides a `Vector2d` by a number, having the effect of shrinking it.
 		 *
@@ -18215,7 +18633,6 @@ declare module 'rhino3dm' {
 	 * Represents the three components of a vector in three-dimensional space, using `double`-precision floating point numbers.
 	 */
 	class Vector3d {
-		private constructor();
 		/**
 		 * Computes the length (or magnitude, or size) of this vector. This is an application of Pythagoras' theorem. If this vector is invalid, its length is considered 0.
 		 */
@@ -18267,6 +18684,7 @@ declare module 'rhino3dm' {
 		 */
 		static compareTo(vector3d: Vector3d, other: Vector3d): number;
 		static create(): Vector3d;
+		constructor();
 		/**
 		 * Initializes a new instance of a vector, using its three components.
 		 * @param x The X (first) component.
@@ -18275,16 +18693,34 @@ declare module 'rhino3dm' {
 		 */
 		static create(x: number, y: number, z: number): Vector3d;
 		/**
+		 * Initializes a new instance of a vector, using its three components.
+		 * @param x The X (first) component.
+		 * @param y The Y (second) component.
+		 * @param z The Z (third) component.
+		 */
+		constructor(x: number, y: number, z: number);
+		/**
 		 * Initializes a new instance of a vector, copying the three components from the three coordinates of a point.
 		 * @param point The point to copy from.
 		 */
 		static create(point: Point3d): Vector3d;
 		/**
+		 * Initializes a new instance of a vector, copying the three components from the three coordinates of a point.
+		 * @param point The point to copy from.
+		 */
+		constructor(point: Point3d);
+		/**
 		 * Initializes a new instance of a vector, copying the three components from a vector.
 		 * @param vector A double-precision vector.
 		 */
 		static create(vector: Vector3f): Vector3d;
+		/**
+		 * Initializes a new instance of a vector, copying the three components from a vector.
+		 * @param vector A double-precision vector.
+		 */
+		constructor(vector: Vector3f);
 		static create(): Vector3d;
+		constructor();
 		/**
 		 * Computes the cross product (or vector product, or exterior product) of two vectors.
 		 *
@@ -18534,7 +18970,6 @@ declare module 'rhino3dm' {
 	 * Represents the three components of a vector in three-dimensional space, using `Single`-precision floating point numbers.
 	 */
 	class Vector3f {
-		private constructor();
 		/**
 		 * Computes the length (or magnitude, or size) of this vector. This is an application of Pythagoras' theorem. If this vector is invalid, its length is considered 0.
 		 */
@@ -18571,6 +19006,7 @@ declare module 'rhino3dm' {
 		 */
 		static compareTo(vector3f: Vector3f, other: Vector3f): number;
 		static create(): Vector3f;
+		constructor();
 		/**
 		 * Constructs a new vector from 3 single precision numbers.
 		 * @param x X component of vector.
@@ -18578,6 +19014,13 @@ declare module 'rhino3dm' {
 		 * @param z Z component of vector.
 		 */
 		static create(x: number, y: number, z: number): Vector3f;
+		/**
+		 * Constructs a new vector from 3 single precision numbers.
+		 * @param x X component of vector.
+		 * @param y Y component of vector.
+		 * @param z Z component of vector.
+		 */
+		constructor(x: number, y: number, z: number);
 		/**
 		 * Computes the cross product (or vector product, or exterior product) of two vectors.
 		 *

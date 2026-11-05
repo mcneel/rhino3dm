@@ -508,6 +508,7 @@ void initGenMeshFace(void)
       .field("C", &BND_MeshFace::m_c)
       .field("D", &BND_MeshFace::m_d);
   class_<RH3DM_MeshFaceFns>("MeshFace")
+      .class_function("create", optional_override([]() { return BND_MeshFace(); }))
       .class_function("create", optional_override([](int a0, int a1, int a2) { return BND_MeshFace(a0, a1, a2); }))
       .class_function("create", optional_override([](int a0, int a1, int a2, int a3) { return BND_MeshFace(a0, a1, a2, a3); }))
       .class_function("unset", optional_override([]() { return BND_MeshFace::Unset(); }))

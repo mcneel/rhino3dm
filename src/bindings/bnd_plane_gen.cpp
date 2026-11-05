@@ -474,6 +474,7 @@ void initGenPlane(void)
       .field("YAxis", &BND_Plane::m_yaxis)
       .field("ZAxis", &BND_Plane::m_zaxis);
   class_<RH3DM_PlaneFns>("Plane")
+      .class_function("create", optional_override([]() { return BND_Plane(); }))
       .class_function("originX", optional_override([](BND_Plane a0) { return a0.OriginX(); }))
       .class_function("originY", optional_override([](BND_Plane a0) { return a0.OriginY(); }))
       .class_function("originZ", optional_override([](BND_Plane a0) { return a0.OriginZ(); }))

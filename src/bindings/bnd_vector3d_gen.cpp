@@ -749,6 +749,7 @@ void initGenVector3d(void)
       .field("Y", &BND_Vector3d::m_y)
       .field("Z", &BND_Vector3d::m_z);
   class_<RH3DM_Vector3dFns>("Vector3d")
+      .class_function("create", optional_override([]() { return BND_Vector3d(); }))
       .class_function("create", optional_override([](double a0, double a1, double a2) { return BND_Vector3d(a0, a1, a2); }))
       .class_function("create", optional_override([](emscripten::val v0) -> emscripten::val {
         if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Z") && v0["Z"].isNumber())) { BND_Point3d a0 = v0.as<BND_Point3d>(); return emscripten::val([&]() { return BND_Vector3d(a0); }()); }

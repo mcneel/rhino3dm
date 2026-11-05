@@ -352,6 +352,7 @@ void initGenPoint3f(void)
       .field("Y", &BND_Point3f::m_y)
       .field("Z", &BND_Point3f::m_z);
   class_<RH3DM_Point3fFns>("Point3f")
+      .class_function("create", optional_override([]() { return BND_Point3f(); }))
       .class_function("create", optional_override([](float a0, float a1, float a2) { return BND_Point3f(a0, a1, a2); }))
       .class_function("origin", optional_override([]() { return BND_Point3f::Origin(); }))
       .class_function("unset", optional_override([]() { return BND_Point3f::Unset(); }))

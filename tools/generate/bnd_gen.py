@@ -275,6 +275,7 @@ def js_post_script():
   var KEEP_ARGS = %s;
   var KEEP_SET = %s;
   var ALIASES = %s;
+  var VALUES = %s;
   function install() {
     var M = Module, missing = [];
     M.rh3dmPostUnresolved = missing;
@@ -383,6 +384,18 @@ def js_post_script():
       }
       proto[Symbol.iterator] = function () { return this.iterator(); };
     });
+    // D92: a value type is a plain object, and `new T(...)` is RhinoCommon's spelling: T becomes a
+    // function returning T.create(...) (`new` yields the object a constructor returns); the
+    // registered holder is its prototype, so every static still resolves. Last: the steps above
+    // install on the holder
+    VALUES.forEach(function (c) {
+      var C = M[c];
+      if (!C || typeof C.create !== 'function') { missing.push('value ' + c); return; }
+      var T = function () { return C.create.apply(C, arguments); };
+      Object.defineProperty(T, 'name', { value: c });
+      Object.setPrototypeOf(T, C);
+      M[c] = T;
+    });
   }
   // emscripten's modularized output calls run() BEFORE the post-js code: the runtime is usually
   // up already, and the module promise's consumers have not seen Module yet (they resume later)
@@ -394,7 +407,7 @@ def js_post_script():
        json.dumps(sorted(set(map(tuple, JS_POST['grid']))), separators=(',', ':')),
        json.dumps(sorted(set(map(tuple, JS_POST['keep_args']))), separators=(',', ':')),
        json.dumps(sorted(set(map(tuple, JS_POST['keep_set']))), separators=(',', ':')),
-       json.dumps(sorted(set(map(tuple, JS_POST['aliases']))), separators=(',', ':')))
+       json.dumps(sorted(set(map(tuple, JS_POST['aliases']))), separators=(',', ':')), j(JS_POST['values']))
 
 
 def hand_chain(cls):

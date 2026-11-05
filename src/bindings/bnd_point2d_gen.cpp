@@ -446,6 +446,7 @@ void initGenPoint2d(void)
       .field("X", &BND_Point2d::m_x)
       .field("Y", &BND_Point2d::m_y);
   class_<RH3DM_Point2dFns>("Point2d")
+      .class_function("create", optional_override([]() { return BND_Point2d(); }))
       .class_function("create", optional_override([](double a0, double a1) { return BND_Point2d(a0, a1); }))
       .class_function("create", optional_override([](emscripten::val v0) -> emscripten::val {
         if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && v0.hasOwnProperty("Y"))) { BND_Vector2d a0 = v0.as<BND_Vector2d>(); return emscripten::val([&]() { return BND_Point2d(a0); }()); }

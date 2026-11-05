@@ -57,7 +57,8 @@ for (const obj of doc.objects) {
 ```
 
 The same goes for `doc.layers`, `doc.materials` and the other tables, `obj.attributes`,
-`mesh.vertices`, `mesh.faces`, `brep.faces`, `nurbsCurve.points` and `subd.faces` (52 members).
+`mesh.vertices`, `mesh.faces`, `brep.faces`, `nurbsCurve.points`, `subd.faces`, and statics such as
+`Linetype.continuous`, `MeshingParameters.default` and `ViewportInfo.defaultTop` (66 members).
 Calling one throws `TypeError: ... is not a function`. Five went the other way and are now
 functions: `isValidWithLog()`, `subd.sharpEdgeCount()`, `vertex.surfacePoint()`,
 `trim.isReversed()`, `vertex.edgeIndices()`.
@@ -122,12 +123,12 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array, fo
 
 ## Values and objects
 
-<!-- D11, D59, D51 -->
-- A value type's constructors are `create(...)`, and its operators are functions with RhinoCommon's
-  names:
+<!-- D11, D59, D51, D92 -->
+- A value type is built with `new`, as in 8.x and RhinoCommon, and gives a plain object
+  (`rhino.T.create(...)` is the same call; `instanceof rhino.T` is false). Its operators are functions with RhinoCommon's names:
 
   ```js
-  const box = rhino.BoundingBox.create(min, max)
+  const box = new rhino.BoundingBox(min, max)   // { Min: {...}, Max: {...} }
   const t = rhino.Transform.multiply(a, b)
   const v = rhino.Vector3d.add(a, b)
   ```
@@ -151,7 +152,7 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array, fo
   alive, so dropping the parent is safe. `parent.delete()` still frees it at once and invalidates its
   views. <!-- D52 -->
 - `SubDEdgeSharpness` is a plain object `{sharpness0, sharpness1}`; build one with
-  `rhino.SubDEdgeSharpness.create(a, b)`, which checks the values as RhinoCommon does. <!-- D61 -->
+  `new rhino.SubDEdgeSharpness(a, b)`, which checks the values as RhinoCommon does. <!-- D61 -->
 
 ## Files and tables
 

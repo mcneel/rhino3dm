@@ -308,6 +308,7 @@ void initGenPoint4d(void)
       .field("Z", &BND_Point4d::m_z)
       .field("W", &BND_Point4d::m_w);
   class_<RH3DM_Point4dFns>("Point4d")
+      .class_function("create", optional_override([]() { return BND_Point4d(); }))
       .class_function("create", optional_override([](double a0, double a1, double a2, double a3) { return BND_Point4d(a0, a1, a2, a3); }))
       .class_function("create", optional_override([](BND_Point3d a0) { return BND_Point4d(a0); }))
       .class_function("add", optional_override([](BND_Point4d a0, BND_Point4d a1) { return a0 + a1; }))

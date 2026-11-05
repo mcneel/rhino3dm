@@ -1631,4 +1631,20 @@ module.exports = (t, ctx) => {
     ctx.raises(() => new r.PointCloud(7), /no constructor matches/);
   });
 
+  t('test_value_types_construct_with_new_d92', () => {
+    // D92: `new T(...)` is RhinoCommon's spelling; it returns T.create(...), the same plain object
+    assert.deepStrictEqual(new r.Point3d(1, 2, 3), { X: 1, Y: 2, Z: 3 });
+    assert.deepStrictEqual(new r.Point3d(), r.Point3d.create());
+    assert.deepStrictEqual(new r.Interval(1, 4), { T0: 1, T1: 4 });
+    const c = new r.Circle(r.Plane.worldXY, 2);
+    assert.deepStrictEqual(c, r.Circle.create(r.Plane.worldXY, 2));
+    assert.strictEqual(r.Circle.circumference(c), 4 * Math.PI);
+    assert.deepStrictEqual(new r.BoundingBox({ X: 0, Y: 0, Z: 0 }, { X: 1, Y: 2, Z: 3 }).Max, { X: 1, Y: 2, Z: 3 });
+    assert(r.Transform.isIdentity(new r.Transform(1)));
+    // the statics stay on the type, static properties included
+    assert(r.Plane.isValid(r.Plane.worldXY));
+    assert.strictEqual(r.Circle.name, 'Circle');
+    ctx.raises(() => new r.Point3d(1, 2), /./);
+  });
+
 };

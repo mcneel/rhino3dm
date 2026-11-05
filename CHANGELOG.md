@@ -19,6 +19,7 @@ diff: https://github.com/mcneel/rhino3dm/compare/9.0.0-beta...9.2.0-beta.0
 - (py, js) Where RhinoCommon returns a null array, Python gets `None` and JS `null` (`BoundingBox.GetCorners`/`GetEdges` of an invalid box, `Polyline.GetSegments` below two points).
 - (py, js) Overloads that differ from another only in their `out` parameters, which Python and JS could never select, have names of their own: `NurbsCurvePointList.GetPoint4d`, `NurbsSurfacePointList.GetPoint4d`, `TextureMapping.TryGetMappingBoxCapped`/`TryGetMappingCylinderCapped`/`TryGetMappingPlaneCapped`, `Transform.DecomposeAffineFull`.
 - (js) Value-type methods that change the value (`Point3d.transform`, `Vector3d.unitize`, `Plane.rotate`, `BoundingBox.inflate`, ...) change the object passed in and return what RhinoCommon returns, as in C# and Python.
+- (js) Value types are built with `new` again (`new rhino.Circle(plane, radius)`), as in RhinoCommon; the result is the same plain object as `rhino.Circle.create(...)`.
 - (js) `rhino3dm.d.ts` declares `[Symbol.iterator]` on the iterable classes, so TypeScript accepts `for (const layer of doc.layers)`.
 - (py) Enum values named `None` are also `E.None_` (`E.None` is not Python syntax).
 - (py) `len(attributes.Decals)`; (js) `attributes.decals.count`.

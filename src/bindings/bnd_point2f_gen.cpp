@@ -280,6 +280,7 @@ void initGenPoint2f(void)
       .field("X", &BND_Point2f::m_x)
       .field("Y", &BND_Point2f::m_y);
   class_<RH3DM_Point2fFns>("Point2f")
+      .class_function("create", optional_override([]() { return BND_Point2f(); }))
       .class_function("create", optional_override([](float a0, float a1) { return BND_Point2f(a0, a1); }))
       .class_function("unset", optional_override([]() { return BND_Point2f::Unset(); }))
       .class_function("isValid", optional_override([](BND_Point2f a0) { return a0.IsValid(); }))

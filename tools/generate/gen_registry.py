@@ -867,7 +867,7 @@ def extend_enum_table(manifest):
 # 'user_strings' (D62, Luis 2026-10-20): a class registering RhinoCommon's internal CommonObject
 # user-string members under their public names, where rhino3dm has them and RhinoCommon does not
 JS_POST = {'keep': [], 'iters': [], 'static_props': [], 'enumerable': [], 'not_iterable': [], 'grid': [],
-           'keep_args': [], 'keep_set': [], 'aliases': []}
+           'keep_args': [], 'keep_set': [], 'aliases': [], 'values': []}
 
 # IEnumerable classes whose RhinoCommon enumerator is a private class over two counts and a
 # (u, v) getter, row-major in u (G102): {C# simple name: (count u, count v, getter)}. Each entry

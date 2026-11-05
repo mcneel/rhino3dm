@@ -476,6 +476,7 @@ void initGenVector3f(void)
       .field("Y", &BND_Vector3f::m_y)
       .field("Z", &BND_Vector3f::m_z);
   class_<RH3DM_Vector3fFns>("Vector3f")
+      .class_function("create", optional_override([]() { return BND_Vector3f(); }))
       .class_function("create", optional_override([](float a0, float a1, float a2) { return BND_Vector3f(a0, a1, a2); }))
       .class_function("zero", optional_override([]() { return BND_Vector3f::Zero(); }))
       .class_function("xAxis", optional_override([]() { return BND_Vector3f::XAxis(); }))

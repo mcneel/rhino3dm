@@ -469,6 +469,7 @@ void initGenInterval(void)
       .field("T0", &BND_Interval::m_t0)
       .field("T1", &BND_Interval::m_t1);
   class_<RH3DM_IntervalFns>("Interval")
+      .class_function("create", optional_override([]() { return BND_Interval(); }))
       .class_function("create", optional_override([](double a0, double a1) { return BND_Interval(a0, a1); }))
       .class_function("equals", optional_override([](BND_Interval a0, BND_Interval a1) { return a0 == a1; }))
       .class_function("add", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {

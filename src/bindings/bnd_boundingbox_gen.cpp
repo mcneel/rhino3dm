@@ -806,6 +806,7 @@ void initGenBoundingBox(void)
       .field("Min", &BND_BoundingBox::m_min)
       .field("Max", &BND_BoundingBox::m_max);
   class_<RH3DM_BoundingBoxFns>("BoundingBox")
+      .class_function("create", optional_override([]() { return BND_BoundingBox(); }))
       .class_function("create", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
         if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Z") && v0["Z"].isNumber()) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Z") && v1["Z"].isNumber())) { BND_Point3d a0 = v0.as<BND_Point3d>(); BND_Point3d a1 = v1.as<BND_Point3d>(); return emscripten::val([&]() { return BND_BoundingBox(a0, a1); }()); }
         if (RH3DM_JsIsSeq(v0) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("M00") && v1.hasOwnProperty("M01") && v1.hasOwnProperty("M02") && v1.hasOwnProperty("M03") && v1.hasOwnProperty("M10") && v1.hasOwnProperty("M11") && v1.hasOwnProperty("M12") && v1.hasOwnProperty("M13") && v1.hasOwnProperty("M20") && v1.hasOwnProperty("M21") && v1.hasOwnProperty("M22") && v1.hasOwnProperty("M23") && v1.hasOwnProperty("M30") && v1.hasOwnProperty("M31") && v1.hasOwnProperty("M32") && v1.hasOwnProperty("M33"))) { emscripten::val a0 = v0.as<emscripten::val>(); BND_Transform a1 = v1.as<BND_Transform>(); return emscripten::val([&]() { std::vector<BND_Point3d> a0_v = RH3DM_JsSeq<BND_Point3d>(a0); return BND_BoundingBox(a0_v, a1); }()); }

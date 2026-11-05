@@ -333,6 +333,7 @@ void initGenSphere(void)
       .field("EquatorialPlane", &BND_Sphere::m_plane)
       .field("Radius", &BND_Sphere::m_radius);
   class_<RH3DM_SphereFns>("Sphere")
+      .class_function("create", optional_override([]() { return BND_Sphere(); }))
       .class_function("create", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
         if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Z") && v0["Z"].isNumber()) && v1.isNumber()) { BND_Point3d a0 = v0.as<BND_Point3d>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return BND_Sphere(a0, a1); }()); }
         if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Origin") && v0.hasOwnProperty("XAxis") && v0.hasOwnProperty("YAxis") && v0.hasOwnProperty("ZAxis")) && v1.isNumber()) { BND_Plane a0 = v0.as<BND_Plane>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return BND_Sphere(a0, a1); }()); }

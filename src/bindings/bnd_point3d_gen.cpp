@@ -580,6 +580,7 @@ void initGenPoint3d(void)
       .field("Y", &BND_Point3d::m_y)
       .field("Z", &BND_Point3d::m_z);
   class_<RH3DM_Point3dFns>("Point3d")
+      .class_function("create", optional_override([]() { return BND_Point3d(); }))
       .class_function("create", optional_override([](double a0, double a1, double a2) { return BND_Point3d(a0, a1, a2); }))
       .class_function("create", optional_override([](emscripten::val v0) -> emscripten::val {
         if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Z") && v0["Z"].isNumber())) { BND_Vector3d a0 = v0.as<BND_Vector3d>(); return emscripten::val([&]() { return BND_Point3d(a0); }()); }

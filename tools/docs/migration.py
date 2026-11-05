@@ -125,7 +125,7 @@ def by_name(b, lang, values):
     if lang == 'py':
         return {'__init__': cls + '(...)', '__mul__': cls + ' * ' + cls, '__getitem__': cls + '[i]',
                 '__iter__': 'for x in ' + cls, '__len__': 'len(%s)' % cls}.get(m, b)
-    return {'__init__': ('%s.create(...)' if cls in values else 'new %s(...)') % cls,
+    return {'__init__': 'new %s(...)' % cls,                      # value types too (D92)
             '__mul__': cls + '.multiply', '__getitem__': cls + '.get(i)', '__iter__': 'for...of ' + cls,
             '__len__': cls + '.count'}.get(m, cls + '.' + camel(m))
 

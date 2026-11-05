@@ -140,6 +140,7 @@ void initGenTorus(void)
       .field("MajorRadius", &BND_Torus::m_majorRadius)
       .field("MinorRadius", &BND_Torus::m_minorRadius);
   class_<RH3DM_TorusFns>("Torus")
+      .class_function("create", optional_override([]() { return BND_Torus(); }))
       .class_function("unset", optional_override([]() { return BND_Torus::Unset(); }))
       .class_function("create", optional_override([](BND_Plane a0, double a1, double a2) { return BND_Torus(a0, a1, a2); }))
       .class_function("isValid", optional_override([](BND_Torus a0) { return a0.IsValid(); }))

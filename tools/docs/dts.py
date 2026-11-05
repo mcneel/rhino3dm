@@ -332,7 +332,7 @@ def build(api, js, py):
         out.extend(tsdoc(doc, indent='\t'))
         base = js.bases.get(cls)
         w('\tclass %s%s {' % (cls, ' extends %s' % base if base else ''))
-        if value:
+        if value and 'create' not in members:
             w('\t\tprivate constructor();')
         for jn in sorted(members):
             kinds = members[jn]
@@ -359,6 +359,9 @@ def build(api, js, py):
                     stats['documented'] += bool(d)
                     out.extend(tsdoc(d, names))
                     w('\t\tstatic create(%s): %s;' % (', '.join(ps), cls))
+                    # `new` calls create and yields the same plain object (D92)
+                    out.extend(tsdoc(d, names))
+                    w('\t\tconstructor(%s);' % ', '.join(ps))
                 continue
             overloads = pyc.get(pn, []) if pn else []
             static = 'class_function' in kinds

@@ -361,6 +361,7 @@ void initGenSubDEdgeSharpness(void)
       .field("sharpness0", &BND_SubDEdgeSharpness::m_sharpness0)
       .field("sharpness1", &BND_SubDEdgeSharpness::m_sharpness1);
   class_<RH3DM_SubDEdgeSharpnessFns>("SubDEdgeSharpness")
+      .class_function("create", optional_override([]() { return BND_SubDEdgeSharpness(); }))
       .class_function("create", optional_override([](emscripten::val v0) -> emscripten::val {
         if (v0.isNumber()) { double a0 = v0.as<double>(); return emscripten::val([&]() { return BND_SubDEdgeSharpness(a0); }()); }
         if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("T0"))) { BND_Interval a0 = v0.as<BND_Interval>(); return emscripten::val([&]() { return BND_SubDEdgeSharpness(a0); }()); }

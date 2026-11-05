@@ -406,6 +406,7 @@ void initGenArc(void)
       .field("Radius", &BND_Arc::m_radius)
       .field("AngleDomain", &BND_Arc::m_angle);
   class_<RH3DM_ArcFns>("Arc")
+      .class_function("create", optional_override([]() { return BND_Arc(); }))
       .class_function("unset", optional_override([]() { return BND_Arc::Unset(); }))
       .class_function("create", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
         if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Plane") && v0.hasOwnProperty("Radius")) && v1.isNumber()) { BND_Circle a0 = v0.as<BND_Circle>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return BND_Arc(a0, a1); }()); }

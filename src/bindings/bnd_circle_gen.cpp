@@ -358,6 +358,7 @@ void initGenCircle(void)
       .field("Plane", &BND_Circle::m_plane)
       .field("Radius", &BND_Circle::m_radius);
   class_<RH3DM_CircleFns>("Circle")
+      .class_function("create", optional_override([]() { return BND_Circle(); }))
       .class_function("unset", optional_override([]() { return BND_Circle::Unset(); }))
       .class_function("create", optional_override([](emscripten::val v0) -> emscripten::val {
         if (v0.isNumber()) { double a0 = v0.as<double>(); return emscripten::val([&]() { return BND_Circle(a0); }()); }

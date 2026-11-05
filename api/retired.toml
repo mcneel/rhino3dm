@@ -1062,7 +1062,7 @@ member = "createFromPoints"
 status = "replaced"
 lang = "js"
 by = ["Arc.__init__"]
-note = "triage JS3 (Luis: map): JS only; Arc.create(p1, p2, p3)"
+note = "triage JS3 (Luis: map): JS only; new Arc(p1, p2, p3)"
 test = "test_retired_arc_arccurve_brep_members"
 
 [[retired]]

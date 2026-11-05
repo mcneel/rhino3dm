@@ -346,7 +346,8 @@ def emit_valuetype_bindings(vt, skipped):
         # a property is field-backed when its translated body IS the field
         field_of = {f: p for f, p in field_backed(vt, cs).items() if p in props}
         pyl = ['  py::class_<%s>(m, "%s")' % (T, reg), '      .def(py::init<>())']
-        jsl = []
+        # C#'s implicit `new T()` (default(T)), as Python's init<>: JS `create()` / `new T()` (G145)
+        jsl = ['      .class_function("create", optional_override([]() { return %s(); }))' % T]
 
         def sig(m):
             return ', '.join('%s %s' % (p['Type'], p['Name']) for p in m['Params'] or [])
@@ -659,6 +660,8 @@ def emit_valuetype_bindings(vt, skipped):
                                % (name, T, pub(pm, 's.%s()' % pm['Getter']), setter))
         vo = ('  value_object<%s>("%sValue")\n%s;' % (T, reg, '\n'.join(vfields)))
         tag = 'RH3DM_%sFns' % reg
+        if any('"create"' in l for l in jsl):
+            JS_POST['values'].append(reg)      # `new` calls create (D92)
         py_block = py_block.replace('@@VEC@@(', '(').replace('@@NVEC@@(', 'RH3DM_NoneIfEmpty(')
         blocks[cs] = (py_block, 'struct %s {};' % tag,
                       vo + '\n  class_<%s>("%s")\n%s;' % (tag, reg, '\n'.join(jsl)))

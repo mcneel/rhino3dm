@@ -33,7 +33,7 @@ page for the name your script uses.
 | `AnnotationBase.setMaskOffset` | `AnnotationBase.maskOffset`, `AnnotationBase.parentDimensionStyle` | `ann.parentDimensionStyle = style`, then the property; pass the annotation's own style |
 | `AnnotationBase.setTextHeight` | `AnnotationBase.textHeight`, `AnnotationBase.parentDimensionStyle` | `ann.parentDimensionStyle = style`, then the property; pass the annotation's own style |
 | `Arc.angle` | `Arc.angle` | same name; RhinoCommon's arguments or result |
-| `Arc.createFromPoints` | `Arc.create(...)` | Arc.create(p1, p2, p3) |
+| `Arc.createFromPoints` | `new Arc(...)` | new Arc(p1, p2, p3) |
 | `ArcCurve.createFromArc`, `ArcCurve.createFromArcParams`, `ArcCurve.createFromCircle`, `ArcCurve.createFromCircleParams` | `new ArcCurve(...)` |  |
 | `ArchivableDictionary.writeGeometry` | removed |  |
 | `BoundingBox.inflateXYZ` | `BoundingBox.inflate` | inflate(box, x, y, z): the value is returned inflated |

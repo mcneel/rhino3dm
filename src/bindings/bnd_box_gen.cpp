@@ -537,6 +537,7 @@ void initGenBox(void)
       .field("Y", &BND_Box::m_dy)
       .field("Z", &BND_Box::m_dz);
   class_<RH3DM_BoxFns>("Box")
+      .class_function("create", optional_override([]() { return BND_Box(); }))
       .class_function("create", optional_override([](BND_BoundingBox a0) { return BND_Box(a0); }))
       .class_function("create", optional_override([](BND_Plane a0, BND_Interval a1, BND_Interval a2, BND_Interval a3) { return BND_Box(a0, a1, a2, a3); }))
       .class_function("create", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {

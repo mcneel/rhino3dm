@@ -175,6 +175,7 @@ void initGenColor4f(void)
       .field("B", &BND_Color4f::m_b)
       .field("A", &BND_Color4f::m_a);
   class_<RH3DM_Color4fFns>("Color4f")
+      .class_function("create", optional_override([]() { return BND_Color4f(); }))
       .class_function("create", optional_override([](float a0, float a1, float a2, float a3) { return BND_Color4f(a0, a1, a2, a3); }))
       .class_function("create", optional_override([](int a0) { return BND_Color4f(a0); }))
       .class_function("empty", optional_override([]() { return BND_Color4f::Empty(); }))

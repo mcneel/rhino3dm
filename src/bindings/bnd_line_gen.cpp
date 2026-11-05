@@ -461,6 +461,7 @@ void initGenLine(void)
       .field("From", &BND_Line::m_from)
       .field("To", &BND_Line::m_to);
   class_<RH3DM_LineFns>("Line")
+      .class_function("create", optional_override([]() { return BND_Line(); }))
       .class_function("fromX", optional_override([](BND_Line a0) { return a0.FromX(); }))
       .class_function("fromY", optional_override([](BND_Line a0) { return a0.FromY(); }))
       .class_function("fromZ", optional_override([](BND_Line a0) { return a0.FromZ(); }))

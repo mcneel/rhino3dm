@@ -235,6 +235,7 @@ void initGenCylinder(void)
       .field("Height1", &BND_Cylinder::m_height1)
       .field("Height2", &BND_Cylinder::m_height2);
   class_<RH3DM_CylinderFns>("Cylinder")
+      .class_function("create", optional_override([]() { return BND_Cylinder(); }))
       .class_function("unset", optional_override([]() { return BND_Cylinder::Unset(); }))
       .class_function("create", optional_override([](BND_Circle a0) { return BND_Cylinder(a0); }))
       .class_function("create", optional_override([](BND_Circle a0, double a1) { return BND_Cylinder(a0, a1); }))

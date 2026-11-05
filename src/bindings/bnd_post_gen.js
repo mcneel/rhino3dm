@@ -8,6 +8,7 @@
   var KEEP_ARGS = [["Brep","tryConvertBrep",0,true],["Leader","create",2,true],["Leader","createWithRichText",2,true],["LinearDimension","create",1,true],["OrdinateDimension","create",0,true],["RadialDimension","create",0,true],["TextEntity","create",2,true],["TextEntity","createWithRichText",2,true]];
   var KEEP_SET = [["AnnotationBase","parentDimensionStyle"]];
   var ALIASES = [["File3dm","destroy","delete"]];
+  var VALUES = ["Arc","BoundingBox","Box","Circle","Color4f","ComponentIndex","Cone","ControlPoint","Cylinder","Ellipse","Interval","Line","MeshFace","Plane","Point2d","Point2f","Point3d","Point3f","Point4d","Sphere","SubDEdgeSharpness","Torus","Transform","Vector2d","Vector3d","Vector3f"];
   function install() {
     var M = Module, missing = [];
     M.rh3dmPostUnresolved = missing;
@@ -115,6 +116,18 @@
         };
       }
       proto[Symbol.iterator] = function () { return this.iterator(); };
+    });
+    // D92: a value type is a plain object, and `new T(...)` is RhinoCommon's spelling: T becomes a
+    // function returning T.create(...) (`new` yields the object a constructor returns); the
+    // registered holder is its prototype, so every static still resolves. Last: the steps above
+    // install on the holder
+    VALUES.forEach(function (c) {
+      var C = M[c];
+      if (!C || typeof C.create !== 'function') { missing.push('value ' + c); return; }
+      var T = function () { return C.create.apply(C, arguments); };
+      Object.defineProperty(T, 'name', { value: c });
+      Object.setPrototypeOf(T, C);
+      M[c] = T;
     });
   }
   // emscripten's modularized output calls run() BEFORE the post-js code: the runtime is usually

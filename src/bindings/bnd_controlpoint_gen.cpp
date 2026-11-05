@@ -173,6 +173,7 @@ void initGenControlPoint(void)
       .field("Z", +[](const BND_ControlPoint& s) { return s.Z(); }, +[](BND_ControlPoint& s, double v) { s.set_Z(v); })
       .field("Weight", +[](const BND_ControlPoint& s) { return s.Weight(); }, +[](BND_ControlPoint& s, double v) { s.set_Weight(v); });
   class_<RH3DM_ControlPointFns>("ControlPoint")
+      .class_function("create", optional_override([]() { return BND_ControlPoint(); }))
       .class_function("create", optional_override([](double a0, double a1, double a2) { return BND_ControlPoint(a0, a1, a2); }))
       .class_function("create", optional_override([](double a0, double a1, double a2, double a3) { return BND_ControlPoint(a0, a1, a2, a3); }))
       .class_function("create", optional_override([](emscripten::val v0) -> emscripten::val {

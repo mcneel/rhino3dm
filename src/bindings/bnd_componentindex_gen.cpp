@@ -211,6 +211,7 @@ void initGenComponentIndex(void)
       .field("ComponentIndexType", +[](const BND_ComponentIndex& s) { return RH3DM_Pub(s.ComponentIndexType()); }, +[](BND_ComponentIndex& s, RH3DM_ComponentIndexType v) { s = BND_ComponentIndex((RH3DM_ComponentIndexType)(int)v, s.m_index); })
       .field("Index", &BND_ComponentIndex::m_index);
   class_<RH3DM_ComponentIndexFns>("ComponentIndex")
+      .class_function("create", optional_override([]() { return BND_ComponentIndex(); }))
       .class_function("create", optional_override([](RH3DM_ComponentIndexType a0, int a1) { return BND_ComponentIndex((RH3DM_ComponentIndexType)(int)a0, a1); }))
       .class_function("componentIndexType", optional_override([](BND_ComponentIndex a0) { return RH3DM_Pub(a0.ComponentIndexType()); }))
       .class_function("isSet", optional_override([](BND_ComponentIndex a0) { return a0.IsSet(); }))

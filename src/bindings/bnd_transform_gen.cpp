@@ -1235,6 +1235,7 @@ void initGenTransform(void)
       .field("M32", &BND_Transform::m_32)
       .field("M33", &BND_Transform::m_33);
   class_<RH3DM_TransformFns>("Transform")
+      .class_function("create", optional_override([]() { return BND_Transform(); }))
       .class_function("create", optional_override([](double a0) { return BND_Transform(a0); }))
       .class_function("identity", optional_override([]() { return BND_Transform::Identity(); }))
       .class_function("zeroTransformation", optional_override([]() { return BND_Transform::ZeroTransformation(); }))

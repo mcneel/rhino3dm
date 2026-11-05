@@ -162,6 +162,7 @@ void initGenCone(void)
       .field("Height", &BND_Cone::m_height)
       .field("Radius", &BND_Cone::m_radius);
   class_<RH3DM_ConeFns>("Cone")
+      .class_function("create", optional_override([]() { return BND_Cone(); }))
       .class_function("unset", optional_override([]() { return BND_Cone::Unset(); }))
       .class_function("create", optional_override([](BND_Plane a0, double a1, double a2) { return BND_Cone(a0, a1, a2); }))
       .class_function("isValid", optional_override([](BND_Cone a0) { return a0.IsValid(); }))

@@ -355,6 +355,7 @@ void initGenVector2d(void)
       .field("X", &BND_Vector2d::m_x)
       .field("Y", &BND_Vector2d::m_y);
   class_<RH3DM_Vector2dFns>("Vector2d")
+      .class_function("create", optional_override([]() { return BND_Vector2d(); }))
       .class_function("create", optional_override([](double a0, double a1) { return BND_Vector2d(a0, a1); }))
       .class_function("Length", optional_override([](BND_Vector2d a0) { return a0.Length(); }))
       .class_function("multiply", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
