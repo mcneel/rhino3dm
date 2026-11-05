@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [9.2.0-beta.0] - unreleased
 
-rhino3dm vNext: the Python and JavaScript bindings are generated from RhinoCommon, so their API is RhinoCommon's (names, signatures, return shapes). What changes for an 8.x script: [`docs/migrating-to-9.md`](docs/migrating-to-9.md).
+rhino3dm vNext: the Python and JavaScript bindings are generated from RhinoCommon, so their API is RhinoCommon's (names, signatures, return shapes). What changes for an 8.x script, per language: [`docs/migrating-to-9.md`](docs/migrating-to-9.md).
 
 diff: https://github.com/mcneel/rhino3dm/compare/9.0.0-beta...9.2.0-beta.0
 
@@ -18,6 +18,8 @@ diff: https://github.com/mcneel/rhino3dm/compare/9.0.0-beta...9.2.0-beta.0
 - (py) Fixed: `Extrusion.ToBrep()` and `TextEntity.Transform(xform)` raised `TypeError` (a derived overload hid the base class's); `Transform.ChangeBasis` keyword arguments are RhinoCommon's names (`X0`, not `X0_cs`).
 - (py, js) Where RhinoCommon returns a null array, Python gets `None` and JS `null` (`BoundingBox.GetCorners`/`GetEdges` of an invalid box, `Polyline.GetSegments` below two points).
 - (py, js) Overloads that differ from another only in their `out` parameters, which Python and JS could never select, have names of their own: `NurbsCurvePointList.GetPoint4d`, `NurbsSurfacePointList.GetPoint4d`, `TextureMapping.TryGetMappingBoxCapped`/`TryGetMappingCylinderCapped`/`TryGetMappingPlaneCapped`, `Transform.DecomposeAffineFull`.
+- (js) Value-type methods that change the value (`Point3d.transform`, `Vector3d.unitize`, `Plane.rotate`, `BoundingBox.inflate`, ...) change the object passed in and return what RhinoCommon returns, as in C# and Python.
+- (js) `rhino3dm.d.ts` declares `[Symbol.iterator]` on the iterable classes, so TypeScript accepts `for (const layer of doc.layers)`.
 - (py) Enum values named `None` are also `E.None_` (`E.None` is not Python syntax).
 - (py) `len(attributes.Decals)`; (js) `attributes.decals.count`.
 - (py) The Python module is built with nanobind 2.7 instead of pybind11 (the `src/lib/pybind11` submodule is gone). On Python 3.12+ it is one stable-ABI (`abi3`) module, and it supports free-threaded CPython (3.14t) without re-enabling the GIL. Enums are integer-like (`int(e)`, `e == 2` work); passing a plain int where an enum is expected is still a `TypeError`. Buffers (`PointCloud`, NURBS control points and knots) are zero-copy views via the buffer protocol, as in 8.x.

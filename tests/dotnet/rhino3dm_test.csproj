@@ -17,11 +17,15 @@
     <PackageReference Include="coverlet.collector" Version="3.2.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- this tree's Rhino3dm, not a published package. librhino3dm_native comes with it when it
-         has been built into src/build/<platform>/ (Rhino3dm.csproj copies it to the output);
-         tools/dev/round.sh dotnet builds it fresh in a container instead -->
+  <!-- this tree's Rhino3dm, not a published package. librhino3dm_native comes with it when it
+       has been built into src/build/<platform>/ (Rhino3dm.csproj copies it to the output);
+       tools/dev/round.sh dotnet builds it fresh in a container instead -->
+  <ItemGroup Condition="'$(Rhino3dmVersion)' == ''">
     <ProjectReference Include="../../src/dotnet/Rhino3dm.csproj" />
+  </ItemGroup>
+  <!-- CI tests the package it built instead: -p:Rhino3dmVersion=<version> (workflow_ci.yml test_dotnet) -->
+  <ItemGroup Condition="'$(Rhino3dmVersion)' != ''">
+    <PackageReference Include="Rhino3dm" Version="$(Rhino3dmVersion)" />
   </ItemGroup>
 
 </Project>

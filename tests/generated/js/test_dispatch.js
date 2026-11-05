@@ -96,8 +96,9 @@ module.exports = (t, ctx) => {
     assert.deepStrictEqual(M(r.Transform.rotation(P(1, 0, 0), P(0, 1, 0), P(1, 2, 3))), [0, -1, 0, 3, 1, 0, 0, 1, 0, 0, 1, -0]);
     assert.deepStrictEqual(M(r.Transform.translation(P(1, 2, 3))), [1, 0, 0, 1, 0, 1, 0, 2, 0, 0, 1, 3]);
     assert.deepStrictEqual(M(r.Transform.translation(1, 2, 3)), [1, 0, 0, 1, 0, 1, 0, 2, 0, 0, 1, 3]);
-    // BoundingBox inflateXYZ (a value: inflate returns the inflated box)
-    const nb = r.BoundingBox.inflate(r.BoundingBox.create(P(0, 0, 0), P(1, 1, 1)), 1, 2, 3);
+    // BoundingBox inflateXYZ (a mutator: inflates the box passed in, returns nothing; G144)
+    const nb = r.BoundingBox.create(P(0, 0, 0), P(1, 1, 1));
+    assert.strictEqual(r.BoundingBox.inflate(nb, 1, 2, 3), undefined);
     assert.deepStrictEqual([A(nb.Min), A(nb.Max)], [[-1, -2, -3], [2, 3, 4]]);
     // Curve closedCurveOrientationPlane / derivativeAtSide / toNurbsCurveSubDomain
     const ncrv = r.Circle.toNurbsCurve(r.Circle.create(5));

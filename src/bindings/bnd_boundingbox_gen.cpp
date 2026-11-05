@@ -826,8 +826,8 @@ void initGenBoundingBox(void)
       .class_function("minimumDistanceTo", optional_override([](BND_BoundingBox a0, BND_Point3d a1) { return a0.MinimumDistanceTo(a1); }))
       .class_function("maximumDistanceTo", optional_override([](BND_BoundingBox a0, BND_Point3d a1) { return a0.MaximumDistanceTo(a1); }))
       .class_function("furthestPoint", optional_override([](BND_BoundingBox a0, BND_Point3d a1) { return a0.FurthestPoint(a1); }))
-      .class_function("inflate", optional_override([](BND_BoundingBox a0, double a1) { a0.Inflate(a1); return a0; }))
-      .class_function("inflate", optional_override([](BND_BoundingBox a0, double a1, double a2, double a3) { a0.Inflate(a1, a2, a3); return a0; }))
+      .class_function("inflate", optional_override([](emscripten::val v0, double a1) { BND_BoundingBox a0 = v0.as<BND_BoundingBox>(); a0.Inflate(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("inflate", optional_override([](emscripten::val v0, double a1, double a2, double a3) { BND_BoundingBox a0 = v0.as<BND_BoundingBox>(); a0.Inflate(a1, a2, a3); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("contains", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
         if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Min") && v0.hasOwnProperty("Max")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Z") && v1["Z"].isNumber())) { BND_BoundingBox a0 = v0.as<BND_BoundingBox>(); BND_Point3d a1 = v1.as<BND_Point3d>(); return emscripten::val([&]() { return a0.Contains(a1); }()); }
         if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Min") && v0.hasOwnProperty("Max")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Min") && v1.hasOwnProperty("Max"))) { BND_BoundingBox a0 = v0.as<BND_BoundingBox>(); BND_BoundingBox a1 = v1.as<BND_BoundingBox>(); return emscripten::val([&]() { return a0.Contains(a1); }()); }
@@ -838,15 +838,15 @@ void initGenBoundingBox(void)
         throw std::invalid_argument("BoundingBox.contains: no overload matches the arguments"); }))
       .class_function("isDisjoint", optional_override([](BND_BoundingBox a0, BND_BoundingBox a1) { return a0.IsDisjoint(a1); }))
       .class_function("isDisjoint", optional_override([](BND_BoundingBox a0, BND_BoundingBox a1, double a2) { return a0.IsDisjoint(a1, a2); }))
-      .class_function("makeValid", optional_override([](BND_BoundingBox a0) { auto r = a0.MakeValid(); emscripten::val o = emscripten::val::object(); o.set("self", a0); o.set("returns", r); return o; }))
+      .class_function("makeValid", optional_override([](emscripten::val v0) { BND_BoundingBox a0 = v0.as<BND_BoundingBox>(); auto r = a0.MakeValid(); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
       .class_function("corner", optional_override([](BND_BoundingBox a0, bool a1, bool a2, bool a3) { return a0.Corner(a1, a2, a3); }))
       .class_function("isDegenerate", optional_override([](BND_BoundingBox a0, double a1) { return a0.IsDegenerate(a1); }))
       .class_function("getCorners", optional_override([](BND_BoundingBox a0) { return RH3DM_JsArrayOrNull(a0.GetCorners()); }))
       .class_function("getEdges", optional_override([](BND_BoundingBox a0) { return RH3DM_JsArrayOrNull(a0.GetEdges()); }))
-      .class_function("transform", optional_override([](BND_BoundingBox a0, BND_Transform a1) { auto r = a0.Transform(a1); emscripten::val o = emscripten::val::object(); o.set("self", a0); o.set("returns", r); return o; }))
+      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_BoundingBox a0 = v0.as<BND_BoundingBox>(); auto r = a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
       .class_function("union", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Min") && v0.hasOwnProperty("Max")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Min") && v1.hasOwnProperty("Max"))) { BND_BoundingBox a0 = v0.as<BND_BoundingBox>(); BND_BoundingBox a1 = v1.as<BND_BoundingBox>(); return emscripten::val([&]() { a0.Union(a1); return a0; }()); }
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Min") && v0.hasOwnProperty("Max")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Z") && v1["Z"].isNumber())) { BND_BoundingBox a0 = v0.as<BND_BoundingBox>(); BND_Point3d a1 = v1.as<BND_Point3d>(); return emscripten::val([&]() { a0.Union(a1); return a0; }()); }
+        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Min") && v0.hasOwnProperty("Max")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Min") && v1.hasOwnProperty("Max"))) { BND_BoundingBox a0 = v0.as<BND_BoundingBox>(); BND_BoundingBox a1 = v1.as<BND_BoundingBox>(); return emscripten::val([&]() { return BND_BoundingBox::Union(a0, a1); }()); }
+        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Min") && v0.hasOwnProperty("Max")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Z") && v1["Z"].isNumber())) { BND_BoundingBox a0 = v0.as<BND_BoundingBox>(); BND_Point3d a1 = v1.as<BND_Point3d>(); return emscripten::val([&]() { return BND_BoundingBox::Union(a0, a1); }()); }
         throw std::invalid_argument("BoundingBox.union: no overload matches the arguments"); }))
       .class_function("intersection", optional_override([](BND_BoundingBox a0, BND_BoundingBox a1) { return BND_BoundingBox::Intersection(a0, a1); }))
       .class_function("toBrep", optional_override([](BND_BoundingBox a0) { return BND_Brep::Gen_CreateFromBox(a0); }), allow_raw_pointers())

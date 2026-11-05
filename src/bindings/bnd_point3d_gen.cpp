@@ -606,11 +606,11 @@ void initGenPoint3d(void)
       .class_function("maximumCoordinate", optional_override([](BND_Point3d a0) { return a0.MaximumCoordinate(); }))
       .class_function("epsilonEquals", optional_override([](BND_Point3d a0, BND_Point3d a1, double a2) { return a0.EpsilonEquals(a1, a2); }))
       .class_function("compareTo", optional_override([](BND_Point3d a0, BND_Point3d a1) { return a0.CompareTo(a1); }))
-      .class_function("interpolate", optional_override([](BND_Point3d a0, BND_Point3d a1, BND_Point3d a2, double a3) { a0.Interpolate(a1, a2, a3); return a0; }))
+      .class_function("interpolate", optional_override([](emscripten::val v0, BND_Point3d a1, BND_Point3d a2, double a3) { BND_Point3d a0 = v0.as<BND_Point3d>(); a0.Interpolate(a1, a2, a3); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("ToString", optional_override([](BND_Point3d a0) { return a0.ToString(); }))
       .class_function("distanceTo", optional_override([](BND_Point3d a0, BND_Point3d a1) { return a0.DistanceTo(a1); }))
       .class_function("distanceToSquared", optional_override([](BND_Point3d a0, BND_Point3d a1) { return a0.DistanceToSquared(a1); }))
-      .class_function("transform", optional_override([](BND_Point3d a0, BND_Transform a1) { a0.Transform(a1); return a0; }))
+      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Point3d a0 = v0.as<BND_Point3d>(); a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("encode", &BND_Point3d_Encode, allow_raw_pointers());
 }
 #endif

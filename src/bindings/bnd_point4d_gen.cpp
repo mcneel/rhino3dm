@@ -319,7 +319,7 @@ void initGenPoint4d(void)
       .class_function("equals", optional_override([](BND_Point4d a0, BND_Point4d a1) { return a0 == a1; }))
       .class_function("epsilonEquals", optional_override([](BND_Point4d a0, BND_Point4d a1, double a2) { return a0.EpsilonEquals(a1, a2); }))
       .class_function("unset", optional_override([]() { return BND_Point4d::Unset(); }))
-      .class_function("transform", optional_override([](BND_Point4d a0, BND_Transform a1) { a0.Transform(a1); return a0; }))
+      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Point4d a0 = v0.as<BND_Point4d>(); a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("isValid", optional_override([](BND_Point4d a0) { return a0.IsValid(); }))
       .class_function("ToString", optional_override([](BND_Point4d a0) { return a0.ToString(); }))
       .class_function("encode", &BND_Point4d_Encode, allow_raw_pointers());

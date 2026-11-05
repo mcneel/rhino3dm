@@ -13,6 +13,7 @@ objects (`{X, Y, Z}`) whose members are static functions taking the value first 
 
 import ast
 import glob
+import json
 import os
 import re
 import sys
@@ -61,6 +62,32 @@ class Js:
                 self.values[v.group(2)] = (v.group(1), re.findall(r'\.field\("(\w+)", &\w+::(\w+)\)', v.group(3)))
             for e in re.finditer(r'enum_<[^>]+>\("(\w+)"\)', text):
                 self.enums_js.add(e.group(1))
+        # the classes the module makes iterable at load (G101 post-js: ENUMERABLE, ITERS, GRID)
+        post = open(os.path.join(BINDINGS, 'bnd_post_gen.js')).read()
+        self.iterable = set()
+        for name in ('ENUMERABLE', 'ITERS'):
+            self.iterable.update(json.loads(re.search(r'var %s = (\[.*?\]);' % name, post).group(1)))
+        self.grid = {g[0]: g[3] for g in json.loads(re.search(r'var GRID = (\[.*?\]\]);', post).group(1))}
+        self.iterable.update(self.grid)
+
+
+def item_type(py, pyc, grid=None):
+    """the TypeScript type of what iterating a class yields, from its Python typings (`grid`: the JS
+    getter a grid enumerator calls for each (u, v))"""
+    if grid:
+        g = pyc.get(grid[0].upper() + grid[1:])
+        if g:
+            return ts_of(g[0][1].returns)
+    if '__next__' in pyc:
+        return ts_of(pyc['__next__'][0][1].returns)
+    if '__iter__' in pyc:
+        it = ast.unparse(pyc['__iter__'][0][1].returns)
+        n = py.classes.get(it, {}).get('__next__')
+        if n:
+            return ts_of(n[0][1].returns)
+    if '__getitem__' in pyc:
+        return ts_of(pyc['__getitem__'][0][1].returns)
+    return 'any'
 
 
 def ts_of(node, cs=None):
@@ -389,6 +416,10 @@ def build(api, js, py):
                 out.extend(tsdoc(d, names))
                 ret = ts_of(fn.returns, m and m.get('Returns'))
                 w('\t\t%s%s(%s): %s;' % ('static ' if static or value else '', jn, ', '.join(ps), ret))
+        if cls in js.iterable:
+            # the module makes these iterable at load (bnd_post_gen.js); pilot #89
+            w('\t\t/** Iterates the items: `for (const x of %s)`. */' % camel(cls))
+            w('\t\t[Symbol.iterator](): Iterator<%s>;' % item_type(py, pyc, js.grid.get(cls)))
         w('\t}')
         w('')
     w('\tclass RhinoModule {')

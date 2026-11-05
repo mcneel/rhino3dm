@@ -477,7 +477,7 @@ void initGenPoint2d(void)
       .class_function("unset", optional_override([]() { return BND_Point2d::Unset(); }))
       .class_function("distanceTo", optional_override([](BND_Point2d a0, BND_Point2d a1) { return a0.DistanceTo(a1); }))
       .class_function("distanceToSquared", optional_override([](BND_Point2d a0, BND_Point2d a1) { return a0.DistanceToSquared(a1); }))
-      .class_function("transform", optional_override([](BND_Point2d a0, BND_Transform a1) { a0.Transform(a1); return a0; }))
+      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Point2d a0 = v0.as<BND_Point2d>(); a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("encode", &BND_Point2d_Encode, allow_raw_pointers());
 }
 #endif

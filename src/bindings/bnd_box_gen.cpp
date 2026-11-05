@@ -554,8 +554,8 @@ void initGenBox(void)
       .class_function("closestPoint", optional_override([](BND_Box a0, BND_Point3d a1) { return a0.ClosestPoint(a1); }))
       .class_function("closestPoint", optional_override([](BND_Box a0, BND_Point3d a1, bool a2) { return a0.ClosestPoint(a1, a2); }))
       .class_function("furthestPoint", optional_override([](BND_Box a0, BND_Point3d a1) { return a0.FurthestPoint(a1); }))
-      .class_function("inflate", optional_override([](BND_Box a0, double a1) { a0.Inflate(a1); return a0; }))
-      .class_function("inflate", optional_override([](BND_Box a0, double a1, double a2, double a3) { a0.Inflate(a1, a2, a3); return a0; }))
+      .class_function("inflate", optional_override([](emscripten::val v0, double a1) { BND_Box a0 = v0.as<BND_Box>(); a0.Inflate(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("inflate", optional_override([](emscripten::val v0, double a1, double a2, double a3) { BND_Box a0 = v0.as<BND_Box>(); a0.Inflate(a1, a2, a3); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("contains", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
         if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Plane") && v0.hasOwnProperty("X") && v0.hasOwnProperty("Y") && v0.hasOwnProperty("Z")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Z") && v1["Z"].isNumber())) { BND_Box a0 = v0.as<BND_Box>(); BND_Point3d a1 = v1.as<BND_Point3d>(); return emscripten::val([&]() { return a0.Contains(a1); }()); }
         if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Plane") && v0.hasOwnProperty("X") && v0.hasOwnProperty("Y") && v0.hasOwnProperty("Z")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Min") && v1.hasOwnProperty("Max"))) { BND_Box a0 = v0.as<BND_Box>(); BND_BoundingBox a1 = v1.as<BND_BoundingBox>(); return emscripten::val([&]() { return a0.Contains(a1); }()); }
@@ -567,8 +567,8 @@ void initGenBox(void)
         if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Plane") && v0.hasOwnProperty("X") && v0.hasOwnProperty("Y") && v0.hasOwnProperty("Z")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Plane") && v1.hasOwnProperty("X") && v1.hasOwnProperty("Y") && v1.hasOwnProperty("Z")) && (v2.typeOf().as<std::string>() == "boolean")) { BND_Box a0 = v0.as<BND_Box>(); BND_Box a1 = v1.as<BND_Box>(); bool a2 = v2.as<bool>(); return emscripten::val([&]() { return a0.Contains(a1, a2); }()); }
         throw std::invalid_argument("Box.contains: no overload matches the arguments"); }))
       .class_function("getCorners", optional_override([](BND_Box a0) { return RH3DM_JsArray(a0.GetCorners()); }))
-      .class_function("transform", optional_override([](BND_Box a0, BND_Transform a1) { auto r = a0.Transform(a1); emscripten::val o = emscripten::val::object(); o.set("self", a0); o.set("returns", r); return o; }))
-      .class_function("repositionBasePlane", optional_override([](BND_Box a0, BND_Point3d a1) { a0.RepositionBasePlane(a1); return a0; }))
+      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Box a0 = v0.as<BND_Box>(); auto r = a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("repositionBasePlane", optional_override([](emscripten::val v0, BND_Point3d a1) { BND_Box a0 = v0.as<BND_Box>(); a0.RepositionBasePlane(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("epsilonEquals", optional_override([](BND_Box a0, BND_Box a1, double a2) { return a0.EpsilonEquals(a1, a2); }));
 }
 #endif

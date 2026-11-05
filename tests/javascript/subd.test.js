@@ -163,7 +163,7 @@ test('edge properties', async () => {
         expect(typeof b).toBe('boolean')
     }
     expect(typeof edge.dartCount).toBe('number')
-    expect(typeof edge.endSharpness(0)).toBe('number')
+    expect(typeof edge.endSharpness(0, false)).toBe('number')   // 8.x endSharpness(i): useCreaseSharpness false
     // controlNetPoint(0) -> vertexFrom.controlNetPoint; controlNetDirection -> controlNetLine's direction
     for (const p of [edge.vertexFrom.controlNetPoint, rhino.Line.direction(edge.controlNetLine), edge.subdivisionPoint, edge.controlNetCenterPoint]) {
         expect(Object.keys(p)).toEqual(['X', 'Y', 'Z'])

@@ -88,7 +88,7 @@ case "${1:-}" in
           python3 "$REPO/tools/docs/pyi.py" "$WORK/python/_rhino3dm.raw.pyi" && python3 "$REPO/tools/docs/dts.py" || exit 1
           mkdir -p "$WORK/tsc" && cp "$REPO/src/js/rhino3dm.d.ts" "$WORK/tsc/"
           docker run --rm -v "$WORK/tsc":/w -w /w $NODE_IMAGE bash -c \
-            'npm i -g typescript@5.6.3 >/dev/null 2>&1; tsc --noEmit --strict rhino3dm.d.ts && echo "TSC OK"'
+            'npm i -g typescript@5.6.3 >/dev/null 2>&1; tsc --noEmit --strict --target es2020 rhino3dm.d.ts && echo "TSC OK"'
           docker run --rm -v "$REPO":/src:ro -v "$WORK":/work $PY_IMAGE bash /src/tools/docs/check_pyi.sh ;;
   sdist)  docker run --rm -v "$REPO":/src:ro -v "$WORK":/work python:3.12-bookworm bash /src/tools/dev/container/sdist.sh "${2:-}" ;;
   *) sed -n '2,23p' "$0"; exit 2 ;;

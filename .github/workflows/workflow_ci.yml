@@ -460,9 +460,9 @@ jobs:
           VERSION=${NAME:9}
           dotnet nuget add source $(pwd)/tests/dotnet/lib/dotnet/bin/Debug
           cd tests/dotnet
-          dotnet add package Rhino3dm -v ${VERSION}
-          dotnet build
-          dotnet test
+          # the test project references src/dotnet; this tests the package built above instead
+          dotnet build -p:Rhino3dmVersion=${VERSION}
+          dotnet test --no-build -p:Rhino3dmVersion=${VERSION}
 
   test_python_bdist:
     name: test py ${{ matrix.python-version }} ${{ matrix.target }} ${{ matrix.os }} bdist

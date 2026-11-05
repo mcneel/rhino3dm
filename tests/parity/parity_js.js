@@ -256,9 +256,8 @@ function evaluate(rhino, c, prebuilt) {
   if (!fn) throw new Error('missing ' + c.member);
   const args = c.args.map(x => decode(rhino, x));
   const ret = self ? fn(self, ...args) : fn(...args);
-  // mutators: void ones return the new value; ones that also return
-  // something return {self, returns} (generator-log G6)
-  if (c.mutates) return (ret && typeof ret === 'object' && 'self' in ret) ? ret : { self: ret, returns: null };
+  // mutators change the value passed in, as in C#, and return C#'s result (G144)
+  if (c.mutates) return { self, returns: ret === undefined ? null : ret };
   return ret;
 }
 
@@ -284,8 +283,6 @@ async function main() {
         if (/^Error: missing/.test(String(e))) { missing.push(c.id + ' (' + String(e).slice(7) + ')'); continue; }
         got = { error: String(e) };
       }
-      // mutators: JS returns the new value; the C# return value is not compared
-      if (c.mutates && want && want.returns === null) { got.returns = null; }
       if (same(want, got)) pass++;
       else { fail++; console.log('  GENERATED MISMATCH', c.id, JSON.stringify(want), JSON.stringify(got)); }
     }

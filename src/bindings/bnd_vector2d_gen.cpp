@@ -376,8 +376,8 @@ void initGenVector2d(void)
       .class_function("squareLength", optional_override([](BND_Vector2d a0) { return a0.SquareLength(); }))
       .class_function("isTiny", optional_override([](BND_Vector2d a0, double a1) { return a0.IsTiny(a1); }))
       .class_function("isTiny", optional_override([](BND_Vector2d a0) { return a0.IsTiny(); }))
-      .class_function("unitize", optional_override([](BND_Vector2d a0) { auto r = a0.Unitize(); emscripten::val o = emscripten::val::object(); o.set("self", a0); o.set("returns", r); return o; }))
-      .class_function("rotate", optional_override([](BND_Vector2d a0, double a1) { auto r = a0.Rotate(a1); emscripten::val o = emscripten::val::object(); o.set("self", a0); o.set("returns", r); return o; }))
+      .class_function("unitize", optional_override([](emscripten::val v0) { BND_Vector2d a0 = v0.as<BND_Vector2d>(); auto r = a0.Unitize(); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("rotate", optional_override([](emscripten::val v0, double a1) { BND_Vector2d a0 = v0.as<BND_Vector2d>(); auto r = a0.Rotate(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
       .class_function("encode", &BND_Vector2d_Encode, allow_raw_pointers());
 }
 #endif

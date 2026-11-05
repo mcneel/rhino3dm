@@ -996,6 +996,10 @@ template <class T> inline emscripten::val RH3DM_JsArray(const std::vector<T>& v)
   emscripten::val a = emscripten::val::array();
   for (size_t i = 0; i < v.size(); i++) a.call<void>("push", emscripten::val(v[i]));
   return a; }
+// a value-type mutator (G144): the changed value goes back into the JS object the caller passed,
+// as RhinoCommon changes the struct in place
+template <class T> inline void RH3DM_JsAssign(emscripten::val& target, const T& v) {
+  emscripten::val::global("Object").call<void>("assign", target, emscripten::val(v)); }
 // an array result C# returns as null (D35): null, not the empty array
 template <class T> inline emscripten::val RH3DM_JsArrayOrNull(const std::vector<T>& v) {
   return v.empty() ? emscripten::val::null() : RH3DM_JsArray(v); }

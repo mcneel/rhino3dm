@@ -2693,6 +2693,8 @@ declare module 'rhino3dm' {
 		readonly count: number;
 		/** The item at `index` (Python: `x[index]`). */
 		get(index: number): BrepEdge;
+		/** Iterates the items: `for (const x of brepEdgeList)`. */
+		[Symbol.iterator](): Iterator<BrepEdge>;
 	}
 
 	/**
@@ -2889,6 +2891,8 @@ declare module 'rhino3dm' {
 		 * Standardize all faces in the brep.
 		 */
 		standardizeFaceSurfaces(): void;
+		/** Iterates the items: `for (const x of brepFaceList)`. */
+		[Symbol.iterator](): Iterator<BrepFace>;
 	}
 
 	/**
@@ -2971,6 +2975,8 @@ declare module 'rhino3dm' {
 		readonly count: number;
 		/** The item at `index` (Python: `x[index]`). */
 		get(index: number): BrepLoop;
+		/** Iterates the items: `for (const x of brepLoopList)`. */
+		[Symbol.iterator](): Iterator<BrepLoop>;
 	}
 
 	/**
@@ -2983,6 +2989,8 @@ declare module 'rhino3dm' {
 		readonly count: number;
 		/** The item at `index` (Python: `x[index]`). */
 		get(index: number): Surface;
+		/** Iterates the items: `for (const x of brepSurfaceList)`. */
+		[Symbol.iterator](): Iterator<Surface>;
 	}
 
 	/**
@@ -3141,6 +3149,8 @@ declare module 'rhino3dm' {
 		 * @returns true if any trim's 2d curve is changed, false otherwise.
 		 */
 		matchEnds(): boolean;
+		/** Iterates the items: `for (const x of brepTrimList)`. */
+		[Symbol.iterator](): Iterator<BrepTrim>;
 	}
 
 	/**
@@ -3193,6 +3203,8 @@ declare module 'rhino3dm' {
 		readonly count: number;
 		/** The item at `index` (Python: `x[index]`). */
 		get(index: number): BrepVertex;
+		/** Iterates the items: `for (const x of brepVertexList)`. */
+		[Symbol.iterator](): Iterator<BrepVertex>;
 	}
 
 	/**
@@ -3239,6 +3251,8 @@ declare module 'rhino3dm' {
 		 * @returns Returns true if index is valid; otherwise returns false.
 		 */
 		tryGetAt(index: number): [boolean, number, number, number];
+		/** Iterates the items: `for (const x of cachedTextureCoordinates)`. */
+		[Symbol.iterator](): Iterator<Point3d>;
 	}
 
 	/**
@@ -4553,11 +4567,15 @@ declare module 'rhino3dm' {
 		 * Remove all the decals from the collection.
 		 */
 		removeAllDecals(): void;
+		/** Iterates the items: `for (const x of decals)`. */
+		[Symbol.iterator](): Iterator<Decal>;
 	}
 
 	class DecalsIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: Decal };
+		/** Iterates the items: `for (const x of decalsIter)`. */
+		[Symbol.iterator](): Iterator<Decal>;
 	}
 
 	/**
@@ -5879,11 +5897,15 @@ declare module 'rhino3dm' {
 		get(index: number): DimensionStyle;
 		/** An iterator over the items (`for...of` works on the object itself). */
 		iterator(): File3dmDimStyleTableIter;
+		/** Iterates the items: `for (const x of file3dmDimStyleTable)`. */
+		[Symbol.iterator](): Iterator<DimensionStyle>;
 	}
 
 	class File3dmDimStyleTableIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: DimensionStyle };
+		/** Iterates the items: `for (const x of file3dmDimStyleTableIter)`. */
+		[Symbol.iterator](): Iterator<DimensionStyle>;
 	}
 
 	/**
@@ -6132,11 +6154,15 @@ declare module 'rhino3dm' {
 		findIndex(index: number): File3dmEmbeddedFile;
 		/** An iterator over the items (`for...of` works on the object itself). */
 		iterator(): File3dmEmbeddedFilesIter;
+		/** Iterates the items: `for (const x of file3dmEmbeddedFiles)`. */
+		[Symbol.iterator](): Iterator<File3dmEmbeddedFile>;
 	}
 
 	class File3dmEmbeddedFilesIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: File3dmEmbeddedFile };
+		/** Iterates the items: `for (const x of file3dmEmbeddedFilesIter)`. */
+		[Symbol.iterator](): Iterator<File3dmEmbeddedFile>;
 	}
 
 	/**
@@ -6217,11 +6243,15 @@ declare module 'rhino3dm' {
 		groupMembers(groupIndex: number): any[];
 		/** An iterator over the items (`for...of` works on the object itself). */
 		iterator(): File3dmGroupTableIter;
+		/** Iterates the items: `for (const x of file3dmGroupTable)`. */
+		[Symbol.iterator](): Iterator<Group>;
 	}
 
 	class File3dmGroupTableIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: Group };
+		/** Iterates the items: `for (const x of file3dmGroupTableIter)`. */
+		[Symbol.iterator](): Iterator<Group>;
 	}
 
 	/**
@@ -6280,11 +6310,15 @@ declare module 'rhino3dm' {
 		get(index: number): HatchPattern;
 		/** An iterator over the items (`for...of` works on the object itself). */
 		iterator(): File3dmHatchPatternTableIter;
+		/** Iterates the items: `for (const x of file3dmHatchPatternTable)`. */
+		[Symbol.iterator](): Iterator<HatchPattern>;
 	}
 
 	class File3dmHatchPatternTableIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: HatchPattern };
+		/** Iterates the items: `for (const x of file3dmHatchPatternTableIter)`. */
+		[Symbol.iterator](): Iterator<HatchPattern>;
 	}
 
 	/**
@@ -6372,11 +6406,15 @@ declare module 'rhino3dm' {
 		get(index: number): InstanceDefinitionGeometry;
 		/** An iterator over the items (`for...of` works on the object itself). */
 		iterator(): File3dmInstanceDefinitionTableIter;
+		/** Iterates the items: `for (const x of file3dmInstanceDefinitionTable)`. */
+		[Symbol.iterator](): Iterator<InstanceDefinitionGeometry>;
 	}
 
 	class File3dmInstanceDefinitionTableIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: InstanceDefinitionGeometry };
+		/** Iterates the items: `for (const x of file3dmInstanceDefinitionTableIter)`. */
+		[Symbol.iterator](): Iterator<InstanceDefinitionGeometry>;
 	}
 
 	/**
@@ -6462,11 +6500,15 @@ declare module 'rhino3dm' {
 		get(index: number): Layer;
 		/** An iterator over the items (`for...of` works on the object itself). */
 		iterator(): File3dmLayerTableIter;
+		/** Iterates the items: `for (const x of file3dmLayerTable)`. */
+		[Symbol.iterator](): Iterator<Layer>;
 	}
 
 	class File3dmLayerTableIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: Layer };
+		/** Iterates the items: `for (const x of file3dmLayerTableIter)`. */
+		[Symbol.iterator](): Iterator<Layer>;
 	}
 
 	/**
@@ -6537,11 +6579,15 @@ declare module 'rhino3dm' {
 		get(index: number): Linetype;
 		/** An iterator over the items (`for...of` works on the object itself). */
 		iterator(): File3dmLinetypeTableIter;
+		/** Iterates the items: `for (const x of file3dmLinetypeTable)`. */
+		[Symbol.iterator](): Iterator<Linetype>;
 	}
 
 	class File3dmLinetypeTableIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: Linetype };
+		/** Iterates the items: `for (const x of file3dmLinetypeTableIter)`. */
+		[Symbol.iterator](): Iterator<Linetype>;
 	}
 
 	/**
@@ -6605,11 +6651,15 @@ declare module 'rhino3dm' {
 		get(index: number): Material;
 		/** An iterator over the items (`for...of` works on the object itself). */
 		iterator(): File3dmMaterialTableIter;
+		/** Iterates the items: `for (const x of file3dmMaterialTable)`. */
+		[Symbol.iterator](): Iterator<Material>;
 	}
 
 	class File3dmMaterialTableIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: Material };
+		/** Iterates the items: `for (const x of file3dmMaterialTableIter)`. */
+		[Symbol.iterator](): Iterator<Material>;
 	}
 
 	/**
@@ -6683,6 +6733,8 @@ declare module 'rhino3dm' {
 		delete(index: number): boolean;
 		/** The item at `index` (Python: `x[index]`). */
 		get(index: number): ConstructionPlane;
+		/** Iterates the items: `for (const x of file3dmNamedConstructionPlanes)`. */
+		[Symbol.iterator](): Iterator<ConstructionPlane>;
 	}
 
 	/**
@@ -7217,11 +7269,15 @@ declare module 'rhino3dm' {
 		getBoundingBox(): BoundingBox;
 		/** An iterator over the items (`for...of` works on the object itself). */
 		iterator(): File3dmObjectTableIter;
+		/** Iterates the items: `for (const x of file3dmObjectTable)`. */
+		[Symbol.iterator](): Iterator<File3dmObject>;
 	}
 
 	class File3dmObjectTableIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: File3dmObject };
+		/** Iterates the items: `for (const x of file3dmObjectTableIter)`. */
+		[Symbol.iterator](): Iterator<File3dmObject>;
 	}
 
 	/**
@@ -7258,6 +7314,8 @@ declare module 'rhino3dm' {
 		dump(): string;
 		/** The item at `index` (Python: `x[index]`). */
 		get(index: number): File3dmPlugInData;
+		/** Iterates the items: `for (const x of file3dmPlugInDataTable)`. */
+		[Symbol.iterator](): Iterator<File3dmPlugInData>;
 	}
 
 	class File3dmRenderContent extends ModelComponent {
@@ -7483,11 +7541,15 @@ declare module 'rhino3dm' {
 		find(g: string): File3dmRenderEnvironment;
 		/** An iterator over the items (`for...of` works on the object itself). */
 		iterator(): File3dmRenderEnvironmentsIter;
+		/** Iterates the items: `for (const x of file3dmRenderEnvironments)`. */
+		[Symbol.iterator](): Iterator<File3dmRenderEnvironment>;
 	}
 
 	class File3dmRenderEnvironmentsIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: File3dmRenderEnvironment };
+		/** Iterates the items: `for (const x of file3dmRenderEnvironmentsIter)`. */
+		[Symbol.iterator](): Iterator<File3dmRenderEnvironment>;
 	}
 
 	class File3dmRenderMaterial extends File3dmRenderContent {
@@ -7546,11 +7608,15 @@ declare module 'rhino3dm' {
 		find(g: string): File3dmRenderMaterial;
 		/** An iterator over the items (`for...of` works on the object itself). */
 		iterator(): File3dmRenderMaterialsIter;
+		/** Iterates the items: `for (const x of file3dmRenderMaterials)`. */
+		[Symbol.iterator](): Iterator<File3dmRenderMaterial>;
 	}
 
 	class File3dmRenderMaterialsIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: File3dmRenderMaterial };
+		/** Iterates the items: `for (const x of file3dmRenderMaterialsIter)`. */
+		[Symbol.iterator](): Iterator<File3dmRenderMaterial>;
 	}
 
 	class File3dmRenderTexture extends File3dmRenderContent {
@@ -7613,11 +7679,15 @@ declare module 'rhino3dm' {
 		find(g: string): File3dmRenderTexture;
 		/** An iterator over the items (`for...of` works on the object itself). */
 		iterator(): File3dmRenderTexturesIter;
+		/** Iterates the items: `for (const x of file3dmRenderTextures)`. */
+		[Symbol.iterator](): Iterator<File3dmRenderTexture>;
 	}
 
 	class File3dmRenderTexturesIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: File3dmRenderTexture };
+		/** Iterates the items: `for (const x of file3dmRenderTexturesIter)`. */
+		[Symbol.iterator](): Iterator<File3dmRenderTexture>;
 	}
 
 	/**
@@ -7937,6 +8007,8 @@ declare module 'rhino3dm' {
 		delete(index: number): boolean;
 		/** The item at `index` (Python: `x[index]`). */
 		get(index: number): ViewInfo;
+		/** Iterates the items: `for (const x of file3dmViewTable)`. */
+		[Symbol.iterator](): Iterator<ViewInfo>;
 	}
 
 	/**
@@ -10236,11 +10308,15 @@ declare module 'rhino3dm' {
 		 * Total number of items in the manifest, including deleted items.
 		 */
 		readonly longCount: number;
+		/** Iterates the items: `for (const x of manifestTable)`. */
+		[Symbol.iterator](): Iterator<ModelComponent>;
 	}
 
 	class ManifestTableIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: ModelComponent };
+		/** Iterates the items: `for (const x of manifestTableIter)`. */
+		[Symbol.iterator](): Iterator<ModelComponent>;
 	}
 
 	class Material extends ModelComponent {
@@ -10994,6 +11070,8 @@ declare module 'rhino3dm' {
 		 * Gets the number of faces that are valid triangles (3 corners).
 		 */
 		readonly triangleCount: number;
+		/** Iterates the items: `for (const x of meshFaceList)`. */
+		[Symbol.iterator](): Iterator<MeshFace>;
 	}
 
 	/**
@@ -11124,6 +11202,8 @@ declare module 'rhino3dm' {
 		 * @returns true on success, false on failure.
 		 */
 		transposeTextureCoordinates(): boolean;
+		/** Iterates the items: `for (const x of meshTextureCoordinateList)`. */
+		[Symbol.iterator](): Iterator<Point2f>;
 	}
 
 	/**
@@ -11276,6 +11356,8 @@ declare module 'rhino3dm' {
 		 * Return colors as an array of integers with packed ARGB values
 		 */
 		toARGBArray(): any[];
+		/** Iterates the items: `for (const x of meshVertexColorList)`. */
+		[Symbol.iterator](): Iterator<any[]>;
 	}
 
 	/**
@@ -11447,6 +11529,8 @@ declare module 'rhino3dm' {
 		 * Set to true if the vertices should be stored in double precision
 		 */
 		useDoublePrecisionVertices: boolean;
+		/** Iterates the items: `for (const x of meshVertexList)`. */
+		[Symbol.iterator](): Iterator<Point3f>;
 	}
 
 	/**
@@ -11569,6 +11653,8 @@ declare module 'rhino3dm' {
 		 * @returns true on success, false on failure.
 		 */
 		unitizeNormals(): boolean;
+		/** Iterates the items: `for (const x of meshVertexNormalList)`. */
+		[Symbol.iterator](): Iterator<Vector3f>;
 	}
 
 	/**
@@ -12077,6 +12163,8 @@ declare module 'rhino3dm' {
 		 * @returns A component.
 		 */
 		superfluousKnot(start: boolean): number;
+		/** Iterates the items: `for (const x of nurbsCurveKnotList)`. */
+		[Symbol.iterator](): Iterator<number>;
 	}
 
 	/**
@@ -12188,6 +12276,8 @@ declare module 'rhino3dm' {
 		 * @returns true if successful, false otherwise.
 		 */
 		setWeight(index: number, weight: number): boolean;
+		/** Iterates the items: `for (const x of nurbsCurvePointList)`. */
+		[Symbol.iterator](): Iterator<ControlPoint>;
 	}
 
 	/**
@@ -12381,6 +12471,8 @@ declare module 'rhino3dm' {
 		 * @returns A component.
 		 */
 		superfluousKnot(start: boolean): number;
+		/** Iterates the items: `for (const x of nurbsSurfaceKnotList)`. */
+		[Symbol.iterator](): Iterator<number>;
 	}
 
 	/**
@@ -12508,6 +12600,8 @@ declare module 'rhino3dm' {
 		 * @returns true if successful, false otherwise.
 		 */
 		setWeight(u: number, v: number, weight: number): boolean;
+		/** Iterates the items: `for (const x of nurbsSurfacePointList)`. */
+		[Symbol.iterator](): Iterator<ControlPoint>;
 	}
 
 	/**
@@ -14021,6 +14115,8 @@ declare module 'rhino3dm' {
 		 * This function differs from the DotNET implementation of List<T> since that one only trims the excess if the excess exceeds 10% of the list length.
 		 */
 		trimExcess(): void;
+		/** Iterates the items: `for (const x of point3dList)`. */
+		[Symbol.iterator](): Iterator<Point3d>;
 	}
 
 	/** The plain-object form of a Point3f value (fields as in RhinoCommon). */
@@ -14567,6 +14663,8 @@ declare module 'rhino3dm' {
 		 * @deprecated since 9.2: use `toThreejsBuffers(false)`
 		 */
 		toThreejsJSON(): any;
+		/** Iterates the items: `for (const x of pointCloud)`. */
+		[Symbol.iterator](): Iterator<PointCloudItem>;
 	}
 
 	/**
@@ -14895,6 +14993,8 @@ declare module 'rhino3dm' {
 		 * @returns The polyline as defined by the sub-domain, or null on failure.
 		 */
 		trim(domain: Interval): Polyline;
+		/** Iterates the items: `for (const x of polyline)`. */
+		[Symbol.iterator](): Iterator<Point3d>;
 	}
 
 	/**
@@ -15011,11 +15111,15 @@ declare module 'rhino3dm' {
 		 * Sets the selected post effect for a certain type.
 		 */
 		setSelectedPostEffect(type: PostEffectType, id: string): void;
+		/** Iterates the items: `for (const x of postEffectCollection)`. */
+		[Symbol.iterator](): Iterator<PostEffectData>;
 	}
 
 	class PostEffectCollectionIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: PostEffectData };
+		/** Iterates the items: `for (const x of postEffectCollectionIter)`. */
+		[Symbol.iterator](): Iterator<PostEffectData>;
 	}
 
 	/**
@@ -15976,11 +16080,15 @@ declare module 'rhino3dm' {
 		find(id: number): SubDEdge;
 		/** An iterator over the items (`for...of` works on the object itself). */
 		iterator(): SubDEdgeListIter;
+		/** Iterates the items: `for (const x of subDEdgeList)`. */
+		[Symbol.iterator](): Iterator<SubDEdge>;
 	}
 
 	class SubDEdgeListIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: SubDEdge };
+		/** Iterates the items: `for (const x of subDEdgeListIter)`. */
+		[Symbol.iterator](): Iterator<SubDEdge>;
 	}
 
 	/** The plain-object form of a SubDEdgeSharpness value (fields as in RhinoCommon). */
@@ -16356,11 +16464,15 @@ declare module 'rhino3dm' {
 		readonly hasPerFaceColors: boolean;
 		/** An iterator over the items (`for...of` works on the object itself). */
 		iterator(): SubDFaceListIter;
+		/** Iterates the items: `for (const x of subDFaceList)`. */
+		[Symbol.iterator](): Iterator<SubDFace>;
 	}
 
 	class SubDFaceListIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: SubDFace };
+		/** Iterates the items: `for (const x of subDFaceListIter)`. */
+		[Symbol.iterator](): Iterator<SubDFace>;
 	}
 
 	/**
@@ -16478,11 +16590,15 @@ declare module 'rhino3dm' {
 		readonly first: SubDVertex;
 		/** An iterator over the items (`for...of` works on the object itself). */
 		iterator(): SubDVertexListIter;
+		/** Iterates the items: `for (const x of subDVertexList)`. */
+		[Symbol.iterator](): Iterator<SubDVertex>;
 	}
 
 	class SubDVertexListIter {
 		/** The next item: `{done: true}` at the end. */
 		next(): { done: boolean, value?: SubDVertex };
+		/** Iterates the items: `for (const x of subDVertexListIter)`. */
+		[Symbol.iterator](): Iterator<SubDVertex>;
 	}
 
 	/**

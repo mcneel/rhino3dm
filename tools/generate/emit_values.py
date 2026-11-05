@@ -458,11 +458,12 @@ def emit_valuetype_bindings(vt, skipped):
                     pyl.append('      .def("__str__", [](%s& self) { return self.ToString(); })' % T)
                 types = [T] + [p['Type'] for p in m['Params']]
                 call = 'a0.%s(%s)' % (n, ', '.join('a%d' % (i + 1) for i in range(len(m['Params']))))
-                if m['Ret'] == 'void':     # mutator: a JS value is a copy -> return it
-                    js_fn(n, types, '%s; return a0;' % call)
-                elif m.get('Mutates'):     # mutates AND returns: both (generator-log G6)
-                    js_fn(n, types, 'auto r = %s; emscripten::val o = emscripten::val::object(); '
-                                    'o.set("self", a0); o.set("returns", r); return o;' % pub(m, call))
+                # a mutator changes the JS object passed in, as RhinoCommon changes the struct in
+                # place (G144: replaces G6's {self, returns}); @@SELF@@ is the write-back
+                if m['Ret'] == 'void':
+                    js_fn(n, types, '%s; @@SELF@@ return emscripten::val::undefined();' % call)
+                elif m.get('Mutates'):
+                    js_fn(n, types, 'auto r = %s; @@SELF@@ return emscripten::val(r);' % pub(m, call))
                 else:
                     js_fn(n, types, 'return %s;' % pub(m, call))
             elif k in ('property', 'static-field') and m['Static']:
@@ -538,14 +539,20 @@ def emit_valuetype_bindings(vt, skipped):
             # overloads JS cannot tell apart (Point3d+Point3d vs Point3d+Vector3d:
             # both {X,Y,Z}) collapse to the first -- a dispatcher could never
             # pick another, it would only cost a shape check per call
+            # A static and an instance form with one shape (BoundingBox.Union(a, b) and a.Union(b),
+            # G132): the static, which is what `rhino.BoundingBox.union(a, b)` reads as (G144)
             by_shape = {}
-            for e in ents:
+            for e in sorted(ents, key=lambda e: '@@SELF@@' in e[1]):
                 by_shape.setdefault(tuple(js_shape(t) for t in e[0]), e)
             ents = list(by_shape.values())
             ents = [js_vectors(types, body) for types, body in ents]
             if len(ents) == 1:
                 types, body = ents[0]
-                params = ', '.join('%s a%d' % (t, i) for i, t in enumerate(types))
+                if '@@SELF@@' in body:   # the value arrives as the JS object, to write back into
+                    params = ', '.join(['emscripten::val v0'] + ['%s a%d' % (t, i) for i, t in enumerate(types) if i])
+                    body = '%s a0 = v0.as<%s>(); %s' % (types[0], types[0], body.replace('@@SELF@@', 'RH3DM_JsAssign(v0, a0);'))
+                else:
+                    params = ', '.join('%s a%d' % (t, i) for i, t in enumerate(types))
                 jsl.append('      .class_function("%s", optional_override([](%s) { %s }))'
                            % (fname, params, body))
                 continue
@@ -558,7 +565,7 @@ def emit_valuetype_bindings(vt, skipped):
                 cond = ' && '.join(js_check('v%d' % i, t) for i, t in enumerate(types)) or 'true'
                 conv = ' '.join('%s a%d = v%d.as<%s>();' % (t, i, i, t) for i, t in enumerate(types))
                 branches.append('if (%s) { %s return emscripten::val([&]() { %s }()); }'
-                                % (cond, conv, body))
+                                % (cond, conv, body.replace('@@SELF@@', 'RH3DM_JsAssign(v0, a0);')))
             jsl.append('      .class_function("%s", optional_override([](%s) -> emscripten::val {\n'
                        '        %s\n        throw std::invalid_argument("%s.%s: no overload matches the arguments"); }))'
                        % (fname, vparams, '\n        '.join(branches), reg, fname))

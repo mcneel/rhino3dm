@@ -95,14 +95,12 @@ module.exports = (t, ctx) => {
     const moved = r.Transform.transformList(xf, [P(0, 0, 0), P(1, 1, 1)]);
     assert.deepStrictEqual(moved, [P(1, 0, 0), P(2, 1, 1)]);
     assert.strictEqual(r.Transform.toFloatArray(xf, true).length, 16);
-    const tr = B.transform(bb, xf);                       // a mutating value member: {self, returns}
-    assert.strictEqual(tr.returns, true);
-    bb = tr.self;
+    assert.strictEqual(B.transform(bb, xf), true);        // a mutator changes the value passed in, as in C# (G144)
     assert.deepStrictEqual(bb.Min, P(1, 0, 0));
     assert.deepStrictEqual(B.closestPoint(bb, P(-5, 1, 1)), P(bb.Min.X, 1, 1));
-    const rot = r.Plane.rotate(r.Plane.worldXY, Math.PI / 2, V(0, 0, 1));
-    assert.strictEqual(rot.returns, true);
-    assert(Math.abs(rot.self.XAxis.Y - 1.0) < 1e-12);
+    const rot = r.Plane.worldXY;
+    assert.strictEqual(r.Plane.rotate(rot, Math.PI / 2, V(0, 0, 1)), true);
+    assert(Math.abs(rot.XAxis.Y - 1.0) < 1e-12);
     const box = r.Box.create(B.create(P(0, 0, 0), P(1, 1, 1)));
     assert.strictEqual(r.Box.contains(box, P(0.5, 0.5, 0.5)), true);
     assert.strictEqual(r.Box.getCorners(box).length, 8);

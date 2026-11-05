@@ -33,6 +33,14 @@ std::string ToStdString(const py::str& str);
 #include "../lib/opennurbs/opennurbs.h"
 #endif
 
+// <windows.h> (through opennurbs) still defines the 16-bit `near` and `far` as empty macros, which
+// eat RhinoCommon's parameter names (ViewportInfo.GetScreenPort(out int near, out int far)) in the
+// generated code. Nothing here uses the macros.
+#if defined(_WIN32)
+#undef near
+#undef far
+#endif
+
 #if defined(ON_WASM_COMPILE)
 #include <emscripten/bind.h>
 #include <emscripten/emscripten.h>
