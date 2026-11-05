@@ -265,6 +265,9 @@ Array results are lists (8.x returned tuples in places), and `None` where RhinoC
 - `TextHasRtfFormatting` is true for more than one text run.
   `PlainText` joins the runs, and for a dimension it returns the authored text (the
   `<>` formula), not the measurement.
+- On macOS and Windows, text may not be measured: an annotation's `GetBoundingBox` is then empty
+  (`IsValid` is false) and `TextModelWidth` is -2. 8.x returned a zero-width box there. Linux
+  measures text. <!-- D90 -->
 
 ## Rendering and settings
 

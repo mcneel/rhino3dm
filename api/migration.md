@@ -435,6 +435,11 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array]], 
   `<>` formula), not the measurement.
 - <!-- js -->WebAssembly has no font engine, so text is not measured: annotation bounding boxes are
   empty, and `textModelWidth` is -2. <!-- D90 --><!-- /js -->
+<!-- py -->
+- On macOS and Windows, text may not be measured: an annotation's `GetBoundingBox` is then empty
+  (`IsValid` is false) and `TextModelWidth` is -2. 8.x returned a zero-width box there. Linux
+  measures text. <!-- D90 -->
+<!-- /py -->
 
 ## Rendering and settings
 

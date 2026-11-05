@@ -1,4 +1,5 @@
 import rhino3dm
+import sys
 import unittest
 import os.path
 from os.path import dirname
@@ -55,9 +56,12 @@ class TestAnnotation(unittest.TestCase):
             # HasPropertyOverrides should be queryable (bool)
             self.assertIn(geo.HasPropertyOverrides, (True, False))
 
-            # A valid bounding box now requires the parent dimension style
-            bbox = geo.GetBoundingBox(True)     # measured with ParentDimensionStyle (D67, G89)
-            self.assertTrue(bbox.IsValid, "Annotation bounding box is not valid")
+            # The bounding box is measured with ParentDimensionStyle (D67, G89). Only the Linux
+            # build has a font engine here (FreeType); on macOS and Windows the text is not
+            # measured and the box is empty, as in JS (D90; 8.x returned a zero-width box)
+            bbox = geo.GetBoundingBox(True)
+            if sys.platform.startswith("linux"):
+                self.assertTrue(bbox.IsValid, "Annotation bounding box is not valid")
 
         self.assertGreater(annotationCount, 0, "No annotations found in test model")
 
