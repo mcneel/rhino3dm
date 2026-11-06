@@ -1,4 +1,5 @@
 const rhino3dm = require('rhino3dm')
+const helpers = require('./helpers')
 
 let rhino
 let surface
@@ -65,4 +66,25 @@ test('getSpanVector', async () => {
     expect(result.length > 0).toBe(true)
     expect(typeof result[0] === 'number').toBe(true)
 
+})
+
+test('surfaceToNurbsSurfaceReturnsTheSurfaceAndItsAccuracy', () => {
+  // toNurbsSurface(tolerance) returns [nurbsSurface, accuracy]; toNurbsSurface() only the surface
+  const srf = helpers.boxBrep(rhino).faces.get(0).underlyingSurface()
+  const res = srf.toNurbsSurface(0.0)
+  expect(Array.isArray(res)).toBe(true)
+  expect(res.length).toBe(2)
+  const [ns, accuracy] = res
+  expect(ns).toBeInstanceOf(rhino.NurbsSurface)
+  expect(Number.isInteger(accuracy)).toBe(true)
+  expect(accuracy).toBeGreaterThan(0)
+  expect(srf.toNurbsSurface()).toBeInstanceOf(rhino.NurbsSurface)
+})
+
+test('surfaceToNurbsSurfaceWithATolerance', () => {
+  // toNurbsSurface(tolerance) returns the NURBS form and its accuracy (D19)
+  const s = rhino.Sphere.toNurbsSurface(new rhino.Sphere(new rhino.Point3d(0, 0, 0), 2))
+  const [ns, accuracy] = s.toNurbsSurface(0.01)
+  expect(accuracy).toBe(1)
+  expect([ns.points.countU, ns.points.countV]).toEqual([9, 5])
 })

@@ -1,6 +1,11 @@
 rhino3dm.py
 ===========
 
+.. important::
+
+   **Coming from rhino3dm 8.x?** 9.2 is generated from RhinoCommon, and much of the API changed.
+   Read :doc:`migrating` first, and look up any 8.x name in :doc:`migrating-members`.
+
 rhino3dm is a Python library for reading, writing and working with Rhino's .3dm files and the
 geometry in them, without Rhino. Its API is RhinoCommon's: the classes, members and names are
 generated from RhinoCommon, and the documentation here is RhinoCommon's own.
@@ -14,10 +19,11 @@ generated from RhinoCommon, and the documentation here is RhinoCommon's own.
    model.Objects.AddCircle(circle)
    model.Write("circle.3dm", 8)
 
-Install with ``pip install rhino3dm``. Coming from rhino3dm 8.x? See the migration guide in the
-repository (``docs/migration-9.2.md``).
+Install with ``pip install rhino3dm``.
 
 .. toctree::
    :maxdepth: 1
 
+   migrating
+   migrating-members
    reference/index

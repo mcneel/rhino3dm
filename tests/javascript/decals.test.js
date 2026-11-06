@@ -1,4 +1,5 @@
 const rhino3dm = require('rhino3dm')
+const helpers = require('./helpers')
 
 let rhino
 beforeAll(async () => {
@@ -49,4 +50,51 @@ test('readDecalLifetime_RH3DM_159', async () => {
     }
 
     expect([held[0].textureInstanceId, held[1].textureInstanceId]).toEqual(expected)
+})
+
+test('decalsIterateCopiesThatOutliveTheFile', () => {
+  // iterating decals yields copies of the decals that stay valid after the file is gone
+  const f = helpers.readModel(rhino, 'sphereDecals.3dm')
+  const objs = [...f.objects]
+  const decals = [...objs[0].attributes.decals]
+  expect(decals.length).toBe(2)
+  for (const d of decals) expect(d.mapping).toBe(rhino.DecalMapping.UV)
+  const ids = decals.map(d => d.textureInstanceId)
+  expect(new Set(ids).size).toBe(2)
+  // the file and its objects are deleted explicitly
+  for (const o of objs) o.delete()
+  f.delete()
+  expect(decals.map(d => d.textureInstanceId)).toEqual(ids)
+})
+
+test('decalsOfNewAttributesAreEmptyAndWritable', () => {
+  // new attributes have no decals; removeAllDecals and clear work, and remove(null) returns false
+  const a = new rhino.ObjectAttributes()
+  expect([...a.decals]).toEqual([])
+  a.decals.removeAllDecals()
+  a.decals.clear()
+  expect(a.decals.remove(null)).toBe(false)
+})
+
+test('decalSweepsAndUVBounds', () => {
+  // A decal's horzSweep, vertSweep and getUVBounds read the values stored in the file
+  const decals = []
+  for (const o of helpers.readModel(rhino, 'sphereDecals.3dm').objects) decals.push(...o.attributes.decals)
+  const expected = [[[0, 0], [0, 0], [0.6, 0.6, 0.7, 0.7]],
+                    [[0, 0], [0, 0], [0.2, 0.2, 0.300000001490116, 0.300000001490116]]]
+  expect(decals.length).toBe(expected.length)
+  expected.forEach(([horz, vert, bounds], k) => {
+    const d = decals[k]
+    expect(Array.from(d.horzSweep())).toEqual(horz)
+    expect(Array.from(d.vertSweep())).toEqual(vert)
+    expect(Array.from(d.getUVBounds())).toEqual(bounds)
+  })
+})
+
+test('objectAttributesDecalsListsTheVisibleDecals', () => {
+  // iterating an object's attributes.decals yields its visible decals, in order (D74)
+  const f = helpers.readModel(rhino, 'sphereDecals.3dm')
+  const decals = [...[...f.objects][0].attributes.decals]
+  expect(decals.map(d => String(d.textureInstanceId)))
+    .toEqual(['84eda676-69e1-4fa5-b81e-412676e88b31', '7339f997-0433-4591-811f-3cf66b6d41fe'])
 })

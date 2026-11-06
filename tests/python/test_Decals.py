@@ -1,5 +1,9 @@
 import rhino3dm
 import unittest
+import os
+import sys
+import helpers
+import gc
 
 # RH3DM-159: the decal table now holds shared_ptr<ON_Decal> (opennurbs' shared_ptr API) instead
 # of borrowed raw pointers wrapped with _owned=true (which dangled / double-freed once the decal
@@ -12,6 +16,8 @@ import unittest
 # committed to RDK user data, and GetDecalArray() repopulates from that committed data every call
 # (RH-86089), so in-memory authoring does not round-trip (tracked: RH3DM-159 / RH3DM-194). Reading
 # decals from a Rhino-authored .3dm works and is what these tests exercise.
+
+
 class TestDecals(unittest.TestCase):
 
     def test_emptyTableIsCrashSafe(self):
@@ -48,6 +54,54 @@ class TestDecals(unittest.TestCase):
 
         # held wrappers still valid and unchanged
         self.assertEqual([str(held[0].TextureInstanceId), str(held[1].TextureInstanceId)], expected_ids)
+
+    def test_decalsIterateCopiesThatOutliveTheFile(self):
+        """Iterating Decals yields copies of the decals that stay valid after the file is gone."""
+        f = helpers.read_model('sphereDecals.3dm')
+        objs = list(f.Objects)
+        decals = list(objs[0].Attributes.Decals)
+        self.assertEqual(len(decals), 2)
+        self.assertTrue(all(d.Mapping == rhino3dm.DecalMapping.UV for d in decals))
+        ids = [d.TextureInstanceId for d in decals]
+        self.assertEqual(len(set(ids)), 2)
+        del f, objs
+        gc.collect()
+        self.assertEqual([d.TextureInstanceId for d in decals], ids)
+
+    def test_decalsLenIsTheNumberOfDecals(self):
+        """len(Decals) counts the decals the iteration yields. (D31)"""
+        f = helpers.read_model('sphereDecals.3dm')
+        self.assertEqual(len(list(f.Objects)[0].Attributes.Decals), 2)
+        self.assertEqual(len(rhino3dm.ObjectAttributes().Decals), 0)
+
+    def test_decalsOfNewAttributesAreEmptyAndWritable(self):
+        """New attributes have no decals; RemoveAllDecals and Clear work, and Remove(None) returns False."""
+        a = rhino3dm.ObjectAttributes()
+        self.assertEqual(list(a.Decals), [])
+        a.Decals.RemoveAllDecals()
+        a.Decals.Clear()
+        self.assertIs(a.Decals.Remove(None), False)
+
+    def test_decalSweepsAndUVBounds(self):
+        """A decal's HorzSweep, VertSweep and GetUVBounds read the values stored in the file."""
+        f = helpers.read_model('sphereDecals.3dm')
+        decals = [d for o in f.Objects for d in o.Attributes.Decals]
+        expected = [((0.0, 0.0), (0.0, 0.0), (0.6, 0.6, 0.7, 0.7)),
+                    ((0.0, 0.0), (0.0, 0.0), (0.2, 0.2, 0.300000001490116, 0.300000001490116))]
+        self.assertEqual(len(decals), len(expected))
+        for (horz, vert, bounds), d in zip(expected, decals):
+            self.assertEqual(horz, tuple(d.HorzSweep()))
+            self.assertEqual(vert, tuple(d.VertSweep()))
+            self.assertEqual(bounds, tuple(d.GetUVBounds()))
+
+    def test_objectAttributesDecalsListsTheVisibleDecals(self):
+        """Iterating an object's Attributes.Decals yields its visible decals, in order (D74)."""
+        f = helpers.read_model('sphereDecals.3dm')
+        decals = list(next(iter(f.Objects)).Attributes.Decals)
+        self.assertEqual(len(decals), 2)
+        self.assertTrue(all(d.IsVisible for d in decals))
+        self.assertEqual([str(d.TextureInstanceId) for d in decals],
+                         ['84eda676-69e1-4fa5-b81e-412676e88b31', '7339f997-0433-4591-811f-3cf66b6d41fe'])
 
 
 if __name__ == '__main__':

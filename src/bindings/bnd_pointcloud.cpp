@@ -3,11 +3,19 @@
 
 using namespace bnd_shared;
 
+// ON_PointCloud::Transform moves the points (and the plane) but not the normals: rotate them too
+static void RotatePointCloud(ON_PointCloud& pc, const ON_Xform& rotation)
+{
+  pc.Transform(rotation);
+  if (pc.m_N.Count() > 0)
+    ON_TransformVectorList(3, pc.m_N.Count(), 3, &pc.m_N[0].x, rotation);
+}
+
 BND_DICT BND_PointCloud_ToThreejsBuffers(const BND_PointCloud& cloud, bool rotateToYUp)
 {
   ON_PointCloud pc(*cloud.RH3DM_Const());
   if (rotateToYUp)
-    pc.Transform(ToYUp());
+    RotatePointCloud(pc, ToYUp());
   BND_DICT rc = RH3DM_DictNew();
   RH3DM_DictSetFloats(rc, "position", Floats3(pc.m_P));
   RH3DM_DictSet(rc, "pointCount", pc.m_P.Count());
@@ -32,7 +40,7 @@ BND_PointCloud* BND_PointCloud_CreateFromThreejsBuffers(BND_DICT buffers, bool r
   for (int i = 0; i < (int)col.size() / 3; i++)
     pc->m_C.Append(ColorAt(col, i));
   if (rotateFromYUp)
-    pc->Transform(FromYUp());
+    RotatePointCloud(*pc, FromYUp());
   pc->InvalidateBoundingBox();
   return new BND_PointCloud(pc);
 }

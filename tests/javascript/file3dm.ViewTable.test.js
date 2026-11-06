@@ -1,4 +1,5 @@
 const rhino3dm = require('rhino3dm')
+const helpers = require('./helpers')
 const fs = require('fs')
 
 let rhino
@@ -51,4 +52,43 @@ test('CreateFileWithView', async () => {
 
   expect(JSON.stringify(loc) === JSON.stringify(loc_read) && JSON.stringify(loc2) === JSON.stringify(loc_read) && JSON.stringify(loc3) === JSON.stringify(loc_read)).toBe(true)
 
+})
+
+test('viewTableDelete', () => {
+  // views.delete(index) removes a view, and throws for an index past the end
+  const f = helpers.readModel(rhino, 'file3dm_stuff.3dm')
+  const n = f.views.count
+  expect(n).toBeGreaterThan(0)
+  expect(f.views.delete(0)).toBe(true)
+  expect(f.views.count).toBe(n - 1)
+  helpers.raises(rhino, () => f.views.delete(99), /out_of_range/)
+})
+
+test('viewTableItemsAreLiveViews', () => {
+  // views iterates over ViewInfo items, and views.get(i) is the file's view: writes to it reach the file
+  const f = helpers.readModel(rhino, 'file3dm_stuff.3dm')
+  const views = [...f.views]
+  expect(views.length).toBe(f.views.count)
+  expect(views.length).toBeGreaterThan(0)
+  expect(views.every(x => x instanceof rhino.ViewInfo)).toBe(true)
+  const v = f.views.get(0)
+  v.name = 'live'
+  expect(f.views.get(0).name).toBe('live')
+})
+
+test('viewTableViewKeepsTheFileAlive', async () => {
+  // a view taken from views stays usable after the file is dropped
+  const v = (() => {
+    const f = helpers.readModel(rhino, 'file3dm_stuff.3dm')
+    const v0 = f.views.get(0)
+    v0.name = 'live'
+    return v0
+  })()
+  await helpers.gcSettle()
+  expect(v.name).toBe('live')
+})
+
+test('viewTableIndexOutOfRangeRaises', () => {
+  // views.get(i) past the end throws
+  helpers.raises(rhino, () => helpers.readModel(rhino, 'file3dm_stuff.3dm').views.get(99), /out_of_range/)
 })

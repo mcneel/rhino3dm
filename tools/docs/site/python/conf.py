@@ -8,7 +8,11 @@ copyright = '2026, Robert McNeel & Associates'
 author = 'Robert McNeel & Associates'
 release = version = os.environ.get('RH3DM_VERSION', '')
 
-extensions = ['autoapi.extension', 'sphinx.ext.napoleon']
+extensions = ['autoapi.extension', 'sphinx.ext.napoleon', 'myst_parser']
+# the migration guide pages (docs/migrating-to-9/python*.md, copied in by make_docs.sh) are Markdown;
+# their in-page links use GitHub's heading anchors
+source_suffix = {'.rst': 'restructuredtext', '.md': 'markdown'}
+myst_heading_anchors = 4
 autoapi_type = 'python'
 autoapi_dirs = [os.environ['RH3DM_PKG']]          # a copy of src/rhino3dm holding __init__.pyi
 autoapi_file_patterns = ['*.pyi']

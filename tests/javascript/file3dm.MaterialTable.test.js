@@ -1,4 +1,5 @@
 const rhino3dm = require('rhino3dm')
+const helpers = require('./helpers')
 
 let rhino
 beforeEach( async() => {
@@ -41,4 +42,30 @@ test('DeleteMaterial', async () => {
 
   expect(qtyMaterials1 === 2 && qtyMaterials2 === 1).toBe(true)
 
+})
+
+test('materialTableFindIdSkipsDeletedMaterials', () => {
+  // materials.findId finds a material by id, and returns null once it is deleted
+  const f = new rhino.File3dm()
+  f.materials.add(new rhino.Material())
+  const mi = f.materials.count - 1
+  const mid = f.materials.findIndex(mi).id
+  expect(f.materials.findId(mid)).not.toBeNull()
+  f.materials.delete(mi)
+  expect(f.materials.findId(mid)).toBeNull()
+})
+
+test('materialTableFindFromAttributes', () => {
+  // findFromAttributes resolves an object's material: the default material by default, a model material through the object
+  const f = new rhino.File3dm()
+  const a = new rhino.ObjectAttributes()
+  const m = f.allMaterials.findFromAttributes(a)
+  expect(m).toBeInstanceOf(rhino.Material)
+  expect(String(m.id).toLowerCase()).toBe('cf2be1de-b81c-4d69-9418-dde91d266086')   // ON_Material::Default
+  const mat = new rhino.Material()
+  mat.name = 'red'
+  const mi = f.allMaterials.addMaterial(mat)
+  a.materialSource = rhino.ObjectMaterialSource.MaterialFromObject
+  a.materialIndex = mi
+  expect(f.allMaterials.findFromAttributes(a).name).toBe('red')
 })

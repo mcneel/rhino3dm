@@ -2,6 +2,7 @@
 // Shaped by RhinoCommon signatures, calling the flat C layer with
 // constants and guards baked from the C# call sites (api/manifest.json).
 #include "bnd_cachedtexturecoordinates_gen.h"
+#include "bnd_commonobject.h"
 
 int BND_CachedTextureCoordinates::Gen_Count() const {
   return ON_TextureCoordinates_GetPointListCount(m_ptr);
@@ -101,7 +102,7 @@ bool BND_CachedTextureCoordinates::Gen_Contains(BND_Point3d item) const {
 #if defined(ON_PYTHON_COMPILE)
 void initGenCachedTextureCoordinates(rh3dmpymodule& m)
 {
-  py::class_<BND_CachedTextureCoordinates>(m, "CachedTextureCoordinates")
+  py::class_<BND_CachedTextureCoordinates, BND_CommonObject>(m, "CachedTextureCoordinates")
       .def_prop_ro("Count", &BND_CachedTextureCoordinates::Gen_Count)
       .def_prop_ro("Dim", &BND_CachedTextureCoordinates::Gen_Dim)
       .def_prop_ro("MappingId", &BND_CachedTextureCoordinates::Gen_MappingId)
@@ -119,7 +120,7 @@ void initGenCachedTextureCoordinates(rh3dmpymodule& m)
 using namespace emscripten;
 void initGenCachedTextureCoordinates(void)
 {
-  class_<BND_CachedTextureCoordinates>("CachedTextureCoordinates")
+  class_<BND_CachedTextureCoordinates, base<BND_CommonObject>>("CachedTextureCoordinates")
       .property("count", &BND_CachedTextureCoordinates::Gen_Count)
       .property("dim", &BND_CachedTextureCoordinates::Gen_Dim)
       .property("mappingId", &BND_CachedTextureCoordinates::Gen_MappingId)
@@ -128,6 +129,8 @@ void initGenCachedTextureCoordinates(void)
       .function("tryGetAt", &BND_CachedTextureCoordinates::Gen_TryGetAt)
       .function("copyTo", optional_override([](BND_CachedTextureCoordinates& self, emscripten::val a0, int a1) -> void { self.Gen_CopyTo(RH3DM_JsSeq<BND_Point3d>(a0), a1); }), allow_raw_pointers())
       .function("indexOf", &BND_CachedTextureCoordinates::Gen_IndexOf)
-      .function("contains", &BND_CachedTextureCoordinates::Gen_Contains);
+      .function("contains", &BND_CachedTextureCoordinates::Gen_Contains)
+      .class_function("decode", &BND_CommonObject_Decode, allow_raw_pointers())
+      .class_function("computeMemoryEstimate", &BND_CommonObject::Gen_ComputeMemoryEstimate);
 }
 #endif

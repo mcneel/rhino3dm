@@ -1,7 +1,13 @@
 import rhino3dm
 import unittest
+import os
+import sys
+import helpers
+import gc
 
 #objective: to test creating file with layers and reasing a file with layers
+
+
 class TestFile3dmViewTable(unittest.TestCase):
     def test_createFileWithView(self):
 
@@ -37,6 +43,42 @@ class TestFile3dmViewTable(unittest.TestCase):
         loc_read = vi_read.Viewport.CameraLocation
 
         self.assertTrue(loc == loc_read and loc2 == loc_read)
+
+    def test_viewTableDelete(self):
+        """Views.Delete(index) removes a view, and raises IndexError for an index past the end."""
+        f = helpers.read_model('file3dm_stuff.3dm')
+        n = f.Views.Count
+        self.assertGreater(n, 0)
+        self.assertGreaterEqual(f.NamedViews.Count, 0)
+        self.assertIs(f.Views.Delete(0), True)
+        self.assertEqual(f.Views.Count, n - 1)
+        with self.assertRaises(IndexError):
+            f.Views.Delete(99)
+
+    def test_viewTableItemsAreLiveViews(self):
+        """Views iterates over ViewInfo items, and Views[i] is the file's view: writes to it reach the file."""
+        f = helpers.read_model('file3dm_stuff.3dm')
+        views = list(f.Views)
+        self.assertEqual(len(views), f.Views.Count)
+        self.assertGreater(len(views), 0)
+        self.assertTrue(all(isinstance(v, rhino3dm.ViewInfo) for v in views))
+        v = f.Views[0]
+        v.Name = 'live'
+        self.assertEqual(f.Views[0].Name, 'live')
+
+    def test_viewTableViewKeepsTheFileAlive(self):
+        """A view taken from Views stays usable after the file is dropped."""
+        f = helpers.read_model('file3dm_stuff.3dm')
+        v = f.Views[0]
+        v.Name = 'live'
+        del f
+        gc.collect()
+        self.assertEqual(v.Name, 'live')
+
+    def test_viewTableIndexOutOfRangeRaises(self):
+        """Views[i] past the end raises IndexError."""
+        with self.assertRaises(IndexError):
+            helpers.read_model('file3dm_stuff.3dm').Views[99]
 
 if __name__ == '__main__':
     print("running tests")

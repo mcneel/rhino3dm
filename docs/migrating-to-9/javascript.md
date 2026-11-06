@@ -300,8 +300,10 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array, fo
   for (const face of subd.faces) { ... }
   ```
 
-- A component's neighbours are `edgeCount`
-  plus `edgeAt(i)` (also `vertexAt`, `faceAt`). An edge's vertices are `vertexFrom` and `vertexTo`.
+- A component's neighbours are arrays: `face.edges`, `face.vertices`, `edge.faces`,
+  `edge.vertices`, `vertex.edges` and `vertex.faces`, without 8.x's `First` / `Next` cursor.
+  RhinoCommon's `edgeCount` plus
+  `edgeAt(i)` (also `vertexAt`, `faceAt`) work too, and an edge's vertices are also `vertexFrom` and `vertexTo`.
 - `vertex.surfacePoint()` and `subd.sharpEdgeCount()` are
   functions, and `vertex.next` and `vertex.previous` are properties.
 - A component whose SubD changed throws. Components compare equal when
@@ -420,6 +422,9 @@ an array of `[key, value]` arrays.
 
 ### Strings and values
 
+- An empty string reads `''` where RhinoCommon returns `null` (`new rhino.ViewInfo().name`,
+  the log of `isValidWithLog()` when there is nothing to report): test with
+  `if (!name)`, which is true for both. <!-- D93 -->
 - `viewport.screenPort` and
   `getScreenPort()` are RhinoCommon's `(x, y, width, height)`, with y the smaller of top and bottom.
   A new `new rhino.ViewportInfo()` reads `(0, 0, 1000, 1000)`. <!-- D58, D38 -->

@@ -8,9 +8,9 @@
 #
 #   tools/docs/make_docs.sh [python|js|all] [--publish]
 #
-# --publish replaces docs/python/9.x/api and docs/javascript/9.x/api (served by GitHub Pages) with the
-# result; without it nothing outside build/dev changes. The 8.x reference stays at docs/*/api until the
-# 9.2 release, when the two swap (Luis 2026-11-04).
+# --publish replaces docs/python/api and docs/javascript/api (served by GitHub Pages) with the result;
+# without it nothing outside build/dev changes. The last 8.x reference is kept in docs/8/python/api and
+# docs/8/javascript/api.
 set -eu
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
 OUT=$REPO/build/dev/site
@@ -25,8 +25,9 @@ python_docs() {
   cp "$REPO/src/rhino3dm/__init__.pyi" "$OUT/py_pkg/rhino3dm/"
   docker run --rm -v "$REPO":/src:ro -v "$OUT":/out -e RH3DM_PKG=/out/py_pkg/rhino3dm -e RH3DM_VERSION="$VERSION" \
     python:3.12-bookworm bash -c '
-      pip install -q sphinx==8.1.3 sphinx-autoapi==3.4.0 astroid==3.3.8 sphinx-rtd-theme==3.0.2 >/dev/null 2>&1
+      pip install -q sphinx==8.1.3 sphinx-autoapi==3.4.0 astroid==3.3.8 sphinx-rtd-theme==3.0.2 myst-parser==4.0.0 >/dev/null 2>&1
       cp -r /src/tools/docs/site/python /tmp/site       # autoapi writes its pages beside the sources
+      bash /src/tools/docs/guide_pages.sh python /tmp/site   # the migration guide, as site pages
       sphinx-build -q -b html /tmp/site /out/python 2> /out/python_warnings.log
       echo "SPHINX EXIT = $?"; echo "warnings: $(grep -c . /out/python_warnings.log)"'
   echo "python: $(find "$OUT/python" -name '*.html' | wc -l | tr -d ' ') pages -> ${OUT#$REPO/}/python"
@@ -37,6 +38,14 @@ js_docs() {
   docker run --rm -v "$REPO":/src:ro -v "$OUT":/out -w /tmp node:24 bash -c '
       npm i -g typedoc@0.26.11 typescript@5.6.3 >/dev/null 2>&1
       cp /src/src/js/rhino3dm.d.ts /src/docs/javascript/RHINO3DM.JS.md /tmp/
+      bash /src/tools/docs/guide_pages.sh javascript /tmp/guide   # the migration guide, as site pages
+      # the README (also the npm page) links the guide on the published site; here, the pages built with it
+      sed -i -e "s#https://mcneel.github.io/rhino3dm/javascript/api/documents/Migrating__renamed_and_removed_members.html#guide/migrating-members.md#g" \
+             -e "s#https://mcneel.github.io/rhino3dm/javascript/api/documents/Migrating_to_9_2.html#guide/migrating.md#g" /tmp/RHINO3DM.JS.md
+      # attached to the module (@document), not the project (--projectDocuments): project documents give
+      # the site a module level whose page has no description; this keeps it flat, as 8.x was
+      { printf "/**\n * @packageDocumentation\n * @document guide/migrating.md\n * @document guide/migrating-members.md\n */\n"
+        cat /tmp/rhino3dm.d.ts; } > /tmp/doc.d.ts && mv /tmp/doc.d.ts /tmp/rhino3dm.d.ts
       typedoc /tmp/rhino3dm.d.ts --readme /tmp/RHINO3DM.JS.md --name "rhino3dm.js '"$VERSION"'" \
         --out /out/javascript --skipErrorChecking > /out/js_warnings.log 2>&1
       echo "TYPEDOC EXIT = $?"; echo "warnings: $(grep -c -i warning /out/js_warnings.log)"'
@@ -51,8 +60,8 @@ case "$WHAT" in
 esac
 
 if [ $PUBLISH = 1 ]; then
-  DEST=9.x/api
-  if [ "$WHAT" != js ]; then rm -rf "$REPO/docs/python/$DEST" && mkdir -p "$REPO/docs/python/9.x" && cp -R "$OUT/python" "$REPO/docs/python/$DEST"; fi
-  if [ "$WHAT" != python ]; then rm -rf "$REPO/docs/javascript/$DEST" && mkdir -p "$REPO/docs/javascript/9.x" && cp -R "$OUT/javascript" "$REPO/docs/javascript/$DEST"; fi
+  DEST=api
+  if [ "$WHAT" != js ]; then rm -rf "$REPO/docs/python/$DEST" && cp -R "$OUT/python" "$REPO/docs/python/$DEST"; fi
+  if [ "$WHAT" != python ]; then rm -rf "$REPO/docs/javascript/$DEST" && cp -R "$OUT/javascript" "$REPO/docs/javascript/$DEST"; fi
   echo "published into docs/python/$DEST, docs/javascript/$DEST"
 fi

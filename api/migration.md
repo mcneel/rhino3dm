@@ -389,9 +389,12 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array]], 
   for (const face of subd.faces) { ... }
   ```
 
-- A component's neighbours are [[`EdgeCount` plus `EdgeAt(i)` (also `VertexAt`, `FaceAt`) || `edgeCount`
-  plus `edgeAt(i)` (also `vertexAt`, `faceAt`)]]. An edge's vertices are [[`VertexFrom` and `VertexTo` ||
-  `vertexFrom` and `vertexTo`]].
+- A component's neighbours are [[lists: `face.Edges`, `face.Vertices`, `edge.Faces`, `edge.Vertices`,
+  `vertex.Edges` and `vertex.Faces` || arrays: `face.edges`, `face.vertices`, `edge.faces`,
+  `edge.vertices`, `vertex.edges` and `vertex.faces`]], without 8.x's `First` / `Next` cursor.
+  RhinoCommon's [[`EdgeCount` plus `EdgeAt(i)` (also `VertexAt`, `FaceAt`) || `edgeCount` plus
+  `edgeAt(i)` (also `vertexAt`, `faceAt`)]] work too, and an edge's vertices are also [[`VertexFrom`
+  and `VertexTo` || `vertexFrom` and `vertexTo`]].
 - [[`SubDVertex.SurfacePoint()` is a method, and `Next`, `Previous` and `First` are properties.
   `SubD.SharpEdgeCount()` is a method. || `vertex.surfacePoint()` and `subd.sharpEdgeCount()` are
   functions, and `vertex.next` and `vertex.previous` are properties.]]
@@ -572,6 +575,9 @@ Wherever RhinoCommon takes a sequence of points, [[any sequence works (a list, a
   <!-- D75 -->
 - `repr(Point3d(1, 2, 3))` is `Point3d(1.0, 2.0, 3.0)`. <!-- D81 -->
 <!-- /py -->
+- An empty string reads `''` where RhinoCommon returns `null` ([[`ViewInfo().Name` || `new rhino.ViewInfo().name`]],
+  the log of [[`IsValidWithLog()` || `isValidWithLog()`]] when there is nothing to report): test with
+  [[`if not name:` || `if (!name)`]], which is true for both. <!-- D93 -->
 - [[`ViewportInfo.ScreenPort` and `GetScreenPort()` are || `viewport.screenPort` and
   `getScreenPort()` are]] RhinoCommon's `(x, y, width, height)`, with y the smaller of top and bottom.
   A new [[`ViewportInfo()` || `new rhino.ViewportInfo()`]] reads `(0, 0, 1000, 1000)`. <!-- D58, D38 -->

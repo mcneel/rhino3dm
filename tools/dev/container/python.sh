@@ -84,8 +84,11 @@ test_() {
     PYTHON_GIL=0 $PY -W error::RuntimeWarning -c "import sys; sys.path.insert(0, '$B'); import _rhino3dm; print('FT: GIL enabled after import:', sys._is_gil_enabled())"
     export PYTHON_GIL=0
   fi
-  RH3DM_MODULE_DIR=$B $PY -m pytest -q -p no:cacheprovider tests/generated tests/parity tests/generator 2>&1 | tail -4
+  RH3DM_MODULE_DIR=$B $PY -m pytest -q -p no:cacheprovider tests/parity tests/generator 2>&1 | tail -4
   $PY tests/parity/test_parity.py $B 2>&1 | tail -14
+  # tests/python as CI runs it (unittest), against the built module as the `rhino3dm` package
+  mkdir -p $B/pkg/rhino3dm && cp -f /src/src/rhino3dm/__init__.py $B/_rhino3dm*.so $B/pkg/rhino3dm/
+  ( cd /src/tests/python && PYTHONPATH=$B/pkg $PY -m unittest discover . 2>&1 | grep -E "^(FAIL|ERROR):|^Ran |^OK|^FAILED" | tail -30 )
 }
 
 case "${1:-all}" in

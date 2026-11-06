@@ -847,6 +847,12 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
     acc = ('RH3DM_Const()', 'RH3DM_NonConst()') if cls.get('proxy') or cls.get('comp') or cls.get('shared') else ('m_ptr', 'm_ptr')
     override = ('\n  %s* %s() const override { return %s; }\n  %s* %sNC() const override { return %s; }'
                 % (base['on'], base['getter'], acc[0], base['on'], base['getter'], acc[1])) if base else ''
+    if base and cls.get('base_ptr_error'):
+        # a class RhinoCommon derives from a base its native type is not (CachedTextureCoordinates :
+        # CommonObject over ON_TextureCoordinates): the base's members raise instead of reading a wrong pointer
+        err = 'throw std::runtime_error("%s")' % cls['base_ptr_error']
+        override = ('\n  %s* %s() const override { %s; }\n  %s* %sNC() const override { %s; }'
+                    % (base['on'], base['getter'], err, base['on'], base['getter'], err))
     if base and any(a['reg'] in NO_OWNED_ABSTRACT for a in abstract_chain(base)):
         override += ('\n  bool RH3DM_NoOwnedPtr() const override { return true; }' if cls.get('comp') else
                      '\n  bool RH3DM_NoOwnedPtr() const override { return m_ptr == nullptr; }')

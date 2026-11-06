@@ -2,10 +2,16 @@
 
 [![](https://data.jsdelivr.com/v1/package/npm/rhino3dm/badge)](https://www.jsdelivr.com/package/npm/rhino3dm)
 
+## Coming from rhino3dm.js 8.x?
+
+rhino3dm.js 9.2 is generated from RhinoCommon, so its API is RhinoCommon's, and most 8.x scripts need changes. For example, points and other values are objects (`{ X: 1, Y: 2, Z: 3 }`, not `[1, 2, 3]`), properties that were functions are properties, and editing an object's geometry no longer changes the file.
+
+- [Migrating to rhino3dm.js 9.2](https://mcneel.github.io/rhino3dm/javascript/api/documents/Migrating_to_9_2.html): what changed, with before-and-after code
+- [Renamed and removed members](https://mcneel.github.io/rhino3dm/javascript/api/documents/Migrating__renamed_and_removed_members.html): every 8.x name and what replaces it
+
 **rhino3dm.js** is a javascript library with associated web assembly (rhino3dm.wasm) that is OpenNURBS plus additional C++ to javascript bindings compiled to web assembly. The library based on OpenNURBS with a RhinoCommon style. The libraries will run on on all major browsers as well as node.js.
 
 For browser based applications, we also develop a 3dmLoader for the popular three.js WebGL library: https://threejs.org/examples/?q=3dm#webgl_loader_3dm
-
 
 ## Usage
 
@@ -23,7 +29,7 @@ The easiest way to get started is to reference a specific version of the library
   <script type="importmap">
       {
           "imports": {
-            "rhino3dm":"https://cdn.jsdelivr.net/npm/rhino3dm@8.32.0/rhino3dm.module.min.js"
+            "rhino3dm":"https://cdn.jsdelivr.net/npm/rhino3dm@9.2.0-beta.0/rhino3dm.module.min.js"
           }
       }
   </script>
@@ -32,8 +38,8 @@ The easiest way to get started is to reference a specific version of the library
 
     import rhino3dm from 'rhino3dm'
     const rhino = await rhino3dm()
-    const sphere = new rhino.Sphere( [1,2,3,], 12 )
-    console.log(sphere.diameter)
+    const sphere = new rhino.Sphere({ X: 1, Y: 2, Z: 3 }, 12)
+    console.log(rhino.Sphere.diameter(sphere))
 
   </script>
 
@@ -67,8 +73,8 @@ Example node.js script:
 ```js
 import rhino3dm from 'rhino3dm'
 const rhino = await rhino3dm()
-const sphere = new rhino.Sphere([1,2,3,], 12)
-console.log(sphere.diameter)
+const sphere = new rhino.Sphere({ X: 1, Y: 2, Z: 3 }, 12)
+console.log(rhino.Sphere.diameter(sphere))
 ```
 
 ### React.js
@@ -85,7 +91,7 @@ import App from "./App";
 const rootElement = document.getElementById("root");
 
 const script = document.createElement("script");
-script.src = "https://cdn.jsdelivr.net/npm/rhino3dm@8.32.0/rhino3dm.min.js";
+script.src = "https://cdn.jsdelivr.net/npm/rhino3dm@9.2.0-beta.0/rhino3dm.min.js";
 script.addEventListener("load", () => {
   ReactDOM.render(
     <StrictMode>
@@ -106,16 +112,17 @@ import React, { useEffect, useState } from "react";
 import "./styles.css";
 
 export default function App() {
-  const [sphere, setSphere] = useState(null);
+  const [diameter, setDiameter] = useState(null);
 
   useEffect(() => {
     window.rhino3dm().then((Module) => {
       //creating a sphere using rhino3dm
-      setSphere(new Module.Sphere([1, 2, 3], 16));
+      const sphere = new Module.Sphere({ X: 1, Y: 2, Z: 3 }, 16);
+      setDiameter(Module.Sphere.diameter(sphere));
     });
   }, []);
 
-  return <div className="App">{sphere && <p>{`sphere diameter is: ${sphere.diameter}`}</p>}</div>;
+  return <div className="App">{diameter !== null && <p>{`sphere diameter is: ${diameter}`}</p>}</div>;
 }
 ```
 
@@ -125,6 +132,8 @@ CodeSandbox of above react implementation can be found [here](https://codesandbo
 ## API Docs
 
 The latest [rhino3dm.js API Documentation](https://mcneel.github.io/rhino3dm/javascript/api/index.html)
+
+The [rhino3dm.js 8.x API Documentation](https://mcneel.github.io/rhino3dm/8/javascript/api/index.html) covers the last 8.x release.
 
 
 ## Examples

@@ -11,6 +11,8 @@ its ecosystem requires:
                                                        parts and cannot carry a suffix
   setup.py                                9.0.0b0      PEP 440
   src/rhino3dm/__init__.py                9.0.0b0      PEP 440
+  docs/javascript/RHINO3DM.JS.md          9.0.0-beta   the jsDelivr URLs in its examples (every one;
+                                                       it is also the npm package's README)
 
 Usage:
   python3 script/bump_version.py                 # propagate version.txt everywhere
@@ -67,6 +69,8 @@ TARGETS = [
      r'(?m)^(\[assembly: AssemblyVersion\(")([^"]+)("\)\])',                                'assembly'),
     ('setup.py',                            r"(version=')([^']+)(')",                      'pep440'),
     ('src/rhino3dm/__init__.py',            r"(__version__ = ')([^']+)(')",                'pep440'),
+    # a 4th element 'all': every match carries the version (at least one must exist)
+    ('docs/javascript/RHINO3DM.JS.md',      r'(cdn\.jsdelivr\.net/npm/rhino3dm@)([^/"]+)(/)',  'semver', 'all'),
 ]
 
 
@@ -78,14 +82,14 @@ def apply(check_only=False):
           % (want['semver'], want['pep440'], want['assembly']))
 
     stale = 0
-    for rel, pattern, key in TARGETS:
+    for rel, pattern, key, *every in TARGETS:
         path = os.path.join(ROOT, rel)
         text = io.open(path, encoding='utf-8').read()
         matches = list(re.finditer(pattern, text))
-        if len(matches) != 1:
-            raise VersionError('%s: expected exactly 1 version match, found %d'
-                               % (rel, len(matches)))
-        current = matches[0].group(2)
+        if (len(matches) == 0) if every else (len(matches) != 1):
+            raise VersionError('%s: expected %s version match, found %d'
+                               % (rel, 'at least 1' if every else 'exactly 1', len(matches)))
+        current = ', '.join(sorted({m.group(2) for m in matches}))
         target = want[key]
         if current == target:
             print('  ok      %-40s %s' % (rel, current))
@@ -94,8 +98,9 @@ def apply(check_only=False):
         if check_only:
             print('  STALE   %-40s %s (want %s)' % (rel, current, target))
         else:
-            io.open(path, 'w', encoding='utf-8').write(
-                text[:matches[0].start(2)] + target + text[matches[0].end(2):])
+            for m in reversed(matches):
+                text = text[:m.start(2)] + target + text[m.end(2):]
+            io.open(path, 'w', encoding='utf-8').write(text)
             print('  updated %-40s %s -> %s' % (rel, current, target))
 
     if check_only and stale:

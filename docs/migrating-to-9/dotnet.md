@@ -1,5 +1,7 @@
 # Migrating to rhino3dm 9.2 (.NET)
 
+<!-- Also the NuGet package page: docs/dotnet/README.md repeats this guide; change both. -->
+
 [← Other languages](../migrating-to-9.md)
 
 The `Rhino3dm` NuGet package was RhinoCommon's code in 8.x, and still is. 9.2 takes it from Rhino 9

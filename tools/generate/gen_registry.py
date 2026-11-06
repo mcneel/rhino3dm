@@ -27,8 +27,9 @@ CLASSES = [
     # the root (G62): RhinoCommon's CommonObject over every class whose native
     # object is an ON_Object. An abstract base may itself extend an abstract base:
     # it answers the base's getters with its own. CachedTextureCoordinates is a
-    # CommonObject in .NET but wraps ON_TextureCoordinates (no ON_Object), so it
-    # does not extend this (pilot-findings #31)
+    # CommonObject in .NET but wraps ON_TextureCoordinates (no ON_Object): it extends
+    # this as in RhinoCommon, and its 'base_ptr_error' getters throw, so the inherited
+    # ON_Object members raise where .NET passes the wrong pointer (pilot-findings #31, #96)
     {'type': 'Rhino.Runtime.CommonObject', 'cs': 'CommonObject',
      'on': 'ON_Object',
      'mode': 'abstract', 'getter': 'RH3DM_ObjPtr',
@@ -230,7 +231,8 @@ CLASSES = [
      'gen': 'BND_File3dmShutLining', 'reg': 'File3dmShutLining'},
     # a BORROWED pointer into a mesh (specgen Borrowed): never deleted; the mesh is kept alive
     {'type': 'Rhino.Render.CachedTextureCoordinates', 'cs': 'CachedTextureCoordinates', 'on': 'ON_TextureCoordinates',
-     'mode': 'pointer', 'noctor': True,
+     'mode': 'pointer', 'noctor': True, 'base': 'CommonObject',
+     'base_ptr_error': 'CachedTextureCoordinates is not an ON_Object: CommonObject members are not available',
      'gen': 'BND_CachedTextureCoordinates', 'reg': 'CachedTextureCoordinates'},
     {'type': 'Rhino.DocObjects.Environment', 'cs': 'Environment', 'on': 'ON_Environment',
      'mode': 'pointer',

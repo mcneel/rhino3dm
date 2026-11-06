@@ -2,6 +2,45 @@ import rhino3dm
 import unittest
 import os
 import gc
+import sys
+import helpers
+import json
+
+
+def _subd_box():
+    """subdBox.3dm and the SubD in it"""
+    f = helpers.read_model('subdBox.3dm')
+    s = helpers.first_geometry(f, rhino3dm.SubD)
+    assert s is not None, 'no SubD in subdBox.3dm'
+    return f, s
+
+
+def _subd_of(name):
+    return [o.Geometry for o in helpers.read_model(name).Objects if isinstance(o.Geometry, rhino3dm.SubD)]
+
+# the sharp edges of each SubD in the fixture files, as 8.x counted them
+_SUBD_SHARP_EDGES = (('subd.3dm', [90]), ('subdBox.3dm', [0]), ('subd_creases.3dm', [3]))
+
+
+def _subd_first(name):
+    """the first SubD in a model in tests/models"""
+    return next(o.Geometry for o in helpers.read_model(name).Objects if isinstance(o.Geometry, rhino3dm.SubD))
+
+
+def _subd_p3(p):
+    """a point as a list, 'nan' for an unset coordinate (as the stored answers write it)"""
+    return ['nan' if v != v else v for v in (p.X, p.Y, p.Z)]
+
+
+def _subd_box_geometry():
+    return helpers.first_geometry(helpers.read_model('subdBox.3dm'), rhino3dm.SubD)
+
+
+def _subd_cylinder(cap, loc=None):
+    r = rhino3dm
+    cyl = r.Cylinder(r.Circle(r.Plane.WorldXY, 2.0), 3.0)
+    loc = r.SubDComponentLocation.ControlNet if loc is None else loc
+    return r.SubD.CreateFromCylinder(cyl, 8, 2, getattr(r.SubDEndCapStyle, cap), r.SubDEdgeTag.Crease, loc)
 
 
 def _fixture_path():
@@ -93,7 +132,7 @@ class TestSubD(unittest.TestCase):
             ids = [c.Id for c in items]
             self.assertEqual(len(set(ids)), n)
         # Iteration starts at the first component (it used to skip it). Only the
-        # vertex list keeps First, a property; the cursor is gone (G129).
+        # vertex list keeps First, a property; the cursor is gone (D26).
         self.assertEqual(list(self.subd.Vertices)[0].Id, self.subd.Vertices.First.Id)
 
     def test_find_by_id_round_trips(self):
@@ -103,7 +142,7 @@ class TestSubD(unittest.TestCase):
         self.assertEqual(self.subd.Vertices.Find(1).Id, 1)
 
     def test_face_sub_iterator_counts(self):
-        # A component's neighbours are Python lists (G129).
+        # A component's neighbours are Python lists (D26).
         face = self.subd.Faces.Find(1)
         self.assertEqual(len(face.Edges), face.EdgeCount)
         self.assertEqual(len(face.Vertices), face.VertexCount)
@@ -221,7 +260,7 @@ class TestSubD(unittest.TestCase):
     # component (a face's Edges/Vertices, an edge's Faces/Vertices, a vertex's
     # Faces/Edges). In 9.x the first three are RhinoCommon's SubD lists and the
     # six are Python lists; the First/Next/Last/Current/CurrentIndex cursor is
-    # gone (G129). The tests below walk each one end to end.
+    # gone (D26). The tests below walk each one end to end.
 
     def _first_with(self, iterator, predicate, what):
         """First component of iterator satisfying predicate (fails if none)."""
@@ -336,6 +375,349 @@ class TestSubD(unittest.TestCase):
         self.assertEqual(len(set(self.subd.Vertices)), VERTEX_COUNT)
         # Different component types are never equal.
         self.assertNotEqual(self.subd.Faces.Find(1), self.subd.Edges.Find(1))
+
+    def test_subdComponentEquality(self):
+        """SubD components are equal when they have the same type, Id and owning SubD (D25)."""
+        f, s = _subd_box()
+        face = list(s.Faces)[0]
+        other = list(s.Faces)[1]
+        self.assertTrue(face == s.Faces.Find(face.Id))
+        self.assertTrue(face.Equals(s.Faces.Find(face.Id)))
+        self.assertTrue(face != other)
+        self.assertFalse(face.Equals(other))
+        edge = face.Edges[0]
+        self.assertTrue(edge == s.Edges.Find(edge.Id))
+        self.assertEqual(hash(edge), hash(s.Edges.Find(edge.Id)))
+        self.assertEqual(edge.GetHashCode(), s.Edges.Find(edge.Id).GetHashCode())
+        vertex = face.Vertices[0]
+        self.assertTrue(vertex == s.Vertices.Find(vertex.Id))
+        self.assertEqual(len(set(s.Vertices)), s.Vertices.Count)
+        self.assertEqual(len(set(list(s.Vertices) * 2)), s.Vertices.Count)
+        # a face and an edge with the same Id are different components
+        e1 = s.Edges.Find(face.Id)
+        self.assertIsNotNone(e1)
+        self.assertTrue(face != e1)
+        # another SubD's component with the same Id is a different component
+        dup = s.Duplicate()
+        self.assertTrue(dup.Faces.Find(face.Id) != face)
+        # anything that is not a component is not equal (and comparing does not raise)
+        self.assertFalse(face.Equals(None))
+        self.assertTrue(face != None)  # noqa: E711
+        self.assertTrue(face != 5)
+
+    def test_subdListsIterateLikeForeach(self):
+        """SubD.Faces, Edges and Vertices iterate every component; len and Count agree (D26)."""
+        f, s = _subd_box()
+        for lst in (s.Faces, s.Edges, s.Vertices):
+            items = list(lst)
+            self.assertGreater(lst.Count, 0)
+            self.assertEqual(len(items), lst.Count)
+            self.assertEqual(len(lst), lst.Count)
+
+    def test_subdVertexNextWalksTheVertexList(self):
+        """Following SubDVertex.Next from the first vertex visits every vertex once."""
+        f, s = _subd_box()
+        n, cur = 0, next(iter(s.Vertices))
+        while cur is not None:
+            n += 1
+            cur = cur.Next
+        self.assertEqual(n, len(s.Vertices))
+
+    def test_subdComponentsReachTheirNeighbours(self):
+        """A SubD vertex has edges and faces; an edge has its two vertices and at least one face."""
+        f, s = _subd_box()
+        v = next(iter(s.Vertices))
+        self.assertGreater(v.EdgeCount, 0)
+        self.assertGreater(v.FaceCount, 0)
+        e = next(iter(s.Edges))
+        self.assertIsNotNone(e.VertexFrom)
+        self.assertIsNotNone(e.VertexTo)
+        self.assertGreaterEqual(e.FaceCount, 1)
+
+    def test_subdVertexControlNetPointWritesLandInTheSubD(self):
+        """Setting a vertex's ControlNetPoint changes the SubD's vertex."""
+        f, s = _subd_box()
+        v = next(iter(s.Vertices))
+        v.ControlNetPoint = rhino3dm.Point3d(10, 20, 30)
+        p = next(iter(s.Vertices)).ControlNetPoint
+        self.assertEqual((p.X, p.Y, p.Z), (10, 20, 30))
+
+    def test_subdNeighboursAreCountAndAt(self):
+        """A component's neighbours are XCount + XAt(i); XAt raises IndexError outside 0..Count-1 (D26)."""
+        f, s = _subd_box()
+        face = next(iter(s.Faces))
+        edges = [face.EdgeAt(i) for i in range(face.EdgeCount)]
+        verts = [face.VertexAt(i) for i in range(face.VertexCount)]
+        self.assertGreaterEqual(face.EdgeCount, 3)
+        self.assertEqual(len(edges), face.EdgeCount)
+        self.assertEqual(len(verts), face.EdgeCount)
+        v = verts[0]
+        for i in range(v.EdgeCount):
+            self.assertIsNotNone(v.EdgeAt(i))
+        for i in range(v.FaceCount):
+            self.assertIsNotNone(v.FaceAt(i))
+        e = edges[0]
+        for i in range(e.FaceCount):
+            self.assertIsNotNone(e.FaceAt(i))
+        with self.assertRaises(IndexError):
+            v.EdgeAt(-1)
+        with self.assertRaises(IndexError):
+            v.EdgeAt(v.EdgeCount)
+
+    def test_subdVerticesFindById(self):
+        """SubD.Vertices.Find(id) returns the vertex with that id, or None; ids start at 1 (D26)."""
+        f, s = _subd_box()
+        self.assertIsNone(s.Vertices.Find(0))
+        self.assertIsNotNone(s.Vertices.Find(1))
+
+    def test_subdComponentsHaveIdsAndStatus(self):
+        """SubD components are SubDComponents with unique ids from 1 and a selected/deleted status."""
+        f, s = _subd_box()
+        faces = list(s.Faces)
+        ids = [x.Id for x in faces]
+        self.assertEqual(len(set(ids)), len(ids))
+        self.assertGreaterEqual(min(ids), 1)
+        self.assertIsInstance(faces[0], rhino3dm.SubDComponent)
+        self.assertEqual(s.Faces.Find(ids[0]).Id, ids[0])
+        v = next(iter(s.Vertices))
+        self.assertIn(v.IsSelected, (False, True))
+        self.assertIs(v.IsDeleted, False)
+
+    def test_subdEdgeEndSharpnessGuardsTheEndIndex(self):
+        """SubDEdge.EndSharpness takes an end index of 0 or 1 and raises IndexError otherwise (D9)."""
+        f, s = _subd_box()
+        e = next(iter(s.Edges))
+        self.assertIsInstance(e.EndSharpness(0, False), float)
+        with self.assertRaisesRegex(IndexError, 'endIndex must be 0 or 1'):
+            e.EndSharpness(2, False)
+
+    def test_subdFacePerFaceColorIsEmptyWhenUnset(self):
+        """SubDFace.PerFaceColor is the empty color (0, 0, 0, 0) when no face color is set."""
+        s = helpers.first_geometry(helpers.read_model('subdBox.3dm'), rhino3dm.SubD)
+        self.assertEqual(tuple(next(iter(s.Faces)).PerFaceColor), (0, 0, 0, 0))
+
+    def test_subdVertexEdgesListsEachEdge(self):
+        """SubDVertex.Edges lists the vertex's edges in EdgeAt order, and each edge keeps its SubD alive."""
+        f = helpers.read_model('subdBox.3dm')
+        s = helpers.first_geometry(f, rhino3dm.SubD)
+        v = next(iter(s.Vertices))
+        edges = v.Edges
+        self.assertGreater(v.EdgeCount, 0)
+        self.assertEqual(len(edges), v.EdgeCount)
+        self.assertEqual([e.Id for e in edges], [v.EdgeAt(i).Id for i in range(v.EdgeCount)])
+        del f, s, v
+        gc.collect()
+        self.assertTrue(all(e.Id > 0 for e in edges))
+
+    def test_subdFaceControlNetCenterPointNormalAndFrame(self):
+        """A SubD face's ControlNetCenterPoint is the mean of its control points, with a unit normal and a frame there."""
+        s = helpers.first_geometry(helpers.read_model('subdBox.3dm'), rhino3dm.SubD)
+        self.assertIsNotNone(s)
+        faces = list(s.Faces)
+        self.assertTrue(faces)
+        for face in faces:
+            n = face.VertexCount
+            pts = [face.VertexAt(i).ControlNetPoint for i in range(n)]
+            c = face.ControlNetCenterPoint
+            for got, want in zip((c.X, c.Y, c.Z), (sum(p.X for p in pts) / n, sum(p.Y for p in pts) / n, sum(p.Z for p in pts) / n)):
+                self.assertAlmostEqual(got, want, delta=1e-12)
+            v = face.ControlNetCenterNormal
+            self.assertAlmostEqual((v.X * v.X + v.Y * v.Y + v.Z * v.Z) ** 0.5, 1.0, delta=1e-12)
+            fr = face.ControlNetCenterFrame
+            self.assertEqual((fr.Origin.X, fr.Origin.Y, fr.Origin.Z), (c.X, c.Y, c.Z))
+            for got, want in zip((fr.ZAxis.X, fr.ZAxis.Y, fr.ZAxis.Z), (v.X, v.Y, v.Z)):
+                self.assertAlmostEqual(got, want, delta=1e-12)
+
+    def test_subdSharpEdgeCount(self):
+        """SharpEdgeCount() is a method counting the edges whose IsSharp is true, as 8.x counted them (D60)."""
+        for name, expected in _SUBD_SHARP_EDGES:
+            subds = _subd_of(name)
+            self.assertEqual(len(subds), len(expected), name)
+            for s, want in zip(subds, expected):
+                n = s.SharpEdgeCount()
+                self.assertEqual(n, sum(1 for e in s.Edges if e.IsSharp))
+                self.assertEqual(n, want, name)
+                self.assertTrue(all(isinstance(e.Sharpness, rhino3dm.SubDEdgeSharpness) for e in s.Edges))
+
+    def test_subdClearEdgeSharpness(self):
+        """ClearEdgeSharpness returns the number of edges it changed, leaves no sharp edge, and adds no SubD error."""
+        for name, _ in _SUBD_SHARP_EDGES:
+            for s in _subd_of(name):
+                n = s.SharpEdgeCount()
+                errors = rhino3dm.SubD.ErrorCount
+                self.assertEqual(s.ClearEdgeSharpness(), n)
+                self.assertEqual(s.SharpEdgeCount(), 0)
+                self.assertEqual(rhino3dm.SubD.ErrorCount, errors)      # a process-wide counter
+
+    def test_subdEdgeSharpnessValueType(self):
+        """SubDEdgeSharpness is a value type of two end sharpnesses with RhinoCommon's queries and constants."""
+        S = rhino3dm.SubDEdgeSharpness
+        s = S(1.0, 2.0)
+        self.assertEqual((s[0], s[1], s.EndSharpness(1)), (1.0, 2.0, 2.0))
+        self.assertTrue(s.IsIncreasing)
+        self.assertTrue(s.IsVariable)
+        self.assertFalse(s.IsConstant)
+        self.assertEqual((s.Reversed()[0], s.Reversed()[1]), (2.0, 1.0))
+        self.assertTrue(S(3.0).IsConstant)
+        self.assertEqual(S(3.0), S(3.0, 3.0))
+        crease = 5.0                       # SubDEdgeSharpness.CreaseValue
+        self.assertTrue(S.Crease.IsCrease)
+        self.assertEqual(S(crease, crease), S.Crease)
+        # a crease at one end alone is not a valid sharpness
+        self.assertTrue(S(crease, 0.0).IsNotValid)
+        self.assertTrue(S.Smooth.IsZero)
+        self.assertEqual(S.Smooth, S())
+
+    def test_subdComponentCountsAndIdsNumberFromOne(self):
+        """Edges, Faces and Vertices count the components, and their Ids number from 1."""
+        s = _subd_first('subdBox.3dm')
+        self.assertEqual((s.Edges.Count, s.Faces.Count, s.Vertices.Count), (48, 24, 26))
+        self.assertEqual(sorted(f.Id for f in s.Faces), list(range(1, 25)))
+        self.assertEqual(sorted(e.Id for e in s.Edges), list(range(1, 49)))
+        self.assertEqual(sorted(v.Id for v in s.Vertices), list(range(1, 27)))
+
+    def test_subdEdgeEndSharpness(self):
+        """SubDEdge.EndSharpness(i, False) reads the crease sharpness at each end of each edge."""
+        s = _subd_first('subd_creases.3dm')
+        edges = sorted(s.Edges, key=lambda e: e.Id)
+        self.assertEqual([(e.EndSharpness(0, False), e.EndSharpness(1, False)) for e in edges],
+                         [(0.0, 0.0)] * 4 + [(1.0, 1.0), (0.0, 0.0), (3.0, 3.0), (2.5, 0.5)] + [(0.0, 0.0)] * 4)
+
+    def test_subdComponentQueriesGiveRhino3dm8Answers(self):
+        """The SubD face, vertex and edge queries give rhino3dm 8.x's answers on every SubD model, component by component."""
+        with open(helpers.model('old_oracle/subd_queries.json')) as fp:
+            oracle = json.load(fp)['fixtures']
+        checked = 0
+        for name, olds in oracle.items():
+            news = [o.Geometry for o in helpers.read_model(name).Objects if isinstance(o.Geometry, rhino3dm.SubD)]
+            self.assertTrue(news)
+            self.assertEqual(len(news), len(olds))
+            for s, old in zip(news, olds):
+                nf = list(s.Faces)
+                self.assertEqual([f.Id for f in nf], [f['id'] for f in old['faces']])
+                for n, o in zip(nf, old['faces']):
+                    self.assertEqual([n.HasEdges, n.HasSharpEdges, n.SharpEdgeCount, n.MaximumEdgeSharpness, n.IsConvex,
+                                      n.IsPlanar(1e-8), n.IsPlanar(1.0), n.MaterialChannelIndex, n.TexturePointsAreSet,
+                                      n.TexturePointsCapacity], o['q'])
+                    self.assertEqual(_subd_p3(n.SubdivisionPoint), o['sub'])
+                    self.assertEqual(_subd_p3(n.TextureCenterPoint), o['tc'])
+                    self.assertEqual([_subd_p3(n.TexturePoint(i)) for i in range(n.TexturePointsCapacity)], o['tp'])
+                nv = list(s.Vertices)
+                self.assertEqual([v.Id for v in nv], [v['id'] for v in old['vertices']])
+                for n, o in zip(nv, old['vertices']):
+                    self.assertEqual([n.IsSmooth, n.IsCrease, n.IsCorner, n.IsDart, n.IsSharp(True), n.IsSharp(False),
+                                      n.VertexSharpness], o['q'])
+                ne = list(s.Edges)
+                self.assertEqual([e.Id for e in ne], [e['id'] for e in old['edges']])
+                for n, o in zip(ne, old['edges']):
+                    self.assertEqual([n.IsSmooth, n.IsCrease, n.IsHardCrease, n.IsDartCrease, n.DartCount], o['q'])
+                    self.assertEqual(_subd_p3(n.SubdivisionPoint), o['sub'])
+                    self.assertEqual(_subd_p3(n.ControlNetCenterPoint), o['cc'])
+                    self.assertEqual([_subd_p3(n.ControlNetCenterNormal(i)) for i in range(n.FaceCount)], o['cn'])
+                checked += len(nf) + len(nv) + len(ne)
+        self.assertGreater(checked, 100)
+
+    def test_subdCreaseModelHasCreasedAndSmoothEdges(self):
+        """The crease model has both creased and smooth edges, so the edge predicates are not all False."""
+        s = _subd_first('subd_creases.3dm')
+        self.assertTrue(any(e.IsCrease for e in s.Edges))
+        self.assertTrue(any(e.IsSmooth for e in s.Edges))
+
+    def test_subdControlNetGivesRhino3dm8Answers(self):
+        """Each edge's VertexFrom / VertexTo control net points and ControlNetLine, and each face's vertex control net points, give rhino3dm 8.x's answers on every SubD model."""
+        with open(helpers.model('old_oracle/subd_controlnet.json')) as fp:
+            oracle = json.load(fp)['fixtures']
+        checked = 0
+        for name, old in oracle.items():
+            s = _subd_first(name)
+            self.assertEqual(s.Edges.Count, len(old['edges']))
+            self.assertEqual(s.Faces.Count, len(old['faces']))
+            for n, o in zip(list(s.Edges), old['edges']):
+                a, b = n.VertexFrom, n.VertexTo
+                self.assertEqual([_subd_p3(a.ControlNetPoint), _subd_p3(b.ControlNetPoint)], o['p'])
+                line = n.ControlNetLine
+                self.assertEqual([_subd_p3(line.From), _subd_p3(line.To)], o['p'])
+                self.assertEqual(_subd_p3(line.Direction), o['dir'])
+                self.assertEqual([a.Id, b.Id], o['v'])
+                checked += 1
+            for n, o in zip(list(s.Faces), old['faces']):
+                self.assertEqual([_subd_p3(n.VertexAt(i).ControlNetPoint) for i in range(n.VertexCount)], o)
+                checked += 1
+        self.assertGreater(checked, 100)
+
+    def test_subdNeighbourListsGive8xNeighbours(self):
+        """face.Edges / .Vertices, edge.Faces / .Vertices, vertex.Faces / .Edges list 8.x's neighbours, in order."""
+        with open(helpers.model('old_oracle/subd_neighbours.json')) as fh:
+            expected = json.load(fh)['subdBox.3dm']
+        subd = _subd_box_geometry()
+        ids = lambda it: [c.Id for c in it]
+        of, oe, ov = expected['faces'], expected['edges'], expected['vertices']
+        checked = 0
+        for comps, olds, props in [(subd.Faces, of, ('Edges', 'Vertices')), (subd.Edges, oe, ('Faces', 'Vertices')),
+                                   (subd.Vertices, ov, ('Faces', 'Edges'))]:
+            self.assertEqual(len(comps), len(olds))
+            for c in comps:
+                for prop in props:
+                    self.assertEqual(ids(getattr(c, prop)), olds[str(c.Id)][prop], (type(c).__name__, prop, c.Id))
+                    checked += 1
+        self.assertGreater(checked, 50)
+
+    def test_subdNeighbourListsAreLists(self):
+        """A component's neighbours are Python lists, matching its EdgeCount / EdgeAt."""
+        subd = _subd_box_geometry()
+        face = next(iter(subd.Faces))
+        v = next(iter(subd.Vertices))
+        for lst in (face.Edges, face.Vertices, v.Faces, v.Edges):
+            self.assertIsInstance(lst, list)
+        self.assertEqual(len(face.Edges), face.EdgeCount)
+        self.assertEqual([e.Id for e in face.Edges], [face.EdgeAt(i).Id for i in range(face.EdgeCount)])
+        self.assertEqual(face.Edges[-1].Id, face.EdgeAt(face.EdgeCount - 1).Id)
+        self.assertTrue(all(isinstance(e, rhino3dm.SubDEdge) and e.FaceCount >= 1 for e in face.Edges))
+
+    def test_subdNeighbourListItemsKeepTheSubDAlive(self):
+        """The components in a neighbour list stay usable after the SubD and its other wrappers are gone."""
+        subd = _subd_box_geometry()
+        faces = next(iter(subd.Edges)).Faces
+        del subd
+        gc.collect()
+        self.assertGreaterEqual(len(faces), 1)
+        self.assertGreaterEqual(faces[0].EdgeCount, 3)
+
+    def test_subdCreateFromCylinderEndCapStyles(self):
+        """CreateFromCylinder with 8 x 2 faces gives each end cap style's face, edge and vertex counts."""
+        got = {cap: (s.Faces.Count, s.Edges.Count, s.Vertices.Count)
+               for cap in ['None', 'Quads', 'Triangles', 'Ngon'] for s in [_subd_cylinder(cap)]}
+        self.assertEqual(got, {'None': (16, 40, 24), 'Quads': (24, 48, 26), 'Triangles': (32, 56, 26), 'Ngon': (18, 40, 24)})
+
+    def test_subdCreateFromCylinderRadiusLocation(self):
+        """CreateFromCylinder puts the control net, or the limit surface, on the radius."""
+        net = _subd_cylinder('None').GetBoundingBox(True)
+        srf = _subd_cylinder('None', rhino3dm.SubDComponentLocation.Surface).GetBoundingBox(True)
+        self.assertEqual((net.Min.X, net.Max.X, net.Max.Z), (-2.0, 2.0, 3.0))
+        self.assertAlmostEqual(srf.Max.X, 2.216388375108776, delta=1e-12)
+        self.assertEqual(srf.Max.Z, 3.0)
+
+    def test_subdCreateFromCylinderRejectsAnIntEndCapStyle(self):
+        """CreateFromCylinder raises TypeError for an int where a SubDEndCapStyle goes."""
+        r = rhino3dm
+        cyl = r.Cylinder(r.Circle(r.Plane.WorldXY, 2.0), 3.0)
+        with self.assertRaises(TypeError):
+            r.SubD.CreateFromCylinder(cyl, 8, 2, 1, r.SubDEdgeTag.Crease, r.SubDComponentLocation.ControlNet)
+
+    def test_subdTextureCoordinateTypeIsUnsetOnANewSubD(self):
+        """A new SubD's TextureCoordinateType is Unset."""
+        self.assertEqual(_subd_cylinder('None').TextureCoordinateType, rhino3dm.SubDTextureCoordinateType.Unset)
+
+    def test_subdDefaultConstructorMakesAnEmptySubD(self):
+        """SubD() is an empty SubD that takes a SubD's members and can be added to a file."""
+        s = rhino3dm.SubD()
+        self.assertEqual((s.Faces.Count, s.Edges.Count, s.Vertices.Count), (0, 0, 0))
+        self.assertEqual(list(s.Faces), [])
+        self.assertIsNone(s.Vertices.First)
+        s.ClearEvaluationCache()
+        f = rhino3dm.File3dm()
+        f.Objects.AddSubD(s)
+        self.assertEqual(len(f.Objects), 1)
 
 
 if __name__ == '__main__':

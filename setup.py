@@ -175,6 +175,17 @@ setup(
 """# rhino3dm.py
 CPython package based on OpenNURBS with a RhinoCommon style
 
+## Coming from rhino3dm 8.x?
+
+rhino3dm 9.2 is generated from RhinoCommon, so its API is RhinoCommon's, and most 8.x scripts need
+changes. For example, editing an object's geometry no longer changes the file, `out` parameters come
+back as a tuple with the success flag first, and bad arguments raise.
+
+* [Migrating to rhino3dm 9.2 (Python)](https://mcneel.github.io/rhino3dm/python/api/migrating.html): what changed, with before-and-after code
+* [Renamed and removed members](https://mcneel.github.io/rhino3dm/python/api/migrating-members.html): every 8.x name and what replaces it
+
+## Links
+
 * Project Homepage at: https://github.com/mcneel/rhino3dm
 * Developer samples at: https://github.com/mcneel/rhino-developer-samples/tree/8/rhino3dm/py
 * Forums at: https://discourse.mcneel.com/c/rhino-developer/rhino3dm/
@@ -197,7 +208,7 @@ req = requests.get("https://files.mcneel.com/TEST/Rhino Logo.3dm")
 model = File3dm.FromByteArray(req.content)
 for obj in model.Objects:
     geometry = obj.Geometry
-    bbox = geometry.GetBoundingBox()
+    bbox = geometry.GetBoundingBox(True)
     print("{}, {}".format(bbox.Min, bbox.Max))
 ```
 """,

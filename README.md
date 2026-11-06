@@ -21,6 +21,8 @@ Functionality includes
 - Use as a client to make calls into the [Rhino Compute cloud server](https://www.rhino3d.com/compute) for advanced manipulation of geometry objects
 - Available on most platforms (Windows, macOS, Linux)
 
+**Coming from rhino3dm 8.x?** 9.2's Python and JavaScript libraries are generated from RhinoCommon, and much of their API changed. See [Migrating to rhino3dm 9.2](docs/migrating-to-9.md).
+
 ---
 
 ## rhino3dm.py (Python)

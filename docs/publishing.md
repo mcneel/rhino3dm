@@ -35,13 +35,15 @@ the built bindings, what it means from RhinoCommon's XML doc comments (read from
 2. `tools/dev/round.sh typings`: regenerates `src/rhino3dm/__init__.pyi` and `src/js/rhino3dm.d.ts`, then
    checks them (`tsc --strict`, `mypy --strict`, stubtest).
 3. `tools/docs/make_docs.sh`: builds the Python reference (Sphinx + sphinx-autoapi over the `.pyi`) and the
-   JavaScript reference (typedoc over the `.d.ts`) into `build/dev/site`, in Docker.
-4. `tools/docs/make_docs.sh all --publish`: copies them into `docs/python/9.x/api` and
-   `docs/javascript/9.x/api`. The 8.x reference stays at `docs/python/api` and `docs/javascript/api` until
-   the 9.2 release, when the two swap.
-5. GitHub Pages serves the `docs/` folder of the `main` branch (`docs/python/9.x/api` →
-   `https://mcneel.github.io/rhino3dm/python/9.x/api/`), so nothing is live until the folders reach `main`.
-   Before the 9.x branch merges, that means a docs-only PR to `main` carrying just `docs/*/9.x/api`.
+   JavaScript reference (typedoc over the `.d.ts`) into `build/dev/site`, in Docker. Each site also carries
+   that language's migration guide (`docs/migrating-to-9/<language>.md` and `<language>-members.md`, copied in
+   by `tools/docs/guide_pages.sh`), so regenerate the guide first (`python3 tools/docs/migration.py`).
+4. `tools/docs/make_docs.sh all --publish`: copies them into `docs/python/api` and `docs/javascript/api`.
+   The last 8.x reference (rhino3dm 8.35 for Python, 8.32 for JavaScript) is kept in `docs/8/python/api`
+   and `docs/8/javascript/api`.
+5. GitHub Pages serves the `docs/` folder of the `main` branch (`docs/python/api` →
+   `https://mcneel.github.io/rhino3dm/python/api/`, `docs/8/python/api` →
+   `https://mcneel.github.io/rhino3dm/8/python/api/`), so nothing is live until the folders reach `main`.
 
 After a RhinoCommon re-pin that changes doc comments, refresh `api/docs.json` first:
 `dotnet run -c Release --project tools/specgen -- docs src/dotnet api/docs.json`.

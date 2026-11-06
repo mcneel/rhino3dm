@@ -1,4 +1,5 @@
 const rhino3dm = require('rhino3dm')
+const helpers = require('./helpers')
 
 let rhino
 
@@ -120,3 +121,59 @@ test('toThreejsBuffers matches toThreejsJSON on a large mesh and is faster', asy
     // the typed-array path should not be slower than the per-element JSON path
     expect(bufMs).toBeLessThanOrEqual(jsonMs)
 }, 60000)
+
+// a quad and a triangle over 5 vertices, with normals, texture coordinates and vertex colors
+function meshForThreejsBuffers(rhino) {
+  const m = new rhino.Mesh()
+  for (const [x, y] of [[0, 0], [1, 0], [1, 1], [0, 1], [2, 0]]) m.vertices.add(x, y, 0)
+  m.faces.addFace(0, 1, 2, 3); m.faces.addFace(1, 4, 2)
+  m.normals.computeNormals()
+  for (const [u, v] of [[0, 0], [1, 0], [1, 1], [0, 1], [2, 0]]) m.textureCoordinates.add(u, v)
+  for (let i = 0; i < 5; i++) m.vertexColors.add(255, i * 50, 0)
+  return m
+}
+
+test('meshToThreejsBuffersGivesTypedArraysWithQuadsAsTriangles', () => {
+  // toThreejsBuffers(rotate) returns typed arrays, a quad as two triangles; rotate turns Z-up into Y-up
+  const m = meshForThreejsBuffers(rhino)
+  const position = { false: [0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 2, 0, 0], true: [0, 0, 0, 1, 0, 0, 1, 0, -1, 0, 0, -1, 2, 0, 0] }
+  for (const rot of [false, true]) {
+    const b = m.toThreejsBuffers(rot)
+    expect(b.position).toBeInstanceOf(Float32Array)
+    expect(b.index).toBeInstanceOf(Uint32Array)
+    expect(b.normal).toBeInstanceOf(Float32Array)
+    expect(b.uv).toBeInstanceOf(Float32Array)
+    expect(b.color).toBeInstanceOf(Float32Array)
+    expect(Array.from(b.index)).toEqual([0, 1, 2, 2, 3, 0, 1, 4, 2])
+    expect(Array.from(b.position)).toEqual(position[rot])
+  }
+})
+
+test('meshCreateFromThreejsBuffersInvertsToThreejsBuffers', () => {
+  // createFromThreejsBuffers(buffers, rotate) gives back the vertices, the triangles, the uvs and the colors
+  const m = meshForThreejsBuffers(rhino)
+  for (const rot of [false, true]) {
+    const back = rhino.Mesh.createFromThreejsBuffers(m.toThreejsBuffers(rot), rot)
+    expect(back.vertices.count).toBe(5)
+    expect(back.faces.count).toBe(3)                        // a quad comes back as two triangles
+    for (let i = 0; i < 5; i++) {
+      const p = back.vertices.point3dAt(i), q = m.vertices.point3dAt(i)
+      expect(p.X).toBeCloseTo(q.X, 6); expect(p.Y).toBeCloseTo(q.Y, 6); expect(p.Z).toBeCloseTo(q.Z, 6)
+    }
+    expect(Array.from(back.vertexColors.toARGBArray())).toEqual(Array.from(m.vertexColors.toARGBArray()))
+    expect(back.textureCoordinates.count).toBe(5)
+  }
+})
+
+test('meshCreateFromThreejsBuffersReadsNonIndexedBuffers', () => {
+  // without an index, every 3 vertices are a triangle
+  const tri = rhino.Mesh.createFromThreejsBuffers({ position: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]) }, false)
+  expect([tri.vertices.count, tri.faces.count]).toEqual([3, 1])
+})
+
+test('meshCreateFromThreejsBuffersRefusesBadBuffers', () => {
+  // a position length that is not a multiple of 3, or an index past the vertices, throws
+  helpers.raises(rhino, () => rhino.Mesh.createFromThreejsBuffers({ position: [0, 0, 0, 1] }, false), /'position' has 4 numbers/)
+  helpers.raises(rhino, () => rhino.Mesh.createFromThreejsBuffers({ position: [0, 0, 0, 1, 0, 0, 0, 1, 0], index: [0, 1, 7] }, false),
+    /outside the vertices/)
+})

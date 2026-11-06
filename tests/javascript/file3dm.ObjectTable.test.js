@@ -1,4 +1,5 @@
 const rhino3dm = require('rhino3dm')
+const helpers = require('./helpers')
 
 let rhino
 beforeEach(async () => {
@@ -105,4 +106,135 @@ test('AddLine with Attributes', async () => {
   file3dm.objects.addLine({ X: 1, Y: 1, Z: 0 }, { X: 5, Y: 5, Z: 5 }, oa)
   expect([...file3dm.objects][1].attributes.layerIndex).toBe(1)
 
+})
+
+function objectTableFileWithLine(rhino) {
+  const f = new rhino.File3dm()
+  f.objects.addLine(new rhino.Point3d(0, 0, 0), new rhino.Point3d(1, 0, 0), null)
+  return f
+}
+
+test('objectTableKeepsTheFileAlive', async () => {
+  // file.objects keeps its file alive after the last reference to the file is dropped; null attributes mean defaults (D52, D10)
+  const objs = (() => new rhino.File3dm().objects)()
+  expect(objs.__rh3dm_parent).toBeInstanceOf(rhino.File3dm)
+  await helpers.gcSettle()
+  objs.addPoint(new rhino.Point3d(1, 2, 3), null)
+  objs.addPoint(new rhino.Point3d(-1, 0, 5), null)
+  const bb = objs.getBoundingBox()
+  expect([bb.Min.X, bb.Max.Z]).toEqual([-1.0, 5.0])
+})
+
+test('objectTableIteratesAsFile3dmObjects', () => {
+  // iterating objects yields File3dmObject items whose geometry is the most-derived class (D8)
+  const f = objectTableFileWithLine(rhino)
+  f.objects.addPoint(new rhino.Point3d(5, 5, 5), null)
+  const objs = [...f.objects]
+  expect(f.objects.count).toBe(2)
+  expect(objs.length).toBe(2)
+  expect(objs[0]).toBeInstanceOf(rhino.File3dmObject)
+  expect(objs[0].geometry).toBeInstanceOf(rhino.LineCurve)
+  expect(objs[1].geometry).toBeInstanceOf(rhino.Point)
+})
+
+test('file3dmObjectGeometryIsCopyOnWrite', () => {
+  // editing an object's geometry changes a private copy, not the file; delete + add changes the file (D1)
+  const f = objectTableFileWithLine(rhino)
+  const obj = [...f.objects][0]
+  const g = obj.geometry
+  expect(g.pointAtStart.X).toBe(0.0)
+  expect(g.transform(rhino.Transform.translation(new rhino.Vector3d(10, 0, 0)))).toBe(true)
+  expect(g.pointAtStart.X).toBe(10.0)             // the private copy moved ...
+  expect(obj.geometry.pointAtStart.X).toBe(0.0)   // ... the file did not
+  // the RhinoCommon way to change the file: delete + add
+  f.objects.delete(obj.id)
+  f.objects.addCurve(g, null)
+  expect([...f.objects].map(o => o.geometry.pointAtStart.X)).toEqual([10.0])
+})
+
+test('file3dmObjectAttributesWriteThroughAndNameChainsToThem', () => {
+  // an object's attributes write into the file, and File3dmObject.name is attributes.name
+  const f = objectTableFileWithLine(rhino)
+  const obj = [...f.objects][0]
+  obj.attributes.name = 'via attributes'
+  expect(obj.name).toBe('via attributes')
+  obj.name = 'via name'
+  expect([...f.objects][0].attributes.name).toBe('via name')
+})
+
+test('file3dmObjectGeometryOfADeletedObjectRaises', () => {
+  // reading the geometry of an object deleted from the file throws (D9)
+  const f = objectTableFileWithLine(rhino)
+  const obj = [...f.objects][0]
+  const g = obj.geometry
+  expect(g.pointAtStart.X).toBe(0.0)
+  f.objects.delete(obj.id)
+  expect(f.objects.count).toBe(0)
+  helpers.raises(rhino, () => g.pointAtStart, /runtime_error,.*no longer in the File3dm/)
+})
+
+test('objectTableAddPolylineAddsACurve', () => {
+  // addPolyline adds an object and returns its id; an empty point list adds nothing and returns the empty id
+  const P = (x, y, z) => new rhino.Point3d(x, y, z)
+  const ZERO_ID = '00000000-0000-0000-0000-000000000000'
+  const f = new rhino.File3dm()
+  const pid = f.objects.addPolyline([P(0, 0, 0), P(1, 0, 0), P(1, 1, 0)], null)
+  expect(f.objects.count).toBe(1)
+  expect(pid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+  expect(pid).not.toBe(ZERO_ID)
+  expect(f.objects.addPolyline([], null)).toBe(ZERO_ID)
+  expect(f.objects.count).toBe(1)
+})
+
+test('objectTableAddInstanceObjectReturnsAnId', () => {
+  // addInstanceObject(index, xform, null) returns a uuid
+  const f = new rhino.File3dm()
+  const iid = f.objects.addInstanceObject(0, rhino.Transform.identity, null)
+  expect(iid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+})
+
+test('objectTableFindByGroupListsTheGroupsObjects', () => {
+  // findByGroup(group) returns the objects in that group (D35)
+  const f = new rhino.File3dm()
+  const g0 = f.allGroups.addGroup()
+  const g1 = f.allGroups.addGroup()
+  const ids = [[], [g0], [g0, g1]].map(groups => {
+    const a = new rhino.ObjectAttributes()
+    for (const g of groups) a.addToGroup(g)
+    return f.objects.addPoint(new rhino.Point3d(groups.length, 0, 0), a)
+  })
+  const grp = f.allGroups.findIndex(g1)
+  expect(f.objects.findByGroup(grp).map(o => String(o.id))).toEqual([String(ids[2])])
+})
+
+test('objectTableAddFile3dmObject', () => {
+  // objects.add(File3dmObject) adds one more object
+  const f = helpers.readModel(rhino, 'file3dm_stuff.3dm')
+  const n0 = [...f.objects].length
+  f.objects.add([...f.objects][0])
+  expect([...f.objects].length).toBe(n0 + 1)
+})
+
+test('objectTableAddGeometryWithoutAttributes', () => {
+  // objects.add(geometry, null) adds the geometry with default attributes
+  const f = helpers.readModel(rhino, 'file3dm_stuff.3dm')
+  const nid = f.objects.add([...f.objects][0].geometry, null)
+  expect(f.objects.findId(nid).geometry).toBeInstanceOf(rhino.GeometryBase)
+})
+
+test('objectTableAddAnnotations', () => {
+  // objects.add takes a leader, which RhinoCommon's Add does not (D71)
+  const f = new rhino.File3dm()
+  const le = rhino.Leader.create('x', rhino.Plane.worldXY, new rhino.DimensionStyle(),
+    [new rhino.Point3d(0, 0, 0), new rhino.Point3d(1, 0, 0)])
+  const lid = f.objects.add(le, null)
+  expect(f.objects.findId(lid).geometry).toBeInstanceOf(rhino.Leader)
+})
+
+test('objectTableAddPointTakesXYZ', () => {
+  // File3dmObjectTable.addPoint(x, y, z) adds a point object at that location
+  const f = new rhino.File3dm()
+  f.objects.addPoint(1, 2, 3)
+  const loc = [...f.objects][0].geometry.location
+  expect([loc.X, loc.Y, loc.Z]).toEqual([1, 2, 3])
 })

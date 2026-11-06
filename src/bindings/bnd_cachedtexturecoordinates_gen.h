@@ -3,13 +3,16 @@
 // constants and guards baked from the C# call sites (api/manifest.json).
 #pragma once
 #include "bnd_common_gen.h"
+#include "bnd_commonobject_gen.h"
 
-class BND_CachedTextureCoordinates
+class BND_CachedTextureCoordinates : public BND_CommonObject
 {
 public:
   ON_TextureCoordinates* m_ptr = nullptr;
   explicit BND_CachedTextureCoordinates(ON_TextureCoordinates* borrowed) : m_ptr(borrowed) {}
   BND_CachedTextureCoordinates(const BND_CachedTextureCoordinates&) = delete;
+  ON_Object* RH3DM_ObjPtr() const override { throw std::runtime_error("CachedTextureCoordinates is not an ON_Object: CommonObject members are not available"); }
+  ON_Object* RH3DM_ObjPtrNC() const override { throw std::runtime_error("CachedTextureCoordinates is not an ON_Object: CommonObject members are not available"); }
 
   int Gen_Count() const;
   int Gen_Dim() const;

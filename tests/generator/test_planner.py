@@ -1262,8 +1262,15 @@ def test_abstract_base_of_an_abstract_base_forwards_its_getters():
     py, js = E.emit_registrations(R.BY_REG['GeometryBase'], [], set())
     assert 'py::class_<BND_GeometryBase, BND_CommonObject>' in py      # isinstance(brep, CommonObject)
     assert 'class_<BND_GeometryBase, base<BND_CommonObject>>' in js
-    # a class whose native type is no ON_Object stays off the root (pilot-findings #31)
-    assert R.BY_REG['CachedTextureCoordinates'].get('base') is None
+    # a class whose native type is no ON_Object extends the root as RhinoCommon does, and its
+    # getters throw instead of handing out a wrong pointer (pilot-findings #31, #96)
+    ctc = R.BY_REG['CachedTextureCoordinates']
+    assert ctc.get('base') == 'CommonObject'
+    txt = E.emit_class(ctc, [], False, [])
+    assert 'class BND_CachedTextureCoordinates : public BND_CommonObject' in txt
+    assert 'ON_Object* RH3DM_ObjPtr() const override { throw std::runtime_error(' in txt
+    assert 'ON_Object* RH3DM_ObjPtrNC() const override { throw std::runtime_error(' in txt
+    assert 'return m_ptr;' not in txt
 
 
 def test_translated_markers_resolve_only_to_generated_value_members():

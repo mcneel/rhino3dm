@@ -14,7 +14,7 @@
 #include <algorithm>
 
 // RhinoCommon's ToString (G136, pilot #68): a value as .NET formats it with the invariant culture.
-// A double / float: the shortest round-trip digits, scientific from 1E+15 (a float's from 1E+07) and
+// A double / float (.NET Core 3.0+): the shortest round-trip digits, scientific from 1E+17 (a float's from 1E+09) and
 // from 1E-05 down, with a signed exponent of at least two digits; NaN, Infinity, -Infinity, -0
 template <class F>
 inline std::wstring RH3DM_NetFloat(F x, int sciAt)
@@ -49,8 +49,8 @@ inline std::wstring RH3DM_NetFloat(F x, int sciAt)
   if (neg) out = "-" + out;
   return std::wstring(out.begin(), out.end());
 }
-inline std::wstring RH3DM_NetStr(double x) { return RH3DM_NetFloat<double>(x, 15); }
-inline std::wstring RH3DM_NetStr(float x) { return RH3DM_NetFloat<float>(x, 7); }
+inline std::wstring RH3DM_NetStr(double x) { return RH3DM_NetFloat<double>(x, 17); }
+inline std::wstring RH3DM_NetStr(float x) { return RH3DM_NetFloat<float>(x, 9); }
 inline std::wstring RH3DM_NetStr(bool b) { return b ? L"True" : L"False"; }
 template <class I, typename std::enable_if<std::is_integral<I>::value && !std::is_same<I, bool>::value, int>::type = 0>
 inline std::wstring RH3DM_NetStr(I i) { return std::to_wstring(i); }

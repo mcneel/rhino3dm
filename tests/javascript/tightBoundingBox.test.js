@@ -1,4 +1,5 @@
 const rhino3dm = require('rhino3dm')
+const helpers = require('./helpers')
 
 let rhino
 
@@ -30,4 +31,10 @@ test('getTightBoundingBox on mesh', async () => {
     expect(tight.Min.X).toBeCloseTo(0, 6)
     expect(tight.Max.X).toBeCloseTo(2, 6)
     expect(tight.Max.Y).toBeCloseTo(3, 6)
+})
+
+test('brepTightBoundingBoxOfABox', () => {
+  // getBoundingBox(true) of a box brep is the box
+  const b = helpers.boxBrep(rhino).getBoundingBox(true)
+  expect([b.Min.X, b.Max.Y, b.Max.Z]).toEqual([0, 2, 3])
 })

@@ -19505,7 +19505,7 @@ class File3dmShutLining:
     def SetCurveRadius(self, curve_id: uuid.UUID, radius: float) -> None:
         """Sets the radius of the pipe used to create the shut-line for the given curve."""
 
-class CachedTextureCoordinates:
+class CachedTextureCoordinates(CommonObject):
     """Used for cached texture coordinates"""
 
     @property

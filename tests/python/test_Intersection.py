@@ -1,7 +1,16 @@
 import rhino3dm
 import unittest
+import os
+import sys
+import helpers
+
+
+def _intersection_line(a, b):
+    return rhino3dm.Line(rhino3dm.Point3d(*a), rhino3dm.Point3d(*b))
 
 #objective:
+
+
 class TestIntersection(unittest.TestCase):
     def test_intersectLineLineResults(self):
 
@@ -150,6 +159,63 @@ class TestIntersection(unittest.TestCase):
 
             self.assertTrue( resultSphereSphere[0] == rhino3dm.SphereSphereIntersection.Circle )
             self.assertTrue( resultSphereSphere[1].IsValid )
+
+    def test_intersectionCircleCircleReturnsTheKindFirst(self):
+        """Intersection.CircleCircle returns (kind, point1, point2); two overlapping circles meet at Multiple (D13)."""
+        a = rhino3dm.Circle(rhino3dm.Point3d(0, 0, 0), 1.0)
+        b = rhino3dm.Circle(rhino3dm.Point3d(1, 0, 0), 1.0)
+        res = rhino3dm.Intersection.CircleCircle(a, b)
+        self.assertEqual(len(res), 3)
+        self.assertIsInstance(res[0], rhino3dm.CircleCircleIntersection)
+        self.assertEqual(int(res[0]), 2)    # Multiple
+
+    def test_intersectionLineCircleReturnsTheIntersectionTuple(self):
+        """LineCircle returns (type, t1, point1, t2, point2): Multiple for a secant, None with zeros for an invalid line."""
+        circle = rhino3dm.Circle(rhino3dm.Point3d(0, 0, 0), 1.0)
+        rc = rhino3dm.Intersection.LineCircle(rhino3dm.Line(rhino3dm.Point3d(-2, 0, 0), rhino3dm.Point3d(2, 0, 0)), circle)
+        self.assertEqual(len(rc), 5)
+        self.assertEqual(int(rc[0]), 2)                      # Multiple
+        bad = rhino3dm.Intersection.LineCircle(rhino3dm.Line(rhino3dm.Point3d(0, 0, 0), rhino3dm.Point3d(0, 0, 0)), circle)
+        self.assertEqual(int(bad[0]), 0)                     # None
+        self.assertEqual(bad[1], 0.0)
+        self.assertEqual(bad[3], 0.0)
+
+    def test_intersectionSphereSphereReturnsTheTypeAndCircle(self):
+        """SphereSphere returns (Circle, circle) for overlapping spheres and None for spheres apart."""
+        a = rhino3dm.Sphere(rhino3dm.Point3d(0, 0, 0), 1.0)
+        b = rhino3dm.Sphere(rhino3dm.Point3d(1, 0, 0), 1.0)
+        ss = rhino3dm.Intersection.SphereSphere(a, b)
+        self.assertEqual(len(ss), 2)
+        self.assertEqual(int(ss[0]), 2)                      # Circle
+        self.assertIsInstance(ss[1], rhino3dm.Circle)
+        far = rhino3dm.Intersection.SphereSphere(a, rhino3dm.Sphere(rhino3dm.Point3d(10, 0, 0), 1.0))
+        self.assertEqual(int(far[0]), 0)                     # None
+
+    def test_intersectionLineLineWithToleranceAndFiniteSegments(self):
+        """LineLine(a, b, tolerance, finiteSegments) returns (ok, a, b), clamping to the segments when finite."""
+        # each case's (ok, a, b) for (tolerance, finite) = (0, False), (0.001, True), (5, True)
+        cases = [((0, 0, 0), (4, 0, 0), (2, -1, 0), (2, 3, 0), [(True, 0.5, 0.25)] * 3),          # crossing inside both
+                 ((0, 0, 0), (1, 0, 0), (3, -1, 0), (3, 1, 0),
+                  [(True, 3.0, 0.5), (False, 1.0, 0.5), (True, 1.0, 0.5)]),                        # past the end of the first
+                 ((0, 0, 0), (1, 0, 0), (0, 0, 1), (1, 0, 1), [(False, 0.0, 0.0)] * 3)]           # parallel
+        for a0, a1, b0, b1, expected in cases:
+            for (tol, finite), want in zip([(0.0, False), (0.001, True), (5.0, True)], expected):
+                got = rhino3dm.Intersection.LineLine(_intersection_line(a0, a1), _intersection_line(b0, b1), tol, finite)
+                self.assertEqual(tuple(got), want)
+
+    def test_intersectionPlaneCircleSecant(self):
+        """PlaneCircle of a vertical circle and the XY plane is a secant at the circle's two crossings."""
+        circle = rhino3dm.Circle(rhino3dm.Plane.WorldZX, 2.0)
+        kind, t0, t1 = rhino3dm.Intersection.PlaneCircle(rhino3dm.Plane.WorldXY, circle)
+        self.assertEqual(kind, rhino3dm.PlaneCircleIntersection.Secant)
+        self.assertEqual(sorted(round(circle.PointAt(t).X, 9) for t in (t0, t1)), [-2.0, 2.0])
+
+    def test_intersectionPlaneCircleCoincident(self):
+        """PlaneCircle of a circle in the plane is Coincident, with unset parameters."""
+        kind, t0, t1 = rhino3dm.Intersection.PlaneCircle(rhino3dm.Plane.WorldXY, rhino3dm.Circle(rhino3dm.Plane.WorldXY, 2.0))
+        self.assertEqual(kind, rhino3dm.PlaneCircleIntersection.Coincident)
+        self.assertEqual(t0, t1)
+        self.assertLess(t0, -1e300)                        # RhinoMath.UnsetValue
 
 if __name__ == '__main__':
     print("running tests")

@@ -44,7 +44,7 @@ class TestVertexIdentityAndTopology(fixture.SubDFixtureTestCase):
     def test_sub_iterators_agree_with_the_indexed_accessor(self):
         for name, vertex in self.vertices.items():
             with self.subTest(vertex=name):
-                # vertex.Edges / vertex.Faces are lists (G129).
+                # vertex.Edges / vertex.Faces are lists (D26).
                 self.assertEqual(len(vertex.Edges), vertex.EdgeCount)
                 self.assertEqual(len(vertex.Faces), vertex.FaceCount)
                 self.assertEqual([e.Id for e in vertex.Edges],

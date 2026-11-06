@@ -234,7 +234,10 @@ Array results are lists (8.x returned tuples in places), and `None` where RhinoC
       ...
   ```
 
-- A component's neighbours are `EdgeCount` plus `EdgeAt(i)` (also `VertexAt`, `FaceAt`). An edge's vertices are `VertexFrom` and `VertexTo`.
+- A component's neighbours are lists: `face.Edges`, `face.Vertices`, `edge.Faces`, `edge.Vertices`,
+  `vertex.Edges` and `vertex.Faces`, without 8.x's `First` / `Next` cursor.
+  RhinoCommon's `EdgeCount` plus `EdgeAt(i)` (also `VertexAt`, `FaceAt`) work too, and an edge's vertices are also `VertexFrom`
+  and `VertexTo`.
 - `SubDVertex.SurfacePoint()` is a method, and `Next`, `Previous` and `First` are properties.
   `SubD.SharpEdgeCount()` is a method.
 - A component whose SubD changed raises `RuntimeError`. Components compare equal when
@@ -353,6 +356,9 @@ a list of `[key, value]` lists.
   significant digits). `str` works on every value type and on classes (`str(layer)` is its full path).
   <!-- D75 -->
 - `repr(Point3d(1, 2, 3))` is `Point3d(1.0, 2.0, 3.0)`. <!-- D81 -->
+- An empty string reads `''` where RhinoCommon returns `null` (`ViewInfo().Name`,
+  the log of `IsValidWithLog()` when there is nothing to report): test with
+  `if not name:`, which is true for both. <!-- D93 -->
 - `ViewportInfo.ScreenPort` and `GetScreenPort()` are RhinoCommon's `(x, y, width, height)`, with y the smaller of top and bottom.
   A new `ViewportInfo()` reads `(0, 0, 1000, 1000)`. <!-- D58, D38 -->
 - `File3dm.FromByteArray` takes any buffer (`bytes`, `bytearray`, numpy). <!-- D38 -->

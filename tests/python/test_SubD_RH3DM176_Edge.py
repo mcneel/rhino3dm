@@ -52,7 +52,7 @@ class TestEdgeIdentityAndTopology(fixture.SubDFixtureTestCase):
     def test_sub_iterators_agree_with_the_indexed_accessors(self):
         for name, edge in self.edges.items():
             with self.subTest(edge=name):
-                # edge.Vertices / edge.Faces are lists (G129).
+                # edge.Vertices / edge.Faces are lists (D26).
                 self.assertEqual(len(edge.Vertices), 2)
                 self.assertEqual(len(edge.Faces), edge.FaceCount)
                 self.assertEqual([v.Id for v in edge.Vertices],

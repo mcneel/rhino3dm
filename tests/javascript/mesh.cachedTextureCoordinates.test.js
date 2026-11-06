@@ -1,4 +1,5 @@
 const rhino3dm = require('rhino3dm')
+const helpers = require('./helpers')
 const fs = require('fs')
 const path = require('path')
 
@@ -107,4 +108,29 @@ test('positive path from fixture', async () => {
     }
 
     expect(found).toBe(true)
+})
+
+const crypto = require('crypto')
+
+test('cachedTextureCoordinatesAreAReadOnlyViewIntoTheMesh', () => {
+  // getCachedTextureCoordinates returns null for an unknown mapping id, and a read-only view for a cached one (D27)
+  const f = helpers.readModel(rhino, 'meshWithTexture.3dm')
+  const objs = [...f.objects]
+  const meshes = objs.map(o => o.geometry).filter(g => g instanceof rhino.Mesh)
+  expect(meshes.length).toBeGreaterThan(0)
+  expect(meshes[0].getCachedTextureCoordinates(crypto.randomUUID())).toBeNull()
+  // a cache, when the file carries one under one of its ids
+  const ids = new Set(objs.map(o => o.attributes.objectId))
+  for (const m of meshes) {
+    for (const mid of ids) {
+      const tc = m.getCachedTextureCoordinates(mid)
+      if (tc !== null) {
+        expect(tc.isReadOnly).toBe(true)
+        expect(tc.count).toBeGreaterThanOrEqual(0)
+        expect([2, 3]).toContain(tc.dim)
+        expect(tc.tryGetAt(-1)).toEqual([false, -1.0, -1.0, -1.0])   // RhinoCommon's -1 defaults
+        return
+      }
+    }
+  }
 })

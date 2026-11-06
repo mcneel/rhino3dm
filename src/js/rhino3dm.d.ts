@@ -3314,7 +3314,14 @@ declare module 'rhino3dm' {
 	/**
 	 * Used for cached texture coordinates
 	 */
-	class CachedTextureCoordinates {
+	class CachedTextureCoordinates extends CommonObject {
+		/**
+		 * Computes an estimate of the number of bytes that this object is using in memory.
+		 *
+		 * This is the same as calling GeometryBase.MemoryEstimate, but works for all CommonObject derived classes.
+		 * @returns An estimated memory footprint.
+		 */
+		static computeMemoryEstimate(obj: CommonObject): number;
 		/**
 		 * Determines whether this collection contains a specific value.
 		 */
@@ -3329,6 +3336,11 @@ declare module 'rhino3dm' {
 		 * Number of cached coordinates.
 		 */
 		readonly count: number;
+		/**
+		 * The object a dict from `Encode` describes (rhino3dm only).
+		 * @param jsonObject A dict as `Encode` returns it.
+		 */
+		static decode(jsonObject: Record<string, any>): CommonObject;
 		/**
 		 * Coordinate dimension: 2 = UV, 3 = UVW
 		 */

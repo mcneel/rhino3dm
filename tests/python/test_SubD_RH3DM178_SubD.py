@@ -6,7 +6,7 @@ instantiations, the two tag enums, and the lifetime guarantee that makes any of
 it usable from a Blender importer that drops the File3dm once it has read it.
 
 9.x: the nine iterators are RhinoCommon's three SubD lists plus six Python
-lists of neighbours; their First/Next/Last/Current cursor is gone (G129).
+lists of neighbours; their First/Next/Last/Current cursor is gone (D26).
 
 Run standalone:
 
@@ -127,7 +127,7 @@ class TestComponentIterators(fixture.SubDFixtureTestCase):
         for label, iterator, expected in cases:
             with self.subTest(iterator=label):
                 self.assertEqual(len(iterator), expected)
-        # Only the SubD lists have Count; the neighbours are lists (G129).
+        # Only the SubD lists have Count; the neighbours are lists (D26).
         for label, iterator, expected in self.subd_rooted():
             with self.subTest(iterator=label):
                 self.assertEqual(iterator.Count, expected)
@@ -143,7 +143,7 @@ class TestComponentIterators(fixture.SubDFixtureTestCase):
 
     def test_iteration_starts_at_the_first_component(self):
         # Only the vertex list keeps First (a property); faces and edges lost
-        # theirs with the cursor (G129).
+        # theirs with the cursor (D26).
         vertices = self.subd.Vertices
         self.assertEqual(list(vertices)[0].Id, vertices.First.Id)
 
