@@ -2015,48 +2015,56 @@ class = "Layer"
 member = "Visible"
 status = "replaced"
 by = ["Layer.IsVisible"]
+test = "test_layerFlags"
 
 [[retired]]
 class = "Layer"
 member = "Locked"
 status = "replaced"
 by = ["Layer.IsLocked"]
+test = "test_layerFlags"
 
 [[retired]]
 class = "Layer"
 member = "Expanded"
 status = "replaced"
 by = ["Layer.IsExpanded"]
+test = "test_layerFlags"
 
 [[retired]]
 class = "Sun"
 member = "EnableOn"
 status = "replaced"
 by = ["Sun.Enabled"]
+test = "test_renderSettings"
 
 [[retired]]
 class = "SafeFrame"
 member = "FieldGridOn"
 status = "replaced"
 by = ["SafeFrame.FieldsOn"]
+test = "test_renderSettings"
 
 [[retired]]
 class = "File3dm"
 member = "Groups"
 status = "replaced"
 by = ["File3dm.AllGroups"]
+test = "test_fileGroupsAndFont"
 
 [[retired]]
 class = "ObjectAttributes"
 member = "ActiveSpace"
 status = "replaced"
 by = ["ObjectAttributes.Space"]
+test = "test_objectAttributes"
 
 [[retired]]
 class = "ObjectAttributes"
 member = "Id"
 status = "replaced"
 by = ["ObjectAttributes.ObjectId"]
+test = "test_objectAttributes"
 
 [[retired]]
 class = "ObjectAttributes"
@@ -2064,30 +2072,35 @@ member = "GetGroupList2"
 status = "replaced"
 lang = "py"
 by = ["ObjectAttributes.GetGroupList"]
+test = "test_objectAttributes"
 
 [[retired]]
 class = "Font"
 member = "StrikeOut"
 status = "replaced"
 by = ["Font.Strikeout"]
+test = "test_fileGroupsAndFont"
 
 [[retired]]
 class = "RenderSettings"
 member = "RenderBackFaces"
 status = "replaced"
 by = ["RenderSettings.RenderBackfaces"]
+test = "test_renderSettings"
 
 [[retired]]
 class = "RenderSettings"
 member = "RenderIsoParams"
 status = "replaced"
 by = ["RenderSettings.RenderIsoparams"]
+test = "test_renderSettings"
 
 [[retired]]
 class = "RenderSettings"
 member = "ShadowMapLevel"
 status = "replaced"
 by = ["RenderSettings.ShadowmapLevel"]
+test = "test_renderSettings"
 
 [[retired]]
 class = "RenderSettings"
@@ -2095,36 +2108,42 @@ member = "SnapShot"
 status = "replaced"
 by = ["RenderSettings.Snapshot"]
 note = "read-only, as in RhinoCommon"
+test = "test_renderSettings"
 
 [[retired]]
 class = "LinearWorkflow"
 member = "PreProcessColorsOn"
 status = "replaced"
 by = ["LinearWorkflow.PreProcessColors"]
+test = "test_renderSettings"
 
 [[retired]]
 class = "LinearWorkflow"
 member = "PreProcessTexturesOn"
 status = "replaced"
 by = ["LinearWorkflow.PreProcessTextures"]
+test = "test_renderSettings"
 
 [[retired]]
 class = "RenderChannels"
 member = "CustomIds"
 status = "replaced"
 by = ["RenderChannels.CustomList"]
+test = "test_renderSettings"
 
 [[retired]]
 class = "PointCloudItem"
 member = "Value"
 status = "replaced"
 by = ["PointCloudItem.PointValue"]
+test = "test_pointCloudItem"
 
 [[retired]]
 class = "CachedTextureCoordinates"
 member = "Dimension"
 status = "replaced"
 by = ["CachedTextureCoordinates.Dim"]
+test = "test_positive_path_from_fixture"
 
 [[retired]]
 class = "DimensionStyle"
@@ -2132,6 +2151,7 @@ member = "FixedExtensionLengthOn"
 status = "replaced"
 by = ["DimensionStyle.FixedExtensionOn"]
 note = "setting it also marks the field as overridden, as in RhinoCommon"
+test = "test_dimensionStyle"
 
 [[retired]]
 class = "DimensionStyle"
@@ -2139,6 +2159,7 @@ member = "IsFieldOverridden"
 status = "replaced"
 by = ["DimensionStyle.IsFieldOverriden"]
 note = "RhinoCommon's spelling"
+test = "test_dimensionStyle"
 
 [[retired]]
 class = "DimensionStyle"
@@ -2147,6 +2168,7 @@ status = "replaced"
 lang = "py"
 by = ["DimensionStyle.TextHeight"]
 note = "setting it also marks the field as overridden, as in RhinoCommon"
+test = "test_dimensionStyle"
 
 [[retired]]
 class = "NurbsSurfacePointList"
@@ -2154,6 +2176,7 @@ member = "MakeRational"
 status = "replaced"
 by = ["NurbsSurface.MakeRational"]
 note = "on the surface"
+test = "test_nurbsSurfacePoints"
 
 [[retired]]
 class = "NurbsSurfacePointList"
@@ -2162,6 +2185,7 @@ status = "replaced"
 lang = "py"
 by = ["NurbsSurfacePointList.CountU", "NurbsSurfacePointList.CountV"]
 note = "the count in each direction"
+test = "test_nurbsSurfacePoints"
 
 [[retired]]
 class = "NurbsSurfacePointList"
@@ -2170,6 +2194,7 @@ status = "replaced"
 lang = "py"
 by = ["NurbsSurfacePointList.GetControlPoint"]
 note = "points[u, v] is points.GetControlPoint(u, v)"
+test = "test_nurbsSurfacePoints"
 
 [[retired]]
 class = "NurbsSurfacePointList"
@@ -2178,6 +2203,7 @@ status = "replaced"
 lang = "py"
 by = ["NurbsSurfacePointList.SetControlPoint"]
 note = "points[u, v] = cp is points.SetControlPoint(u, v, cp)"
+test = "test_nurbsSurfacePoints"
 
 [[retired]]
 class = "UnitSystem"
@@ -2196,13 +2222,21 @@ js = "dimstyles"
 status = "replaced"
 lang = "js"
 by = ["File3dm.DimStyles"]
+test = "objectAttributesFontAndGroups"
 
 [[retired]]
 class = "Environment"
-members = ["GetBackgroundImage", "SetBackgroundImage"]
+member = "GetBackgroundImage"
 status = "replaced"
 lang = "js"
 by = ["Environment.BackgroundImage"]
+
+[[retired]]
+class = "Environment"
+member = "SetBackgroundImage"
+status = "proposed-drop"
+lang = "js"
+note = "the background image is read-only, as in RhinoCommon"
 
 [[retired]]
 class = "ViewInfo"
@@ -2210,6 +2244,7 @@ members = ["GetViewport", "SetViewport"]
 status = "replaced"
 lang = "js"
 by = ["ViewInfo.Viewport"]
+test = "stringTableAndViewInfo"
 
 [[retired]]
 class = "File3dmStringTable"
@@ -2218,6 +2253,7 @@ js = "getvalue"
 status = "replaced"
 lang = "js"
 by = ["File3dmStringTable.GetValue"]
+test = "stringTableAndViewInfo"
 
 [[retired]]
 class = "Sun"
@@ -2226,6 +2262,7 @@ status = "replaced"
 lang = "js"
 by = ["Sun.MaxYear", "Sun.MinYear"]
 note = "static: rhino.Sun.maxYear, as in RhinoCommon"
+test = "renderSettings"
 
 [[retired]]
 class = "TextureMapping"
@@ -2234,6 +2271,7 @@ js = "CreateBoxMapping"
 status = "replaced"
 lang = "js"
 by = ["TextureMapping.CreateBoxMapping"]
+test = "valueStaticsAndJsSpellings"
 
 [[retired]]
 class = "PolylineCurve"
@@ -2242,6 +2280,7 @@ js = "ToPolyline"
 status = "replaced"
 lang = "js"
 by = ["PolylineCurve.ToPolyline"]
+test = "valueStaticsAndJsSpellings"
 
 [[retired]]
 class = "Linetype"
@@ -2250,6 +2289,7 @@ js = "dashdot"
 status = "replaced"
 lang = "js"
 by = ["Linetype.DashDot"]
+test = "valueStaticsAndJsSpellings"
 
 # Members of the renamed classes (api/migration.md "Renamed classes") that changed name too
 
@@ -2258,6 +2298,7 @@ class = "EmbeddedFile"
 member = "Write"
 status = "replaced"
 by = ["File3dmEmbeddedFile.SaveToFile"]
+test = "test_embeddedFileAndInstanceDefinition"
 
 [[retired]]
 class = "EmbeddedFile"
@@ -2266,6 +2307,7 @@ js = "fileName"
 status = "replaced"
 lang = "js"
 by = ["File3dmEmbeddedFile.Filename"]
+test = "embeddedFilesAddAndIterate"
 
 [[retired]]
 class = "File3dmEmbeddedFileTable"
@@ -2274,6 +2316,7 @@ js = "get"
 status = "replaced"
 lang = "js"
 by = ["File3dmEmbeddedFiles.FindIndex"]
+test = "embeddedFilesFindIndex"
 
 [[retired]]
 class = "Displacement"
@@ -2287,6 +2330,7 @@ member = "GetObjectIds2"
 status = "replaced"
 lang = "py"
 by = ["InstanceDefinitionGeometry.GetObjectIds"]
+test = "test_embeddedFileAndInstanceDefinition"
 
 [[retired]]
 class = "RenderTexture"
@@ -2308,6 +2352,7 @@ members = ["GetFirstChild", "GetNextSibling"]
 status = "replaced"
 lang = "js"
 by = ["File3dmRenderContent.Children"]
+test = "renderContentChildrenLinkToTheirParent"
 
 [[retired]]
 class = "RenderContent"
@@ -2315,6 +2360,7 @@ member = "GetParent"
 status = "replaced"
 lang = "js"
 by = ["File3dmRenderContent.Parent"]
+test = "renderContentChildrenLinkToTheirParent"
 
 [[retired]]
 class = "RenderContent"
@@ -2322,6 +2368,7 @@ member = "GetTopLevel"
 status = "replaced"
 lang = "js"
 by = ["File3dmRenderContent.TopLevel"]
+test = "renderContentChildrenLinkToTheirParent"
 
 [[retired]]
 class = "RenderContent"

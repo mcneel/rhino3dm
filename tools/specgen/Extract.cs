@@ -3379,6 +3379,10 @@ class Walker : CSharpSyntaxWalker
                         return new ArgInfo { Kind = "out", Text = text, Value = oi };
                     kind = "out";
                 }
+                else if (a.Expression is BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AddExpression or (int)SyntaxKind.SubtractExpression,
+                                                                 Left: IdentifierNameSyntax pal, Right: LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NumericLiteralExpression } }
+                         && paramNames.Contains(pal.Identifier.Text))
+                    return new ArgInfo { Kind = "paramarith", Text = a.Expression.ToString(), Value = pal.Identifier.Text };
                 else if (a.Expression is LiteralExpressionSyntax
                          || (a.Expression is PrefixUnaryExpressionSyntax pre
                              && pre.Operand is LiteralExpressionSyntax))
@@ -3691,6 +3695,12 @@ class Walker : CSharpSyntaxWalker
                     break;
                 case InvocationExpressionSyntax { Expression: MemberBindingExpressionSyntax } mbi
                     when mbi.Parent is ConditionalAccessExpressionSyntax { Parent: BinaryExpressionSyntax mbc } && NullablePtr(mbc) != null:
+                    break;
+                // `F(ptr, degree + 1)`: a parameter plus or minus a number, straight to a native
+                // (NurbsCurve(degree, pointCount); the argument is "paramarith")
+                case BinaryExpressionSyntax { RawKind: (int)SyntaxKind.AddExpression or (int)SyntaxKind.SubtractExpression,
+                                              Left: IdentifierNameSyntax, Right: LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NumericLiteralExpression } } pab
+                    when pab.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Parent: InvocationExpressionSyntax pau } } && IsUnmCall(pau):
                     break;
                 case BinaryExpressionSyntax b
                     when !b.IsKind(SyntaxKind.EqualsExpression)

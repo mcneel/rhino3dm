@@ -120,7 +120,10 @@ if(${RHINO3DM_JS})
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fwasm-exceptions")
   set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fwasm-exceptions -sEXPORTED_RUNTIME_METHODS=getExceptionMessage,incrementExceptionRefcount,decrementExceptionRefcount")
   if(MODULE)
-    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sEXPORT_ES6=1")
+    # the ES module is the browser build (package.json "browser"/"import" exports; Node gets
+    # rhino3dm.js): without Node support it has no `node:` or `ws` imports, which bundlers
+    # (webpack 5) cannot resolve for the web. Its .wasm is byte-identical to rhino3dm.js's.
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sEXPORT_ES6=1 -sENVIRONMENT=web,worker")
   endif()
 endif()
 

@@ -254,6 +254,14 @@ jobs:
           merge-multiple: true
       - name: list files
         run: ls -R dist
+      # a platform whose build failed silently would be missing from the release: fail instead
+      - name: check every platform has a wheel
+        shell: bash
+        run: |
+          for pat in 'manylinux.*x86_64' 'manylinux.*aarch64' 'win_amd64' 'win_arm64' 'macosx.*(universal2|arm64)'; do
+            ls dist | grep -Eq "\.whl$" && ls dist | grep -E "\.whl$" | grep -Eq "$pat" || { echo "::error::no wheel for $pat"; exit 1; }
+          done
+          ls dist | grep -q '\.tar\.gz$' || { echo "::error::no sdist"; exit 1; }
       - name: publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
@@ -441,6 +449,16 @@ jobs:
         run: "ls -R src/build/"
       - name: pack dotnet
         run: dotnet pack src/dotnet/Rhino3dm.csproj
+      # the csproj packs a runtime only when its native library exists, so a missing
+      # artifact would publish a package without that platform: fail instead
+      - name: check every runtime is packed
+        shell: bash
+        run: |
+          pkg=$(ls src/dotnet/bin/Release/Rhino3dm.*.nupkg | head -1)
+          unzip -l "$pkg" | grep runtimes/
+          for rid in win-x64 win-x86 win-arm64 osx-x64 osx-arm64 linux-x64 linux-arm64; do
+            unzip -l "$pkg" | grep -q "runtimes/$rid/native/" || { echo "::error::$pkg has no runtimes/$rid"; exit 1; }
+          done
       - name: artifacts nupkg
         uses: actions/upload-artifact@v4.3.1
         with:
@@ -489,30 +507,6 @@ jobs:
           cd src/build/javascript/artifacts
           uglifyjs rhino3dm.module.js  --compress -o rhino3dm.module.min.js
           uglifyjs rhino3dm.js  --compress -o rhino3dm.min.js
-      # WASM64 (memory64) opt-in variant. Shipped in a wasm64/ subdir so the
-      # generated loader's reference to rhino3dm.wasm stays intact. Default
-      # (wasm32) build above remains the package main for broad browser support.
-      - name: setup js wasm64 module
-        run: python3 script/setup.py -p js -o -v -m -w
-      - name: build js wasm64 module
-        run: python3 script/build.py -p js -o -v
-      - name: copy wasm64 module
-        shell: bash
-        run: |
-          mkdir -p src/build/javascript/artifacts/wasm64
-          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts/wasm64/rhino3dm.module.js
-      - name: setup js wasm64
-        run: python3 script/setup.py -p js -o -v -w
-      - name: build js wasm64
-        run: python3 script/build.py -p js -o -v
-      - name: copy wasm64
-        shell: bash
-        run: |
-          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts/wasm64/rhino3dm.js
-          mv src/build/javascript/artifacts_js/rhino3dm.wasm src/build/javascript/artifacts/wasm64/rhino3dm.wasm
-          cd src/build/javascript/artifacts/wasm64
-          uglifyjs rhino3dm.module.js  --compress -o rhino3dm.module.min.js
-          uglifyjs rhino3dm.js  --compress -o rhino3dm.min.js
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
         with:
@@ -540,7 +534,7 @@ jobs:
         with:
           name: rhino3dm.js
           path: tests/javascript/lib
-      - name: test javascript (wasm32)
+      - name: test javascript
         run: |
           ls tests/javascript/lib
           cd tests/javascript
@@ -548,12 +542,9 @@ jobs:
           npm test
       - name: test es6 module build
         run: cd tests/javascript && node module.smoke.mjs
-      - name: test javascript (wasm64)
-        run: |
-          cd tests/javascript
-          cp lib/wasm64/rhino3dm.js lib/rhino3dm.js
-          cp lib/wasm64/rhino3dm.wasm lib/rhino3dm.wasm
-          npm test
+      # npm pack, then the package as users load it: Node require, Node import, a webpack 5 bundle
+      - name: test npm package
+        run: bash tests/javascript/package/run.sh tests/javascript/lib
 
 # PUBLISH
 
@@ -583,8 +574,8 @@ jobs:
       - name: list files
         run: ls -R rhino3dm.js
       - name: publish to npm
-        # the assembled artifact already contains package.json, README, .d.ts,
-        # the wasm32 build (package main) and the wasm64/ subdir
+        # the assembled artifact already contains package.json, README, .d.ts, rhino3dm.js
+        # (Node; package main), rhino3dm.module.js (browsers and bundlers) and rhino3dm.wasm
         run: npm publish --tag "${{ inputs.npm_dist_tag }}"
         working-directory: rhino3dm.js
 

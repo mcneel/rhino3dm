@@ -538,6 +538,11 @@ jobs:
           cd tests/javascript
           npm i
           npm test
+      - name: test es6 module build
+        run: cd tests/javascript && node module.smoke.mjs
+      # npm pack, then the package as users load it: Node require, Node import, a webpack 5 bundle
+      - name: test npm package
+        run: bash tests/javascript/package/run.sh tests/javascript/lib
       
 
 

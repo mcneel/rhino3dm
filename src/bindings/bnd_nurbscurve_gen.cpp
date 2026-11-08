@@ -17,6 +17,12 @@ BND_NurbsCurve::BND_NurbsCurve()
 BND_NurbsCurve::BND_NurbsCurve(const BND_NurbsCurve* other)
   : BND_Curve(ON_NurbsCurve_New((other ? (ON_NurbsCurve*)(other->RH3DM_Const()) : nullptr))) {}
 
+BND_NurbsCurve::BND_NurbsCurve(int degree, int pointCount)
+  : BND_NurbsCurve() { ON_NurbsCurve_Create(static_cast<ON_NurbsCurve*>(RH3DM_NonConst()), 3, false, (degree + 1), pointCount); }
+
+BND_NurbsCurve::BND_NurbsCurve(int dimension, bool rational, int order, int pointCount)
+  : BND_NurbsCurve() { ON_NurbsCurve_Create(static_cast<ON_NurbsCurve*>(RH3DM_NonConst()), dimension, rational, order, pointCount); }
+
 class BND_BezierCurve* BND_NurbsCurve::Gen_ConvertSpanToBezier(int spanIndex) const {
   ON_BezierCurve* p = ON_NurbsCurve_ConvertSpanToBezier(static_cast<ON_NurbsCurve*>(RH3DM_Const()), spanIndex);
   if (!p) return nullptr;
@@ -170,6 +176,8 @@ void initGenNurbsCurve(rh3dmpymodule& m)
 {
   py::class_<BND_NurbsCurve, BND_Curve>(m, "NurbsCurve")
       .def(py::init<const BND_NurbsCurve*>(), py::arg("other").none())
+      .def(py::init<int, int>(), py::arg("degree"), py::arg("pointCount"))
+      .def(py::init<int, bool, int, int>(), py::arg("dimension"), py::arg("rational"), py::arg("order"), py::arg("pointCount"))
       .def("ConvertSpanToBezier", &BND_NurbsCurve::Gen_ConvertSpanToBezier, py::arg("spanIndex"))
       .def("GrevilleParameter", &BND_NurbsCurve::Gen_GrevilleParameter, py::arg("index"))
       .def_prop_ro("HasBezierSpans", &BND_NurbsCurve::Gen_HasBezierSpans)
@@ -197,6 +205,8 @@ void initGenNurbsCurve(void)
 {
   class_<BND_NurbsCurve, base<BND_Curve>>("NurbsCurve")
       .constructor<const BND_NurbsCurve*>()
+      .constructor<int, int>()
+      .constructor<int, bool, int, int>()
       .property("hasBezierSpans", &BND_NurbsCurve::Gen_HasBezierSpans)
       .property("isRational", &BND_NurbsCurve::Gen_IsRational)
       .property("order", &BND_NurbsCurve::Gen_Order)

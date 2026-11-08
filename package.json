@@ -1,9 +1,32 @@
 {
   "name": "rhino3dm",
   "version": "9.2.0-beta.0",
-  "description": "Node.js package based on OpenNURBS with a RhinoCommon style",
+  "description": "rhino3dm.js: OpenNURBS geometry with an API generated from RhinoCommon, compiled to WebAssembly",
   "main": "rhino3dm.js",
+  "module": "rhino3dm.module.js",
   "types": "rhino3dm.d.ts",
+  "exports": {
+    ".": {
+      "types": "./rhino3dm.d.ts",
+      "node": "./rhino3dm.js",
+      "browser": "./rhino3dm.module.js",
+      "import": "./rhino3dm.module.js",
+      "default": "./rhino3dm.js"
+    },
+    "./package.json": "./package.json",
+    "./*": "./*"
+  },
+  "files": [
+    "rhino3dm.js",
+    "rhino3dm.min.js",
+    "rhino3dm.module.js",
+    "rhino3dm.module.min.js",
+    "rhino3dm.wasm",
+    "rhino3dm.d.ts"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

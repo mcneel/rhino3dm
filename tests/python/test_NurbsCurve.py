@@ -144,6 +144,14 @@ class TestNurbsCurve(unittest.TestCase):
         self.assertAlmostEqual(p4.X / p4.W, p3.X, places=12)
         self.assertAlmostEqual(p4.Y / p4.W, p3.Y, places=12)
 
+    def test_constructorsFromDegreeAndCounts(self):
+        """NurbsCurve(degree, pointCount) and NurbsCurve(dimension, rational, order, pointCount)."""
+        c = rhino3dm.NurbsCurve(3, 5)
+        self.assertEqual((c.Degree, c.Order, c.Points.Count, c.Dimension, c.IsRational), (3, 4, 5, 3, False))
+        self.assertEqual(c.Knots.Count, 7)
+        r = rhino3dm.NurbsCurve(2, True, 3, 4)
+        self.assertEqual((r.Dimension, r.IsRational, r.Order, r.Points.Count), (2, True, 3, 4))
+
 
 if __name__ == '__main__':
     print("running tests")

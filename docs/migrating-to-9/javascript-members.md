@@ -160,7 +160,8 @@ page for the name your script uses.
 | `DracoCompression.compressOptions` | `DracoCompression.compress` | compress(mesh, options): the same bytes |
 | `EmbeddedFile.fileName` | `File3dmEmbeddedFile.filename` |  |
 | `EmbeddedFile.write` | `File3dmEmbeddedFile.saveToFile` |  |
-| `Environment.getBackgroundImage`, `Environment.setBackgroundImage` | `Environment.backgroundImage` |  |
+| `Environment.getBackgroundImage` | `Environment.backgroundImage` |  |
+| `Environment.setBackgroundImage` | removed | the background image is read-only, as in RhinoCommon |
 | `Extrusion.createWithPlane` | `Extrusion.create` |  |
 | `File3dm.dimstyles` | `File3dm.dimStyles` |  |
 | `File3dm.embeddedFilePaths` | `File3dm.embeddedFiles` | [f.filename for f in file.embeddedFiles]; a Windows path reads in this platform's form |

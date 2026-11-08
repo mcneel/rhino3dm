@@ -102,3 +102,12 @@ test('nurbsCurvePointsGetPoint4dReturnsTheWeightedPoint', () => {
   expect(p3.W).toBeUndefined()
   expect(p3.X).toBe(1)
 })
+
+test('nurbsCurveConstructorsFromDegreeAndCounts', () => {
+  // new NurbsCurve(degree, pointCount) and new NurbsCurve(dimension, rational, order, pointCount)
+  const c = new rhino.NurbsCurve(3, 5)
+  expect([c.degree, c.order, c.points.count, c.dimension, c.isRational]).toEqual([3, 4, 5, 3, false])
+  expect(c.knots.count).toBe(7)
+  const r = new rhino.NurbsCurve(2, true, 3, 4)
+  expect([r.dimension, r.isRational, r.order, r.points.count]).toEqual([2, true, 3, 4])
+})

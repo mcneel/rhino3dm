@@ -1928,6 +1928,8 @@ js  ModelComponent.referenceModelSerialNumber [property]
 js  NurbsCurve.append [function]
 js  NurbsCurve.computeMemoryEstimate [class_function]
 js  NurbsCurve.constructor<const BND_NurbsCurve*>
+js  NurbsCurve.constructor<int, bool, int, int>
+js  NurbsCurve.constructor<int, int>
 js  NurbsCurve.convertSpanToBezier [function]
 js  NurbsCurve.create [class_function]
 js  NurbsCurve.createControlPointCurve [class_function]
@@ -5231,6 +5233,8 @@ py  NurbsCurve.Order [property ro]
 py  NurbsCurve.Points [property ro]
 py  NurbsCurve.Reparameterize(c)
 py  NurbsCurve.__init__(const BND_NurbsCurve*)
+py  NurbsCurve.__init__(int, bool, int, int)
+py  NurbsCurve.__init__(int, int)
 py  NurbsCurveKnotList.ClampEnd(end)
 py  NurbsCurveKnotList.Count [property ro]
 py  NurbsCurveKnotList.CreatePeriodicKnots(knotSpacing)

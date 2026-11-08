@@ -37,7 +37,7 @@ See [our python documentation](docs/python/RHINO3DM.PY.md) for details
 
 ## rhino3dm.js (JavaScript and node.js)
 
-**rhino3dm.js** is a javascript library with an associated web assembly (rhino3dm.wasm). rhino3dm.js should run on all major browsers as well as [node.js](https://nodejs.org/).
+**rhino3dm.js** is a javascript library with an associated web assembly (rhino3dm.wasm). It runs in Chrome 133+, Firefox 134+ and [Node.js](https://nodejs.org/) 24+ (it uses 64-bit WebAssembly memory, which Safari supports only in its Technology Preview).
 
 rhino3dm.js packages are available on npm: https://www.npmjs.com/package/rhino3dm
 
@@ -50,12 +50,12 @@ rhino3dm.js packages are available on npm: https://www.npmjs.com/package/rhino3d
 
   <!-- Import maps polyfill -->
   <!-- Remove this when import maps will be widely supported -->
-  <script async src="https://unpkg.com/es-module-shims@1.8.2/dist/es-module-shims.js"></script>
+  <script async src="https://unpkg.com/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
 
   <script type="importmap">
       {
           "imports": {
-            "rhino3dm":"https://unpkg.com/rhino3dm@8.17.0/rhino3dm.module.min.js"
+            "rhino3dm":"https://cdn.jsdelivr.net/npm/rhino3dm@9.2.0-beta.0/rhino3dm.module.min.js"
           }
       }
   </script>
@@ -64,8 +64,8 @@ rhino3dm.js packages are available on npm: https://www.npmjs.com/package/rhino3d
 
     import rhino3dm from 'rhino3dm'
     const rhino = await rhino3dm()
-    const sphere = new rhino.Sphere( [1,2,3,], 12 )
-    console.log(sphere.diameter)
+    const sphere = new rhino.Sphere({ X: 1, Y: 2, Z: 3 }, 12)
+    console.log(rhino.Sphere.diameter(sphere))
 
   </script>
 

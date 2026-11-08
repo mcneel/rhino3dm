@@ -385,10 +385,19 @@ def build(api, js, py):
                 continue
             overloads = pyc.get(pn, []) if pn else []
             static = 'class_function' in kinds
-            if overloads and overloads[0][0] == 'attr' and ast.unparse(overloads[0][1].annotation) == '_StaticOrInstance':
-                # one name, static AND instance (G132: BoundingBox.Union): both, from RhinoCommon
-                for m in [m for t in api.base_types(api.cs_of[cls]) for m in api.by_type.get(t, [])
-                          if m['Name'] == pn and m['Kind'] == 'method']:
+            # one name, static AND instance (G132: BoundingBox.Union). The final stub spells it `Any`
+            # (pyi.py), so: an attribute in Python that JS registers as a function (G150)
+            if (overloads and overloads[0][0] == 'attr'
+                    and ast.unparse(overloads[0][1].annotation) in ('_StaticOrInstance', 'Any')
+                    and ('class_function' in kinds or 'function' in kinds)):
+                forms = [m for t in api.base_types(api.cs_of[cls]) for m in api.by_type.get(t, [])
+                         if m['Name'] == pn and m['Kind'] == 'method']
+                if value:
+                    # a value type's instance form takes the value first, so it has a static form's
+                    # arity: JS registers one function per arity -- the static one (it returns the result)
+                    sar = {len(m['Params'] or []) for m in forms if m.get('Static')}
+                    forms = [m for m in forms if m.get('Static') or len(m['Params'] or []) + 1 not in sar]
+                for m in forms:
                     ps = [('%s: %s' % (p['Name'], ts_text(pyi_type(p['Type']) or 'object'))) for p in m['Params'] or []]
                     if not m.get('Static') and value:
                         ps.insert(0, '%s: %s' % (camel(cls), cls))

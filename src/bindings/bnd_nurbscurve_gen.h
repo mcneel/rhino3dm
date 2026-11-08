@@ -11,6 +11,8 @@ public:
   explicit BND_NurbsCurve(ON_NurbsCurve* owned) : BND_Curve(owned) {}
   BND_NurbsCurve();
   BND_NurbsCurve(const BND_NurbsCurve* other);
+  BND_NurbsCurve(int degree, int pointCount);
+  BND_NurbsCurve(int dimension, bool rational, int order, int pointCount);
   BND_NurbsCurve(ONX_Model* model, ON_UUID id) : BND_Curve(model, id) {}
   BND_NurbsCurve(ON_Object* (*comp)(void*, int, bool), void* owner, int key, bool cow = false) : BND_Curve(comp, owner, key, cow) {}
 

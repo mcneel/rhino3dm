@@ -35,6 +35,14 @@ BND_Color ON_Color_to_Binding(const ON_Color& color)
 
 ON_Color Binding_to_ON_Color(const BND_Color& color)
 {
+  // a colour is {r, g, b, a} (a optional): anything else used to read as black
+  bool ok = color.typeOf().as<std::string>() == "object" && !color.isNull()
+    && !emscripten::val::global("Array").call<bool>("isArray", color);
+  for (const char* k : { "r", "g", "b" })
+    ok = ok && color[k].typeOf().as<std::string>() == "number";
+  ok = ok && (color["a"].isUndefined() || color["a"].typeOf().as<std::string>() == "number");
+  if (!ok)
+    emscripten::val::global("TypeError").new_(emscripten::val("expected a color {r, g, b, a}")).throw_();
   int r = color["r"].as<int>();
   int g = color["g"].as<int>();
   int b = color["b"].as<int>();

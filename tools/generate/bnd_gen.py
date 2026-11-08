@@ -752,6 +752,8 @@ def main():
     # ... and a translated body's `new T()` through one (G86)
     newobj_targets |= {c['reg'] for c in CLASSES for _, plans in per_class for p in plans
                        if p['shape'][0] in ('translated', 'translatedout') and ('new %s()' % c['gen']) in p['shape'][2]}
+    # ... and an init constructor's `: T()` (pilot #102: NurbsCurve(degree, pointCount))
+    newobj_targets |= {reg for reg, ps in argctors.items() if any(p.get('init_call') for p in ps)}
     for cls in CLASSES:
         if cls['reg'] not in newobj_targets or ctors.get(cls['reg']) or cls.get('ff') or cls['mode'] != 'pointer':
             continue
@@ -1826,6 +1828,11 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
                         raise SystemExit('%s(%s): no %s to copy with' % (cls['reg'], cls['reg'], cp['via']))
                     ctor += '\n{gen}::{gen}(const {gen}& {pn})\n  : {gen}() {{ {stmt} }}\n'.format(
                         gen=cls['gen'], pn=cp['param'], stmt=stmt)
+                    continue
+                if p.get('init_call'):
+                    # the default construction, then the initializing native (pilot #102)
+                    ctor += '\n{gen}::{gen}({sig})\n  : {gen}() {{ {call}; }}\n'.format(
+                        gen=cls['gen'], call=p['init_call'], sig=', '.join('%s %s' % a for a in p['bind_args']))
                     continue
                 ctor += ('\n{gen}::{gen}({sig})' + body).format(
                     gen=cls['gen'], member=member, on=cls['on'], expr=p['ctor_call'],

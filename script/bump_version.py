@@ -13,6 +13,10 @@ its ecosystem requires:
   src/rhino3dm/__init__.py                9.0.0b0      PEP 440
   docs/javascript/RHINO3DM.JS.md          9.0.0-beta   the jsDelivr URLs in its examples (every one;
                                                        it is also the npm package's README)
+  README.md                               9.0.0-beta   the same, in its rhino3dm.js example
+
+--check also fails on a jsDelivr/unpkg rhino3dm@<version> pin anywhere else in the repository's
+pages (outside docs/8, the archived 8.x reference).
 
 Usage:
   python3 script/bump_version.py                 # propagate version.txt everywhere
@@ -71,7 +75,26 @@ TARGETS = [
     ('src/rhino3dm/__init__.py',            r"(__version__ = ')([^']+)(')",                'pep440'),
     # a 4th element 'all': every match carries the version (at least one must exist)
     ('docs/javascript/RHINO3DM.JS.md',      r'(cdn\.jsdelivr\.net/npm/rhino3dm@)([^/"]+)(/)',  'semver', 'all'),
+    ('README.md',                           r'(cdn\.jsdelivr\.net/npm/rhino3dm@)([^/"]+)(/)',  'semver', 'all'),
 ]
+
+# every other CDN pin in the repository's pages must be the same version too: a new example
+# with an old pin fails --check (the archived 8.x reference under docs/8 is history, not checked)
+CDN_PIN = re.compile(r'(?:cdn\.jsdelivr\.net/npm|unpkg\.com)/rhino3dm@([^/"\s]+)/')
+CDN_SKIP = ('docs/8/', 'node_modules/')
+
+
+def stray_pins(version):
+    import subprocess
+    files = subprocess.run(['git', 'ls-files', '*.md', '*.html', '*.rst', '*.js', '*.mjs'], cwd=ROOT,
+                           capture_output=True, text=True, check=True).stdout.split()
+    out = []
+    for rel in files:
+        if rel.startswith(CDN_SKIP):
+            continue
+        text = io.open(os.path.join(ROOT, rel), encoding='utf-8', errors='replace').read()
+        out += ['%s: rhino3dm@%s' % (rel, v) for v in sorted(set(CDN_PIN.findall(text))) if v != version]
+    return out
 
 
 def apply(check_only=False):
@@ -103,8 +126,11 @@ def apply(check_only=False):
             io.open(path, 'w', encoding='utf-8').write(text)
             print('  updated %-40s %s -> %s' % (rel, current, target))
 
-    if check_only and stale:
-        print('\n%d file(s) out of sync with src/version.txt' % stale)
+    stray = stray_pins(want['semver'])
+    for s in stray:
+        print('  STRAY   %s (want %s; add the file to TARGETS)' % (s, want['semver']))
+    if check_only and (stale or stray):
+        print('\n%d file(s) out of sync with src/version.txt' % (stale + len(stray)))
         return 1
     print('\n%s' % ('all in sync' if not stale else 'updated %d file(s)' % stale))
     return 0

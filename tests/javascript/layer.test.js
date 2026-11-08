@@ -41,3 +41,15 @@ test('layerFullPathOutsideAFileIsItsName', () => {
   // a layer in no file has its name as fullPath
   expect(new rhino.Layer().fullPath).toBe(new rhino.Layer().name)
 })
+
+test('layerColorRejectsAnArray', () => {
+  // a color is {r, g, b, a}; an array or a missing channel throws instead of reading as black
+  const layer = new rhino.Layer()
+  layer.color = { r: 10, g: 20, b: 30, a: 255 }
+  expect([layer.color.r, layer.color.g, layer.color.b]).toEqual([10, 20, 30])
+  layer.color = { r: 1, g: 2, b: 3 }
+  expect([layer.color.r, layer.color.g, layer.color.b]).toEqual([1, 2, 3])
+  helpers.raises(rhino, () => { layer.color = [255, 0, 0, 255] }, /expected a color/)
+  helpers.raises(rhino, () => { layer.color = { r: 255, g: 0 } }, /expected a color/)
+  expect([layer.color.r, layer.color.g, layer.color.b]).toEqual([1, 2, 3])
+})

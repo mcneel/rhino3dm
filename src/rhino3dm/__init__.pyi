@@ -13661,11 +13661,32 @@ class ArcCurve(Curve):
 class NurbsCurve(Curve):
     """Represents a Non Uniform Rational B-Splines (NURBS) curve."""
 
+    @overload
     def __init__(self, other: NurbsCurve | None) -> None:
         """Initializes a NURBS curve by copying its values from another NURBS curve.
 
         Args:
             other: The other curve. This value can be null.
+        """
+
+    @overload
+    def __init__(self, degree: int, pointCount: int) -> None:
+        """Constructs a new NURBS curve with a specific degree and control point count.
+
+        Args:
+            degree: Degree of curve. Must be equal to or larger than 1 and smaller than or equal to 11.
+            pointCount: Number of control-points.
+        """
+
+    @overload
+    def __init__(self, dimension: int, rational: bool, order: int, pointCount: int) -> None:
+        """Constructs a new NURBS curve with knot and CV memory allocated.
+
+        Args:
+            dimension: >=1.
+            rational: true to make a rational NURBS.
+            order: (>= 2) The order=degree+1.
+            pointCount: (>= order) number of control vertices.
         """
 
     def ConvertSpanToBezier(self, spanIndex: int) -> BezierCurve:

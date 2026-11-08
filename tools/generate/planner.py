@@ -420,6 +420,12 @@ def plan(member, cfn, cls):
             if cs_param_modes.get(name) != ('', 'bool') or len(arms) != 2:
                 return None, 'conditional arg on %s' % name
             call_exprs.append('(%s ? %s : %s)' % (name, arms[0], arms[1]))
+        elif k == 'paramarith':
+            # `degree + 1` on a numeric parameter (NurbsCurve(degree, pointCount); pilot #102)
+            name = carg['Value']
+            if cs_param_modes.get(name) not in (('', 'int'), ('', 'double')) or ctype not in ('int', 'double'):
+                return None, 'arithmetic arg on %s' % name
+            call_exprs.append('(%s)' % carg['Text'])
         elif k == 'paramptr':
             # a generated class passed as an argument: hand the C function the
             # wrapped object's native pointer (abstract bases via their getter)
@@ -1639,6 +1645,37 @@ def default_ctor_call(cls, manifest, c_by_name):
     return None
 
 
+def init_ctor(x):
+    """`ptr = UNM.ON_X_New(IntPtr.Zero); ConstructNonConstObject(ptr); Init(args);` with Init a
+    native on the new object (NurbsCurve(dimension, rational, order, pointCount) -- private
+    Create inlined; pilot #102): two calls, the first the default creation, the second's first
+    argument the new object's pointer"""
+    c = x.get('Calls') or []
+    return (len(c) == 2 and not x.get('CtorCond') and c[0]['Args']
+            and all(a['Kind'] == 'expr' and a['Text'] == 'IntPtr.Zero' for a in c[0]['Args'])
+            and c[1]['Args'] and c[1]['Args'][0]['Kind'] == 'expr' and c[1]['Args'][0].get('Value') == 'NonConstPointer')
+
+
+def init_ctor_plan(x, cls, c_by_name):
+    """an init_ctor: the default construction, then the second call planned as a void method on
+    the new object (C# ignores its result too)"""
+    if cls['mode'] != 'pointer':
+        return None, 'init: %s mode' % cls['mode']
+    if x['Body'] not in ('trivial', 'pattern') or x.get('Guards'):
+        return None, 'init: body %s' % x['Body']
+    fn = c_by_name.get(x['Calls'][1]['Name'])
+    if fn is None:
+        return None, 'init: no C function'
+    m2 = dict(x, Kind='method', Static=False, Name='__init', Returns='void', Calls=[x['Calls'][1]])
+    p, why = plan(m2, fn, cls)
+    if p is None:
+        return None, 'init: ' + why
+    if p['locals'] or p['shape'][0] != 'direct':
+        return None, 'init: shape'
+    p['init_call'] = '%s(%s)' % (fn['name'], ', '.join(p['call_exprs']))
+    return p, None
+
+
 def arg_ctor_plans(cls, manifest, c_by_name, skipped):
     """RhinoCommon constructors with arguments (`LineCurve(Point3d from,
     Point3d to) { ConstructNonConstObject(UNM.ON_LineCurve_New2(from, to)); }`)
@@ -1660,10 +1697,20 @@ def arg_ctor_plans(cls, manifest, c_by_name, skipped):
             else:
                 out.append(p)
             continue
+        if (x['Type'] == cls['type'] and x['Kind'] == 'constructor' and init_ctor(x)
+                and x['Variant'] in ('portable', 'rhino3dm-only')):
+            p, why = init_ctor_plan(x, cls, c_by_name)
+            if p is None:
+                skip(why)
+            else:
+                out.append(p)
+            continue
         if not (x['Type'] == cls['type'] and x['Kind'] == 'constructor'
                 and x['Variant'] in ('portable', 'rhino3dm-only')
-                and x.get('Calls') and len(x['Calls']) == 1):
+                and x.get('Calls')):
             continue
+        if len(x['Calls']) != 1:
+            skip('%d calls' % len(x['Calls'])); continue
         call = x['Calls'][0]
         if all(a['Kind'] == 'expr' and a['Text'] == 'IntPtr.Zero' for a in call['Args']):
             continue                                    # the default ctor tier

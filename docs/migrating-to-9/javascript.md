@@ -154,6 +154,8 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array, fo
   views. <!-- D52 -->
 - `SubDEdgeSharpness` is a plain object `{sharpness0, sharpness1}`; build one with
   `new rhino.SubDEdgeSharpness(a, b)`, which checks the values as RhinoCommon does. <!-- D61 -->
+- A color is `{r, g, b, a}` (`a` optional). Anything else, such as an array, throws `TypeError`; 8.x read
+  it as black.
 
 ## Files and tables
 

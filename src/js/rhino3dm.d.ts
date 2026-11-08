@@ -2179,7 +2179,24 @@ declare module 'rhino3dm' {
 		 * @returns true if this operation is successful; otherwise false.
 		 */
 		static transform(boundingBox: BoundingBox, xform: Transform): boolean;
-		static readonly union: any;
+		/**
+		 * Returns a new BoundingBox that represents the union of boxes a and b.
+		 *
+		 * Invalid boxes are ignored and will not affect the union.
+		 * @param a First box to include in union.
+		 * @param b Second box to include in union.
+		 * @returns The BoundingBox that contains both a and b.
+		 */
+		static union(a: BoundingBox, b: BoundingBox): BoundingBox;
+		/**
+		 * Returns a new BoundingBox that represents the union of a bounding box and a point.
+		 *
+		 * Invalid boxes and points are ignored and will not affect the union.
+		 * @param box Box to include in the union.
+		 * @param point Point to include in the union.
+		 * @returns The BoundingBox that contains both the box and the point.
+		 */
+		static union(box: BoundingBox, point: Point3d): BoundingBox;
 		/**
 		 * Gets a bounding box that has Unset coordinates for Min and Max.
 		 */
@@ -12279,6 +12296,20 @@ declare module 'rhino3dm' {
 		 * @param other The other curve. This value can be null.
 		 */
 		constructor(other: NurbsCurve | null);
+		/**
+		 * Constructs a new NURBS curve with a specific degree and control point count.
+		 * @param degree Degree of curve. Must be equal to or larger than 1 and smaller than or equal to 11.
+		 * @param pointCount Number of control-points.
+		 */
+		constructor(degree: number, pointCount: number);
+		/**
+		 * Constructs a new NURBS curve with knot and CV memory allocated.
+		 * @param dimension >=1.
+		 * @param rational true to make a rational NURBS.
+		 * @param order (>= 2) The order=degree+1.
+		 * @param pointCount (>= order) number of control vertices.
+		 */
+		constructor(dimension: number, rational: boolean, order: number, pointCount: number);
 		/**
 		 * Converts a span of the NURBS curve into a Bezier.
 		 * @param spanIndex The span index, where (0 <= spanIndex <= Points.Count - Order).
