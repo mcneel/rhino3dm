@@ -19,6 +19,9 @@ public:
   bool RH3DM_IsView() const { return m_model != nullptr; }
   ON_3dmView* RH3DM_Val() const {
     if (!m_model) return const_cast<ON_3dmView*>(&m_val);
+    const auto& t = m_named ? m_model->m_settings.m_named_views : m_model->m_settings.m_views;
+    for (int i = 0; i < t.Count(); i++)
+      if (t.At(i) == m_vptr && t[i].m_vp.ViewportId() == m_id) return const_cast<ON_3dmView*>(m_vptr);
     ON_3dmView* p = ONX_Model_ViewPointer(m_model, m_id, m_vptr, m_named);
     if (!p) throw std::runtime_error("Rhino.DocObjects.ViewInfo: the view is no longer in the File3dm");
     return p;

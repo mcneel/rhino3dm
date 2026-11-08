@@ -168,8 +168,12 @@ CLASSES = [
      # G104: RhinoCommon's `internal ViewInfo(File3dm parent, Guid id, IntPtr ptr, bool namedViewTable)` -- a
      # LIVE view into the file's (named) view table. ConstPointer/NonConstPointer resolve it with
      # ONX_Model_ViewPointer(file, id, ptr, named); the generated view resolves on every access (RhinoCommon
-     # returns its cached ptr while non-zero, which dangles once the table reallocates)
-     'fileview': {'resolver': 'ONX_Model_ViewPointer', 'ctor': ['File3dm', 'Guid', 'IntPtr', 'bool']},
+     # returns its cached ptr while non-zero, which dangles once the table reallocates).
+     # pilot #100: the resolver matches by viewport id alone (the ptr only when the id is nil), but named
+     # views saved from one viewport share its id, so every one resolved to the first. The cached ptr is
+     # used while it is still an element of its table with that id ('tables', 'id'); the resolver after
+     'fileview': {'resolver': 'ONX_Model_ViewPointer', 'ctor': ['File3dm', 'Guid', 'IntPtr', 'bool'],
+                  'tables': ('m_settings.m_views', 'm_settings.m_named_views'), 'id': 'm_vp.ViewportId()'},
      'gen': 'BND_ViewInfo', 'reg': 'ViewInfo'},
     # -- more geometry
     {'type': 'Rhino.Geometry.Point', 'cs': 'Point', 'on': 'ON_Point',
@@ -328,6 +332,11 @@ CLASSES = [
     {'type': 'Rhino.Geometry.Arrowhead', 'cs': 'Arrowhead', 'on': None,
      'mode': 'static',
      'gen': 'BND_Arrowhead', 'reg': 'Arrowhead'},
+    # pilot #104: 8.x had UnitSystem.UnitScale; RhinoCommon's is RhinoMath.UnitScale (with the
+    # constants and the portable helpers)
+    {'type': 'Rhino.RhinoMath', 'cs': 'RhinoMath', 'on': None,
+     'mode': 'static',
+     'gen': 'BND_RhinoMath', 'reg': 'RhinoMath'},
     # the file's render settings: a VIEW of the file (no id) whose setters copy
     # on write and commit back (RenderSettings.Commit, see G41)
     {'type': 'Rhino.Render.RenderSettings', 'cs': 'RenderSettings', 'user_strings': True, 'on': 'ON_3dmRenderSettings',
@@ -647,6 +656,11 @@ def register_value_types(vt):
                 DATA_INFO[m['Type']]['methods'].add(m['Name'])
     for r in vt.get('classmembers') or []:
         CLASS_BODIES[(r['Type'], r['Kind'], r['Name'], tuple(r.get('ParamsCs') or ()))] = r
+    VT_STATIC_CLASS.clear()
+    static_cpp = {t['Cs']: t['Cpp'] for t in vt['types'] if t.get('IsStaticClass')}
+    for m in vt['members']:
+        if m['Type'] in static_cpp and m.get('Ok') and m.get('Public'):
+            VT_STATIC_CLASS.setdefault(m['Type'], (static_cpp[m['Type']], []))[1].append(m)
     for m in vt['members']:
         if m.get('Ok') and m.get('Static') and m['Kind'] in ('property', 'static-field'):
             VT_STATICS.add((m['Type'], m['Name']))
@@ -1050,6 +1064,7 @@ VT_ENUMS = {}        # RH3DM_<Name> -> the C++ type the bindings register under 
 VT_DEFINED_ENUMS = set()   # generated public enums the translated values header defines (G107)
 VT_STATICS = set()   # (C# type, name) of translated static getters (Plane.WorldXY)
 VT_CONSTS = set()    # (C# type, name) of translated constants (RhinoMath.UnsetValue)
+VT_STATIC_CLASS = {} # C# static class -> (translated struct, its public translated members) (RhinoMath)
 VT_PROPS = set()     # (C# type, name) of translated instance properties (Interval.Min)
 VT_PROP_RET = {}     # (C# type, name) -> C++ return type of that property's getter
 VT_PROP_SET = set()  # (C# type, name) of translated instance properties with a setter (G67)

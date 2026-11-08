@@ -2793,6 +2793,41 @@ def plan_class(cls, manifest, c_by_name, skipped):
                               'bind_args': [], 'shape': ('constprop', CS_ARG[ret][0], lit.rstrip('dDfFuU')), 'extra_fns': [],
                               'guards': [], 'success': None, 'failthrow': None, 'typearg_pos': [], 'commits': False})
 
+    # a static class the value-type translator also holds (RhinoMath; pilot #104): its public
+    # constants (static read-only properties) and its pure statics over numbers, through the
+    # translated struct. What a native call needs (UnitScale) is planned above.
+    if cls['mode'] == 'static' and cls['type'].split('.')[-1] in VT_STATIC_CLASS:
+        vcpp, vmembers = VT_STATIC_CLASS[cls['type'].split('.')[-1]]
+        nums = ('double', 'int', 'bool', 'uint')
+        for v in vmembers:
+            if v['Ret'] not in nums:
+                continue
+            if v['Kind'] == 'field-const':
+                rec = [x for x in manifest['members'] if x['Type'] == cls['type'] and x['Kind'] == 'const'
+                       and x['Name'] == v['Name']]
+                if not rec or any(p['m']['Name'] == v['Name'] for p in plans):
+                    continue
+                plans.append({'m': dict(rec[0], Kind='property', Static=True, Returns=v['Ret']), 'fn': None,
+                              'cls': cls, 'static': True, 'call_exprs': [], 'locals': [], 'bind_args': [],
+                              'shape': ('constprop', CS_ARG[v['Ret']][0], '%s::%s' % (vcpp, v['Name'])),
+                              'extra_fns': [], 'guards': [], 'success': None, 'failthrow': None,
+                              'typearg_pos': [], 'commits': False})
+            elif v['Kind'] == 'method' and v.get('Static'):
+                ps = v.get('Params') or []
+                if any(q['Type'] not in nums or q.get('Mode') for q in ps):
+                    continue
+                types = tuple(q['Type'] for q in ps)
+                rec = [x for x in manifest['members'] if x['Type'] == cls['type'] and x['Kind'] == 'method'
+                       and x['Name'] == v['Name'] and tuple(q['Type'] for q in x.get('Params') or []) == types]
+                if not rec or any(p['m']['Name'] == v['Name'] and tuple(q['Type'] for q in p['m'].get('Params') or []) == types
+                                  for p in plans):
+                    continue
+                body = '{\n  return %s::%s(%s);\n}' % (vcpp, v['Name'], ', '.join(q['Name'] for q in ps))
+                plans.append({'m': rec[0], 'fn': None, 'cls': cls, 'static': True, 'call_exprs': [], 'locals': [],
+                              'bind_args': [(CS_ARG[q['Type']][0], q['Name']) for q in ps],
+                              'shape': ('translated', CS_ARG[v['Ret']][0], body), 'extra_fns': [], 'guards': [],
+                              'success': None, 'failthrow': None, 'typearg_pos': [], 'commits': False})
+
     # property chains (`File3dmObject.Name => Attributes.Name`): a property of
     # the object a sibling property returns, both generated -- the sibling here
     # (a view or child), the member on its class (planned earlier, PLANNED)

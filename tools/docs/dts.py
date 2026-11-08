@@ -58,8 +58,13 @@ class Js:
             text = open(path).read()
             for b in re.finditer(r'class_<BND_(\w+), base<BND_(\w+)>>\("(\w+)"\)', text):
                 self.bases[b.group(3)] = b.group(2)
-            for v in re.finditer(r'value_object<(BND_\w+)>\("(\w+)Value"\)((?:\s*\.field\("\w+", &\w+::\w+\))*)', text):
-                self.values[v.group(2)] = (v.group(1), re.findall(r'\.field\("(\w+)", &\w+::(\w+)\)', v.group(3)))
+            # a field is a member (`&BND_Arc::m_radius`) or a getter/setter pair whose setter names its
+            # C++ type (`+[](BND_Cylinder& s, BND_Plane v)`): ControlPoint, Cylinder, ComponentIndex
+            for v in re.finditer(r'value_object<(BND_\w+)>\("(\w+)Value"\)(.*?);\n', text, re.S):
+                self.values[v.group(2)] = (v.group(1), [
+                    (jn, mem or None, (sett or '').replace('RH3DM_', '') or None)
+                    for jn, mem, sett in re.findall(r'\.field\("(\w+)", (?:&\w+::(\w+)\)|\+\[\].*?, \+\[\]\(\w+& s, (\w+) v\))',
+                                                    v.group(3))])
             for e in re.finditer(r'enum_<[^>]+>\("(\w+)"\)', text):
                 self.enums_js.add(e.group(1))
         # the classes the module makes iterable at load (G101 post-js: ENUMERABLE, ITERS, GRID)
@@ -219,6 +224,20 @@ def _params(fn, skip_self=True, lead=None):
     return out, names
 
 
+def _cs_params(ps, m):
+    """`ps` (from _params) with each parameter whose C# type JS spells differently retyped: a colour is
+    `{r, g, b, a}`, though Python spells it like a Rectangle (`tuple[int, int, int, int]`; pilot #101)"""
+    ins = [p for p in ((m or {}).get('Params') or []) if p.get('Mode') not in ('out', 'ref')]
+    lead = len(ps) - len(ins)
+    if not ins or lead < 0:
+        return ps
+    out = list(ps)
+    for i, p in enumerate(ins):
+        if p.get('Type') in CS_TS:
+            out[lead + i] = out[lead + i].split(': ', 1)[0] + ': ' + CS_TS[p['Type']]
+    return out
+
+
 # a JS name for one Python overload (HAND_MEMBERS `js`: JS cannot overload on argument types)
 def _hand_js():
     from gen_registry import HAND_MEMBERS
@@ -324,8 +343,8 @@ def build(api, js, py):
             ftypes = {f['Name']: f['Type'] for t in api.vt_raw if t['Cpp'] == cpp for f in t['Fields']}
             w('\t/** The plain-object form of a %s value (fields as in RhinoCommon). */' % cls)
             w('\tinterface %s {' % cls)
-            for jn, f in fields:
-                ct = ftypes.get(f, 'double')
+            for jn, f, st in fields:
+                ct = ftypes.get(f, 'double') if f else st
                 w('\t\t%s: %s;' % (jn, 'number' if ct in ('double', 'float', 'int') else ct.replace('BND_', '')))
             w('\t}')
         doc = api.type_doc(cls, 'js') or api.hand_doc(cls, None)
@@ -342,7 +361,7 @@ def build(api, js, py):
                     ps, names = _params(fn)
                     m = api.member(cls, '__init__', 'constructor', params=names)
                     out.extend(tsdoc(api.doc(m, 'js') or api.hand_doc(cls, '__init__', names), names))
-                    w('\t\tconstructor(%s);' % ', '.join(ps))
+                    w('\t\tconstructor(%s);' % ', '.join(_cs_params(ps, m)))
                 if not pyc.get('__init__'):
                     w('\t\tconstructor(...args: any[]);')
                 continue
@@ -355,6 +374,7 @@ def build(api, js, py):
                         continue                    # Python's copy / sequence forms
                     m = api.member(cls, '__init__', 'constructor', params=names)
                     d = api.doc(m, 'js') or api.hand_doc(cls, '__init__', names)
+                    ps = _cs_params(ps, m)
                     stats['typed'] += 1
                     stats['documented'] += bool(d)
                     out.extend(tsdoc(d, names))
@@ -413,6 +433,7 @@ def build(api, js, py):
                 lead = (camel(cls), cls) if value and kind == 'method' else None
                 ps, names = _params(fn, lead=lead)
                 m = api.member(cls, pn, 'method', params=names, static=(kind == 'static'))
+                ps = _cs_params(ps, m)
                 d = api.doc(m, 'js') or api.hand_doc(cls, pn, names)
                 stats['typed'] += 1
                 stats['documented'] += bool(d)

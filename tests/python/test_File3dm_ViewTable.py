@@ -75,6 +75,20 @@ class TestFile3dmViewTable(unittest.TestCase):
         gc.collect()
         self.assertEqual(v.Name, 'live')
 
+    def test_namedViewsSharingAViewportIdStayDistinct(self):
+        """Named views saved from one viewport share its id; NamedViews[i] still reads and writes view i."""
+        import uuid
+        f = rhino3dm.File3dm()
+        shared = uuid.uuid4()
+        for name in ('One', 'Two', 'Three'):
+            vi = rhino3dm.ViewInfo()
+            vi.Name = name
+            vi.Viewport.Id = shared
+            f.NamedViews.Add(vi)
+        self.assertEqual([v.Name for v in f.NamedViews], ['One', 'Two', 'Three'])
+        f.NamedViews[2].Name = 'Third'
+        self.assertEqual([f.NamedViews[i].Name for i in range(3)], ['One', 'Two', 'Third'])
+
     def test_viewTableIndexOutOfRangeRaises(self):
         """Views[i] past the end raises IndexError."""
         with self.assertRaises(IndexError):

@@ -30,7 +30,7 @@ maps each 8.x member that is gone to its replacement.
 [The changes most scripts hit](#the-changes-most-scripts-hit) ·
 <!-- js -->[Values and objects](#values-and-objects) · <!-- /js -->
 [Files and tables](#files-and-tables) · [Geometry](#geometry) · [Annotations](#annotations) ·
-[Rendering and settings](#rendering-and-settings) · [Enums](#enums) ·
+[Rendering and settings](#rendering-and-settings) · [Renamed classes](#renamed-classes) · [Enums](#enums) ·
 [Errors, values and identity](#errors-values-and-identity) · [Packaging](#packaging)
 
 ## The changes most scripts hit
@@ -52,7 +52,8 @@ const d = rhino.Point3d.distanceTo(p, q)
 ```
 
 See [Values and objects](#values-and-objects) for constructors, operators and the methods that change
-a value.
+a value. [Renamed and removed members](javascript-members.md) lists every 8.x member of these types
+with its 9.2 form: `arc.circumference` is `rhino.Arc.circumference(arc)`, `arc.radius` is `arc.Radius`.
 
 ### 2. Properties are properties
 
@@ -480,10 +481,35 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array]], 
   Rhino's rules: the material the attributes select, and its PBR base colour when it is physically
   based. <!-- D63 -->
 
+## Renamed classes
+
+- These 8.x classes have RhinoCommon's names. Their members keep their names, unless
+  [[[Renamed and removed members](python-members.md) || [Renamed and removed members](javascript-members.md)]]
+  lists them:
+
+  | 8.x | 9.2 |
+  |---|---|
+  | `Text` | `TextEntity` |
+  | `DimLinear`, `DimAngular`, `DimRadial`, `DimOrdinate` | `LinearDimension`, `AngularDimension`, `RadialDimension`, `OrdinateDimension` |
+  | `InstanceDefinition` | `InstanceDefinitionGeometry` |
+  | `InstanceReference` | `InstanceReferenceGeometry` |
+  | `EmbeddedFile` | `File3dmEmbeddedFile` |
+  | `File3dmEmbeddedFileTable` | `File3dmEmbeddedFiles` |
+  | `MeshNormalList` | `MeshVertexNormalList` |
+  | `CurvePiping`, `Displacement`, `EdgeSoftening`, `ShutLining`, `Thickening` | `File3dmCurvePiping`, `File3dmDisplacement`, `File3dmEdgeSoftening`, `File3dmShutLining`, `File3dmThickening` |
+  | `RenderContent` | `File3dmRenderContent` |
+  | `RenderMaterial`, `RenderEnvironment`, `RenderTexture` | `File3dmRenderMaterial`, `File3dmRenderEnvironment`, `File3dmRenderTexture` |
+  | `PostEffect` | `PostEffectData` |
+  | `File3dmDecalTable` | `Decals` |
+  | `File3dmPostEffectTable` | `PostEffectCollection` |
+
+- `PointGrid` and `File3dmRdkDocumentData` are gone. [[`File3dm.RdkXml` || `file3dm.rdkXml`]] still
+  returns the document's RDK XML.
+
 ## Enums
 
 <!-- D76, D77, D18 -->
-- Every enum is RhinoCommon's, with RhinoCommon's names and values. Twelve 8.x enums had no
+- Every enum is RhinoCommon's, with RhinoCommon's names and values. Fifteen 8.x enums had no
   RhinoCommon namesake and are replaced:
 
   <!-- py -->
@@ -497,6 +523,9 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array]], 
   | `DisplacementSweepResolutionFormulas` | `File3dmDisplacement.SweepResolutionFormulas` |
   | `DitheringMethods` | `Dithering.Methods` |
   | `EnvironmentBackgroundProjections` | `Environment.BackgroundProjections` |
+  | `LengthDisplay` | `DimensionStyle.LengthDisplay` |
+  | `MaskFrame` | `DimensionStyle.MaskFrame` |
+  | `MaskType` | `DimensionStyle.MaskType` |
   | `PostEffectTypes` | `PostEffectType` |
   | `RenderChannelsModes` | `RenderChannels.Modes` |
 
@@ -512,6 +541,9 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array]], 
   | `DisplacementSweepResolutionFormulas` | `File3dmDisplacementSweepResolutionFormulas` |
   | `DitheringMethods` | `DitheringMethods` |
   | `EnvironmentBackgroundProjections` | `EnvironmentBackgroundProjections` |
+  | `LengthDisplay` | `DimensionStyleLengthDisplay` |
+  | `MaskFrame` | `DimensionStyleMaskFrame` |
+  | `MaskType` | `DimensionStyleMaskType` |
   | `PostEffectTypes` | `PostEffectType` |
   | `RenderChannelsModes` | `RenderChannelsModes` |
 
@@ -522,6 +554,10 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array]], 
   `None = 0, FloydSteinberg = 1, SimpleNoise = 2` (8.x: `SimpleNoise = 0`), and `PostEffectType` is
   `Early = 0, ToneMapping = 1, Late = 2`. <!-- D36, D50 -->
 - `LightStyle.Unknown` is `LightStyle.None`.
+- `BlendContinuity`, `CurveExtensionStyle`, `CurveKnotStyle`, `CurveOffsetCornerStyle`, `LoftType`,
+  `PointContainment` and `RegionContainment` are gone: no 9.2 member takes or returns them.
+- <!-- js -->`DimensionStyleField.ArrowSize` and `LeaderArrowSize` are `Arrowsize` and
+  `LeaderArrowsize`, RhinoCommon's spelling.<!-- /js -->
 - <!-- py -->`None` is a keyword, so a value named `None` is also available as `None_`
   (`rhino3dm.LightStyle.None_`). `E['None']` and `getattr(E, 'None')` work too, and the value's name
   is still `'None'`.<!-- /py -->

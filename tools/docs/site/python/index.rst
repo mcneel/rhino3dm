@@ -1,14 +1,14 @@
 rhino3dm.py
 ===========
 
+rhino3dm is a Python library for reading, writing and working with Rhino's .3dm files and the
+geometry in them, without Rhino. The API is generated from RhinoCommon, and the documentation
+here is RhinoCommon's own.
+
 .. important::
 
    **Coming from rhino3dm 8.x?** 9.2 is generated from RhinoCommon, and much of the API changed.
    Read :doc:`migrating` first, and look up any 8.x name in :doc:`migrating-members`.
-
-rhino3dm is a Python library for reading, writing and working with Rhino's .3dm files and the
-geometry in them, without Rhino. Its API is RhinoCommon's: the classes, members and names are
-generated from RhinoCommon, and the documentation here is RhinoCommon's own.
 
 .. code-block:: python
 

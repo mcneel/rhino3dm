@@ -2005,3 +2005,341 @@ lang = "js"
 by = ["PointCloud.AddRange"]
 note = "triage JS1 (Luis: retire): JS only; addRange(points, colors) (G130)"
 test = "test_retired_append_line_and_add_range_colors_g130"
+
+# ---- 8.x names the guide did not list (pilot #104; Luis 2026-11-08: accepted). Each fate is the
+# proposal in docs/vnext/rhino3dm-only-proposals.md; every `by` member was checked against the
+# 9.2 build. Most have no `test` yet.
+
+[[retired]]
+class = "Layer"
+member = "Visible"
+status = "replaced"
+by = ["Layer.IsVisible"]
+
+[[retired]]
+class = "Layer"
+member = "Locked"
+status = "replaced"
+by = ["Layer.IsLocked"]
+
+[[retired]]
+class = "Layer"
+member = "Expanded"
+status = "replaced"
+by = ["Layer.IsExpanded"]
+
+[[retired]]
+class = "Sun"
+member = "EnableOn"
+status = "replaced"
+by = ["Sun.Enabled"]
+
+[[retired]]
+class = "SafeFrame"
+member = "FieldGridOn"
+status = "replaced"
+by = ["SafeFrame.FieldsOn"]
+
+[[retired]]
+class = "File3dm"
+member = "Groups"
+status = "replaced"
+by = ["File3dm.AllGroups"]
+
+[[retired]]
+class = "ObjectAttributes"
+member = "ActiveSpace"
+status = "replaced"
+by = ["ObjectAttributes.Space"]
+
+[[retired]]
+class = "ObjectAttributes"
+member = "Id"
+status = "replaced"
+by = ["ObjectAttributes.ObjectId"]
+
+[[retired]]
+class = "ObjectAttributes"
+member = "GetGroupList2"
+status = "replaced"
+lang = "py"
+by = ["ObjectAttributes.GetGroupList"]
+
+[[retired]]
+class = "Font"
+member = "StrikeOut"
+status = "replaced"
+by = ["Font.Strikeout"]
+
+[[retired]]
+class = "RenderSettings"
+member = "RenderBackFaces"
+status = "replaced"
+by = ["RenderSettings.RenderBackfaces"]
+
+[[retired]]
+class = "RenderSettings"
+member = "RenderIsoParams"
+status = "replaced"
+by = ["RenderSettings.RenderIsoparams"]
+
+[[retired]]
+class = "RenderSettings"
+member = "ShadowMapLevel"
+status = "replaced"
+by = ["RenderSettings.ShadowmapLevel"]
+
+[[retired]]
+class = "RenderSettings"
+member = "SnapShot"
+status = "replaced"
+by = ["RenderSettings.Snapshot"]
+note = "read-only, as in RhinoCommon"
+
+[[retired]]
+class = "LinearWorkflow"
+member = "PreProcessColorsOn"
+status = "replaced"
+by = ["LinearWorkflow.PreProcessColors"]
+
+[[retired]]
+class = "LinearWorkflow"
+member = "PreProcessTexturesOn"
+status = "replaced"
+by = ["LinearWorkflow.PreProcessTextures"]
+
+[[retired]]
+class = "RenderChannels"
+member = "CustomIds"
+status = "replaced"
+by = ["RenderChannels.CustomList"]
+
+[[retired]]
+class = "PointCloudItem"
+member = "Value"
+status = "replaced"
+by = ["PointCloudItem.PointValue"]
+
+[[retired]]
+class = "CachedTextureCoordinates"
+member = "Dimension"
+status = "replaced"
+by = ["CachedTextureCoordinates.Dim"]
+
+[[retired]]
+class = "DimensionStyle"
+member = "FixedExtensionLengthOn"
+status = "replaced"
+by = ["DimensionStyle.FixedExtensionOn"]
+note = "setting it also marks the field as overridden, as in RhinoCommon"
+
+[[retired]]
+class = "DimensionStyle"
+member = "IsFieldOverridden"
+status = "replaced"
+by = ["DimensionStyle.IsFieldOverriden"]
+note = "RhinoCommon's spelling"
+
+[[retired]]
+class = "DimensionStyle"
+member = "TextHEight"
+status = "replaced"
+lang = "py"
+by = ["DimensionStyle.TextHeight"]
+note = "setting it also marks the field as overridden, as in RhinoCommon"
+
+[[retired]]
+class = "NurbsSurfacePointList"
+member = "MakeRational"
+status = "replaced"
+by = ["NurbsSurface.MakeRational"]
+note = "on the surface"
+
+[[retired]]
+class = "NurbsSurfacePointList"
+member = "__len__"
+status = "replaced"
+lang = "py"
+by = ["NurbsSurfacePointList.CountU", "NurbsSurfacePointList.CountV"]
+note = "the count in each direction"
+
+[[retired]]
+class = "NurbsSurfacePointList"
+member = "__getitem__"
+status = "replaced"
+lang = "py"
+by = ["NurbsSurfacePointList.GetControlPoint"]
+note = "points[u, v] is points.GetControlPoint(u, v)"
+
+[[retired]]
+class = "NurbsSurfacePointList"
+member = "__setitem__"
+status = "replaced"
+lang = "py"
+by = ["NurbsSurfacePointList.SetControlPoint"]
+note = "points[u, v] = cp is points.SetControlPoint(u, v, cp)"
+
+[[retired]]
+class = "UnitSystem"
+member = "UnitScale"
+status = "replaced"
+lang = "py"
+by = ["RhinoMath.UnitScale"]
+test = "test_unitScale"
+
+# JS only
+
+[[retired]]
+class = "File3dm"
+member = "DimStyles"
+js = "dimstyles"
+status = "replaced"
+lang = "js"
+by = ["File3dm.DimStyles"]
+
+[[retired]]
+class = "Environment"
+members = ["GetBackgroundImage", "SetBackgroundImage"]
+status = "replaced"
+lang = "js"
+by = ["Environment.BackgroundImage"]
+
+[[retired]]
+class = "ViewInfo"
+members = ["GetViewport", "SetViewport"]
+status = "replaced"
+lang = "js"
+by = ["ViewInfo.Viewport"]
+
+[[retired]]
+class = "File3dmStringTable"
+member = "GetValue"
+js = "getvalue"
+status = "replaced"
+lang = "js"
+by = ["File3dmStringTable.GetValue"]
+
+[[retired]]
+class = "Sun"
+members = ["MaxYear", "MinYear"]
+status = "replaced"
+lang = "js"
+by = ["Sun.MaxYear", "Sun.MinYear"]
+note = "static: rhino.Sun.maxYear, as in RhinoCommon"
+
+[[retired]]
+class = "TextureMapping"
+member = "CreateBoxMapping"
+js = "CreateBoxMapping"
+status = "replaced"
+lang = "js"
+by = ["TextureMapping.CreateBoxMapping"]
+
+[[retired]]
+class = "PolylineCurve"
+member = "ToPolyline"
+js = "ToPolyline"
+status = "replaced"
+lang = "js"
+by = ["PolylineCurve.ToPolyline"]
+
+[[retired]]
+class = "Linetype"
+member = "DashDot"
+js = "dashdot"
+status = "replaced"
+lang = "js"
+by = ["Linetype.DashDot"]
+
+# Members of the renamed classes (api/migration.md "Renamed classes") that changed name too
+
+[[retired]]
+class = "EmbeddedFile"
+member = "Write"
+status = "replaced"
+by = ["File3dmEmbeddedFile.SaveToFile"]
+
+[[retired]]
+class = "EmbeddedFile"
+member = "Filename"
+js = "fileName"
+status = "replaced"
+lang = "js"
+by = ["File3dmEmbeddedFile.Filename"]
+
+[[retired]]
+class = "File3dmEmbeddedFileTable"
+member = "Get"
+js = "get"
+status = "replaced"
+lang = "js"
+by = ["File3dmEmbeddedFiles.FindIndex"]
+
+[[retired]]
+class = "Displacement"
+member = "Texture"
+status = "replaced"
+by = ["File3dmDisplacement.TextureId"]
+
+[[retired]]
+class = "InstanceDefinition"
+member = "GetObjectIds2"
+status = "replaced"
+lang = "py"
+by = ["InstanceDefinitionGeometry.GetObjectIds"]
+
+[[retired]]
+class = "RenderTexture"
+member = "FileName"
+status = "replaced"
+by = ["File3dmRenderTexture.Filename"]
+note = "read-only, as in RhinoCommon"
+
+[[retired]]
+class = "RenderTexture"
+member = "SetFilename"
+status = "dropped"
+lang = "js"
+note = "the file name is read-only, as in RhinoCommon (Luis 2026-11-08: dropped)"
+
+[[retired]]
+class = "RenderContent"
+members = ["GetFirstChild", "GetNextSibling"]
+status = "replaced"
+lang = "js"
+by = ["File3dmRenderContent.Children"]
+
+[[retired]]
+class = "RenderContent"
+member = "GetParent"
+status = "replaced"
+lang = "js"
+by = ["File3dmRenderContent.Parent"]
+
+[[retired]]
+class = "RenderContent"
+member = "GetTopLevel"
+status = "replaced"
+lang = "js"
+by = ["File3dmRenderContent.TopLevel"]
+
+[[retired]]
+class = "RenderContent"
+member = "GetXML"
+status = "replaced"
+lang = "js"
+by = ["File3dmRenderContent.XML"]
+
+[[retired]]
+class = "RenderContent"
+member = "SetTypeName"
+status = "dropped"
+lang = "js"
+note = "the type name is read-only, as in RhinoCommon (Luis 2026-11-08: dropped)"
+
+[[retired]]
+class = "RenderContent"
+members = ["GetUserStrings", "UserStringCount"]
+status = "dropped"
+lang = "js"
+note = "getUserString and setUserString remain (Luis 2026-11-08: dropped)"

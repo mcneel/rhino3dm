@@ -15,6 +15,7 @@ page) and docs/migrating-to-9/dotnet.md are written by hand.
     python3 tools/docs/migration.py --check   # exit 1 when one is stale
 """
 import glob
+import json
 import os
 import re
 import sys
@@ -133,7 +134,8 @@ def by_name(b, lang, values):
 def rows(lang):
     values = value_types() if lang == 'js' else set()
     out = []
-    for x in tomllib.load(open(os.path.join(ROOT, 'api', 'retired.toml'), 'rb'))['retired']:
+    retired = tomllib.load(open(os.path.join(ROOT, 'api', 'retired.toml'), 'rb'))['retired']
+    for x in retired:
         if x.get('lang', lang) != lang:
             continue
         cls = OLD_CLASS.get(x['class'], x['class'].replace('BND_', ''))
@@ -158,7 +160,68 @@ def rows(lang):
                 continue
             note = note or "same name; RhinoCommon's arguments or result"
         out.append((x['class'].replace('BND_', ''), names[0].lower(), '| %s | %s | %s |' % (old, new, note)))
+    if lang == 'js':
+        covered = {(x['class'], x.get('js') or camel(n)) for x in retired if x.get('lang', 'js') == 'js'
+                   for n in x.get('members') or [x['member']]}
+        out += value_rows(covered)
     return [r for *_, r in sorted(out)]
+
+
+def dts_value_types():
+    """the 9.2 JS value types from the committed typings: {type: (fields, {static: params})}"""
+    d = open(os.path.join(ROOT, 'src', 'js', 'rhino3dm.d.ts')).read()
+    out = {}
+    for t, body in re.findall(r'\n\tinterface (\w+) \{(.*?)\n\t\}', d, re.S):
+        cls = re.search(r'\n\tclass %s \{(.*?)\n\t\}' % t, d, re.S)
+        if not cls:
+            continue
+        st = {}
+        for n, ps in re.findall(r'\n\t\tstatic (?:readonly )?(\w+)(?:\(([^)]*)\))?', cls.group(1)):
+            st.setdefault(n, [p.split(':')[0].strip('? ') for p in ps.split(',') if p.strip()])
+        out[t] = (re.findall(r'\n\t\t(\w+)\??:', body), st)
+    return out
+
+
+def value_rows(covered):
+    """the JS members page's rows for the 8.x members of the classes 9.2 makes plain value objects
+    (api/js8-value-members.json): `arc.circumference` is `rhino.Arc.circumference(arc)`, `arc.radius`
+    is the field `arc.Radius`. Every 8.x member must map, or have its own row in retired.toml"""
+    old = json.load(open(os.path.join(ROOT, 'api', 'js8-value-members.json')))
+    now = dts_value_types()
+    out, missing = [], []
+    for t, members in old.items():
+        if not t[0].isupper():
+            continue
+        fields, st = now[t]
+        var = camel(t)
+        for m in members:
+            static = m.startswith('static:')
+            n = m[len('static:'):] if static else m
+            if (t, n) in covered:
+                continue
+            if static:
+                if n in st:
+                    continue                                   # the same static
+                missing.append('%s.%s' % (t, m))
+                continue
+            fn = n if n in st else n[:1].upper() + n[1:] if n[:1].upper() + n[1:] in st else None
+            if fn is not None:
+                ps = st[fn]
+                if not ps or ps[0] != var:
+                    missing.append('%s.%s' % (t, m))               # a static that is not the method
+                    continue
+                new, note = 'rhino.%s.%s(%s)' % (t, fn, ', '.join(ps)), ''
+            elif n.lower() in {f.lower() for f in fields}:
+                f = [f for f in fields if f.lower() == n.lower()][0]
+                new, note = '%s.%s' % (var, f), 'a field of the plain object'
+            else:
+                missing.append('%s.%s' % (t, m))
+                continue
+            out.append((t, n.lower(), '| `%s.%s` | `%s` | %s |' % (t, n, new, note)))
+    if missing:
+        raise SystemExit('api/js8-value-members.json: no 9.2 counterpart and no retired.toml row: %s'
+                         % ', '.join(missing))
+    return out
 
 
 def members_page(lang):

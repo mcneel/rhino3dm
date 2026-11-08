@@ -1,0 +1,16 @@
+{
+"_comment": "rhino3dm 8.35.0 (npm): the members of the JS classes that 9.2 makes plain value objects, as the 8.x module listed them (static: a member of the class). Read by tools/docs/migration.py.",
+"Arc": ["angle", "angleDegrees", "angleDomain", "boundingBox", "center", "circumference", "closestParameter", "closestPoint", "diameter", "endAngle", "endAngleDegrees", "endPoint", "isCircle", "isValid", "length", "midPoint", "plane", "pointAt", "radius", "reverse", "startAngle", "startAngleDegrees", "startPoint", "static:createFromPoints", "tangentAt", "toNurbsCurve", "transform", "trim"],
+"BoundingBox": ["area", "center", "closestPoint", "contains", "diagonal", "inflate", "inflateXYZ", "isDegenerate", "isValid", "max", "min", "static:union", "toBrep", "transform", "volume"],
+"Box": ["area", "center", "closestPoint", "isValid", "pointAt", "transform", "volume"],
+"Circle": ["boundingBox", "center", "circumference", "closestParameter", "closestPoint", "derivativeAt", "diameter", "isInPlane", "isValid", "normal", "plane", "pointAt", "radius", "reverse", "tangentAt", "toNurbsCurve", "transform", "translate"],
+"ComponentIndex": ["componentIndexType", "index"],
+"Cone": ["angleInDegrees", "angleInRadians", "apexPoint", "axis", "basePoint", "height", "isValid", "radius", "toBrep", "toNurbsSurface"],
+"Cylinder": ["axis", "center", "circleAt", "height1", "height2", "isFinite", "isValid", "radius", "toBrep", "toNurbsSurface", "totalHeight"],
+"Ellipse": [],
+"Line": ["direction", "from", "isValid", "length", "pointAt", "to", "transform", "unitTangent"],
+"Plane": ["static:unset", "static:worldXY", "static:worldYZ", "static:worldZX"],
+"Point3d": ["static:transform"],
+"Sphere": ["center", "closestParameter", "closestPoint", "diameter", "isValid", "latitudeDegrees", "latitudeRadians", "longitudeDegrees", "longitudeRadians", "normalAt", "northPole", "pointAt", "radius", "southPole", "toBrep", "toNurbsSurface"],
+"Transform": ["determinant", "isAffine", "isIdentity", "isLinear", "isRotation", "isValid", "isZero", "isZero4x4", "isZeroTransformation", "m00", "m01", "m02", "m03", "m10", "m11", "m12", "m13", "m20", "m21", "m22", "m23", "m30", "m31", "m32", "m33", "rigidType", "similarityType", "static:identity", "static:mirror", "static:mirrorPlane", "static:multiply", "static:planeToPlane", "static:rotation", "static:rotationVectors", "static:scale", "static:shear", "static:translationVector", "static:translationXYZ", "static:unset", "static:zeroTransformation", "toFloatArray", "transformBoundingBox", "transpose", "tryGetInverse"]
+}

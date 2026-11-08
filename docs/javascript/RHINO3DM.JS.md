@@ -2,16 +2,16 @@
 
 [![](https://data.jsdelivr.com/v1/package/npm/rhino3dm/badge)](https://www.jsdelivr.com/package/npm/rhino3dm)
 
+**rhino3dm.js** is a javascript library with associated web assembly (rhino3dm.wasm) that is OpenNURBS plus C++ to javascript bindings compiled to web assembly. The API is generated from RhinoCommon. The library runs in Chrome 133+, Firefox 134+ and Node.js 24+ (it uses 64-bit WebAssembly memory, which Safari supports only in its Technology Preview).
+
+For browser based applications, we also develop a 3dmLoader for the popular three.js WebGL library: https://threejs.org/examples/?q=3dm#webgl_loader_3dm
+
 ## Coming from rhino3dm.js 8.x?
 
-rhino3dm.js 9.2 is generated from RhinoCommon, so its API is RhinoCommon's, and most 8.x scripts need changes. For example, points and other values are objects (`{ X: 1, Y: 2, Z: 3 }`, not `[1, 2, 3]`), properties that were functions are properties, and editing an object's geometry no longer changes the file.
+Most 8.x scripts need changes. For example, points and other values are objects (`{ X: 1, Y: 2, Z: 3 }`, not `[1, 2, 3]`), properties that were functions are properties, and editing an object's geometry no longer changes the file.
 
 - [Migrating to rhino3dm.js 9.2](https://mcneel.github.io/rhino3dm/javascript/api/documents/Migrating_to_9_2.html): what changed, with before-and-after code
 - [Renamed and removed members](https://mcneel.github.io/rhino3dm/javascript/api/documents/Migrating__renamed_and_removed_members.html): every 8.x name and what replaces it
-
-**rhino3dm.js** is a javascript library with associated web assembly (rhino3dm.wasm) that is OpenNURBS plus additional C++ to javascript bindings compiled to web assembly. The library based on OpenNURBS with a RhinoCommon style. The libraries will run on on all major browsers as well as node.js.
-
-For browser based applications, we also develop a 3dmLoader for the popular three.js WebGL library: https://threejs.org/examples/?q=3dm#webgl_loader_3dm
 
 ## Usage
 
@@ -84,7 +84,7 @@ Similar to plain html, **rhino3dm.js** can be added as a script in `index.js`
 ```js
 // index.js
 import { StrictMode } from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import App from "./App";
 
@@ -93,11 +93,10 @@ const rootElement = document.getElementById("root");
 const script = document.createElement("script");
 script.src = "https://cdn.jsdelivr.net/npm/rhino3dm@9.2.0-beta.0/rhino3dm.min.js";
 script.addEventListener("load", () => {
-  ReactDOM.render(
+  createRoot(rootElement).render(
     <StrictMode>
       <App />
-    </StrictMode>,
-    rootElement
+    </StrictMode>
   );
 });
 document.body.appendChild(script);

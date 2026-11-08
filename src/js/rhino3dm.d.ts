@@ -3724,6 +3724,8 @@ declare module 'rhino3dm' {
 
 	/** The plain-object form of a ComponentIndex value (fields as in RhinoCommon). */
 	interface ComponentIndex {
+		ComponentIndexType: ComponentIndexType;
+		Index: number;
 	}
 	/**
 	 * Represents an index of an element contained in another object.
@@ -3950,6 +3952,10 @@ declare module 'rhino3dm' {
 
 	/** The plain-object form of a ControlPoint value (fields as in RhinoCommon). */
 	interface ControlPoint {
+		X: number;
+		Y: number;
+		Z: number;
+		Weight: number;
 	}
 	/**
 	 * Represents control point geometry with three-dimensional position and weight.
@@ -4567,6 +4573,10 @@ declare module 'rhino3dm' {
 
 	/** The plain-object form of a Cylinder value (fields as in RhinoCommon). */
 	interface Cylinder {
+		BasePlane: Plane;
+		Radius: number;
+		Height1: number;
+		Height2: number;
 	}
 	/**
 	 * Represents the values of a plane, a radius and two heights -on top and beneath- that define a right circular cylinder.
@@ -6666,7 +6676,7 @@ declare module 'rhino3dm' {
 		 * @param color Layer color.
 		 * @returns The layer's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.
 		 */
-		addDefaultLayer(name: string, color: [number, number, number, number]): number;
+		addDefaultLayer(name: string, color: { r: number, g: number, b: number, a: number }): number;
 		/**
 		 * Easy way to add a new layer to the model.
 		 *
@@ -6675,7 +6685,7 @@ declare module 'rhino3dm' {
 		 * @param color Layer color.
 		 * @returns The layer's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.
 		 */
-		addLayer(name: string, color: [number, number, number, number]): number;
+		addLayer(name: string, color: { r: number, g: number, b: number, a: number }): number;
 		/**
 		 * Add a new layer to the model.
 		 * @param name Layer name.
@@ -6683,7 +6693,7 @@ declare module 'rhino3dm' {
 		 * @param parentId The id of the parent layer, can be Guid.Empty.
 		 * @returns The layer's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.
 		 */
-		addLayer(name: string, color: [number, number, number, number], parentId: string): number;
+		addLayer(name: string, color: { r: number, g: number, b: number, a: number }, parentId: string): number;
 		/**
 		 * Returns `ModelComponentType.Layer`.
 		 */
@@ -9510,7 +9520,7 @@ declare module 'rhino3dm' {
 		 * @param viewportId If not Guid.Empty, then the setting applies only to the viewport with the specified id.
 		 * @param color The display color.
 		 */
-		setPerViewportColor(viewportId: string, color: [number, number, number, number]): void;
+		setPerViewportColor(viewportId: string, color: { r: number, g: number, b: number, a: number }): void;
 		/**
 		 * Sets the per layer persistent visibility. The persistent viability setting is used for layers whose visibility can be changed by a parent layer. In this case, when a parent layer is turned off, then child layers are also turned off. The persistent visibility setting determines what happens when the parent is turned on again.
 		 * @param viewportId If not Guid.Empty, then the setting applies only to the viewport with the specified id. If Guid.Empty, then the setting applies to all viewports with per viewport layer settings.
@@ -9522,7 +9532,7 @@ declare module 'rhino3dm' {
 		 * @param viewportId If not Guid.Empty, then the setting applies only to the viewport with the specified id.
 		 * @param color The plot color.
 		 */
-		setPerViewportPlotColor(viewportId: string, color: [number, number, number, number]): void;
+		setPerViewportPlotColor(viewportId: string, color: { r: number, g: number, b: number, a: number }): void;
 		/**
 		 * Sets the plot weight, in millimeters, for this layer.
 		 * @param viewportId If not Guid.Empty, then the setting applies only to the viewport with the specified id.
@@ -11551,7 +11561,7 @@ declare module 'rhino3dm' {
 		 * @param color Color to append.
 		 * @returns The index of the newly added color.
 		 */
-		add(color: [number, number, number, number]): number;
+		add(color: { r: number, g: number, b: number, a: number }): number;
 		/**
 		 * Adds a new vertex color to the end of the color list.
 		 * @param red Red component of color, must be in the 0~255 range.
@@ -11606,14 +11616,14 @@ declare module 'rhino3dm' {
 		 * @param color Color to set, Alpha channels will be ignored.
 		 * @returns true on success, false on failure.
 		 */
-		setColor(index: number, color: [number, number, number, number]): boolean;
+		setColor(index: number, color: { r: number, g: number, b: number, a: number }): boolean;
 		/**
 		 * Sets a color at the three or four vertex indices of a specified face.
 		 * @param face A face to use to retrieve indices.
 		 * @param color A color.
 		 * @returns true on success; false on error.
 		 */
-		setColor(face: MeshFace, color: [number, number, number, number]): boolean;
+		setColor(face: MeshFace, color: { r: number, g: number, b: number, a: number }): boolean;
 		/**
 		 * Sets or adds a vertex color to the color List.
 		 *
@@ -14758,7 +14768,7 @@ declare module 'rhino3dm' {
 		 * @param point Point to append.
 		 * @param color Color of new point.
 		 */
-		add(point: Point3d, color: [number, number, number, number]): void;
+		add(point: Point3d, color: { r: number, g: number, b: number, a: number }): void;
 		/**
 		 * Append a new point to the end of the list.
 		 * @param point Point to append.
@@ -14771,7 +14781,7 @@ declare module 'rhino3dm' {
 		 * @param normal Normal vector of new point.
 		 * @param color Color of new point.
 		 */
-		add(point: Point3d, normal: Vector3d, color: [number, number, number, number]): void;
+		add(point: Point3d, normal: Vector3d, color: { r: number, g: number, b: number, a: number }): void;
 		/**
 		 * Append a new point to the end of the list.
 		 * @param point Point to append.
@@ -14779,7 +14789,7 @@ declare module 'rhino3dm' {
 		 * @param color Color of new point.
 		 * @param value Extra value of new point. An extra value can be used to store a user-defined value, such as intensity.
 		 */
-		add(point: Point3d, normal: Vector3d, color: [number, number, number, number], value: number): void;
+		add(point: Point3d, normal: Vector3d, color: { r: number, g: number, b: number, a: number }, value: number): void;
 		/**
 		 * Appends a point with a value (rhino3dm only; RhinoCommon takes the value with a normal and a color).
 		 * @param point The point.
@@ -14963,7 +14973,7 @@ declare module 'rhino3dm' {
 		 * @param point Point to append.
 		 * @param color Color of new point.
 		 */
-		insert(index: number, point: Point3d, color: [number, number, number, number]): void;
+		insert(index: number, point: Point3d, color: { r: number, g: number, b: number, a: number }): void;
 		/**
 		 * Inserts a new point into the point list.
 		 * @param index Insertion index.
@@ -14978,7 +14988,7 @@ declare module 'rhino3dm' {
 		 * @param normal Normal vector of new point.
 		 * @param color Color of new point.
 		 */
-		insert(index: number, point: Point3d, normal: Vector3d, color: [number, number, number, number]): void;
+		insert(index: number, point: Point3d, normal: Vector3d, color: { r: number, g: number, b: number, a: number }): void;
 		/**
 		 * Inserts a new point into the point list.
 		 * @param index Insertion index.
@@ -14987,7 +14997,7 @@ declare module 'rhino3dm' {
 		 * @param color Color of new point.
 		 * @param value An extra value of new point. An extra values can be used to store a user-defined value, such as intensity.
 		 */
-		insert(index: number, point: Point3d, normal: Vector3d, color: [number, number, number, number], value: number): void;
+		insert(index: number, point: Point3d, normal: Vector3d, color: { r: number, g: number, b: number, a: number }, value: number): void;
 		/**
 		 * Inserts a point with a value (rhino3dm only).
 		 * @param index Where the point goes: 0 to `Count`.
@@ -15920,6 +15930,181 @@ declare module 'rhino3dm' {
 		 * If false, the "u" parameter is the angle parameter and the "v" parameter is the curve parameter. If true, the "u" parameter is the curve parameter and the "v" parameter is the angle parameter.
 		 */
 		readonly isTransposed: boolean;
+	}
+
+	/**
+	 * Provides constants and static methods that are additional to `Math`.
+	 */
+	class RhinoMath {
+		/**
+		 * Limits a `double` to be specified within an interval of two numbers, by specifying a fixed minimum and maximum.
+		 * @param value A number.
+		 * @param bound1 A first bound.
+		 * @param bound2 A second bound. This does not necessarily need to be larger or smaller than bound1.
+		 * @returns The clamped value.
+		 */
+		static clamp(value: number, bound1: number, bound2: number): number;
+		/**
+		 * Limits a `double` to be specified within an interval of two numbers, by specifying a fixed minimum and maximum.
+		 * @param value A number.
+		 * @param bound1 A first bound.
+		 * @param bound2 A second bound. This does not necessarily need to be larger or smaller than bound1.
+		 * @returns The clamped value.
+		 */
+		static clamp(value: number, bound1: number, bound2: number): number;
+		/**
+		 * Represents the default angle tolerance, used when no other values are provided.
+		 *
+		 * This is one degree, expressed in radians.
+		 *
+		 * This is equivalent to openNURBS ON_DEFAULT_ANGLE_TOLERANCE.
+		 */
+		static readonly defaultAngleTolerance: number;
+		/**
+		 * Get Rhino's default distance tolerance in millimeters.
+		 *
+		 * This is equivalent to openNURBS ON_DEFAULT_DISTANCE_TOLERANCE_MM.
+		 */
+		static readonly defaultDistanceToleranceMillimeters: number;
+		/**
+		 * Gets the value of DBL_EPSILON, which is the smallest positive floating point number x such that 1 + x != 1. This is different than Double.Epsilon which is the smallest positive Double value that is greater than zero.
+		 *
+		 * This is equivalent to openNURBS ON_EPSILON.
+		 */
+		static readonly epsilon: number;
+		/**
+		 * Compare two doubles for equality within some "epsilon" range
+		 */
+		static epsilonEquals(x: number, y: number, epsilon: number): boolean;
+		/**
+		 * Expert tool to evaluate surface unit normal.
+		 * @param limitDirection Determines which direction is used to compute the limit, where: 0 = default, 1 = from quadrant I, 2 = from quadrant II, etc.
+		 * @param ds First partial derivative.
+		 * @param dt First partial derivative.
+		 * @param dss Second partial derivative.
+		 * @param dst Second partial derivative.
+		 * @param dtt Second partial derivative.
+		 * @returns True if successful, false otherwise.
+		 */
+		static evaluateNormal(limitDirection: number, ds: Vector3d, dt: Vector3d, dss: Vector3d, dst: Vector3d, dtt: Vector3d): [boolean, Vector3d];
+		/**
+		 * Expert tool to evaluate partial derivatives of surface unit normal.
+		 * @param ds First partial derivative.
+		 * @param dt First partial derivative.
+		 * @param dss Second partial derivative.
+		 * @param dst Second partial derivative.
+		 * @param dtt Second partial derivative.
+		 * @returns true if Jacobian is non-degenerate, false if Jacobian is degenerate.
+		 */
+		static evaluateNormalPartials(ds: Vector3d, dt: Vector3d, dss: Vector3d, dst: Vector3d, dtt: Vector3d): [boolean, Vector3d, Vector3d];
+		/**
+		 * Expert tool to evaluate sectional curvature from surface derivatives and section plane normal.
+		 * @param ds First partial derivative.
+		 * @param dt First partial derivative.
+		 * @param dss Second partial derivative.
+		 * @param dst Second partial derivative.
+		 * @param dtt Second partial derivative.
+		 * @param planeNormal Unit normal to section plane.
+		 * @returns True if successful. False if first partials are not linearly independent, in which case the k is set to zero.
+		 */
+		static evaluateSectionalCurvature(ds: Vector3d, dt: Vector3d, dss: Vector3d, dst: Vector3d, dtt: Vector3d, planeNormal: Vector3d): [boolean, Vector3d];
+		/**
+		 * Quarter of a rotation. 90 degrees. 1.57...
+		 */
+		static readonly halfPI: number;
+		/**
+		 * Value used to indicate a radius of curvature is infinite.
+		 */
+		static readonly infiniteRadius: number;
+		/**
+		 * Determines whether a `double` value is valid within the RhinoCommon context.
+		 *
+		 * Rhino does not use Double.NaN by convention, so this test evaluates to true if:
+		 *
+		 * x is not equal to RhinoMath.UnsetValue
+		 *
+		 * System.Double.IsNaN(x) evaluates to false
+		 *
+		 * System.Double.IsInfinity(x) evaluates to false
+		 * @param x `double` number to test for validity.
+		 * @returns true if the number if valid, false if the number is NaN, Infinity or Unset.
+		 */
+		static isValidDouble(x: number): boolean;
+		/**
+		 * Return number of meters per one unit of a given unit system
+		 */
+		static metersPerUnit(units: UnitSystem): number;
+		/**
+		 * One eigth of a rotation. 45 degrees. 0.78...
+		 */
+		static readonly quarterPI: number;
+		/**
+		 * Represents a default value that is used when comparing square roots.
+		 *
+		 * This value is several orders of magnitude larger than `RhinoMath.ZeroTolerance`.
+		 *
+		 * This is equivalent to openNURBS ON_SQRT_EPSILON.
+		 */
+		static readonly sqrtEpsilon: number;
+		/**
+		 * Ratio of circumference divided by radius. Full rotation. 360 degrees. 6.28...
+		 */
+		static readonly tau: number;
+		/**
+		 * Convert an angle from radians to degrees.
+		 * @param radians Radians to convert (180 degrees equals pi radians).
+		 */
+		static toDegrees(radians: number): number;
+		/**
+		 * Convert an angle from degrees to radians.
+		 * @param degrees Degrees to convert (180 degrees equals pi radians).
+		 */
+		static toRadians(degrees: number): number;
+		/**
+		 * Full rotation. 360 degrees. 6.28...
+		 */
+		static readonly twoPI: number;
+		/**
+		 * Computes the scale factor for changing the measurements unit systems.
+		 * @param from The system to convert from.
+		 * @param to The system to convert measurements into.
+		 * @returns A scale multiplier.
+		 */
+		static unitScale(from: UnitSystem, to: UnitSystem): number;
+		/**
+		 * Computes the scale factor for changing the measurements unit systems.
+		 * @param from The system to convert from.
+		 * @param fromMetersPerUnit For custom units, specify the meters per unit.
+		 * @param to The system to convert measurements into.
+		 * @param toMetersPerUnit For custom units, specify the meters per unit.
+		 * @returns A scale multiplier.
+		 */
+		static unitScale(from: UnitSystem, fromMetersPerUnit: number, to: UnitSystem, toMetersPerUnit: number): number;
+		/**
+		 * When signed int values are used in a context where 0 and small negative values are valid indices and there needs to be a value that indicates the index is not set.
+		 *
+		 * This is equivalent to openNURBS ON_UNSET_INT_INDEX.
+		 */
+		static readonly unsetIntIndex: number;
+		/**
+		 * Gets the Rhino standard Unset value. Use this value rather than Double.NaN when a bogus floating point value is required.
+		 *
+		 * This is equivalent to openNURBS ON_UNSET_VALUE.
+		 */
+		static readonly unsetValue: number;
+		/**
+		 * Limits a `double` to be specified within an interval of two numbers by repeating the available interval cyclically.
+		 * @param value A number.
+		 * @param bound1 A first bound.
+		 * @param bound2 A second bound. This does not necessarily need to be larger or smaller than bound1.
+		 */
+		static wrap(value: number, bound1: number, bound2: number): number;
+		/**
+		 * Gets Rhino's Zero Tolerance constant, which is 2^-32. In cases when an absolute "zero" tolerance is required to compare model space coordinates, ZeroTolerance is used. The value of ZeroTolerance should be no smaller than `RhinoMath.Epsilon` and should be several orders of magnitude smaller than `RhinoMath.SqrtEpsilon`.
+		 *
+		 * This is equivalent to openNURBS ON_ZERO_TOLERANCE.
+		 */
+		static readonly zeroTolerance: number;
 	}
 
 	/**
@@ -17719,7 +17904,7 @@ declare module 'rhino3dm' {
 		 *
 		 * new rgb = colorcolor + a0[0]*(current RGB) + a1[1]*(texture RGB) + a2[2]*min(current RGB,texture RGB) + a3[3]*max(current RGB,texture RGB)
 		 */
-		setRGBBlendValues(color: [number, number, number, number], a0: number, a1: number, a2: number, a3: number): void;
+		setRGBBlendValues(color: { r: number, g: number, b: number, a: number }, a0: number, a1: number, a2: number, a3: number): void;
 		/**
 		 * Determines how this texture is combined with others in a material's texture list.
 		 */
@@ -20107,6 +20292,7 @@ declare module 'rhino3dm' {
 		RenderChannels: typeof RenderChannels;
 		RenderSettings: typeof RenderSettings;
 		RevSurface: typeof RevSurface;
+		RhinoMath: typeof RhinoMath;
 		SafeFrame: typeof SafeFrame;
 		Skylight: typeof Skylight;
 		Sphere: typeof Sphere;

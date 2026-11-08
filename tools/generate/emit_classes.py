@@ -1102,6 +1102,14 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         # a value OR a live view into a file's table (G104: ViewInfo from File3dm.Views): the view
         # resolves on every access, and throws once its object left the file
         fv = cls['fileview']
+        # the cached pointer while it is still an element of its table, with the id it was made for
+        # (pilot #100: the id alone cannot tell named views of one viewport apart); then the resolver
+        intable = ''
+        if fv.get('tables'):
+            intable = '''
+    const auto& t = m_named ? m_model->%s : m_model->%s;
+    for (int i = 0; i < t.Count(); i++)
+      if (t.At(i) == m_vptr && t[i].%s == m_id) return const_cast<{on}*>(m_vptr);''' % (fv['tables'][1], fv['tables'][0], fv['id'])
         storage = '''  {on} m_val;
   ONX_Model* m_model = nullptr;      // a file view: the file ...
   ON_UUID m_id = ON_nil_uuid;        // ... the id (a nil id: matched by pointer value)
@@ -1111,11 +1119,11 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
   {gen}(ONX_Model* model, ON_UUID id, void* ptr, bool named) : m_model(model), m_id(id), m_vptr((const {on}*)ptr), m_named(named) {{}}{dctor}
   bool RH3DM_IsView() const {{ return m_model != nullptr; }}
   {on}* RH3DM_Val() const {{
-    if (!m_model) return const_cast<{on}*>(&m_val);
+    if (!m_model) return const_cast<{on}*>(&m_val);%s
     {on}* p = %s(m_model, m_id, m_vptr, m_named);
     if (!p) throw std::runtime_error("%s: the view is no longer in the File3dm");
     return p;
-  }}{override}''' % (fv['resolver'], cls['type'])
+  }}{override}''' % (intable, fv['resolver'], cls['type'])
     else:
         # a value adopted from a native result (G49 valadopt) is copied in
         storage = '''  {on} m_val;
@@ -1746,7 +1754,15 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
     for (jn, arity, static), ps in js_methods.items():
         by_shape = {}
         for p in ps:
-            by_shape.setdefault(tuple(js_class_shape(t)[0] for t, _ in p['bind_args']), p)
+            k = tuple(js_class_shape(t)[0] for t, _ in p['bind_args'])
+            # int or float beside double (RhinoMath.Clamp, MeshTextureCoordinateList.Add): JS numbers
+            # are doubles, so the double one (D70) -- an int one would truncate 0.5 (pilot #104)
+            if k in by_shape:
+                pairs = list(zip([t for t, _ in by_shape[k]['bind_args']], [t for t, _ in p['bind_args']]))
+                if any(a != b for a, b in pairs) and all(a == b or (a in ('int', 'float') and b == 'double')
+                                                         for a, b in pairs):
+                    by_shape[k] = p
+            by_shape.setdefault(k, p)
         ps = list(by_shape.values())
         if len(ps) == 1 and (any(js_seq_arg(t) for t, _ in ps[0]['bind_args'])
                              or _ret_cpp(ps[0], cls).startswith('std::vector<') or _ret_cpp(ps[0], cls) == 'RH3DM_Bytes'):

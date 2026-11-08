@@ -31,7 +31,7 @@ ON_Plane FromPlaneStruct(const ON_PLANE_STRUCT& ps);
 // generated value types (translated RhinoCommon bodies) and the conversions
 // from the C layer's opennurbs values; field-wise, so independent of which
 // C# constructors translated
-#include "bnd_rhinomath_gen.h"
+#include "bnd_rhinomath_values_gen.h"
 #include "bnd_interval_gen.h"
 #include "bnd_point2d_gen.h"
 #include "bnd_vector2d_gen.h"
@@ -1297,6 +1297,9 @@ extern "C" TextRunTypeConsts ON_TextRun_Type(const ON_TextRun* constPtrTextRun);
 extern "C" TextureMappingType ON_TextureMapping_GetMappingType(const ON_TextureMapping* pTextureMapping);
 extern "C" TextureProjectionModes ON_Texture_GetProjectionMode(const ON_Texture* pConstTexture);
 extern "C" bool Draco_Write(const RH3DM_CL_Draco* draco, const RHMONO_STRING* path);
+extern "C" bool ONC_EvNormal(int limit_dir, ON_3DVECTOR_STRUCT ds, ON_3DVECTOR_STRUCT dt, ON_3DVECTOR_STRUCT dss, ON_3DVECTOR_STRUCT dst, ON_3DVECTOR_STRUCT dtt, ON_3dVector* n);
+extern "C" bool ONC_EvNormalPartials(ON_3DVECTOR_STRUCT ds, ON_3DVECTOR_STRUCT dt, ON_3DVECTOR_STRUCT dss, ON_3DVECTOR_STRUCT dst, ON_3DVECTOR_STRUCT dtt, ON_3dVector* ns, ON_3dVector* nt);
+extern "C" bool ONC_EvSectionalCurvature(ON_3DVECTOR_STRUCT ds, ON_3DVECTOR_STRUCT dt, ON_3DVECTOR_STRUCT dss, ON_3DVECTOR_STRUCT dst, ON_3DVECTOR_STRUCT dtt, ON_3DVECTOR_STRUCT planeNormal, ON_3dVector* k);
 extern "C" bool ONX_Model_AddEmbeddedFile(ONX_Model* model, const RHMONO_STRING* filename);
 extern "C" bool ONX_Model_AddModelComponent(ONX_Model* pModel, const ON_ModelComponent* pConstModelComponent);
 extern "C" bool ONX_Model_NamedCPlaneTable_Delete(ONX_Model* pModel, int index);
@@ -1908,6 +1911,9 @@ extern "C" const ON_TextureCoordinates* ON_Mesh_CachedTextureCoordinates(ON_Mesh
 extern "C" const ON_TextureCoordinates* ON_Mesh_GetCachedTextureCoordinates_ONX_Model(ON_Mesh* pMesh, const ONX_Model* pModel, ON_UUID objectId, const ON_Texture* pTexture);
 extern "C" const ON_Viewport* ON_3dmView_ViewportPointer(const ON_3dmView* pView);
 extern "C" double GetSunAltitude(double latitude, double longitude, double timeZoneHours, int daylightMinutes, int year, int month, int day, double hours, bool fast);
+extern "C" double ONC_MetersPerLengthUnit(ON::LengthUnitSystem us);
+extern "C" double ONC_UnitScale(ON::LengthUnitSystem usFrom, ON::LengthUnitSystem usTo);
+extern "C" double ONC_UnitScale2(ON::LengthUnitSystem usFrom, double mpuFrom, ON::LengthUnitSystem usTo, double mpuTo);
 extern "C" double ON_2dVector_Length(ON_2DVECTOR_STRUCT v);
 extern "C" double ON_3dmObjectAttributes_CurvePiping_GetRadius(const ON_3dmObjectAttributes* attr);
 extern "C" double ON_3dmObjectAttributes_Displacement_GetBlackPoint(const ON_3dmObjectAttributes* attr);
@@ -3036,6 +3042,7 @@ class BND_TextEntity;
 class BND_InstanceReferenceGeometry;
 class BND_Intersection;
 class BND_Arrowhead;
+class BND_RhinoMath;
 class BND_RenderSettings;
 class BND_GroundPlane;
 class BND_SafeFrame;

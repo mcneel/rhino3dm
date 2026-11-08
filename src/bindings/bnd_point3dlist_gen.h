@@ -4,7 +4,7 @@
 
 #pragma once
 #include "bnd_values_gen.h"
-#include "bnd_rhinomath_gen.h"
+#include "bnd_rhinomath_values_gen.h"
 #include "bnd_rhinolist_gen.h"
 
 struct BND_Point3dList : public BND_RhinoListPoint3d

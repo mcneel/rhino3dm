@@ -4,7 +4,7 @@
 
 #pragma once
 #include "bnd_values_gen.h"
-#include "bnd_rhinomath_gen.h"
+#include "bnd_rhinomath_values_gen.h"
 #include "bnd_point4d_gen.h"
 
 struct BND_ControlPoint

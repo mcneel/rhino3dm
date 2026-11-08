@@ -88,6 +88,21 @@ test('viewTableViewKeepsTheFileAlive', async () => {
   expect(v.name).toBe('live')
 })
 
+test('namedViewsSharingAViewportIdStayDistinct', () => {
+  // named views saved from one viewport share its id; namedViews.get(i) still reads and writes view i
+  const f = new rhino.File3dm()
+  const shared = '2b0f9a4e-6c1d-4f3a-9e57-3f8d1c2a7b64'
+  for (const name of ['One', 'Two', 'Three']) {
+    const vi = new rhino.ViewInfo()
+    vi.name = name
+    vi.viewport.id = shared
+    f.namedViews.add(vi)
+  }
+  expect([...f.namedViews].map(v => v.name)).toEqual(['One', 'Two', 'Three'])
+  f.namedViews.get(2).name = 'Third'
+  expect([0, 1, 2].map(i => f.namedViews.get(i).name)).toEqual(['One', 'Two', 'Third'])
+})
+
 test('viewTableIndexOutOfRangeRaises', () => {
   // views.get(i) past the end throws
   helpers.raises(rhino, () => helpers.readModel(rhino, 'file3dm_stuff.3dm').views.get(99), /out_of_range/)

@@ -21998,6 +21998,189 @@ class Arrowhead:
             The outline points; empty for `ArrowType.None` and `ArrowType.UserBlock`.
         """
 
+class RhinoMath:
+    """Provides constants and static methods that are additional to `Math`."""
+
+    @staticmethod
+    def EvaluateNormal(limitDirection: int, ds: Vector3d, dt: Vector3d, dss: Vector3d, dst: Vector3d, dtt: Vector3d) -> tuple[bool, Vector3d]:
+        """Expert tool to evaluate surface unit normal.
+
+        Args:
+            limitDirection: Determines which direction is used to compute the limit, where: 0 = default, 1 = from quadrant I, 2 = from quadrant II, etc.
+            ds: First partial derivative.
+            dt: First partial derivative.
+            dss: Second partial derivative.
+            dst: Second partial derivative.
+            dtt: Second partial derivative.
+
+        Returns:
+            True if successful, false otherwise.
+        """
+
+    @staticmethod
+    def EvaluateNormalPartials(ds: Vector3d, dt: Vector3d, dss: Vector3d, dst: Vector3d, dtt: Vector3d) -> tuple[bool, Vector3d, Vector3d]:
+        """Expert tool to evaluate partial derivatives of surface unit normal.
+
+        Args:
+            ds: First partial derivative.
+            dt: First partial derivative.
+            dss: Second partial derivative.
+            dst: Second partial derivative.
+            dtt: Second partial derivative.
+
+        Returns:
+            true if Jacobian is non-degenerate, false if Jacobian is degenerate.
+        """
+
+    @staticmethod
+    def EvaluateSectionalCurvature(ds: Vector3d, dt: Vector3d, dss: Vector3d, dst: Vector3d, dtt: Vector3d, planeNormal: Vector3d) -> tuple[bool, Vector3d]:
+        """Expert tool to evaluate sectional curvature from surface derivatives and section plane normal.
+
+        Args:
+            ds: First partial derivative.
+            dt: First partial derivative.
+            dss: Second partial derivative.
+            dst: Second partial derivative.
+            dtt: Second partial derivative.
+            planeNormal: Unit normal to section plane.
+
+        Returns:
+            True if successful. False if first partials are not linearly independent, in which case the k is set to zero.
+        """
+
+    @staticmethod
+    def MetersPerUnit(units: UnitSystem) -> float:
+        """Return number of meters per one unit of a given unit system"""
+
+    @overload
+    @staticmethod
+    def UnitScale(from_: UnitSystem, to: UnitSystem) -> float:
+        """Computes the scale factor for changing the measurements unit systems.
+
+        Args:
+            from: The system to convert from.
+            to: The system to convert measurements into.
+
+        Returns:
+            A scale multiplier.
+        """
+
+    @overload
+    @staticmethod
+    def UnitScale(from_: UnitSystem, fromMetersPerUnit: float, to: UnitSystem, toMetersPerUnit: float) -> float:
+        """Computes the scale factor for changing the measurements unit systems.
+
+        Args:
+            from: The system to convert from.
+            fromMetersPerUnit: For custom units, specify the meters per unit.
+            to: The system to convert measurements into.
+            toMetersPerUnit: For custom units, specify the meters per unit.
+
+        Returns:
+            A scale multiplier.
+        """
+    HalfPI: float = ...
+    """(arg: object, /) -> float"""
+    QuarterPI: float = ...
+    """(arg: object, /) -> float"""
+    TwoPI: float = ...
+    """(arg: object, /) -> float"""
+    Tau: float = ...
+    """(arg: object, /) -> float"""
+    ZeroTolerance: float = ...
+    """(arg: object, /) -> float"""
+    UnsetValue: float = ...
+    """(arg: object, /) -> float"""
+    Epsilon: float = ...
+    """(arg: object, /) -> float"""
+    SqrtEpsilon: float = ...
+    """(arg: object, /) -> float"""
+    DefaultAngleTolerance: float = ...
+    """(arg: object, /) -> float"""
+    DefaultDistanceToleranceMillimeters: float = ...
+    """(arg: object, /) -> float"""
+    UnsetIntIndex: int = ...
+    """(arg: object, /) -> int"""
+    InfiniteRadius: float = ...
+    """(arg: object, /) -> float"""
+
+    @staticmethod
+    def ToRadians(degrees: float) -> float:
+        """Convert an angle from degrees to radians.
+
+        Args:
+            degrees: Degrees to convert (180 degrees equals pi radians).
+        """
+
+    @staticmethod
+    def ToDegrees(radians: float) -> float:
+        """Convert an angle from radians to degrees.
+
+        Args:
+            radians: Radians to convert (180 degrees equals pi radians).
+        """
+
+    @staticmethod
+    def IsValidDouble(x: float) -> bool:
+        """Determines whether a `double` value is valid within the RhinoCommon context.
+
+        Rhino does not use Double.NaN by convention, so this test evaluates to true if:
+
+        x is not equal to RhinoMath.UnsetValue
+
+        System.Double.IsNaN(x) evaluates to false
+
+        System.Double.IsInfinity(x) evaluates to false
+
+        Args:
+            x: `double` number to test for validity.
+
+        Returns:
+            true if the number if valid, false if the number is NaN, Infinity or Unset.
+        """
+
+    @overload
+    @staticmethod
+    def Clamp(value: int, bound1: int, bound2: int) -> int:
+        """Limits a `double` to be specified within an interval of two numbers, by specifying a fixed minimum and maximum.
+
+        Args:
+            value: A number.
+            bound1: A first bound.
+            bound2: A second bound. This does not necessarily need to be larger or smaller than bound1.
+
+        Returns:
+            The clamped value.
+        """
+
+    @overload
+    @staticmethod
+    def Clamp(value: float, bound1: float, bound2: float) -> float:
+        """Limits a `double` to be specified within an interval of two numbers, by specifying a fixed minimum and maximum.
+
+        Args:
+            value: A number.
+            bound1: A first bound.
+            bound2: A second bound. This does not necessarily need to be larger or smaller than bound1.
+
+        Returns:
+            The clamped value.
+        """
+
+    @staticmethod
+    def Wrap(value: float, bound1: float, bound2: float) -> float:
+        """Limits a `double` to be specified within an interval of two numbers by repeating the available interval cyclically.
+
+        Args:
+            value: A number.
+            bound1: A first bound.
+            bound2: A second bound. This does not necessarily need to be larger or smaller than bound1.
+        """
+
+    @staticmethod
+    def EpsilonEquals(x: float, y: float, epsilon: float) -> bool:
+        """Compare two doubles for equality within some "epsilon" range"""
+
 class RenderSettings(CommonObject):
     """Contains settings used in rendering."""
 

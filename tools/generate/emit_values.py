@@ -31,7 +31,9 @@ def natural_size(t, by_cpp):
 
 
 def vt_file(t):
-    return 'gen_%s' % t['Cs'].lower()
+    # a static class's translated struct (RhinoMath) is internal; the bound class of the same
+    # name (registry mode 'static') owns gen_rhinomath (pilot #104)
+    return 'gen_%s%s' % (t['Cs'].lower(), '_values' if t.get('IsStaticClass') else '')
 
 
 def emit_valuetypes(vt, blocks):

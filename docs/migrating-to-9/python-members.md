@@ -39,6 +39,7 @@ page for the name your script uses.
 | `BrepTrim.EdgeIndex`, `BrepTrim.StartVertexIndex`, `BrepTrim.EndVertexIndex` | `BrepTrim.Edge`, `BrepTrim.StartVertex`, `BrepTrim.EndVertex` | trim.Edge.EdgeIndex, trim.StartVertex.VertexIndex, trim.EndVertex.VertexIndex |
 | `BrepVertex.EdgeCount` | `BrepVertex.EdgeIndices` | len(vertex.EdgeIndices()) |
 | `CachedTextureCoordinates.Contains` | `CachedTextureCoordinates.Contains` | Contains(Point3d) |
+| `CachedTextureCoordinates.Dimension` | `CachedTextureCoordinates.Dim` |  |
 | `CachedTextureCoordinates.IndexOf` | `CachedTextureCoordinates.IndexOf` | IndexOf(Point3d) |
 | `Centermark.GetDisplayLines` | `Centermark.GetDisplayLines` | same name; RhinoCommon's arguments or result |
 | `CommonObject.GetUserString` | `GeometryBase.GetUserString`, `ObjectAttributes.GetUserString`, `Layer.GetUserString`, `Material.GetUserString`, `Linetype.GetUserString`, `Group.GetUserString`, `HatchPattern.GetUserString`, `DimensionStyle.GetUserString`, `InstanceDefinitionGeometry.GetUserString`, `TextureMapping.GetUserString`, `ViewportInfo.GetUserString`, `RenderSettings.GetUserString`, `Bitmap.GetUserString` |  |
@@ -60,9 +61,15 @@ page for the name your script uses.
 | `DimOrdinate.Points` | `OrdinateDimension.Get3dPoints` | Get3dPoints() -> (success, points...) in RhinoCommon's order |
 | `DimRadial.Points` | `RadialDimension.Get3dPoints` | Get3dPoints() -> (success, points...) in RhinoCommon's order |
 | `DimensionStyle.Field` | `DimensionStyle.Field` | same name; RhinoCommon's arguments or result |
+| `DimensionStyle.FixedExtensionLengthOn` | `DimensionStyle.FixedExtensionOn` | setting it also marks the field as overridden, as in RhinoCommon |
+| `DimensionStyle.IsFieldOverridden` | `DimensionStyle.IsFieldOverriden` | RhinoCommon's spelling |
+| `DimensionStyle.TextHEight` | `DimensionStyle.TextHeight` | setting it also marks the field as overridden, as in RhinoCommon |
+| `Displacement.Texture` | `File3dmDisplacement.TextureId` |  |
+| `EmbeddedFile.Write` | `File3dmEmbeddedFile.SaveToFile` |  |
 | `Extrusion.CreateWithPlane` | `Extrusion.Create` | Create(curve, plane, height, cap) |
 | `File3dm.EmbeddedFilePaths` | `File3dm.EmbeddedFiles` | [f.Filename for f in file.EmbeddedFiles]; a Windows path reads in this platform's form |
 | `File3dm.EmbeddedFilePaths2` | `File3dm.EmbeddedFiles` | as EmbeddedFilePaths |
+| `File3dm.Groups` | `File3dm.AllGroups` |  |
 | `File3dm.RenderContent` | `File3dm.RenderMaterials`, `File3dm.RenderEnvironments`, `File3dm.RenderTextures` | one collection per kind of render content |
 | `File3dmDecalTable.FindIndex` | `for x in Decals` |  |
 | `File3dmGroupTable.GroupMembers2` | `File3dmGroupTable.GroupMembers` |  |
@@ -86,10 +93,17 @@ page for the name your script uses.
 | `File3dmShutLiningCurveTable.Add` | `File3dmShutLining.AddCurve` | AddCurve(Guid curveId) -- a curve following the curve object curveId (no duplicate id) |
 | `File3dmShutLiningCurveTable.FindId` | `File3dmShutLining.GetCurves` | curves are addressed by id (Curve*(id) / SetCurve*(id, v)) |
 | `File3dmShutLiningCurveTable.FindIndex` | `File3dmShutLining.GetCurves` | GetCurves()[i] is the id |
+| `Font.StrikeOut` | `Font.Strikeout` |  |
 | `GeometryBase.GetBoundingBox` | `GeometryBase.GetBoundingBox` | same name; RhinoCommon's arguments or result |
 | `GeometryBase.GetTightBoundingBox` | `GeometryBase.GetBoundingBox` | GetBoundingBox(true); an annotation answers with its own box |
+| `InstanceDefinition.GetObjectIds2` | `InstanceDefinitionGeometry.GetObjectIds` |  |
+| `Layer.Expanded` | `Layer.IsExpanded` |  |
+| `Layer.Locked` | `Layer.IsLocked` |  |
 | `Layer.PathSeparator` | `ModelComponent.NamePathSeparator` |  |
+| `Layer.Visible` | `Layer.IsVisible` |  |
 | `Leader.Points` | `Leader.Points3D` | Points3D (and Points2D, in the leader plane) |
+| `LinearWorkflow.PreProcessColorsOn` | `LinearWorkflow.PreProcessColors` |  |
+| `LinearWorkflow.PreProcessTexturesOn` | `LinearWorkflow.PreProcessTextures` |  |
 | `Material.RenderMaterialInstanceId` | `Material.RenderMaterialInstanceId` | same name; RhinoCommon's arguments or result |
 | `Material.SetTexture` | `Material.SetTexture` | same name; RhinoCommon's arguments or result |
 | `Mesh.CreateFromSubDControlNet` | `Mesh.CreateFromSubDControlNet`, `Mesh.CreateFromSubDControlNetWithTextureCoordinates` |  |
@@ -104,8 +118,15 @@ page for the name your script uses.
 | `NurbsSurfaceKnotList.IsClampedStart` | `NurbsSurfaceKnotList.ClampedAtStart` |  |
 | `NurbsSurfaceKnotList.ToList` | `NurbsSurfaceKnotList[i]` | iterate the list |
 | `NurbsSurfaceKnotList.ToList2` | `NurbsSurfaceKnotList[i]` |  |
+| `NurbsSurfacePointList.__getitem__` | `NurbsSurfacePointList.GetControlPoint` | points[u, v] is points.GetControlPoint(u, v) |
+| `NurbsSurfacePointList.__len__` | `NurbsSurfacePointList.CountU`, `NurbsSurfacePointList.CountV` | the count in each direction |
+| `NurbsSurfacePointList.__setitem__` | `NurbsSurfacePointList.SetControlPoint` | points[u, v] = cp is points.SetControlPoint(u, v, cp) |
 | `NurbsSurfacePointList.MakeNonRational` | `NurbsSurface.MakeNonRational` | on the surface |
+| `NurbsSurfacePointList.MakeRational` | `NurbsSurface.MakeRational` | on the surface |
+| `ObjectAttributes.ActiveSpace` | `ObjectAttributes.Space` |  |
 | `ObjectAttributes.DrawColor` | `ObjectAttributes.DrawColor` | Rhino's rules over the file; by-material now follows the material source and PBR base color |
+| `ObjectAttributes.GetGroupList2` | `ObjectAttributes.GetGroupList` |  |
+| `ObjectAttributes.Id` | `ObjectAttributes.ObjectId` |  |
 | `ObjectAttributes.MeshModifiers` | `ObjectAttributes.File3dmMeshModifiers` | RhinoCommon's name |
 | `PhysicallyBasedMaterial.EmissionColor` | `PhysicallyBasedMaterial.Emission` | a Color4f |
 | `PhysicallyBasedMaterial.Supported` | `Material.IsPhysicallyBased` | on the material |
@@ -117,6 +138,7 @@ page for the name your script uses.
 | `PointCloud.GetValues` | `PointCloud.GetPointValues` |  |
 | `PointCloud.GetValues2` | `PointCloud.GetPointValues` |  |
 | `PointCloud.InsertRange` | `PointCloud.InsertRange` | same name; RhinoCommon's arguments or result |
+| `PointCloudItem.Value` | `PointCloudItem.PointValue` |  |
 | `PolyCurve.Explode2` | `PolyCurve.Explode` |  |
 | `Polyline.ClosesPoint` | `Polyline.ClosestPoint` | the old name was a typo |
 | `Polyline.CreateFromPoints` | `Polyline(...)` | Polyline(points) |
@@ -128,6 +150,7 @@ page for the name your script uses.
 | `PostEffect.SetParameter` | `PostEffectData.SetParameter` |  |
 | `PostEffect.Shown` | `PostEffectData.Shown` |  |
 | `PostEffect.Type` | `PostEffectData.Type` |  |
+| `RenderChannels.CustomIds` | `RenderChannels.CustomList` |  |
 | `RenderContent.ChildSlotAmount` | `File3dmRenderContent.ChildSlotAmount` | RenderContent's shape, slot name first; ChildSlotAmount of an unset slot is 0.0, not 100.0 |
 | `RenderContent.FirstChild` | `File3dmRenderContent.Children` |  |
 | `RenderContent.NextSibling` | `File3dmRenderContent.Children` | see FirstChild |
@@ -139,7 +162,13 @@ page for the name your script uses.
 | `RenderEnvironments.ReflectionOverride` | `RenderSettings.RenderEnvironmentOverride`, `RenderSettings.SetRenderEnvironmentOverride` | per usage, EnvironmentUsage.Reflection |
 | `RenderEnvironments.SkylightingId` | `RenderSettings.RenderEnvironmentId`, `RenderSettings.SetRenderEnvironmentId` | RenderEnvironmentId(EnvironmentUsage.Skylighting, EnvironmentPurpose.Standard) / SetRenderEnvironmentId |
 | `RenderEnvironments.SkylightingOverride` | `RenderSettings.RenderEnvironmentOverride`, `RenderSettings.SetRenderEnvironmentOverride` | per usage, EnvironmentUsage.Skylighting |
+| `RenderSettings.RenderBackFaces` | `RenderSettings.RenderBackfaces` |  |
 | `RenderSettings.RenderEnvironments` | `RenderSettings.RenderEnvironmentId`, `RenderSettings.RenderEnvironmentOverride` | per usage |
+| `RenderSettings.RenderIsoParams` | `RenderSettings.RenderIsoparams` |  |
+| `RenderSettings.ShadowMapLevel` | `RenderSettings.ShadowmapLevel` |  |
+| `RenderSettings.SnapShot` | `RenderSettings.Snapshot` | read-only, as in RhinoCommon |
+| `RenderTexture.FileName` | `File3dmRenderTexture.Filename` | read-only, as in RhinoCommon |
+| `SafeFrame.FieldGridOn` | `SafeFrame.FieldsOn` |  |
 | `ShutLining.Curves` | `File3dmShutLining.GetCurves`, `File3dmShutLining.CurveRadius`, `File3dmShutLining.AddCurve` | GetCurves() ids, then CurveEnabled/CurveRadius/CurveProfile/CurvePull/CurveIsBump(id) and their setters; AddCurve() |
 | `ShutLiningCurve.Enabled` | `File3dmShutLining.CurveEnabled`, `File3dmShutLining.SetCurveEnabled` | CurveEnabled(id) / SetCurveEnabled(id, v) |
 | `ShutLiningCurve.Id` | `File3dmShutLining.GetCurves` | the getter is GetCurves()[i]; the SETTER (retarget) has no RhinoCommon counterpart -- DeleteAllCurves() + AddCurve(newId) () + the settings |
@@ -186,6 +215,7 @@ page for the name your script uses.
 | `subd.Vertices.First` | `SubDVertexList.First` |  |
 | `subd.Vertices.Next`, `subd.Vertices.Last`, `subd.Vertices.Current`, `subd.Vertices.CurrentIndex` | removed | no RhinoCommon cursor; iterate subd.Vertices |
 | `Sun.Day` | `Sun.GetDateTime`, `Sun.SetDateTime` | GetDateTime(DateTimeKind.Local).day |
+| `Sun.EnableOn` | `Sun.Enabled` |  |
 | `Sun.Hours` | `Sun.GetDateTime`, `Sun.SetDateTime` | hour + minute/60 + second/3600 of GetDateTime(DateTimeKind.Local): RhinoCommon's DateTime holds whole seconds |
 | `Sun.Month` | `Sun.GetDateTime`, `Sun.SetDateTime` | GetDateTime(DateTimeKind.Local).month |
 | `Sun.SunColorFromAltitude` | `Sun.ColorFromAltitude` |  |
@@ -197,5 +227,6 @@ page for the name your script uses.
 | `TextureMapping.SwapTextureCoordinate` | `TextureMapping.UvwTransform` | UvwTransform = S * UvwTransform, S the identity with rows i and j swapped |
 | `TextureMapping.TileTextureCoordinate` | `TextureMapping.UvwTransform` | UvwTransform = T * UvwTransform, T the identity with T[dir][dir] = count, T[dir][3] = offset |
 | `Transform.ToFloatArray2` | `Transform.ToFloatArray` |  |
+| `UnitSystem.UnitScale` | `RhinoMath.UnitScale` |  |
 | `Vector3d.DotProduct` | `Vector3d * Vector3d` | the * operator: a * b |
 | `ViewInfo.WallpaperName` | `ViewInfo.WallpaperFilename` |  |

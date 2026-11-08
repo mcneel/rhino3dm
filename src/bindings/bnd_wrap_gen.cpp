@@ -75,6 +75,7 @@
 #include "bnd_instancereferencegeometry_gen.h"
 #include "bnd_intersection_gen.h"
 #include "bnd_arrowhead_gen.h"
+#include "bnd_rhinomath_gen.h"
 #include "bnd_rendersettings_gen.h"
 #include "bnd_groundplane_gen.h"
 #include "bnd_safeframe_gen.h"

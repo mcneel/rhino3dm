@@ -437,7 +437,7 @@ def gen_layout(files, vt_types):
     includes between them rewritten, and `../bindings/x.h` (a hand file, same directory) as `x.h`.
     The emitters keep their working names (gen_meshx.h); this is the one place that maps them"""
     stems = {'gen_%s' % c['reg'].lower(): c['cs'] for c in CLASSES}
-    stems.update((vt_file(t), t['Cs']) for t in vt_types)
+    stems.update((vt_file(t), t['Cs'] + ('_values' if t.get('IsStaticClass') else '')) for t in vt_types)
     ren = {}
     for name in files:
         stem, ext = os.path.splitext(name)
