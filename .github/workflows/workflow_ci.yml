@@ -7,9 +7,10 @@ on:
   pull_request:
 
 env:
-  # oldest macOS the wheels and the native library run on: the macos-15 runner builds them, and
-  # this sets the wheel tag (macosx_13_0) and CMake's CMAKE_OSX_DEPLOYMENT_TARGET
-  MACOSX_DEPLOYMENT_TARGET: '13.0'
+  # oldest macOS the wheels and the native library run on, as in 8.x: the macos-15 runner builds
+  # them, and this sets the wheel tag (macosx_14_0) and CMake's CMAKE_OSX_DEPLOYMENT_TARGET.
+  # 14.0 also covers std::to_chars for doubles (macOS 13.3+), which the generated bindings use
+  MACOSX_DEPLOYMENT_TARGET: '14.0'
   RETENTION_DAYS: 15
 
 jobs:
@@ -249,8 +250,10 @@ jobs:
         run: git submodule update --init --recursive
       - name: bootstrap
         run: python3 script/bootstrap.py -p js
+      # the ES module is built as released (no -d): a debug build keeps emscripten's environment
+      # check, which stops this browser-only module from loading in node for the smoke test below
       - name: setup js module
-        run: python3 script/setup.py -p js -o -v -d -m
+        run: python3 script/setup.py -p js -o -v -m
       - name: build js module
         run: python3 script/build.py -p js -o -v
       - name: copy files

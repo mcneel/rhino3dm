@@ -44,9 +44,10 @@ on:
         type: string
         default: 'latest'
 env:
-  # oldest macOS the wheels and the native library run on: the macos-15 runner builds them, and
-  # this sets the wheel tag (macosx_13_0) and CMake's CMAKE_OSX_DEPLOYMENT_TARGET
-  MACOSX_DEPLOYMENT_TARGET: '13.0'
+  # oldest macOS the wheels and the native library run on, as in 8.x: the macos-15 runner builds
+  # them, and this sets the wheel tag (macosx_14_0) and CMake's CMAKE_OSX_DEPLOYMENT_TARGET.
+  # 14.0 also covers std::to_chars for doubles (macOS 13.3+), which the generated bindings use
+  MACOSX_DEPLOYMENT_TARGET: '14.0'
 
 jobs:
 
