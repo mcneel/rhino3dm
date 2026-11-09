@@ -118,6 +118,9 @@ Array results are lists (8.x returned tuples in places), and `None` where RhinoC
   available yet (`Views` and `NamedViews` are). <!-- D21 -->
 - `File3dm.EmbeddedFilePaths()` is `File3dm.EmbeddedFiles` (each item's `Filename`). Paths are cleaned for
   the platform, so a path saved on Windows reads with `/` on Linux and macOS. <!-- D69 -->
+- An embedded file's `Filename` is read-only. 8.x set it, then added the file; in 9.2
+  `File3dmEmbeddedFile.Read(path)` takes the name from the path, and `EmbeddedFiles.Add(file)` adds
+  it.
 - `File3dm.Created` and `LastEdited` are new: `datetime.datetime` values. <!-- D33 -->
 - `model.Objects.Add(geometry, attributes)` adds
   leaders, text and radial or ordinate dimensions too, as 8.x did, although RhinoCommon throws for

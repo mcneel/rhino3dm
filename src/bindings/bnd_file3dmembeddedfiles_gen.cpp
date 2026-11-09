@@ -4,6 +4,7 @@
 #include "bnd_file3dmembeddedfiles_gen.h"
 #include "bnd_file3dmembeddedfile_gen.h"
 #include "bnd_manifesttable_gen.h"
+#include "bnd_file3dmembeddedfiles.h"
 
 bool BND_File3dmEmbeddedFiles::Gen_Add(std::wstring filename) const {
   return ONX_Model_AddEmbeddedFile(m_ptr, RH3DM_S(filename).data());
@@ -51,6 +52,7 @@ void initGenFile3dmEmbeddedFiles(rh3dmpymodule& m)
       .def("Add", &BND_File3dmEmbeddedFiles::Gen_Add, py::arg("filename"))
       .def_prop_ro("Count", &BND_File3dmEmbeddedFiles::Gen_Count)
       .def("FindIndex", &BND_File3dmEmbeddedFiles::Gen_FindIndex, py::rv_policy::take_ownership, py::keep_alive<0, 1>(), py::arg("index"))
+      .def("Add", &BND_File3dmEmbeddedFiles_AddFile, py::arg("embeddedFile"))
       .def("__len__", &BND_File3dmEmbeddedFiles::Gen_Count)
       .def("__iter__", &BND_File3dmEmbeddedFiles::Gen_iter, py::keep_alive<0, 1>());
   py::class_<BND_File3dmEmbeddedFilesIter>(m, "File3dmEmbeddedFilesIter")
@@ -68,6 +70,7 @@ using namespace emscripten;
 void initGenFile3dmEmbeddedFiles(void)
 {
   class_<BND_File3dmEmbeddedFiles>("File3dmEmbeddedFiles")
+      .function("rh3dmAddFile", &BND_File3dmEmbeddedFiles_AddFile, allow_raw_pointers())
       .property("count", &BND_File3dmEmbeddedFiles::Gen_Count)
       .function("add", &BND_File3dmEmbeddedFiles::Gen_Add)
       .function("findIndex", &BND_File3dmEmbeddedFiles::Gen_FindIndex, allow_raw_pointers())

@@ -23234,6 +23234,8 @@ class File3dm:
     def GetEmbeddedFileAsBase64(self, path: str) -> str:
         """The bytes of a file embedded in the model, base64 encoded (rhino3dm only).
 
+        Finds only the files Rhino's renderer embedded, not ones added with EmbeddedFiles.Add. To read any embedded file, take it from File3dm.EmbeddedFiles and call its ToByteArray().
+
         Args:
             path: The embedded file's path, or (not strict) just its name.
 
@@ -23244,6 +23246,8 @@ class File3dm:
     @overload
     def GetEmbeddedFileAsBase64(self, path: str, strict: bool) -> str:
         """The bytes of a file embedded in the model, base64 encoded (rhino3dm only).
+
+        Finds only the files Rhino's renderer embedded, not ones added with EmbeddedFiles.Add. To read any embedded file, take it from File3dm.EmbeddedFiles and call its ToByteArray().
 
         Args:
             path: The embedded file's path, or (not strict) just its name.
@@ -25747,6 +25751,9 @@ class File3dmEmbeddedFile(ModelComponent):
             The embedded file, or None when the file cannot be read.
         """
 
+    def ToByteArray(self) -> bytes:
+        """The embedded file's bytes (rhino3dm only): empty when it has no data. JS gets a Uint8Array, Python bytes."""
+
     def Clear(self) -> bool:
         """Clears the embedded file data.
 
@@ -25775,7 +25782,12 @@ class File3dmEmbeddedFile(ModelComponent):
 
 class File3dmEmbeddedFiles:
 
+    @overload
     def Add(self, filename: str) -> bool:
+        """Add a new embedded file and load it from a local file."""
+
+    @overload
+    def Add(self, embeddedFile: File3dmEmbeddedFile) -> bool:
         """Add a new embedded file and load it from a local file."""
 
     @property

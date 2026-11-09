@@ -24,7 +24,7 @@ from gen_registry import *
 from planner import *
 from emit_classes import *
 from emit_values import *
-from emit_hand import hand_class_registrations, hand_js_aliases, hand_js_post
+from emit_hand import hand_class_registrations, hand_js_aliases, hand_js_dispatch, hand_js_post
 
 
 def _derives(d, base):
@@ -275,6 +275,7 @@ def js_post_script():
   var KEEP_ARGS = %s;
   var KEEP_SET = %s;
   var ALIASES = %s;
+  var DISPATCH = %s;
   var VALUES = %s;
   function install() {
     var M = Module, missing = [];
@@ -343,6 +344,17 @@ def js_post_script():
       if (!proto || typeof proto[a[2]] !== 'function') { missing.push('alias ' + a[0] + '.' + a[1]); return; }
       proto[a[1]] = function () { return this[a[2]].apply(this, arguments); };
     });
+    // one argument of a class -> a hand member (embeddedFiles.add(file) beside add(path); pilot #106)
+    DISPATCH.forEach(function (a) {
+      var C = M[a[0]], proto = C && C.prototype, f = proto && proto[a[1]], A = M[a[3]];
+      if (typeof f !== 'function' || !proto || typeof proto[a[2]] !== 'function' || !A) { missing.push('dispatch ' + a[0] + '.' + a[1]); return; }
+      var w = function (x) {
+        if (arguments.length === 1 && x instanceof A) return this[a[2]](x);
+        return f.apply(this, arguments);
+      };
+      if (f.overloadTable) w.overloadTable = f.overloadTable;
+      proto[a[1]] = w;
+    });
     ITERS.forEach(function (c) {
       var C = M[c], proto = C && C.prototype, f = proto && proto.next;
       if (typeof f !== 'function') { missing.push('iter ' + c); return; }
@@ -407,7 +419,8 @@ def js_post_script():
        json.dumps(sorted(set(map(tuple, JS_POST['grid']))), separators=(',', ':')),
        json.dumps(sorted(set(map(tuple, JS_POST['keep_args']))), separators=(',', ':')),
        json.dumps(sorted(set(map(tuple, JS_POST['keep_set']))), separators=(',', ':')),
-       json.dumps(sorted(set(map(tuple, JS_POST['aliases']))), separators=(',', ':')), j(JS_POST['values']))
+       json.dumps(sorted(set(map(tuple, JS_POST['aliases']))), separators=(',', ':')),
+       json.dumps(sorted(set(map(tuple, JS_POST['dispatch']))), separators=(',', ':')), j(JS_POST['values']))
 
 
 def hand_chain(cls):
@@ -1944,7 +1957,8 @@ void initGen{reg}(void)
     keep = [c for c in JS_POST['enumerable'] if c not in grids and (has(c, 'iterator') or (has(c, 'count') and has(c, 'get')))]
     JS_POST['not_iterable'] = sorted(set(JS_POST['enumerable']) - set(keep) - grids)
     JS_POST['enumerable'] = keep
-    JS_POST['aliases'].extend(hand_js_aliases())   # G124
+    JS_POST['aliases'].extend(hand_js_aliases())
+    JS_POST['dispatch'].extend(hand_js_dispatch())   # G124
     _hk, _he = hand_js_post()                          # G129
     JS_POST['keep'].extend(_hk)
     JS_POST['enumerable'].extend(_he)

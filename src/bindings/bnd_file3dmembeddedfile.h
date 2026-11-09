@@ -14,3 +14,7 @@
 BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile_Read(std::wstring fileName);   // owned; null when unreadable
 // JS only (Luis 2026-10-18): an embedded file from its bytes, as the old fromByteArray (owned)
 BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile_FromByteArray(std::string bytes);
+// ... with the file name it is embedded under (Luis 2026-11-08: 8.x set FileName, 9.2's is read-only)
+BND_File3dmEmbeddedFile* BND_File3dmEmbeddedFile_FromByteArrayNamed(std::string bytes, std::wstring filename);
+// its bytes (Luis 2026-11-08): empty when it has no data
+RH3DM_Bytes BND_File3dmEmbeddedFile_ToByteArray(const BND_File3dmEmbeddedFile& file);

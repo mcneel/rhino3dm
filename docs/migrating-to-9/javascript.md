@@ -190,6 +190,9 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array, fo
   available yet (`views` and `namedViews` are). <!-- D21 -->
 - `doc.embeddedFilePaths()` is `doc.embeddedFiles` (each item's `filename`). Paths are cleaned for
   the platform, so a path saved on Windows reads with `/` on Linux and macOS. <!-- D69 -->
+- An embedded file's `filename` is read-only. 8.x set it, then added the file; in 9.2
+  `File3dmEmbeddedFile.fromByteArray(bytes, filename)` names it, and `doc.embeddedFiles.add(file)`
+  adds it.
 - `doc.created` and
   `doc.lastEdited` are new: `Date` values. <!-- D33 -->
 - `doc.objects.add(geometry, attributes)` adds

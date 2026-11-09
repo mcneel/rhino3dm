@@ -918,10 +918,12 @@ js  File3dmEmbeddedFile.modelComponentTypeRequiresUniqueName [class_function]
 js  File3dmEmbeddedFile.namePathSeparator [class_function]
 js  File3dmEmbeddedFile.read [class_function]
 js  File3dmEmbeddedFile.saveToFile [function]
+js  File3dmEmbeddedFile.toByteArray [function]
 js  File3dmEmbeddedFiles.add [function]
 js  File3dmEmbeddedFiles.count [property]
 js  File3dmEmbeddedFiles.findIndex [function]
 js  File3dmEmbeddedFiles.iterator [function]
+js  File3dmEmbeddedFiles.rh3dmAddFile [function]
 js  File3dmEmbeddedFilesIter.next [function]
 js  File3dmGroupTable.add [function]
 js  File3dmGroupTable.addGroup [function]
@@ -4149,7 +4151,9 @@ py  File3dmEmbeddedFile.Filename [property ro]
 py  File3dmEmbeddedFile.Length [property ro]
 py  File3dmEmbeddedFile.Read(fileName) [static]
 py  File3dmEmbeddedFile.SaveToFile(filename)
+py  File3dmEmbeddedFile.ToByteArray()
 py  File3dmEmbeddedFile.__init__()
+py  File3dmEmbeddedFiles.Add(embeddedFile)
 py  File3dmEmbeddedFiles.Add(filename)
 py  File3dmEmbeddedFiles.Count [property ro]
 py  File3dmEmbeddedFiles.FindIndex(index)

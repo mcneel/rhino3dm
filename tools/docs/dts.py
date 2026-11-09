@@ -47,6 +47,8 @@ class Js:
             if not m:
                 continue
             cls, name = m.group(1), m.group(2)
+            if name.startswith('rh3dm'):
+                continue                  # internal: the post-script dispatches to it (pilot #106)
             kind = m.group(4) if m.lastindex and m.lastindex >= 4 else 'constructor'
             self.classes.setdefault(cls, {}).setdefault(name, set()).add(kind)
         for text in files.values():
@@ -271,7 +273,11 @@ def js_only(api, cls, jn, static, value, pyc):
                 return tsdoc(d, names) + [t + '%s%s(%s): %s;' % (s, jn, ', '.join(ps), ts_of(fn.returns))]
     d = api.hand_doc(cls, jn)
     if d.get('ts'):
-        return tsdoc(d, list(d.get('params') or {})) + [t + d['ts'] + ';']
+        ts = d['ts'] if isinstance(d['ts'], list) else [d['ts']]
+        out = []
+        for one in ts:
+            out += tsdoc(d, list(d.get('params') or {})) + [t + one + ';']
+        return out
     if jn in ('get', 'set') and ('__getitem__' in pyc):
         g = pyc['__getitem__'][0][1]
         it = ts_of(g.returns)

@@ -5839,12 +5839,16 @@ declare module 'rhino3dm' {
 		static fromByteArray(bytes: Uint8Array): File3dm;
 		/**
 		 * The bytes of a file embedded in the model, base64 encoded (rhino3dm only).
+		 *
+		 * Finds only the files Rhino's renderer embedded, not ones added with EmbeddedFiles.Add. To read any embedded file, take it from File3dm.EmbeddedFiles and call its ToByteArray().
 		 * @param path The embedded file's path, or (not strict) just its name.
 		 * @returns The file's bytes as a base64 string, empty when no embedded file matches.
 		 */
 		getEmbeddedFileAsBase64(path: string): string;
 		/**
 		 * The bytes of a file embedded in the model, base64 encoded (rhino3dm only).
+		 *
+		 * Finds only the files Rhino's renderer embedded, not ones added with EmbeddedFiles.Add. To read any embedded file, take it from File3dm.EmbeddedFiles and call its ToByteArray().
 		 * @param path The embedded file's path, or (not strict) just its name.
 		 * @param strict True: the path must match exactly, case included. False (the default): the path or the file name matches, ignoring case.
 		 * @returns The file's bytes as a base64 string, empty when no embedded file matches.
@@ -5852,6 +5856,8 @@ declare module 'rhino3dm' {
 		getEmbeddedFileAsBase64(path: string, strict: boolean): string;
 		/**
 		 * The bytes of a file embedded in the model, base64 encoded (rhino3dm only).
+		 *
+		 * Finds only the files Rhino's renderer embedded, not ones added with EmbeddedFiles.Add. To read any embedded file, take it from File3dm.EmbeddedFiles and call its ToByteArray().
 		 * @param path The embedded file's path, or (not strict) just its name.
 		 * @param strict True: the path must match exactly, case included. False (the default): the path or the file name matches, ignoring case.
 		 * @returns The file's bytes as a base64 string, empty when no embedded file matches.
@@ -6351,9 +6357,17 @@ declare module 'rhino3dm' {
 		 */
 		readonly filename: string;
 		/**
-		 * An embedded file from its bytes (JS only).
+		 * An embedded file from its bytes, named `filename` when given: the name it is embedded under (JS only). Add it with `file3dm.embeddedFiles.add(embeddedFile)`.
+		 * @param bytes The file's bytes.
+		 * @param filename The name to embed it under.
 		 */
 		static fromByteArray(bytes: Uint8Array): File3dmEmbeddedFile | null;
+		/**
+		 * An embedded file from its bytes, named `filename` when given: the name it is embedded under (JS only). Add it with `file3dm.embeddedFiles.add(embeddedFile)`.
+		 * @param bytes The file's bytes.
+		 * @param filename The name to embed it under.
+		 */
+		static fromByteArray(bytes: Uint8Array, filename: string): File3dmEmbeddedFile | null;
 		/**
 		 * Tests for a valid model component name.
 		 * @param name The string to validate.
@@ -6394,6 +6408,10 @@ declare module 'rhino3dm' {
 		 * Saves the contents of the embedded file to a local file. Returns true if successful, else false.
 		 */
 		saveToFile(filename: string): boolean;
+		/**
+		 * The embedded file's bytes (rhino3dm only): empty when it has no data. JS gets a Uint8Array, Python bytes.
+		 */
+		toByteArray(): Uint8Array;
 	}
 
 	class File3dmEmbeddedFiles {
@@ -6401,6 +6419,10 @@ declare module 'rhino3dm' {
 		 * Add a new embedded file and load it from a local file.
 		 */
 		add(filename: string): boolean;
+		/**
+		 * Add a new embedded file and load it from a local file.
+		 */
+		add(embeddedFile: File3dmEmbeddedFile): boolean;
 		/**
 		 * Gets the number of embedded files in the model.
 		 */

@@ -40,6 +40,7 @@ summary = "The model's embedded bitmaps (rhino3dm only)."
 summary = "The bytes of a file embedded in the model, base64 encoded (rhino3dm only)."
 params = { path = "The embedded file's path, or (not strict) just its name.", strict = "True: the path must match exactly, case included. False (the default): the path or the file name matches, ignoring case." }
 returns = "The file's bytes as a base64 string, empty when no embedded file matches."
+remarks = "Finds only the files Rhino's renderer embedded, not ones added with EmbeddedFiles.Add. To read any embedded file, take it from File3dm.EmbeddedFiles and call its ToByteArray()."
 
 ["*.RdkXml"]
 summary = "The object's render data (RDK) as XML (rhino3dm only)."
@@ -93,6 +94,14 @@ summary = "The faces attached to this vertex (rhino3dm only)."
 summary = "Removes the group with this id (rhino3dm only)."
 params = { id = "The group's id." }
 returns = "True when a group was removed."
+
+["File3dmEmbeddedFiles.Add(embeddedFile)"]
+summary = "Adds a copy of an embedded file to the model, under its file name (rhino3dm only)."
+params = { embeddedFile = "The embedded file, from File3dmEmbeddedFile.Read (or, in JS, fromByteArray)." }
+returns = "true when it was added; false when the embedded file has no data."
+
+["File3dmEmbeddedFile.ToByteArray"]
+summary = "The embedded file's bytes (rhino3dm only): empty when it has no data. JS gets a Uint8Array, Python bytes."
 
 ["File3dmEmbeddedFile.Read"]
 summary = "An embedded file loaded from disk, ready to add to a model (rhino3dm only)."
@@ -228,8 +237,9 @@ params = { bytes = "The file's bytes." }
 ts = "static fromByteArray(bytes: Uint8Array): File3dm | null"
 
 ["File3dmEmbeddedFile.fromByteArray"]
-summary = "An embedded file from its bytes (JS only)."
-ts = "static fromByteArray(bytes: Uint8Array): File3dmEmbeddedFile | null"
+summary = "An embedded file from its bytes, named `filename` when given: the name it is embedded under (JS only). Add it with `file3dm.embeddedFiles.add(embeddedFile)`."
+params = { bytes = "The file's bytes.", filename = "The name to embed it under." }
+ts = ["static fromByteArray(bytes: Uint8Array): File3dmEmbeddedFile | null", "static fromByteArray(bytes: Uint8Array, filename: string): File3dmEmbeddedFile | null"]
 
 ["Decals.__len__"]
 summary = "The number of decals iteration yields: the visible ones (rhino3dm only; RhinoCommon's Decals is enumerable only)."

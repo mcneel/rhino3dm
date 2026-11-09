@@ -49,6 +49,34 @@ test('embeddedFileReadReadsAFileFromDisk', () => {
   expect(rhino.File3dmEmbeddedFile.read('/tmp/missing_embedded_file.txt')).toBeNull()
 })
 
+test('embeddedFilesAddAnEmbeddedFileFromBytes', () => {
+  // fromByteArray(bytes, filename) names the file; embeddedFiles.add(file) adds a copy, which survives a write
+  const bytes = new Uint8Array(Array.from({ length: 300 }, (_, i) => i % 251))
+  const ef = rhino.File3dmEmbeddedFile.fromByteArray(bytes, 'texture.bin')
+  expect(ef.filename).toBe('texture.bin')
+  const f = new rhino.File3dm()
+  expect(f.embeddedFiles.add(ef)).toBe(true)
+  expect(f.embeddedFiles.count).toBe(1)
+  expect(f.embeddedFiles.findIndex(0).filename).toBe('texture.bin')
+  expect(f.embeddedFiles.findIndex(0).length).toBe(BigInt(300))
+  const g = rhino.File3dm.fromByteArray(f.toByteArray())
+  expect([...g.embeddedFiles].map(e => e.filename)).toEqual(['texture.bin'])
+  expect(f.embeddedFiles.add(new rhino.File3dmEmbeddedFile())).toBe(false)
+})
+
+test('embeddedFileToByteArray', () => {
+  // toByteArray returns an embedded file's bytes, also after a write and read; empty without data
+  const bytes = new Uint8Array(Array.from({ length: 768 }, (_, i) => i % 256))
+  const f = new rhino.File3dm()
+  expect(f.embeddedFiles.add(rhino.File3dmEmbeddedFile.fromByteArray(bytes, 'data.bin'))).toBe(true)
+  const out = f.embeddedFiles.findIndex(0).toByteArray()
+  expect(out).toBeInstanceOf(Uint8Array)
+  expect([...out]).toEqual([...bytes])
+  const g = rhino.File3dm.fromByteArray(f.toByteArray())
+  expect([...g.embeddedFiles.findIndex(0).toByteArray()]).toEqual([...bytes])
+  expect(new rhino.File3dmEmbeddedFile().toByteArray().length).toBe(0)
+})
+
 test('embeddedFileFromByteArray', () => {
   // File3dmEmbeddedFile.fromByteArray makes an embedded file of those bytes
   const bytes = new Uint8Array(Array.from({ length: 300 }, (_, i) => i % 251))

@@ -248,6 +248,10 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array]], 
 - [[`File3dm.EmbeddedFilePaths()` is `File3dm.EmbeddedFiles` (each item's `Filename`) ||
   `doc.embeddedFilePaths()` is `doc.embeddedFiles` (each item's `filename`)]]. Paths are cleaned for
   the platform, so a path saved on Windows reads with `/` on Linux and macOS. <!-- D69 -->
+- An embedded file's [[`Filename` || `filename`]] is read-only. 8.x set it, then added the file; in 9.2
+  [[`File3dmEmbeddedFile.Read(path)` takes the name from the path, and `EmbeddedFiles.Add(file)` adds
+  it || `File3dmEmbeddedFile.fromByteArray(bytes, filename)` names it, and `doc.embeddedFiles.add(file)`
+  adds it]].
 - [[`File3dm.Created` and `LastEdited` are new: `datetime.datetime` values || `doc.created` and
   `doc.lastEdited` are new: `Date` values]]. <!-- D33 -->
 - [[`model.Objects.Add(geometry, attributes)` || `doc.objects.add(geometry, attributes)`]] adds

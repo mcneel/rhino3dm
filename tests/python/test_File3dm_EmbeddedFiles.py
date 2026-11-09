@@ -99,6 +99,38 @@ class TestFile3dmEmbeddedFiles(unittest.TestCase):
             self.assertTrue(ef.Filename.endswith('note.txt'))
             self.assertIsNone(rhino3dm.File3dmEmbeddedFile.Read(os.path.join(d, 'missing.txt')))
 
+    def test_embeddedFilesAddAnEmbeddedFile(self):
+        """EmbeddedFiles.Add(embeddedFile) adds a copy of a File3dmEmbeddedFile, which survives a write."""
+        with helpers.TempDir() as d:
+            note = os.path.join(d, 'note.txt')
+            with open(note, 'w') as fh:
+                fh.write('hello')
+            f = rhino3dm.File3dm()
+            self.assertTrue(f.EmbeddedFiles.Add(rhino3dm.File3dmEmbeddedFile.Read(note)))
+            self.assertEqual(len(f.EmbeddedFiles), 1)
+            self.assertTrue(f.EmbeddedFiles.FindIndex(0).Filename.endswith('note.txt'))
+            self.assertEqual(f.EmbeddedFiles.FindIndex(0).Length, 5)
+            out = os.path.join(d, 'embedded.3dm')
+            self.assertTrue(f.Write(out, 8))
+            self.assertEqual(len(rhino3dm.File3dm.Read(out).EmbeddedFiles), 1)
+            self.assertFalse(f.EmbeddedFiles.Add(rhino3dm.File3dmEmbeddedFile()))
+
+    def test_embeddedFileToByteArray(self):
+        """ToByteArray returns an embedded file's bytes, also after a write and read; empty without data."""
+        with helpers.TempDir() as d:
+            note = os.path.join(d, 'note.txt')
+            with open(note, 'wb') as fh:
+                fh.write(bytes(range(256)) * 3)
+            ef = rhino3dm.File3dmEmbeddedFile.Read(note)
+            self.assertEqual(ef.ToByteArray(), bytes(range(256)) * 3)
+            f = rhino3dm.File3dm()
+            self.assertTrue(f.EmbeddedFiles.Add(ef))
+            out = os.path.join(d, 'embedded.3dm')
+            self.assertTrue(f.Write(out, 8))
+            g = rhino3dm.File3dm.Read(out)
+            self.assertEqual(g.EmbeddedFiles.FindIndex(0).ToByteArray(), bytes(range(256)) * 3)
+        self.assertEqual(rhino3dm.File3dmEmbeddedFile().ToByteArray(), b'')
+
     def test_file3dmGetEmbeddedFileAsBase64(self):
         """GetEmbeddedFileAsBase64 finds a file Rhino embedded by its name, in any case; '' when absent or not the full path in strict mode."""
         f = helpers.read_model('sphereDecals.3dm')

@@ -8,6 +8,7 @@
   var KEEP_ARGS = [["Brep","tryConvertBrep",0,true],["Leader","create",2,true],["Leader","createWithRichText",2,true],["LinearDimension","create",1,true],["OrdinateDimension","create",0,true],["RadialDimension","create",0,true],["TextEntity","create",2,true],["TextEntity","createWithRichText",2,true]];
   var KEEP_SET = [["AnnotationBase","parentDimensionStyle"]];
   var ALIASES = [["File3dm","destroy","delete"]];
+  var DISPATCH = [["File3dmEmbeddedFiles","add","rh3dmAddFile","File3dmEmbeddedFile"]];
   var VALUES = ["Arc","BoundingBox","Box","Circle","Color4f","ComponentIndex","Cone","ControlPoint","Cylinder","Ellipse","Interval","Line","MeshFace","Plane","Point2d","Point2f","Point3d","Point3f","Point4d","Sphere","SubDEdgeSharpness","Torus","Transform","Vector2d","Vector3d","Vector3f"];
   function install() {
     var M = Module, missing = [];
@@ -75,6 +76,17 @@
       var C = M[a[0]], proto = C && C.prototype;
       if (!proto || typeof proto[a[2]] !== 'function') { missing.push('alias ' + a[0] + '.' + a[1]); return; }
       proto[a[1]] = function () { return this[a[2]].apply(this, arguments); };
+    });
+    // one argument of a class -> a hand member (embeddedFiles.add(file) beside add(path); pilot #106)
+    DISPATCH.forEach(function (a) {
+      var C = M[a[0]], proto = C && C.prototype, f = proto && proto[a[1]], A = M[a[3]];
+      if (typeof f !== 'function' || !proto || typeof proto[a[2]] !== 'function' || !A) { missing.push('dispatch ' + a[0] + '.' + a[1]); return; }
+      var w = function (x) {
+        if (arguments.length === 1 && x instanceof A) return this[a[2]](x);
+        return f.apply(this, arguments);
+      };
+      if (f.overloadTable) w.overloadTable = f.overloadTable;
+      proto[a[1]] = w;
     });
     ITERS.forEach(function (c) {
       var C = M[c], proto = C && C.prototype, f = proto && proto.next;

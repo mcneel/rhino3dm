@@ -883,7 +883,7 @@ def extend_enum_table(manifest):
 # 'user_strings' (D62, Luis 2026-10-20): a class registering RhinoCommon's internal CommonObject
 # user-string members under their public names, where rhino3dm has them and RhinoCommon does not
 JS_POST = {'keep': [], 'iters': [], 'static_props': [], 'enumerable': [], 'not_iterable': [], 'grid': [],
-           'keep_args': [], 'keep_set': [], 'aliases': [], 'values': []}
+           'keep_args': [], 'keep_set': [], 'aliases': [], 'dispatch': [], 'values': []}
 
 # IEnumerable classes whose RhinoCommon enumerator is a private class over two counts and a
 # (u, v) getter, row-major in u (G102): {C# simple name: (count u, count v, getter)}. Each entry
@@ -1573,6 +1573,8 @@ HAND_BINDINGS = [
 #   keep_alive  the result refers to self (a view): Python keeps self alive while it lives
 #   op       a Python operator (`__eq__`): an argument of another type gives NotImplemented, not TypeError
 #   none     argument names whose (pointer) parameter takes None -- nanobind refuses None unless told
+#   dispatch (JS name, class): JS calls of that name with one argument of the class go to this member
+#   bytes    the method (no arguments) returns RH3DM_Bytes: Python bytes, a JS Uint8Array
 # On a value type JS has no instances (values are plain objects, G38): a method is the class
 # function `rhino.BoundingBox.encode(box)`, as the generated value-type members are.
 def _hm(name, kind, fn, header, **kw):
@@ -1620,6 +1622,19 @@ HAND_MEMBERS['CommonObject'].append(
 # now embind's delete() under the old name (the old one freed the model twice)
 HAND_MEMBERS['File3dmEmbeddedFile'].append(
     _hm('FromByteArray', 'static', 'BND_File3dmEmbeddedFile_FromByteArray', _F, args=['bytes'], py=False))
+# Luis 2026-11-08 (pilot #106): adding an embedded file object (8.x Add(EmbeddedFile)); JS names a
+# file made from bytes, as 8.x set FileName. JS `add` takes both: the post-script dispatches a
+# File3dmEmbeddedFile argument to the hand member (`dispatch`), a path to the generated add
+HAND_MEMBERS['File3dmEmbeddedFile'].append(
+    _hm('FromByteArray', 'static', 'BND_File3dmEmbeddedFile_FromByteArrayNamed', _F, args=['bytes', 'filename'], py=False))
+# Luis 2026-11-08: an embedded file's bytes (opennurbs SaveToBuffer) -- the other direction of
+# fromByteArray, and the one way JS can read any embedded file (GetEmbeddedFileAsBase64 sees only the
+# files Rhino's renderer embedded)
+HAND_MEMBERS['File3dmEmbeddedFile'].append(
+    _hm('ToByteArray', 'method', 'BND_File3dmEmbeddedFile_ToByteArray', _F, bytes=True))
+HAND_MEMBERS['File3dmEmbeddedFiles'] = [
+    _hm('Add', 'method', 'BND_File3dmEmbeddedFiles_AddFile', _F, args=['embeddedFile'], overload=True,
+        js='rh3dmAddFile', dispatch=('add', 'File3dmEmbeddedFile'))]
 HAND_MEMBERS['File3dm'].append(dict(name='destroy', kind='alias', of='delete', py=False, js='destroy'))
 # overloads rhino3dm has and RhinoCommon lacks (Luis 2026-10-30: kept by hand, upstream U38): Python
 # overloads of the generated members (as the old bindings had them), JS the old split names
@@ -1722,7 +1737,7 @@ for _reg, _es in HAND_MEMBERS.items():
 
 def hand_class_names():
     return {c if isinstance(c, str) else c['name'] for c in HAND_CLASSES}
-HAND_MEMBER_KEYS = {'name', 'kind', 'fn', 'header', 'args', 'js', 'py', 'keep_alive', 'set', 'of', 'overload', 'list', 'op', 'none'}
+HAND_MEMBER_KEYS = {'name', 'kind', 'fn', 'header', 'args', 'js', 'py', 'keep_alive', 'set', 'of', 'overload', 'list', 'op', 'none', 'dispatch', 'bytes'}
 # the one hand file allowed to name a binding: the neutral types' implementation
 HAND_SHIM = {'bindings/bnd_common.h', 'bindings/bnd_common.cpp'}
 HAND_BINDING_WORDS = re.compile(r'\bpy::|\bnb::|\bemscripten\b|\bON_PYTHON_COMPILE\b|\bON_WASM_COMPILE\b|\bNANOBIND\b')
