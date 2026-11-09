@@ -281,26 +281,9 @@ def setup_windows():
     
     global librhino3dm_native_folder
     
-    # 32 bit version...
-    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower()))
-    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower(), "win32"))
-    target_file_name = "librhino3dm_native.vcxproj"
-
-    item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
-    if not overwrite_check(item_to_check):
-        return False
-
-    os.chdir(target_path)
- 
-    # generate the project files
-    print("")
-    if xcode_logging:
-        print("Generating vcxproj files for Windows 32-bit native build...")
-    else:
-        print(bcolors.BOLD + "Generating vcxproj files for Windows 32-bit native build..." + bcolors.ENDC)
-    librhino3dm_native_folder = librhino3dm_native_folder.replace('\\', '//')
-    command = ("cmake -G \"Visual Studio 17 2022\" -Tv142 -A Win32 " + librhino3dm_native_folder)
-    run_command(command)
+    # no 32-bit version: opennurbs 9 needs 64-bit pointers (SubD component pointers carry a type tag
+    # in their low bits; opennurbs_subd.h static_asserts it), so win32 does not compile (RH3DM-215)
+    check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower()))
 
     # 64 bit version...
     target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower(), "win64"))

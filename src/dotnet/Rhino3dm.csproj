@@ -46,14 +46,6 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="exists('..\build\windows\win32\Release\librhino3dm_native.dll')">
-    <None Include="..\build\windows\win32\Release\librhino3dm_native.dll">
-      <PackagePath>runtimes\win-x86\native</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Pack>true</Pack>
-    </None>
-  </ItemGroup>
-
   <ItemGroup Condition="exists('..\build\windows\winarm64\Release\librhino3dm_native.dll')">
     <None Include="..\build\windows\winarm64\Release\librhino3dm_native.dll">
       <PackagePath>runtimes\win-arm64\native</PackagePath>

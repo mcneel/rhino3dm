@@ -296,7 +296,7 @@ jobs:
           - os: windows-2022
             target: windows
             image: ""
-            # glob picks up win32, win64, AND winarm64 subdirs (preserved into the artifact)
+            # glob picks up the win64 and winarm64 subdirs (preserved into the artifact)
             artifact-path: src\build\windows\*\Release\librhino3dm_native.dll
             architecture: ""
             # also cross-build the Windows ARM64 native lib (requires MSVC ARM64 build tools on the runner)
@@ -460,7 +460,8 @@ jobs:
         run: |
           pkg=$(ls src/dotnet/bin/Release/Rhino3dm.*.nupkg | head -1)
           unzip -l "$pkg" | grep runtimes/
-          for rid in win-x64 win-x86 win-arm64 osx-x64 osx-arm64 linux-x64 linux-arm64; do
+          # no win-x86: opennurbs 9 needs 64-bit pointers (RH3DM-215)
+          for rid in win-x64 win-arm64 osx-x64 osx-arm64 linux-x64 linux-arm64; do
             unzip -l "$pkg" | grep -q "runtimes/$rid/native/" || { echo "::error::$pkg has no runtimes/$rid"; exit 1; }
           done
       - name: artifacts nupkg

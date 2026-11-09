@@ -179,24 +179,7 @@ def build_windows():
     ext = 'dll'
     native_lib_filename = native_lib_name + '.' + ext
 
-    print(" Building Windows 32-bit native library...")
-    target_path = os.path.join(build_folder, platform_full_names.get("windows").lower(), "win32")
-    vcxproj_path = os.path.abspath(os.path.join(target_path, native_lib_name + '.vcxproj'))
-
-    if not check_for_setup_files(vcxproj_path):
-        return False
-    
-    item_to_check = os.path.abspath(os.path.join(target_path, "Release", native_lib_filename))    
-    if not overwrite_check(item_to_check):
-        return False
-
-    os.chdir(target_path)
-    
-    run_command("cmake --build . --config Release --target librhino3dm_native", False)
-
-    if not build_did_succeed(item_to_check):                
-        return False
-
+    # no 32-bit library: opennurbs 9 needs 64-bit pointers (see setup_windows in setup.py; RH3DM-215)
     print(" Building Windows 64-bit native library...")
     target_path = os.path.join(build_folder, platform_full_names.get("windows").lower(), "win64")
     vcxproj_path = os.path.abspath(os.path.join(target_path, native_lib_name + '.vcxproj'))

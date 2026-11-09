@@ -25,6 +25,13 @@ most code builds and runs unchanged. What changes:
 The package targets `netstandard2.0`, `net48` and `net10.0` (8.x: `netstandard2.0`, `net48` and
 `net7.0`). A .NET 7, 8 or 9 project uses the `netstandard2.0` build.
 
+### Platforms
+
+Native libraries for Windows x64 and Arm64, macOS (Apple silicon and Intel) and Linux x64 and Arm64.
+There is no 32-bit Windows library any more (8.x had `win-x86`): opennurbs 9 needs 64-bit pointers.
+A .NET Framework application that loads the package must run as a 64-bit process (turn off "Prefer
+32-bit"). macOS 14 or later.
+
 ### Members that threw at runtime
 
 Some 8.x members compiled but threw `EntryPointNotFoundException` on every call, because the native
