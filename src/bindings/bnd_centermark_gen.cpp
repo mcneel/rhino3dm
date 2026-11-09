@@ -9,6 +9,9 @@
 BND_Centermark::BND_Centermark()
   : BND_Dimension(ON_Centermark_New()) {}
 
+BND_Centermark::BND_Centermark(BND_Plane plane, BND_Point3d centerPoint, double radius)
+  : BND_Dimension([&]() { ON_Centermark* rh3dm_p = ON_V6_Centermark_Create(ON_nil_uuid, RH3DM_Val(plane), RH3DM_Val(centerPoint), radius); return rh3dm_p ? rh3dm_p : ON_Centermark_New(); }()) {}
+
 bool BND_Centermark::Gen_AdjustFromPoints(BND_Plane plane, BND_Point3d centerPoint) const {
   return ON_V6_Centermark_AdjustFromPoints(static_cast<ON_Centermark*>(RH3DM_NonConst()), RH3DM_Val(plane), RH3DM_Val(centerPoint));
 }
@@ -58,6 +61,7 @@ void initGenCentermark(rh3dmpymodule& m)
 {
   py::class_<BND_Centermark, BND_Dimension>(m, "Centermark")
       .def(py::init<>())
+      .def(py::init<BND_Plane, BND_Point3d, double>(), py::arg("plane"), py::arg("centerPoint"), py::arg("radius"))
       .def("AdjustFromPoints", &BND_Centermark::Gen_AdjustFromPoints, py::arg("plane"), py::arg("centerPoint"))
       .def_prop_rw("Radius", &BND_Centermark::Gen_Radius, &BND_Centermark::Gen_set_Radius)
       .def("GetDisplayLines", &BND_Centermark::Gen_GetDisplayLines, py::arg("style"), py::arg("scale"));
@@ -70,6 +74,7 @@ void initGenCentermark(void)
 {
   class_<BND_Centermark, base<BND_Dimension>>("Centermark")
       .constructor<>()
+      .constructor<BND_Plane, BND_Point3d, double>()
       .property("radius", &BND_Centermark::Gen_Radius, &BND_Centermark::Gen_set_Radius)
       .function("adjustFromPoints", &BND_Centermark::Gen_AdjustFromPoints)
       .function("getDisplayLines", &BND_Centermark::Gen_GetDisplayLines)

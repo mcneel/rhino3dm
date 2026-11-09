@@ -161,7 +161,7 @@ page for the name your script uses.
 | `EmbeddedFile.fileName` | `File3dmEmbeddedFile.filename` |  |
 | `EmbeddedFile.write` | `File3dmEmbeddedFile.saveToFile` |  |
 | `Environment.getBackgroundImage` | `Environment.backgroundImage` |  |
-| `Environment.setBackgroundImage` | removed | the background image is read-only, as in RhinoCommon |
+| `Environment.setBackgroundImage` | `Environment.backgroundImage` | set the property; rhino3dm keeps its setter (RhinoCommon's is read-only) |
 | `Extrusion.createWithPlane` | `Extrusion.create` |  |
 | `File3dm.dimstyles` | `File3dm.dimStyles` |  |
 | `File3dm.embeddedFilePaths` | `File3dm.embeddedFiles` | [f.filename for f in file.embeddedFiles]; a Windows path reads in this platform's form |

@@ -1648,32 +1648,50 @@ def default_ctor_call(cls, manifest, c_by_name):
 def init_ctor(x):
     """`ptr = UNM.ON_X_New(IntPtr.Zero); ConstructNonConstObject(ptr); Init(args);` with Init a
     native on the new object (NurbsCurve(dimension, rational, order, pointCount) -- private
-    Create inlined; pilot #102): two calls, the first the default creation, the second's first
-    argument the new object's pointer"""
+    Create inlined; pilot #102), or several (RadialDimension(dimtype, plane, ...): `ptr =
+    ON_DimRadial_New(); F(ptr, ..); G(ptr, ..)`; pilot #112): the first call the default creation
+    (no arguments, or IntPtr.Zero ones), each later call's first argument the new object -- its
+    pointer, or the one local every later call starts with"""
     c = x.get('Calls') or []
-    return (len(c) == 2 and not x.get('CtorCond') and c[0]['Args']
-            and all(a['Kind'] == 'expr' and a['Text'] == 'IntPtr.Zero' for a in c[0]['Args'])
-            and c[1]['Args'] and c[1]['Args'][0]['Kind'] == 'expr' and c[1]['Args'][0].get('Value') == 'NonConstPointer')
+    if len(c) < 2 or x.get('CtorCond') or not all(a['Kind'] == 'expr' and a['Text'] == 'IntPtr.Zero' for a in c[0]['Args']):
+        return False
+    firsts = [k['Args'][0] if k['Args'] else None for k in c[1:]]
+    if any(a is None or a['Kind'] != 'expr' for a in firsts):
+        return False
+    params = {q['Name'] for q in x.get('Params') or []}
+    return (all(a.get('Value') == 'NonConstPointer' for a in firsts)
+            or (len({a['Text'] for a in firsts}) == 1 and not firsts[0].get('Value')
+                and re.match(r'^[A-Za-z_]\w*$', firsts[0]['Text']) and firsts[0]['Text'] not in params))
 
 
 def init_ctor_plan(x, cls, c_by_name):
-    """an init_ctor: the default construction, then the second call planned as a void method on
-    the new object (C# ignores its result too)"""
+    """an init_ctor: the default construction, then each later call planned as a void method on
+    the new object (C# ignores their results too)"""
     if cls['mode'] != 'pointer':
         return None, 'init: %s mode' % cls['mode']
     if x['Body'] not in ('trivial', 'pattern') or x.get('Guards'):
         return None, 'init: body %s' % x['Body']
-    fn = c_by_name.get(x['Calls'][1]['Name'])
-    if fn is None:
-        return None, 'init: no C function'
-    m2 = dict(x, Kind='method', Static=False, Name='__init', Returns='void', Calls=[x['Calls'][1]])
-    p, why = plan(m2, fn, cls)
-    if p is None:
-        return None, 'init: ' + why
-    if p['locals'] or p['shape'][0] != 'direct':
-        return None, 'init: shape'
-    p['init_call'] = '%s(%s)' % (fn['name'], ', '.join(p['call_exprs']))
-    return p, None
+    calls, p0 = [], None
+    for call in x['Calls'][1:]:
+        fn = c_by_name.get(call['Name'])
+        if fn is None:
+            return None, 'init: no C function'
+        self_arg = {'Call': None, 'Kind': 'expr', 'Text': 'ptr_this', 'Value': 'NonConstPointer'}
+        m2 = dict(x, Kind='method', Static=False, Name='__init', Returns='void',
+                  Calls=[dict(call, Args=[self_arg] + call['Args'][1:])])
+        p, why = plan(m2, fn, cls)
+        if p is None:
+            return None, 'init: ' + why
+        if p['locals'] or p['shape'][0] != 'direct':
+            return None, 'init: shape'
+        calls.append('%s(%s)' % (fn['name'], ', '.join(p['call_exprs'])))
+        if p0 is None:
+            p0 = p
+        elif p['bind_args'] != p0['bind_args']:
+            # every call binds the same constructor parameters (plan binds them all, used or not)
+            return None, 'init: calls bind differently'
+    p0['init_call'] = '; '.join(calls)
+    return p0, None
 
 
 def arg_ctor_plans(cls, manifest, c_by_name, skipped):
@@ -1797,6 +1815,23 @@ def cond_ctor_plan(x, cls, c_by_name):
     guard over the parameters only -> one plan whose creation is a ternary"""
     if x['Body'] not in ('trivial', 'pattern') or x.get('Guards'):
         return None, 'cond ctor body'
+    if x['CtorCond']['Cond'] == '@null':
+        # `p = F(..); if (IntPtr.Zero == p) p = G();` (Centermark(plane, center, radius); pilot #112):
+        # F planned as an ordinary constructor, G -- no arguments -- when F returns null
+        fn, fallback = c_by_name.get(x['Calls'][0]['Name']), c_by_name.get(x['Calls'][1]['Name'])
+        if fn is None or fn['returns'] != '%s*' % cls['on'] or fallback is None \
+                or fallback['returns'] != '%s*' % cls['on'] or fallback['params']:
+            return None, 'fallback ctor creation fn'
+        m2 = dict(x, Kind='method', Static=True, Name='__ctor', Returns=cls['cs'], Calls=[x['Calls'][0]], CtorCond=None)
+        p, why = plan(m2, fn, cls)
+        if p is None:
+            return None, 'fallback ctor: %s' % why
+        if p['locals'] or p['shape'][0] != 'wrap':
+            return None, 'fallback ctor shape'
+        p = dict(p, extra_fns=list(p.get('extra_fns') or []) + [fallback])
+        p['ctor_call'] = '[&]() { %s* rh3dm_p = %s(%s); return rh3dm_p ? rh3dm_p : %s(); }()' % (
+            cls['on'], fn['name'], ', '.join(p['call_exprs']), fallback['name'])
+        return p, None
     arms = []
     for call in x['Calls']:
         fn = c_by_name.get(call['Name'])

@@ -4,6 +4,7 @@
 #include "bnd_environment_gen.h"
 #include "bnd_texture_gen.h"
 #include "bnd_commonobject.h"
+#include "bnd_environment.h"
 
 BND_Environment::BND_Environment()
   : m_ptr(ON_Environment_New()) {}
@@ -31,6 +32,7 @@ void initGenEnvironment(rh3dmpymodule& m)
 {
   py::class_<BND_Environment, BND_CommonObject>(m, "Environment")
       .def(py::init<>())
+      .def("_set_BackgroundImage", &BND_Environment_SetBackgroundImage, py::arg("value").none())
       .def_prop_ro("BackgroundColor", &BND_Environment::Gen_BackgroundColor)
       .def_prop_ro("BackgroundImage", &BND_Environment::Gen_BackgroundImage, py::rv_policy::take_ownership)
       .def_prop_ro("BackgroundProjection", &BND_Environment::Gen_BackgroundProjection);
@@ -43,6 +45,7 @@ void initGenEnvironment(void)
 {
   class_<BND_Environment, base<BND_CommonObject>>("Environment")
       .constructor<>()
+      .function("rh3dmSetBackgroundImage", &BND_Environment_SetBackgroundImage, allow_raw_pointers())
       .property("backgroundColor", &BND_Environment::Gen_BackgroundColor)
       .property("backgroundImage", &BND_Environment::Gen_BackgroundImage, allow_raw_pointers())
       .property("backgroundProjection", &BND_Environment::Gen_BackgroundProjection)

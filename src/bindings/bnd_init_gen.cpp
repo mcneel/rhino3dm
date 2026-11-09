@@ -1231,6 +1231,18 @@ class _StaticOrInstance(object):
         return self._static if obj is None else self._instance.__get__(obj, cls)
 for _cls in list(vars(_m).values()):
     if isinstance(_cls, type):
+        # pilot #111: `_set_<Name>`, a hand setter for the generated read-only property <Name>
+        for _attr in [a for a in vars(_cls) if a.startswith('_set_')]:
+            _prop = vars(_cls).get(_attr[len('_set_'):])
+            if isinstance(_prop, property) and _prop.fset is None:
+                # a Python function (named as the property; a closure, not a default argument) so
+                # stubgen writes a valid setter
+                def _make_setter(f, name):
+                    def _setter(self, value):
+                        f(self, value)
+                    _setter.__name__ = _setter.__qualname__ = name
+                    return _setter
+                setattr(_cls, _attr[len('_set_'):], property(_prop.fget, _make_setter(getattr(_cls, _attr), _attr[len('_set_'):]), None, _prop.__doc__))
         for _attr in [a for a in vars(_cls) if a.startswith('_static_')]:
             _inst = vars(_cls).get(_attr[len('_static_'):])
             if _inst is not None:

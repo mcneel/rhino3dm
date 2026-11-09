@@ -46,7 +46,7 @@ ON_Color Binding_to_ON_Color(const BND_Color& color)
   int r = color["r"].as<int>();
   int g = color["g"].as<int>();
   int b = color["b"].as<int>();
-  int a = color["a"].as<int>();
+  int a = color["a"].isUndefined() ? 255 : color["a"].as<int>();  // no a: opaque
   return ON_Color(r,g,b,255-a);
 }
 

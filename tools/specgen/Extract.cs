@@ -999,7 +999,8 @@ record MemberRecord
     public WrapTupleInfo WrapTuple { get; init; } // Body=="wraptuple": a tuple of geometry made from native pointers (G72)
     public string HolderEmpty { get; init; }  // Holder: the array is empty when the call's result COMPAREs ("== 0"; G73)
     public string HolderStatic { get; init; } // Holder: handed to a static of a translated data class, `Polyline.PolyLineFromNativeArray` (G82)
-    public GuardInfo CtorCond { get; init; }  // a constructor choosing its creation call: Calls[0] when Cond, else Calls[1] (G82)
+    public GuardInfo CtorCond { get; init; }  // a constructor choosing its creation call: Calls[0] when Cond, else Calls[1] (G82);
+                                              // Cond "@null": Calls[0], and Calls[1] when it returns null (pilot #112)
     public Dictionary<string, string> ParamDefaults { get; init; } // `p = p ?? new T();` -- parameter -> T (G64)
     public TempNativeInfo TempNative { get; init; } // `IntPtr L = p.CopyToNative();` then the calls on L (see TempNativeInfo; G65)
     public string ResultFilter { get; init; }   // `if (X is T item && !item.P) return item; return null;`: the bool property P of the result that voids it (G66)
@@ -6115,6 +6116,8 @@ class Walker : CSharpSyntaxWalker
         }
         if (kind == "constructor" && !Generatable.Contains(a?.Body ?? "") && CondCtor(seqBody ?? body, paramNames ?? NoParams) is { } cca)
             a = cca;
+        if (kind == "constructor" && !Generatable.Contains(a?.Body ?? "") && FallbackCtor(body, paramNames ?? NoParams) is { } fca)
+            a = fca;
         if (!Generatable.Contains(a?.Body ?? "") && SwitchReturns(body) is { } swb)
         {
             // G83: a switch assigning a result local, read as the switch returning it
@@ -6983,6 +6986,35 @@ class Walker : CSharpSyntaxWalker
     // (PolylineCurve(points)). Each arm is analyzed as the ordinary constructor
     // `ConstructNonConstObject(F(..))`; both must be trivial, the condition a
     // guard condition. Calls[0] is the COND arm.
+    // pilot #112: `IntPtr ptr = UNM.F(..); if (IntPtr.Zero == ptr) ptr = UNM.G(); ConstructNonConstObject(ptr);`
+    // (Centermark(plane, center, radius), the AngularDimension creators): F, or the empty object G()
+    // when F fails. Analyzed as `ConstructNonConstObject(F(..))`; G is Calls[1], CtorCond's Cond "@null".
+    AccessorInfo FallbackCtor(SyntaxNode body, ISet<string> paramNames)
+    {
+        if (body is not BlockSyntax { Statements: [LocalDeclarationStatementSyntax pd, IfStatementSyntax { Else: null } f, ExpressionStatementSyntax { Expression: InvocationExpressionSyntax cn }] }
+            || pd.Declaration is not { Variables: [var pv] } || pv.Initializer?.Value is not InvocationExpressionSyntax create || !IsUnmCall(create)
+            || CalleeName(cn) != "ConstructNonConstObject" || cn.ArgumentList.Arguments is not [var ca] || ca.Expression.ToString() != pv.Identifier.Text)
+            return null;
+        var ptr = pv.Identifier.Text;
+        var cond = f.Condition.ToString().Replace(" ", "");
+        if (cond != "IntPtr.Zero==" + ptr && cond != ptr + "==IntPtr.Zero")
+            return null;
+        var st = f.Statement is BlockSyntax { Statements: [var one] } ? one : f.Statement;
+        if (st is not ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Left: IdentifierNameSyntax l, Right: InvocationExpressionSyntax g } }
+            || l.Identifier.Text != ptr || !IsUnmCall(g) || g.ArgumentList.Arguments.Count != 0)
+            return null;
+        var a = AnalyzeBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement($"ConstructNonConstObject({create});")), paramNames);
+        if (a.Body != "trivial" || a.Calls is not { Length: 1 } || a.Guards != null)
+            return null;
+        var gname = ((MemberAccessExpressionSyntax)g.Expression).Name.Identifier.Text;
+        return a with
+        {
+            Calls = new[] { a.Calls[0], new CallInfo { Name = gname, Args = Array.Empty<ArgInfo>() } },
+            Native = a.Calls.Select(c => c.Name).Append(gname).Distinct().OrderBy(n => n, StringComparer.Ordinal).ToArray(),
+            CtorCond = new GuardInfo { Cond = "@null", Ids = Array.Empty<string>() },
+        };
+    }
+
     AccessorInfo CondCtor(SyntaxNode body, ISet<string> paramNames)
     {
         // a trailing `ApplyMemoryPressure();` is a GC hint (G73): PointCloud(points), pilot #76

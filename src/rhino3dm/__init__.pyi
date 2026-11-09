@@ -19601,6 +19601,10 @@ class Environment(CommonObject):
     def BackgroundImage(self) -> Texture:
         """The background image texture."""
 
+    @BackgroundImage.setter
+    def BackgroundImage(self, value: Texture) -> None:
+        ...
+
     @property
     def BackgroundProjection(self) -> Environment.BackgroundProjections:
         """The background projection."""
@@ -21200,6 +21204,49 @@ class AngularDimension(Dimension):
         """Constructs an angular dimension."""
 
     @overload
+    def __init__(self, line1: Line, pointOnLine1: Point3d, line2: Line, pointOnLine2: Point3d, pointOnAngularDimensionArc: Point3d, bSetExtensionPoints: bool) -> None:
+        """Constructs an angular dimension between the lines.
+
+        If the lines intersect in a single point, that point is used as the center of the angular dimension arc.In this case, there are eight possible angles to dimension.The pointOnAngularDimensionArc and pointOnLine parameters are used to select the correct angle to dimension. If a pointOnLine parameter is not set, the corresponding line's midpoint is used.
+
+        If the lines are colinear, the point on the line closest to pointOnAngularDimensionArc is the center of the angular dimension arc.
+
+        Args:
+            line1: The first line.
+            pointOnLine1: If specified, indicates which semi-infinite portion of line1 to dimension. Otherwise the midpoint of line1 as a segment is used. When in doubt, use Point3d.Unset.
+            line2: The second line.
+            pointOnAngularDimensionArc: A point on the interior of the angular dimension arc.
+            bSetExtensionPoints: If bSetExtensionPoints is true, and a pointOnLine parameter is valid, that point is used as the extension point. Otherwise the angular dimension arc endpoint is used.
+        """
+
+    @overload
+    def __init__(self, plane: Plane, horizontal: Vector3d, centerpoint: Point3d, defpoint1: Point3d, defpoint2: Point3d, dimlinepoint: Point3d) -> None:
+        """Constructs an angular dimension with extension lines starting at plane origin (arc center).
+
+        Args:
+            plane: Dimension's plane.
+            horizontal: Horizontal reference direction.
+            centerpoint: Dimension center point.
+            defpoint1: Point on first extension line.
+            defpoint2: Point on second extension line.
+            dimlinepoint: Point on dimension arc.
+        """
+
+    @overload
+    def __init__(self, plane: Plane, horizontal: Vector3d, extpoint1: Point3d, extpoint2: Point3d, dirpoint1: Point3d, dirpoint2: Point3d, dimlinepoint: Point3d) -> None:
+        """Constructs an angular dimension from parameters.
+
+        Args:
+            plane: The dimension's plane.
+            horizontal: The horizontal direction.
+            extpoint1: Start of first extension line.
+            extpoint2: start of second extension line.
+            dirpoint1: point on first extension vector.
+            dirpoint2: Spoint on second extension vector.
+            dimlinepoint: point on dimension line.
+        """
+
+    @overload
     def __init__(self, arc: Arc, offset: float) -> None:
         """Constructs an angular dimension from a given arc.
 
@@ -21334,8 +21381,21 @@ class AngularDimension(Dimension):
 class RadialDimension(Dimension):
     """Represents a dimension of a circular entity that can be measured with radius or diameter."""
 
+    @overload
     def __init__(self) -> None:
         """Constructs a radial dimension."""
+
+    @overload
+    def __init__(self, dimtype: _rh.AnnotationType, plane: Plane, centerpoint: Point3d, radiuspoint: Point3d, dimlinepoint: Point3d) -> None:
+        """Constructs a radial dimension from parameters.
+
+        Args:
+            dimtype: AnnotationType.Diameter or AnnotationType.Radius
+            plane: Dimension's plane
+            centerpoint: Dimension's center point
+            radiuspoint: Point on dimension radius
+            dimlinepoint: Point on dimension line
+        """
 
     def AdjustFromPoints(self, plane: Plane, centerpoint: Point3d, radiuspoint: Point3d, dimlinepoint: Point3d, rotationInPlane: float) -> bool:
         """Update Dimension geometry from point locations
@@ -21582,8 +21642,19 @@ class OrdinateDimension(Dimension):
 class Centermark(Dimension):
     """Represents a center mark dimension."""
 
+    @overload
     def __init__(self) -> None:
         """Constructs a new center mark dimension."""
+
+    @overload
+    def __init__(self, plane: Plane, centerPoint: Point3d, radius: float) -> None:
+        """Constructs a new center mark dimension.
+
+        Args:
+            plane: Dimension's plane.
+            centerPoint: Dimension's center point.
+            radius: Center mark's radius.
+        """
 
     def AdjustFromPoints(self, plane: Plane, centerPoint: Point3d) -> bool:
         """Update dimension geometry from point locations.

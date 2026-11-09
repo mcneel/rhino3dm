@@ -9,7 +9,8 @@ from gen_registry import HAND_CLASSES, HAND_MEMBERS, camel, hand_class_names
 def hand_names(reg, strict=False):
     """the Python and JS names reg's hand members take (a generated member must not reuse one).
     `strict`: leaving out Python overloads of a generated member (`overload`: True, G126)"""
-    es = HAND_MEMBERS.get(reg, [])
+    # a setter names the generated property it completes (registered as _set_<Name> / rh3dmSet<Name>)
+    es = [e for e in HAND_MEMBERS.get(reg, []) if e.get('kind') != 'setter']
     return ({e['name'] for e in es if e.get('py', True) and not (strict and e.get('overload'))},
             {e.get('js', camel(e['name'])) for e in es if e.get('js', camel(e['name'])) is not None})
 
@@ -39,6 +40,12 @@ def hand_registrations(reg, value=False, overloads=False):
         # `none`: the arguments a pointer parameter takes None for (nanobind asks for it: .none())
         args = ''.join(', py::arg("%s")%s' % (a, '.none()' if a in (e.get('none') or []) else '')
                        for a in e.get('args') or [])
+        if kind == 'setter':
+            if e.get('py', True):
+                py.append('      .def("_set_%s", &%s, py::arg("value").none())' % (e['name'], fn))
+            if e.get('js', '') is not None:
+                js.append('      .function("rh3dmSet%s", &%s, allow_raw_pointers())' % (e['name'], fn))
+            continue
         if e.get('py', True):
             if kind == 'method':
                 op = ', py::is_operator()' if e.get('op') else ''
@@ -90,6 +97,13 @@ def hand_js_dispatch():
     embeddedFiles.add(file) beside the generated add(path), which embind cannot overload by type)"""
     return [(reg, e['dispatch'][0], e.get('js', camel(e['name'])), e['dispatch'][1])
             for reg, es in sorted(HAND_MEMBERS.items()) for e in es if e.get('dispatch')]
+
+
+def hand_js_setters():
+    """[(class, JS property, setter function)] for the JS post-script (JS_POST 'setters'): a setter
+    for a generated read-only property (kind 'setter'; pilot #111)"""
+    return [(reg, e.get('js', camel(e['name'])), 'rh3dmSet' + e['name'])
+            for reg, es in sorted(HAND_MEMBERS.items()) for e in es if e['kind'] == 'setter' and e.get('js', '') is not None]
 
 
 def hand_class_registrations():

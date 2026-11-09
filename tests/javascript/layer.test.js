@@ -47,8 +47,8 @@ test('layerColorRejectsAnArray', () => {
   const layer = new rhino.Layer()
   layer.color = { r: 10, g: 20, b: 30, a: 255 }
   expect([layer.color.r, layer.color.g, layer.color.b]).toEqual([10, 20, 30])
-  layer.color = { r: 1, g: 2, b: 3 }
-  expect([layer.color.r, layer.color.g, layer.color.b]).toEqual([1, 2, 3])
+  layer.color = { r: 1, g: 2, b: 3 }  // no a: opaque
+  expect([layer.color.r, layer.color.g, layer.color.b, layer.color.a]).toEqual([1, 2, 3, 255])
   helpers.raises(rhino, () => { layer.color = [255, 0, 0, 255] }, /expected a color/)
   helpers.raises(rhino, () => { layer.color = { r: 255, g: 0 } }, /expected a color/)
   expect([layer.color.r, layer.color.g, layer.color.b]).toEqual([1, 2, 3])

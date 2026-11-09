@@ -624,7 +624,8 @@ Wherever RhinoCommon takes a sequence of points, [[any sequence works (a list, a
   `getScreenPort()` are]] RhinoCommon's `(x, y, width, height)`, with y the smaller of top and bottom.
   A new [[`ViewportInfo()` || `new rhino.ViewportInfo()`]] reads `(0, 0, 1000, 1000)`. <!-- D58, D38 -->
 - [[`File3dm.FromByteArray` takes any buffer (`bytes`, `bytearray`, numpy) ||
-  `rhino.File3dm.fromByteArray` takes a `Uint8Array`]]. <!-- D38 -->
+  `rhino.File3dm.fromByteArray` takes a `Uint8Array` or an `ArrayBuffer`; anything else throws
+  `TypeError`]]. <!-- D38 -->
 
 ### Object identity
 

@@ -181,8 +181,18 @@ def process_class(api, cls, stats, depth=0):
         cls.body = body
         return
     body = []
+    getters = {}
     for st in cls.body:
         body.append(st)
+        if isinstance(st, ast.FunctionDef) and any(ast.unparse(d) == 'property' for d in st.decorator_list):
+            getters[st.name] = st.returns
+        # a setter rhino3dm adds to a generated read-only property (pilot #111) is a plain Python
+        # function: stubgen writes it untyped -- the value is the getter's type
+        if (isinstance(st, ast.FunctionDef) and getters.get(st.name) is not None
+                and any(ast.unparse(d) == '%s.setter' % st.name for d in st.decorator_list)
+                and len(st.args.args) == 2 and st.args.args[1].annotation is None):
+            st.args.args[1].annotation = getters[st.name]
+            st.returns = ast.Constant(None)
         if isinstance(st, ast.AnnAssign) and ast.unparse(st.annotation) == '_StaticOrInstance':
             # one name, static AND instance (G132: BoundingBox.Union): no type checker spells that,
             # so `Any`, and both forms in the docstring

@@ -883,7 +883,7 @@ def extend_enum_table(manifest):
 # 'user_strings' (D62, Luis 2026-10-20): a class registering RhinoCommon's internal CommonObject
 # user-string members under their public names, where rhino3dm has them and RhinoCommon does not
 JS_POST = {'keep': [], 'iters': [], 'static_props': [], 'enumerable': [], 'not_iterable': [], 'grid': [],
-           'keep_args': [], 'keep_set': [], 'aliases': [], 'dispatch': [], 'values': []}
+           'keep_args': [], 'keep_set': [], 'aliases': [], 'dispatch': [], 'setters': [], 'values': []}
 
 # IEnumerable classes whose RhinoCommon enumerator is a private class over two counts and a
 # (u, v) getter, row-major in u (G102): {C# simple name: (count u, count v, getter)}. Each entry
@@ -1575,6 +1575,9 @@ HAND_BINDINGS = [
 #   none     argument names whose (pointer) parameter takes None -- nanobind refuses None unless told
 #   dispatch (JS name, class): JS calls of that name with one argument of the class go to this member
 #   bytes    the method (no arguments) returns RH3DM_Bytes: Python bytes, a JS Uint8Array
+#   kind 'setter': void fn(BND_<reg>& self, V value) -- a setter for the GENERATED read-only property
+#            `name` (RhinoCommon has a getter only): Python `_set_<name>` and JS `rh3dmSet<Name>`, which
+#            module init (Python) and the post-script (JS) attach to the property
 # On a value type JS has no instances (values are plain objects, G38): a method is the class
 # function `rhino.BoundingBox.encode(box)`, as the generated value-type members are.
 def _hm(name, kind, fn, header, **kw):
@@ -1632,6 +1635,10 @@ HAND_MEMBERS['File3dmEmbeddedFile'].append(
 # files Rhino's renderer embedded)
 HAND_MEMBERS['File3dmEmbeddedFile'].append(
     _hm('ToByteArray', 'method', 'BND_File3dmEmbeddedFile_ToByteArray', _F, bytes=True))
+# Luis 2026-11-08 (pilot #111): 8.x could set the background image; RhinoCommon's getter only
+# (upstream U46: a setter in RhinoCommon). The texture is copied in.
+HAND_MEMBERS['Environment'] = [
+    _hm('BackgroundImage', 'setter', 'BND_Environment_SetBackgroundImage', _F, args=['value'])]
 HAND_MEMBERS['File3dmEmbeddedFiles'] = [
     _hm('Add', 'method', 'BND_File3dmEmbeddedFiles_AddFile', _F, args=['embeddedFile'], overload=True,
         js='rh3dmAddFile', dispatch=('add', 'File3dmEmbeddedFile'))]
@@ -1767,7 +1774,7 @@ def check_hand_members(regs, src_root):
             if e.get('overload') and e.get('js', camel(e.get('name', ''))) == camel(e.get('name', '')):
                 # embind keeps one overload per arity: a JS overload needs its own name (or js: None)
                 errs.append('%s: an overload takes its own JS name' % where)
-            if e.get('kind') not in ('method', 'static', 'property'):
+            if e.get('kind') not in ('method', 'static', 'property', 'setter'):
                 errs.append('%s: kind %r' % (where, e.get('kind')))
             if 'set' in e and e.get('kind') != 'property':
                 errs.append('%s: a setter on a %s' % (where, e.get('kind')))

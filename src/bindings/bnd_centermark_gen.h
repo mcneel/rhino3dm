@@ -10,6 +10,7 @@ class BND_Centermark : public BND_Dimension
 public:
   explicit BND_Centermark(ON_Centermark* owned) : BND_Dimension(owned) {}
   BND_Centermark();
+  BND_Centermark(BND_Plane plane, BND_Point3d centerPoint, double radius);
   BND_Centermark(ONX_Model* model, ON_UUID id) : BND_Dimension(model, id) {}
   BND_Centermark(ON_Object* (*comp)(void*, int, bool), void* owner, int key, bool cow = false) : BND_Dimension(comp, owner, key, cow) {}
 

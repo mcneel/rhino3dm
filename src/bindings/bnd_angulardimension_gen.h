@@ -10,6 +10,9 @@ class BND_AngularDimension : public BND_Dimension
 public:
   explicit BND_AngularDimension(ON_DimAngular* owned) : BND_Dimension(owned) {}
   BND_AngularDimension();
+  BND_AngularDimension(BND_Line line1, BND_Point3d pointOnLine1, BND_Line line2, BND_Point3d pointOnLine2, BND_Point3d pointOnAngularDimensionArc, bool bSetExtensionPoints);
+  BND_AngularDimension(BND_Plane plane, BND_Vector3d horizontal, BND_Point3d centerpoint, BND_Point3d defpoint1, BND_Point3d defpoint2, BND_Point3d dimlinepoint);
+  BND_AngularDimension(BND_Plane plane, BND_Vector3d horizontal, BND_Point3d extpoint1, BND_Point3d extpoint2, BND_Point3d dirpoint1, BND_Point3d dirpoint2, BND_Point3d dimlinepoint);
   BND_AngularDimension(BND_Arc arc, double offset);
   BND_AngularDimension(ONX_Model* model, ON_UUID id) : BND_Dimension(model, id) {}
   BND_AngularDimension(ON_Object* (*comp)(void*, int, bool), void* owner, int key, bool cow = false) : BND_Dimension(comp, owner, key, cow) {}

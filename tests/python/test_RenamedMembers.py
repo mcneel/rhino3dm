@@ -87,6 +87,29 @@ class TestRenamedMembers(unittest.TestCase):
         idef = helpers.read_model('blocks.3dm').AllInstanceDefinitions[0]
         self.assertTrue(all(isinstance(i, uuid.UUID) for i in idef.GetObjectIds()))
 
+    def test_environmentBackgroundImage(self):
+        """Environment.BackgroundImage reads, and (rhino3dm only) sets a copy of a texture."""
+        env = rhino3dm.Environment()
+        self.assertIsInstance(env.BackgroundImage, rhino3dm.Texture)
+        tex = rhino3dm.Texture()
+        tex.FileName = 'background.png'
+        env.BackgroundImage = tex
+        self.assertEqual(env.BackgroundImage.FileName, 'background.png')
+        tex.FileName = 'other.png'
+        self.assertEqual(env.BackgroundImage.FileName, 'background.png')
+
+    def test_renderContentAndDisplacement(self):
+        """RenderTexture.FileName / RenderContent XML / Displacement.Texture are Filename / XML / TextureId."""
+        f = helpers.read_model('sphereDecals.3dm')
+        names = [t.Filename.replace('\\', '/').split('/')[-1] for t in f.RenderTextures]
+        self.assertEqual(sorted(names), ['E6AD.jpg', 'E6EC.jpg'])
+        xml = list(helpers.read_model('meshWithTexture.3dm').RenderMaterials)[0].XML(False)
+        self.assertTrue(xml.lstrip().startswith('<'))
+        disp = [o.Attributes.File3dmMeshModifiers.Displacement for o in helpers.read_model('subd_creases.3dm').Objects
+                if o.Attributes.File3dmMeshModifiers and o.Attributes.File3dmMeshModifiers.Displacement]
+        self.assertTrue(disp)
+        self.assertIsInstance(disp[0].TextureId, uuid.UUID)
+
 
 if __name__ == '__main__':
     unittest.main()

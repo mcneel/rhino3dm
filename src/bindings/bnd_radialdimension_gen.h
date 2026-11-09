@@ -10,6 +10,7 @@ class BND_RadialDimension : public BND_Dimension
 public:
   explicit BND_RadialDimension(ON_DimRadial* owned) : BND_Dimension(owned) {}
   BND_RadialDimension();
+  BND_RadialDimension(RH3DM_AnnotationType dimtype, BND_Plane plane, BND_Point3d centerpoint, BND_Point3d radiuspoint, BND_Point3d dimlinepoint);
   BND_RadialDimension(ONX_Model* model, ON_UUID id) : BND_Dimension(model, id) {}
   BND_RadialDimension(ON_Object* (*comp)(void*, int, bool), void* owner, int key, bool cow = false) : BND_Dimension(comp, owner, key, cow) {}
 

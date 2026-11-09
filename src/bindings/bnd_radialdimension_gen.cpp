@@ -11,6 +11,9 @@
 BND_RadialDimension::BND_RadialDimension()
   : BND_Dimension(ON_DimRadial_New()) {}
 
+BND_RadialDimension::BND_RadialDimension(RH3DM_AnnotationType dimtype, BND_Plane plane, BND_Point3d centerpoint, BND_Point3d radiuspoint, BND_Point3d dimlinepoint)
+  : BND_RadialDimension() { ON_V6_DimRadial_SetDimensionType(static_cast<ON_DimRadial*>(RH3DM_NonConst()), (ON::AnnotationType)(int)(dimtype)); ON_V6_DimRadial_AdjustFromPoints(static_cast<ON_DimRadial*>(RH3DM_NonConst()), RH3DM_Val(plane), RH3DM_Val(centerpoint), RH3DM_Val(radiuspoint), RH3DM_Val(dimlinepoint)); }
+
 bool BND_RadialDimension::Gen_AdjustFromPoints(BND_Plane plane, BND_Point3d centerpoint, BND_Point3d radiuspoint, BND_Point3d dimlinepoint, double rotationInPlane) const {
   return ON_V6_DimRadial_AdjustFromPoints(static_cast<ON_DimRadial*>(RH3DM_NonConst()), RH3DM_Val(plane), RH3DM_Val(centerpoint), RH3DM_Val(radiuspoint), RH3DM_Val(dimlinepoint));
 }
@@ -215,6 +218,7 @@ void initGenRadialDimension(rh3dmpymodule& m)
 {
   py::class_<BND_RadialDimension, BND_Dimension>(m, "RadialDimension")
       .def(py::init<>())
+      .def(py::init<RH3DM_AnnotationType, BND_Plane, BND_Point3d, BND_Point3d, BND_Point3d>(), py::arg("dimtype"), py::arg("plane"), py::arg("centerpoint"), py::arg("radiuspoint"), py::arg("dimlinepoint"))
       .def("AdjustFromPoints", &BND_RadialDimension::Gen_AdjustFromPoints, py::arg("plane"), py::arg("centerpoint"), py::arg("radiuspoint"), py::arg("dimlinepoint"), py::arg("rotationInPlane"))
       .def_prop_rw("AnnotationType", &BND_RadialDimension::Gen_AnnotationType, &BND_RadialDimension::Gen_set_AnnotationType, py::for_setter(py::arg("value").noconvert()))
       .def_prop_rw("CenterPoint", &BND_RadialDimension::Gen_CenterPoint, &BND_RadialDimension::Gen_set_CenterPoint)
@@ -244,6 +248,7 @@ void initGenRadialDimension(void)
 {
   class_<BND_RadialDimension, base<BND_Dimension>>("RadialDimension")
       .constructor<>()
+      .constructor<RH3DM_AnnotationType, BND_Plane, BND_Point3d, BND_Point3d, BND_Point3d>()
       .property("annotationType", &BND_RadialDimension::Gen_AnnotationType, &BND_RadialDimension::Gen_set_AnnotationType)
       .property("centerPoint", &BND_RadialDimension::Gen_CenterPoint, &BND_RadialDimension::Gen_set_CenterPoint)
       .property("dimlinePoint", &BND_RadialDimension::Gen_DimlinePoint, &BND_RadialDimension::Gen_set_DimlinePoint)

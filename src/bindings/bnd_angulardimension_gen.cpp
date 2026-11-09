@@ -9,6 +9,15 @@
 BND_AngularDimension::BND_AngularDimension()
   : BND_Dimension(ON_DimAngular_New()) {}
 
+BND_AngularDimension::BND_AngularDimension(BND_Line line1, BND_Point3d pointOnLine1, BND_Line line2, BND_Point3d pointOnLine2, BND_Point3d pointOnAngularDimensionArc, bool bSetExtensionPoints)
+  : BND_Dimension([&]() { ON_DimAngular* rh3dm_p = ON_V6_DimAngular_Create3(nullptr, RH3DM_Ptr(&line1), RH3DM_Val(pointOnLine1), RH3DM_Ptr(&line2), RH3DM_Val(pointOnLine2), RH3DM_Val(pointOnAngularDimensionArc), bSetExtensionPoints); return rh3dm_p ? rh3dm_p : ON_DimAngular_New(); }()) {}
+
+BND_AngularDimension::BND_AngularDimension(BND_Plane plane, BND_Vector3d horizontal, BND_Point3d centerpoint, BND_Point3d defpoint1, BND_Point3d defpoint2, BND_Point3d dimlinepoint)
+  : BND_Dimension([&]() { ON_DimAngular* rh3dm_p = ON_V6_DimAngular_Create(ON_nil_uuid, RH3DM_Val(plane), RH3DM_Val(horizontal), RH3DM_Val(centerpoint), RH3DM_Val(defpoint1), RH3DM_Val(defpoint2), RH3DM_Val(dimlinepoint)); return rh3dm_p ? rh3dm_p : ON_DimAngular_New(); }()) {}
+
+BND_AngularDimension::BND_AngularDimension(BND_Plane plane, BND_Vector3d horizontal, BND_Point3d extpoint1, BND_Point3d extpoint2, BND_Point3d dirpoint1, BND_Point3d dirpoint2, BND_Point3d dimlinepoint)
+  : BND_Dimension([&]() { ON_DimAngular* rh3dm_p = ON_V6_DimAngular_Create2Fixed(ON_nil_uuid, RH3DM_Val(plane), RH3DM_Val(horizontal), RH3DM_Val(extpoint1), RH3DM_Val(extpoint2), RH3DM_Val(dirpoint1), RH3DM_Val(dirpoint2), RH3DM_Val(dimlinepoint)); return rh3dm_p ? rh3dm_p : ON_DimAngular_New(); }()) {}
+
 BND_AngularDimension::BND_AngularDimension(BND_Arc arc, double offset)
   : BND_Dimension(ON_DimAngular_New2(RH3DM_Ptr(&arc), offset)) {}
 
@@ -191,6 +200,9 @@ void initGenAngularDimension(rh3dmpymodule& m)
 {
   py::class_<BND_AngularDimension, BND_Dimension>(m, "AngularDimension")
       .def(py::init<>())
+      .def(py::init<BND_Line, BND_Point3d, BND_Line, BND_Point3d, BND_Point3d, bool>(), py::arg("line1"), py::arg("pointOnLine1"), py::arg("line2"), py::arg("pointOnLine2"), py::arg("pointOnAngularDimensionArc"), py::arg("bSetExtensionPoints"))
+      .def(py::init<BND_Plane, BND_Vector3d, BND_Point3d, BND_Point3d, BND_Point3d, BND_Point3d>(), py::arg("plane"), py::arg("horizontal"), py::arg("centerpoint"), py::arg("defpoint1"), py::arg("defpoint2"), py::arg("dimlinepoint"))
+      .def(py::init<BND_Plane, BND_Vector3d, BND_Point3d, BND_Point3d, BND_Point3d, BND_Point3d, BND_Point3d>(), py::arg("plane"), py::arg("horizontal"), py::arg("extpoint1"), py::arg("extpoint2"), py::arg("dirpoint1"), py::arg("dirpoint2"), py::arg("dimlinepoint"))
       .def(py::init<BND_Arc, double>(), py::arg("arc"), py::arg("offset"))
       .def("AdjustFromPoints", &BND_AngularDimension::Gen_AdjustFromPoints, py::arg("plane"), py::arg("centerpoint"), py::arg("defpoint1"), py::arg("defpoint2"), py::arg("dimlinepoint"))
       .def("AdjustFromPoints", &BND_AngularDimension::Gen_AdjustFromPoints_2, py::arg("plane"), py::arg("extpoint1"), py::arg("extpoint2"), py::arg("dirpoint1"), py::arg("dirpoint2"), py::arg("dimlinepoint"))
@@ -219,6 +231,11 @@ void initGenAngularDimension(void)
 {
   class_<BND_AngularDimension, base<BND_Dimension>>("AngularDimension")
       .constructor<>()
+      .constructor(optional_override([](emscripten::val v0, emscripten::val v1, emscripten::val v2, emscripten::val v3, emscripten::val v4, emscripten::val v5) -> BND_AngularDimension* {
+        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Origin") && v0.hasOwnProperty("XAxis") && v0.hasOwnProperty("YAxis") && v0.hasOwnProperty("ZAxis")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Z") && v1["Z"].isNumber()) && (!v2.isNull() && v2.typeOf().as<std::string>() == "object" && v2.hasOwnProperty("Z") && v2["Z"].isNumber()) && (!v3.isNull() && v3.typeOf().as<std::string>() == "object" && v3.hasOwnProperty("Z") && v3["Z"].isNumber()) && (!v4.isNull() && v4.typeOf().as<std::string>() == "object" && v4.hasOwnProperty("Z") && v4["Z"].isNumber()) && (!v5.isNull() && v5.typeOf().as<std::string>() == "object" && v5.hasOwnProperty("Z") && v5["Z"].isNumber())) return new BND_AngularDimension(v0.as<BND_Plane>(), v1.as<BND_Vector3d>(), v2.as<BND_Point3d>(), v3.as<BND_Point3d>(), v4.as<BND_Point3d>(), v5.as<BND_Point3d>());
+        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("From") && v0.hasOwnProperty("To")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Z") && v1["Z"].isNumber()) && (!v2.isNull() && v2.typeOf().as<std::string>() == "object" && v2.hasOwnProperty("From") && v2.hasOwnProperty("To")) && (!v3.isNull() && v3.typeOf().as<std::string>() == "object" && v3.hasOwnProperty("Z") && v3["Z"].isNumber()) && (!v4.isNull() && v4.typeOf().as<std::string>() == "object" && v4.hasOwnProperty("Z") && v4["Z"].isNumber()) && (v5.typeOf().as<std::string>() == "boolean")) return new BND_AngularDimension(v0.as<BND_Line>(), v1.as<BND_Point3d>(), v2.as<BND_Line>(), v3.as<BND_Point3d>(), v4.as<BND_Point3d>(), v5.as<bool>());
+        throw std::invalid_argument("AngularDimension: no constructor matches the arguments"); }), allow_raw_pointers())
+      .constructor<BND_Plane, BND_Vector3d, BND_Point3d, BND_Point3d, BND_Point3d, BND_Point3d, BND_Point3d>()
       .constructor<BND_Arc, double>()
       .property("angleFormat", &BND_AngularDimension::Gen_AngleFormat, &BND_AngularDimension::Gen_set_AngleFormat)
       .property("angleResolution", &BND_AngularDimension::Gen_AngleResolution, &BND_AngularDimension::Gen_set_AngleResolution)

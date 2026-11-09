@@ -1153,6 +1153,40 @@ declare module 'rhino3dm' {
 		 */
 		constructor();
 		/**
+		 * Constructs an angular dimension between the lines.
+		 *
+		 * If the lines intersect in a single point, that point is used as the center of the angular dimension arc.In this case, there are eight possible angles to dimension.The pointOnAngularDimensionArc and pointOnLine parameters are used to select the correct angle to dimension. If a pointOnLine parameter is not set, the corresponding line's midpoint is used.
+		 *
+		 * If the lines are colinear, the point on the line closest to pointOnAngularDimensionArc is the center of the angular dimension arc.
+		 * @param line1 The first line.
+		 * @param pointOnLine1 If specified, indicates which semi-infinite portion of line1 to dimension. Otherwise the midpoint of line1 as a segment is used. When in doubt, use Point3d.Unset.
+		 * @param line2 The second line.
+		 * @param pointOnAngularDimensionArc A point on the interior of the angular dimension arc.
+		 * @param bSetExtensionPoints If bSetExtensionPoints is true, and a pointOnLine parameter is valid, that point is used as the extension point. Otherwise the angular dimension arc endpoint is used.
+		 */
+		constructor(line1: Line, pointOnLine1: Point3d, line2: Line, pointOnLine2: Point3d, pointOnAngularDimensionArc: Point3d, bSetExtensionPoints: boolean);
+		/**
+		 * Constructs an angular dimension with extension lines starting at plane origin (arc center).
+		 * @param plane Dimension's plane.
+		 * @param horizontal Horizontal reference direction.
+		 * @param centerpoint Dimension center point.
+		 * @param defpoint1 Point on first extension line.
+		 * @param defpoint2 Point on second extension line.
+		 * @param dimlinepoint Point on dimension arc.
+		 */
+		constructor(plane: Plane, horizontal: Vector3d, centerpoint: Point3d, defpoint1: Point3d, defpoint2: Point3d, dimlinepoint: Point3d);
+		/**
+		 * Constructs an angular dimension from parameters.
+		 * @param plane The dimension's plane.
+		 * @param horizontal The horizontal direction.
+		 * @param extpoint1 Start of first extension line.
+		 * @param extpoint2 start of second extension line.
+		 * @param dirpoint1 point on first extension vector.
+		 * @param dirpoint2 Spoint on second extension vector.
+		 * @param dimlinepoint point on dimension line.
+		 */
+		constructor(plane: Plane, horizontal: Vector3d, extpoint1: Point3d, extpoint2: Point3d, dirpoint1: Point3d, dirpoint2: Point3d, dimlinepoint: Point3d);
+		/**
 		 * Constructs an angular dimension from a given arc.
 		 * @param arc The start and end points of the arc are the start and endpoints of the dimension
 		 * @param offset How far to offset the dimension location from the arc
@@ -3411,6 +3445,13 @@ declare module 'rhino3dm' {
 		 */
 		constructor();
 		/**
+		 * Constructs a new center mark dimension.
+		 * @param plane Dimension's plane.
+		 * @param centerPoint Dimension's center point.
+		 * @param radius Center mark's radius.
+		 */
+		constructor(plane: Plane, centerPoint: Point3d, radius: number);
+		/**
 		 * The object a dict from `Encode` describes (rhino3dm only).
 		 * @param jsonObject A dict as `Encode` returns it.
 		 */
@@ -5470,7 +5511,7 @@ declare module 'rhino3dm' {
 		/**
 		 * The background image texture.
 		 */
-		readonly backgroundImage: Texture;
+		backgroundImage: Texture;
 		/**
 		 * The background projection.
 		 */
@@ -15625,6 +15666,15 @@ declare module 'rhino3dm' {
 		 * Constructs a radial dimension.
 		 */
 		constructor();
+		/**
+		 * Constructs a radial dimension from parameters.
+		 * @param dimtype AnnotationType.Diameter or AnnotationType.Radius
+		 * @param plane Dimension's plane
+		 * @param centerpoint Dimension's center point
+		 * @param radiuspoint Point on dimension radius
+		 * @param dimlinepoint Point on dimension line
+		 */
+		constructor(dimtype: AnnotationType, plane: Plane, centerpoint: Point3d, radiuspoint: Point3d, dimlinepoint: Point3d);
 		/**
 		 * Initialize Dimension parameters
 		 * @param dimStyle Dimension's dimstyle

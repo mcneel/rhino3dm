@@ -24,7 +24,7 @@ from gen_registry import *
 from planner import *
 from emit_classes import *
 from emit_values import *
-from emit_hand import hand_class_registrations, hand_js_aliases, hand_js_dispatch, hand_js_post
+from emit_hand import hand_class_registrations, hand_js_aliases, hand_js_dispatch, hand_js_post, hand_js_setters
 
 
 def _derives(d, base):
@@ -276,6 +276,7 @@ def js_post_script():
   var KEEP_SET = %s;
   var ALIASES = %s;
   var DISPATCH = %s;
+  var SETTERS = %s;
   var VALUES = %s;
   function install() {
     var M = Module, missing = [];
@@ -355,6 +356,13 @@ def js_post_script():
       if (f.overloadTable) w.overloadTable = f.overloadTable;
       proto[a[1]] = w;
     });
+    // a setter for a generated read-only property (Environment.backgroundImage; pilot #111)
+    SETTERS.forEach(function (a) {
+      var C = M[a[0]], proto = C && C.prototype, d = proto && Object.getOwnPropertyDescriptor(proto, a[1]);
+      if (!d || !d.get || typeof proto[a[2]] !== 'function') { missing.push('setter ' + a[0] + '.' + a[1]); return; }
+      Object.defineProperty(proto, a[1], { get: d.get, set: function (v) { this[a[2]](v); },
+                                          enumerable: d.enumerable, configurable: true });
+    });
     ITERS.forEach(function (c) {
       var C = M[c], proto = C && C.prototype, f = proto && proto.next;
       if (typeof f !== 'function') { missing.push('iter ' + c); return; }
@@ -420,7 +428,8 @@ def js_post_script():
        json.dumps(sorted(set(map(tuple, JS_POST['keep_args']))), separators=(',', ':')),
        json.dumps(sorted(set(map(tuple, JS_POST['keep_set']))), separators=(',', ':')),
        json.dumps(sorted(set(map(tuple, JS_POST['aliases']))), separators=(',', ':')),
-       json.dumps(sorted(set(map(tuple, JS_POST['dispatch']))), separators=(',', ':')), j(JS_POST['values']))
+       json.dumps(sorted(set(map(tuple, JS_POST['dispatch']))), separators=(',', ':')),
+       json.dumps(sorted(set(map(tuple, JS_POST['setters']))), separators=(',', ':')), j(JS_POST['values']))
 
 
 def hand_chain(cls):
@@ -1157,8 +1166,17 @@ template <> struct type_caster<RH3DM_Bytes> {
     return PyBytes_FromStringAndSize((const char*)b.v.data(), (Py_ssize_t)b.v.size()); }
 }; } }
 #else
+// a byte[] argument: a Uint8Array (a Node Buffer is one), an ArrayBuffer (as 8.x took), another
+// typed-array view (its bytes), or an array of numbers; anything else is a TypeError (pilot #110:
+// an ArrayBuffer used to fail with "Cannot convert undefined to a BigInt")
 inline RH3DM_Bytes RH3DM_JsBytes(const emscripten::val& v) {
-  RH3DM_Bytes b; b.v = emscripten::convertJSArrayToNumberVector<unsigned char>(v); return b; }
+  emscripten::val U8 = emscripten::val::global("Uint8Array"), AB = emscripten::val::global("ArrayBuffer");
+  emscripten::val u = v;
+  if (v.instanceof(AB)) u = U8.new_(v);
+  else if (AB.call<bool>("isView", v) && !v.instanceof(U8)) u = U8.new_(v["buffer"], v["byteOffset"], v["byteLength"]);
+  else if (!v.instanceof(U8) && !v.isArray())
+    emscripten::val::global("TypeError").new_(emscripten::val("expected a Uint8Array (or an ArrayBuffer)")).throw_();
+  RH3DM_Bytes b; b.v = emscripten::convertJSArrayToNumberVector<unsigned char>(u); return b; }
 // a byte[] result (G101: File3dm.ToByteArray): a Uint8Array of its own (a copy, not a heap view)
 inline emscripten::val RH3DM_JsBytesOut(const RH3DM_Bytes& b) {
   return emscripten::val(emscripten::typed_memory_view(b.v.size(), b.v.data())).call<emscripten::val>("slice"); }
@@ -1959,6 +1977,7 @@ void initGen{reg}(void)
     JS_POST['enumerable'] = keep
     JS_POST['aliases'].extend(hand_js_aliases())
     JS_POST['dispatch'].extend(hand_js_dispatch())   # G124
+    JS_POST['setters'].extend(hand_js_setters())
     _hk, _he = hand_js_post()                          # G129
     JS_POST['keep'].extend(_hk)
     JS_POST['enumerable'].extend(_he)
@@ -1985,6 +2004,18 @@ class _StaticOrInstance(object):
         return self._static if obj is None else self._instance.__get__(obj, cls)
 for _cls in list(vars(_m).values()):
     if isinstance(_cls, type):
+        # pilot #111: `_set_<Name>`, a hand setter for the generated read-only property <Name>
+        for _attr in [a for a in vars(_cls) if a.startswith('_set_')]:
+            _prop = vars(_cls).get(_attr[len('_set_'):])
+            if isinstance(_prop, property) and _prop.fset is None:
+                # a Python function (named as the property; a closure, not a default argument) so
+                # stubgen writes a valid setter
+                def _make_setter(f, name):
+                    def _setter(self, value):
+                        f(self, value)
+                    _setter.__name__ = _setter.__qualname__ = name
+                    return _setter
+                setattr(_cls, _attr[len('_set_'):], property(_prop.fget, _make_setter(getattr(_cls, _attr), _attr[len('_set_'):]), None, _prop.__doc__))
         for _attr in [a for a in vars(_cls) if a.startswith('_static_')]:
             _inst = vars(_cls).get(_attr[len('_static_'):])
             if _inst is not None:

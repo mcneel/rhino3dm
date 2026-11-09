@@ -10,8 +10,10 @@ js  AngularDimension.arrowPoint1 [property]
 js  AngularDimension.arrowPoint2 [property]
 js  AngularDimension.centerPoint [property]
 js  AngularDimension.computeMemoryEstimate [class_function]
+js  AngularDimension.constructor(dispatched)
 js  AngularDimension.constructor<>
 js  AngularDimension.constructor<BND_Arc, double>
+js  AngularDimension.constructor<BND_Plane, BND_Vector3d, BND_Point3d, BND_Point3d, BND_Point3d, BND_Point3d, BND_Point3d>
 js  AngularDimension.create [class_function]
 js  AngularDimension.decode [class_function]
 js  AngularDimension.defPoint1 [property]
@@ -333,6 +335,7 @@ js  CachedTextureCoordinates.tryGetAt [function]
 js  Centermark.adjustFromPoints [function]
 js  Centermark.computeMemoryEstimate [class_function]
 js  Centermark.constructor<>
+js  Centermark.constructor<BND_Plane, BND_Point3d, double>
 js  Centermark.decode [class_function]
 js  Centermark.getDisplayLines [function]
 js  Centermark.plainTextToRtf [class_function]
@@ -756,6 +759,7 @@ js  Environment.backgroundProjection [property]
 js  Environment.computeMemoryEstimate [class_function]
 js  Environment.constructor<>
 js  Environment.decode [class_function]
+js  Environment.rh3dmSetBackgroundImage [function]
 js  Extrusion.addInnerProfile [function]
 js  Extrusion.capCount [property]
 js  Extrusion.computeMemoryEstimate [class_function]
@@ -2425,6 +2429,7 @@ js  RadialDimension.annotationType [property]
 js  RadialDimension.centerPoint [property]
 js  RadialDimension.computeMemoryEstimate [class_function]
 js  RadialDimension.constructor<>
+js  RadialDimension.constructor<RH3DM_AnnotationType, BND_Plane, BND_Point3d, BND_Point3d, BND_Point3d>
 js  RadialDimension.create [class_function]
 js  RadialDimension.decode [class_function]
 js  RadialDimension.dimlinePoint [property]
@@ -3146,6 +3151,9 @@ py  AngularDimension.GetTextRectangle()
 py  AngularDimension.Radius [property ro]
 py  AngularDimension.__init__()
 py  AngularDimension.__init__(BND_Arc, double)
+py  AngularDimension.__init__(BND_Line, BND_Point3d, BND_Line, BND_Point3d, BND_Point3d, bool)
+py  AngularDimension.__init__(BND_Plane, BND_Vector3d, BND_Point3d, BND_Point3d, BND_Point3d, BND_Point3d)
+py  AngularDimension.__init__(BND_Plane, BND_Vector3d, BND_Point3d, BND_Point3d, BND_Point3d, BND_Point3d, BND_Point3d)
 py  AnnotationBase.AlternateDimensionLengthDisplay [property rw]
 py  AnnotationBase.AnnotationType [property ro]
 py  AnnotationBase.ClearPropertyOverrides()
@@ -3508,6 +3516,7 @@ py  Centermark.AdjustFromPoints(plane, centerPoint)
 py  Centermark.GetDisplayLines(style, scale)
 py  Centermark.Radius [property rw]
 py  Centermark.__init__()
+py  Centermark.__init__(BND_Plane, BND_Point3d, double)
 py  Circle.BoundingBox [property ro]
 py  Circle.Center [property rw]
 py  Circle.Circumference [property rw]
@@ -3990,6 +3999,7 @@ py  Environment.BackgroundColor [property ro]
 py  Environment.BackgroundImage [property ro]
 py  Environment.BackgroundProjection [property ro]
 py  Environment.__init__()
+py  Environment._set_BackgroundImage(value)
 py  Extrusion.AddInnerProfile(innerProfile)
 py  Extrusion.CapCount [property ro]
 py  Extrusion.Create(curve, plane, height, cap) [static]
@@ -5880,6 +5890,7 @@ py  RadialDimension.TextAngleType [property rw]
 py  RadialDimension.TextLocation [property rw]
 py  RadialDimension.TextOrientation [property rw]
 py  RadialDimension.__init__()
+py  RadialDimension.__init__(RH3DM_AnnotationType, BND_Plane, BND_Point3d, BND_Point3d, BND_Point3d)
 py  RenderChannels.CustomList [property ro]
 py  RenderChannels.Mode [property rw]
 py  RenderChannels.__init__()

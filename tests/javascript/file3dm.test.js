@@ -197,3 +197,12 @@ test('file3dmDestroyDeletesTheModel', () => {
   f.destroy()
   expect(() => f.objects).toThrow(/deleted/)
 })
+
+test('file3dmFromByteArrayTakesAnArrayBuffer', () => {
+  // fromByteArray takes a Uint8Array or an ArrayBuffer (as 8.x did); anything else throws TypeError
+  const bytes = new rhino.File3dm().toByteArray()
+  expect(rhino.File3dm.fromByteArray(bytes)).toBeInstanceOf(rhino.File3dm)
+  const ab = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
+  expect(rhino.File3dm.fromByteArray(ab)).toBeInstanceOf(rhino.File3dm)
+  expect(() => rhino.File3dm.fromByteArray('not bytes')).toThrow(/expected a Uint8Array/)
+})

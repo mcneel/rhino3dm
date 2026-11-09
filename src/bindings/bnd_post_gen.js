@@ -9,6 +9,7 @@
   var KEEP_SET = [["AnnotationBase","parentDimensionStyle"]];
   var ALIASES = [["File3dm","destroy","delete"]];
   var DISPATCH = [["File3dmEmbeddedFiles","add","rh3dmAddFile","File3dmEmbeddedFile"]];
+  var SETTERS = [["Environment","backgroundImage","rh3dmSetBackgroundImage"]];
   var VALUES = ["Arc","BoundingBox","Box","Circle","Color4f","ComponentIndex","Cone","ControlPoint","Cylinder","Ellipse","Interval","Line","MeshFace","Plane","Point2d","Point2f","Point3d","Point3f","Point4d","Sphere","SubDEdgeSharpness","Torus","Transform","Vector2d","Vector3d","Vector3f"];
   function install() {
     var M = Module, missing = [];
@@ -87,6 +88,13 @@
       };
       if (f.overloadTable) w.overloadTable = f.overloadTable;
       proto[a[1]] = w;
+    });
+    // a setter for a generated read-only property (Environment.backgroundImage; pilot #111)
+    SETTERS.forEach(function (a) {
+      var C = M[a[0]], proto = C && C.prototype, d = proto && Object.getOwnPropertyDescriptor(proto, a[1]);
+      if (!d || !d.get || typeof proto[a[2]] !== 'function') { missing.push('setter ' + a[0] + '.' + a[1]); return; }
+      Object.defineProperty(proto, a[1], { get: d.get, set: function (v) { this[a[2]](v); },
+                                          enumerable: d.enumerable, configurable: true });
     });
     ITERS.forEach(function (c) {
       var C = M[c], proto = C && C.prototype, f = proto && proto.next;

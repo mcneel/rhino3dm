@@ -300,8 +300,17 @@ template <> struct type_caster<RH3DM_Bytes> {
     return PyBytes_FromStringAndSize((const char*)b.v.data(), (Py_ssize_t)b.v.size()); }
 }; } }
 #else
+// a byte[] argument: a Uint8Array (a Node Buffer is one), an ArrayBuffer (as 8.x took), another
+// typed-array view (its bytes), or an array of numbers; anything else is a TypeError (pilot #110:
+// an ArrayBuffer used to fail with "Cannot convert undefined to a BigInt")
 inline RH3DM_Bytes RH3DM_JsBytes(const emscripten::val& v) {
-  RH3DM_Bytes b; b.v = emscripten::convertJSArrayToNumberVector<unsigned char>(v); return b; }
+  emscripten::val U8 = emscripten::val::global("Uint8Array"), AB = emscripten::val::global("ArrayBuffer");
+  emscripten::val u = v;
+  if (v.instanceof(AB)) u = U8.new_(v);
+  else if (AB.call<bool>("isView", v) && !v.instanceof(U8)) u = U8.new_(v["buffer"], v["byteOffset"], v["byteLength"]);
+  else if (!v.instanceof(U8) && !v.isArray())
+    emscripten::val::global("TypeError").new_(emscripten::val("expected a Uint8Array (or an ArrayBuffer)")).throw_();
+  RH3DM_Bytes b; b.v = emscripten::convertJSArrayToNumberVector<unsigned char>(u); return b; }
 // a byte[] result (G101: File3dm.ToByteArray): a Uint8Array of its own (a copy, not a heap view)
 inline emscripten::val RH3DM_JsBytesOut(const RH3DM_Bytes& b) {
   return emscripten::val(emscripten::typed_memory_view(b.v.size(), b.v.data())).call<emscripten::val>("slice"); }
@@ -1069,6 +1078,7 @@ extern "C" ON_Brep* ON_Surface_BrepForm(const ON_Surface* pConstSurface);
 extern "C" ON_BrepLoop* ON_BrepLoop_GetPointer(const ON_Brep* pConstBrep, int loop_index);
 extern "C" ON_BrepVertex* ON_BrepVertex_GetPointer(ON_Brep* pBrep, int index);
 extern "C" ON_Centermark* ON_Centermark_New();
+extern "C" ON_Centermark* ON_V6_Centermark_Create(ON_UUID style_id, ON_PLANE_STRUCT planestruct, ON_3DPOINT_STRUCT centerptstruct, double radius);
 extern "C" ON_Curve* ON_BrepLoop_GetCurve2d(const ON_Brep* pConstBrep, int loop_index);
 extern "C" ON_Curve* ON_BrepLoop_GetCurve3d(const ON_Brep* pConstBrep, int loop_index);
 extern "C" ON_Curve* ON_CurveArray_Get(ON_SimpleArray<ON_Curve*>* arrayPtr, int index);
@@ -1083,7 +1093,10 @@ extern "C" ON_Curve* ON_Surface_IsoCurve2(const ON_Surface* pConstSurface, int i
 extern "C" ON_Decal* SharedPtr_ON_Decal_RawPtr(std::shared_ptr<ON_Decal>* decal_sp);
 extern "C" ON_DimAngular* ON_DimAngular_New();
 extern "C" ON_DimAngular* ON_DimAngular_New2(ON_Arc* arc, double offset);
+extern "C" ON_DimAngular* ON_V6_DimAngular_Create(ON_UUID style_id, ON_PLANE_STRUCT planestruct, ON_3DVECTOR_STRUCT horizstruct, ON_3DPOINT_STRUCT centerptstruct, ON_3DPOINT_STRUCT defpt1struct, ON_3DPOINT_STRUCT defpt2struct, ON_3DPOINT_STRUCT dimlineptstruct);
 extern "C" ON_DimAngular* ON_V6_DimAngular_Create2(ON_UUID style_id, ON_PLANE_STRUCT planestruct, ON_3DPOINT_STRUCT extpt1struct, ON_3DPOINT_STRUCT extpt2struct, ON_3DPOINT_STRUCT dirpt1struct, ON_3DPOINT_STRUCT dirpt2struct, ON_3DPOINT_STRUCT dimlineptstruct);
+extern "C" ON_DimAngular* ON_V6_DimAngular_Create2Fixed(ON_UUID style_id, ON_PLANE_STRUCT planestruct, ON_3DVECTOR_STRUCT horizstruct, ON_3DPOINT_STRUCT extpt1struct, ON_3DPOINT_STRUCT extpt2struct, ON_3DPOINT_STRUCT dirpt1struct, ON_3DPOINT_STRUCT dirpt2struct, ON_3DPOINT_STRUCT dimlineptstruct);
+extern "C" ON_DimAngular* ON_V6_DimAngular_Create3(const ON_DimStyle* constDimStyle, const ON_Line* line1, ON_3DPOINT_STRUCT point_on_line1_struct, const ON_Line* line2, ON_3DPOINT_STRUCT point_on_line2_struct, ON_3DPOINT_STRUCT point_on_angular_dimension_arc_struct, bool bSetExtensionPoints);
 extern "C" ON_DimLinear* ON_DimLinear_New();
 extern "C" ON_DimLinear* ON_V6_DimLinear_Create(ON::AnnotationType dimtype, ON_UUID style_id, ON_PLANE_STRUCT planestruct, ON_3DVECTOR_STRUCT horizstruct, ON_3DPOINT_STRUCT defpt1struct, ON_3DPOINT_STRUCT defpt2struct, ON_3DPOINT_STRUCT dimlineptstruct, double rotation);
 extern "C" ON_DimOrdinate* ON_DimOrdinate_New();

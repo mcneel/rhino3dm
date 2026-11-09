@@ -83,3 +83,28 @@ test('stringTableAndViewInfo', () => {
   expect(f.strings.getValue('k')).toBe('v')
   expect(new rhino.ViewInfo().viewport).toBeInstanceOf(rhino.ViewportInfo)
 })
+
+test('environmentBackgroundImage', () => {
+  // environment.getBackgroundImage() / setBackgroundImage(t) are the backgroundImage property (rhino3dm keeps its setter)
+  const env = new rhino.Environment()
+  expect(env.backgroundImage).toBeInstanceOf(rhino.Texture)
+  const tex = new rhino.Texture()
+  tex.fileName = 'background.png'
+  env.backgroundImage = tex
+  expect(env.backgroundImage.fileName).toBe('background.png')
+  tex.fileName = 'other.png'
+  expect(env.backgroundImage.fileName).toBe('background.png')
+})
+
+test('renderContentAndDisplacement', () => {
+  // renderTexture.fileName / renderContent.getXML() / displacement.texture are filename / xML() / textureId
+  const f = helpers.readModel(rhino, 'sphereDecals.3dm')
+  const names = [...f.renderTextures].map(t => t.filename.replace(/\\/g, '/').split('/').pop())
+  expect(names.sort()).toEqual(['E6AD.jpg', 'E6EC.jpg'])
+  const xml = [...helpers.readModel(rhino, 'meshWithTexture.3dm').renderMaterials][0].xML(false)
+  expect(xml.trimStart().startsWith('<')).toBe(true)
+  const disp = [...helpers.readModel(rhino, 'subd_creases.3dm').objects]
+    .map(o => o.attributes.file3dmMeshModifiers && o.attributes.file3dmMeshModifiers.displacement).filter(d => d)
+  expect(disp.length).toBeGreaterThan(0)
+  expect(typeof disp[0].textureId).toBe('string')
+})

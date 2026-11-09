@@ -246,8 +246,25 @@ def pages():
     return out
 
 
+def unknown_tests():
+    """retired.toml `test` names no test in tests/python or tests/javascript defines (G151: the
+    tests/generated fold renamed them all, and nothing noticed)"""
+    names = set()
+    for p in glob.glob(os.path.join(ROOT, 'tests', 'python', '*.py')):
+        names.update(re.findall(r'\bdef (test_\w+)', open(p).read()))
+    for p in glob.glob(os.path.join(ROOT, 'tests', 'javascript', '*.js')):
+        names.update(re.findall(r"\btest\('(\w+)'", open(p).read()))
+    rows = tomllib.load(open(os.path.join(ROOT, 'api', 'retired.toml'), 'rb'))['retired']
+    return sorted({x['test'] for x in rows if x.get('test') and x['test'] not in names})
+
+
 def main():
     stale = []
+    missing = unknown_tests()
+    if missing:
+        print('api/retired.toml names tests that do not exist: %s' % ', '.join(missing))
+        if '--check' in sys.argv:
+            sys.exit(1)
     for name, text in pages().items():
         path = os.path.join(OUT, name)
         if not os.path.exists(path) or open(path).read() != text:
