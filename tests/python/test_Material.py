@@ -93,7 +93,7 @@ class TestMaterial(unittest.TestCase):
         tex.FileName = '/tmp/bump.png'
         tex.TextureType = rhino3dm.TextureType.Bump
         self.assertIs(m.SetTexture(tex, tex.TextureType), True)
-        self.assertEqual(m.GetTexture(rhino3dm.TextureType.Bump).FileName, '/tmp/bump.png')
+        self.assertEqual(m.GetTexture(rhino3dm.TextureType.Bump).FileName, helpers.stored_path('/tmp/bump.png'))
 
     def test_materialRenderMaterialInstanceId(self):
         """RenderMaterialInstanceId starts nil and can be set; setting it makes the universal render engine the plug-in."""

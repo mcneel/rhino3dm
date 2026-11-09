@@ -6,7 +6,7 @@
 // handed to it here, as a bundler or a page may do with `wasmBinary`.
 // Run with: node module.smoke.mjs  (exits non-zero on failure)
 
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import rhino3dm from './lib/rhino3dm.module.js'
 
 function assert(cond, msg) {
@@ -16,7 +16,10 @@ function assert(cond, msg) {
   }
 }
 
-const wasmBinary = readFileSync(new URL('./lib/rhino3dm.wasm', import.meta.url))
+// CI builds the module as released and rhino3dm.js as debug, so their wasm differ there: CI keeps
+// the module's own as rhino3dm.module.wasm. A package has one rhino3dm.wasm for both.
+const own = new URL('./lib/rhino3dm.module.wasm', import.meta.url)
+const wasmBinary = readFileSync(existsSync(own) ? own : new URL('./lib/rhino3dm.wasm', import.meta.url))
 const rhino = await rhino3dm({ wasmBinary })
 
 assert(typeof rhino.Sphere === 'function', 'Sphere missing from module build')

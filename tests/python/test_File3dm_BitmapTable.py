@@ -8,6 +8,7 @@ import uuid
 
 
 _BITMAPTABLE_PATHS = ['/tmp/rh3dm_a.png', '/tmp/rh3dm_b.png', '/tmp/rh3dm_c.png']
+_STORED = [helpers.stored_path(p) for p in _BITMAPTABLE_PATHS]  # as opennurbs keeps them on this platform
 
 
 def _bitmaptable_file():
@@ -63,7 +64,7 @@ class TestFile3dmBitmapTableRhinoCommon(unittest.TestCase):
             b.FileFullPath = p
             added = f.Bitmaps.Add(b)
             self.assertIsNotNone(added)
-            self.assertEqual(added.FileFullPath, p)
+            self.assertEqual(added.FileFullPath, helpers.stored_path(p))
             ids.append(added.Id)
         self.assertEqual(len(f.Bitmaps), 3)
         self.assertEqual(len(set(map(str, ids))), 3)
@@ -71,9 +72,9 @@ class TestFile3dmBitmapTableRhinoCommon(unittest.TestCase):
     def test_bitmapTableFindIdFindIndexAndIndexer(self):
         """FindIndex and the indexer are positional, FindId finds by id; FindId / FindIndex return None and the indexer raises IndexError when absent."""
         f, ids = _bitmaptable_file()
-        self.assertEqual([f.Bitmaps.FindIndex(i).FileFullPath for i in range(3)], _BITMAPTABLE_PATHS)
-        self.assertEqual(f.Bitmaps[1].FileFullPath, _BITMAPTABLE_PATHS[1])
-        self.assertEqual(f.Bitmaps.FindId(ids[1]).FileFullPath, _BITMAPTABLE_PATHS[1])
+        self.assertEqual([f.Bitmaps.FindIndex(i).FileFullPath for i in range(3)], _STORED)
+        self.assertEqual(f.Bitmaps[1].FileFullPath, _STORED[1])
+        self.assertEqual(f.Bitmaps.FindId(ids[1]).FileFullPath, _STORED[1])
         self.assertIsNone(f.Bitmaps.FindId(uuid.uuid4()))
         self.assertIsNone(f.Bitmaps.FindIndex(999))
         with self.assertRaises(IndexError):
@@ -90,7 +91,7 @@ class TestFile3dmBitmapTableRhinoCommon(unittest.TestCase):
         f, ids = _bitmaptable_file()
         self.assertTrue(f.Bitmaps.Delete(ids[0]))
         self.assertEqual(len(f.Bitmaps), 2)
-        self.assertEqual([b.FileFullPath for b in f.Bitmaps], _BITMAPTABLE_PATHS[1:])
+        self.assertEqual([b.FileFullPath for b in f.Bitmaps], _STORED[1:])
 
     def test_bitmapTableRoundTripsThroughAFile(self):
         """Bitmaps are written and read back, and a bitmap read from a file keeps the file alive."""
@@ -100,11 +101,11 @@ class TestFile3dmBitmapTableRhinoCommon(unittest.TestCase):
             out = os.path.join(d, 'bitmaps.3dm')
             self.assertTrue(f.Write(out, None))
             g = rhino3dm.File3dm.Read(out)
-        self.assertEqual(sorted(b.FileFullPath for b in g.Bitmaps), sorted(_BITMAPTABLE_PATHS[1:]))
+        self.assertEqual(sorted(b.FileFullPath for b in g.Bitmaps), sorted(_STORED[1:]))
         bm = next(iter(g.Bitmaps))
         del g
         gc.collect()
-        self.assertIn(bm.FileFullPath, _BITMAPTABLE_PATHS)
+        self.assertIn(bm.FileFullPath, _STORED)
 
 if __name__ == '__main__':
     print("running tests")

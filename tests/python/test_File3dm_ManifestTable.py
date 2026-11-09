@@ -80,9 +80,9 @@ class TestFile3dmManifestTable(unittest.TestCase):
         imgs = list(f.Manifest.GetEnumerator(rhino3dm.ModelComponentType.Image))
         self.assertEqual(len(imgs), 1)
         self.assertIsInstance(imgs[0], rhino3dm.Bitmap)
-        self.assertEqual(imgs[0].FileFullPath, '/tmp/rh3dm_manifest.png')
+        self.assertEqual(imgs[0].FileFullPath, helpers.stored_path('/tmp/rh3dm_manifest.png'))
         self.assertEqual(imgs[0].Id, added.Id)
-        self.assertEqual(f.Manifest.FindId(added.Id).FileFullPath, '/tmp/rh3dm_manifest.png')
+        self.assertEqual(f.Manifest.FindId(added.Id).FileFullPath, helpers.stored_path('/tmp/rh3dm_manifest.png'))
 
     def test_manifestFindIndexRenderContent(self):
         """Manifest.FindIndex(i, RenderContent) returns the file's render content by index, as a File3dmRenderContent."""

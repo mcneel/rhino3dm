@@ -12,7 +12,7 @@ class TestFileReference(unittest.TestCase):
         fr = rhino3dm.FileReference.CreateFromFullAndRelativePaths('/tmp/textures/wood.png', 'textures/wood.png')
         self.assertIsNotNone(fr)
         self.assertTrue(fr.IsSet)
-        self.assertEqual(fr.FullPath, '/tmp/textures/wood.png')
+        self.assertEqual(fr.FullPath, helpers.stored_path('/tmp/textures/wood.png'))
         self.assertEqual(fr.RelativePath, 'textures/wood.png')
         del fr
         gc.collect()

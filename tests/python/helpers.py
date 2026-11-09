@@ -1,6 +1,6 @@
 """Shared helpers for the Python tests.
 
-    from helpers import MODELS, model, curve, box_brep, quad_mesh, temp_dir
+    from helpers import MODELS, model, curve, box_brep, quad_mesh, temp_dir, stored_path
 """
 
 import os
@@ -15,6 +15,11 @@ MODELS = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'models'
 def model(name):
     """the path of a file in tests/models"""
     return os.path.join(MODELS, name)
+
+
+def stored_path(path):
+    """a full path as opennurbs stores it on this platform: with Windows separators on Windows"""
+    return os.path.normpath(path) if os.name == 'nt' else path
 
 
 def read_model(name):
