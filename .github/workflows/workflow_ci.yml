@@ -7,6 +7,9 @@ on:
   pull_request:
 
 env:
+  # oldest macOS the wheels and the native library run on: the macos-15 runner builds them, and
+  # this sets the wheel tag (macosx_13_0) and CMake's CMAKE_OSX_DEPLOYMENT_TARGET
+  MACOSX_DEPLOYMENT_TARGET: '13.0'
   RETENTION_DAYS: 15
 
 jobs:
@@ -285,7 +288,7 @@ jobs:
     if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' || needs.check_tests_py.outputs.any_changed == 'true' }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2022, windows-11-arm, macos-14, macos-15]
+        os: [ubuntu-latest, windows-2022, windows-11-arm, macos-15]
         python-version: ['3.12']
         include:
           - os: ubuntu-latest
@@ -296,8 +299,6 @@ jobs:
             target: windows
             # native ARM64 python (not emulated x64) — see setup-python step
             architecture: arm64
-          - os: macos-14
-            target: macos
           - os: macos-15
             target: macos
       fail-fast: false
@@ -470,7 +471,7 @@ jobs:
     needs: [build_py_all_bdist]
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2022, windows-11-arm, macos-14, macos-15]
+        os: [ubuntu-latest, windows-2022, windows-11-arm, macos-15]
         python-version: ['3.12']
         include:
           - os: ubuntu-latest
@@ -481,8 +482,6 @@ jobs:
             target: windows
             # native ARM64 python (not emulated x64) — see setup-python step
             architecture: arm64
-          - os: macos-14
-            target: macos
           - os: macos-15
             target: macos
       fail-fast: false
