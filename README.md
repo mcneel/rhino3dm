@@ -1,92 +1,119 @@
 # rhino3dm
 
 [![workflow ci](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_ci.yml/badge.svg?branch=main)](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_ci.yml)
-[![workflow ci](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml/badge.svg?branch=main)](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml)
+[![workflow release](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml/badge.svg?branch=main)](https://github.com/mcneel/rhino3dm/actions/workflows/workflow_release.yml)
+[![PyPI](https://img.shields.io/pypi/v/rhino3dm.svg?style=flat-square)](https://pypi.org/project/rhino3dm)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/rhino3dm?style=flat-square)](https://pypi.org/project/rhino3dm)
+[![npm](https://img.shields.io/npm/v/rhino3dm.svg?style=flat-square)](https://www.npmjs.com/package/rhino3dm)
+[![npm - Downloads](https://img.shields.io/npm/dm/rhino3dm?style=flat-square)](https://www.npmjs.com/package/rhino3dm)
+[![NuGet](https://img.shields.io/nuget/v/Rhino3dm.svg?style=flat-square)](https://www.nuget.org/packages/Rhino3dm/)
+[![NuGet - Downloads](https://img.shields.io/nuget/dt/rhino3dm.svg?style=flat-square)](https://www.nuget.org/packages/Rhino3dm/)
 
+**Read, write and create Rhino 3D models (`.3dm` files) in Python, JavaScript and .NET.**
 
-[![PyPI](https://img.shields.io/pypi/v/rhino3dm.svg?style=flat-square)](https://pypi.org/project/rhino3dm)![PyPI - Downloads](https://img.shields.io/pypi/dm/rhino3dm?style=flat-square)
+rhino3dm brings [openNURBS](https://developer.rhino3d.com/guides/opennurbs/what-is-opennurbs/), the
+library behind Rhino's file format, to Python, JavaScript and .NET with [RhinoCommon's](https://developer.rhino3d.com/guides/rhinocommon/what-is-rhinocommon/) API.
 
-[![NuGet](https://img.shields.io/nuget/v/Rhino3dm.svg?style=flat-square)](https://www.nuget.org/profiles/McNeel)[![NuGet Downloads](https://img.shields.io/nuget/dt/rhino3dm.svg?style=flat-square)](https://www.nuget.org/packages/rhino3dm/)
+- Create, inspect and edit every geometry type Rhino supports: points, point clouds, NURBS curves and
+  surfaces, polysurfaces (B-Reps), meshes, SubDs, extrusions and annotations
+- Work with the rest of a model: layers, materials, object attributes, transforms, views
+- Read and write all of it to and from `.3dm` files
+- Send geometry to [Rhino.Compute](https://www.rhino3d.com/compute) for operations that need Rhino
+- Runs on Windows, macOS and Linux, and in the browser
 
-[![npm](https://img.shields.io/npm/v/rhino3dm.svg?style=flat-square)](https://www.npmjs.com/package/rhino3dm)![npm](https://img.shields.io/npm/dm/rhino3dm?style=flat-square)
+## rhino3dm 9.2 (beta)
 
+In 9.2 the Python and JavaScript libraries are generated from RhinoCommon, so their API is
+RhinoCommon's in every language: the same class names, member names, signatures and behaviour, and the
+[RhinoCommon documentation](https://developer.rhino3d.com/api/rhinocommon/) applies to all three. Most
+8.x Python and JavaScript scripts need changes; .NET code mostly does not.
 
-**rhino3dm** is a set of libraries based on the [OpenNURBS](https://developer.rhino3d.com/guides/opennurbs/what-is-opennurbs/) geometry library with a ["RhinoCommon"](https://developer.rhino3d.com/guides/rhinocommon/what-is-rhinocommon/) style. This provides the ability to access and manipulate geometry through .NET, Python or JavaScript applications independent of Rhino.  
+- [Migrating to rhino3dm 9.2](docs/migrating-to-9.md): what changed for each language
+- [CHANGELOG](CHANGELOG.md)
 
-Functionality includes
+9.2 is a pre-release. The default install is still the latest 8.x; install the beta as shown below.
 
-- Create, interrogate, and store all geometry types supported in Rhino. This includes points, point clouds, NURBS curves and surfaces, polysurfaces (B-Reps), meshes, annotations, extrusions, and SubDs.
-- Work with non-geometry classes supported in Rhino like layers, object attributes, transforms and viewports
-- Read and write all of the above information to and from the *.3dm* file format
-- Use as a client to make calls into the [Rhino Compute cloud server](https://www.rhino3d.com/compute) for advanced manipulation of geometry objects
-- Available on most platforms (Windows, macOS, Linux)
+## Python
 
-**Coming from rhino3dm 8.x?** 9.2's Python and JavaScript libraries are generated from RhinoCommon, and much of their API changed. See [Migrating to rhino3dm 9.2](docs/migrating-to-9.md).
-
----
-
-## rhino3dm.py (Python)
-**rhino3dm.py** is a python package that can be used on all current versions of CPython (3.8 - 3.14) and is available on all platforms (Windows, macOS, Linux) 
-
-rhino3dm.js packages are available on pypi: https://pypi.org/project/rhino3dm/
-
-`pip install --user rhino3dm`
-
-See [our python documentation](docs/python/RHINO3DM.PY.md) for details
-
-
-## rhino3dm.js (JavaScript and node.js)
-
-**rhino3dm.js** is a javascript library with an associated web assembly (rhino3dm.wasm). It runs in Chrome 133+, Firefox 134+ and [Node.js](https://nodejs.org/) 24+ (it uses 64-bit WebAssembly memory, which Safari supports only in its Technology Preview).
-
-rhino3dm.js packages are available on npm: https://www.npmjs.com/package/rhino3dm
-
-<img src="docs/images/rhino3dm_rhinologo.png" width="200"></img>
-
-```html
-<!DOCTYPE html>
-
-<body>
-
-  <!-- Import maps polyfill -->
-  <!-- Remove this when import maps will be widely supported -->
-  <script async src="https://unpkg.com/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
-
-  <script type="importmap">
-      {
-          "imports": {
-            "rhino3dm":"https://cdn.jsdelivr.net/npm/rhino3dm@9.2.0-beta.0/rhino3dm.module.min.js"
-          }
-      }
-  </script>
-
-  <script type="module">
-
-    import rhino3dm from 'rhino3dm'
-    const rhino = await rhino3dm()
-    const sphere = new rhino.Sphere({ X: 1, Y: 2, Z: 3 }, 12)
-    console.log(rhino.Sphere.diameter(sphere))
-
-  </script>
-
-</body>
-
-</html>
+```
+pip install rhino3dm           # latest stable (8.x)
+pip install --pre rhino3dm     # 9.2 beta
 ```
 
-See [our javascript documentation](docs/javascript/RHINO3DM.JS.md) for details
+Wheels for CPython 3.10 to 3.14 on Windows, macOS and Linux.
 
-## Rhino3dm.NET
+```python
+import rhino3dm as r
 
-Rhino3dm.NET (formerly known as Rhino3dmIO) allows you to write standalone .NET applications. 
+model = r.File3dm()
+model.Objects.AddSphere(r.Sphere(r.Point3d(1, 2, 3), 12))
+model.Write("sphere.3dm", 8)
+```
 
-rhino3dm.net packages are available on nuget: https://www.nuget.org/packages/Rhino3dm/
+[rhino3dm.py documentation](docs/python/RHINO3DM.PY.md) ·
+[API reference](https://mcneel.github.io/rhino3dm/python/api/index.html) ·
+[PyPI](https://pypi.org/project/rhino3dm/)
 
-From this repository we build macOS, windows, and linux packages in various runtimes which all all delivered via the nuget package.
+## JavaScript
 
-### More
+```
+npm install rhino3dm           # latest stable (8.x)
+npm install rhino3dm@next      # 9.2 beta
+```
 
-Some more details and discussions can be found at:
-  * [discourse.mcneel.com](https://discourse.mcneel.com/c/rhino-developer/rhino3dm/)
-  * [Steve Baer's Blog](https://stevebaer.wordpress.com/2018/10/15/rhino3dm-geometry-toolkits-for-net-python-and-javascript/)
-  
+rhino3dm.js is compiled to WebAssembly and runs in every current browser and in Node.js 22+. In a
+browser you can load it from a CDN without installing anything.
+
+```js
+import rhino3dm from 'rhino3dm'
+
+const rhino = await rhino3dm()
+const model = new rhino.File3dm()
+model.objects.addSphere(new rhino.Sphere({ X: 1, Y: 2, Z: 3 }, 12))
+const bytes = model.toByteArray()
+```
+
+For three.js there is a [3dm loader](https://threejs.org/examples/?q=3dm#webgl_loader_3dm) built on
+rhino3dm.js.
+
+[rhino3dm.js documentation](docs/javascript/RHINO3DM.JS.md) ·
+[API reference](https://mcneel.github.io/rhino3dm/javascript/api/index.html) ·
+[npm](https://www.npmjs.com/package/rhino3dm)
+
+## .NET
+
+```
+dotnet add package Rhino3dm                 # latest stable (8.x)
+dotnet add package Rhino3dm --prerelease    # 9.2 beta
+```
+
+Rhino3dm (formerly Rhino3dmIO) is built from RhinoCommon's own source. One NuGet package carries the
+native libraries for Windows, macOS and Linux.
+
+```csharp
+using Rhino.FileIO;
+using Rhino.Geometry;
+
+var model = new File3dm();
+model.Objects.AddSphere(new Sphere(new Point3d(1, 2, 3), 12));
+model.Write("sphere.3dm", 8);
+```
+
+[Rhino3dm documentation](docs/dotnet/README.md) ·
+[RhinoCommon API reference](https://developer.rhino3d.com/api/rhinocommon/) ·
+[NuGet](https://www.nuget.org/packages/Rhino3dm/)
+
+## Building from source
+
+See the build guides for [Python](docs/python/RHINO3DM-BUILD.PY.md),
+[JavaScript](docs/javascript/RHINO3DM-BUILD.JS.md) and [.NET](docs/dotnet/RHINO3DM-BUILD.CS.md), and
+[CONTRIBUTING](CONTRIBUTING.md).
+
+## Help and discussion
+
+- [rhino3dm on the McNeel forum](https://discourse.mcneel.com/c/rhino-developer/rhino3dm/)
+- [Issues](https://github.com/mcneel/rhino3dm/issues)
+
+## License
+
+[MIT](LICENSE)
