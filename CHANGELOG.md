@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [9.2.0-beta.0] - unreleased
+## [9.2.0-beta.0] - 2026.11.10
 
 rhino3dm vNext: the Python and JavaScript bindings are generated from RhinoCommon, so their API is RhinoCommon's (names, signatures, return shapes). What changes for an 8.x script, per language: [`docs/migrating-to-9.md`](docs/migrating-to-9.md).
 
