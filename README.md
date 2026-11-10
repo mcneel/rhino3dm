@@ -52,7 +52,8 @@ model.Write("sphere.3dm", 8)
 
 [rhino3dm.py documentation](docs/python/RHINO3DM.PY.md) ·
 [API reference](https://mcneel.github.io/rhino3dm/python/api/index.html) ·
-[PyPI](https://pypi.org/project/rhino3dm/)
+[PyPI](https://pypi.org/project/rhino3dm/) ·
+[Samples](https://github.com/mcneel/rhino-developer-samples/tree/9/rhino3dm/py)
 
 ## JavaScript
 
@@ -78,7 +79,8 @@ rhino3dm.js.
 
 [rhino3dm.js documentation](docs/javascript/RHINO3DM.JS.md) ·
 [API reference](https://mcneel.github.io/rhino3dm/javascript/api/index.html) ·
-[npm](https://www.npmjs.com/package/rhino3dm)
+[npm](https://www.npmjs.com/package/rhino3dm) ·
+[Samples](https://github.com/mcneel/rhino-developer-samples/tree/9/rhino3dm/js)
 
 ## .NET
 
@@ -101,7 +103,8 @@ model.Write("sphere.3dm", 8);
 
 [Rhino3dm documentation](docs/dotnet/README.md) ·
 [RhinoCommon API reference](https://developer.rhino3d.com/api/rhinocommon/) ·
-[NuGet](https://www.nuget.org/packages/Rhino3dm/)
+[NuGet](https://www.nuget.org/packages/Rhino3dm/) ·
+[Samples](https://github.com/mcneel/rhino-developer-samples/tree/9/rhino3dm/cs)
 
 ## Building from source
 
