@@ -13,10 +13,10 @@ its ecosystem requires:
   src/rhino3dm/__init__.py                9.0.0b0      PEP 440
   docs/javascript/RHINO3DM.JS.md          9.0.0-beta   the jsDelivr URLs in its examples (every one;
                                                        it is also the npm package's README)
-  README.md                               9.0.0-beta   the same, in its rhino3dm.js example
 
 --check also fails on a jsDelivr/unpkg rhino3dm@<version> pin anywhere else in the repository's
-pages (outside docs/8, the archived 8.x reference).
+pages (outside docs/8, the archived 8.x reference), README.md included: such a pin is checked
+but not updated, so add its file to TARGETS.
 
 Usage:
   python3 script/bump_version.py                 # propagate version.txt everywhere
@@ -75,7 +75,6 @@ TARGETS = [
     ('src/rhino3dm/__init__.py',            r"(__version__ = ')([^']+)(')",                'pep440'),
     # a 4th element 'all': every match carries the version (at least one must exist)
     ('docs/javascript/RHINO3DM.JS.md',      r'(cdn\.jsdelivr\.net/npm/rhino3dm@)([^/"]+)(/)',  'semver', 'all'),
-    ('README.md',                           r'(cdn\.jsdelivr\.net/npm/rhino3dm@)([^/"]+)(/)',  'semver', 'all'),
 ]
 
 # every other CDN pin in the repository's pages must be the same version too: a new example
