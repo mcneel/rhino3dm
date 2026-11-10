@@ -38,6 +38,12 @@ file(RENAME "../lib/opennurbs/android_uuid/gen_uuid_nt.skip" "../lib/opennurbs/a
 # C++17 on every platform: opennurbs 9 uses <execution> (std::execution::par_unseq) on MSVC and
 # std::to_chars for doubles
 set (CMAKE_CXX_STANDARD 17)
+# No fused multiply-add contraction on Linux: GCC defaults to -ffp-contract=fast, which fuses
+# across statements. Apple clang keeps its default (on: within an expression), so macOS arm64
+# can differ from x64 in the last bit; MSVC does not contract unless /fp:contract
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  add_compile_options(-ffp-contract=off)
+endif()
 
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
