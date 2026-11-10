@@ -18,6 +18,14 @@ pyexec = Path(sys.executable).resolve()
 
 print(f"Using Python executable: {pyexec}")
 
+# Wheels: one per version for 3.10 / 3.11, and one stable-ABI (abi3) wheel for CPython 3.12+.
+# nanobind's STABLE_ABI builds the abi3 module on 3.12+ (src/CMakeLists.txt); this tags the wheel to
+# match, so pip installs it on 3.12 and every later version. A free-threaded interpreter has no abi3:
+# it builds a version-specific module, and importing it turns the GIL back on (no FREE_THREADED)
+FREE_THREADED = bool(sysconfig.get_config_var("Py_GIL_DISABLED"))
+ABI3 = sys.implementation.name == "cpython" and sys.version_info >= (3, 12) and not FREE_THREADED
+print(f"Wheel: {'abi3 (cp312)' if ABI3 else 'version-specific'}{', free-threaded' if FREE_THREADED else ''}")
+
 def system(cmd : List, **kwargs):
     print(f"Running {' '.join(cmd)}")
     if "cwd" in kwargs.keys():
@@ -141,7 +149,13 @@ class CMakeBuild(build_ext):
             os.makedirs(self.build_lib + "/rhino3dm")
         for file in glob.glob(self.build_temp + "/Release/*.pyd"):
             shutil.copy(file, self.build_lib + "/rhino3dm")
-        for file in glob.glob(self.build_temp + "/*.so"):
+        modules = glob.glob(self.build_temp + "/*.so")
+        # an abi3 wheel must hold the abi3 module: CMake without Development.SABIModule (needs 3.26+)
+        # silently builds a version-specific one, which would break the wheel on later Pythons.
+        # (Windows names both _rhino3dm.pyd; the release workflow's abi3 test covers it there.)
+        if ABI3 and modules and not any(f.endswith(".abi3.so") for f in modules):
+            raise RuntimeError(f"abi3 wheel but no abi3 module was built: {modules}. Is CMake 3.26 or later?")
+        for file in modules:
             if platform.system() == "Linux" and self.debug:
                 print("debug linux")
                 system(["stat", file])
@@ -167,6 +181,7 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
+        "Programming Language :: Python :: 3.15",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: MacOS",
         "Operating System :: POSIX :: Linux",
@@ -254,7 +269,7 @@ for obj in model.Objects:
 
 ## Platforms
 
-| | Python 3.10 to 3.14 |
+| | Python 3.10 or later |
 |---|---|
 | Windows | x64, Arm64 |
 | macOS 14 or later | universal (Apple silicon and Intel) |
@@ -278,5 +293,6 @@ Ask on the [forum](https://discourse.mcneel.com/c/rhino-developer/rhino3dm/), an
     ext_modules=[CMakeExtension('rhino3dm._rhino3dm')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
-    include_package_data=True
+    include_package_data=True,
+    options={"bdist_wheel": {"py_limited_api": "cp312"}} if ABI3 else {},
 )

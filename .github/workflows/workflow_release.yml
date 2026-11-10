@@ -120,7 +120,10 @@ jobs:
     container: ${{ matrix.image.container }}
     strategy:
       matrix:
-        python-version: [cp310-cp310, cp311-cp311, cp312-cp312, cp313-cp313, cp314-cp314]
+        # 3.10 / 3.11 version-specific, cp312 builds the abi3 wheel for 3.12+ (test_py_abi3 runs it
+        # on later versions). No free-threaded wheel: rhino3dm turns the GIL back on there (no
+        # FREE_THREADED in src/CMakeLists.txt), so a 3.14t user builds from the sdist
+        python-version: [cp310-cp310, cp311-cp311, cp312-cp312]
         image: 
           - container: quay.io/pypa/manylinux_2_28_x86_64
             architecture: x86_64
@@ -171,7 +174,8 @@ jobs:
     strategy:
       matrix:
         os: [windows-2022, windows-11-arm, macos-15]
-        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+        # as build_py_manylinux: 3.12 builds the abi3 wheel
+        python-version: ['3.10', '3.11', '3.12']
         include:
           - os: windows-2022
             target: windows
@@ -240,9 +244,50 @@ jobs:
           path: dist
           name: ${{ steps.artifactname.outputs.file }}
 
+  # the abi3 wheel is built on 3.12 only: install it on the later versions and run the tests there.
+  # 3.16 is a pre-release until 2027-10, so its failures don't fail the release
+  test_py_abi3:
+    name: test python abi3 wheel ${{ matrix.python-version }} ${{ matrix.os }}
+    needs: [build_py_manylinux, build_py_all_bdist]
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.python-version == '3.16' }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-2022, windows-11-arm, macos-15]
+        python-version: ['3.13', '3.14', '3.15', '3.16']
+        include:
+          - os: windows-11-arm
+            architecture: arm64
+      fail-fast: false
+    steps:
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5.4.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
+          architecture: ${{ matrix.architecture }}
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: download the abi3 wheels
+        uses: actions/download-artifact@v4
+        with:
+          pattern: 'rhino3dm-*-cp312-abi3-*'
+          path: wheels
+          merge-multiple: true
+      - name: test python abi3 wheel
+        shell: bash
+        run: |
+          python --version
+          ls wheels
+          # pip picks the wheel matching this platform out of all of them
+          python -m pip install --no-index --find-links wheels rhino3dm --force-reinstall
+          python -c "import rhino3dm, os; f = os.listdir(os.path.dirname(rhino3dm.__file__)); print(f); assert any('abi3' in n or n.endswith('.pyd') for n in f)"
+          cd tests/python
+          python -m unittest discover .
+
   publish_pypi:
     name: publish python to PyPI
-    needs: [build_py_sdist, build_py_manylinux, build_py_all_bdist]
+    needs: [build_py_sdist, build_py_manylinux, build_py_all_bdist, test_py_abi3]
     if: ${{ inputs.publish_to_pypi }}
     runs-on: ubuntu-latest
     permissions:
@@ -269,6 +314,8 @@ jobs:
         run: |
           for pat in 'manylinux.*x86_64' 'manylinux.*aarch64' 'win_amd64' 'win_arm64' 'macosx.*(universal2|arm64)'; do
             ls dist | grep -Eq "\.whl$" && ls dist | grep -E "\.whl$" | grep -Eq "$pat" || { echo "::error::no wheel for $pat"; exit 1; }
+            # and the abi3 wheel that covers 3.12 and later on that platform
+            ls dist | grep -E "cp312-abi3-.*\.whl$" | grep -Eq "$pat" || { echo "::error::no abi3 wheel for $pat"; exit 1; }
           done
           ls dist | grep -q '\.tar\.gz$' || { echo "::error::no sdist"; exit 1; }
       - name: publish to PyPI

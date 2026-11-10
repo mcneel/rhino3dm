@@ -8,8 +8,9 @@
 #   python.sh all     build, test
 #   python.sh stubs   the raw stub of the built module (build does it too) -> build/dev/python/_rhino3dm.raw.pyi
 # The system Python is 3.12, so this builds the abi3 module (M2). PY_FT=1: the same against a
-# free-threaded CPython (3.14t, installed with uv in the container; its own build tree), tested with
-# PYTHON_GIL=0 -- the module must load without re-enabling the GIL.
+# free-threaded CPython (3.14t, installed with uv in the container; its own build tree). The module
+# does not declare free-threading support (no FREE_THREADED, Luis 2026-11-10), so importing it must
+# turn the GIL back on; the tests then run as on a GIL build.
 # -ffp-contract=off: no fused multiply-add, so results are bitwise comparable
 # with the .NET oracle (tests/parity/README.md).
 set -u
@@ -79,10 +80,11 @@ stubs() {   # nanobind's stub of the built module: tools/docs/pyi.py's input (M5
 test_() {
   cd /src
   if [ "${PY_FT:-0}" = 1 ]; then
-    # loading must not turn the GIL back on (an extension not declared free-threading safe does,
-    # with a RuntimeWarning)
-    PYTHON_GIL=0 $PY -W error::RuntimeWarning -c "import sys; sys.path.insert(0, '$B'); import _rhino3dm; print('FT: GIL enabled after import:', sys._is_gil_enabled())"
-    export PYTHON_GIL=0
+    # loading must turn the GIL back on (with a RuntimeWarning): opennurbs is not safe for parallel
+    # use. PYTHON_GIL=0 would force it off, so it must not be set here
+    unset PYTHON_GIL
+    $PY -W ignore::RuntimeWarning -c "import sys; sys.path.insert(0, '$B'); import _rhino3dm; e = sys._is_gil_enabled(); print('FT: GIL enabled after import:', e); sys.exit(0 if e else 1)" \
+      || echo "FT FAIL: the GIL stayed off after import"
   fi
   RH3DM_MODULE_DIR=$B $PY -m pytest -q -p no:cacheprovider tests/parity tests/generator 2>&1 | tail -4
   $PY tests/parity/test_parity.py $B 2>&1 | tail -14

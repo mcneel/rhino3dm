@@ -9,6 +9,7 @@
 #   tools/dev/round.sh dotnet   tests/dotnet against src/dotnet + a fresh native library (.NET 10 SDK)
 #   tools/dev/round.sh all      oracle, then build + tests, then wasm64, then dotnet
 #   tools/dev/round.sh ft [check|build|test|all]   the Python build against free-threaded CPython 3.14t
+#                               (the import must turn the GIL back on)
 #   tools/dev/round.sh sdist    the Python sdist round-trip: package, unpack, build from the package
 #   tools/dev/round.sh typings  src/rhino3dm/__init__.pyi + src/js/rhino3dm.d.ts from the last Python
 #                               build's stub (tools/docs); tsc --strict on the .d.ts, mypy --strict +
