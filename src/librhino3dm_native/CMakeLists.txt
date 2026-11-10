@@ -35,7 +35,9 @@ file(GLOB uuid_SRC "../lib/opennurbs/android_uuid/*.h" "../lib/opennurbs/android
 file(RENAME "../lib/opennurbs/android_uuid/gen_uuid_nt.skip" "../lib/opennurbs/android_uuid/gen_uuid_nt.c")
 
 
-set (CMAKE_CXX_STANDARD 14)
+# C++17 on every platform: opennurbs 9 uses <execution> (std::execution::par_unseq) on MSVC and
+# std::to_chars for doubles
+set (CMAKE_CXX_STANDARD 17)
 
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 

@@ -16,10 +16,6 @@ from subprocess import Popen, PIPE
 import shlex
 import shutil
 import fileinput
-if sys.version_info[0] < 3:
-    import imp
-else:
-    from importlib.machinery import SourceFileLoader
 import time
 
 # ---------------------------------------------------- Globals ---------------------------------------------------------
@@ -35,10 +31,9 @@ src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
 build_folder = os.path.abspath(os.path.join(src_folder, "build"))
 librhino3dm_native_folder = os.path.abspath(os.path.join(src_folder, "librhino3dm_native"))
 
-if sys.version_info[0] < 3:
-    bootstrap = imp.load_source('bootstrap', os.path.join(script_folder, "bootstrap.py"))
-else:
-    bootstrap = SourceFileLoader('bootstrap', os.path.join(script_folder, "bootstrap.py")).load_module()
+# bootstrap.py sits beside this script (SourceFileLoader.load_module is gone in Python 3.15)
+sys.path.insert(0, script_folder)
+import bootstrap
 
 # ---------------------------------------------------- Logging ---------------------------------------------------------
 # colors for terminal reporting
