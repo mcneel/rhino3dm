@@ -43,6 +43,11 @@ on:
         description: 'JS: npm dist-tag (use "next" for pre-releases, e.g. 8.x-beta)'
         type: string
         default: 'latest'
+
+# read-only token by default; the publish jobs add id-token: write for trusted publishing
+permissions:
+  contents: read
+
 env:
   # oldest macOS the wheels and the native library run on, as in 8.x: the macos-15 runner builds
   # them, and this sets the wheel tag (macosx_14_0) and CMake's CMAKE_OSX_DEPLOYMENT_TARGET.

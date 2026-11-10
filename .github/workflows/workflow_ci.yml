@@ -6,6 +6,11 @@ on:
   push:
   pull_request:
 
+# read-only token: CI only checks out, diffs and moves artifacts (which use their own token)
+permissions:
+  contents: read
+  pull-requests: read   # tj-actions/changed-files can list a PR's files through the API
+
 env:
   # oldest macOS the wheels and the native library run on, as in 8.x: the macos-15 runner builds
   # them, and this sets the wheel tag (macosx_14_0) and CMake's CMAKE_OSX_DEPLOYMENT_TARGET.

@@ -46,7 +46,7 @@ test('readDecalLifetime_RH3DM_159', async () => {
     const expected = [held[0].textureInstanceId, held[1].textureInstanceId]
 
     for (let n = 0; n < 50; n++) {
-        [...decals]
+        expect([...decals].length).toBe(2)
     }
 
     expect([held[0].textureInstanceId, held[1].textureInstanceId]).toEqual(expected)
