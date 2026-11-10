@@ -12,7 +12,8 @@ diff: https://github.com/mcneel/rhino3dm/compare/9.0.0-beta...9.2.0-beta.0
 
 ### Changed
 
-- openNURBS submodule to 9.2 (`c87c7200`); rhino3dm takes the openNURBS minor version.
+- openNURBS submodule to 9.2 (`2bd2e66e`); rhino3dm takes the openNURBS minor version.
+- (js) wasm32 is the default build again, as in 8.x: the package's main module runs in every current browser, Safari and iOS included, and in Node 22+, and it is faster than memory64. The memory64 build ships in `wasm64/` (Chrome 133+, Firefox 134+, Node 24+), as in 8.x, for models that need more than 4 GB. openNURBS supports wasm32 since RH-100167 (RH3DM-215). `script/setup.py -p js` builds wasm32; `--wasm64` builds memory64.
 - (py, js) Bindings generated from RhinoCommon (rhino 9.x `db884416462`); the hand-written bindings are gone, except members RhinoCommon lacks (`api/exceptions.toml`).
 - (py, js) The typings (`__init__.pyi`, `rhino3dm.d.ts`) are generated from the built bindings and RhinoCommon's doc comments, so they describe this API, docstrings included (`tools/docs`). The Python stub passes `mypy --strict` and matches the module's names; the TypeScript passes `tsc --strict`.
 - (py) Fixed: `Extrusion.ToBrep()` and `TextEntity.Transform(xform)` raised `TypeError` (a derived overload hid the base class's); `Transform.ChangeBasis` keyword arguments are RhinoCommon's names (`X0`, not `X0_cs`).

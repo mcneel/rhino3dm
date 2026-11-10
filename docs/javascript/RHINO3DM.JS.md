@@ -2,7 +2,7 @@
 
 [![](https://data.jsdelivr.com/v1/package/npm/rhino3dm/badge)](https://www.jsdelivr.com/package/npm/rhino3dm)
 
-**rhino3dm.js** is a javascript library with associated web assembly (rhino3dm.wasm) that is OpenNURBS plus C++ to javascript bindings compiled to web assembly. The API is generated from RhinoCommon. The library runs in Chrome 133+, Firefox 134+ and Node.js 24+ (it uses 64-bit WebAssembly memory, which Safari supports only in its Technology Preview).
+**rhino3dm.js** is a javascript library with associated web assembly (rhino3dm.wasm) that is OpenNURBS plus C++ to javascript bindings compiled to web assembly. The API is generated from RhinoCommon. The library runs in every current browser, Safari and iOS included, and in Node.js 22+. The package also ships a 64-bit-memory (memory64) build in `wasm64/` for models that need more than 4 GB; it runs in Chrome 133+, Firefox 134+ and Node.js 24+ (Safari supports memory64 only in its Technology Preview), and it is slower, so use it only when you need the memory.
 
 For browser based applications, we also develop a 3dmLoader for the popular three.js WebGL library: https://threejs.org/examples/?q=3dm#webgl_loader_3dm
 

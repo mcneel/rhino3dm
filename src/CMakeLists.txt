@@ -88,11 +88,10 @@ if(${RHINO3DM_JS})
   # (MDN browser-compat-data, checked 2026-10-07): Chrome 133, Firefox 134,
   # Node 24; Safari still Technology Preview only.
   #
-  # WASM64 is the DEFAULT as of 9.0 (script/setup.py passes -D WASM64=TRUE unless
-  # --wasm32 is given). This is not a preference: opennurbs 9.x packs a type tag
-  # into the low bits of SubD component pointers and requires 64-bit pointers, so
-  # a wasm32 build does not compile. Awaiting RH3DM-215; once that is resolved the
-  # default should be revisited, since Safari and Node < 24 cannot run memory64.
+  # wasm32 is the DEFAULT again since 9.2, as in 8.x (script/setup.py passes
+  # -D WASM64=TRUE only with --wasm64): it runs in every browser and on Node 22,
+  # and it is faster than memory64. The release ships memory64 in the package's
+  # wasm64/ folder. opennurbs supports wasm32 since RH-100167 (RH3DM-215).
   if(WASM64)
     message("WASM64 (memory64) build")
     # -sMEMORY64 is a codegen/target flag (wasm32 -> wasm64): it must be applied

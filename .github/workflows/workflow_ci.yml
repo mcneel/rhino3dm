@@ -288,6 +288,44 @@ jobs:
           name: rhino3dm.js
           retention-days: ${{ env.RETENTION_DAYS }}
 
+  # The memory64 variant the release ships in wasm64/. Its own job, in parallel with build_js,
+  # so it adds runner minutes but not wall-clock time: one debug build, no ES module.
+  build_js_wasm64:
+    name: build rhino3dm.js wasm64
+    runs-on: ubuntu-latest
+    needs: [check_bindings, check_workflow, check_build_scripts, check_tests_js]
+    if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' || needs.check_tests_js.outputs.any_changed == 'true' }}
+    container:
+      image: emscripten/emsdk:5.0.7
+    steps:
+      - name: info
+        run: python3 --version && emcc --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: safe dir
+        run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
+      - name: update submodules
+        run: git submodule update --init --recursive
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p js
+      - name: setup js wasm64
+        run: python3 script/setup.py -p js -o -v -d -w
+      - name: build js wasm64
+        run: python3 script/build.py -p js -o -v
+      - name: copy files
+        shell: bash
+        run: |
+          mkdir src/build/javascript/artifacts
+          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts
+          mv src/build/javascript/artifacts_js/rhino3dm.wasm src/build/javascript/artifacts
+          cp package.json src/build/javascript/artifacts
+      - name: artifacts
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          path: src/build/javascript/artifacts
+          name: rhino3dm.js-wasm64
+          retention-days: ${{ env.RETENTION_DAYS }}
+
   build_py_all_bdist:
     name: build python ${{ matrix.python-version }} ${{ matrix.target }} ${{ matrix.os }} bdist
     runs-on: ${{ matrix.os }}
@@ -530,14 +568,14 @@ jobs:
         with:
           name: rhino3dm.js
           path: tests/javascript/lib
-      # The default build is WASM64 (memory64) as of 9.0, which needs node >= 24
-      # (BCD: chrome 133, firefox 134, node 24, safari preview). ubuntu-latest's
-      # bundled node is unpinned and too old; without this the module fails to
-      # instantiate with "CompileError: invalid table elements limits flags".
-      - name: setup node 24
+      # The default build is wasm32 again since 9.2 (memory64 is the release's wasm64/
+      # variant). Test it on Node 22, the oldest Node package.json allows; ubuntu-latest's
+      # bundled node is unpinned. A memory64 module would fail here with
+      # "CompileError: invalid table elements limits flags", so this also guards the default.
+      - name: setup node 22
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
       - name: test javascript
         run: |
           ls tests/javascript/lib
@@ -551,4 +589,26 @@ jobs:
         run: bash tests/javascript/package/run.sh tests/javascript/lib
       
 
-
+  test_javascript_wasm64:
+    name: test javascript wasm64
+    runs-on: ubuntu-latest
+    needs: [build_js_wasm64]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: download artifact
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: rhino3dm.js-wasm64
+          path: tests/javascript/lib
+      # memory64 runs unflagged on Node 24+
+      - name: setup node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: test javascript
+        run: |
+          ls tests/javascript/lib
+          cd tests/javascript
+          npm i
+          npm test

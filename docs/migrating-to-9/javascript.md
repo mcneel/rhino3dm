@@ -480,7 +480,9 @@ a new view of it, not `geometry` itself.
 
 ## Packaging
 
-- The module is WebAssembly with 64-bit memory (memory64), which openNURBS 9 needs. It runs in
-  Chrome 133+, Firefox 134+ and Node 24+. Safari supports memory64 only in its Technology Preview.
+- The package's main module is 32-bit WebAssembly, as in 8.x: it runs in every current browser,
+  Safari and iOS included, and in Node 22+. A 64-bit-memory (memory64) build is in `wasm64/`, as in
+  8.x, for models that need more than 4 GB; it runs in Chrome 133+, Firefox 134+ and Node 24+
+  (Safari supports memory64 only in its Technology Preview) and is slower.
 - The package ships typings (`rhino3dm.d.ts`) with RhinoCommon's documentation, so editors complete
   and type-check rhino3dm code.

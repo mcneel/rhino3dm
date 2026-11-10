@@ -1,7 +1,8 @@
 #!/bin/bash
 # Check the npm package as its users load it: run.sh <dir with the package's files>
 #   npm pack -> install the tarball -> Node require, Node import, a webpack 5 browser bundle
-# Needs Node 24+ and network access (npm install). Exits non-zero on the first failure.
+# Needs Node 22+ (24+ to load a wasm64/ variant) and network access (npm install). Exits non-zero
+# on the first failure.
 set -euo pipefail
 PKG=$(cd "$1" && pwd)
 HERE=$(cd "$(dirname "$0")" && pwd)

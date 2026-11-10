@@ -22,10 +22,11 @@
     "rhino3dm.module.js",
     "rhino3dm.module.min.js",
     "rhino3dm.wasm",
-    "rhino3dm.d.ts"
+    "rhino3dm.d.ts",
+    "wasm64/"
   ],
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

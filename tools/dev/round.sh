@@ -2,11 +2,12 @@
 # Build and validate the vNext generated bindings in Docker (Linux), from the host.
 #
 #   tools/dev/round.sh check    fast: compile only src/bindings/*.cpp (Python toolchain)
-#   tools/dev/round.sh build    Python + WASM builds and their tests, in parallel
+#   tools/dev/round.sh build    Python + WASM (wasm32, the package main) builds and their tests, in parallel
+#   tools/dev/round.sh wasm64 [build|test|all]   the WASM64 (memory64) build the package ships in wasm64/
 #   tools/dev/round.sh oracle   regenerate the .NET parity goldens (tests/parity/oracle/run_linux.sh)
 #   tools/dev/round.sh test     tests only, against the last builds (no rebuild)
 #   tools/dev/round.sh dotnet   tests/dotnet against src/dotnet + a fresh native library (.NET 10 SDK)
-#   tools/dev/round.sh all      oracle, then build + tests, then dotnet
+#   tools/dev/round.sh all      oracle, then build + tests, then wasm64, then dotnet
 #   tools/dev/round.sh ft [check|build|test|all]   the Python build against free-threaded CPython 3.14t
 #   tools/dev/round.sh sdist    the Python sdist round-trip: package, unpack, build from the package
 #   tools/dev/round.sh typings  src/rhino3dm/__init__.pyi + src/js/rhino3dm.d.ts from the last Python
@@ -82,7 +83,8 @@ case "${1:-}" in
   dotnet) dotnet_tests ;;
   ft)     docker run --rm -v "$REPO":/src -v "$WORK":/work -v "$VOLUME":/build -e PY_FT=1 $PY_IMAGE \
             bash /src/tools/dev/container/python.sh "${2:-all}" ;;
-  all)    echo "== oracle"; oracle; both all all; drift; dotnet_tests ;;
+  all)    echo "== oracle"; oracle; both all all; drift; echo "== wasm64"; wasm all 64 | grep -vE "^\| "; dotnet_tests ;;
+  wasm64) wasm "${2:-all}" 64 | grep -vE "^\| " ;;
   drift)  drift ;;
   typings) [ -f "$WORK/python/_rhino3dm.raw.pyi" ] || { echo "no $WORK/python/_rhino3dm.raw.pyi: build Python first"; exit 1; }
           python3 "$REPO/tools/docs/pyi.py" "$WORK/python/_rhino3dm.raw.pyi" && python3 "$REPO/tools/docs/dts.py" || exit 1
@@ -91,5 +93,5 @@ case "${1:-}" in
             'npm i -g typescript@5.6.3 >/dev/null 2>&1; tsc --noEmit --strict --target es2020 rhino3dm.d.ts && echo "TSC OK"'
           docker run --rm -v "$REPO":/src:ro -v "$WORK":/work $PY_IMAGE bash /src/tools/docs/check_pyi.sh ;;
   sdist)  docker run --rm -v "$REPO":/src:ro -v "$WORK":/work python:3.12-bookworm bash /src/tools/dev/container/sdist.sh "${2:-}" ;;
-  *) sed -n '2,23p' "$0"; exit 2 ;;
+  *) sed -n '2,24p' "$0"; exit 2 ;;
 esac

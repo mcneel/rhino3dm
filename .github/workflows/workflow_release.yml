@@ -512,6 +512,31 @@ jobs:
           cd src/build/javascript/artifacts
           uglifyjs rhino3dm.module.js  --compress -o rhino3dm.module.min.js
           uglifyjs rhino3dm.js  --compress -o rhino3dm.min.js
+      # WASM64 (memory64) opt-in variant, as in 8.x. Shipped in a wasm64/ subdir so the
+      # generated loader's reference to rhino3dm.wasm stays intact. The default (wasm32)
+      # build above remains the package main: it runs in every browser (Safari has
+      # memory64 only in Technology Preview) and on Node 22, and it is faster.
+      - name: setup js wasm64 module
+        run: python3 script/setup.py -p js -o -v -m -w
+      - name: build js wasm64 module
+        run: python3 script/build.py -p js -o -v
+      - name: copy wasm64 module
+        shell: bash
+        run: |
+          mkdir -p src/build/javascript/artifacts/wasm64
+          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts/wasm64/rhino3dm.module.js
+      - name: setup js wasm64
+        run: python3 script/setup.py -p js -o -v -w
+      - name: build js wasm64
+        run: python3 script/build.py -p js -o -v
+      - name: copy wasm64
+        shell: bash
+        run: |
+          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts/wasm64/rhino3dm.js
+          mv src/build/javascript/artifacts_js/rhino3dm.wasm src/build/javascript/artifacts/wasm64/rhino3dm.wasm
+          cd src/build/javascript/artifacts/wasm64
+          uglifyjs rhino3dm.module.js  --compress -o rhino3dm.module.min.js
+          uglifyjs rhino3dm.js  --compress -o rhino3dm.min.js
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
         with:
@@ -530,10 +555,11 @@ jobs:
         run: python3 --version && cmake --version && node --version
       - name: checkout
         uses: actions/checkout@v4.1.1
-      - name: setup node
+      # the package main is wasm32: test it on Node 22, the oldest Node package.json allows
+      - name: setup node 22
         uses: actions/setup-node@v4
         with:
-          node-version: '24'   # wasm64 (memory64) runs unflagged on Node 24+
+          node-version: '22'
       - name: download artifact
         uses: actions/download-artifact@v4.1.7
         with:
@@ -541,13 +567,23 @@ jobs:
           path: tests/javascript/lib
       - name: test javascript
         run: |
-          ls tests/javascript/lib
+          ls -R tests/javascript/lib
           cd tests/javascript
           npm i
           npm test
       - name: test es6 module build
         run: cd tests/javascript && node module.smoke.mjs
-      # npm pack, then the package as users load it: Node require, Node import, a webpack 5 bundle
+      # wasm64/ (memory64) runs unflagged on Node 24+
+      - name: setup node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: test wasm64 build
+        run: |
+          cd tests/javascript
+          node -e "require('./lib/wasm64/rhino3dm.js')().then(r => { if (r.Sphere.diameter(new r.Sphere({X:0,Y:0,Z:0}, 5)) !== 10) process.exit(1); console.log('wasm64 OK') })"
+      # npm pack, then the package as users load it: Node require (wasm32 and wasm64/), Node
+      # import, a webpack 5 bundle
       - name: test npm package
         run: bash tests/javascript/package/run.sh tests/javascript/lib
 
