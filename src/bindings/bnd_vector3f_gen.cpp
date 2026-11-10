@@ -499,9 +499,9 @@ void initGenVector3f(void)
       .class_function("negate", optional_override([](BND_Vector3f a0) { return -a0; }))
       .class_function("subtract", optional_override([](BND_Vector3f a0, BND_Vector3f a1) { return a0 - a1; }))
       .class_function("multiply", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && v0.hasOwnProperty("Y") && v0.hasOwnProperty("Z")) && v1.isNumber()) { BND_Vector3f a0 = v0.as<BND_Vector3f>(); float a1 = v1.as<float>(); return emscripten::val([&]() { return a0 * a1; }()); }
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && v0.hasOwnProperty("Y") && v0.hasOwnProperty("Z")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("X") && v1.hasOwnProperty("Y") && v1.hasOwnProperty("Z"))) { BND_Vector3f a0 = v0.as<BND_Vector3f>(); BND_Vector3f a1 = v1.as<BND_Vector3f>(); return emscripten::val([&]() { return a0 * a1; }()); }
-        if (v0.isNumber() && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("X") && v1.hasOwnProperty("Y") && v1.hasOwnProperty("Z"))) { float a0 = v0.as<float>(); BND_Vector3f a1 = v1.as<BND_Vector3f>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y,Z") && v1.isNumber()) { BND_Vector3f a0 = v0.as<BND_Vector3f>(); float a1 = v1.as<float>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y,Z") && RH3DM_JsHasFields(v1, "X,Y,Z")) { BND_Vector3f a0 = v0.as<BND_Vector3f>(); BND_Vector3f a1 = v1.as<BND_Vector3f>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "X,Y,Z")) { float a0 = v0.as<float>(); BND_Vector3f a1 = v1.as<BND_Vector3f>(); return emscripten::val([&]() { return a0 * a1; }()); }
         throw std::invalid_argument("Vector3f.multiply: no overload matches the arguments"); }))
       .class_function("divide", optional_override([](BND_Vector3f a0, double a1) { return a0 / a1; }))
       .class_function("crossProduct", optional_override([](BND_Vector3f a0, BND_Vector3f a1) { return BND_Vector3f::CrossProduct(a0, a1); }))

@@ -150,8 +150,8 @@ void initGenPolyCurve(void)
       .property("isNested", &BND_PolyCurve::Gen_IsNested)
       .property("segmentCount", &BND_PolyCurve::Gen_SegmentCount)
       .function("append", optional_override([](BND_PolyCurve& self, emscripten::val v0) -> bool {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Plane") && v0.hasOwnProperty("Radius") && v0.hasOwnProperty("AngleDomain"))) return self.Gen_Append(v0.as<BND_Arc>());
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("From") && v0.hasOwnProperty("To"))) return self.Gen_Append_3(v0.as<BND_Line>());
+        if (RH3DM_JsHasFields(v0, "Plane,Radius,AngleDomain")) return self.Gen_Append(v0.as<BND_Arc>());
+        if (RH3DM_JsHasFields(v0, "From,To")) return self.Gen_Append_3(v0.as<BND_Line>());
         if ((v0.isNull() || v0.instanceof(emscripten::val::module_property("Curve")))) return self.Gen_Append_2((v0.isNull() ? nullptr : v0.as<BND_Curve*>(emscripten::allow_raw_pointers())));
         throw std::invalid_argument("PolyCurve.append: no overload matches the arguments"); }), allow_raw_pointers())
       .function("appendSegment", &BND_PolyCurve::Gen_AppendSegment, allow_raw_pointers())

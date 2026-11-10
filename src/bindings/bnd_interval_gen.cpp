@@ -473,12 +473,12 @@ void initGenInterval(void)
       .class_function("create", optional_override([](double a0, double a1) { return BND_Interval(a0, a1); }))
       .class_function("equals", optional_override([](BND_Interval a0, BND_Interval a1) { return a0 == a1; }))
       .class_function("add", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("T0")) && v1.isNumber()) { BND_Interval a0 = v0.as<BND_Interval>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return a0 + a1; }()); }
-        if (v0.isNumber() && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("T0"))) { double a0 = v0.as<double>(); BND_Interval a1 = v1.as<BND_Interval>(); return emscripten::val([&]() { return a0 + a1; }()); }
+        if ((RH3DM_JsHasFields(v0, "T0")) && v1.isNumber()) { BND_Interval a0 = v0.as<BND_Interval>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return a0 + a1; }()); }
+        if (v0.isNumber() && (RH3DM_JsHasFields(v1, "T0"))) { double a0 = v0.as<double>(); BND_Interval a1 = v1.as<BND_Interval>(); return emscripten::val([&]() { return a0 + a1; }()); }
         throw std::invalid_argument("Interval.add: no overload matches the arguments"); }))
       .class_function("subtract", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("T0")) && v1.isNumber()) { BND_Interval a0 = v0.as<BND_Interval>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return a0 - a1; }()); }
-        if (v0.isNumber() && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("T0"))) { double a0 = v0.as<double>(); BND_Interval a1 = v1.as<BND_Interval>(); return emscripten::val([&]() { return a0 - a1; }()); }
+        if ((RH3DM_JsHasFields(v0, "T0")) && v1.isNumber()) { BND_Interval a0 = v0.as<BND_Interval>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return a0 - a1; }()); }
+        if (v0.isNumber() && (RH3DM_JsHasFields(v1, "T0"))) { double a0 = v0.as<double>(); BND_Interval a1 = v1.as<BND_Interval>(); return emscripten::val([&]() { return a0 - a1; }()); }
         throw std::invalid_argument("Interval.subtract: no overload matches the arguments"); }))
       .class_function("unset", optional_override([]() { return BND_Interval::Unset(); }))
       .class_function("zeroToOne", optional_override([]() { return BND_Interval::ZeroToOne(); }))

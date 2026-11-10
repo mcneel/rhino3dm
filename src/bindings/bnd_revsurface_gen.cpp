@@ -109,16 +109,16 @@ void initGenRevSurface(void)
       .property("isTransposed", &BND_RevSurface::Gen_IsTransposed)
       .function("axisAndCurveCoplanar", &BND_RevSurface::Gen_AxisAndCurveCoplanar)
       .class_function("create", optional_override([](emscripten::val v0, emscripten::val v1, emscripten::val v2, emscripten::val v3) -> emscripten::val {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("From") && v0.hasOwnProperty("To")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("From") && v1.hasOwnProperty("To")) && v2.isNumber() && v3.isNumber()) return emscripten::val(BND_RevSurface::Gen_Create_3(v0.as<BND_Line>(), v1.as<BND_Line>(), v2.as<double>(), v3.as<double>()), emscripten::allow_raw_pointers());
-        if (v0.instanceof(emscripten::val::module_property("Curve")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("From") && v1.hasOwnProperty("To")) && v2.isNumber() && v3.isNumber()) return emscripten::val(BND_RevSurface::Gen_Create(*v0.as<BND_Curve*>(emscripten::allow_raw_pointers()), v1.as<BND_Line>(), v2.as<double>(), v3.as<double>()), emscripten::allow_raw_pointers());
+        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "From,To") && v2.isNumber() && v3.isNumber()) return emscripten::val(BND_RevSurface::Gen_Create_3(v0.as<BND_Line>(), v1.as<BND_Line>(), v2.as<double>(), v3.as<double>()), emscripten::allow_raw_pointers());
+        if (v0.instanceof(emscripten::val::module_property("Curve")) && RH3DM_JsHasFields(v1, "From,To") && v2.isNumber() && v3.isNumber()) return emscripten::val(BND_RevSurface::Gen_Create(*v0.as<BND_Curve*>(emscripten::allow_raw_pointers()), v1.as<BND_Line>(), v2.as<double>(), v3.as<double>()), emscripten::allow_raw_pointers());
         throw std::invalid_argument("RevSurface.create: no overload matches the arguments"); }), allow_raw_pointers())
       .class_function("createFromCone", &BND_RevSurface::Gen_CreateFromCone, allow_raw_pointers())
       .class_function("createFromCylinder", &BND_RevSurface::Gen_CreateFromCylinder, allow_raw_pointers())
       .class_function("createFromSphere", &BND_RevSurface::Gen_CreateFromSphere, allow_raw_pointers())
       .class_function("createFromTorus", &BND_RevSurface::Gen_CreateFromTorus, allow_raw_pointers())
       .class_function("create", optional_override([](emscripten::val v0, emscripten::val v1) -> BND_RevSurface* {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("From") && v0.hasOwnProperty("To")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("From") && v1.hasOwnProperty("To"))) return BND_RevSurface::Gen_Create_4(v0.as<BND_Line>(), v1.as<BND_Line>());
-        if (v0.instanceof(emscripten::val::module_property("Curve")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("From") && v1.hasOwnProperty("To"))) return BND_RevSurface::Gen_Create_2(*v0.as<BND_Curve*>(emscripten::allow_raw_pointers()), v1.as<BND_Line>());
+        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "From,To")) return BND_RevSurface::Gen_Create_4(v0.as<BND_Line>(), v1.as<BND_Line>());
+        if (v0.instanceof(emscripten::val::module_property("Curve")) && RH3DM_JsHasFields(v1, "From,To")) return BND_RevSurface::Gen_Create_2(*v0.as<BND_Curve*>(emscripten::allow_raw_pointers()), v1.as<BND_Line>());
         throw std::invalid_argument("RevSurface.create: no overload matches the arguments"); }), allow_raw_pointers())
       .class_function("decode", &BND_CommonObject_Decode, allow_raw_pointers())
       .class_function("computeMemoryEstimate", &BND_CommonObject::Gen_ComputeMemoryEstimate);

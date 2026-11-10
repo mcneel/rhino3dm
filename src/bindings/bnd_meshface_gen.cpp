@@ -514,8 +514,8 @@ void initGenMeshFace(void)
       .class_function("unset", optional_override([]() { return BND_MeshFace::Unset(); }))
       .class_function("isValid", optional_override([](BND_MeshFace a0) { return a0.IsValid(); }))
       .class_function("isValid", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("A") && v0.hasOwnProperty("B") && v0.hasOwnProperty("C") && v0.hasOwnProperty("D")) && v1.isNumber()) { BND_MeshFace a0 = v0.as<BND_MeshFace>(); int a1 = v1.as<int>(); return emscripten::val([&]() { return a0.IsValid(a1); }()); }
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("A") && v0.hasOwnProperty("B") && v0.hasOwnProperty("C") && v0.hasOwnProperty("D")) && RH3DM_JsIsSeq(v1)) { BND_MeshFace a0 = v0.as<BND_MeshFace>(); emscripten::val a1 = v1.as<emscripten::val>(); return emscripten::val([&]() { std::vector<BND_Point3d> a1_v = RH3DM_JsSeq<BND_Point3d>(a1); return a0.IsValid(a1_v); }()); }
+        if (RH3DM_JsHasFields(v0, "A,B,C,D") && v1.isNumber()) { BND_MeshFace a0 = v0.as<BND_MeshFace>(); int a1 = v1.as<int>(); return emscripten::val([&]() { return a0.IsValid(a1); }()); }
+        if (RH3DM_JsHasFields(v0, "A,B,C,D") && RH3DM_JsIsSeq(v1)) { BND_MeshFace a0 = v0.as<BND_MeshFace>(); emscripten::val a1 = v1.as<emscripten::val>(); return emscripten::val([&]() { std::vector<BND_Point3d> a1_v = RH3DM_JsSeq<BND_Point3d>(a1); return a0.IsValid(a1_v); }()); }
         throw std::invalid_argument("MeshFace.isValid: no overload matches the arguments"); }))
       .class_function("repair", optional_override([](emscripten::val v0, emscripten::val a1) { BND_MeshFace a0 = v0.as<BND_MeshFace>(); std::vector<BND_Point3d> a1_v = RH3DM_JsSeq<BND_Point3d>(a1); auto r = a0.Repair(a1_v); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
       .class_function("isValidEx", optional_override([](BND_MeshFace a0, emscripten::val a1) { std::vector<BND_Point3d> a1_v = RH3DM_JsSeq<BND_Point3d>(a1); return a0.IsValidEx(a1_v); }))

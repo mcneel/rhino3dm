@@ -182,13 +182,13 @@ void initGenNurbsSurfacePointList(void)
       .function("getPoint", &BND_NurbsSurfacePointList::Gen_GetPoint)
       .function("getWeight", &BND_NurbsSurfacePointList::Gen_GetWeight)
       .function("setPoint", optional_override([](BND_NurbsSurfacePointList& self, emscripten::val v0, emscripten::val v1, emscripten::val v2) -> bool {
-        if (v0.isNumber() && v1.isNumber() && (!v2.isNull() && v2.typeOf().as<std::string>() == "object" && v2.hasOwnProperty("X") && v2.hasOwnProperty("Y") && v2.hasOwnProperty("Z") && v2.hasOwnProperty("W"))) return self.Gen_SetPoint_2(v0.as<int>(), v1.as<int>(), v2.as<BND_Point4d>());
-        if (v0.isNumber() && v1.isNumber() && (!v2.isNull() && v2.typeOf().as<std::string>() == "object" && v2.hasOwnProperty("Z") && v2["Z"].isNumber())) return self.Gen_SetPoint(v0.as<int>(), v1.as<int>(), v2.as<BND_Point3d>());
+        if (v0.isNumber() && v1.isNumber() && RH3DM_JsHasFields(v2, "X,Y,Z,W")) return self.Gen_SetPoint_2(v0.as<int>(), v1.as<int>(), v2.as<BND_Point4d>());
+        if (v0.isNumber() && v1.isNumber() && (RH3DM_JsHasFields(v2, "Z") && v2["Z"].isNumber())) return self.Gen_SetPoint(v0.as<int>(), v1.as<int>(), v2.as<BND_Point3d>());
         throw std::invalid_argument("NurbsSurfacePointList.setPoint: no overload matches the arguments"); }), allow_raw_pointers())
       .function("setWeight", &BND_NurbsSurfacePointList::Gen_SetWeight)
       .function("getPoint4d", &BND_NurbsSurfacePointList::Gen_GetPoint_2)
       .function("setControlPoint", optional_override([](BND_NurbsSurfacePointList& self, emscripten::val v0, emscripten::val v1, emscripten::val v2) -> bool {
-        if (v0.isNumber() && v1.isNumber() && (!v2.isNull() && v2.typeOf().as<std::string>() == "object" && v2.hasOwnProperty("Z") && v2["Z"].isNumber())) return self.Gen_SetControlPoint_2(v0.as<int>(), v1.as<int>(), v2.as<BND_Point3d>());
+        if (v0.isNumber() && v1.isNumber() && (RH3DM_JsHasFields(v2, "Z") && v2["Z"].isNumber())) return self.Gen_SetControlPoint_2(v0.as<int>(), v1.as<int>(), v2.as<BND_Point3d>());
         if (v0.isNumber() && v1.isNumber() && true) return self.Gen_SetControlPoint(v0.as<int>(), v1.as<int>(), v2.as<BND_ControlPoint>());
         throw std::invalid_argument("NurbsSurfacePointList.setControlPoint: no overload matches the arguments"); }), allow_raw_pointers())
       .function("setPoint", &BND_NurbsSurfacePointList::Gen_SetPoint_3)

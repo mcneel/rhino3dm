@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <ctime>
 #include <cstring>
+#include <unordered_map>
 
 // The real C-layer contract header: blittable structs, RHMONO_STRING, and
 // CRhCmnStringHolder (whose layout is platform-conditional, so a local copy
@@ -170,7 +171,19 @@ template <class T> inline emscripten::val RH3DM_JsArray(const std::vector<T>& v)
 // a value-type mutator (G144): the changed value goes back into the JS object the caller passed,
 // as RhinoCommon changes the struct in place
 template <class T> inline void RH3DM_JsAssign(emscripten::val& target, const T& v) {
-  emscripten::val::global("Object").call<void>("assign", target, emscripten::val(v)); }
+  static const emscripten::val assign = emscripten::val::global("Object")["assign"];  // G152: looked up once
+  assign(target, emscripten::val(v)); }
+// an overload dispatcher's value-object test (G152): a non-null object with every one of `fields`
+// (comma-separated) as an own property, in ONE call into JS (Module.RH3DM_hasFields, gen_pre.js).
+// One hasOwnProperty call per field from C++ crossed into JS ~34 times for Transform.multiply: 59x
+// slower than 8.x. The field arrays are made once per literal
+inline bool RH3DM_JsHasFields(const emscripten::val& v, const char* fields) {
+  static const emscripten::val has = emscripten::val::module_property("RH3DM_hasFields");
+  static std::unordered_map<const char*, emscripten::val> keys;
+  auto it = keys.find(fields);
+  if (it == keys.end())
+    it = keys.emplace(fields, emscripten::val(std::string(fields)).call<emscripten::val>("split", std::string(","))).first;
+  return has(v, it->second).as<bool>(); }
 // an array result C# returns as null (D35): null, not the empty array
 template <class T> inline emscripten::val RH3DM_JsArrayOrNull(const std::vector<T>& v) {
   return v.empty() ? emscripten::val::null() : RH3DM_JsArray(v); }

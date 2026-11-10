@@ -188,8 +188,8 @@ void initGenNurbsCurvePointList(void)
       .function("makeNonRational", &BND_NurbsCurvePointList::Gen_MakeNonRational)
       .function("makeRational", &BND_NurbsCurvePointList::Gen_MakeRational)
       .function("setPoint", optional_override([](BND_NurbsCurvePointList& self, emscripten::val v0, emscripten::val v1) -> bool {
-        if (v0.isNumber() && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("X") && v1.hasOwnProperty("Y") && v1.hasOwnProperty("Z") && v1.hasOwnProperty("W"))) return self.Gen_SetPoint_2(v0.as<int>(), v1.as<BND_Point4d>());
-        if (v0.isNumber() && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Z") && v1["Z"].isNumber())) return self.Gen_SetPoint(v0.as<int>(), v1.as<BND_Point3d>());
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "X,Y,Z,W")) return self.Gen_SetPoint_2(v0.as<int>(), v1.as<BND_Point4d>());
+        if (v0.isNumber() && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) return self.Gen_SetPoint(v0.as<int>(), v1.as<BND_Point3d>());
         throw std::invalid_argument("NurbsCurvePointList.setPoint: no overload matches the arguments"); }), allow_raw_pointers())
       .function("setWeight", &BND_NurbsCurvePointList::Gen_SetWeight)
       .function("getPoint4d", &BND_NurbsCurvePointList::Gen_GetPoint_2)
