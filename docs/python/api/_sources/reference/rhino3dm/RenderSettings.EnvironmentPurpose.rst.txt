@@ -1,0 +1,24 @@
+rhino3dm.RenderSettings.EnvironmentPurpose
+==========================================
+
+.. py:class:: rhino3dm.RenderSettings.EnvironmentPurpose
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   The purpose a render environment is being used for.
+
+
+   .. py:attribute:: ForRendering
+      :value: 1
+
+
+      Used to get the environment instance id to be used for actual rendering.
+
+
+   .. py:attribute:: Standard
+      :value: 0
+
+
+      Used to directly get and set the environment instance id.
+

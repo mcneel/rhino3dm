@@ -1,0 +1,891 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rhino3dm.Layer &mdash; rhino3dm.py 9.2.0-beta.0</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f348fe97"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="rhino3dm.Leader" href="Leader.html" />
+    <link rel="prev" title="rhino3dm.KnotStyle" href="KnotStyle.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            rhino3dm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../migrating.html">Migrating to rhino3dm 9.2 (Python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../migrating-members.html">Renamed and removed members (Python)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">rhino3dm</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="index.html#attributes">Attributes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#classes">Classes</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="ActiveSpace.html">rhino3dm.ActiveSpace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="AngularDimension.html">rhino3dm.AngularDimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="AnnotationBase.html">rhino3dm.AnnotationBase</a></li>
+<li class="toctree-l4"><a class="reference internal" href="AnnotationType.html">rhino3dm.AnnotationType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="AntialiasLevel.html">rhino3dm.AntialiasLevel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Arc.html">rhino3dm.Arc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ArcArcIntersection.html">rhino3dm.ArcArcIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ArcCurve.html">rhino3dm.ArcCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ArchivableDictionary.html">rhino3dm.ArchivableDictionary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Arrowhead.html">rhino3dm.Arrowhead</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BackgroundStyle.html">rhino3dm.BackgroundStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BasepointZero.html">rhino3dm.BasepointZero</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BezierCurve.html">rhino3dm.BezierCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Bitmap.html">rhino3dm.Bitmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BoundingBox.html">rhino3dm.BoundingBox</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Box.html">rhino3dm.Box</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Brep.html">rhino3dm.Brep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepEdge.html">rhino3dm.BrepEdge</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepEdgeList.html">rhino3dm.BrepEdgeList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepFace.html">rhino3dm.BrepFace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepFaceList.html">rhino3dm.BrepFaceList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepLoop.html">rhino3dm.BrepLoop</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepLoopList.html">rhino3dm.BrepLoopList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepLoopType.html">rhino3dm.BrepLoopType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepSolidOrientation.html">rhino3dm.BrepSolidOrientation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepSurfaceList.html">rhino3dm.BrepSurfaceList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepTrim.html">rhino3dm.BrepTrim</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepTrimList.html">rhino3dm.BrepTrimList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepTrimType.html">rhino3dm.BrepTrimType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepVertex.html">rhino3dm.BrepVertex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepVertexList.html">rhino3dm.BrepVertexList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CachedTextureCoordinates.html">rhino3dm.CachedTextureCoordinates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Centermark.html">rhino3dm.Centermark</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Circle.html">rhino3dm.Circle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CircleCircleIntersection.html">rhino3dm.CircleCircleIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Color4f.html">rhino3dm.Color4f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CommonObject.html">rhino3dm.CommonObject</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ComponentIndex.html">rhino3dm.ComponentIndex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ComponentIndexType.html">rhino3dm.ComponentIndexType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Cone.html">rhino3dm.Cone</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ConstructionPlane.html">rhino3dm.ConstructionPlane</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ConstructionPlaneGridDefaults.html">rhino3dm.ConstructionPlaneGridDefaults</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Continuity.html">rhino3dm.Continuity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ControlPoint.html">rhino3dm.ControlPoint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CoordinateSystem.html">rhino3dm.CoordinateSystem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Curve.html">rhino3dm.Curve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CurveEnd.html">rhino3dm.CurveEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CurveEvaluationSide.html">rhino3dm.CurveEvaluationSide</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CurveOrientation.html">rhino3dm.CurveOrientation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CurveProxy.html">rhino3dm.CurveProxy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Cylinder.html">rhino3dm.Cylinder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DateTimeKind.html">rhino3dm.DateTimeKind</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Decal.html">rhino3dm.Decal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DecalMapping.html">rhino3dm.DecalMapping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DecalProjection.html">rhino3dm.DecalProjection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Decals.html">rhino3dm.Decals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DecalsIter.html">rhino3dm.DecalsIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Dimension.html">rhino3dm.Dimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DimensionStyle.html">rhino3dm.DimensionStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Dithering.html">rhino3dm.Dithering</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DracoColorFormat.html">rhino3dm.DracoColorFormat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DracoCompression.html">rhino3dm.DracoCompression</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DracoCompressionOptions.html">rhino3dm.DracoCompressionOptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="EarthAnchorPoint.html">rhino3dm.EarthAnchorPoint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="EarthCoordinateSystem.html">rhino3dm.EarthCoordinateSystem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="EdgeAdjacency.html">rhino3dm.EdgeAdjacency</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Ellipse.html">rhino3dm.Ellipse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Environment.html">rhino3dm.Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Extrusion.html">rhino3dm.Extrusion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dm.html">rhino3dm.File3dm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmBitmapTable.html">rhino3dm.File3dmBitmapTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmBitmapTableIter.html">rhino3dm.File3dmBitmapTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmCurvePiping.html">rhino3dm.File3dmCurvePiping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmDimStyleTable.html">rhino3dm.File3dmDimStyleTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmDimStyleTableIter.html">rhino3dm.File3dmDimStyleTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmDisplacement.html">rhino3dm.File3dmDisplacement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmEdgeSoftening.html">rhino3dm.File3dmEdgeSoftening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmEmbeddedFile.html">rhino3dm.File3dmEmbeddedFile</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmEmbeddedFiles.html">rhino3dm.File3dmEmbeddedFiles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmEmbeddedFilesIter.html">rhino3dm.File3dmEmbeddedFilesIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmGroupTable.html">rhino3dm.File3dmGroupTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmGroupTableIter.html">rhino3dm.File3dmGroupTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmHatchPatternTable.html">rhino3dm.File3dmHatchPatternTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmHatchPatternTableIter.html">rhino3dm.File3dmHatchPatternTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmInstanceDefinitionTable.html">rhino3dm.File3dmInstanceDefinitionTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmInstanceDefinitionTableIter.html">rhino3dm.File3dmInstanceDefinitionTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmLayerTable.html">rhino3dm.File3dmLayerTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmLayerTableIter.html">rhino3dm.File3dmLayerTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmLinetypeTable.html">rhino3dm.File3dmLinetypeTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmLinetypeTableIter.html">rhino3dm.File3dmLinetypeTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmMaterialTable.html">rhino3dm.File3dmMaterialTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmMaterialTableIter.html">rhino3dm.File3dmMaterialTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmMeshModifiers.html">rhino3dm.File3dmMeshModifiers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmNamedConstructionPlanes.html">rhino3dm.File3dmNamedConstructionPlanes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmNotes.html">rhino3dm.File3dmNotes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmObject.html">rhino3dm.File3dmObject</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmObjectTable.html">rhino3dm.File3dmObjectTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmObjectTableIter.html">rhino3dm.File3dmObjectTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmPlugInData.html">rhino3dm.File3dmPlugInData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmPlugInDataTable.html">rhino3dm.File3dmPlugInDataTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderContent.html">rhino3dm.File3dmRenderContent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderEnvironment.html">rhino3dm.File3dmRenderEnvironment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderEnvironments.html">rhino3dm.File3dmRenderEnvironments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderEnvironmentsIter.html">rhino3dm.File3dmRenderEnvironmentsIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderMaterial.html">rhino3dm.File3dmRenderMaterial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderMaterials.html">rhino3dm.File3dmRenderMaterials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderMaterialsIter.html">rhino3dm.File3dmRenderMaterialsIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderTexture.html">rhino3dm.File3dmRenderTexture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderTextures.html">rhino3dm.File3dmRenderTextures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderTexturesIter.html">rhino3dm.File3dmRenderTexturesIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmSettings.html">rhino3dm.File3dmSettings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmShutLining.html">rhino3dm.File3dmShutLining</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmStringTable.html">rhino3dm.File3dmStringTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmThickening.html">rhino3dm.File3dmThickening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmViewTable.html">rhino3dm.File3dmViewTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmWriteOptions.html">rhino3dm.File3dmWriteOptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="FileReference.html">rhino3dm.FileReference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="FileReferenceStatus.html">rhino3dm.FileReferenceStatus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Font.html">rhino3dm.Font</a></li>
+<li class="toctree-l4"><a class="reference internal" href="GeometryBase.html">rhino3dm.GeometryBase</a></li>
+<li class="toctree-l4"><a class="reference internal" href="GroundPlane.html">rhino3dm.GroundPlane</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Group.html">rhino3dm.Group</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Hatch.html">rhino3dm.Hatch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="HatchPattern.html">rhino3dm.HatchPattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="HatchPatternFillType.html">rhino3dm.HatchPatternFillType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="InstanceDefinitionGeometry.html">rhino3dm.InstanceDefinitionGeometry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="InstanceDefinitionLayerStyle.html">rhino3dm.InstanceDefinitionLayerStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="InstanceDefinitionUpdateType.html">rhino3dm.InstanceDefinitionUpdateType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="InstanceReferenceGeometry.html">rhino3dm.InstanceReferenceGeometry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Intersection.html">rhino3dm.Intersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Interval.html">rhino3dm.Interval</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IsoStatus.html">rhino3dm.IsoStatus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ItemColorSource.html">rhino3dm.ItemColorSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="KnotStyle.html">rhino3dm.KnotStyle</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">rhino3dm.Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Leader.html">rhino3dm.Leader</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Light.html">rhino3dm.Light</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LightStyle.html">rhino3dm.LightStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Line.html">rhino3dm.Line</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineCapStyle.html">rhino3dm.LineCapStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineCircleIntersection.html">rhino3dm.LineCircleIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineCurve.html">rhino3dm.LineCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineCylinderIntersection.html">rhino3dm.LineCylinderIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineJoinStyle.html">rhino3dm.LineJoinStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineSphereIntersection.html">rhino3dm.LineSphereIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LinearDimension.html">rhino3dm.LinearDimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LinearWorkflow.html">rhino3dm.LinearWorkflow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Linetype.html">rhino3dm.Linetype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ManifestTable.html">rhino3dm.ManifestTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ManifestTableIter.html">rhino3dm.ManifestTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Material.html">rhino3dm.Material</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Mesh.html">rhino3dm.Mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshFace.html">rhino3dm.MeshFace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshFaceList.html">rhino3dm.MeshFaceList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshTextureCoordinateList.html">rhino3dm.MeshTextureCoordinateList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshTopologyEdgeList.html">rhino3dm.MeshTopologyEdgeList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshType.html">rhino3dm.MeshType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshVertexColorList.html">rhino3dm.MeshVertexColorList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshVertexList.html">rhino3dm.MeshVertexList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshVertexNormalList.html">rhino3dm.MeshVertexNormalList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshingParameterTextureRange.html">rhino3dm.MeshingParameterTextureRange</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshingParameters.html">rhino3dm.MeshingParameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ModelComponent.html">rhino3dm.ModelComponent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ModelComponentType.html">rhino3dm.ModelComponentType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsCurve.html">rhino3dm.NurbsCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsCurveKnotList.html">rhino3dm.NurbsCurveKnotList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsCurvePointList.html">rhino3dm.NurbsCurvePointList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsSurface.html">rhino3dm.NurbsSurface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsSurfaceKnotList.html">rhino3dm.NurbsSurfaceKnotList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsSurfacePointList.html">rhino3dm.NurbsSurfacePointList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectAttributes.html">rhino3dm.ObjectAttributes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectColorSource.html">rhino3dm.ObjectColorSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectDecoration.html">rhino3dm.ObjectDecoration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectLinetypeSource.html">rhino3dm.ObjectLinetypeSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectMaterialSource.html">rhino3dm.ObjectMaterialSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectMode.html">rhino3dm.ObjectMode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectPlotColorSource.html">rhino3dm.ObjectPlotColorSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectPlotWeightSource.html">rhino3dm.ObjectPlotWeightSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectSectionAttributesSource.html">rhino3dm.ObjectSectionAttributesSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectType.html">rhino3dm.ObjectType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="OrdinateDimension.html">rhino3dm.OrdinateDimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PageSettings.html">rhino3dm.PageSettings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PhysicallyBasedMaterial.html">rhino3dm.PhysicallyBasedMaterial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Plane.html">rhino3dm.Plane</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PlaneCircleIntersection.html">rhino3dm.PlaneCircleIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PlaneSphereIntersection.html">rhino3dm.PlaneSphereIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PlaneSurface.html">rhino3dm.PlaneSurface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point.html">rhino3dm.Point</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point2d.html">rhino3dm.Point2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point2f.html">rhino3dm.Point2f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point3d.html">rhino3dm.Point3d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point3dList.html">rhino3dm.Point3dList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point3f.html">rhino3dm.Point3f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point4d.html">rhino3dm.Point4d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PointCloud.html">rhino3dm.PointCloud</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PointCloudItem.html">rhino3dm.PointCloudItem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PolyCurve.html">rhino3dm.PolyCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Polyline.html">rhino3dm.Polyline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PolylineCurve.html">rhino3dm.PolylineCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PostEffectCollection.html">rhino3dm.PostEffectCollection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PostEffectCollectionIter.html">rhino3dm.PostEffectCollectionIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PostEffectData.html">rhino3dm.PostEffectData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PostEffectType.html">rhino3dm.PostEffectType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Projection.html">rhino3dm.Projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RadialDimension.html">rhino3dm.RadialDimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RenderChannels.html">rhino3dm.RenderChannels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RenderSettings.html">rhino3dm.RenderSettings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RevSurface.html">rhino3dm.RevSurface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RhinoMath.html">rhino3dm.RhinoMath</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SafeFrame.html">rhino3dm.SafeFrame</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SectionLabelStyle.html">rhino3dm.SectionLabelStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Skylight.html">rhino3dm.Skylight</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Sphere.html">rhino3dm.Sphere</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SphereSphereIntersection.html">rhino3dm.SphereSphereIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubD.html">rhino3dm.SubD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDComponent.html">rhino3dm.SubDComponent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDComponentLocation.html">rhino3dm.SubDComponentLocation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEdge.html">rhino3dm.SubDEdge</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEdgeList.html">rhino3dm.SubDEdgeList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEdgeListIter.html">rhino3dm.SubDEdgeListIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEdgeSharpness.html">rhino3dm.SubDEdgeSharpness</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEdgeTag.html">rhino3dm.SubDEdgeTag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEndCapStyle.html">rhino3dm.SubDEndCapStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDFace.html">rhino3dm.SubDFace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDFaceList.html">rhino3dm.SubDFaceList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDFaceListIter.html">rhino3dm.SubDFaceListIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDTextureCoordinateType.html">rhino3dm.SubDTextureCoordinateType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDVertex.html">rhino3dm.SubDVertex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDVertexList.html">rhino3dm.SubDVertexList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDVertexListIter.html">rhino3dm.SubDVertexListIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDVertexTag.html">rhino3dm.SubDVertexTag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Sun.html">rhino3dm.Sun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Surface.html">rhino3dm.Surface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SurfaceProxy.html">rhino3dm.SurfaceProxy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextDot.html">rhino3dm.TextDot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextEntity.html">rhino3dm.TextEntity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextHorizontalAlignment.html">rhino3dm.TextHorizontalAlignment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextJustification.html">rhino3dm.TextJustification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextOrientation.html">rhino3dm.TextOrientation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextRunType.html">rhino3dm.TextRunType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextVerticalAlignment.html">rhino3dm.TextVerticalAlignment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Texture.html">rhino3dm.Texture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureCombineMode.html">rhino3dm.TextureCombineMode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureFilter.html">rhino3dm.TextureFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureMapping.html">rhino3dm.TextureMapping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureMappingType.html">rhino3dm.TextureMappingType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureProjectionModes.html">rhino3dm.TextureProjectionModes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureSpace.html">rhino3dm.TextureSpace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureType.html">rhino3dm.TextureType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureUvwWrapping.html">rhino3dm.TextureUvwWrapping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Torus.html">rhino3dm.Torus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Transform.html">rhino3dm.Transform</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TransformRigidType.html">rhino3dm.TransformRigidType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TransformSimilarityType.html">rhino3dm.TransformSimilarityType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="UnitSystem.html">rhino3dm.UnitSystem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Vector2d.html">rhino3dm.Vector2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Vector3d.html">rhino3dm.Vector3d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Vector3f.html">rhino3dm.Vector3f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ViewInfo.html">rhino3dm.ViewInfo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ViewInfoFocalBlurModes.html">rhino3dm.ViewInfoFocalBlurModes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ViewSectionBehavior.html">rhino3dm.ViewSectionBehavior</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ViewType.html">rhino3dm.ViewType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ViewportInfo.html">rhino3dm.ViewportInfo</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rhino3dm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="index.html">rhino3dm</a></li>
+      <li class="breadcrumb-item active">rhino3dm.Layer</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/reference/rhino3dm/Layer.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="rhino3dm-layer">
+<h1>rhino3dm.Layer<a class="headerlink" href="#rhino3dm-layer" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.Layer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">Layer</span></span><a class="headerlink" href="#rhino3dm.Layer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelComponent</span></code></p>
+<p>Base class for all components in a model (document) and manages the index, id and other information common to this type of objects.</p>
+<p>This class parallels the C++ ON_ModelComponent.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.CommitChanges">
+<span class="sig-name descname"><span class="pre">CommitChanges</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#rhino3dm.Layer.CommitChanges" title="Link to this definition"></a></dt>
+<dd><p>Deprecated since 6.0.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.CopyAttributesFrom">
+<span class="sig-name descname"><span class="pre">CopyAttributesFrom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">otherLayer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rhino3dm.Layer" title="rhino3dm.Layer"><span class="pre">Layer</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.CopyAttributesFrom" title="Link to this definition"></a></dt>
+<dd><p>Copy typical attributes from another layer</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.Default">
+<span class="sig-name descname"><span class="pre">Default</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.Default" title="Link to this definition"></a></dt>
+<dd><p>Sets layer to default settings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.DeleteAllUserStrings">
+<span class="sig-name descname"><span class="pre">DeleteAllUserStrings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.DeleteAllUserStrings" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.DeleteModelVisible">
+<span class="sig-name descname"><span class="pre">DeleteModelVisible</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.DeleteModelVisible" title="Link to this definition"></a></dt>
+<dd><p>Remove any model visibility setting so the layer’s global setting will be used for all viewports.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.DeletePerViewportColor">
+<span class="sig-name descname"><span class="pre">DeletePerViewportColor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.DeletePerViewportColor" title="Link to this definition"></a></dt>
+<dd><p>Remove any per viewport layer color setting so the layer’s overall setting will be used for all viewports.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>viewportId</strong> – If not Guid.Empty, then the setting for this viewport will be deleted. If Guid.Empty, the all per viewport layer color settings will be removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.DeletePerViewportPlotColor">
+<span class="sig-name descname"><span class="pre">DeletePerViewportPlotColor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.DeletePerViewportPlotColor" title="Link to this definition"></a></dt>
+<dd><p>Remove any per viewport layer plot color setting so the layer’s overall setting will be used for all viewports.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>viewportId</strong> – If not Guid.Empty, then the setting for this viewport will be deleted. If Guid.Empty, the all per viewport layer color settings will be removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.DeletePerViewportPlotWeight">
+<span class="sig-name descname"><span class="pre">DeletePerViewportPlotWeight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.DeletePerViewportPlotWeight" title="Link to this definition"></a></dt>
+<dd><p>Remove any per viewport layer plot weight setting so the layer’s overall setting will be used for all viewports.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>viewportId</strong> – If not Guid.Empty, then the setting for this viewport will be deleted. If Guid.Empty, the all per viewport layer color settings will be removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.DeletePerViewportSettings">
+<span class="sig-name descname"><span class="pre">DeletePerViewportSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.DeletePerViewportSettings" title="Link to this definition"></a></dt>
+<dd><p>Deletes per viewport layer settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>viewportId</strong> – If not Guid.Empty, then the settings for that viewport are deleted. If Guid.Empty, then all per viewport settings are deleted.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.DeletePerViewportVisible">
+<span class="sig-name descname"><span class="pre">DeletePerViewportVisible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.DeletePerViewportVisible" title="Link to this definition"></a></dt>
+<dd><p>Remove any per viewport visibility setting so the layer’s overall setting will be used for all viewports.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>viewportId</strong> – If not Guid.Empty, then the setting for this viewport will be deleted. If Guid.Empty, the all per viewport visibility settings will be removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.DeletePlotColor">
+<span class="sig-name descname"><span class="pre">DeletePlotColor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.DeletePlotColor" title="Link to this definition"></a></dt>
+<dd><p>Removes the plot color for layer. The layer’s color will be used for the plot color.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.Equals">
+<span class="sig-name descname"><span class="pre">Equals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rhino3dm.Layer" title="rhino3dm.Layer"><span class="pre">Layer</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#rhino3dm.Layer.Equals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.GetPersistentLocking">
+<span class="sig-name descname"><span class="pre">GetPersistentLocking</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#rhino3dm.Layer.GetPersistentLocking" title="Link to this definition"></a></dt>
+<dd><p>The persistent locking setting is used for layers that can be locked by a “parent” object. A common case is when a layer is a child layer (Layer.ParentI is not nil). In this case, when a parent layer is locked, then child layers are also locked. The persistent locking setting determines what happens when the parent is unlocked again.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.GetPersistentVisibility">
+<span class="sig-name descname"><span class="pre">GetPersistentVisibility</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#rhino3dm.Layer.GetPersistentVisibility" title="Link to this definition"></a></dt>
+<dd><p>The global persistent visibility setting is used for layers whose visibility can be changed by a “parent” object. A common case is when a layer is a child layer (ParentId is not nil). In this case, when a parent layer is turned off, then child layers are also turned off. The persistent visibility setting determines what happens when the parent is turned on again.</p>
+<p>Returns true if this layer’s visibility is controlled by a parent object and the parent is turned on (after being off), then this layer will also be turned on. Returns false if this layer’s visibility is controlled by a parent object and the parent layer is turned on (after being off), then this layer will continue to be off.</p>
+<p>When the persistent viability is not explicitly set, this property returns the current value of IsVisible</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.GetUserString">
+<span class="sig-name descname"><span class="pre">GetUserString</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#rhino3dm.Layer.GetUserString" title="Link to this definition"></a></dt>
+<dd><p>Gets user string from this geometry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> – id used to retrieve the string.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>string associated with the key if successful. null if no key was found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.GetUserStrings">
+<span class="sig-name descname"><span class="pre">GetUserStrings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rhino3dm.Layer.GetUserStrings" title="Link to this definition"></a></dt>
+<dd><p>Gets a copy of all (user key string, user value string) pairs attached to this geometry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new collection.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.HasPerViewportSettings">
+<span class="sig-name descname"><span class="pre">HasPerViewportSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#rhino3dm.Layer.HasPerViewportSettings" title="Link to this definition"></a></dt>
+<dd><p>Verifies that a layer has per viewport settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>viewportId</strong> – If not Guid.Empty, then checks for settings for that specific viewport. If Guid.Empty, then checks for any viewport settings.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the layer has per viewport settings, false otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.PerViewportColor">
+<span class="sig-name descname"><span class="pre">PerViewportColor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rhino3dm.Layer.PerViewportColor" title="Link to this definition"></a></dt>
+<dd><p>Gets the display color for this layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>viewportId</strong> – If not Guid.Empty, then the setting applies only to the viewport with the specified id.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The display color.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.PerViewportIsVisible">
+<span class="sig-name descname"><span class="pre">PerViewportIsVisible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#rhino3dm.Layer.PerViewportIsVisible" title="Link to this definition"></a></dt>
+<dd><p>Gets the per viewport visibility of this layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>viewportId</strong> – If not Guid.Empty, then the visibility setting for that viewport is returned. If Guid.Empty, the IsVisible property is returned.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns true if objects on layer are visible.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.PerViewportPersistentVisibility">
+<span class="sig-name descname"><span class="pre">PerViewportPersistentVisibility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#rhino3dm.Layer.PerViewportPersistentVisibility" title="Link to this definition"></a></dt>
+<dd><p>Gets the per layer persistent visibility. The persistent viability setting is used for layers whose visibility can be changed by a parent layer. In this case, when a parent layer is turned off, then child layers are also turned off. The persistent visibility setting determines what happens when the parent is turned on again.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Return true if this layer’s visibility in the specified viewport is controlled by a parent object and the parent is turned on (after being off), then this layer will also be turned on in the specified viewport. Returns false if this layer’s visibility in the specified viewport is controlled by a parent object and the parent layer is turned on(after being off), then this layer will continue to be off in the specified viewport.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.PerViewportPlotColor">
+<span class="sig-name descname"><span class="pre">PerViewportPlotColor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#rhino3dm.Layer.PerViewportPlotColor" title="Link to this definition"></a></dt>
+<dd><p>Gets the plot color for this layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>viewportId</strong> – If not Guid.Empty, then the setting applies only to the viewport with the specified id.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The plot color.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.PerViewportPlotWeight">
+<span class="sig-name descname"><span class="pre">PerViewportPlotWeight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#rhino3dm.Layer.PerViewportPlotWeight" title="Link to this definition"></a></dt>
+<dd><p>Gets the plot weight, in millimeters, for this layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>viewportId</strong> – If not Guid.Empty, then the setting applies only to the viewport with the specified id.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The plot color.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.RemoveCustomSectionStyle">
+<span class="sig-name descname"><span class="pre">RemoveCustomSectionStyle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.RemoveCustomSectionStyle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.SetPerViewportColor">
+<span class="sig-name descname"><span class="pre">SetPerViewportColor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.SetPerViewportColor" title="Link to this definition"></a></dt>
+<dd><p>Sets the display color for this layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>viewportId</strong> – If not Guid.Empty, then the setting applies only to the viewport with the specified id.</p></li>
+<li><p><strong>color</strong> – The display color.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.SetPerViewportPersistentVisibility">
+<span class="sig-name descname"><span class="pre">SetPerViewportPersistentVisibility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">persistentVisibility</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.SetPerViewportPersistentVisibility" title="Link to this definition"></a></dt>
+<dd><p>Sets the per layer persistent visibility. The persistent viability setting is used for layers whose visibility can be changed by a parent layer. In this case, when a parent layer is turned off, then child layers are also turned off. The persistent visibility setting determines what happens when the parent is turned on again.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>viewportId</strong> – If not Guid.Empty, then the setting applies only to the viewport with the specified id. If Guid.Empty, then the setting applies to all viewports with per viewport layer settings.</p></li>
+<li><p><strong>persistentVisibility</strong> – If true, this layer’s visibility in the specified viewport is controlled by a parent object and the parent is turned on (after being off), then this layer will also be turned on in the specified viewport. If false, this layer’s visibility in the specified viewport is controlled by a parent object and the parent layer is turned on (after being off), then this layer will continue to be off in the specified viewport.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.SetPerViewportPlotColor">
+<span class="sig-name descname"><span class="pre">SetPerViewportPlotColor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.SetPerViewportPlotColor" title="Link to this definition"></a></dt>
+<dd><p>Sets the plot color for this layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>viewportId</strong> – If not Guid.Empty, then the setting applies only to the viewport with the specified id.</p></li>
+<li><p><strong>color</strong> – The plot color.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.SetPerViewportPlotWeight">
+<span class="sig-name descname"><span class="pre">SetPerViewportPlotWeight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotWeight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.SetPerViewportPlotWeight" title="Link to this definition"></a></dt>
+<dd><p>Sets the plot weight, in millimeters, for this layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>viewportId</strong> – If not Guid.Empty, then the setting applies only to the viewport with the specified id.</p></li>
+<li><p><strong>plotWeight</strong> – The plot weight in millimeters. A weight of 0.0 indicates the “default” pen weight should be used. A weight of -1.0 indicates the layer should not be printed.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.SetPerViewportVisible">
+<span class="sig-name descname"><span class="pre">SetPerViewportVisible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.SetPerViewportVisible" title="Link to this definition"></a></dt>
+<dd><p>Controls layer visibility in specific viewports.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>viewportId</strong> – If not Guid.Empty, then the setting applies only to the viewport with the specified id. If Guid.Empty, then the setting applies to all viewports with per viewport layer settings.</p></li>
+<li><p><strong>visible</strong> – true to make layer visible, false to make layer invisible.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.SetPersistentLocking">
+<span class="sig-name descname"><span class="pre">SetPersistentLocking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">persistentLocking</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.SetPersistentLocking" title="Link to this definition"></a></dt>
+<dd><p>Set the persistent locking setting for this layer</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.SetPersistentVisibility">
+<span class="sig-name descname"><span class="pre">SetPersistentVisibility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">persistentVisibility</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.SetPersistentVisibility" title="Link to this definition"></a></dt>
+<dd><p>Set the global persistent visibility setting for this layer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.SetUserString">
+<span class="sig-name descname"><span class="pre">SetUserString</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#rhino3dm.Layer.SetUserString" title="Link to this definition"></a></dt>
+<dd><p>Attach a user string (key,value combination) to this geometry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> – id used to retrieve this string.</p></li>
+<li><p><strong>value</strong> – string associated with key.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>true on success.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.ToString">
+<span class="sig-name descname"><span class="pre">ToString</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#rhino3dm.Layer.ToString" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.UnsetModelPersistentVisibility">
+<span class="sig-name descname"><span class="pre">UnsetModelPersistentVisibility</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.UnsetModelPersistentVisibility" title="Link to this definition"></a></dt>
+<dd><p>Remove any model persistent visibility setting from this layer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.UnsetPerViewportPersistentVisibility">
+<span class="sig-name descname"><span class="pre">UnsetPerViewportPersistentVisibility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viewportId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">uuid.UUID</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.UnsetPerViewportPersistentVisibility" title="Link to this definition"></a></dt>
+<dd><p>Remove any per viewport persistent visibility setting so the layer’s overall setting will be used for all viewports.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>viewportId</strong> – If not Guid.Empty, then the setting for this viewport will be deleted. If Guid.Empty, the all per viewport visibility settings will be removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.UnsetPersistentLocking">
+<span class="sig-name descname"><span class="pre">UnsetPersistentLocking</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.UnsetPersistentLocking" title="Link to this definition"></a></dt>
+<dd><p>Remove any explicitly persistent locking settings from this layer</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rhino3dm.Layer.UnsetPersistentVisibility">
+<span class="sig-name descname"><span class="pre">UnsetPersistentVisibility</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#rhino3dm.Layer.UnsetPersistentVisibility" title="Link to this definition"></a></dt>
+<dd><p>Remove any explicit persistent visibility setting from this layer</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.Color">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Color</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rhino3dm.Layer.Color" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the display color for this layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.ComponentType">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ComponentType</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="ModelComponentType.html#rhino3dm.ModelComponentType" title="rhino3dm.ModelComponentType"><span class="pre">ModelComponentType</span></a></em><a class="headerlink" href="#rhino3dm.Layer.ComponentType" title="Link to this definition"></a></dt>
+<dd><p>Returns <code class="docutils literal notranslate"><span class="pre">ModelComponentType.Layer</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.Description">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rhino3dm.Layer.Description" title="Link to this definition"></a></dt>
+<dd><p>Gets and sets a short description of the layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.FullPath">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FullPath</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rhino3dm.Layer.FullPath" title="Link to this definition"></a></dt>
+<dd><p>Gets the full path to this layer. The full path includes nesting information.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.Id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">uuid.UUID</span></em><a class="headerlink" href="#rhino3dm.Layer.Id" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the ID of this layer object. You typically do not need to assign a custom ID.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.IgesLevel">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IgesLevel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rhino3dm.Layer.IgesLevel" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the IGES level for this layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.IsDeleted">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsDeleted</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#rhino3dm.Layer.IsDeleted" title="Link to this definition"></a></dt>
+<dd><p>Gets a value indicating whether this layer has been deleted and is currently in the Undo buffer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.IsExpanded">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsExpanded</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#rhino3dm.Layer.IsExpanded" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets a value indicating whether this layer is expanded in the Rhino Layer dialog.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.IsLocked">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsLocked</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#rhino3dm.Layer.IsLocked" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets a value indicating the locked state of this layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.IsReference">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsReference</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#rhino3dm.Layer.IsReference" title="Link to this definition"></a></dt>
+<dd><p>Gets a value indicting whether this layer is a referenced layer. Referenced layers are part of referenced documents.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.IsVisible">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsVisible</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#rhino3dm.Layer.IsVisible" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the global visibility of this layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.LayerIndex">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LayerIndex</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rhino3dm.Layer.LayerIndex" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the index of this layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.LinetypeIndex">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LinetypeIndex</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rhino3dm.Layer.LinetypeIndex" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the line-type index for this layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.ModelIsVisible">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModelIsVisible</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#rhino3dm.Layer.ModelIsVisible" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the model visiblity of this layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.ModelPersistentVisibility">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModelPersistentVisibility</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#rhino3dm.Layer.ModelPersistentVisibility" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the model persistent visibility of this layer. The persistent viability setting is used for layers whose visibility can be changed by a parent layer. In this case, when a parent layer is turned off, then child layers are also turned off. The persistent visibility setting determines what happens when the parent is turned on again.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.Name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rhino3dm.Layer.Name" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the name of this layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.ParentLayerId">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ParentLayerId</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">uuid.UUID</span></em><a class="headerlink" href="#rhino3dm.Layer.ParentLayerId" title="Link to this definition"></a></dt>
+<dd><p>Gets the ID of the parent layer. Layers can be organized in a hierarchical structure, in which case this returns the parent layer ID. If the layer has no parent, Guid.Empty will be returned.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.PerViewportIsVisibleInNewDetails">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PerViewportIsVisibleInNewDetails</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#rhino3dm.Layer.PerViewportIsVisibleInNewDetails" title="Link to this definition"></a></dt>
+<dd><p>Gets and sets the initial per viewport visibility of this layer in newly created detail views.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.PersistentVisibility">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PersistentVisibility</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#rhino3dm.Layer.PersistentVisibility" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the global persistent visibility setting for this layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.PlotColor">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PlotColor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rhino3dm.Layer.PlotColor" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the plot color for this layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.PlotWeight">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PlotWeight</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#rhino3dm.Layer.PlotWeight" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the weight of the plotting pen in millimeters. A weight of 0.0 indicates the “default” pen weight should be used. A weight of -1.0 indicates the layer should not be printed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.RenderMaterialIndex">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RenderMaterialIndex</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rhino3dm.Layer.RenderMaterialIndex" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the index of render material for objects on this layer that have MaterialSource() == MaterialFromLayer. A material index of -1 indicates no material has been assigned and the material created by the default Material constructor should be used.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.SortIndex">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SortIndex</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rhino3dm.Layer.SortIndex" title="Link to this definition"></a></dt>
+<dd><p>Runtime index used to sort layers in layer dialog.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.Layer.UserStringCount">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UserStringCount</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rhino3dm.Layer.UserStringCount" title="Link to this definition"></a></dt>
+<dd><p>Gets the amount of user strings.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="KnotStyle.html" class="btn btn-neutral float-left" title="rhino3dm.KnotStyle" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Leader.html" class="btn btn-neutral float-right" title="rhino3dm.Leader" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Robert McNeel &amp; Associates.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

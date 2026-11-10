@@ -59,6 +59,8 @@ The _setup.py_ script uses CMake to generate the make files necessary to build t
 $ python3 setup.py --platform js --verbose
 ```
 
+This configures a wasm32 build, the package's main build. Add `--wasm64` for the memory64 variant the package ships in `wasm64/` (it needs Chrome 133+, Firefox 134+ or Node.js 24+), and `--module` for the ES module.
+
 ### build.py
 
 The _build.py_ script run `make` to build the _rhino3dm.js_ and _rhino3dm.wasm_ files to the _build/javascript/artifacts\_js_ folder.  To build, run:

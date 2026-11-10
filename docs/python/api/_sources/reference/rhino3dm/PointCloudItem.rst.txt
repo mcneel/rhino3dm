@@ -1,0 +1,70 @@
+rhino3dm.PointCloudItem
+=======================
+
+.. py:class:: rhino3dm.PointCloudItem
+
+   Represents a single item in a point cloud. A PointCloud item always has a location, but it has an optional normal vector and color.
+
+
+   .. py:property:: Color
+      :type: tuple[int, int, int, int]
+
+
+      Gets or sets the color of this point cloud item. If this point cloud item does not have a color, System.Drawing.Color.Black is returned.
+
+
+   .. py:property:: Hidden
+      :type: bool
+
+
+      Gets or sets the hidden flag of this point cloud item. If this point cloud item does not have a hidden flag, false is returned.
+
+
+   .. py:property:: Index
+      :type: int
+
+
+      Gets the index of this point cloud item.
+
+
+   .. py:property:: Location
+      :type: Point3d
+
+
+      Gets or sets the location of this point cloud item.
+
+
+   .. py:property:: Normal
+      :type: Vector3d
+
+
+      Gets or sets the normal vector for this point cloud item. If this point cloud item does not have a normal vector, Vector3d.Unset is returned.
+
+
+   .. py:property:: PointValue
+      :type: float
+
+
+      Gets or set the extra value of this point cloud item. The extra value can be used to store a user-defined value, such as intensity. If this point cloud item does not have an extra value, RhinoMath.UnsetValue is returned.
+
+
+   .. py:property:: X
+      :type: float
+
+
+      Gets or sets the X component of this point cloud item location.
+
+
+   .. py:property:: Y
+      :type: float
+
+
+      Gets or sets the Y component of this point cloud item location.
+
+
+   .. py:property:: Z
+      :type: float
+
+
+      Gets or sets the Z component of this point cloud item location.
+

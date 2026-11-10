@@ -1,0 +1,47 @@
+rhino3dm.TextDot
+================
+
+.. py:class:: rhino3dm.TextDot(text: str, location: Point3d)
+
+   Bases: :py:obj:`GeometryBase`
+
+
+   Represents a text dot, or an annotation entity with text that always faces the camera and always has the same size.
+
+   This class refers to the geometric element that is independent from the document.
+
+
+   .. py:property:: FontFace
+      :type: str
+
+
+      Font face used for displaying the dot
+
+
+   .. py:property:: FontHeight
+      :type: int
+
+
+      Height of font used for displaying the dot
+
+
+   .. py:property:: Point
+      :type: Point3d
+
+
+      Gets or sets the position of the text dot.
+
+
+   .. py:property:: SecondaryText
+      :type: str
+
+
+      Gets or sets the secondary text of the text dot.
+
+
+   .. py:property:: Text
+      :type: str
+
+
+      Gets or sets the primary text of the text dot.
+

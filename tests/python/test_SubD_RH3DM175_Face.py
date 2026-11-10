@@ -31,8 +31,8 @@ class TestFaceIdentityAndTopology(fixture.SubDFixtureTestCase):
         ids = [f.Id for f in self.subd.Faces]
         self.assertEqual(len(set(ids)), spec.SUBD["face_count"])
         for face in self.subd.Faces:
-            self.assertEqual(self.subd.Faces[face.Id].Id, face.Id)
-            self.assertEqual(face.Index, face.Id)
+            self.assertEqual(self.subd.Faces.Find(face.Id).Id, face.Id)
+            # 8.x's face.Index was the Id; RhinoCommon has only Id.
 
     def test_edge_and_vertex_counts(self):
         for name, face in self.faces.items():
@@ -44,26 +44,27 @@ class TestFaceIdentityAndTopology(fixture.SubDFixtureTestCase):
     def test_vertices_are_the_authored_loop(self):
         for name, face in self.faces.items():
             with self.subTest(face=name):
-                got = [fixture.vertex_name(face.Vertex(i))
+                got = [fixture.vertex_name(face.VertexAt(i))
                        for i in range(face.VertexCount)]
                 self.assertEqual(set(got), set(spec.FACES[name]["loop"]))
 
     def test_edges_are_the_authored_boundary(self):
         for name, face in self.faces.items():
             with self.subTest(face=name):
-                got = {fixture.edge_name(face.Edge(i)) for i in range(face.EdgeCount)}
+                got = {fixture.edge_name(face.EdgeAt(i)) for i in range(face.EdgeCount)}
                 expected = {spec.canon(e) for e in spec.FACES[name]["edges"]}
                 self.assertEqual(got, expected)
 
     def test_sub_iterators_agree_with_the_indexed_accessors(self):
         for name, face in self.faces.items():
             with self.subTest(face=name):
-                self.assertEqual(face.Edges.Count, face.EdgeCount)
-                self.assertEqual(face.Vertices.Count, face.VertexCount)
+                # face.Edges / face.Vertices are lists (D26).
+                self.assertEqual(len(face.Edges), face.EdgeCount)
+                self.assertEqual(len(face.Vertices), face.VertexCount)
                 self.assertEqual([e.Id for e in face.Edges],
-                                 [face.Edge(i).Id for i in range(face.EdgeCount)])
+                                 [face.EdgeAt(i).Id for i in range(face.EdgeCount)])
                 self.assertEqual([v.Id for v in face.Vertices],
-                                 [face.Vertex(i).Id for i in range(face.VertexCount)])
+                                 [face.VertexAt(i).Id for i in range(face.VertexCount)])
 
     def test_every_face_edge_reports_this_face(self):
         for name, face in self.faces.items():
@@ -78,9 +79,9 @@ class TestFaceGeometry(fixture.SubDFixtureTestCase):
         for name, face in self.faces.items():
             with self.subTest(face=name):
                 for i in range(face.VertexCount):
-                    vertex = face.Vertex(i)
+                    vertex = face.VertexAt(i)
                     self.assertPointEqual(
-                        face.ControlNetPoint(i),
+                        vertex.ControlNetPoint,   # 8.x: face.ControlNetPoint(i)
                         spec.VERTEX_POINTS[fixture.vertex_name(vertex)],
                         "%s.ControlNetPoint(%d)" % (name, i))
 
@@ -119,11 +120,10 @@ class TestFaceGeometry(fixture.SubDFixtureTestCase):
     def test_faces_are_convex_and_planar(self):
         for name, face in self.faces.items():
             with self.subTest(face=name):
+                # IsNotConvex / IsNotPlanar were removed (D72).
                 self.assertTrue(face.IsConvex, "%s should be convex" % name)
-                self.assertFalse(face.IsNotConvex)
                 self.assertTrue(face.IsPlanar(spec.VALUE_TOL),
                                 "%s should be planar" % name)
-                self.assertFalse(face.IsNotPlanar(spec.VALUE_TOL))
 
 
 class TestFaceSharpness(fixture.SubDFixtureTestCase):
@@ -155,7 +155,7 @@ class TestFaceSharpness(fixture.SubDFixtureTestCase):
             with self.subTest(face=name):
                 sharp = [e for e in face.Edges if e.IsSharp]
                 self.assertEqual(len(sharp), face.SharpEdgeCount)
-                ends = [e.EndSharpness(i) for e in sharp for i in (0, 1)]
+                ends = [e.EndSharpness(i, False) for e in sharp for i in (0, 1)]
                 self.assertAlmostEqual(face.MaximumEdgeSharpness,
                                        max(ends) if ends else 0.0,
                                        delta=spec.VALUE_TOL)

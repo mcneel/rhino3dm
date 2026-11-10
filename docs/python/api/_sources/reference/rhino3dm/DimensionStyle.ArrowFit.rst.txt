@@ -1,0 +1,31 @@
+rhino3dm.DimensionStyle.ArrowFit
+================================
+
+.. py:class:: rhino3dm.DimensionStyle.ArrowFit
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Arrow display position inside or outside extension lines
+
+
+   .. py:attribute:: ArrowsInside
+      :value: 1
+
+
+      Force arrows inside extensions
+
+
+   .. py:attribute:: ArrowsOutside
+      :value: 2
+
+
+      Force arrows outside extensions
+
+
+   .. py:attribute:: Auto
+      :value: 0
+
+
+      Auto - Display when space permits
+

@@ -1,0 +1,60 @@
+rhino3dm.FileReference
+======================
+
+.. py:class:: rhino3dm.FileReference
+
+   Manages a reference to an existing or non-existing file, using either or both absolute or relative paths. Once constructed, this class is immutable.
+
+
+   .. py:method:: CreateFromFullAndRelativePaths(fullPath: str, relativePath: str) -> FileReference
+      :staticmethod:
+
+
+      Returns a new file reference. This returns a new instance even if the path does not exist.
+
+      :param fullPath: A full path. This parameter cannot be null.
+      :param relativePath: A relative path. This parameter can be null.
+
+      :returns: A file reference to the specified paths.
+
+
+
+   .. py:method:: CreateFromFullPath(fullPath: str) -> FileReference
+      :staticmethod:
+
+
+      Returns a new file reference. This returns a new instance even if the path does not exist.
+
+      :param fullPath: A full path.
+
+      :returns: A file reference to the specified path.
+
+
+
+   .. py:property:: FullPath
+      :type: str
+
+
+      Gets the absolute path of this file reference.
+
+
+   .. py:property:: FullPathStatus
+      :type: FileReferenceStatus
+
+
+      Gets the file reference status.
+
+
+   .. py:property:: IsSet
+      :type: bool
+
+
+      Returns an indication of the fact that the reference is actually set to a non-null value.
+
+
+   .. py:property:: RelativePath
+      :type: str
+
+
+      Gets the relative path of this file reference.
+

@@ -22,10 +22,6 @@ import shlex
 import shutil
 from subprocess import Popen, PIPE
 import time
-if sys.version_info[0] < 3:
-    import imp
-else:
-    from importlib.machinery import SourceFileLoader
 import time
 # ---------------------------------------------------- Globals ---------------------------------------------------------
 
@@ -46,10 +42,9 @@ docs_folder = os.path.abspath(os.path.join(script_folder, "..", "docs"))
 librhino3dm_native_folder = os.path.abspath(os.path.join(src_folder, "librhino3dm_native"))
 native_lib_name = 'librhino3dm_native'
 
-if sys.version_info[0] < 3:
-    bootstrap = imp.load_source('bootstrap', os.path.join(script_folder, "bootstrap.py"))
-else:
-    bootstrap = SourceFileLoader('bootstrap', os.path.join(script_folder, "bootstrap.py")).load_module()
+# bootstrap.py sits beside this script (SourceFileLoader.load_module is gone in Python 3.15)
+sys.path.insert(0, script_folder)
+import bootstrap
 # ---------------------------------------------------- Logging ---------------------------------------------------------
 # colors for terminal reporting
 class bcolors:
@@ -179,24 +174,7 @@ def build_windows():
     ext = 'dll'
     native_lib_filename = native_lib_name + '.' + ext
 
-    print(" Building Windows 32-bit native library...")
-    target_path = os.path.join(build_folder, platform_full_names.get("windows").lower(), "win32")
-    vcxproj_path = os.path.abspath(os.path.join(target_path, native_lib_name + '.vcxproj'))
-
-    if not check_for_setup_files(vcxproj_path):
-        return False
-    
-    item_to_check = os.path.abspath(os.path.join(target_path, "Release", native_lib_filename))    
-    if not overwrite_check(item_to_check):
-        return False
-
-    os.chdir(target_path)
-    
-    run_command("cmake --build . --config Release --target librhino3dm_native", False)
-
-    if not build_did_succeed(item_to_check):                
-        return False
-
+    # no 32-bit library: opennurbs 9 needs 64-bit pointers (see setup_windows in setup.py; RH3DM-215)
     print(" Building Windows 64-bit native library...")
     target_path = os.path.join(build_folder, platform_full_names.get("windows").lower(), "win64")
     vcxproj_path = os.path.abspath(os.path.join(target_path, native_lib_name + '.vcxproj'))
@@ -321,7 +299,7 @@ def build_macos():
         csproj_path = os.path.abspath(os.path.join(dotnet_folder, "Rhino3dm.csproj"))
         output_dir = os.path.abspath(os.path.join(target_path, "dotnet"))
 
-        command = 'dotnet build -f net7.0 ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
+        command = 'dotnet build -f net10.0 ' + csproj_path + ' /p:Configuration=Release;OutDir=' + output_dir
         run_command(command)
 
         item_to_check = os.path.abspath(os.path.join(output_dir, "Rhino3dm.dll"))
@@ -475,17 +453,10 @@ def build_js():
 
     
 
-    # build draco_wasm static lib
+    # Draco is compiled inside the rhino3dm build (src/draco_sources.cmake): no separate step.
     # Parallelize the make across all available cores; the compile phase is the
     # bottleneck (hundreds of TUs) and make defaults to a single job.
-    # Build only the draco_static target (libdraco.a) rather than the default
-    # 'all': rhino3dm links libdraco.a alone, so the draco_decoder/draco_encoder
-    # command-line tools 'all' also builds are dead weight under Emscripten
-    # (two extra executable links per fresh build).
     jobs = os.cpu_count() or 4
-    draco_path = os.path.join(target_path, "draco_wasm")
-    os.chdir(draco_path)
-    run_command("emmake make -j" + str(jobs) + " draco_static", True)
 
     os.chdir(target_path)
 

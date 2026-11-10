@@ -1,0 +1,121 @@
+rhino3dm.BrepFaceList
+=====================
+
+.. py:class:: rhino3dm.BrepFaceList
+
+   Provides access to all the Faces in a Brep object.
+
+
+   .. py:method:: Add(surface: Surface) -> BrepFace
+                  Add(surfaceIndex: int) -> BrepFace
+
+      Create and add a new face to this list. An incomplete face is added. The caller must create and fill in the loops used by the face.
+
+      :param surfaceIndex: index of surface in brep's Surfaces list
+
+
+
+   .. py:method:: AddConeFace(vertex: BrepVertex, edge: BrepEdge, revEdge: bool) -> BrepFace
+
+      Add a new face to the brep whose surface geometry is a ruled cone with the edge as the base and the vertex as the apex point.
+
+      :param vertex: The apex of the cone will be at this vertex. The north side of the surface's parameter space will be a singular point at the vertex.
+      :param edge: The south side of the face's surface will run along this edge.
+      :param revEdge: true if the new face's outer boundary orientation along the edge is opposite the orientation of edge.
+
+
+
+   .. py:method:: AddRuledFace(edgeA: BrepEdge, revEdgeA: bool, edgeB: BrepEdge, revEdgeB: bool) -> BrepFace
+
+      Add a new face to the brep whose surface geometry is a ruled surface between two edges.
+
+      :param edgeA: The south side of the face's surface will run along edgeA.
+      :param revEdgeA: true if the new face's outer boundary orientation along edgeA is opposite the orientation of edgeA.
+      :param edgeB: The north side of the face's surface will run along edgeA
+      :param revEdgeB: true if the new face's outer boundary orientation along edgeB is opposite the orientation of edgeB
+
+
+
+   .. py:method:: ClearPerFaceColors() -> int
+
+      Removes all per face color overrides on the active level.
+
+      Per face colors are a mutable property on ``BrepFace`` and are set with ``BrepFace.PerFaceColor``.
+
+      :returns: Number of changed faces.
+
+
+
+   .. py:method:: ExtractFace(faceIndex: int) -> Brep
+
+      Extracts a face from a Brep.
+
+      :param faceIndex: A face index
+
+      :returns: A brep. This can be null.
+
+
+
+   .. py:method:: Flip(onlyReversedFaces: bool) -> None
+
+      Flips the orientation of faces.
+
+      :param onlyReversedFaces: If true, clears all BrepFace.OrientationIsReversed flags by calling BrepFace.Transpose() on each face with a true OrientationIsReversed setting. If false, all of the faces are flipped regardless of their orientation.
+
+
+
+   .. py:method:: RemoveAt(faceIndex: int) -> None
+
+      Deletes a face at a specified index.
+
+      :param faceIndex: The index of the mesh face.
+
+
+
+   .. py:method:: RemoveSlits() -> bool
+
+      Remove slit trims and slit boundaries from each face.
+
+      :returns: true if any slits were removed
+
+
+
+   .. py:method:: ShrinkFaces() -> bool
+
+      Shrinks all the underlying surfaces in this Brep. Sometimes the surfaces extend far beyond the trimming boundaries of the Brep Face. This function will remove those portions of the surfaces that are not used.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: StandardizeFaceSurface(faceIndex: int) -> bool
+
+      Standardizes the relationship between a BrepFace and the 3d surface it uses. When done, the face will be the only face that references its 3d surface, and the orientations of the face and 3d surface will be the same.
+
+      :param faceIndex: The index of the face.
+
+      :returns: true if successful.
+
+
+
+   .. py:method:: StandardizeFaceSurfaces() -> None
+
+      Standardize all faces in the brep.
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the number of brep faces.
+
+
+   .. py:property:: HasPerFaceColors
+      :type: bool
+
+
+      True if one or more faces on the active level have per face color overrides.
+
+      Per face colors are a mutable property on ``BrepFace`` and are set with ``BrepFace.PerFaceColor``.
+

@@ -1,0 +1,296 @@
+rhino3dm.AnnotationBase
+=======================
+
+.. py:class:: rhino3dm.AnnotationBase
+
+   Bases: :py:obj:`GeometryBase`
+
+
+   Provides a common base class to all annotation geometry.
+
+   This class refers to the geometric element that is independent from the document.
+
+
+   .. py:method:: ClearPropertyOverrides() -> bool
+
+      Clears all overridden properties for this annotation
+
+
+
+   .. py:method:: GetDimensionStyle(parentDimStyle: DimensionStyle | None) -> DimensionStyle
+
+      Return the proper dimension style from which to get properties for this annotation object If this object has style overrides, those will be included in the returned dimension style and the style will be updated to include the current state of the parent style for non-overridden fields
+
+
+
+   .. py:method:: IsAllBold() -> bool
+
+      Returns true if all of the text in the annotation is Bold, otherwise returns false
+
+
+
+   .. py:method:: IsAllItalic() -> bool
+
+      Returns true if all of the text in the annotation is Italic, otherwise returns false
+
+
+
+   .. py:method:: IsAllUnderlined() -> bool
+
+      Returns true if all of the text in the annotation is Underlined, otherwise returns false
+
+
+
+   .. py:method:: IsPropertyOverridden(field: DimensionStyle) -> bool
+
+      Returns true if a property is overridden
+
+
+
+   .. py:method:: PlainTextToRtf(str: AnnotationBase.PlainTextToRtf.str) -> AnnotationBase.PlainTextToRtf.str
+      :staticmethod:
+
+
+
+   .. py:method:: RunReplace(replaceString: str, startRunIndex: int, startRunPosition: int, endRunIndex: int, endRunPosition: int) -> bool
+
+      Replace text within a formatted string
+
+
+
+   .. py:method:: SetBold(set_on: bool) -> bool
+
+
+   .. py:method:: SetFacename(set_on: bool, facename: str) -> bool
+
+
+   .. py:method:: SetItalic(set_on: bool) -> bool
+
+
+   .. py:method:: SetOverrideDimStyle(OverrideStyle: DimensionStyle) -> bool
+
+      Set a style including overrides for this annotation object. The DimensionStyle OverrideStyle must have the override fields marked as overridden and must have it's Id set to nil. Use DimensionStyle.SetFieldOverride(Field field) and related functions to manage override settings. To override a field, the field value must be set and the field must be marked as an override. The DimensionStyle passed in here must not be in the dimstyle table
+
+
+
+   .. py:method:: SetRichText(rtfText: str, dimstyle: DimensionStyle | None) -> None
+
+      Sets the annotation's text as rich text (RTF), optionally using a specified dimension style for formatting overrides.
+
+      :param rtfText: The RTF (Rich Text Format) string to assign to the annotation.
+      :param dimstyle: The dimension style to use for formatting overrides, or null to use the current style.
+
+
+
+   .. py:method:: SetUnderline(set_on: bool) -> bool
+
+
+   .. py:method:: WrapText() -> None
+                  WrapText(wrapWidth: float) -> None
+
+      Wrap text to the given width. Unlike ``WrapText``, this does not use or change ``FormatWidth``. Has no effect unless ``TextIsWrapped`` is true.
+
+      :param wrapWidth: The width to wrap the text to, in model units. Must be positive.
+
+
+
+   .. py:property:: AlternateDimensionLengthDisplay
+      :type: DimensionStyle
+
+
+      Alternate length display units and format
+
+
+   .. py:property:: AnnotationType
+      :type: AnnotationType
+
+
+      Type of annotation
+
+
+   .. py:property:: DimensionLengthDisplay
+      :type: DimensionStyle
+
+
+      Length display units and format
+
+
+   .. py:property:: DimensionScale
+      :type: float
+
+
+      Gets or sets the dimension scale
+
+
+   .. py:property:: DimensionStyleId
+      :type: uuid.UUID
+
+
+      Id of this annotation's parent dimstyle If this annotation has overrides to dimstyle properties, those overrides will be represented in the DimensionStyle returned by DimensionStyle(ParentStyle)
+
+
+   .. py:property:: DrawForward
+      :type: bool
+
+
+      Gets or sets whether the text is oriented towards the reader when viewed from behind
+
+
+   .. py:property:: FirstCharFont
+      :type: Font
+
+
+      Returns the font used by the first run of text in an annotation
+
+
+   .. py:property:: Font
+      :type: Font
+
+
+      The base Font for the text of the annotation. The text string is rich text and therefore a different font that the base font can be associated with sub strings of the text
+
+
+   .. py:property:: FormatWidth
+      :type: float
+
+
+      Text format width (Wrapping rectangle)
+
+
+   .. py:property:: HasPropertyOverrides
+      :type: bool
+
+
+
+   .. py:property:: LineSpaceScale
+      :type: float
+
+
+      Scale applied to line spacing
+
+
+   .. py:property:: MaskColor
+      :type: tuple[int, int, int, int]
+
+
+      Color to use for drawing a text mask when it is enabled. If the mask is enabled and MaskColor is System.Drawing.Color.Transparent, then the viewport's color will be used for the MaskColor
+
+
+   .. py:property:: MaskColorSource
+      :type: DimensionStyle
+
+
+      Gets or sets whether the mask background color is from the background or from a color
+
+
+   .. py:property:: MaskEnabled
+      :type: bool
+
+
+      Determines whether or not to draw a Text Mask
+
+
+   .. py:property:: MaskFrame
+      :type: DimensionStyle
+
+
+      Gets or sets whether to draw a frame around a text mask
+
+
+   .. py:property:: MaskOffset
+      :type: float
+
+
+      Offset for the border around text of the rectangle used to draw the mask. This value multiplied by TextHeight is the offset on each side of the tight rectangle around the text characters to the mask rectangle. The default value is 0.1.
+
+
+   .. py:property:: ParentDimensionStyle
+      :type: DimensionStyle
+
+
+      The parent dimension style associated with this annotation
+
+
+   .. py:property:: PlainText
+      :type: str
+
+
+      Text stripped of RTF formatting information
+
+
+   .. py:property:: PlainTextWithFields
+      :type: str
+
+
+      Text stripped of RTF formatting information and with field expressions intact
+
+
+   .. py:property:: Plane
+      :type: Plane
+
+
+      Plane that this annotation lies on
+
+
+   .. py:property:: RichText
+      :type: str
+
+
+      Text including additional RTF formatting information
+
+
+   .. py:property:: Text
+      :type: str
+
+
+      Text including additional RTF formatting information
+
+
+   .. py:property:: TextHasRtfFormatting
+      :type: bool
+
+
+      Gets a value indicating whether the annotation's text is formatted as RTF (Rich Text Format). Returns true if the text begins with an RTF header; otherwise, false.
+
+
+   .. py:property:: TextHeight
+      :type: float
+
+
+      AnnotationBase.TextHeight Gets the parent dimstyle for the annotation and gets or sets the text height in the dimstyle
+
+
+   .. py:property:: TextIsWrapped
+      :type: bool
+
+
+      Is text wrapping on
+
+
+   .. py:property:: TextModelWidth
+      :type: float
+
+
+      Width of text in the model
+
+
+   .. py:property:: TextRotationDegrees
+      :type: float
+
+
+      Rotation of text in degrees
+
+
+   .. py:property:: TextRotationRadians
+      :type: float
+
+
+      Rotation of text in radians
+
+
+   .. py:property:: UseKerning
+      :type: bool
+
+
+      Use kerning data in font to set distances between glyphs
+

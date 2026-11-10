@@ -1,0 +1,76 @@
+rhino3dm.Torus
+==============
+
+.. py:class:: rhino3dm.Torus
+              Torus(basePlane: Plane, majorRadius: float, minorRadius: float)
+
+   Represents the value of a plane and two radii in a torus that is oriented in three-dimensional space.
+
+
+   .. py:method:: EpsilonEquals(other: Torus, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: ToBrep() -> Brep
+
+      Converts this torus to a Brep. This is synonymous with calling ``Brep.CreateFromTorus``.
+
+      :returns: A Brep representation of this torus, or null on error.
+
+
+
+   .. py:method:: ToNurbsSurface() -> NurbsSurface
+
+      Converts this torus to its NURBS surface representation. This is synonymous with calling ``NurbsSurface.CreateFromTorus``.
+
+      :returns: A NURBS surface representation of this torus, or null on error.
+
+
+
+   .. py:method:: ToRevSurface() -> RevSurface
+
+      Converts this torus to a surface of revolution representation. This is synonymous with calling ``RevSurface.CreateFromTorus``.
+
+      :returns: A surface of revolution representation of this torus, or null on error.
+
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Gets a value indicating whether this torus is valid.
+
+
+   .. py:property:: MajorRadius
+      :type: float
+
+
+      Gets or sets the radius of the circle that lies at the heart of the torus.
+
+
+   .. py:property:: MinorRadius
+      :type: float
+
+
+      Gets or sets the radius of the torus section.
+
+
+   .. py:property:: Plane
+      :type: Plane
+
+
+      Gets or sets the plane for the torus large circle.
+
+
+   .. py:attribute:: Unset
+      :type:  Torus
+      :value: Ellipsis
+
+
+      object, /) -> Torus
+
+      :type: (arg
+

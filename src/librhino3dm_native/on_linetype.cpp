@@ -23,6 +23,29 @@ RH_C_FUNCTION void ON_Linetype_Default(ON_Linetype* pLinetype)
     *pLinetype = ON_Linetype::Continuous;
 }
 
+// A copy of the built-in line pattern with the given index (ON_Linetype::Continuous is -1
+// through ON_Linetype::Dots at -9), or nullptr.
+RH_C_FUNCTION ON_Linetype* ON_Linetype_NewBuiltIn(int index)
+{
+  const ON_Linetype* builtins[] =
+  {
+    &ON_Linetype::Continuous, &ON_Linetype::ByLayer, &ON_Linetype::ByParent,
+    &ON_Linetype::Hidden, &ON_Linetype::Dashed, &ON_Linetype::DashDot,
+    &ON_Linetype::Center, &ON_Linetype::Border, &ON_Linetype::Dots
+  };
+  for (const ON_Linetype* builtin : builtins)
+  {
+    if (builtin->Index() == index)
+      return new ON_Linetype(*builtin);
+  }
+  return nullptr;
+}
+
+RH_C_FUNCTION bool ON_Linetype_ClearPattern(ON_Linetype* pLinetype)
+{
+  return pLinetype ? pLinetype->ClearPattern() : false;
+}
+
 RH_C_FUNCTION void ON_Linetype_GetLinetypeName(const ON_Linetype* pLinetype, CRhCmnStringHolder* pStringHolder)
 {
   if( pLinetype && pStringHolder)

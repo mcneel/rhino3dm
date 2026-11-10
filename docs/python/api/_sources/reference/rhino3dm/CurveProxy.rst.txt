@@ -1,0 +1,17 @@
+rhino3dm.CurveProxy
+===================
+
+.. py:class:: rhino3dm.CurveProxy
+
+   Bases: :py:obj:`Curve`
+
+
+   Represent curve geometry. Usually this is part of another piece of geometry that can be represented as a "proxy".
+
+
+   .. py:property:: ProxyCurveIsReversed
+      :type: bool
+
+
+      True if "this" is a curve is reversed from the "real" curve geometry
+

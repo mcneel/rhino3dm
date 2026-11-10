@@ -1,0 +1,118 @@
+rhino3dm.File3dmShutLining
+==========================
+
+.. py:class:: rhino3dm.File3dmShutLining
+
+   Represents the shut-lining attached to file3dm object attributes.
+
+
+   .. py:method:: AddCurve() -> uuid.UUID
+                  AddCurve(curveId: uuid.UUID) -> uuid.UUID
+
+      Adds a curve to the shut-lining that follows the curve object with the given id. If the shut-lining already has a curve that follows that object, no curve is added.
+
+      :param curveId: The id of a curve object in the model.
+
+      :returns: curveId on success, Guid.Empty if curveId is Guid.Empty.
+
+
+
+   .. py:method:: CurveEnabled(curve_id: uuid.UUID) -> bool
+
+      Return whether shut-line is created for the given curve.
+
+
+
+   .. py:method:: CurveIsBump(curve_id: uuid.UUID) -> bool
+
+      Returns whether to create a bump instead of a dent for the given curve.
+
+
+
+   .. py:method:: CurveProfile(curve_id: uuid.UUID) -> int
+
+      Returns the profile of the shut-line for the given curve.
+
+
+
+   .. py:method:: CurvePull(curve_id: uuid.UUID) -> bool
+
+      Returns whether the given curve is pulled to the surface before creating the shut-line.
+
+
+
+   .. py:method:: CurveRadius(curve_id: uuid.UUID) -> float
+
+      Returns the radius of the pipe used to create the shut-line for the given curve.
+
+
+
+   .. py:method:: DeleteAllCurves() -> None
+
+      Deletes all the curves from the shut-lining.
+
+
+
+   .. py:method:: GetCurves() -> list[Any]
+
+      Gets all the curves on the shut-lining. Each curve is identified by a Guid. If there are no curves present, the array will be empty.
+
+
+
+   .. py:method:: SetCurveEnabled(curve_id: uuid.UUID, enabled: bool) -> None
+
+      Sets whether shut-line is created for the given curve.
+
+
+
+   .. py:method:: SetCurveIsBump(curve_id: uuid.UUID, b: bool) -> None
+
+      Sets whether to create a bump instead of a dent for the given curve.
+
+
+
+   .. py:method:: SetCurveProfile(curve_id: uuid.UUID, profile: int) -> None
+
+      Sets the profile of the shut-line for the given curve.
+
+
+
+   .. py:method:: SetCurvePull(curve_id: uuid.UUID, pull: bool) -> None
+
+      Sets whether the given curve is pulled to the surface before creating the shut-line.
+
+
+
+   .. py:method:: SetCurveRadius(curve_id: uuid.UUID, radius: float) -> None
+
+      Sets the radius of the pipe used to create the shut-line for the given curve.
+
+
+
+   .. py:property:: AutoUpdate
+      :type: bool
+
+
+      Specifies whether the shut-lining automatically updates or not.
+
+
+   .. py:property:: Faceted
+      :type: bool
+
+
+      Specifies whether the shut-lining is faceted or not.
+
+
+   .. py:property:: ForceUpdate
+      :type: bool
+
+
+      Specifies whether updating is forced or not.
+
+
+   .. py:property:: On
+      :type: bool
+
+
+      Specifies whether shut-lining is enabled or not.
+

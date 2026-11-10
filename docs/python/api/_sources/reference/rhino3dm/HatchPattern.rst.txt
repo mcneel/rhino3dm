@@ -1,0 +1,117 @@
+rhino3dm.HatchPattern
+=====================
+
+.. py:class:: rhino3dm.HatchPattern
+              HatchPattern(other: HatchPattern)
+
+   Bases: :py:obj:`ModelComponent`
+
+
+   Base class for all components in a model (document) and manages the index, id and other information common to this type of objects.
+
+   This class parallels the C++ ON\_ModelComponent.
+
+
+   .. py:method:: DeleteAllUserStrings() -> None
+
+
+   .. py:method:: GetUserString(key: str) -> str
+
+      Gets user string from this geometry.
+
+      :param key: id used to retrieve the string.
+
+      :returns: string associated with the key if successful. null if no key was found.
+
+
+
+   .. py:method:: GetUserStrings() -> list[Any]
+
+      Gets a copy of all (user key string, user value string) pairs attached to this geometry.
+
+      :returns: A new collection.
+
+
+
+   .. py:method:: RemoveAllHatchLines() -> None
+
+      Remove all of the hatch line from the pattern.
+
+
+
+   .. py:method:: RemoveHatchLine(hatchLineIndex: int) -> bool
+
+      Remove a hatch line from the pattern.
+
+      :param hatchLineIndex: The index of the hatch line to remove.
+
+      :returns: True if successful, false if index is out of range.
+
+
+
+   .. py:method:: SetUserString(key: str, value: str) -> bool
+
+      Attach a user string (key,value combination) to this geometry.
+
+      :param key: id used to retrieve this string.
+      :param value: string associated with key.
+
+      :returns: true on success.
+
+
+
+   .. py:property:: AlwaysModelDistances
+      :type: bool
+
+
+      Hatchpattern patterns are typically interpreted as distances on the printed output when printing. In this case AlwaysModelDistances is false (default). When set to true, the hatch pattern will be interpreted as being in world distances.
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.HatchPattern``.
+
+
+   .. py:property:: Description
+      :type: str
+
+
+      Gets and sets a short description of the pattern.
+
+
+   .. py:property:: FillType
+      :type: HatchPatternFillType
+
+
+      Gets the pattern's fill type.
+
+
+   .. py:property:: HatchLineCount
+      :type: int
+
+
+      Get the number of HatchLines in the pattern.
+
+
+   .. py:property:: Index
+      :type: int
+
+
+      Index in the hatch pattern table for this pattern. -1 if not in the table.
+
+
+   .. py:property:: PatternUnitSystem
+      :type: UnitSystem
+
+
+      Hatchpattern patterns are typically defined as distances on the printed output when printing. In this case PatternUnitSystem is UnitSystem.None (default). When set to any other unit system, the hatch pattern will be scaled acordingly.
+
+
+   .. py:property:: UserStringCount
+      :type: int
+
+
+      Gets the amount of user strings.
+

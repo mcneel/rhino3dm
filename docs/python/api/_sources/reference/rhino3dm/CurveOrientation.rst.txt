@@ -1,0 +1,31 @@
+rhino3dm.CurveOrientation
+=========================
+
+.. py:class:: rhino3dm.CurveOrientation
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated values for closed curve orientations.
+
+
+   .. py:attribute:: Clockwise
+      :value: -1
+
+
+      The curve's orientation is clockwise in the XY plane.
+
+
+   .. py:attribute:: CounterClockwise
+      :value: 1
+
+
+      The curve's orientation is counter clockwise in the XY plane.
+
+
+   .. py:attribute:: Undefined
+      :value: 0
+
+
+      Unable to compute the curve's orientation.
+

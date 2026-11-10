@@ -1,0 +1,29 @@
+rhino3dm.OrdinateDimension.MeasuredDirection
+============================================
+
+.. py:class:: rhino3dm.OrdinateDimension.MeasuredDirection
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Ordinate dimension measures x or y direction
+
+
+   .. py:attribute:: Unset
+      :value: 0
+
+
+
+   .. py:attribute:: Xaxis
+      :value: 1
+
+
+      Measures horizontal distance
+
+
+   .. py:attribute:: Yaxis
+      :value: 2
+
+
+      Measures vertical distance
+

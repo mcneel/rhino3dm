@@ -1,0 +1,269 @@
+rhino3dm.Interval
+=================
+
+.. py:class:: rhino3dm.Interval
+              Interval(t0: float, t1: float)
+              Interval(arg: Interval)
+              Interval(arg: collections.abc.Sequence[Any], /)
+
+   Represents an interval in one-dimensional space, that is defined as two extrema or bounds.
+
+
+   .. py:method:: CompareTo(other: Interval) -> int
+
+      Compares this ``Interval`` with another interval.
+
+      The lower bound has first evaluation priority.
+
+      :param other: The other ``Interval`` to compare with.
+
+      :returns: if this is identical to other
+                -1: if this[0] < other[0]
+                +1: if this[0] > other[0]
+                -1: if this[0] == other[0] and this[1] < other[1]
+                +1: if this[0] == other[0] and this[1] > other[1]
+                .
+      :rtype: 0
+
+
+
+   .. py:method:: EpsilonEquals(other: Interval, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: Equals(other: Interval) -> bool
+
+      Determines whether the specified ``Interval`` is equal to the current ``Interval``, comparing by value.
+
+      :param other: The other interval to compare with.
+
+      :returns: true if obj is an ``Interval`` and has the same bounds; false otherwise.
+
+
+
+   .. py:method:: Expand(value: float) -> None
+
+      Expand an interval by adding the value to T1 and subtracting it from T0. If T1 < T0, T0 and T1 are swapped.
+
+
+
+   .. py:method:: FromIntersection(a: Interval, b: Interval) -> Interval
+      :staticmethod:
+
+
+      Returns a new Interval that is the Intersection of the two input Intervals.
+
+      :param a: The first input interval.
+      :param b: The second input interval.
+
+      :returns: If the intersection is not empty, then intersection = [max(a.Min(),b.Min()), min(a.Max(),b.Max())] The interval [ON.UnsetValue,ON.UnsetValue] is considered to be the empty set interval. The result of any intersection involving an empty set interval or disjoint intervals is the empty set interval.
+
+
+
+   .. py:method:: FromUnion(a: Interval, b: Interval) -> Interval
+      :staticmethod:
+
+
+      Returns a new Interval which contains both inputs.
+
+      :param a: The first input interval.
+      :param b: The second input interval.
+
+      :returns: The union of an empty set and an increasing interval is the increasing interval.
+                The union of two empty sets is empty.
+                The union of an empty set an a non-empty interval is the non-empty interval.
+                The union of two non-empty intervals is [min(a.Min(),b.Min()), max(a.Max(),b.Max())]
+
+
+
+   .. py:method:: Grow(value: float) -> None
+
+      Grows the ``Interval`` to include the given number.
+
+      :param value: Number to include in this interval.
+
+
+
+   .. py:method:: IncludesInterval(interval: Interval) -> bool
+                  IncludesInterval(interval: Interval, strict: bool) -> bool
+
+      Tests another interval for Interval inclusion.
+
+      :param interval: Interval to test.
+      :param strict: If true, the other interval must be fully on the inside of the Interval.
+
+      :returns: true if the other interval is contained within the limits of this Interval; otherwise false.
+
+
+
+   .. py:method:: IncludesParameter(t: float) -> bool
+                  IncludesParameter(t: float, strict: bool) -> bool
+
+      Tests a parameter for Interval inclusion.
+
+      :param t: Parameter to test.
+      :param strict: If true, the parameter must be fully on the inside of the Interval.
+
+      :returns: true if t is contained within the limits of this Interval.
+
+
+
+   .. py:method:: MakeIncreasing() -> None
+
+      Ensures this ``Interval`` is either singleton or increasing.
+
+
+
+   .. py:method:: NormalizedIntervalAt(intervalParameter: Interval) -> Interval
+
+      Converts interval value, or pair of values, to normalized parameter.
+
+      :returns: Normalized parameter x so that min\*(1.0-x) + max\*x = intervalParameter.
+
+
+
+   .. py:method:: NormalizedParameterAt(intervalParameter: float) -> float
+
+      Converts interval value, or pair of values, to normalized parameter.
+
+      :returns: Normalized parameter x so that min\*(1.0-x) + max\*x = intervalParameter.
+
+
+
+   .. py:method:: ParameterAt(normalizedParameter: float) -> float
+
+      Converts normalized parameter to interval value, or pair of values.
+
+      :returns: Interval parameter min\*(1.0-normalizedParameter) + max\*normalizedParameter.
+
+
+
+   .. py:method:: ParameterIntervalAt(normalizedInterval: Interval) -> Interval
+
+      Converts normalized parameter to interval value, or pair of values.
+
+      :returns: Interval parameter min\*(1.0-normalizedParameter) + max\*normalized\_paramete.
+
+
+
+   .. py:method:: Reverse() -> None
+
+      Changes interval to [-T1, -T0].
+
+
+
+   .. py:method:: Swap() -> None
+
+      Exchanges T0 and T1.
+
+
+
+   .. py:method:: ToString() -> str
+
+      Returns a string representation of this ``Interval``.
+
+      :returns: A string with T0,T1.
+
+
+
+   .. py:property:: IsDecreasing
+      :type: bool
+
+
+      Returns true if T[0] > T[1].
+
+
+   .. py:property:: IsIncreasing
+      :type: bool
+
+
+      Returns true if T0 < T1.
+
+
+   .. py:property:: IsSingleton
+      :type: bool
+
+
+      Returns true if T0 == T1 != ON.UnsetValue.
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Gets a value indicating whether or not this Interval is valid. Valid intervals must contain valid numbers.
+
+
+   .. py:property:: Length
+      :type: float
+
+
+      Gets the signed length of the numeric range. If the interval is decreasing, a negative length will be returned.
+
+
+   .. py:property:: Max
+      :type: float
+
+
+      Gets the larger of T0 and T1.
+
+
+   .. py:property:: Mid
+      :type: float
+
+
+      Gets the average of T0 and T1.
+
+
+   .. py:property:: Min
+      :type: float
+
+
+      Gets the smaller of T0 and T1.
+
+
+   .. py:property:: T0
+      :type: float
+
+
+      Gets or sets the lower bound of the Interval.
+
+
+   .. py:property:: T1
+      :type: float
+
+
+      Gets or sets the upper bound of the Interval.
+
+
+   .. py:attribute:: Unset
+      :type:  Interval
+      :value: Ellipsis
+
+
+      object, /) -> Interval
+
+      :type: (arg
+
+
+   .. py:attribute:: ZeroToOne
+      :type:  Interval
+      :value: Ellipsis
+
+
+      object, /) -> Interval
+
+      :type: (arg
+
+
+   .. py:attribute:: ZeroToTwoPi
+      :type:  Interval
+      :value: Ellipsis
+
+
+      object, /) -> Interval
+
+      :type: (arg
+

@@ -166,3 +166,8 @@ RH_C_FUNCTION void ON_InstanceRef_GetTransform( const ON_InstanceRef* pConstInst
   if ( pConstInstanceRef && transform )
     *transform = pConstInstanceRef->m_xform;
 }
+
+RH_C_FUNCTION bool ON_InstanceDefinition_IsInstanceGeometryId(const ON_InstanceDefinition* pConstIdef, ON_UUID id)
+{
+  return pConstIdef ? pConstIdef->IsInstanceGeometryId(id) : false;
+}

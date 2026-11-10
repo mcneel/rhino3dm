@@ -1,0 +1,804 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Migrating to rhino3dm 9.2 (Python) &mdash; rhino3dm.py 9.2.0-beta.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f348fe97"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Renamed and removed members (Python)" href="migrating-members.html" />
+    <link rel="prev" title="rhino3dm.py" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            rhino3dm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Migrating to rhino3dm 9.2 (Python)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-changes-most-scripts-hit">The changes most scripts hit</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#editing-an-object-s-geometry-no-longer-changes-the-file">1. Editing an object’s geometry no longer changes the file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#out-parameters-come-back-as-a-tuple-success-first">2. <code class="docutils literal notranslate"><span class="pre">out</span></code> parameters come back as a tuple, success first</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#editing-tables">3. Editing tables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#in-place-methods-return-nothing">4. In-place methods return nothing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bad-arguments-raise">5. Bad arguments raise</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#arrays-are-lists">6. Arrays are lists</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#files-and-tables">Files and tables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#getting-items-iterating-and-indexing">Getting items: iterating and indexing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#table-items-are-live">Table items are live</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tables-and-their-members">Tables and their members</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#embedded-files">Embedded files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#file-settings">File settings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#geometry">Geometry</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#all-geometry">All geometry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#points-vectors-and-transforms">Points, vectors and transforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#curves">Curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#polylines-and-point-lists">Polylines and point lists</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#surfaces">Surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#breps">Breps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#extrusions">Extrusions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#meshes">Meshes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#subd">SubD</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#annotations">Annotations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rendering-and-settings">Rendering and settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#renamed-classes">Renamed classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#enums">Enums</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#errors-values-and-identity">Errors, values and identity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#errors">Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#arrays-and-sequences">Arrays and sequences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#strings-and-values">Strings and values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#object-identity">Object identity</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#packaging">Packaging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="migrating-members.html">Renamed and removed members (Python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rhino3dm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Migrating to rhino3dm 9.2 (Python)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/migrating.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <!-- Generated by tools/docs/migration.py from api/migration.md. Do not edit. -->
+<section id="migrating-to-rhino3dm-9-2-python">
+<h1>Migrating to rhino3dm 9.2 (Python)<a class="headerlink" href="#migrating-to-rhino3dm-9-2-python" title="Link to this heading"></a></h1>
+<p><a href="../../javascript/api/documents/Migrating_to_9_2.html">JavaScript version</a></p>
+<p>rhino3dm 9.2’s Python bindings are generated from RhinoCommon, the .NET SDK of Rhino,
+so the API is RhinoCommon’s: its names, signatures and behaviour. The typings that ship with the package (<code class="docutils literal notranslate"><span class="pre">rhino3dm/__init__.pyi</span></code>) list every
+member with its documentation.</p>
+<p>rhino3dm 8.x was written by hand and often differed from RhinoCommon. The changes below are the ones most scripts will hit. <a class="reference internal" href="migrating-members.html"><span class="std std-doc">Renamed and removed members</span></a>
+maps each 8.x member that is gone to its replacement.</p>
+<p><a class="reference internal" href="#the-changes-most-scripts-hit">The changes most scripts hit</a> ·
+<a class="reference internal" href="#files-and-tables">Files and tables</a> · <a class="reference internal" href="#geometry">Geometry</a> · <a class="reference internal" href="#annotations">Annotations</a> ·
+<a class="reference internal" href="#rendering-and-settings">Rendering and settings</a> · <a class="reference internal" href="#renamed-classes">Renamed classes</a> · <a class="reference internal" href="#enums">Enums</a> ·
+<a class="reference internal" href="#errors-values-and-identity">Errors, values and identity</a> · <a class="reference internal" href="#packaging">Packaging</a></p>
+<section id="the-changes-most-scripts-hit">
+<h2>The changes most scripts hit<a class="headerlink" href="#the-changes-most-scripts-hit" title="Link to this heading"></a></h2>
+<section id="editing-an-object-s-geometry-no-longer-changes-the-file">
+<h3>1. Editing an object’s geometry no longer changes the file<a class="headerlink" href="#editing-an-object-s-geometry-no-longer-changes-the-file" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">obj.Geometry</span></code> is now a copy-on-write view, like it is in RhinoCommon. This means that the first edit makes a
+private copy, and the file stays as it was (no error). To change the file, replace the object:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">Objects</span><span class="p">:</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">Geometry</span><span class="o">.</span><span class="n">Transform</span><span class="p">(</span><span class="n">xform</span><span class="p">)</span>
+
+<span class="c1"># 9.2</span>
+<span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Objects</span><span class="p">):</span>
+    <span class="n">geometry</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Geometry</span>
+    <span class="n">geometry</span><span class="o">.</span><span class="n">Transform</span><span class="p">(</span><span class="n">xform</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">Objects</span><span class="o">.</span><span class="n">Delete</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">Id</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">Objects</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">Attributes</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">obj.Attributes</span></code> still writes through. A brep face’s surface and mesh, an
+extrusion’s mesh and a material’s textures are copy-on-write views too (<a class="reference internal" href="#all-geometry">Geometry</a>).</p>
+</section>
+<section id="out-parameters-come-back-as-a-tuple-success-first">
+<h3>2. <code class="docutils literal notranslate"><span class="pre">out</span></code> parameters come back as a tuple, success first<a class="headerlink" href="#out-parameters-come-back-as-a-tuple-success-first" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="n">frustum</span> <span class="o">=</span> <span class="n">viewport</span><span class="o">.</span><span class="n">GetFrustum</span><span class="p">()</span>   <span class="c1"># a dict</span>
+<span class="n">left</span><span class="p">,</span> <span class="n">near</span> <span class="o">=</span> <span class="n">frustum</span><span class="p">[</span><span class="s1">'left'</span><span class="p">],</span> <span class="n">frustum</span><span class="p">[</span><span class="s1">'near'</span><span class="p">]</span>
+
+<span class="c1"># 9.2</span>
+<span class="n">ok</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">near</span><span class="p">,</span> <span class="n">far</span> <span class="o">=</span> <span class="n">viewport</span><span class="o">.</span><span class="n">GetFrustum</span><span class="p">()</span>
+<span class="n">ok</span><span class="p">,</span> <span class="n">plane</span> <span class="o">=</span> <span class="n">curve</span><span class="o">.</span><span class="n">TryGetPlane</span><span class="p">()</span>   <span class="c1"># new in 9.2, same pattern</span>
+</pre></div>
+</div>
+</section>
+<section id="editing-tables">
+<h3>3. Editing tables<a class="headerlink" href="#editing-tables" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="n">model</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">index</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Layers</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">Layers</span><span class="o">.</span><span class="n">Delete</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">Id</span><span class="p">)</span>
+
+<span class="c1"># 9.2</span>
+<span class="n">model</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>              <span class="c1"># 0 is the current version</span>
+<span class="n">model</span><span class="o">.</span><span class="n">Layers</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>           <span class="c1"># returns nothing</span>
+<span class="n">index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Layers</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="n">model</span><span class="o">.</span><span class="n">Layers</span><span class="o">.</span><span class="n">Delete</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>        <span class="c1"># or Delete(index), which raises for a bad index</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">model.Layers.AddLayer(name,</span> <span class="pre">color)</span></code> still returns the index.
+The same goes for the other tables (materials, linetypes, dimension styles, …).</p>
+</section>
+<section id="in-place-methods-return-nothing">
+<h3>4. In-place methods return nothing<a class="headerlink" href="#in-place-methods-return-nothing" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">Transform</span><span class="p">(</span><span class="n">xform</span><span class="p">)</span>  <span class="c1"># edited p and returned it</span>
+<span class="n">v</span><span class="o">.</span><span class="n">Unitize</span><span class="p">()</span>             <span class="c1"># returned None</span>
+
+<span class="c1"># 9.2</span>
+<span class="n">p</span><span class="o">.</span><span class="n">Transform</span><span class="p">(</span><span class="n">xform</span><span class="p">)</span>      <span class="c1"># edits p, returns None</span>
+<span class="n">ok</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">Unitize</span><span class="p">()</span>        <span class="c1"># False for a zero vector</span>
+</pre></div>
+</div>
+</section>
+<section id="bad-arguments-raise">
+<h3>5. Bad arguments raise<a class="headerlink" href="#bad-arguments-raise" title="Link to this heading"></a></h3>
+<p>RhinoCommon’s argument checks run here too: <code class="docutils literal notranslate"><span class="pre">curve.SpanDomain(-1)</span></code> raises <code class="docutils literal notranslate"><span class="pre">IndexError</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">File3dm.Read('missing.3dm')</span></code> raises <code class="docutils literal notranslate"><span class="pre">FileNotFoundError</span></code>.
+See <a class="reference internal" href="#errors">Errors</a> for how .NET’s exceptions map to Python’s.</p>
+</section>
+<section id="arrays-are-lists">
+<h3>6. Arrays are lists<a class="headerlink" href="#arrays-are-lists" title="Link to this heading"></a></h3>
+<p>Array results are lists (8.x returned tuples in places), and <code class="docutils literal notranslate"><span class="pre">None</span></code> where RhinoCommon returns <code class="docutils literal notranslate"><span class="pre">null</span></code>, for example
+<code class="docutils literal notranslate"><span class="pre">BoundingBox.GetCorners()</span></code> of an invalid box.</p>
+</section>
+</section>
+<section id="files-and-tables">
+<h2>Files and tables<a class="headerlink" href="#files-and-tables" title="Link to this heading"></a></h2>
+<section id="getting-items-iterating-and-indexing">
+<h3>Getting items: iterating and indexing<a class="headerlink" href="#getting-items-iterating-and-indexing" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Objects</span><span class="p">)):</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">Objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+<span class="c1"># 9.2</span>
+<span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">Objects</span><span class="p">:</span>
+    <span class="o">...</span>
+<span class="n">third</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Objects</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Iteration</strong> walks the live components (<code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">layer</span> <span class="pre">in</span> <span class="pre">model.Layers</span></code>), skipping deleted ones. 8.x raised at the first deleted item.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">model.Objects[i]</span></code></strong> is gone, as in RhinoCommon: iterate, or <code class="docutils literal notranslate"><span class="pre">list(model.Objects)[i]</span></code>.
+<code class="docutils literal notranslate"><span class="pre">len(model.Objects)</span></code> works.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">FindIndex(i)</span></code></strong> returns <code class="docutils literal notranslate"><span class="pre">None</span></code> for a deleted or out-of-range index. <code class="docutils literal notranslate"><span class="pre">table[i]</span></code> still
+raises <code class="docutils literal notranslate"><span class="pre">IndexError</span></code>.</p></li>
+<li><p><strong>Bitmaps</strong>: <code class="docutils literal notranslate"><span class="pre">FindId</span></code> finds images, and <code class="docutils literal notranslate"><span class="pre">FindIndex(i)</span></code> / <code class="docutils literal notranslate"><span class="pre">[i]</span></code>
+give the i-th image.</p></li>
+<li><p><strong>Decals</strong>: iterate them (<code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">d</span> <span class="pre">in</span> <span class="pre">attributes.Decals</span></code>); hidden decals are skipped, as in RhinoCommon. <code class="docutils literal notranslate"><span class="pre">len(attributes.Decals)</span></code> counts what iteration yields. There is no index: use
+<code class="docutils literal notranslate"><span class="pre">list(attributes.Decals)[i]</span></code>.</p></li>
+</ul>
+</section>
+<section id="table-items-are-live">
+<h3>Table items are live<a class="headerlink" href="#table-items-are-live" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>A layer you hold reflects later edits to the file, and raises <code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code> once its
+layer is deleted from the file. In 8.x it kept stale data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model.Views[i]</span></code> and <code class="docutils literal notranslate"><span class="pre">NamedViews[i]</span></code> are
+live too: the same view while it is in the file, and a <code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code> once it is
+not.</p></li>
+<li><p>Objects come back as their most specific class: a plane surface is a <code class="docutils literal notranslate"><span class="pre">PlaneSurface</span></code>, not a
+<code class="docutils literal notranslate"><span class="pre">Surface</span></code>, so <code class="docutils literal notranslate"><span class="pre">isinstance</span></code> checks change.</p></li>
+</ul>
+</section>
+<section id="tables-and-their-members">
+<h3>Tables and their members<a class="headerlink" href="#tables-and-their-members" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">model.Layers</span></code> and <code class="docutils literal notranslate"><span class="pre">model.AllLayers</span></code> both exist, as in
+RhinoCommon (also materials, linetypes, dimension styles, instance definitions and hatch patterns).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model.Strings</span></code> has RhinoCommon’s members: <code class="docutils literal notranslate"><span class="pre">Count</span></code>, <code class="docutils literal notranslate"><span class="pre">GetKey(i)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">GetValue(i)</span></code>, <code class="docutils literal notranslate"><span class="pre">GetValue(key)</span></code>, <code class="docutils literal notranslate"><span class="pre">SetString(key,</span> <span class="pre">value)</span></code>, <code class="docutils literal notranslate"><span class="pre">Delete(key)</span></code>. There is no <code class="docutils literal notranslate"><span class="pre">len</span></code> and no
+indexing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">File3dm.Manifest</span></code> lists every component of the file. Its images are <code class="docutils literal notranslate"><span class="pre">Bitmap</span></code>
+objects.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">File3dm.AllViews</span></code> and <code class="docutils literal notranslate"><span class="pre">AllNamedViews</span></code> are not
+available yet (<code class="docutils literal notranslate"><span class="pre">Views</span></code> and <code class="docutils literal notranslate"><span class="pre">NamedViews</span></code> are).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model.Objects.Add(geometry,</span> <span class="pre">attributes)</span></code> adds
+leaders, text and radial or ordinate dimensions too, as 8.x did, although RhinoCommon throws for
+them.</p></li>
+<li><p><strong>Adding a bitmap</strong>: set <code class="docutils literal notranslate"><span class="pre">bitmap.FileFullPath</span> <span class="pre">=</span> <span class="pre">path</span></code>, then
+<code class="docutils literal notranslate"><span class="pre">model.Bitmaps.Add(bitmap)</span></code> returns the file’s copy.</p></li>
+</ul>
+</section>
+<section id="embedded-files">
+<h3>Embedded files<a class="headerlink" href="#embedded-files" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="n">file</span> <span class="o">=</span> <span class="n">rhino3dm</span><span class="o">.</span><span class="n">EmbeddedFile</span><span class="o">.</span><span class="n">Read</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">EmbeddedFiles</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<span class="n">paths</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">EmbeddedFilePaths</span><span class="p">()</span>
+
+<span class="c1"># 9.2</span>
+<span class="n">file</span> <span class="o">=</span> <span class="n">rhino3dm</span><span class="o">.</span><span class="n">File3dmEmbeddedFile</span><span class="o">.</span><span class="n">Read</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>   <span class="c1"># named after path</span>
+<span class="n">model</span><span class="o">.</span><span class="n">EmbeddedFiles</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">Filename</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">EmbeddedFiles</span><span class="p">]</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>An embedded file’s <code class="docutils literal notranslate"><span class="pre">Filename</span></code> is read-only: the name comes from the path given
+to <code class="docutils literal notranslate"><span class="pre">File3dmEmbeddedFile.Read(path)</span></code>.</p></li>
+<li><p>Paths are cleaned for the platform, so a path saved on Windows reads with <code class="docutils literal notranslate"><span class="pre">/</span></code> on Linux and macOS.</p></li>
+</ul>
+</section>
+<section id="file-settings">
+<h3>File settings<a class="headerlink" href="#file-settings" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">File3dm.Created</span></code> and <code class="docutils literal notranslate"><span class="pre">LastEdited</span></code> are new: <code class="docutils literal notranslate"><span class="pre">datetime.datetime</span></code> values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ConstructionPlane</span></code> and <code class="docutils literal notranslate"><span class="pre">File3dmWriteOptions</span></code> gain RhinoCommon’s members:
+<code class="docutils literal notranslate"><span class="pre">ShowGrid</span></code>, <code class="docutils literal notranslate"><span class="pre">ShowAxes</span></code>, <code class="docutils literal notranslate"><span class="pre">ShowZAxis</span></code>, and the write
+options’ mesh options.</p></li>
+</ul>
+</section>
+</section>
+<section id="geometry">
+<h2>Geometry<a class="headerlink" href="#geometry" title="Link to this heading"></a></h2>
+<section id="all-geometry">
+<h3>All geometry<a class="headerlink" href="#all-geometry" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Copy-on-write.</strong> Like <code class="docutils literal notranslate"><span class="pre">obj.Geometry</span></code>, <code class="docutils literal notranslate"><span class="pre">BrepFace.UnderlyingSurface()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">BrepFace.GetMesh(type)</span></code>, <code class="docutils literal notranslate"><span class="pre">Extrusion.GetMesh(type)</span></code> and <code class="docutils literal notranslate"><span class="pre">Material.GetBitmapTexture()</span></code> (and the other texture getters) return copy-on-write views: an edit
+does not reach the file. Put changes back with <code class="docutils literal notranslate"><span class="pre">BrepFace.SetMesh(type,</span> <span class="pre">mesh)</span></code> or
+<code class="docutils literal notranslate"><span class="pre">Material.SetBitmapTexture(texture)</span></code>.</p></li>
+<li><p><strong>Values of invalid inputs follow RhinoCommon.</strong> For example the distance to an unset point is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>
+(8.x: infinity).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IsValidWithLog</span></code> is a method: <code class="docutils literal notranslate"><span class="pre">ok,</span> <span class="pre">log</span> <span class="pre">=</span> <span class="pre">obj.IsValidWithLog()</span></code>.</p></li>
+<li><p>Constructors RhinoCommon does not have are gone: <code class="docutils literal notranslate"><span class="pre">Group()</span></code>, <code class="docutils literal notranslate"><span class="pre">Hatch()</span></code>, <code class="docutils literal notranslate"><span class="pre">RevSurface()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">TextureMapping()</span></code>, <code class="docutils literal notranslate"><span class="pre">Decal()</span></code>, <code class="docutils literal notranslate"><span class="pre">Point()</span></code>. Use RhinoCommon’s factories (<code class="docutils literal notranslate"><span class="pre">model.AllGroups.AddGroup</span></code>, <code class="docutils literal notranslate"><span class="pre">Hatch.CreateFromBrep</span></code>,
+<code class="docutils literal notranslate"><span class="pre">RevSurface.Create</span></code>, <code class="docutils literal notranslate"><span class="pre">TextureMapping.Create*Mapping</span></code>, <code class="docutils literal notranslate"><span class="pre">Point(location)</span></code>).</p></li>
+<li><p>Some RhinoCommon overloads differ only in their <code class="docutils literal notranslate"><span class="pre">out</span></code> parameters, so Python can reach only
+one of them under RhinoCommon’s name. The others have names of their own, listed in each section
+below.</p></li>
+</ul>
+</section>
+<section id="points-vectors-and-transforms">
+<h3>Points, vectors and transforms<a class="headerlink" href="#points-vectors-and-transforms" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Transform</span></code> is a value type, so assignment copies it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Point3d.Transform</span></code> and <code class="docutils literal notranslate"><span class="pre">Vector3d.Unitize</span></code> change the value in place: see
+<a class="reference internal" href="#in-place-methods-return-nothing">the changes most scripts hit</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Plane.WorldXY</span></code>, <code class="docutils literal notranslate"><span class="pre">Transform.Identity</span></code>, <code class="docutils literal notranslate"><span class="pre">Vector3d.Length</span></code> and the other members that are properties
+in RhinoCommon are properties: <code class="docutils literal notranslate"><span class="pre">Plane.WorldXY</span></code>, not <code class="docutils literal notranslate"><span class="pre">Plane.WorldXY()</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Transform.DecomposeAffine</span></code> with all four <code class="docutils literal notranslate"><span class="pre">out</span></code> values is
+<code class="docutils literal notranslate"><span class="pre">Transform.DecomposeAffineFull</span></code>.</p></li>
+</ul>
+</section>
+<section id="curves">
+<h3>Curves<a class="headerlink" href="#curves" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Curve.CreateControlPointCurve(points,</span> <span class="pre">degree)</span></code> builds the curve as RhinoCommon does. Two points still give a <code class="docutils literal notranslate"><span class="pre">LineCurve</span></code>, and degree 1
+still gives a <code class="docutils literal notranslate"><span class="pre">PolylineCurve</span></code>. For a NURBS curve:</p>
+<ul>
+<li><p><strong>The domain is <code class="docutils literal notranslate"><span class="pre">0</span></code> to the length of the control polygon.</strong> 8.x used knot spacing 1, so the domain
+was <code class="docutils literal notranslate"><span class="pre">0</span></code> to the number of points minus the degree. The shape is the same, but every parameter
+changes: <code class="docutils literal notranslate"><span class="pre">PointAt(t)</span></code>, <code class="docutils literal notranslate"><span class="pre">Domain</span></code> and closest-point results.</p></li>
+<li><p><strong>A closed point list (last point equal to the first) gives a smooth periodic curve.</strong> 8.x made a
+clamped curve with a kink where it closes.</p></li>
+<li><p><strong>Too few points for the degree lowers the degree</strong> to the number of points minus one. 8.x
+returned <code class="docutils literal notranslate"><span class="pre">None</span></code>. The degree is also clamped to 1–11.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Curve.DerivativeAt</span></code> returns <code class="docutils literal notranslate"><span class="pre">Vector3d</span></code>s (the point first, as a vector).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NurbsCurvePointList.GetPoint(i)</span></code> returning a <code class="docutils literal notranslate"><span class="pre">Point4d</span></code> is
+<code class="docutils literal notranslate"><span class="pre">GetPoint4d(i)</span></code>.</p></li>
+</ul>
+</section>
+<section id="polylines-and-point-lists">
+<h3>Polylines and point lists<a class="headerlink" href="#polylines-and-point-lists" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Polyline</span></code> and <code class="docutils literal notranslate"><span class="pre">Point3dList</span></code> are RhinoCommon’s lists, with all of <code class="docutils literal notranslate"><span class="pre">RhinoList</span></code>’s members
+(<code class="docutils literal notranslate"><span class="pre">AddRange</span></code>, <code class="docutils literal notranslate"><span class="pre">RemoveRange</span></code>, <code class="docutils literal notranslate"><span class="pre">IndexOf</span></code>, <code class="docutils literal notranslate"><span class="pre">Sort</span></code>, <code class="docutils literal notranslate"><span class="pre">Reverse</span></code>, <code class="docutils literal notranslate"><span class="pre">First</span></code>, <code class="docutils literal notranslate"><span class="pre">Last</span></code>, <code class="docutils literal notranslate"><span class="pre">ToArray</span></code>, …). They are reference
+types: an assignment shares the list. Index with <code class="docutils literal notranslate"><span class="pre">[]</span></code> and <code class="docutils literal notranslate"><span class="pre">len()</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Polyline.GetSegments()</span></code> (8.x <code class="docutils literal notranslate"><span class="pre">GetSegments2()</span></code>) returns <code class="docutils literal notranslate"><span class="pre">Line</span></code> values,
+not <code class="docutils literal notranslate"><span class="pre">LineCurve</span></code> objects, and <code class="docutils literal notranslate"><span class="pre">None</span></code> with fewer than two points.
+<code class="docutils literal notranslate"><span class="pre">Point3dList.Append(points)</span></code> is <code class="docutils literal notranslate"><span class="pre">AddRange(points)</span></code>.</p></li>
+</ul>
+</section>
+<section id="surfaces">
+<h3>Surfaces<a class="headerlink" href="#surfaces" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">NurbsSurface.Create(...)</span></code> with invalid arguments returns
+<code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NurbsSurfacePointList.GetPoint(u,</span> <span class="pre">v)</span></code> returning a <code class="docutils literal notranslate"><span class="pre">Point4d</span></code> is
+<code class="docutils literal notranslate"><span class="pre">GetPoint4d(u,</span> <span class="pre">v)</span></code>.</p></li>
+</ul>
+</section>
+<section id="breps">
+<h3>Breps<a class="headerlink" href="#breps" title="Link to this heading"></a></h3>
+<ul>
+<li><p>Editing a face’s surface no longer changes the brep. <code class="docutils literal notranslate"><span class="pre">BrepFace.UnderlyingSurface()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">brep.Surfaces[i]</span></code> return copy-on-write
+views. In 8.x an edit moved the surface inside the brep but left its edges and trims
+where they were, which made the brep invalid (<code class="docutils literal notranslate"><span class="pre">brep.IsValid</span></code> became false) and
+could write a broken brep to the file. To move the brep, transform
+it (<code class="docutils literal notranslate"><span class="pre">brep.Transform(xform)</span></code>). To use the edited surface, build a new
+brep from it:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="n">surface</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">UnderlyingSurface</span><span class="p">()</span>
+<span class="n">surface</span><span class="o">.</span><span class="n">Transform</span><span class="p">(</span><span class="n">xform</span><span class="p">)</span>      <span class="c1"># moved the face's surface inside the brep, not its edges and trims</span>
+<span class="n">brep</span><span class="o">.</span><span class="n">IsValid</span>                  <span class="c1"># False: the brep is now invalid</span>
+
+<span class="c1"># 9.2</span>
+<span class="n">surface</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">UnderlyingSurface</span><span class="p">()</span>
+<span class="n">surface</span><span class="o">.</span><span class="n">Transform</span><span class="p">(</span><span class="n">xform</span><span class="p">)</span>      <span class="c1"># moves a copy: the brep is unchanged</span>
+<span class="n">new_brep</span> <span class="o">=</span> <span class="n">rhino3dm</span><span class="o">.</span><span class="n">Brep</span><span class="o">.</span><span class="n">CreateFromSurface</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>Editing a <code class="docutils literal notranslate"><span class="pre">BrepEdge</span></code> or <code class="docutils literal notranslate"><span class="pre">BrepTrim</span></code> through a <code class="docutils literal notranslate"><span class="pre">Curve</span></code> method (<code class="docutils literal notranslate"><span class="pre">edge.Reverse()</span></code>) raises <code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BrepFace.PerFaceColor</span></code> of a face without one is <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0)</span></code> (8.x
+<code class="docutils literal notranslate"><span class="pre">(255,</span> <span class="pre">255,</span> <span class="pre">255,</span> <span class="pre">0)</span></code>), and it can be set.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BrepFace.GetMesh(type)</span></code> returns a copy-on-write view: editing it does
+not change the face. Put the change back with <code class="docutils literal notranslate"><span class="pre">BrepFace.SetMesh(type,</span> <span class="pre">mesh)</span></code>.</p></li>
+</ul>
+</section>
+<section id="extrusions">
+<h3>Extrusions<a class="headerlink" href="#extrusions" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Editing the mesh <code class="docutils literal notranslate"><span class="pre">Extrusion.GetMesh(type)</span></code> returns no longer
+changes the extrusion or the meshes it stores: it is a copy-on-write view. In 8.x the edit changed
+the extrusion’s stored mesh. Put the change back with <code class="docutils literal notranslate"><span class="pre">Extrusion.SetMesh(mesh,</span> <span class="pre">type)</span></code>.</p></li>
+</ul>
+</section>
+<section id="meshes">
+<h3>Meshes<a class="headerlink" href="#meshes" title="Link to this heading"></a></h3>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">mesh.Faces[i]</span></code> is a <code class="docutils literal notranslate"><span class="pre">MeshFace</span></code> (<code class="docutils literal notranslate"><span class="pre">A</span></code>, <code class="docutils literal notranslate"><span class="pre">B</span></code>, <code class="docutils literal notranslate"><span class="pre">C</span></code>, <code class="docutils literal notranslate"><span class="pre">D</span></code>, <code class="docutils literal notranslate"><span class="pre">IsQuad</span></code>), not a 4-tuple:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">Faces</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="n">is_quad</span> <span class="o">=</span> <span class="n">c</span> <span class="o">!=</span> <span class="n">d</span>
+
+<span class="c1"># 9.2</span>
+<span class="n">face</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">Faces</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">face</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="n">face</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="n">face</span><span class="o">.</span><span class="n">D</span>
+<span class="n">is_quad</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">IsQuad</span>
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mesh.Normals.Add(x,</span> <span class="pre">y,</span> <span class="pre">z)</span></code> stores the vector as given. 8.x
+unitized it on add. Unitize afterwards, once the mesh has a normal for each vertex:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="n">mesh</span><span class="o">.</span><span class="n">Normals</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span>   <span class="c1"># stored as (0, 0, 1)</span>
+
+<span class="c1"># 9.2</span>
+<span class="n">mesh</span><span class="o">.</span><span class="n">Normals</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span>   <span class="c1"># stored as (0, 0, 5)</span>
+<span class="n">mesh</span><span class="o">.</span><span class="n">Normals</span><span class="o">.</span><span class="n">UnitizeNormals</span><span class="p">()</span>     <span class="c1"># now (0, 0, 1)</span>
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Mesh.GetCachedTextureCoordinates(id)</span></code> is a view into
+the mesh, not a copy.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Mesh.GetCachedTextureCoordinatesFromTexture(file,</span> <span class="pre">objectId,</span> <span class="pre">texture)</span></code> is an overload of
+<code class="docutils literal notranslate"><span class="pre">GetCachedTextureCoordinates</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">SetCachedTextureCoordinatesFromMaterial</span></code> returns
+nothing.</p></li>
+</ul>
+</section>
+<section id="subd">
+<h3>SubD<a class="headerlink" href="#subd" title="Link to this heading"></a></h3>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">subd.Faces</span></code>, <code class="docutils literal notranslate"><span class="pre">subd.Edges</span></code> and <code class="docutils literal notranslate"><span class="pre">subd.Vertices</span></code> are lists with <code class="docutils literal notranslate"><span class="pre">len</span></code>, iteration and <code class="docutils literal notranslate"><span class="pre">Find(id)</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">First</span></code> / <code class="docutils literal notranslate"><span class="pre">Next</span></code> / <code class="docutils literal notranslate"><span class="pre">Current</span></code> cursors are gone. In 8.x, <code class="docutils literal notranslate"><span class="pre">Next()</span></code> did not stop after the last
+component: a <code class="docutils literal notranslate"><span class="pre">while</span></code> loop over it never ended, or crashed. <code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">face</span> <span class="pre">in</span> <span class="pre">subd.Faces</span></code> works in both.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="n">count</span> <span class="o">=</span> <span class="n">subd</span><span class="o">.</span><span class="n">Faces</span><span class="o">.</span><span class="n">Count</span>
+<span class="n">face</span> <span class="o">=</span> <span class="n">subd</span><span class="o">.</span><span class="n">Faces</span><span class="p">[</span><span class="n">face_id</span><span class="p">]</span>          <span class="c1"># by id</span>
+
+<span class="c1"># 9.2</span>
+<span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">subd</span><span class="o">.</span><span class="n">Faces</span><span class="p">)</span>
+<span class="n">face</span> <span class="o">=</span> <span class="n">subd</span><span class="o">.</span><span class="n">Faces</span><span class="o">.</span><span class="n">Find</span><span class="p">(</span><span class="n">face_id</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>A component’s neighbours are lists: <code class="docutils literal notranslate"><span class="pre">face.Edges</span></code>, <code class="docutils literal notranslate"><span class="pre">face.Vertices</span></code>, <code class="docutils literal notranslate"><span class="pre">edge.Faces</span></code>, <code class="docutils literal notranslate"><span class="pre">edge.Vertices</span></code>,
+<code class="docutils literal notranslate"><span class="pre">vertex.Edges</span></code> and <code class="docutils literal notranslate"><span class="pre">vertex.Faces</span></code>, not 8.x’s cursors. RhinoCommon’s
+<code class="docutils literal notranslate"><span class="pre">EdgeCount</span></code> plus <code class="docutils literal notranslate"><span class="pre">EdgeAt(i)</span></code> (also <code class="docutils literal notranslate"><span class="pre">VertexAt</span></code>, <code class="docutils literal notranslate"><span class="pre">FaceAt</span></code>) work too, and an edge’s vertices are also <code class="docutils literal notranslate"><span class="pre">VertexFrom</span></code> and <code class="docutils literal notranslate"><span class="pre">VertexTo</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="n">edges</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">Edges</span>                  <span class="c1"># a cursor</span>
+<span class="n">count</span> <span class="o">=</span> <span class="n">edges</span><span class="o">.</span><span class="n">Count</span>
+<span class="n">edge</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># 9.2</span>
+<span class="n">edges</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">Edges</span>                  <span class="c1"># a list</span>
+<span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>                  <span class="c1"># or face.EdgeCount</span>
+<span class="n">edge</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>                     <span class="c1"># or face.EdgeAt(0)</span>
+<span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">VertexFrom</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">VertexTo</span>
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SubDVertex.SurfacePoint()</span></code> is a method, and <code class="docutils literal notranslate"><span class="pre">Next</span></code>, <code class="docutils literal notranslate"><span class="pre">Previous</span></code> and <code class="docutils literal notranslate"><span class="pre">First</span></code> are properties.
+<code class="docutils literal notranslate"><span class="pre">SubD.SharpEdgeCount()</span></code> is a method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="n">point</span> <span class="o">=</span> <span class="n">vertex</span><span class="o">.</span><span class="n">SurfacePoint</span>
+<span class="n">following</span> <span class="o">=</span> <span class="n">vertex</span><span class="o">.</span><span class="n">Next</span><span class="p">()</span>
+<span class="n">first</span> <span class="o">=</span> <span class="n">subd</span><span class="o">.</span><span class="n">Vertices</span><span class="o">.</span><span class="n">First</span><span class="p">()</span>
+<span class="n">sharp</span> <span class="o">=</span> <span class="n">subd</span><span class="o">.</span><span class="n">SharpEdgeCount</span>
+
+<span class="c1"># 9.2</span>
+<span class="n">point</span> <span class="o">=</span> <span class="n">vertex</span><span class="o">.</span><span class="n">SurfacePoint</span><span class="p">()</span>
+<span class="n">following</span> <span class="o">=</span> <span class="n">vertex</span><span class="o">.</span><span class="n">Next</span>
+<span class="n">first</span> <span class="o">=</span> <span class="n">subd</span><span class="o">.</span><span class="n">Vertices</span><span class="o">.</span><span class="n">First</span>
+<span class="n">sharp</span> <span class="o">=</span> <span class="n">subd</span><span class="o">.</span><span class="n">SharpEdgeCount</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+<li><p>A component whose SubD changed raises <code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code>; 8.x kept answering as if
+nothing had changed. Components compare equal when they are the same component of the same SubD
+(<code class="docutils literal notranslate"><span class="pre">==</span></code>).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="n">face</span> <span class="o">=</span> <span class="n">subd</span><span class="o">.</span><span class="n">Faces</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">subd</span><span class="o">.</span><span class="n">Subdivide</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">face</span><span class="o">.</span><span class="n">EdgeCount</span>         <span class="c1"># still answered</span>
+
+<span class="c1"># 9.2</span>
+<span class="n">face</span> <span class="o">=</span> <span class="n">subd</span><span class="o">.</span><span class="n">Faces</span><span class="o">.</span><span class="n">Find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">subd</span><span class="o">.</span><span class="n">Subdivide</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">face</span><span class="o">.</span><span class="n">EdgeCount</span>         <span class="c1"># RuntimeError: the component is no longer in its owner</span>
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SubDFace.IsNotConvex</span></code> and <code class="docutils literal notranslate"><span class="pre">IsNotPlanar(tol)</span></code> are gone: use <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">IsConvex</span></code> and <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">IsPlanar(tol)</span></code>.
+They differ only for a degenerate face; test <code class="docutils literal notranslate"><span class="pre">ControlNetCenterNormal.IsZero</span></code> first when that matters.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="k">if</span> <span class="n">face</span><span class="o">.</span><span class="n">IsNotConvex</span> <span class="ow">or</span> <span class="n">face</span><span class="o">.</span><span class="n">IsNotPlanar</span><span class="p">(</span><span class="n">tol</span><span class="p">):</span>
+    <span class="o">...</span>
+
+<span class="c1"># 9.2</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">face</span><span class="o">.</span><span class="n">IsConvex</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">face</span><span class="o">.</span><span class="n">IsPlanar</span><span class="p">(</span><span class="n">tol</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SubDFace.PerFaceColor</span></code> of a face without one is <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0)</span></code> (8.x
+<code class="docutils literal notranslate"><span class="pre">(255,</span> <span class="pre">255,</span> <span class="pre">255,</span> <span class="pre">0)</span></code>), and it can be set.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="n">face</span><span class="o">.</span><span class="n">PerFaceColor</span>                       <span class="c1"># (255, 255, 255, 0) when unset; read-only</span>
+
+<span class="c1"># 9.2</span>
+<span class="n">face</span><span class="o">.</span><span class="n">PerFaceColor</span>                       <span class="c1"># (0, 0, 0, 0) when unset</span>
+<span class="n">face</span><span class="o">.</span><span class="n">PerFaceColor</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+<section id="annotations">
+<h2>Annotations<a class="headerlink" href="#annotations" title="Link to this heading"></a></h2>
+<ul>
+<li><p>The explicit-parent accessors (<code class="docutils literal notranslate"><span class="pre">GetTextHeight(style)</span></code>, <code class="docutils literal notranslate"><span class="pre">SetMaskColor(style,</span> <span class="pre">color)</span></code>, …) are gone. Set the parent, then use the
+property, as in RhinoCommon:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 8.x</span>
+<span class="n">style</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">DimStyles</span><span class="o">.</span><span class="n">FindId</span><span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">DimensionStyleId</span><span class="p">)</span>
+<span class="n">height</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">GetTextHeight</span><span class="p">(</span><span class="n">style</span><span class="p">)</span>
+
+<span class="c1"># 9.2</span>
+<span class="n">ann</span><span class="o">.</span><span class="n">ParentDimensionStyle</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">DimStyles</span><span class="o">.</span><span class="n">FindId</span><span class="p">(</span><span class="n">ann</span><span class="o">.</span><span class="n">DimensionStyleId</span><span class="p">)</span>
+<span class="n">height</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">TextHeight</span>
+</pre></div>
+</div>
+<p>Pass the annotation’s own style. Assigning a different style makes it the annotation’s style and
+drops its overrides. Without a parent, these properties read the defaults, as in RhinoCommon.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DimLinear.Points</span></code> (and the other dimensions’ <code class="docutils literal notranslate"><span class="pre">Points</span></code> dicts) is <code class="docutils literal notranslate"><span class="pre">Get3dPoints()</span></code>, a tuple
+<code class="docutils literal notranslate"><span class="pre">(success,</span> <span class="pre">p1,</span> <span class="pre">p2,</span> <span class="pre">...)</span></code>. <code class="docutils literal notranslate"><span class="pre">Leader.Points</span></code> is <code class="docutils literal notranslate"><span class="pre">Points3D</span></code> (and <code class="docutils literal notranslate"><span class="pre">Points2D</span></code>), and an angular dimension’s angle is
+<code class="docutils literal notranslate"><span class="pre">NumericValue</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Arrowhead</span></code> has its static <code class="docutils literal notranslate"><span class="pre">GetPoints(type)</span></code> only; its constructors and
+properties are not bound yet.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TextHasRtfFormatting</span></code> is true for more than one text run.
+<code class="docutils literal notranslate"><span class="pre">PlainText</span></code> joins the runs, and for a dimension it returns the authored text (the
+<code class="docutils literal notranslate"><span class="pre">&lt;&gt;</span></code> formula), not the measurement.</p></li>
+<li><p>On macOS and Windows, text may not be measured: an annotation’s <code class="docutils literal notranslate"><span class="pre">GetBoundingBox</span></code> is then empty
+(<code class="docutils literal notranslate"><span class="pre">IsValid</span></code> is false) and <code class="docutils literal notranslate"><span class="pre">TextModelWidth</span></code> is -2. 8.x returned a zero-width box there. Linux
+measures text.</p></li>
+</ul>
+</section>
+<section id="rendering-and-settings">
+<h2>Rendering and settings<a class="headerlink" href="#rendering-and-settings" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RenderContent.GetParameter(name)</span></code> returns the value by its type
+(<code class="docutils literal notranslate"><span class="pre">bool</span></code>, <code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">uuid.UUID</span></code>, a tuple of doubles, <code class="docutils literal notranslate"><span class="pre">Color4f</span></code>, <code class="docutils literal notranslate"><span class="pre">Transform</span></code>, <code class="docutils literal notranslate"><span class="pre">bytes</span></code>), and <code class="docutils literal notranslate"><span class="pre">None</span></code>
+when there is no such parameter. 8.x always returned a string. <code class="docutils literal notranslate"><span class="pre">SetParameter</span></code> accepts the same values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RenderContent.TopLevel</span></code> of a grandchild is its parent, as in RhinoCommon.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SetChildSlotOn(name,</span> <span class="pre">on)</span></code> and <code class="docutils literal notranslate"><span class="pre">SetChildSlotAmount(name,</span> <span class="pre">amount)</span></code> take the slot name first. <code class="docutils literal notranslate"><span class="pre">ChildSlotAmount</span></code> of an unset slot is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RenderSettings.PostEffects</span></code> is a <code class="docutils literal notranslate"><span class="pre">PostEffectCollection</span></code> of
+<code class="docutils literal notranslate"><span class="pre">PostEffectData</span></code>: iterate it, or use <code class="docutils literal notranslate"><span class="pre">PostEffectDataFromId(id)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PhysicallyBasedMaterial.BaseColor</span></code> (and <code class="docutils literal notranslate"><span class="pre">Emission</span></code>, <code class="docutils literal notranslate"><span class="pre">SubsurfaceScatteringColor</span></code>) is a <code class="docutils literal notranslate"><span class="pre">Color4f</span></code> (<code class="docutils literal notranslate"><span class="pre">R</span></code>, <code class="docutils literal notranslate"><span class="pre">G</span></code>, <code class="docutils literal notranslate"><span class="pre">B</span></code>, <code class="docutils literal notranslate"><span class="pre">A</span></code>),
+not a tuple. Python accepts a 4-sequence where a <code class="docutils literal notranslate"><span class="pre">Color4f</span></code> is expected.</p></li>
+<li><p><strong>Sun</strong>: the date is a <code class="docutils literal notranslate"><span class="pre">datetime.datetime</span></code>: <code class="docutils literal notranslate"><span class="pre">sun.GetDateTime(DateTimeKind.Local)</span></code>
+and <code class="docutils literal notranslate"><span class="pre">sun.SetDateTime(d,</span> <span class="pre">DateTimeKind.Local)</span></code>, in place of the year, month, day and hours
+properties. Times are whole seconds. <code class="docutils literal notranslate"><span class="pre">SunColorFromAltitude</span></code> is <code class="docutils literal notranslate"><span class="pre">ColorFromAltitude</span></code>, which rounds each channel (8.x
+truncated, so a channel can differ by 1).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TextureMapping.RequiresVertexNormals</span></code> is gone. Use <code class="docutils literal notranslate"><span class="pre">MappingType</span></code>, <code class="docutils literal notranslate"><span class="pre">Projection</span></code> and <code class="docutils literal notranslate"><span class="pre">Capped</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TextureMapping.TryGetMappingBox</span></code>, <code class="docutils literal notranslate"><span class="pre">TryGetMappingCylinder</span></code> and <code class="docutils literal notranslate"><span class="pre">TryGetMappingPlane</span></code> with the capped <code class="docutils literal notranslate"><span class="pre">out</span></code> values
+are <code class="docutils literal notranslate"><span class="pre">TryGetMappingBoxCapped</span></code>, <code class="docutils literal notranslate"><span class="pre">TryGetMappingCylinderCapped</span></code> and <code class="docutils literal notranslate"><span class="pre">TryGetMappingPlaneCapped</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ObjectAttributes.DrawColor(file)</span></code> for a colour by material uses
+Rhino’s rules: the material the attributes select, and its PBR base colour when it is physically
+based.</p></li>
+</ul>
+</section>
+<section id="renamed-classes">
+<h2>Renamed classes<a class="headerlink" href="#renamed-classes" title="Link to this heading"></a></h2>
+<ul>
+<li><p>These 8.x classes have RhinoCommon’s names. Their members keep their names, unless
+<a class="reference internal" href="migrating-members.html"><span class="std std-doc">Renamed and removed members</span></a>
+lists them:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>8.x</p></th>
+<th class="head"><p>9.2</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Text</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">TextEntity</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DimLinear</span></code>, <code class="docutils literal notranslate"><span class="pre">DimAngular</span></code>, <code class="docutils literal notranslate"><span class="pre">DimRadial</span></code>, <code class="docutils literal notranslate"><span class="pre">DimOrdinate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">LinearDimension</span></code>, <code class="docutils literal notranslate"><span class="pre">AngularDimension</span></code>, <code class="docutils literal notranslate"><span class="pre">RadialDimension</span></code>, <code class="docutils literal notranslate"><span class="pre">OrdinateDimension</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">InstanceDefinition</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">InstanceDefinitionGeometry</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">InstanceReference</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">InstanceReferenceGeometry</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EmbeddedFile</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">File3dmEmbeddedFile</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">File3dmEmbeddedFileTable</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">File3dmEmbeddedFiles</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MeshNormalList</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MeshVertexNormalList</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CurvePiping</span></code>, <code class="docutils literal notranslate"><span class="pre">Displacement</span></code>, <code class="docutils literal notranslate"><span class="pre">EdgeSoftening</span></code>, <code class="docutils literal notranslate"><span class="pre">ShutLining</span></code>, <code class="docutils literal notranslate"><span class="pre">Thickening</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">File3dmCurvePiping</span></code>, <code class="docutils literal notranslate"><span class="pre">File3dmDisplacement</span></code>, <code class="docutils literal notranslate"><span class="pre">File3dmEdgeSoftening</span></code>, <code class="docutils literal notranslate"><span class="pre">File3dmShutLining</span></code>, <code class="docutils literal notranslate"><span class="pre">File3dmThickening</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RenderContent</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">File3dmRenderContent</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">RenderMaterial</span></code>, <code class="docutils literal notranslate"><span class="pre">RenderEnvironment</span></code>, <code class="docutils literal notranslate"><span class="pre">RenderTexture</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">File3dmRenderMaterial</span></code>, <code class="docutils literal notranslate"><span class="pre">File3dmRenderEnvironment</span></code>, <code class="docutils literal notranslate"><span class="pre">File3dmRenderTexture</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PostEffect</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">PostEffectData</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">File3dmDecalTable</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Decals</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">File3dmPostEffectTable</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">PostEffectCollection</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PointGrid</span></code> and <code class="docutils literal notranslate"><span class="pre">File3dmRdkDocumentData</span></code> are gone. <code class="docutils literal notranslate"><span class="pre">File3dm.RdkXml</span></code> still
+returns the document’s RDK XML.</p></li>
+</ul>
+</section>
+<section id="enums">
+<h2>Enums<a class="headerlink" href="#enums" title="Link to this heading"></a></h2>
+<ul>
+<li><p>Every enum is RhinoCommon’s, with RhinoCommon’s names and values. Fifteen 8.x enums had no
+RhinoCommon namesake and are replaced:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>8.x</p></th>
+<th class="head"><p>9.2</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">AnnotationTypes</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">AnnotationType</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ArrowheadTypes</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DimensionStyle.ArrowType</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CurvePipingCapTypes</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">File3dmCurvePiping.CapTypes</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DecalMappings</span></code>, <code class="docutils literal notranslate"><span class="pre">Mappings</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DecalMapping</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DecalProjections</span></code>, <code class="docutils literal notranslate"><span class="pre">Projections</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DecalProjection</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DisplacementSweepResolutionFormulas</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">File3dmDisplacement.SweepResolutionFormulas</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DitheringMethods</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Dithering.Methods</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">EnvironmentBackgroundProjections</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Environment.BackgroundProjections</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">LengthDisplay</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DimensionStyle.LengthDisplay</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MaskFrame</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DimensionStyle.MaskFrame</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MaskType</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DimensionStyle.MaskType</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">PostEffectTypes</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">PostEffectType</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RenderChannelsModes</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">RenderChannels.Modes</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>An enum is nested in its class, as in RhinoCommon.</p>
+</li>
+<li><p>Some values are numbered differently: <code class="docutils literal notranslate"><span class="pre">Dithering.Methods</span></code> is
+<code class="docutils literal notranslate"><span class="pre">None</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">FloydSteinberg</span> <span class="pre">=</span> <span class="pre">1,</span> <span class="pre">SimpleNoise</span> <span class="pre">=</span> <span class="pre">2</span></code> (8.x: <code class="docutils literal notranslate"><span class="pre">SimpleNoise</span> <span class="pre">=</span> <span class="pre">0</span></code>), and <code class="docutils literal notranslate"><span class="pre">PostEffectType</span></code> is
+<code class="docutils literal notranslate"><span class="pre">Early</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">ToneMapping</span> <span class="pre">=</span> <span class="pre">1,</span> <span class="pre">Late</span> <span class="pre">=</span> <span class="pre">2</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LightStyle.Unknown</span></code> is <code class="docutils literal notranslate"><span class="pre">LightStyle.None</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BlendContinuity</span></code>, <code class="docutils literal notranslate"><span class="pre">CurveExtensionStyle</span></code>, <code class="docutils literal notranslate"><span class="pre">CurveKnotStyle</span></code>, <code class="docutils literal notranslate"><span class="pre">CurveOffsetCornerStyle</span></code>, <code class="docutils literal notranslate"><span class="pre">LoftType</span></code>,
+<code class="docutils literal notranslate"><span class="pre">PointContainment</span></code> and <code class="docutils literal notranslate"><span class="pre">RegionContainment</span></code> are gone: no 9.2 member takes or returns them.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code> is a keyword, so a value named <code class="docutils literal notranslate"><span class="pre">None</span></code> is also available as <code class="docutils literal notranslate"><span class="pre">None_</span></code>
+(<code class="docutils literal notranslate"><span class="pre">rhino3dm.LightStyle.None_</span></code>). <code class="docutils literal notranslate"><span class="pre">E['None']</span></code> and <code class="docutils literal notranslate"><span class="pre">getattr(E,</span> <span class="pre">'None')</span></code> work too, and the value’s name
+is still <code class="docutils literal notranslate"><span class="pre">'None'</span></code>.</p></li>
+<li><p>Enums are integer-like (<code class="docutils literal notranslate"><span class="pre">int(e)</span></code> and <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">==</span> <span class="pre">2</span></code> work), but passing a plain int where an enum is
+expected raises <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>.</p></li>
+</ul>
+</section>
+<section id="errors-values-and-identity">
+<h2>Errors, values and identity<a class="headerlink" href="#errors-values-and-identity" title="Link to this heading"></a></h2>
+<section id="errors">
+<h3>Errors<a class="headerlink" href="#errors" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>.NET</p></th>
+<th class="head"><p>Python</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">IndexOutOfRangeException</span></code>, <code class="docutils literal notranslate"><span class="pre">ArgumentOutOfRangeException</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">IndexError</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ArgumentNullException</span></code>, <code class="docutils literal notranslate"><span class="pre">ArgumentException</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ValueError</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">InvalidOperationException</span></code>, <code class="docutils literal notranslate"><span class="pre">NotSupportedException</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">FileNotFoundException</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">FileNotFoundError</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Where RhinoCommon accepts <code class="docutils literal notranslate"><span class="pre">null</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code> is accepted and behaves as in .NET:
+<code class="docutils literal notranslate"><span class="pre">PolyCurve.Append(None)</span></code> returns <code class="docutils literal notranslate"><span class="pre">False</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">model.Objects.AddPoint(p,</span> <span class="pre">None)</span></code> uses the default attributes.</p>
+</section>
+<section id="arrays-and-sequences">
+<h3>Arrays and sequences<a class="headerlink" href="#arrays-and-sequences" title="Link to this heading"></a></h3>
+<p>Wherever RhinoCommon takes a sequence of points, any sequence works (a list, a tuple, a
+<code class="docutils literal notranslate"><span class="pre">Point3dList</span></code>). <code class="docutils literal notranslate"><span class="pre">GetUserStrings()</span></code> returns
+a list of <code class="docutils literal notranslate"><span class="pre">[key,</span> <span class="pre">value]</span></code> lists.</p>
+</section>
+<section id="strings-and-values">
+<h3>Strings and values<a class="headerlink" href="#strings-and-values" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">str(point)</span></code> is RhinoCommon’s <code class="docutils literal notranslate"><span class="pre">ToString()</span></code>: full precision (<code class="docutils literal notranslate"><span class="pre">0.30000000000000004</span></code>, where 8.x printed 6
+significant digits). <code class="docutils literal notranslate"><span class="pre">str</span></code> works on every value type and on classes (<code class="docutils literal notranslate"><span class="pre">str(layer)</span></code> is its full path).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">repr(Point3d(1,</span> <span class="pre">2,</span> <span class="pre">3))</span></code> is <code class="docutils literal notranslate"><span class="pre">Point3d(1.0,</span> <span class="pre">2.0,</span> <span class="pre">3.0)</span></code>.</p></li>
+<li><p>An empty string reads <code class="docutils literal notranslate"><span class="pre">''</span></code> where RhinoCommon returns <code class="docutils literal notranslate"><span class="pre">null</span></code> (<code class="docutils literal notranslate"><span class="pre">ViewInfo().Name</span></code>,
+the log of <code class="docutils literal notranslate"><span class="pre">IsValidWithLog()</span></code> when there is nothing to report): test with
+<code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">not</span> <span class="pre">name:</span></code>, which is true for both.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ViewportInfo.ScreenPort</span></code> and <code class="docutils literal notranslate"><span class="pre">GetScreenPort()</span></code> are RhinoCommon’s <code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y,</span> <span class="pre">width,</span> <span class="pre">height)</span></code>, with y the smaller of top and bottom.
+A new <code class="docutils literal notranslate"><span class="pre">ViewportInfo()</span></code> reads <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">1000,</span> <span class="pre">1000)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">File3dm.FromByteArray</span></code> takes any buffer (<code class="docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="docutils literal notranslate"><span class="pre">bytearray</span></code>, numpy).</p></li>
+</ul>
+</section>
+<section id="object-identity">
+<h3>Object identity<a class="headerlink" href="#object-identity" title="Link to this heading"></a></h3>
+<p>Contents and behaviour follow RhinoCommon, but object identity may not. Accessors such as
+<code class="docutils literal notranslate"><span class="pre">obj.Geometry</span></code>, <code class="docutils literal notranslate"><span class="pre">brep.Faces</span></code> and <code class="docutils literal notranslate"><span class="pre">brep.Faces[0]</span></code> return a new view each time, so <code class="docutils literal notranslate"><span class="pre">brep.Faces[0]</span> <span class="pre">is</span> <span class="pre">brep.Faces[0]</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>. Compare components by their index or id.
+<code class="docutils literal notranslate"><span class="pre">Brep.TryConvertBrep(geometry)</span></code> on a file’s brep returns
+a new view of it, not <code class="docutils literal notranslate"><span class="pre">geometry</span></code> itself.</p>
+</section>
+</section>
+<section id="packaging">
+<h2>Packaging<a class="headerlink" href="#packaging" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>The module is built with nanobind. On Python 3.12 and newer it is one stable-ABI (<code class="docutils literal notranslate"><span class="pre">abi3</span></code>) module,
+and it supports free-threaded CPython 3.14t.</p></li>
+<li><p>The package ships typings (<code class="docutils literal notranslate"><span class="pre">__init__.pyi</span></code>) with RhinoCommon’s documentation, so editors complete
+and type-check rhino3dm code.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="rhino3dm.py" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="migrating-members.html" class="btn btn-neutral float-right" title="Renamed and removed members (Python)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Robert McNeel &amp; Associates.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

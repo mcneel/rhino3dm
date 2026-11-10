@@ -1,0 +1,38 @@
+rhino3dm.EdgeAdjacency
+======================
+
+.. py:class:: rhino3dm.EdgeAdjacency
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Enumerates all possible Topological Edge adjacency types.
+
+
+   .. py:attribute:: Interior
+      :value: 2
+
+
+      Edge is used by two adjacent faces.
+
+
+   .. py:attribute:: Naked
+      :value: 1
+
+
+      Edge is used by a single face.
+
+
+   .. py:attribute:: NonManifold
+      :value: 3
+
+
+      Edge is used by three or more adjacent faces.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``EdgeAdjacency.None`` is not Python syntax; ``EdgeAdjacency['None']`` is the same member). Edge is not used by any faces and is therefore superfluous.
+

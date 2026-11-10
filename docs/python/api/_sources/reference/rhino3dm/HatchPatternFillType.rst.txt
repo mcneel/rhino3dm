@@ -1,0 +1,25 @@
+rhino3dm.HatchPatternFillType
+=============================
+
+.. py:class:: rhino3dm.HatchPatternFillType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Enum where members are also (and must be) ints
+
+
+   .. py:attribute:: Gradient
+      :value: 2
+
+
+
+   .. py:attribute:: Lines
+      :value: 1
+
+
+
+   .. py:attribute:: Solid
+      :value: 0
+
+

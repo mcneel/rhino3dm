@@ -312,6 +312,7 @@ namespace Rhino.UI
         IntPtr pString = sw.NonConstPointer;
         IntPtr const_ptr_dimstyle = dimStyle == null ? IntPtr.Zero : dimStyle.ConstPointer();
         UnsafeNativeMethods.ON_TextContext_FormatDistanceAndTolerance(distance, units, const_ptr_dimstyle, alternate, pString);
+        GC.KeepAlive(dimStyle);
         return sw.ToString();
       }
     }
@@ -332,6 +333,7 @@ namespace Rhino.UI
         IntPtr pString = sw.NonConstPointer;
         IntPtr const_ptr_dimstyle = dimStyle == null ? IntPtr.Zero : dimStyle.ConstPointer();
         UnsafeNativeMethods.ON_TextContext_FormatArea(area, units, const_ptr_dimstyle, alternate, pString);
+        GC.KeepAlive(dimStyle);
         return sw.ToString();
       }
     }
@@ -352,6 +354,7 @@ namespace Rhino.UI
         IntPtr pString = sw.NonConstPointer;
         IntPtr const_ptr_dimstyle = dimStyle == null ? IntPtr.Zero : dimStyle.ConstPointer();
         UnsafeNativeMethods.ON_TextContext_FormatVolume(volume, units, const_ptr_dimstyle, alternate, pString);
+        GC.KeepAlive(dimStyle);
         return sw.ToString();
       }
     }

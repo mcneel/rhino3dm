@@ -1,0 +1,528 @@
+rhino3dm.ObjectAttributes
+=========================
+
+.. py:class:: rhino3dm.ObjectAttributes
+
+   Bases: :py:obj:`CommonObject`
+
+
+   Attributes (color, material, layer,...) associated with a rhino object
+
+
+   .. py:method:: AddActiveInViewportOverride(viewportId: uuid.UUID, active: bool) -> bool
+
+
+   .. py:method:: AddHideInDetailOverride(detailId: uuid.UUID) -> bool
+
+      Make this object hidden in a given detail
+
+
+
+   .. py:method:: AddToGroup(groupIndex: int) -> None
+
+      Adds object to the group with specified index by appending index to group list.
+
+      If the object is already in group, nothing is changed.
+
+      :param groupIndex: The index that will be added.
+
+
+
+   .. py:method:: ClearRenderingAttributes() -> None
+
+      Clears, or resets the rendering attributes.
+
+
+
+   .. py:method:: DeleteAllUserStrings() -> None
+
+
+   .. py:method:: DrawColor(file: File3dm, viewportId: uuid.UUID) -> tuple[int, int, int, int]
+                  DrawColor(file: File3dm) -> tuple[int, int, int, int]
+
+      Gets the draw color of an object in a file, which is based on the object's color source: the layer's color, the object's color, or the color of its material (the base color of a physically based material, else the diffuse color). Unlike the document overload in Rhino, black and white are never switched to suit a viewport background.
+
+      :param file: The file that contains the object's layer and material.
+
+      :returns: The draw color.
+
+
+
+   .. py:method:: Duplicate() -> ObjectAttributes
+
+      Constructs a copy of this ``ObjectAttributes`` instance.
+
+      :returns: A new instance on success, or null on failure.
+
+
+
+   .. py:method:: GetCustomLinetype() -> Linetype
+
+      Get an optional custom linetype associated with these attributes. If null, then the attributes use the linetype index to determine it's linetype
+
+
+
+   .. py:method:: GetDisplayModeOverride(viewportId: uuid.UUID) -> uuid.UUID
+
+      Returns the id of the display mode of an objects. Object display modes are view based. Thus, it is possible to have an object display different in different views.
+
+      :param viewportId: Id of a Rhino Viewport.
+
+      :returns: A display node id if the object has a display mode override for the viewport; otherwise Guid.Empty is returned.
+
+
+
+   .. py:method:: GetGroupList() -> list[int] | None
+
+      Returns an array of GroupCount group indices. If GroupCount is zero, then GetGroupList() returns null.
+
+      :returns: An array of group indices. null might be returned in place of an empty array.
+
+
+
+   .. py:method:: GetHideInDetailOverrides() -> list[Any]
+
+      Get list of details that this object is supposed to be hidden in
+
+
+
+   .. py:method:: GetUserString(key: str) -> str
+
+      Gets a user string.
+
+      :param key: id used to retrieve the string.
+
+      :returns: string associated with the key if successful. null if no key was found.
+
+
+
+   .. py:method:: GetUserStrings() -> list[Any]
+
+      Gets an independent copy of the collection of (user text key, user text value) pairs attached to this object.
+
+      :returns: A collection of key strings and values strings. This
+
+
+
+   .. py:method:: HasActiveInViewportOverride(viewportId: uuid.UUID) -> tuple[bool, bool]
+
+
+   .. py:method:: HasDisplayModeOverride(viewportId: uuid.UUID) -> bool
+
+      Determines if an object has a display mode override for a given viewport.
+
+      :param viewportId: Id of a Rhino Viewport.
+
+      :returns: true if the object has a display mode override for the viewport; otherwise, false.
+
+
+
+   .. py:method:: IsInGroup(groupIndex: int) -> bool
+
+      Determines if an object belong to a group or not.
+
+      :param groupIndex: The index that will be tested.
+
+
+
+   .. py:method:: ObjectFrame() -> Plane
+
+
+   .. py:method:: RemoveActiveInViewportOverride(viewportId: uuid.UUID, active: bool) -> bool
+
+
+   .. py:method:: RemoveCustomLinetype() -> None
+
+
+   .. py:method:: RemoveCustomSectionStyle() -> None
+
+
+   .. py:method:: RemoveDisplayModeOverride(rhinoViewportId: uuid.UUID) -> None
+                  RemoveDisplayModeOverride() -> None
+
+      By default, objects are drawn using the display mode of the viewport that the object is being drawn in. Setting a specific display mode, instructs Rhino to always use that display mode, regardless of the viewport's mode. This function resets an object to use the viewport's display mode for all viewports.
+
+
+
+   .. py:method:: RemoveFromAllGroups() -> None
+
+      Removes object from all groups.
+
+
+
+   .. py:method:: RemoveFromGroup(groupIndex: int) -> None
+
+      removes object from the group with specified index.
+
+      If the object is not in the group, nothing is changed.
+
+      :param groupIndex: The index that will be removed.
+
+
+
+   .. py:method:: RemoveHideInDetailOverride(detailId: uuid.UUID) -> bool
+
+      Remove hidden in detail flag for a specific detail
+
+
+
+   .. py:method:: SetCustomLinetype(linetype: Linetype) -> None
+
+
+   .. py:method:: SetObjectFrame(xform: Transform) -> None
+                  SetObjectFrame(plane: Plane) -> None
+
+
+   .. py:method:: SetUserString(key: str, value: str) -> bool
+
+      Attach a user string (key,value combination) to this geometry.
+
+      :param key: id used to retrieve this string.
+      :param value: string associated with key. If null, the key will be removed
+
+      :returns: true on success.
+
+
+
+   .. py:method:: Transform(xform: Transform) -> bool
+
+      Apply a transformation.
+
+      :param xform: The transformation.
+
+      :returns: true if successful, false otherwise.
+
+
+
+   .. py:property:: CastsShadows
+      :type: bool
+
+
+      Gets or sets an object's casts shadows property, or whether or not an object casts shadows on other objects and a ground plane.
+
+
+   .. py:property:: ClippingPlaneLabelStyle
+      :type: SectionLabelStyle
+
+
+      Defines how a label for a clipping plane object should be shown
+
+
+   .. py:property:: ColorSource
+      :type: ObjectColorSource
+
+
+      The color used to display an object is specified in one of three ways. If ColorSource is ON::color\_from\_layer, then the object's layer ON\_Layer::Color() is used. If ColorSource is ON::color\_from\_object, then value of m\_color is used. If ColorSource is ON::color\_from\_material, then the diffuse color of the object's render material is used. See ON\_3dmObjectAttributes::MaterialSource() to determine where to get the definition of the object's render material.
+
+
+   .. py:property:: CustomMeshingParameters
+      :type: MeshingParameters
+
+
+      Returns or sets the per-object render meshing parameters, which controls the object's render mesh density. If this property is null, then the object uses the document's render meshing parameters. To remove the per-object render meshing parameters, set this property to null.
+
+
+   .. py:property:: Decals
+      :type: Decals
+
+
+      Gets all object decals associated with this object.
+
+
+   .. py:property:: DetailBackgroundVisible
+      :type: bool
+
+
+      Should the background color show for a detail
+
+
+   .. py:property:: DisplayOrder
+      :type: int
+
+
+      Display order used to force objects to be drawn on top or behind each other. Larger numbers draw on top of smaller numbers.
+
+      0 = draw object in standard depth buffered order
+
+      <0 = draw object behind "normal" draw order objects
+
+      >0 = draw object on top of "normal" draw order objects
+
+
+   .. py:property:: EnableCustomMeshingParameters
+      :type: bool
+
+
+      En/disables the custom meshing parameters enabled state.
+
+
+   .. py:property:: File3dmMeshModifiers
+      :type: File3dmMeshModifiers
+
+
+      Get an object that provides access to mesh modifiers when the attributes is for a File3dmObject.
+
+
+   .. py:property:: GroupCount
+      :type: int
+
+
+      number of groups object belongs to.
+
+
+   .. py:property:: HasMapping
+      :type: bool
+
+
+      A mapping from any plug-in source is associated with these attributes Need to do this here to respond correctly to ModifyObjectAttributes event
+
+
+   .. py:property:: HatchBackgroundFillColor
+      :type: tuple[int, int, int, int]
+
+
+      Fill color for hatches (default is Color.Empty)
+
+
+   .. py:property:: HatchBackgroundFillPrintColor
+      :type: tuple[int, int, int, int]
+
+
+      Fill color for hatches when printing (default is Color.Empty)
+
+
+   .. py:property:: HatchBoundaryColor
+      :type: tuple[int, int, int, int]
+
+
+      Hatch boundary color override. Default is unset color which means use the standard attributes and layer colors to determine the boundary color
+
+
+   .. py:property:: HatchBoundaryColorSource
+      :type: ItemColorSource
+
+
+      Source for the hatch boundary display color. Determines whether the boundary color is read from the layer, from the object's main attribute color, inherited from the parent, or read from the custom override color set by HatchBoundaryColor (ColorCustom).
+
+
+   .. py:property:: HatchBoundaryPlotColor
+      :type: tuple[int, int, int, int]
+
+
+      Hatch boundary plot color override. Default is unset color which means use the standard attributes and layer colors to determine the boundary color
+
+
+   .. py:property:: HatchBoundaryPlotColorSource
+      :type: ItemColorSource
+
+
+      Source for the hatch boundary plot/print color. Determines whether the boundary plot color is read from the layer, from the object's main attribute color, inherited from the parent, or read from the custom override color set by HatchBoundaryPlotColor (ColorCustom).
+
+
+   .. py:property:: HatchBoundaryPlotWeightMillimeters
+      :type: float
+
+
+      do not plot 0: use default weight defined by the print dialog positive values are thicknesses in millimeters to print to
+
+      :type: Plot width of hatch boundary curves. values less than -1 (-10 is default)
+
+      :type: plot weight is determined by the m\_plot\_weight -1
+
+
+   .. py:property:: HatchBoundaryVisible
+      :type: bool
+
+
+      Draw the bounrdaries for a hatch (default is false)
+
+
+   .. py:property:: IsInstanceDefinitionObject
+      :type: bool
+
+
+      Use this query to determine if an object is part of an instance definition.
+
+
+   .. py:property:: LayerIndex
+      :type: int
+
+
+      Gets or sets an associated layer index.
+
+      Layer definitions in an OpenNURBS model are stored in a layer table. The layer table is conceptually an array of ON\_Layer classes. Every OpenNURBS object in a model is on some layer. The object's layer is specified by zero based indices into the ON\_Layer array.
+
+
+   .. py:property:: LinetypeIndex
+      :type: int
+
+
+      Gets or sets the linetype index.
+
+      Linetype definitions in an OpenNURBS model are stored in a linetype table. The linetype table is conceptually an array of ON\_Linetype classes. Every OpenNURBS object in a model references some linetype. The object's linetype is specified by zero based indices into the ON\_Linetype array.
+
+      Index 0 is reserved for continuous linetype (no pattern).
+
+
+   .. py:property:: LinetypePatternScale
+      :type: float
+
+
+      Per object linetype scale
+
+
+   .. py:property:: LinetypeSource
+      :type: ObjectLinetypeSource
+
+
+      The Linetype used to display an object is specified in one of two ways. If LinetypeSource is ON::linetype\_from\_layer, then the object's layer ON\_Layer::Linetype() is used. If LinetypeSource is ON::linetype\_from\_object, then value of m\_linetype is used.
+
+
+   .. py:property:: MaterialIndex
+      :type: int
+
+
+      Gets or sets the material index.
+
+      If you want something simple and fast, set the index of the rendering material.
+
+
+   .. py:property:: MaterialSource
+      :type: ObjectMaterialSource
+
+
+      Determines if the simple material should come from the object or from it's layer. High quality rendering plug-ins should use m\_rendering\_attributes.
+
+
+   .. py:property:: Mode
+      :type: ObjectMode
+
+
+      normal, locked or hidden. If an object is in normal mode, then the object's layer controls visibility and selectability. If an object is locked, then the object's layer controls visibility by the object cannot be selected. If the object is hidden, it is not visible and it cannot be selected.
+
+      :type: An object must be in one of three modes
+
+
+   .. py:property:: Name
+      :type: str
+
+
+      Gets or sets an object optional text name.
+
+      More than one object in a model can have the same name and some objects may have no name.
+
+
+   .. py:attribute:: OCSMappingChannelId
+      :type:  int
+      :value: Ellipsis
+
+
+      object, /) -> int
+
+      :type: (arg
+
+
+   .. py:property:: ObjectColor
+      :type: tuple[int, int, int, int]
+
+
+      If ON::color\_from\_object == ColorSource, then color is the object's display color.
+
+
+   .. py:property:: ObjectDecoration
+      :type: ObjectDecoration
+
+
+      Used to indicate an object has a decoration (like an arrowhead on a curve)
+
+
+   .. py:property:: ObjectId
+      :type: uuid.UUID
+
+
+      Every object has a Guid (globally unique identifier, also known as UUID, or universally unique identifier). The default value is Guid.Empty.
+
+      When an object is added to a model, the value is checked. If the value is Guid.Empty, a new Guid is created. If the value is not null but it is already used by another object in the model, a new Guid is created. If the value is not Guid.Empty and it is not used by another object in the model, then that value persists. When an object is updated, by a move for example, the value of ObjectId persists.
+
+      This value is the same as the one returned by object.Id.
+
+
+   .. py:property:: PlotColor
+      :type: tuple[int, int, int, int]
+
+
+      If plot\_color\_from\_object == PlotColorSource, then PlotColor is the object's plotting color.
+
+
+   .. py:property:: PlotColorSource
+      :type: ObjectPlotColorSource
+
+
+      The color used to plot an object on paper is specified in one of three ways. If PlotColorSource is ON::plot\_color\_from\_layer, then the object's layer ON\_Layer::PlotColor() is used. If PlotColorSource is ON::plot\_color\_from\_object, then value of PlotColor() is used.
+
+
+   .. py:property:: PlotWeight
+      :type: float
+
+
+      Plot weight in millimeters. =0.0 means use the default width <0.0 means don't plot (visible for screen display, but does not show on plot)
+
+
+   .. py:property:: PlotWeightSource
+      :type: ObjectPlotWeightSource
+
+
+
+   .. py:property:: ReceivesShadows
+      :type: bool
+
+
+      Gets or sets an object's receives shadows property, or whether or not an object receives shadows from other objects.
+
+
+   .. py:property:: SectionAttributesSource
+      :type: ObjectSectionAttributesSource
+
+
+      Where section attributes are read from
+
+
+   .. py:property:: Space
+      :type: ActiveSpace
+
+
+      Starting with V4, objects can be in either model space or page space. If an object is in page space, then ViewportId is not nil and identifies the page it is on.
+
+
+   .. py:property:: Url
+      :type: str
+
+
+      Objects may have an URL. There are no restrictions on what value this URL may have. As an example, if the object came from a commercial part library, the URL might point to the definition of that part.
+
+
+   .. py:property:: UserStringCount
+      :type: int
+
+
+
+   .. py:property:: ViewportId
+      :type: uuid.UUID
+
+
+      If ViewportId is nil, the object is active in all viewports. If ViewportId is not nil, then this object is only active in a specific view. This field is primarily used to assign page space objects to a specific page, but it can also be used to restrict model space to a specific view.
+
+
+   .. py:property:: Visible
+      :type: bool
+
+
+      Gets or sets an object's visibility.
+
+
+   .. py:property:: WireDensity
+      :type: int
+
+
+      When a surface object is displayed in wireframe, this controls how many isoparametric wires are used. value number of isoparametric wires -1 boundary wires (off) 0 boundary and knot wires 1 boundary and knot wires and, if there are no interior knots, a single interior wire. N>=2 boundary and knot wires and (N+1) interior wires.
+

@@ -1,4 +1,5 @@
 const rhino3dm = require('rhino3dm')
+const helpers = require('./helpers')
 
 let rhino
 
@@ -11,12 +12,13 @@ beforeAll(async () => {
 function makeCloud(rhino, n, { withColor = false, withNormal = false } = {}) {
     const pc = new rhino.PointCloud()
     for (let i = 0; i < n; i++) {
-        const p = [ (i % 512) * 0.25 - 64, ((i * 3) % 512) * 0.25 - 64, Math.sin(i * 0.05) * 10 ]
+        const p = { X: (i % 512) * 0.25 - 64, Y: ((i * 3) % 512) * 0.25 - 64, Z: Math.sin(i * 0.05) * 10 }
         const color = { r: i % 256, g: 0, b: 255 - (i % 256), a: 0 }
-        const normal = [ 0, 0, 1 ]
-        if (withColor && withNormal) pc.addPointNormalColor(p, normal, color)
-        else if (withColor) pc.addPointColor(p, color)
-        else if (withNormal) pc.addPointNormal(p, normal)
+        const normal = { X: 0, Y: 0, Z: 1 }
+        // addPointNormalColor / addPointColor / addPointNormal -> add overloads
+        if (withColor && withNormal) pc.add(p, normal, color)
+        else if (withColor) pc.add(p, color)
+        else if (withNormal) pc.add(p, normal)
         else pc.add(p)
     }
     return pc
@@ -71,7 +73,7 @@ test('toThreejsBuffers includes normal when present', async () => {
 
 test('toThreejsBuffers(true) rotates Z-up to Y-up', async () => {
     const pc = new rhino.PointCloud()
-    pc.add([ 1, 2, 3 ])
+    pc.add({ X: 1, Y: 2, Z: 3 })
     const buf = pc.toThreejsBuffers(true)
     // Rhino is Z-up, three.js is Y-up: (x, y, z) -> (x, z, -y)
     expect(buf.position[0]).toBeCloseTo(1, 4)
@@ -106,3 +108,39 @@ test('toThreejsBuffers matches toThreejsJSON on a large cloud and is faster', as
 
     expect(bufMs).toBeLessThanOrEqual(jsonMs)
 }, 60000)
+
+// two points with normals and colors (red, blue)
+function pointCloudForThreejsBuffers(rhino) {
+  const pc = new rhino.PointCloud()
+  pc.add(new rhino.Point3d(1, 2, 3), new rhino.Vector3d(0, 0, 1), { r: 255, g: 0, b: 0, a: 255 })
+  pc.add(new rhino.Point3d(4, 5, 6), new rhino.Vector3d(0, 1, 0), { r: 0, g: 0, b: 255, a: 255 })
+  return pc
+}
+
+test('pointCloudThreejsBuffersRoundTrip', () => {
+  // toThreejsBuffers gives positions, colors (0..1) and normals; createFromThreejsBuffers reads them back
+  const pc = pointCloudForThreejsBuffers(rhino)
+  const b = pc.toThreejsBuffers(false)
+  expect(Array.from(b.position)).toEqual([1, 2, 3, 4, 5, 6])
+  expect(Array.from(b.color)).toEqual([1, 0, 0, 0, 0, 1])
+  const back = rhino.PointCloud.createFromThreejsBuffers(b, false)
+  expect(Array.from(back.getPoints()).map(q => [q.X, q.Y, q.Z])).toEqual([[1, 2, 3], [4, 5, 6]])
+  expect(Array.from(back.getColors()).map(k => [k.r, k.g, k.b])).toEqual([[255, 0, 0], [0, 0, 255]])
+  expect(Array.from(back.getNormals()).map(q => [q.X, q.Y, q.Z])).toEqual([[0, 0, 1], [0, 1, 0]])
+})
+
+test('pointCloudToThreejsBuffersRotatesToYUp', () => {
+  // toThreejsBuffers(true) maps (x, y, z) to (x, z, -y), the points and their normals alike
+  const b = pointCloudForThreejsBuffers(rhino).toThreejsBuffers(true)
+  expect(Array.from(b.position)).toEqual([1, 3, -2, 4, 6, -5])
+  expect(Array.from(b.normal).map(v => v + 0)).toEqual([0, 1, 0, 0, 0, -1])
+})
+
+test('pointCloudThreejsBuffersRoundTripThroughYUp', () => {
+  // createFromThreejsBuffers(buffers, true) undoes toThreejsBuffers(true): points and normals come back
+  const b = pointCloudForThreejsBuffers(rhino).toThreejsBuffers(true)
+  const back = rhino.PointCloud.createFromThreejsBuffers(b, true)
+  const round = vs => vs.map(q => [q.X, q.Y, q.Z].map(c => Math.round(c * 1e6) / 1e6 + 0))
+  expect(round(Array.from(back.getPoints()))).toEqual([[1, 2, 3], [4, 5, 6]])
+  expect(round(Array.from(back.getNormals()))).toEqual([[0, 0, 1], [0, 1, 0]])
+})

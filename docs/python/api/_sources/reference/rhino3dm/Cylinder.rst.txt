@@ -1,0 +1,147 @@
+rhino3dm.Cylinder
+=================
+
+.. py:class:: rhino3dm.Cylinder
+              Cylinder(baseCircle: Circle)
+              Cylinder(baseCircle: Circle, height: float)
+
+   Represents the values of a plane, a radius and two heights -on top and beneath- that define a right circular cylinder.
+
+
+   .. py:method:: CircleAt(linearParameter: float) -> Circle
+
+      Compute the circle at the given elevation parameter.
+
+      :param linearParameter: Height parameter for circle section.
+
+
+
+   .. py:method:: EpsilonEquals(other: Cylinder, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: LineAt(angularParameter: float) -> Line
+
+      Compute the line at the given angle parameter. This line will be degenerate if the cylinder is infinite.
+
+      :param angularParameter: Angle parameter for line section.
+
+
+
+   .. py:method:: ToBrep(capBottom: bool, capTop: bool) -> Brep
+
+      Constructs a Brep representation of this Cylinder. This is synonymous with calling NurbsSurface.CreateFromCylinder().
+
+      :param capBottom: If true, the bottom of the cylinder will be capped.
+      :param capTop: If true, the top of the cylinder will be capped.
+
+      :returns: A Brep representation of the cylinder or null.
+
+
+
+   .. py:method:: ToNurbsSurface() -> NurbsSurface
+
+      Constructs a Nurbs surface representation of this cylinder. This is synonymous with calling NurbsSurface.CreateFromCylinder().
+
+      :returns: A Nurbs surface representation of the cylinder or null.
+
+
+
+   .. py:method:: ToRevSurface() -> RevSurface
+
+      Constructs a RevSurface representation of this Cylinder. This is synonymous with calling RevSurface.CreateFromCylinder().
+
+      :returns: A RevSurface representation of the cylinder or null.
+
+
+
+   .. py:method:: Transform(xform: Transform) -> bool
+
+      Transforms this cylinder. Note that non-similarity preserving transformations cannot be applied to a cylinder.
+
+      :param xform: Transformation matrix to apply.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:property:: Axis
+      :type: Vector3d
+
+
+      Gets the axis direction of the cylinder.
+
+
+   .. py:property:: BasePlane
+      :type: Plane
+
+
+      Gets or sets the base plane of the cylinder.
+
+
+   .. py:property:: Center
+      :type: Point3d
+
+
+      Gets the center point of the defining circle.
+
+
+   .. py:property:: Height1
+      :type: float
+
+
+      BasePlane.Origin + Height1 \* BasePlane.ZAxis.
+
+      :type: Gets or sets the start height of the cylinder. The center of bottom cap is
+
+
+   .. py:property:: Height2
+      :type: float
+
+
+      BasePlane.Origin + Height2 \* BasePlane.ZAxis.
+
+      :type: Gets or sets the end height of the cylinder. If the end height equals the start height, the cylinder is presumed to be infinite. The center of top cap is
+
+
+   .. py:property:: IsFinite
+      :type: bool
+
+
+      true if the cylinder is finite (Height0 != Height1) false if the cylinder is infinite.
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Gets a boolean value indicating whether this cylinder is valid.
+
+      A valid cylinder is represented by a valid circle and two valid heights.
+
+
+   .. py:property:: Radius
+      :type: float
+
+
+      Gets or sets the radius of the cylinder.
+
+
+   .. py:property:: TotalHeight
+      :type: float
+
+
+      Gets the height of the cylinder. Infinite cylinders have a height of zero, not Double.PositiveInfinity.
+
+
+   .. py:attribute:: Unset
+      :type:  Cylinder
+      :value: Ellipsis
+
+
+      object, /) -> Cylinder
+
+      :type: (arg
+

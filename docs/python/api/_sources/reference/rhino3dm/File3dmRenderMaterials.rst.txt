@@ -1,0 +1,16 @@
+rhino3dm.File3dmRenderMaterials
+===============================
+
+.. py:class:: rhino3dm.File3dmRenderMaterials
+
+   .. py:method:: Add(material: File3dmRenderMaterial) -> None
+
+      Adds a render material to the model (rhino3dm only).
+
+
+
+   .. py:method:: Find(g: uuid.UUID) -> File3dmRenderMaterial
+
+      Finds a material by its id, if possible. Returns null on failure.
+
+

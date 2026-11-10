@@ -1,0 +1,4 @@
+rhino3dm.DecalsIter
+===================
+
+.. py:class:: rhino3dm.DecalsIter

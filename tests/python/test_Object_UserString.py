@@ -1,7 +1,12 @@
 import rhino3dm
 import unittest
+import os
+import sys
+import helpers
 
 #objective: to test that adding a user string to an object and reading it back returns the same string
+
+
 class TestObject(unittest.TestCase):
     def test_addUserString(self):
 
@@ -17,14 +22,19 @@ class TestObject(unittest.TestCase):
 
         file3dm.Objects.AddCircle(circle, oa)
 
-        file3dm.Write("test_Object_UserString.3dm")
+        file3dm.Write("test_Object_UserString.3dm", 0)
 
         file3dmRead = rhino3dm.File3dm.Read("test_Object_UserString.3dm")
 
-        obj = file3dmRead.Objects[0]
+        obj = list(file3dmRead.Objects)[0]
         valueRead = obj.Attributes.GetUserString(key)
 
         self.assertTrue( value == valueRead )
+
+    def test_objectGeometryUserStringsAreSeparateFromAttributes(self):
+        """The geometry of an object whose user strings are on its attributes lists none of its own."""
+        f = helpers.read_model('object_UserStrings.3dm')
+        self.assertEqual(sorted(next(o.Geometry for o in f.Objects).GetUserStrings()), [])
 
 if __name__ == '__main__':
     print("running tests")

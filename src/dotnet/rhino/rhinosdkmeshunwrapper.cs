@@ -20,6 +20,7 @@ namespace Rhino.Geometry
     public MeshUnwrapper(Mesh mesh)
     {
       m_ptr = UnsafeNativeMethods.RHC_RhinoMeshUnwrapper_New(mesh.ConstPointer());
+      GC.KeepAlive(mesh);
     }
 
     /// <summary>

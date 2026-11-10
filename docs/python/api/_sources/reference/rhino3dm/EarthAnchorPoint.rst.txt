@@ -1,0 +1,167 @@
+rhino3dm.EarthAnchorPoint
+=========================
+
+.. py:class:: rhino3dm.EarthAnchorPoint
+
+   Contains information about the model's position in latitude, longitude, and elevation for GIS mapping applications.
+
+
+   .. py:method:: EarthLocationIsSet() -> bool
+
+      Checks if the earth location is set or not.
+
+      :returns: Boolean value, true if set else false
+
+
+
+   .. py:method:: GetEarthAnchorPlane() -> tuple[Plane, Vector3d]
+
+      Returns the earth anchor plane
+
+      :returns: A plane value.
+
+
+
+   .. py:method:: GetModelCompass() -> Plane
+
+      Returns a plane in model coordinates whose X axis points East, Y axis points North and Z axis points Up. The origin is set to ModelBasepoint.
+
+      :returns: A plane value. This might be invalid on error.
+
+
+
+   .. py:method:: GetModelToEarthTransform(modelUnitSystem: UnitSystem) -> Transform
+
+      Gets a transformation from model coordinates to earth coordinates. This transformation assumes the model is small enough that the curvature of the earth can be ignored.
+
+      If M is a point in model coordinates and E = model\_to\_earth\*M, then E.x = latitude in decimal degrees E.y = longitude in decimal degrees E.z = elevation in meters above mean sea level Because the earth is not flat, there is a small amount of error when using a linear transformation to calculate oblate spherical coordinates. This error is small. If the distance from P to M is d meters, then the approximation error is latitude error <= longitude error <= elevation error <= 6379000\*((1 + (d/6356000)^2)-1) meters
+
+      In particular, if every point in the model is within 1000 meters of the m\_model\_basepoint, then the maximum approximation errors are latitude error <= longitude error <= elevation error <= 8 centimeters.
+
+      :param modelUnitSystem: The model unit system.
+
+      :returns: Transform on success. Invalid Transform on error.
+
+      Deprecated since 9.0.
+
+
+
+   .. py:method:: ModelLocationIsSet() -> bool
+
+      Checks if the model location is set or not.
+
+      :returns: Boolean value, true if set else false
+
+
+
+   .. py:property:: Description
+      :type: str
+
+
+      Gets or sets the long form of the identifying information about this location.
+
+
+   .. py:property:: EarthBasepointElevation
+      :type: float
+
+
+      Gets or sets the point elevation on earth, in meters.
+
+
+   .. py:property:: EarthBasepointElevationCoordinateSystem
+      :type: EarthCoordinateSystem
+
+
+      Gets or sets a value indicating the zero level convention relating to a location on Earth.
+
+
+   .. py:property:: EarthBasepointElevationZero
+      :type: BasepointZero
+
+
+      Gets or sets a value indicating the zero level convention relating to a location on Earth.
+
+
+   .. py:property:: EarthBasepointLatitude
+      :type: float
+
+
+      Gets or sets a point latitude on earth, in degrees. +90 = north pole, 0 = equator, -90 = south pole.
+
+
+   .. py:property:: EarthBasepointLongitude
+      :type: float
+
+
+      Gets or sets the point longitude on earth, in degrees.
+
+
+   .. py:property:: KMLOrientationHeadingAngleDegrees
+      :type: float
+
+
+      Gets Keyhole Markup Language (KML) orientation heading angle in degrees.
+
+
+   .. py:property:: KMLOrientationHeadingAngleRadians
+      :type: float
+
+
+      Gets Keyhole Markup Language (KML) orientation heading angle in radians.
+
+
+   .. py:property:: KMLOrientationRollAngleDegrees
+      :type: float
+
+
+      Gets Keyhole Markup Language (KML) orientation roll angle in degrees.
+
+
+   .. py:property:: KMLOrientationRollAngleRadians
+      :type: float
+
+
+      Gets Keyhole Markup Language (KML) orientation roll angle in degrees.
+
+
+   .. py:property:: KMLOrientationTiltAngleDegrees
+      :type: float
+
+
+      Gets Keyhole Markup Language (KML) orientation tilt angle in degrees.
+
+
+   .. py:property:: KMLOrientationTiltAngleRadians
+      :type: float
+
+
+      Gets Keyhole Markup Language (KML) orientation tilt angle in degrees.
+
+
+   .. py:property:: ModelBasePoint
+      :type: Point3d
+
+
+      Corresponding model point in model coordinates.
+
+
+   .. py:property:: ModelEast
+      :type: Vector3d
+
+
+      Earth directions in model coordinates.
+
+
+   .. py:property:: ModelNorth
+      :type: Vector3d
+
+
+      Earth directions in model coordinates.
+
+
+   .. py:property:: Name
+      :type: str
+
+
+      Gets or sets the short form of the identifying information about this location.
+

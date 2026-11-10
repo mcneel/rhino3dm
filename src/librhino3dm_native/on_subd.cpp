@@ -1199,29 +1199,11 @@ RH_C_FUNCTION void ON_SubDFace_ComponentIndex(const ON_SubDFace* constFacePtr, O
   }
 }
 
-#if !defined(RHINO3DM_BUILD)
-
-RH_C_FUNCTION void ON_SubDFace_LimitSurfaceCenterPoint(const ON_SubDFace* constFace, ON_3dPoint* pPointOut)
-{
-  if (constFace && pPointOut)
-  {
-    *pPointOut = constFace->SurfaceCenterPoint();
-  }
-}
-
 RH_C_FUNCTION void ON_SubDFace_ControlNetCenterPoint(const ON_SubDFace* constFace, ON_3dPoint* pPointOut)
 {
   if (constFace && pPointOut)
   {
     *pPointOut = constFace->ControlNetCenterPoint();
-  }
-}
-
-RH_C_FUNCTION void ON_SubDFace_SurfaceCenterNormal(const ON_SubDFace* constFace, ON_3dVector* vNormalOut)
-{
-  if (constFace && vNormalOut)
-  {
-    *vNormalOut = constFace->SurfaceCenterNormal();
   }
 }
 
@@ -1233,19 +1215,37 @@ RH_C_FUNCTION void ON_SubDFace_ControlNetCenterNormal(const ON_SubDFace* constFa
   }
 }
 
-RH_C_FUNCTION void ON_SubDFace_SurfaceCenterFrame(const ON_SubDFace* constFace, ON_PLANE_STRUCT* pPlaneOut)
-{
-  if (constFace && pPlaneOut)
-  {
-    CopyToPlaneStruct(*pPlaneOut, constFace->SurfaceCenterFrame());
-  }
-}
-
 RH_C_FUNCTION void ON_SubDFace_ControlNetCenterFrame(const ON_SubDFace* constFace, ON_PLANE_STRUCT* pPlaneOut)
 {
   if (constFace && pPlaneOut)
   {
     CopyToPlaneStruct(*pPlaneOut, constFace->ControlNetCenterFrame());
+  }
+}
+
+#if !defined(RHINO3DM_BUILD)
+
+RH_C_FUNCTION void ON_SubDFace_LimitSurfaceCenterPoint(const ON_SubDFace* constFace, ON_3dPoint* pPointOut)
+{
+  if (constFace && pPointOut)
+  {
+    *pPointOut = constFace->SurfaceCenterPoint();
+  }
+}
+
+RH_C_FUNCTION void ON_SubDFace_SurfaceCenterNormal(const ON_SubDFace* constFace, ON_3dVector* vNormalOut)
+{
+  if (constFace && vNormalOut)
+  {
+    *vNormalOut = constFace->SurfaceCenterNormal();
+  }
+}
+
+RH_C_FUNCTION void ON_SubDFace_SurfaceCenterFrame(const ON_SubDFace* constFace, ON_PLANE_STRUCT* pPlaneOut)
+{
+  if (constFace && pPlaneOut)
+  {
+    CopyToPlaneStruct(*pPlaneOut, constFace->SurfaceCenterFrame());
   }
 }
 
@@ -2034,6 +2034,183 @@ RH_C_FUNCTION bool ON_SubDEdge_IsSharp(const ON_SubDEdge* constEdgePtr)
   if (constEdgePtr)
     return constEdgePtr->IsSharp();
   return false;
+}
+
+// RH-99868: SubD component queries (public opennurbs members)
+RH_C_FUNCTION bool ON_SubDEdge_IsSmooth(const ON_SubDEdge* constEdgePtr)
+{
+  if (constEdgePtr)
+    return constEdgePtr->IsSmooth();
+  return false;
+}
+
+RH_C_FUNCTION bool ON_SubDEdge_IsCrease(const ON_SubDEdge* constEdgePtr)
+{
+  if (constEdgePtr)
+    return constEdgePtr->IsCrease();
+  return false;
+}
+
+RH_C_FUNCTION bool ON_SubDEdge_IsHardCrease(const ON_SubDEdge* constEdgePtr)
+{
+  if (constEdgePtr)
+    return constEdgePtr->IsHardCrease();
+  return false;
+}
+
+RH_C_FUNCTION bool ON_SubDEdge_IsDartCrease(const ON_SubDEdge* constEdgePtr)
+{
+  if (constEdgePtr)
+    return constEdgePtr->IsDartCrease();
+  return false;
+}
+
+RH_C_FUNCTION unsigned int ON_SubDEdge_DartCount(const ON_SubDEdge* constEdgePtr)
+{
+  if (constEdgePtr)
+    return constEdgePtr->DartCount();
+  return 0U;
+}
+
+RH_C_FUNCTION void ON_SubDEdge_SubdivisionPoint(const ON_SubDEdge* constEdgePtr, ON_3dPoint* pOut)
+{
+  if (constEdgePtr && pOut)
+    *pOut = constEdgePtr->SubdivisionPoint();
+}
+
+RH_C_FUNCTION void ON_SubDEdge_ControlNetCenterPoint(const ON_SubDEdge* constEdgePtr, ON_3dPoint* pOut)
+{
+  if (constEdgePtr && pOut)
+    *pOut = constEdgePtr->ControlNetCenterPoint();
+}
+
+RH_C_FUNCTION void ON_SubDEdge_ControlNetCenterNormal(const ON_SubDEdge* constEdgePtr, unsigned int edgeFaceIndex, ON_3dVector* pOut)
+{
+  if (constEdgePtr && pOut)
+    *pOut = constEdgePtr->ControlNetCenterNormal(edgeFaceIndex);
+}
+
+RH_C_FUNCTION bool ON_SubDFace_HasEdges(const ON_SubDFace* constFacePtr)
+{
+  if (constFacePtr)
+    return constFacePtr->HasEdges();
+  return false;
+}
+
+RH_C_FUNCTION bool ON_SubDFace_HasSharpEdges(const ON_SubDFace* constFacePtr)
+{
+  if (constFacePtr)
+    return constFacePtr->HasSharpEdges();
+  return false;
+}
+
+RH_C_FUNCTION unsigned int ON_SubDFace_SharpEdgeCount(const ON_SubDFace* constFacePtr)
+{
+  if (constFacePtr)
+    return constFacePtr->SharpEdgeCount();
+  return 0U;
+}
+
+RH_C_FUNCTION double ON_SubDFace_MaximumEdgeSharpness(const ON_SubDFace* constFacePtr)
+{
+  if (constFacePtr)
+    return constFacePtr->MaximumEdgeSharpness();
+  return 0.0;
+}
+
+RH_C_FUNCTION bool ON_SubDFace_IsConvex(const ON_SubDFace* constFacePtr)
+{
+  if (constFacePtr)
+    return constFacePtr->IsConvex();
+  return false;
+}
+
+RH_C_FUNCTION bool ON_SubDFace_IsPlanar(const ON_SubDFace* constFacePtr, double planarTolerance)
+{
+  if (constFacePtr)
+    return constFacePtr->IsPlanar(planarTolerance);
+  return false;
+}
+
+RH_C_FUNCTION int ON_SubDFace_MaterialChannelIndex(const ON_SubDFace* constFacePtr)
+{
+  if (constFacePtr)
+    return constFacePtr->MaterialChannelIndex();
+  return 0;
+}
+
+RH_C_FUNCTION void ON_SubDFace_SubdivisionPoint(const ON_SubDFace* constFacePtr, ON_3dPoint* pOut)
+{
+  if (constFacePtr && pOut)
+    *pOut = constFacePtr->SubdivisionPoint();
+}
+
+RH_C_FUNCTION bool ON_SubDFace_TexturePointsAreSet(const ON_SubDFace* constFacePtr)
+{
+  if (constFacePtr)
+    return constFacePtr->TexturePointsAreSet();
+  return false;
+}
+
+RH_C_FUNCTION unsigned int ON_SubDFace_TexturePointsCapacity(const ON_SubDFace* constFacePtr)
+{
+  if (constFacePtr)
+    return constFacePtr->TexturePointsCapacity();
+  return 0U;
+}
+
+RH_C_FUNCTION void ON_SubDFace_TexturePoint(const ON_SubDFace* constFacePtr, unsigned int index, ON_3dPoint* pOut)
+{
+  if (constFacePtr && pOut)
+    *pOut = constFacePtr->TexturePoint(index);
+}
+
+RH_C_FUNCTION void ON_SubDFace_TextureCenterPoint(const ON_SubDFace* constFacePtr, ON_3dPoint* pOut)
+{
+  if (constFacePtr && pOut)
+    *pOut = constFacePtr->TextureCenterPoint();
+}
+
+RH_C_FUNCTION bool ON_SubDVertex_IsSmooth(const ON_SubDVertex* constVertexPtr)
+{
+  if (constVertexPtr)
+    return constVertexPtr->IsSmooth();
+  return false;
+}
+
+RH_C_FUNCTION bool ON_SubDVertex_IsCrease(const ON_SubDVertex* constVertexPtr)
+{
+  if (constVertexPtr)
+    return constVertexPtr->IsCrease();
+  return false;
+}
+
+RH_C_FUNCTION bool ON_SubDVertex_IsCorner(const ON_SubDVertex* constVertexPtr)
+{
+  if (constVertexPtr)
+    return constVertexPtr->IsCorner();
+  return false;
+}
+
+RH_C_FUNCTION bool ON_SubDVertex_IsDart(const ON_SubDVertex* constVertexPtr)
+{
+  if (constVertexPtr)
+    return constVertexPtr->IsDart();
+  return false;
+}
+
+RH_C_FUNCTION bool ON_SubDVertex_IsSharp(const ON_SubDVertex* constVertexPtr, bool bEndCheck)
+{
+  if (constVertexPtr)
+    return constVertexPtr->IsSharp(bEndCheck);
+  return false;
+}
+
+RH_C_FUNCTION double ON_SubDVertex_VertexSharpness(const ON_SubDVertex* constVertexPtr)
+{
+  if (constVertexPtr)
+    return constVertexPtr->VertexSharpness();
+  return 0.0;
 }
 
 RH_C_FUNCTION unsigned int ON_SubD_SharpEdgeCount(const ON_SubD* constSubDPtr, ON_SUBD_EDGE_SHARPNESS_STRUCT* sharpnessRange)

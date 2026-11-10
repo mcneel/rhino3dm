@@ -1,0 +1,79 @@
+rhino3dm.CachedTextureCoordinates
+=================================
+
+.. py:class:: rhino3dm.CachedTextureCoordinates
+
+   Bases: :py:obj:`CommonObject`
+
+
+   Used for cached texture coordinates
+
+
+   .. py:method:: Contains(item: Point3d) -> bool
+
+      Determines whether this collection contains a specific value.
+
+
+
+   .. py:method:: CopyTo(array: collections.abc.Sequence[Point3d], arrayIndex: int) -> None
+
+      Copies the elements of the this collection to an System.Array, starting at a particular System.Array index.
+
+      :param array: The one-dimensional System.Array that is the destination of the elements copied from this collection. The System.Array must have zero-based indexing.
+      :param arrayIndex: The zero-based index in array at which copying begins.
+
+      :raises ArgumentNullException: array is null
+      :raises ArgumentOutOfRangeException: arrayIndex is less than 0.
+      :raises ArgumentException: The number of elements in this collection is greater than the available space from arrayIndex to the end of the destination array.
+
+
+
+   .. py:method:: IndexOf(item: Point3d) -> int
+
+      Determines the index of a specific point in this collection.
+
+      :param item: The point (UV or UVW) to locate in this collection.
+
+      :returns: The index of item if found in the list; otherwise, -1.
+
+
+
+   .. py:method:: TryGetAt(index: int) -> tuple[bool, float, float, float]
+
+      Use this method to iterate the cached texture coordinate array.
+
+      :param index: Index for the vertex to fetch.
+
+      :returns: Returns true if index is valid; otherwise returns false.
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Number of cached coordinates.
+
+
+   .. py:property:: Dim
+      :type: int
+
+
+      2 = UV, 3 = UVW
+
+      :type: Coordinate dimension
+
+
+   .. py:property:: IsReadOnly
+      :type: bool
+
+
+      This collection is always read-only
+
+
+   .. py:property:: MappingId
+      :type: uuid.UUID
+
+
+      The texture mapping Id.
+

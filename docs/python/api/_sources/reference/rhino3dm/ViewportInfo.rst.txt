@@ -1,0 +1,748 @@
+rhino3dm.ViewportInfo
+=====================
+
+.. py:class:: rhino3dm.ViewportInfo
+              ViewportInfo(other: ViewportInfo)
+
+   Bases: :py:obj:`CommonObject`
+
+
+   Represents a viewing frustum.
+
+
+   .. py:method:: ChangeToParallelProjection(symmetricFrustum: bool) -> bool
+
+      Use this function to change projections of valid viewports from parallel to perspective. It will make common additional adjustments to the frustum and camera location so the resulting views are similar. The camera direction and target point are not be changed. If the current projection is parallel and symmetricFrustum, FrustumIsLeftRightSymmetric() and FrustumIsTopBottomSymmetric() are all equal, then no changes are made and true is returned.
+
+      :param symmetricFrustum: true if you want the resulting frustum to be symmetric.
+
+      :returns: true if the operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: ChangeToParallelReflectedProjection() -> bool
+
+      When a viewport is set to Parallel Reflected projection, the geometry on the ceiling is shown as if it is mirrored to the floor below.
+
+      :returns: true if successful
+
+
+
+   .. py:method:: ChangeToPerspectiveProjection(targetDistance: float, symmetricFrustum: bool, lensLength: float) -> bool
+
+      Use this function to change projections of valid viewports from parallel to perspective. It will make common additional adjustments to the frustum and camera location so the resulting views are similar. The camera direction and target point are not changed. If the current projection is perspective and symmetricFrustum, IsFrustumIsLeftRightSymmetric, and IsFrustumIsTopBottomSymmetric are all equal, then no changes are made and true is returned.
+
+      :param targetDistance: If RhinoMath.UnsetValue this parameter is ignored. Otherwise it must be > 0 and indicates which plane in the current view frustum should be preserved.
+      :param symmetricFrustum: true if you want the resulting frustum to be symmetric.
+      :param lensLength: (pass 50.0 when in doubt) 35 mm lens length to use when changing from parallel to perspective projections. If the current projection is perspective or lens\_length is <= 0.0, then this parameter is ignored.
+
+      :returns: true if the operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: ChangeToSymmetricFrustum(isLeftRightSymmetric: bool, isTopBottomSymmetric: bool, targetDistance: float) -> bool
+
+      If needed, adjusts the current frustum so it has the specified symmetries and adjust the camera location so the target plane remains visible.
+
+      :param isLeftRightSymmetric: If true, the frustum will be adjusted so left = -right.
+      :param isTopBottomSymmetric: If true, the frustum will be adjusted so top = -bottom.
+      :param targetDistance: If projection is not perspective or target\_distance is RhinoMath.UnsetValue, then this parameter is ignored. If the projection is perspective and targetDistance is not RhinoMath.UnsetValue, then it must be > 0.0 and it is used to determine which plane in the old frustum will appear unchanged in the new frustum.
+
+      :returns: Returns true if the viewport has now a frustum with the specified symmetries.
+
+
+
+   .. py:method:: ChangeToTwoPointPerspectiveProjection(targetDistance: float, up: Vector3d, lensLength: float) -> bool
+
+      Changes projections of valid viewports to a two point perspective. It will make common additional adjustments to the frustum and camera location and direction so the resulting views are similar. If the current projection is perspective and IsFrustumIsLeftRightSymmetric is true and IsFrustumIsTopBottomSymmetric is false, then no changes are made and true is returned.
+
+      :param targetDistance: If RhinoMath.UnsetValue this parameter is ignored. Otherwise it must be > 0 and indicates which plane in the current view frustum should be preserved.
+      :param up: The locked up direction. Pass Vector3d.Zero if you want to use the world axis direction that is closest to the current up direction. Pass CameraY() if you want to preserve the current up direction.
+      :param lensLength: (pass 50.0 when in doubt) 35 mm lens length to use when changing from parallel to perspective projections. If the current projection is perspective or lens\_length is <= 0.0, then this parameter is ignored.
+
+      :returns: true if the operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: DollyCamera(dollyVector: Vector3d) -> bool
+
+      DollyCamera() does not update the frustum's clipping planes. To update the frustum's clipping planes call DollyFrustum(d) with d = dollyVector o cameraFrameZ. To convert screen locations into a dolly vector, use GetDollyCameraVector(). Does not update frustum. To update frustum use DollyFrustum(d) with d = dollyVector o cameraFrameZ.
+
+      :param dollyVector: dolly vector in world coordinates.
+
+      :returns: true if the operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: DollyExtents(cameraCoordinateBoundingBox: BoundingBox, border: float) -> bool
+                  DollyExtents(geometry: collections.abc.Sequence[GeometryBase] | None, border: float) -> bool
+
+      Dolly the camera location and so that the view frustum contains all of the document objects that can be seen in view. If the projection is perspective, the camera angle is not changed.
+
+      :param border: If border > 1.0, then the frustum is enlarged by this factor to provide a border around the view. If 0.0 < border < 1.0, then the frustum is shrunk by this factor and the objects will extend past the edges of the view. A border of 0.0 or 1.0 adds no border. 1.1 works well for parallel projections; 0.0 is suggested for perspective projections.
+
+      :returns: True if successful.
+
+
+
+   .. py:method:: DollyFrustum(dollyDistance: float) -> bool
+
+      Moves the frustum clipping planes.
+
+      :param dollyDistance: Distance to move in camera direction.
+
+      :returns: true if the operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: Extents(halfViewAngleRadians: float, bbox: BoundingBox) -> bool
+                  Extents(halfViewAngleRadians: float, sphere: Sphere) -> bool
+
+      Extends this viewport view to include a sphere.
+
+      Use Extents() as a quick way to set a viewport to so that bounding volume is inside of a viewports frustum. The view angle is used to determine the position of the camera.
+
+      :param halfViewAngleRadians: 1/2 smallest subtended view angle in radians.
+      :param sphere: A sphere in 3d world coordinates.
+
+      :returns: true if the operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: FrustumCenterPoint(targetDistance: float) -> Point3d
+
+      Return a point on the central axis of the view frustum. This point is a good choice for a general purpose target point.
+
+      :param targetDistance: If targetDistance > 0.0, then the distance from the returned point to the camera plane will be targetDistance. Note that if the frustum is not symmetric, the distance from the returned point to the camera location will be larger than targetDistance. If targetDistance == ON\_UNSET\_VALUE and the frustum is valid with near > 0.0, then 0.5\*(near + far) will be used as the targetDistance.
+
+      :returns: A point on the frustum's central axis. If the viewport or input is not valid, then ON\_3dPoint::UnsetPoint is returned.
+
+
+
+   .. py:method:: GetBoundingBoxDepth(bbox: BoundingBox) -> tuple[bool, float, float]
+
+      Gets near and far clipping distances of a bounding box. This function ignores the current value of the viewport's near and far settings. If the viewport is a perspective projection, the it intersects the semi infinite frustum volume with the bounding box and returns the near and far distances of the intersection. If the viewport is a parallel projection, it intersects the infinite view region with the bounding box and returns the near and far distances of the projection.
+
+      :param bbox: The bounding box to sample.
+
+      :returns: true if the bounding box intersects the view frustum and near\_dist/far\_dist were set. false if the bounding box does not intersect the view frustum.
+
+
+
+   .. py:method:: GetCameraAngles() -> tuple[bool, float, float, float]
+
+      Gets the field of view angles.
+
+      :returns: true if the operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: GetCameraFrame() -> tuple[bool, Point3d, Vector3d, Vector3d, Vector3d]
+
+      Gets location and vectors of this camera.
+
+      :returns: true if current camera orientation is valid; otherwise false.
+
+
+
+   .. py:method:: GetDollyCameraVector(screenX0: int, screenY0: int, screenX1: int, screenY1: int, projectionPlaneDistance: float) -> Vector3d
+
+      Gets a world coordinate dolly vector that can be passed to DollyCamera().
+
+      :param screenX0: Screen coordinates of start point.
+      :param screenY0: Screen coordinates of start point.
+      :param screenX1: Screen coordinates of end point.
+      :param screenY1: Screen coordinates of end point.
+      :param projectionPlaneDistance: Distance of projection plane from camera. When in doubt, use 0.5\*(frus\_near+frus\_far).
+
+      :returns: The world coordinate dolly vector.
+
+
+
+   .. py:method:: GetFrustum() -> tuple[bool, float, float, float, float, float, float]
+
+      Gets the view frustum.
+
+      :returns: true if operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: GetFrustumLine(screenX: float, screenY: float) -> Line
+
+      Gets the world coordinate line in the view frustum that projects to a point on the screen.
+
+      :param screenX: (screenx,screeny) = screen location.
+      :param screenY: (screenx,screeny) = screen location.
+
+      :returns: 3d world coordinate line segment starting on the near clipping plane and ending on the far clipping plane.
+
+
+
+   .. py:method:: GetPointDepth(point: Point3d) -> tuple[bool, float]
+
+      Gets the clipping distance of a point. This function ignores the current value of the viewport's near and far settings. If the viewport is a perspective projection, then it intersects the semi infinite frustum volume with the bounding box and returns the near and far distances of the intersection. If the viewport is a parallel projection, it intersects the infinite view region with the bounding box and returns the near and far distances of the projection.
+
+      :param point: A point to measure.
+
+      :returns: true if the bounding box intersects the view frustum and near\_dist/far\_dist were set. false if the bounding box does not intersect the view frustum.
+
+
+
+   .. py:method:: GetScreenPort() -> tuple[int, int, int, int]
+
+      Gets the location of viewport in pixels. See documentation for ``SetScreenPort``\ SetScreenPort.
+
+      :returns: The rectangle, or ``Empty``\ Empty rectangle on error.
+
+
+
+   .. py:method:: GetScreenPortLocation() -> tuple[int, int, int, int]
+
+      Get the location of viewport in pixels (non System.Drawing version of GetScreenPort)
+
+
+
+   .. py:method:: GetSphereDepth(sphere: Sphere) -> tuple[bool, float, float]
+
+      Gets near and far clipping distances of a bounding sphere.
+
+      :param sphere: The sphere to sample.
+
+      :returns: true if the sphere intersects the view frustum and near\_dist/far\_dist were set. false if the sphere does not intersect the view frustum.
+
+
+
+   .. py:method:: GetUserString(key: str) -> str
+
+      The named string attached to this object (rhino3dm only).
+
+      :param key: The string's name.
+
+      :returns: The text, empty when the key is not set.
+
+
+
+   .. py:method:: GetUserStrings() -> list[Any]
+
+      Every named string attached to this object (rhino3dm only).
+
+      :returns: A list of ``[key, value]`` pairs.
+
+
+
+   .. py:method:: GetWorldToScreenScale(pointInFrustum: Point3d) -> float
+
+      Gets the scale factor from point in frustum to screen scale.
+
+      :param pointInFrustum: point in viewing frustum.
+
+      :returns: number of pixels per world unit at the 3d point.
+
+
+
+   .. py:method:: GetXform(sourceSystem: CoordinateSystem, destinationSystem: CoordinateSystem) -> Transform
+
+      Computes a transform from a coordinate system to another.
+
+      :param sourceSystem: The coordinate system to map from.
+      :param destinationSystem: The coordinate system to map into.
+
+      :returns: The 4x4 transformation matrix (acts on the left).
+
+
+
+   .. py:method:: RotateCamera(rotationAngleRadians: float, rotationAxis: Vector3d, rotationCenter: Point3d) -> bool
+
+      Rotates the view camera.
+
+      :param rotationAngleRadians: The amount to rotate expressed in radians.
+      :param rotationAxis: The axis to rotate around.
+      :param rotationCenter: The point to rotate around.
+
+      :returns: True if rotation is successful, false otherwise.
+
+
+
+   .. py:method:: SetCameraDirection(direction: Vector3d) -> bool
+
+      Sets the direction that the camera faces.
+
+      :param direction: A new direction.
+
+      :returns: true if the direction was set; otherwise false.
+
+
+
+   .. py:method:: SetCameraLocation(location: Point3d) -> bool
+
+      Sets the camera location (position) point.
+
+      :returns: true if the operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: SetCameraUp(up: Vector3d) -> bool
+
+      Sets the camera up vector.
+
+      :param up: A new direction.
+
+      :returns: true if the direction was set; otherwise false.
+
+
+
+   .. py:method:: SetFrustum(left: float, right: float, bottom: float, top: float, nearDistance: float, farDistance: float) -> bool
+
+      Sets the view frustum. If FrustumSymmetryIsLocked() is true and left != -right or bottom != -top, then they will be adjusted so the resulting frustum is symmetric.
+
+      :param left: A new left value.
+      :param right: A new right value.
+      :param bottom: A new bottom value.
+      :param top: A new top value.
+      :param nearDistance: A new near distance value.
+      :param farDistance: A new far distance value.
+
+      :returns: true if operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: SetFrustumNearFar(boundingBox: BoundingBox) -> bool
+                  SetFrustumNearFar(center: Point3d, radius: float) -> bool
+                  SetFrustumNearFar(nearDistance: float, farDistance: float) -> bool
+                  SetFrustumNearFar(nearDistance: float, farDistance: float, minNearDistance: float, minNearOverFar: float, targetDistance: float) -> bool
+
+      Sets near and far clipping distance subject to constraints.
+
+      :param nearDistance: (>0) desired near clipping distance.
+      :param farDistance: (>near\_dist) desired near clipping distance.
+      :param minNearDistance: If min\_near\_dist <= 0.0, it is ignored. If min\_near\_dist > 0 and near\_dist < min\_near\_dist, then the frustum's near\_dist will be increased to min\_near\_dist.
+      :param minNearOverFar: If min\_near\_over\_far <= 0.0, it is ignored. If near\_dist < far\_dist\*min\_near\_over\_far, then near\_dist is increased and/or far\_dist is decreased so that near\_dist = far\_dist\*min\_near\_over\_far. If near\_dist < target\_dist < far\_dist, then near\_dist near\_dist is increased and far\_dist is decreased so that projection precision will be good at target\_dist. Otherwise, near\_dist is simply set to far\_dist\*min\_near\_over\_far.
+      :param targetDistance: If target\_dist <= 0.0, it is ignored. If target\_dist > 0, it is used as described in the description of the min\_near\_over\_far parameter.
+
+      :returns: true if operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: SetScreenPort(left: int, right: int, bottom: int, top: int, near: int, far: int) -> bool
+                  SetScreenPort(windowRectangle: tuple[int, int, int, int], near: int, far: int) -> bool
+                  SetScreenPort(windowRectangle: tuple[int, int, int, int]) -> bool
+
+      Gets the location of viewport in pixels.
+
+      See value meanings in ``SetScreenPort``\ SetScreenPort.
+
+      :param windowRectangle: A new rectangle.
+
+      :returns: true if input is valid.
+
+
+
+   .. py:method:: SetUserString(key: str, value: str) -> bool
+
+      Attaches a named string to this object (rhino3dm only).
+
+      :param key: The string's name.
+      :param value: The text; an empty string removes the key.
+
+      :returns: True on success.
+
+
+
+   .. py:method:: SetViewScale(scaleX: float, scaleY: float, scaleZ: float) -> None
+
+      Set scaling applied for this viewport projection. For reflected projections, call with values 1,1,-1
+
+
+
+   .. py:method:: TargetDistance(useFrustumCenterFallback: bool) -> float
+
+      Gets the distance from the target point to the camera plane. Note that if the frustum is not symmetric, then this distance is shorter than the distance from the target to the camera location.
+
+      :param useFrustumCenterFallback: If bUseFrustumCenterFallback is false and the target point is not valid, then ON\_UNSET\_VALUE is returned. If bUseFrustumCenterFallback is true and the frustum is valid and current target point is not valid or is behind the camera, then 0.5\*(near + far) is returned.
+
+      :returns: Shortest signed distance from camera plane to target point. If the target point is on the visible side of the camera, a positive value is returned. ON\_UNSET\_VALUE is returned when the input of view is not valid.
+
+
+
+   .. py:method:: TransformCamera(xform: Transform) -> bool
+
+      Transforms the view camera location, direction, and up.
+
+      :param xform: Transformation to apply to camera.
+
+      :returns: True if a valid camera was transformed, false if invalid camera, frustum, or transformation.
+
+
+
+   .. py:method:: UnlockCamera() -> None
+
+      Unlocks the camera vectors and location.
+
+
+
+   .. py:method:: UnlockFrustumSymmetry() -> None
+
+      Unlocks frustum horizontal and vertical symmetries.
+
+
+
+   .. py:method:: ZoomToScreenRect(left: int, top: int, right: int, bottom: int) -> bool
+                  ZoomToScreenRect(windowRectangle: tuple[int, int, int, int]) -> bool
+
+      Zooms to a screen zone.
+
+      View changing from screen input points. Handy for using a mouse to manipulate a view. ZoomToScreenRect() may change camera and frustum settings.
+
+      :param windowRectangle: The new window rectangle in screen space.
+
+      :returns: true if the operation succeeded; otherwise, false.
+
+
+
+   .. py:property:: Camera35mmLensLength
+      :type: float
+
+
+      This property assumes the camera is horizontal and crop the film rather than the image when the aspect of the frustum is not 36/24. (35mm film is 36mm wide and 24mm high.) Setting preserves camera location, changes the frustum, but maintains the frustum's aspect.
+
+
+   .. py:property:: CameraAngle
+      :type: float
+
+
+      Gets or sets the 1/2 of smallest subtended view angle. See ``GetCameraAngles`` for more information.
+
+
+   .. py:property:: CameraDirection
+      :type: Vector3d
+
+
+      Gets the direction that the camera faces.
+
+
+   .. py:property:: CameraLocation
+      :type: Point3d
+
+
+      Gets the camera location (position) point.
+
+
+   .. py:property:: CameraUp
+      :type: Vector3d
+
+
+      Gets the camera up vector.
+
+
+   .. py:property:: CameraX
+      :type: Vector3d
+
+
+      Gets the unit "to the right" vector.
+
+
+   .. py:property:: CameraY
+      :type: Vector3d
+
+
+      Gets the unit "up" vector.
+
+
+   .. py:property:: CameraZ
+      :type: Vector3d
+
+
+      Gets the unit vector in -CameraDirection.
+
+
+   .. py:attribute:: DefaultCameraDirection
+      :type:  Vector3d
+      :value: Ellipsis
+
+
+      object, /) -> Vector3d
+
+      :type: (arg
+
+
+   .. py:attribute:: DefaultPerspective
+      :type:  ViewportInfo
+      :value: Ellipsis
+
+
+      object, /) -> ViewportInfo
+
+      :type: (arg
+
+
+   .. py:attribute:: DefaultTop
+      :type:  ViewportInfo
+      :value: Ellipsis
+
+
+      object, /) -> ViewportInfo
+
+      :type: (arg
+
+
+   .. py:property:: FrustumAspect
+      :type: float
+
+
+      Setting FrustumAspect changes the larger of the frustum's width/height so that the resulting value of width/height matches the requested aspect. The camera angle is not changed. If you change the shape of the view port with a call SetScreenPort(), then you generally want to call SetFrustumAspect() with the value returned by GetScreenPortAspect().
+
+
+   .. py:property:: FrustumBottom
+      :type: float
+
+
+      Gets the frustum bottom value. This is -top if the frustum has a horizontal symmetry axis.
+
+      This number is usually negative.
+
+
+   .. py:property:: FrustumBottomPlane
+      :type: Plane
+
+
+      Gets the frustum bottom plane that separates visible from off-screen.
+
+
+   .. py:property:: FrustumCenter
+      :type: Point3d
+
+
+      Gets the frustum center point.
+
+
+   .. py:property:: FrustumFar
+      :type: float
+
+
+      Gets the frustum far-cutting value.
+
+
+   .. py:property:: FrustumFarPlane
+      :type: Plane
+
+
+      Gets far clipping plane if camera and frustum are valid. The plane's frame is the same as the camera's frame. The origin is located at the intersection of the camera direction ray and the far clipping plane. The plane's normal points into the frustum towards the camera location.
+
+
+   .. py:property:: FrustumHeight
+      :type: float
+
+
+      Gets the frustum height. This is ``FrustumTop`` - ``FrustumBottom``.
+
+
+   .. py:property:: FrustumLeft
+      :type: float
+
+
+      Gets the frustum left value. This is -right if the frustum has a vertical symmetry axis.
+
+      This number is usually negative.
+
+
+   .. py:property:: FrustumLeftPlane
+      :type: Plane
+
+
+      Gets the frustum left plane that separates visible from off-screen.
+
+
+   .. py:property:: FrustumMaximumDiameter
+      :type: float
+
+
+      Gets the frustum maximum diameter, or the maximum between ``FrustumWidth`` and ``FrustumHeight``.
+
+
+   .. py:property:: FrustumMinimumDiameter
+      :type: float
+
+
+      Gets the frustum minimum diameter, or the minimum between ``FrustumWidth`` and ``FrustumHeight``.
+
+
+   .. py:property:: FrustumNear
+      :type: float
+
+
+      Gets the frustum near-cutting value.
+
+
+   .. py:property:: FrustumNearPlane
+      :type: Plane
+
+
+      Gets near clipping plane if camera and frustum are valid. The plane's frame is the same as the camera's frame. The origin is located at the intersection of the camera direction ray and the near clipping plane. The plane's normal points out of the frustum towards the camera location.
+
+
+   .. py:property:: FrustumRight
+      :type: float
+
+
+      Gets the frustum right value. This is -left if the frustum has a vertical symmetry axis.
+
+      This number is usually positive.
+
+
+   .. py:property:: FrustumRightPlane
+      :type: Plane
+
+
+      Gets the frustum right plane that separates visible from off-screen.
+
+
+   .. py:property:: FrustumTop
+      :type: float
+
+
+      Gets the frustum top value. This is -bottom if the frustum has a horizontal symmetry axis.
+
+      This number is usually positive.
+
+
+   .. py:property:: FrustumTopPlane
+      :type: Plane
+
+
+      Gets the frustum top plane that separates visible from off-screen.
+
+
+   .. py:property:: FrustumWidth
+      :type: float
+
+
+      Gets the frustum width. This is ``FrustumRight`` - ``FrustumLeft``.
+
+
+   .. py:property:: Id
+      :type: uuid.UUID
+
+
+      Sets the viewport's id to the value used to uniquely identify this viewport. There is no approved way to change the viewport id once it is set in order to maintain consistency across multiple viewports and those routines that manage them.
+
+
+   .. py:property:: IsCameraDirectionLocked
+      :type: bool
+
+
+      Gets or sets a value that indicates whether the direction that the camera faces is unmodifiable.
+
+
+   .. py:property:: IsCameraLocationLocked
+      :type: bool
+
+
+      Gets or sets a value that indicates whether the camera location is unmodifiable.
+
+
+   .. py:property:: IsCameraUpLocked
+      :type: bool
+
+
+      Gets or sets a value that indicates whether the camera up vector is unmodifiable.
+
+
+   .. py:property:: IsFrustumLeftRightSymmetric
+      :type: bool
+
+
+      Gets or sets a value that indicates whether the camera frustum has a vertical symmetry axis.
+
+
+   .. py:property:: IsFrustumTopBottomSymmetric
+      :type: bool
+
+
+      Gets or sets a value that indicates whether the camera frustum has a horizontal symmetry axis.
+
+
+   .. py:property:: IsParallelProjection
+      :type: bool
+
+
+      Get or set whether this projection is parallel.
+
+
+   .. py:property:: IsPerspectiveProjection
+      :type: bool
+
+
+      Get or set whether this projection is perspective.
+
+
+   .. py:property:: IsTwoPointPerspectiveProjection
+      :type: bool
+
+
+      Gets a value that indicates whether this projection is a two-point perspective.
+
+
+   .. py:property:: IsValidCamera
+      :type: bool
+
+
+      Gets a value that indicates whether the camera is valid.
+
+
+   .. py:property:: IsValidCameraFrame
+      :type: bool
+
+
+      Gets a value that indicates whether the camera up, direction, X, Y and Z are valid. Unlike ``IsValidCamera``, this does not check the camera location.
+
+
+   .. py:property:: IsValidFrustum
+      :type: bool
+
+
+      Gets a value that indicates whether the frustum is valid.
+
+
+   .. py:property:: PerspectiveMinNearDist
+      :type: float
+
+
+      Expert user function to control the minimum value of near when perspective projections are being used.
+
+
+   .. py:property:: PerspectiveMinNearOverFar
+      :type: float
+
+
+      Expert user function to control the minimum ratio of near/far when perspective projections are begin used.
+
+
+   .. py:property:: ScreenPort
+      :type: tuple[int, int, int, int]
+
+
+      Get or set the screen port. ``SetScreenPort`` and ``GetScreenPort``
+
+
+   .. py:property:: ScreenPortAspect
+      :type: float
+
+
+      Gets the screen aspect ratio.
+
+      This is width / height.
+
+
+   .. py:property:: TargetPoint
+      :type: Point3d
+
+
+      The current value of the target point. This point does not play a role in the view projection calculations. It can be used as a fixed point when changing the camera so the visible regions of the before and after frustums both contain the region of interest. The default constructor sets this point on ON\_3dPoint::UnsetPoint. You must explicitly call one SetTargetPoint() functions to set the target point.
+
+
+   .. py:property:: UserStringCount
+      :type: int
+
+
+      The number of named strings attached to this object (rhino3dm only).
+

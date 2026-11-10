@@ -509,6 +509,7 @@ namespace Rhino.Geometry.Intersect
         UnsafeNativeMethods.RhObjectClashEventArray_Delete(ptr_clash_events); // delete
         GC.KeepAlive(setA);
         GC.KeepAlive(setB);
+        GC.KeepAlive(meshingParameters);
         return rc;
       }
     }
@@ -556,6 +557,7 @@ namespace Rhino.Geometry.Intersect
         var count = UnsafeNativeMethods.RHC_CRhClashDetect_FindClashDetail(ptr_obj_a, ptr_obj_b, distance, (int)meshType, ptr_mp, ptr_out_meshes);
         GC.KeepAlive(objA);
         GC.KeepAlive(objB);
+        GC.KeepAlive(meshingParameters);
         return count > 0 ? out_meshes.ToNonConstArray() : new Mesh[0];
       }
     }

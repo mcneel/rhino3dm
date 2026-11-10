@@ -1,0 +1,80 @@
+rhino3dm.Font.FontWeight
+========================
+
+.. py:class:: rhino3dm.Font.FontWeight
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Weight enum values Avoid casting these values to int. Use ON\_Font::WindowsLogfontWeightFromWeight() or ON\_Font::AppleWeightOfFontFromWeight() or add another converter.
+
+
+   .. py:attribute:: Bold
+      :value: 7
+
+
+      IsBold = true
+
+
+   .. py:attribute:: Heavy
+      :value: 9
+
+
+      IsBold = true Also called Black
+
+
+   .. py:attribute:: Light
+      :value: 3
+
+
+      IsLight = true
+
+
+   .. py:attribute:: Medium
+      :value: 5
+
+
+      IsNormalWeight = true
+
+
+   .. py:attribute:: Normal
+      :value: 4
+
+
+      Default font weight. IsNormalWeight = true Also called Regular.
+
+
+   .. py:attribute:: Semibold
+      :value: 6
+
+
+      IsBold = true
+
+
+   .. py:attribute:: Thin
+      :value: 1
+
+
+      IsLight = true
+
+
+   .. py:attribute:: Ultrabold
+      :value: 8
+
+
+      IsBold = true
+
+
+   .. py:attribute:: Ultralight
+      :value: 2
+
+
+      IsLight = true
+
+
+   .. py:attribute:: Unset
+      :value: 0
+
+
+      Not set.
+

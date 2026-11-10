@@ -326,6 +326,74 @@ namespace Rhino.Render
       }
     }
 
+    /// <summary>
+    /// Whether the sun is allowed to be enabled. This is a separate setting from <see cref="Enabled"/>.
+    /// </summary>
+    /// <since>9.2</since>
+    public bool EnableAllowed
+    {
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SunSetting.EnableAllowed))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SunSetting.EnableAllowed, v);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Whether manual control of the sun is allowed. This is a separate setting from <see cref="ManualControlOn"/>.
+    /// </summary>
+    /// <since>9.2</since>
+    public bool ManualControlAllowed
+    {
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.SunSetting.ManualControlAllowed))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.SunSetting.ManualControlAllowed, v);
+        }
+      }
+    }
+
+    /// <summary>The minimum year the sun's date and time methods allow.</summary>
+    /// <since>9.2</since>
+    public static int MinYear
+    {
+      get { return UnsafeNativeMethods.ON_Sun_MinYear(); }
+    }
+
+    /// <summary>The maximum year the sun's date and time methods allow.</summary>
+    /// <since>9.2</since>
+    public static int MaxYear
+    {
+      get { return UnsafeNativeMethods.ON_Sun_MaxYear(); }
+    }
+
+    /// <summary>Whether the sun's settings are valid.</summary>
+    /// <since>9.2</since>
+    public bool IsValid
+    {
+      get
+      {
+        bool rc = UnsafeNativeMethods.ON_Sun_IsValid(CppPointer);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
     /// <since>5.10</since>
     /// <obsolete>8.0</obsolete>
     [Obsolete("Use ManualControlOn")]
@@ -812,6 +880,8 @@ namespace Rhino.Render
     public override void CopyFrom(FreeFloatingBase src)
     {
       UnsafeNativeMethods.ON_Sun_CopyFrom(CppPointer, src.CppPointer);
+      GC.KeepAlive(this);
+      GC.KeepAlive(src);
     }
 
     internal override void DeleteCpp()
@@ -907,6 +977,8 @@ namespace Rhino.Render
     public override void CopyFrom(FreeFloatingBase src)
     {
       UnsafeNativeMethods.ON_Skylight_CopyFrom(CppPointer, src.CppPointer);
+      GC.KeepAlive(this);
+      GC.KeepAlive(src);
     }
 
     internal override void DeleteCpp()

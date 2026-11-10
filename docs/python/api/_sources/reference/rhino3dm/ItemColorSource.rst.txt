@@ -1,0 +1,38 @@
+rhino3dm.ItemColorSource
+========================
+
+.. py:class:: rhino3dm.ItemColorSource
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Color source for a per-item color override on object attributes (for example, hatch boundary color or hatch pattern color). Selects whether the color is read from the layer, from the object's main attribute color, inherited from the parent, or read from a custom override color stored on the attribute itself.
+
+
+   .. py:attribute:: ColorCustom
+      :value: 4
+
+
+      Use the per-item custom override color stored on the attribute (for example, the color set by the matching color property such as HatchBoundaryColor or HatchPatternColor).
+
+
+   .. py:attribute:: ColorFromLayer
+      :value: 0
+
+
+      Use color assigned to layer.
+
+
+   .. py:attribute:: ColorFromObject
+      :value: 1
+
+
+      Use the object's main attribute color.
+
+
+   .. py:attribute:: ColorFromParent
+      :value: 3
+
+
+      For objects with parents (like objects in instance references), use the parent's color. If no parent, treat as ColorFromLayer.
+

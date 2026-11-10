@@ -1,0 +1,85 @@
+rhino3dm.MeshTopologyEdgeList
+=============================
+
+.. py:class:: rhino3dm.MeshTopologyEdgeList
+
+   Represents an entry point to the list of edges in a mesh topology.
+
+
+   .. py:method:: CollapseEdge(topologyEdgeIndex: int) -> bool
+
+      Replaces a mesh edge with a vertex at its center and update adjacent faces as needed.
+
+      :param topologyEdgeIndex: An index of a topology edge in ``Mesh.TopologyEdges``.
+
+      :returns: true if successful.
+
+
+
+   .. py:method:: EdgeLine(topologyEdgeIndex: int) -> Line
+
+      Gets the 3d line along an edge.
+
+      :param topologyEdgeIndex: The topology edge index.
+
+      :returns: Line along edge. If input is not valid, an Invalid Line is returned.
+
+
+
+   .. py:method:: GetConnectedFaces(topologyEdgeIndex: int) -> list[Any]
+
+      Gets indices of faces connected to an edge.
+
+      :param topologyEdgeIndex: An index of a topology edge that is queried.
+
+      :returns: An array of face indices the edge borders. This might be empty on error.
+
+
+
+   .. py:method:: GetEdgeIndex(topologyVertex1: int, topologyVertex2: int) -> int
+
+      Returns index of edge that connects topological vertices. returns -1 if no edge is found.
+
+      :param topologyVertex1: The first topology vertex index.
+      :param topologyVertex2: The second topology vertex index.
+
+      :returns: The edge index.
+
+
+
+   .. py:method:: IsHidden(topologyEdgeIndex: int) -> bool
+
+      Returns true if the topological edge is hidden. The mesh topology edge is hidden only if either of its mesh topology vertices is hidden.
+
+      :param topologyEdgeIndex: An index of a topology edge in ``Mesh.TopologyEdges``.
+
+      :returns: true if mesh topology edge is hidden.
+
+
+
+   .. py:method:: IsSwappableEdge(topologyEdgeIndex: int) -> bool
+
+      Determines if a mesh edge index is valid input for ``SwapEdge``.
+
+      :param topologyEdgeIndex: An index of a topology edge in ``Mesh.TopologyEdges``.
+
+      :returns: true if edge can be swapped.
+
+
+
+   .. py:method:: SwapEdge(topologyEdgeIndex: int) -> bool
+
+      If the edge is shared by two triangular face, then the edge is swapped.
+
+      :param topologyEdgeIndex: An index of a topology edge in ``Mesh.TopologyEdges``.
+
+      :returns: true if successful.
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the amount of edges in this list.
+

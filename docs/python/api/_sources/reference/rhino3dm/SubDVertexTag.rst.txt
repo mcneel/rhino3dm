@@ -1,0 +1,45 @@
+rhino3dm.SubDVertexTag
+======================
+
+.. py:class:: rhino3dm.SubDVertexTag
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   ON\_SubDVertexTag identifies the type of subdivision vertex. Different tags use different subdivision algorithms to determine where the subdivision point and limit point are located. There are topological constraints that restrict which tags can be assigned.
+
+
+   .. py:attribute:: Corner
+      :value: 3
+
+
+      Can be an interior, boundary, nonmanifold, or isolated vertex. The location of a corner vertex is fixed. The all subdivision points and the limit point are at the initial vertex location. The edges ending at a corner vertex can be smooth or crease edges. A corner vertex subdivision point is P where P = ON\_SubDVertex.ControlNetPoint(). A corner vertex limit surface point is P where P = ON\_SubDVertex.ControlNetPoint().
+
+
+   .. py:attribute:: Crease
+      :value: 2
+
+
+      Can be an interior or a boundary vertex. Exactly two edges ending at a crease vertex must be tagged as ON\_SubDEdgeTag::Crease and may have 1 or 2 faces. All other edges ending at a crease must be tagged as tagON\_SubD::EdgeTag::Smooth and have 2 faces. Below P = ON\_SubDVertex.ControlNetPoint() and Ai = ON\_SubDVertex.Edge(i)->OtherEndVertex()->ControlNetPoint(). A crease vertex subdivision point is (6\*P + A1 + A2)/8. A crease vertex limit surface point is (4\*P + A1 + A2)/6.
+
+
+   .. py:attribute:: Dart
+      :value: 4
+
+
+      Must be an interior vertex. Every edge attached to a dart vertex must have 2 faces. Exactly one edge attached to a dart vertex must be tagged as ON\_SubDEdgeTag::Crease and every other attached edge must be tagged as ON\_SubDEdgeTag::smooth.
+
+
+   .. py:attribute:: Smooth
+      :value: 1
+
+
+      Must be an interior vertex. All edges attached to a smooth vertex must be tagged as ON\_SubDEdgeTag::Smooth and must have 2 faces.
+
+
+   .. py:attribute:: Unset
+      :value: 0
+
+
+      Not a valid vertex tag and the default value for ON\_SubDVertex.m\_vertex\_tag. This encourages developers to thoughtfully initialize ON\_SubDVertex.m\_vertex\_tag or use ON\_SubD.UpdateAllTagsAndSectorCoefficients() to automatically set the m\_vertex\_tag values at an appropriate time.
+

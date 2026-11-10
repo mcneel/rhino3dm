@@ -1,0 +1,32 @@
+rhino3dm.BrepVertex
+===================
+
+.. py:class:: rhino3dm.BrepVertex(location: Point3d)
+
+   Bases: :py:obj:`Point`
+
+
+   Brep vertex information
+
+
+   .. py:method:: EdgeIndices() -> list[Any]
+
+      Gets the indices of all edges associated with this vertex.
+
+      :returns: Empty array on failure.
+
+
+
+   .. py:property:: Tolerance
+      :type: float
+
+
+      Accuracy of vertex point, either >=0.0 or ``RhinoMath.UnsetValue``. A value of ``RhinoMath.UnsetValue`` indicates that the tolerance should be computed. A value of 0.0 indicates that the distance from the vertex to any applicable edge or trim end is <= ``RhinoMath.ZeroTolerance``. If an edge begins or ends at this vertex, then the distance from the vertex's 3d point to the appropriate end of the edge's 3d curve must be <= this tolerance. If a trim begins or ends at this vertex, then the distance from the vertex's 3d point to the 3d point on the surface obtained by evaluating the surface at the appropriate end of the trimming curve must be <= this tolerance.
+
+
+   .. py:property:: VertexIndex
+      :type: int
+
+
+      Gets the index of this vertex in the Brep.Vertices collection.
+

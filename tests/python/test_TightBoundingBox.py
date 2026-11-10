@@ -1,12 +1,17 @@
 import unittest
 import rhino3dm
+import os
+import sys
+import helpers
 
 # RH3DM-188: GetTightBoundingBox exposed on GeometryBase (Py/JS parity with .NET)
+
+
 class TestTightBoundingBox(unittest.TestCase):
 
     def test_sphereBrepTightBoundingBox(self):
         brep = rhino3dm.Sphere(rhino3dm.Point3d(0, 0, 0), 5).ToBrep()
-        tight = brep.GetTightBoundingBox()
+        tight = brep.GetBoundingBox(True)
         self.assertTrue(tight.IsValid)
         self.assertAlmostEqual(tight.Min.X, -5, places=3)
         self.assertAlmostEqual(tight.Min.Y, -5, places=3)
@@ -22,11 +27,16 @@ class TestTightBoundingBox(unittest.TestCase):
         mesh.Vertices.Add(2, 3, 0)
         mesh.Vertices.Add(0, 3, 0)
         mesh.Faces.AddFace(0, 1, 2, 3)
-        tight = mesh.GetTightBoundingBox()
+        tight = mesh.GetBoundingBox(True)
         self.assertTrue(tight.IsValid)
         self.assertAlmostEqual(tight.Min.X, 0, places=6)
         self.assertAlmostEqual(tight.Max.X, 2, places=6)
         self.assertAlmostEqual(tight.Max.Y, 3, places=6)
+
+    def test_brepTightBoundingBoxOfABox(self):
+        """GetBoundingBox(True) of a box brep is the box."""
+        b = helpers.box_brep().GetBoundingBox(True)
+        self.assertEqual((b.Min.X, b.Min.Y, b.Max.Y, b.Max.Z), (0, 0, 2, 3))
 
 
 if __name__ == '__main__':

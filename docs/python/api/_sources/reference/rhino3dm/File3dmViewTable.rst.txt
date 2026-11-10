@@ -1,0 +1,36 @@
+rhino3dm.File3dmViewTable
+=========================
+
+.. py:class:: rhino3dm.File3dmViewTable
+
+   Provides access to views in the 3dm file.
+
+
+   .. py:method:: Add(item: ViewInfo) -> None
+
+      Adds a
+
+
+
+   .. py:method:: Clear() -> None
+
+      Removes all items from the table.
+
+
+
+   .. py:method:: Delete(index: int) -> bool
+
+      Removes an item.
+
+      :param index: The index of the item to remove.
+
+      :returns: True if the item was removed.
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the amount of items in the table.
+

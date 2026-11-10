@@ -1,0 +1,31 @@
+rhino3dm.TransformRigidType
+===========================
+
+.. py:class:: rhino3dm.TransformRigidType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Lists all possible outcomes for rigid transformation.
+
+
+   .. py:attribute:: NotRigid
+      :value: 0
+
+
+      Transformation is not an orthogonal transformation.
+
+
+   .. py:attribute:: Rigid
+      :value: 1
+
+
+      Transformation is an rigid transformation.
+
+
+   .. py:attribute:: RigidReversing
+      :value: -1
+
+
+      Transformation is an orientation reversing isometry.
+

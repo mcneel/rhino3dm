@@ -1,0 +1,107 @@
+rhino3dm.BrepTrim
+=================
+
+.. py:class:: rhino3dm.BrepTrim
+
+   Bases: :py:obj:`CurveProxy`
+
+
+   Brep trim information is stored in BrepTrim classes. Brep.Trims is an array of all the trims in the brep. A BrepTrim is derived from CurveProxy so the trim can supply easy to use evaluation tools via the Curve virtual member functions. Note well that the domains and orientations of the curve m\_C2[trim.m\_c2i] and the trim as a curve may not agree.
+
+
+   .. py:method:: IsReversed() -> bool
+
+      Get orientation of trim with respect to it's corresponding edge.
+
+      :returns: true if the 2d trim and 3d edge have opposite orientations
+
+
+
+   .. py:method:: SetTolerances(toleranceU: float, toleranceV: float) -> None
+
+      The values in tolerance[] record the accuracy of the parameter space trimming curves.
+
+      tolerance[0] = accuracy of parameter space curve in first ("u") parameter
+
+      tolerance[1] = accuracy of parameter space curve in second ("v") parameter
+
+      A value of RhinoMath.UnsetValue indicates that the tolerance should be computed. If the value >= 0.0, then the tolerance is set. If the value is RhinoMath.UnsetValue, then the tolerance needs to be computed.
+
+      If the trim is not singular, then the trim must have an edge. If P is a 3d point on the edge's curve and surface(u,v) = Q is the point on the surface that is closest to P, then there must be a parameter t in the interval [m\_t[0], m\_t[1]] such that \|u - curve2d(t)[0]\| <= tolerance[0] and \|v - curve2d(t)[1]\| <= tolerance[1]
+
+      If P is the 3d point for the vertex brep.m\_V[m\_vi[k]] and (uk,vk) is the corresponding end of the trim's parameter space curve, then there must be a surface parameter (u,v) such that:
+
+      - the distance from the 3d point surface(u,v) to P is <= brep.m\_V[m\_vi[k]].m\_tolerance, - \|u-uk\| <= tolerance[0]. - \|v-vk\| <= tolerance[1].
+
+
+
+   .. py:method:: SetTrimCurve(curve2dIndex: int, subDomain: Interval) -> bool
+
+      Set 2d curve geometry used by a b-rep trim.
+
+      :param curve2dIndex: index of 2d curve in m\_C2[] array
+
+      :returns: true if successful
+
+
+
+   .. py:property:: Edge
+      :type: BrepEdge
+
+
+      Brep edge this trim belongs to. This will be null for singular trims
+
+
+   .. py:property:: EndVertex
+      :type: BrepVertex
+
+
+      BrepVertex at end of trim
+
+
+   .. py:property:: Face
+      :type: BrepFace
+
+
+      Brep face this trim belongs to
+
+
+   .. py:property:: IsoStatus
+      :type: IsoStatus
+
+
+
+   .. py:property:: Loop
+      :type: BrepLoop
+
+
+      Loop that this trim belongs to
+
+
+   .. py:property:: StartVertex
+      :type: BrepVertex
+
+
+      BrepVertex at start of trim
+
+
+   .. py:property:: TrimCurveIndex
+      :type: int
+
+
+      Gets the Brep.Curves2D 2d curve index of the 2d curve geometry used by this trim, or -1.
+
+
+   .. py:property:: TrimIndex
+      :type: int
+
+
+      Gets the index of this trim in the Brep.Trims collection.
+
+
+   .. py:property:: TrimType
+      :type: BrepTrimType
+
+
+      Type of trim
+

@@ -1,0 +1,96 @@
+rhino3dm.File3dmInstanceDefinitionTable
+=======================================
+
+.. py:class:: rhino3dm.File3dmInstanceDefinitionTable
+
+   Provides access to instance (block) definitions in the 3dm file.
+
+
+   .. py:method:: Add(item: InstanceDefinitionGeometry) -> None
+                  Add(name: str, description: str, url: str, urlTag: str, basePoint: Point3d, geometry: collections.abc.Sequence[GeometryBase] | None, attributes: collections.abc.Sequence[ObjectAttributes] | None) -> int
+                  Add(name: str, description: str, basePoint: Point3d, geometry: collections.abc.Sequence[GeometryBase] | None, attributes: collections.abc.Sequence[ObjectAttributes] | None) -> int
+
+      Adds an instance definition to the instance definition table.
+
+      :param name: The definition name.
+      :param description: The definition description.
+      :param basePoint: A base point.
+      :param geometry: An element.
+      :param attributes: An attribute.
+
+      :returns: >=0 index of instance definition in the instance definition table. -1 on failure.
+
+
+
+   .. py:method:: AddLinked(filename: str, name: str, description: str) -> int
+
+      Adds a linked instance definition to the instance definition table.
+
+      :param filename: Full path of the file to link.
+      :param name: The definition name.
+      :param description: The definition description.
+
+
+
+   .. py:method:: Delete(item: InstanceDefinitionGeometry | None) -> bool
+                  Delete(index: int) -> None
+
+      Flags a component as deleted.
+
+      :param index: The index of the item to flag.
+
+      :returns: True on success.
+
+
+
+   .. py:method:: Dump() -> str
+
+      Prepares a text dump of object table.
+
+      :returns: A string containing the dump.
+
+
+
+   .. py:method:: FindId(id: uuid.UUID) -> InstanceDefinitionGeometry
+
+      Uses the guid to find a model component. Deleted objects cannot be found by id. The guid is the value that is stored in the .Id property. In a single document, no two active objects have the same guid. If an object is replaced with a new object, then the guid persists. For example, if the \_Move command moves an object, then the moved object inherits its guid from the starting object. If the Copy command copies an object, then the copy gets a new guid. This guid persists through file saving/opening operations. This function will not find grip objects.
+
+      :param id: ID of model component to search for.
+
+      :returns: Reference to the rhino object with the objectId or null if no such object could be found.
+
+
+
+   .. py:method:: FindIndex(index: int) -> InstanceDefinitionGeometry
+
+      Retrieves an instance definition based on Index. This search type of search is discouraged. We are moving towards using only IDs for all tables.
+
+      :param index: The index to search for.
+
+      :returns: An instance definition, or null if none was found.
+
+
+
+   .. py:method:: FindName(name: str) -> InstanceDefinitionGeometry
+
+      Finds an InstanceDefinitionGeometry given its name.
+
+      :param name: The name of the InstanceDefinitionGeometry to be searched.
+
+      :returns: An InstanceDefinitionGeometry, or null on error.
+
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.InstanceDefinition``.
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Returns the count of all items, including deleted ones.
+

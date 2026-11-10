@@ -1,0 +1,52 @@
+rhino3dm.KnotStyle
+==================
+
+.. py:class:: rhino3dm.KnotStyle
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Knot styles for NURBS curves and surfaces. If a knot vector meets the conditions of two styles, then the style with the lowest value is used.
+
+
+   .. py:attribute:: ClampedEnd
+      :value: 4
+
+
+      Clamped end knots (with at least one interior non-uniform knot).
+
+
+   .. py:attribute:: NonUniform
+      :value: 5
+
+
+      Known to be none of the other styles
+
+
+   .. py:attribute:: PiecewiseBezier
+      :value: 3
+
+
+      All internal knots have full multiplicity.
+
+
+   .. py:attribute:: QuasiUniform
+      :value: 2
+
+
+      Uniform knots (clamped ends, degree >= 2).
+
+
+   .. py:attribute:: Uniform
+      :value: 1
+
+
+      Uniform knots (ends not clamped).
+
+
+   .. py:attribute:: Unknown
+      :value: 0
+
+
+      Unknown knot style
+

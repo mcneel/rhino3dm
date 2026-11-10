@@ -147,6 +147,7 @@ namespace Rhino.Geometry
       Vector3d dir2 = Vector3d.Unset;
 
       IntPtr ptr = UnsafeNativeMethods.ON_Surface_EvCurvature(ptr_const_surface, u, v, ref point, ref normal, ref dir1, ref dir2);
+      GC.KeepAlive(surface);
       if (ptr != IntPtr.Zero)
       {
         SurfaceCurvature rc = new SurfaceCurvature(ptr)
@@ -367,7 +368,9 @@ namespace Rhino.Geometry
     {
       IntPtr ptr_const_this = ConstPointer();
       IntPtr ptr_const_other = other.ConstPointer();
-      return UnsafeNativeMethods.ON_SurfaceCurvature_Compare(ptr_const_this, ptr_const_other);
+      int rc = UnsafeNativeMethods.ON_SurfaceCurvature_Compare(ptr_const_this, ptr_const_other);
+      GC.KeepAlive(other);
+      return rc;
     }
 
     #endregion
@@ -2820,6 +2823,7 @@ namespace Rhino.Geometry
         double fit = double.NaN;
         int nSections = UnsafeNativeMethods.RHC_RhFitCurveToSurface2(this.ConstPointer(), trimCurve3d.ConstPointer(), trimProjectionDir, simpleKnots.ConstPointer(),
           tolerance, divideIntoSections, FitCurvesArray.NonConstPointer(), ref fit, ref trimCurvePtr, ref ptr_splitCurve);
+        GC.KeepAlive(trimCurve3d);
 
         if (trimCurvePtr != IntPtr.Zero)
           trimCurveOnSurface = GeometryBase.CreateGeometryHelper(trimCurvePtr, null) as Curve;

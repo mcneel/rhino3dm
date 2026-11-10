@@ -17,10 +17,10 @@ We are currently using msbuild 16.5.0.12403.  Scripts read this:
 
 ### dotnet
 
-We are currently using the .NET Core SDK 3.1.302.  Scripts read this:
+We are currently using the .NET 10 SDK (any 10.0.x; CI installs it with actions/setup-dotnet). Scripts read this:
 
-`dotnet_currently_using = 3.1.302`
-`dotnet_install_notes_linux = On Ubuntu, you can install the dotnet SDK using the apt-get package manager.  Follow these instructions: https://docs.microsoft.com/en-us/dotnet/core/install/linux-package-manager-ubuntu-1804`
+`dotnet_currently_using = 10.0`
+`dotnet_install_notes_linux = Install the .NET 10 SDK: https://learn.microsoft.com/dotnet/core/install/linux`
 
 ## iOS
 
@@ -97,6 +97,10 @@ We are currently using Python 3.7.1. Scripts read this:
 We are currently using CMake 3.21.1. Scripts read this:
 
 `cmake_currently_using = 3.21.1`
+
+`libclang_currently_using = 18.1.1`
+`libclang_install_notes = The API extractor (tools/extract) parses C++ with the libclang PyPI wheel, which bundles its own native library: pip3 install libclang==18.1.1 . The pin matters: codegen output must be byte-identical across machines or the regenerate-and-diff CI gate produces false failures.`
+
 `cmake_archive_url_macos = https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1-macos-universal.dmg`
 `cmake_archive_url_windows = https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1-windows-x86_64.msi`
 `cmake_install_notes_macos = Once the CMake.app is installed, launch it, and follow the directions in Tools > How to Install for Command Line Use`

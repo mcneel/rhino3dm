@@ -1,0 +1,25 @@
+rhino3dm.PostEffectType
+=======================
+
+.. py:class:: rhino3dm.PostEffectType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Enum where members are also (and must be) ints
+
+
+   .. py:attribute:: Early
+      :value: 0
+
+
+
+   .. py:attribute:: Late
+      :value: 2
+
+
+
+   .. py:attribute:: ToneMapping
+      :value: 1
+
+

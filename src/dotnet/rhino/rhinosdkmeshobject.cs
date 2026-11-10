@@ -140,6 +140,7 @@ namespace Rhino.DocObjects.Custom
       var type_id = GetType().GUID;
       var p_const_mesh = mesh.ConstPointer();
       m_pRhinoObject = UnsafeNativeMethods.CRhinoCustomObject_New2(type_id, p_const_mesh);
+      GC.KeepAlive(mesh);
     }
 
     ~CustomMeshObject() { Dispose(false); }

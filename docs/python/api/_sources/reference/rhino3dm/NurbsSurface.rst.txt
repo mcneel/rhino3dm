@@ -1,0 +1,180 @@
+rhino3dm.NurbsSurface
+=====================
+
+.. py:class:: rhino3dm.NurbsSurface(other: NurbsSurface)
+              NurbsSurface(dimension: int, isRational: bool, order0: int, order1: int, controlPointCount0: int, controlPointCount1: int)
+
+   Bases: :py:obj:`Surface`
+
+
+   Represents a Non Uniform Rational B-Splines (NURBS) surface.
+
+
+   .. py:method:: CopyFrom(other: NurbsSurface) -> None
+
+      Copies this NURBS surface from another NURBS surface.
+
+      :param other: The other NURBS surface to use as source.
+
+
+
+   .. py:method:: Create(dimension: int, isRational: bool, order0: int, order1: int, controlPointCount0: int, controlPointCount1: int) -> NurbsSurface
+      :staticmethod:
+
+
+      Constructs a new NURBS surface with internal uninitialized arrays.
+
+      :param dimension: The number of dimensions.
+                        >= 1. This value is usually 3.
+      :param isRational: true to make a rational NURBS.
+      :param order0: The order in U direction.
+                     >= 2.
+      :param order1: The order in V direction.
+                     >= 2.
+      :param controlPointCount0: Control point count in U direction.
+                                 >= order0.
+      :param controlPointCount1: Control point count in V direction.
+                                 >= order1.
+
+      :returns: A new NURBS surface, or null on error.
+
+
+
+   .. py:method:: CreateFromCone(cone: Cone) -> NurbsSurface
+      :staticmethod:
+
+
+      Constructs a new NURBS surfaces from cone data.
+
+      :param cone: A cone value.
+
+      :returns: A new NURBS surface, or null on error.
+
+
+
+   .. py:method:: CreateFromCylinder(cylinder: Cylinder) -> NurbsSurface
+      :staticmethod:
+
+
+      Constructs a new NURBS surfaces from cylinder data.
+
+      :param cylinder: A cylinder value.
+
+      :returns: A new NURBS surface, or null on error.
+
+
+
+   .. py:method:: CreateFromSphere(sphere: Sphere) -> NurbsSurface
+      :staticmethod:
+
+
+      Constructs a new NURBS surfaces from sphere data.
+
+      :param sphere: A sphere value.
+
+      :returns: A new NURBS surface, or null on error.
+
+
+
+   .. py:method:: CreateFromTorus(torus: Torus) -> NurbsSurface
+      :staticmethod:
+
+
+      Constructs a new NURBS surfaces from torus data.
+
+      :param torus: A torus value.
+
+      :returns: A new NURBS surface, or null on error.
+
+
+
+   .. py:method:: CreateRuledSurface(curveA: Curve, curveB: Curve) -> NurbsSurface
+      :staticmethod:
+
+
+      Constructs a ruled surface between two curves. Curves must share the same knot-vector.
+
+      :param curveA: First curve.
+      :param curveB: Second curve.
+
+      :returns: A ruled surface on success or null on failure.
+
+
+
+   .. py:method:: IncreaseDegreeU(desiredDegree: int) -> bool
+
+      Increase the degree of this surface in U direction.
+
+      :param desiredDegree: The desired degree. Degrees should be number between and including 1 and 11.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: IncreaseDegreeV(desiredDegree: int) -> bool
+
+      Increase the degree of this surface in V direction.
+
+      :param desiredDegree: The desired degree. Degrees should be number between and including 1 and 11.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: MakeNonRational() -> bool
+
+      Makes this surface non-rational.
+
+      :returns: true if the operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: MakeRational() -> bool
+
+      Makes this surface rational.
+
+      :returns: true if the operation succeeded; otherwise, false.
+
+
+
+   .. py:property:: IsRational
+      :type: bool
+
+
+      Gets a value indicating whether or not the NURBS surface is rational.
+
+
+   .. py:property:: KnotsU
+      :type: NurbsSurfaceKnotList
+
+
+      The U direction knot vector.
+
+
+   .. py:property:: KnotsV
+      :type: NurbsSurfaceKnotList
+
+
+      The V direction knot vector.
+
+
+   .. py:property:: OrderU
+      :type: int
+
+
+      Gets the order in the U direction.
+
+
+   .. py:property:: OrderV
+      :type: int
+
+
+      Gets the order in the V direction.
+
+
+   .. py:property:: Points
+      :type: NurbsSurfacePointList
+
+
+      Gets a collection of surface control points that form this surface.
+

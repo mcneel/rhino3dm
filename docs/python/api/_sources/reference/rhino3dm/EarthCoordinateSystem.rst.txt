@@ -1,0 +1,52 @@
+rhino3dm.EarthCoordinateSystem
+==============================
+
+.. py:class:: rhino3dm.EarthCoordinateSystem
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   ON::EarthCoordinateSystem identifies the standard used to define Earth latitude, longitude, and elevation coordinates.
+
+
+   .. py:attribute:: CenterOfEarth
+      :value: 3
+
+
+      ON::EarthCoordinateSystem::CenterOfEarth Not well defined. The Earth's center of mass and center of volume are at different locations.
+
+
+   .. py:attribute:: EGM2008
+      :value: 6
+
+
+      ON::EarthCoordinateSystem::EGM2008 Earth Gravitational Model 2008 standard.
+
+
+   .. py:attribute:: GroundLevel
+      :value: 1
+
+
+      ON::EarthCoordinateSystem::GroundLevel Not well defined, but latitude and longitude will be good enough for architecture sun studies.
+
+
+   .. py:attribute:: MeanSeaLevel
+      :value: 2
+
+
+      ON::EarthCoordinateSystem::MeanSeaLevel Not well defined, but latitude and longitude will be good enough for architecture sun studies.
+
+
+   .. py:attribute:: Unset
+      :value: 0
+
+
+      ON::EarthCoordinateSystem::Unset
+
+
+   .. py:attribute:: WGS1984
+      :value: 5
+
+
+      ON::EarthCoordinateSystem::WGS1984 World Geodetic System 1984 standard. (Current GPS standard.)
+

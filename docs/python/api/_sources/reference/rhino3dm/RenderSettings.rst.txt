@@ -1,0 +1,316 @@
+rhino3dm.RenderSettings
+=======================
+
+.. toctree::
+   :hidden:
+
+   /reference/rhino3dm/RenderSettings.EnvironmentPurpose
+   /reference/rhino3dm/RenderSettings.EnvironmentUsage
+   /reference/rhino3dm/RenderSettings.RenderingSources
+
+.. py:class:: rhino3dm.RenderSettings
+              RenderSettings(source: RenderSettings | None)
+
+   Bases: :py:obj:`CommonObject`
+
+
+   Contains settings used in rendering.
+
+
+   .. py:method:: GetUserString(key: str) -> str
+
+      The named string attached to this object (rhino3dm only).
+
+      :param key: The string's name.
+
+      :returns: The text, empty when the key is not set.
+
+
+
+   .. py:method:: GetUserStrings() -> list[Any]
+
+      Every named string attached to this object (rhino3dm only).
+
+      :returns: A list of ``[key, value]`` pairs.
+
+
+
+   .. py:method:: RenderEnvironmentId(usage: RenderSettings, purpose: RenderSettings) -> uuid.UUID
+
+      Get the id of the render environment for a particular usage. If usage is Background and the background mode is set to 'Solid Color' or 'Gradient' (i.e., not 'Environment'), then Guid.Empty will be returned.
+
+
+
+   .. py:method:: RenderEnvironmentOverride(usage: RenderSettings) -> bool
+
+      For usage background, this checks if the background style is set to 'Environment'. For reflection and skylighting, it checks if the relevant custom override is enabled.
+
+
+
+   .. py:method:: SetRenderEnvironmentId(usage: RenderSettings, guid: uuid.UUID) -> None
+
+      Set the id of the render environment for a particular usage. Passing Guid.Empty for usage Skylighting or Reflection will turn the override for that usage off.
+
+
+
+   .. py:method:: SetRenderEnvironmentOverride(usage: RenderSettings, on: bool) -> None
+
+      Set the given environment override on/off. Only works for usage Reflection and Skylighting.
+
+
+
+   .. py:method:: SetUserString(key: str, value: str) -> bool
+
+      Attaches a named string to this object (rhino3dm only).
+
+      :param key: The string's name.
+      :param value: The text; an empty string removes the key.
+
+      :returns: True on success.
+
+
+
+   .. py:property:: AmbientLight
+      :type: tuple[int, int, int, int]
+
+
+      Gets or sets the ambient light color used in rendering.
+
+
+   .. py:property:: AntialiasLevel
+      :type: AntialiasLevel
+
+
+      Gets or sets anti-alias level, used for render quality
+
+
+   .. py:property:: BackgroundColorBottom
+      :type: tuple[int, int, int, int]
+
+
+      Gets or sets the background bottom color used in rendering.
+
+
+   .. py:property:: BackgroundColorTop
+      :type: tuple[int, int, int, int]
+
+
+      Gets or sets the background top color used in rendering.
+
+      Sets also the background color if a solid background color is set.
+
+
+   .. py:property:: BackgroundStyle
+      :type: BackgroundStyle
+
+
+      How the viewport's background should be filled.
+
+
+   .. py:property:: DepthCue
+      :type: bool
+
+
+      Gets or sets a value indicating whether to render using depth cues.
+
+      These are clues to help the perception of position and orientation of objects in the image.
+
+
+   .. py:property:: Dithering
+      :type: Dithering
+
+
+      If this object is associated with a document, this gets the document dithering. If this object is associated with a File3dm, this gets the File3dm's dithering. Otherwise it gets a 'free-floating' dithering object.
+
+
+   .. py:property:: FlatShade
+      :type: bool
+
+
+      Gets or sets a value indicating whether to render using flat shading.
+
+
+   .. py:property:: GroundPlane
+      :type: GroundPlane
+
+
+      If this object is associated with a document, this gets the document ground plane. If this object is associated with a File3dm, this gets the File3dm's ground plane. Otherwise it gets a 'free-floating' ground plane object.
+
+
+   .. py:property:: ImageDpi
+      :type: float
+
+
+      Number of dots/inch (dots=pixels) to use when printing and saving bitmaps. The default is 72.0 dots/inch.
+
+
+   .. py:property:: ImageUnitSystem
+      :type: UnitSystem
+
+
+      unit system to use when converting image pixel size and DPI information into a print size. Default = inches
+
+
+   .. py:property:: LinearWorkflow
+      :type: LinearWorkflow
+
+
+      If this object is associated with a document, this gets the document linear workflow. If this object is associated with a File3dm, this gets the File3dm's linear workflow. Otherwise it gets a 'free-floating' linear workflow object.
+
+
+   .. py:property:: NamedView
+      :type: str
+
+
+      Get or set the given named view
+
+
+   .. py:property:: PostEffects
+      :type: PostEffectCollection
+
+
+      If this object is associated with a document, this gets the document post effect data collection. If this object is associated with a File3dm, this gets the File3dm's post effect data collection. Otherwise it gets a 'free-floating' post effect data collection object.
+
+
+   .. py:property:: RenderAnnotations
+      :type: bool
+
+
+      Gets or sets a value indicating whether to instruct the rendering engine to show annotations, such as linear dimensions or angular dimensions.
+
+
+   .. py:property:: RenderBackfaces
+      :type: bool
+
+
+      Gets or sets a value indicating whether to render back faces.
+
+
+   .. py:property:: RenderChannels
+      :type: RenderChannels
+
+
+      If this object is associated with a document, this gets the document render channels. Otherwise it gets a 'free-floating' render channels object.
+
+
+   .. py:property:: RenderCurves
+      :type: bool
+
+
+      Gets or sets a value indicating whether to instruct the rendering engine to show curves.
+
+
+   .. py:property:: RenderIsoparams
+      :type: bool
+
+
+      Gets or sets a value indicating whether to instruct the rendering engine to show isocurves.
+
+
+   .. py:property:: RenderMeshEdges
+      :type: bool
+
+
+      Gets or sets a value indicating whether to instruct the rendering engine to show mesh edges.
+
+
+   .. py:property:: RenderPoints
+      :type: bool
+
+
+      Gets or sets a value indicating whether to instruct the rendering engine to show points.
+
+
+   .. py:property:: RenderSource
+      :type: RenderSettings
+
+
+      Gets or sets the render source ``RenderingSources`` enumeration.
+
+
+   .. py:property:: SafeFrame
+      :type: SafeFrame
+
+
+      If this object is associated with a document, this gets the document safe-frame. If this object is associated with a File3dm, this gets the File3dm's safe-frame. Otherwise it gets a 'free-floating' safe-frame object.
+
+
+   .. py:property:: ScaleBackgroundToFit
+      :type: bool
+
+
+      Gets or sets a value indicating whether to scale the wallpaper in the background or not. This is meaningful only if the viewport has a wallpaper and render settings are set to render Wallpaper into the background.
+
+
+   .. py:property:: ShadowmapLevel
+      :type: int
+
+
+      0=none, 1=normal, 2=best.
+
+
+   .. py:property:: Skylight
+      :type: Skylight
+
+
+      If this object is associated with a document, this gets the document skylight. If this object is associated with a File3dm, this gets the File3dm's skylight. Otherwise it gets a 'free-floating' skylight object.
+
+
+   .. py:property:: Snapshot
+      :type: str
+
+
+      Set or get the given snapshot view
+
+
+   .. py:property:: SpecificViewport
+      :type: str
+
+
+      Set or get the given specific viewport
+
+
+   .. py:property:: Sun
+      :type: Sun
+
+
+      If this object is associated with a document, this gets the document sun. If this object is associated with a File3dm, this gets the File3dm's sun. Otherwise it gets a 'free-floating' sun object.
+
+
+   .. py:property:: TransparentBackground
+      :type: bool
+
+
+      Gets or sets whether rendering should be done with transparent background.
+
+
+   .. py:property:: UseHiddenLights
+      :type: bool
+
+
+      Gets or sets a value indicating whether to render using lights that are on layers that are off.
+
+
+   .. py:property:: UseViewportSize
+      :type: bool
+
+
+      Gets or sets a value indicating whether to use the resolution of the viewport being rendered or ImageSize when rendering
+
+
+   .. py:property:: UserStringCount
+      :type: int
+
+
+      The number of named strings attached to this object (rhino3dm only).
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rhino3dm.RenderSettings.EnvironmentPurpose
+   rhino3dm.RenderSettings.EnvironmentUsage
+   rhino3dm.RenderSettings.RenderingSources
+
+

@@ -1,0 +1,31 @@
+rhino3dm.InstanceDefinitionLayerStyle
+=====================================
+
+.. py:class:: rhino3dm.InstanceDefinitionLayerStyle
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   InstanceDefinition.LayerStyle specifies how model components (layers, materials, dimension styles, etc.) from linked instance definition files appear in the active model.
+
+
+   .. py:attribute:: Active
+      :value: 1
+
+
+      Model components (layers, materials, dimension styles, etc.) from linked instance definition files are embedded as ordinary components in the active model. This layer style may be used when the instance definition type is InstanceDefinitionUpdateType.Linked.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``InstanceDefinitionLayerStyle.None`` is not Python syntax; ``InstanceDefinitionLayerStyle['None']`` is the same member). This is the only valid layer style when the instance definition type is InstanceDefinitionUpdateType.Static or InstanceDefinitionUpdateType.LinkedAndEmbedded. This style is not valid when the instance definition type is InstanceDefinitionUpdateType.Linked.
+
+
+   .. py:attribute:: Reference
+      :value: 2
+
+
+      Layers from the linked instance definition are reference components in the model. This is the default layer style when the instance definition type is InstanceDefinitionUpdateType.Linked. This layer style may be used when the instance definition type is InstanceDefinitionUpdateType.Linked.
+

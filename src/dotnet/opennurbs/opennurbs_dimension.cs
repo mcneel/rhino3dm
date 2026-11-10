@@ -2005,6 +2005,21 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Gets the radius of the dimension arc: the distance from the center point to the dimension line point.
+    /// </summary>
+    /// <since>9.2</since>
+    public double Radius
+    {
+      get
+      {
+        IntPtr const_ptr_this = ConstPointer();
+        double rc = UnsafeNativeMethods.ON_V6_DimAngular_Radius(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
     /// Get locations of dimension's 3d points
     /// </summary>
     /// <param name="centerpoint">Dimension's center point</param>
@@ -2508,6 +2523,7 @@ namespace Rhino.Geometry
           }
         }
       }
+      GC.KeepAlive(style);
       GC.KeepAlive(this);
       return rc;
     }
@@ -3010,6 +3026,7 @@ namespace Rhino.Geometry
         IntPtr dimptr = ConstPointer();
         IntPtr styleptr = style.ConstPointer();
         UnsafeNativeMethods.ON_V6_DimOrdinate_GetDisplayText(dimptr, unitsystem, 1.0, styleptr, strptr);
+        GC.KeepAlive(style);
         GC.KeepAlive(this);
         return sw.ToString();
       }
@@ -3170,7 +3187,8 @@ namespace Rhino.Geometry
       }
     }
 
-    /*
+    /// <since>9.2</since>
+    [ConstOperation]
     public bool GetDisplayLines(DimensionStyle style, double scale, out IEnumerable<Line> lines)
     {
       Line[] linearray = new Line[6];
@@ -3178,18 +3196,19 @@ namespace Rhino.Geometry
       lines = linelist;
       bool[] isline = { false, false, false, false, false, false };
       bool rc = UnsafeNativeMethods.ON_V6_Centermark_GetDisplayLines(ConstPointer(), style.ConstPointer(), scale, linearray,
-        isline, 6);
+        isline, linearray.Length);
       if (rc)
       {
-        for (int i = 0; i < 9; i++)
+        for (int i = 0; i < linearray.Length; i++)
         {
           if (isline[i])
             linelist.Add(linearray[i]);
         }
       }
+      GC.KeepAlive(style);
+      GC.KeepAlive(this);
       return rc;
     }
-    */
   }
 }
 

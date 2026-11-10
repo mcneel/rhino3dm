@@ -1,0 +1,109 @@
+rhino3dm.OrdinateDimension
+==========================
+
+.. toctree::
+   :hidden:
+
+   /reference/rhino3dm/OrdinateDimension.MeasuredDirection
+
+.. py:class:: rhino3dm.OrdinateDimension
+
+   Bases: :py:obj:`Dimension`
+
+
+   Represents an ordinate dimension
+
+
+   .. py:method:: AdjustFromPoints(plane: Plane, direction: OrdinateDimension, basepoint: Point3d, defpoint: Point3d, leaderpoint: Point3d, kinkoffset1: float, kinkoffset2: float) -> bool
+
+      Update Dimension geometry from point locations
+
+      :param plane: Dimension's plane
+      :param direction: MeasuredDirection.XAxis or MeasuredDirection.YAxisw
+      :param basepoint: Dimension's base point
+      :param defpoint: Dimension's definition point
+      :param leaderpoint: Point at tail of leader
+      :param kinkoffset1: Distance to first jog
+      :param kinkoffset2: Distance to second jog
+
+
+
+   .. py:method:: Create(dimStyle: DimensionStyle, plane: Plane, direction: OrdinateDimension, basepoint: Point3d, defpoint: Point3d, leaderpoint: Point3d, kinkoffset1: float, kinkoffset2: float) -> OrdinateDimension
+      :staticmethod:
+
+
+      Initialize Dimension parameters
+
+      :param dimStyle: Dimension's AnnotationStyle
+      :param plane: Dimension's plane
+      :param direction: MeasuredDirection.XAxis or MeasuredDirection.YAxis
+      :param basepoint: Dimension's base point
+      :param defpoint: Dimension's definition point
+      :param leaderpoint: Point at tail of leader
+      :param kinkoffset1: Distance to first jog
+      :param kinkoffset2: Distance to second jog
+
+
+
+   .. py:method:: Get3dPoints() -> tuple[bool, Point3d, Point3d, Point3d, Point3d, Point3d]
+
+      Get locations of dimension's 3d points
+
+
+
+   .. py:method:: GetDisplayLines(style: DimensionStyle, scale: float) -> tuple[bool, list[Line]]
+
+
+   .. py:method:: GetDistanceDisplayText(unitsystem: UnitSystem, style: DimensionStyle) -> str
+
+      Deprecated since 9.0.
+
+
+
+   .. py:method:: GetTextRectangle() -> tuple[bool, list[Point3d]]
+
+
+   .. py:property:: DefPoint
+      :type: Point2d
+
+
+
+   .. py:property:: Direction
+      :type: OrdinateDimension
+
+
+      Gets or sets the measured direction.
+
+
+   .. py:property:: KinkOffset1
+      :type: float
+
+
+
+   .. py:property:: KinkOffset2
+      :type: float
+
+
+
+   .. py:property:: KinkPoint1
+      :type: Point2d
+
+
+
+   .. py:property:: KinkPoint2
+      :type: Point2d
+
+
+
+   .. py:property:: LeaderPoint
+      :type: Point2d
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rhino3dm.OrdinateDimension.MeasuredDirection
+
+

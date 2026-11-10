@@ -333,6 +333,8 @@ namespace Rhino.Geometry
 
       Matrix rc = new Matrix(a.RowCount, b.ColumnCount);
       UnsafeNativeMethods.ON_Matrix_Multiply(rc.m_ptr, a.m_ptr, b.m_ptr);
+      GC.KeepAlive(a);
+      GC.KeepAlive(b);
       return rc;
     }
 
@@ -354,6 +356,8 @@ namespace Rhino.Geometry
 
       Matrix rc = new Matrix(a.RowCount, a.ColumnCount);
       UnsafeNativeMethods.ON_Matrix_Add(rc.m_ptr, a.m_ptr, b.m_ptr);
+      GC.KeepAlive(a);
+      GC.KeepAlive(b);
       return rc;
     }
 

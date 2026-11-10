@@ -1,7 +1,7 @@
 # Build Instructions for .NET
 ### Get The Source
 
-This repo uses [OpenNURBS](https://github.com/mcneel/opennurbs) and [pybind11](https://github.com/pybind/pybind11) as submodules, so you need to run another git command after you have cloned. `cd` into the new repository directory and run
+This repo uses [OpenNURBS](https://github.com/mcneel/opennurbs) and [nanobind](https://github.com/wjakob/nanobind) as submodules, so you need to run another git command after you have cloned. `cd` into the new repository directory and run
   * `git submodule update --init`
 
 ## Install the Tools

@@ -1,0 +1,293 @@
+rhino3dm.Material
+=================
+
+.. py:class:: rhino3dm.Material
+              Material(other: Material)
+
+   Bases: :py:obj:`ModelComponent`
+
+
+   Base class for all components in a model (document) and manages the index, id and other information common to this type of objects.
+
+   This class parallels the C++ ON\_ModelComponent.
+
+
+   .. py:method:: CommitChanges() -> bool
+
+
+   .. py:method:: CompareAppearance(material1: Material, material2: Material) -> int
+      :staticmethod:
+
+
+      Compares all the settings that affect the appearance of two materials (colors, reflection, textures, plug-in id), ignoring index, id, name and render material instance id.
+
+      :param material1: The first material.
+      :param material2: The second material.
+
+      :returns: 0 when the materials look the same; otherwise a negative or positive value for ordering.
+
+
+
+   .. py:method:: CopyFrom(other: Material) -> None
+
+
+   .. py:method:: Default() -> None
+
+      Set material to default settings.
+
+
+
+   .. py:method:: GetBitmapTexture() -> Texture
+
+
+   .. py:method:: GetBumpTexture() -> Texture
+
+      Gets the bump texture of this material.
+
+      :returns: A texture; or null if no bump texture has been added to this material.
+
+
+
+   .. py:method:: GetEnvironmentTexture() -> Texture
+
+
+   .. py:method:: GetTexture(which: TextureType) -> Texture
+
+      Get the texture that corresponds with the specified texture type for this material.
+
+
+
+   .. py:method:: GetTransparencyTexture() -> Texture
+
+
+   .. py:method:: GetUserString(key: str) -> str
+
+      Gets a user string.
+
+      :param key: id used to retrieve the string.
+
+      :returns: string associated with the key if successful. null if no key was found.
+
+
+
+   .. py:method:: GetUserStrings() -> list[Any]
+
+      Gets an independent copy of the collection of (user text key, user text value) pairs attached to this object.
+
+      :returns: A collection of key strings and values strings. This
+
+
+
+   .. py:method:: SetBitmapTexture(texture: Texture) -> bool
+                  SetBitmapTexture(filename: str) -> bool
+
+
+   .. py:method:: SetBumpTexture(texture: Texture) -> bool
+                  SetBumpTexture(filename: str) -> bool
+
+
+   .. py:method:: SetEnvironmentTexture(texture: Texture) -> bool
+                  SetEnvironmentTexture(filename: str) -> bool
+
+
+   .. py:method:: SetTexture(texture: Texture, which: TextureType) -> bool
+
+      Set the texture that corresponds with the specified texture type for this material.
+
+      :param texture: An instance of Rhino.DocObjects.Texture
+      :param which: Use Rhino.DocObjects.TextureType
+
+
+
+   .. py:method:: SetTransparencyTexture(texture: Texture) -> bool
+                  SetTransparencyTexture(filename: str) -> bool
+
+
+   .. py:method:: SetUserString(key: str, value: str) -> bool
+
+      Attach a user string (key,value combination) to this geometry.
+
+      :param key: id used to retrieve this string.
+      :param value: string associated with key.
+
+      :returns: true on success.
+
+
+
+   .. py:method:: ToPhysicallyBased() -> None
+
+
+   .. py:property:: AlphaTransparency
+      :type: bool
+
+
+
+   .. py:property:: AmbientColor
+      :type: tuple[int, int, int, int]
+
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.RenderMaterial``.
+
+
+   .. py:property:: DiffuseColor
+      :type: tuple[int, int, int, int]
+
+
+
+   .. py:property:: DisableLighting
+      :type: bool
+
+
+
+   .. py:property:: EmissionColor
+      :type: tuple[int, int, int, int]
+
+
+
+   .. py:property:: FresnelIndexOfRefraction
+      :type: float
+
+
+      Gets or sets the Fresnel index of refraction of the material, default is 1.56
+
+
+   .. py:property:: FresnelReflections
+      :type: bool
+
+
+      Gets or sets if Fresnel reflections are used.
+
+
+   .. py:property:: IndexOfRefraction
+      :type: float
+
+
+      Gets or sets the index of refraction of the material, generally >= 1.0 (speed of light in vacuum)/(speed of light in material)
+
+
+   .. py:property:: IsDeleted
+      :type: bool
+
+
+      Deleted materials are kept in the runtime material table so that undo will work with materials. Call IsDeleted to determine to determine if a material is deleted.
+
+
+   .. py:property:: IsPhysicallyBased
+      :type: bool
+
+
+
+   .. py:property:: IsReference
+      :type: bool
+
+
+      Rhino allows multiple files to be viewed simultaneously. Materials in the document are "normal" or "reference". Reference materials are not saved.
+
+
+   .. py:property:: MaterialIndex
+      :type: int
+
+
+
+   .. py:attribute:: MaxShine
+      :type:  float
+      :value: Ellipsis
+
+
+      object, /) -> float
+
+      :type: (arg
+
+
+   .. py:property:: Name
+      :type: str
+
+
+      Gets or sets the name
+
+      :raises InvalidOperationException: When setting the Name failed. This usually happens because the instance Name is already locked.
+
+
+   .. py:property:: PhysicallyBased
+      :type: PhysicallyBasedMaterial
+
+
+
+   .. py:property:: PreviewColor
+      :type: tuple[int, int, int, int]
+
+
+      Very simple preview color function for GUIs.
+
+
+   .. py:property:: ReflectionColor
+      :type: tuple[int, int, int, int]
+
+
+
+   .. py:property:: ReflectionGlossiness
+      :type: float
+
+
+      Gets or sets the reflection glossiness.
+
+
+   .. py:property:: Reflectivity
+      :type: float
+
+
+      Gets or sets how reflective a material is, 0f is no reflection 1f is 100% reflective.
+
+
+   .. py:property:: RefractionGlossiness
+      :type: float
+
+
+      Gets or sets the refraction glossiness.
+
+
+   .. py:property:: RenderMaterialInstanceId
+      :type: uuid.UUID
+
+
+
+   .. py:property:: RenderPlugInId
+      :type: uuid.UUID
+
+
+      The Id of the RenderPlugIn that is associated with this material.
+
+
+   .. py:property:: Shine
+      :type: float
+
+
+      Gets or sets the shine factor of the material.
+
+
+   .. py:property:: SpecularColor
+      :type: tuple[int, int, int, int]
+
+
+
+   .. py:property:: Transparency
+      :type: float
+
+
+      Gets or sets the transparency of the material (0.0 = opaque to 1.0 = transparent)
+
+
+   .. py:property:: TransparentColor
+      :type: tuple[int, int, int, int]
+
+
+
+   .. py:property:: UserStringCount
+      :type: int
+
+

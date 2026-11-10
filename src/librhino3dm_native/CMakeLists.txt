@@ -15,6 +15,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Android")
 endif()
 
 file(GLOB bindings_SRC "./*.h" "./*.cpp")
+# draco.cpp (synced from RhinoCommon's c/draco.cpp): the Draco encode/decode subset rhino3dm compiles,
+# not all of Draco (../draco_sources.cmake, written by tools/dev/draco_subset.py)
+include("${CMAKE_CURRENT_SOURCE_DIR}/../draco_sources.cmake")
+include_directories(${draco_subset_INCLUDE})
+list(APPEND bindings_SRC ${draco_subset_SRC})
 file(GLOB zlib_SRC "../lib/opennurbs/zlib/*.h" "../lib/opennurbs/zlib/*.c")
 
 # temporarily rename the 3 cpp files that we don't want to compile on OSX
@@ -30,7 +35,15 @@ file(GLOB uuid_SRC "../lib/opennurbs/android_uuid/*.h" "../lib/opennurbs/android
 file(RENAME "../lib/opennurbs/android_uuid/gen_uuid_nt.skip" "../lib/opennurbs/android_uuid/gen_uuid_nt.c")
 
 
-set (CMAKE_CXX_STANDARD 14)
+# C++17 on every platform: opennurbs 9 uses <execution> (std::execution::par_unseq) on MSVC and
+# std::to_chars for doubles
+set (CMAKE_CXX_STANDARD 17)
+# No fused multiply-add contraction on Linux: GCC defaults to -ffp-contract=fast, which fuses
+# across statements. Apple clang keeps its default (on: within an expression), so macOS arm64
+# can differ from x64 in the last bit; MSVC does not contract unless /fp:contract
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  add_compile_options(-ffp-contract=off)
+endif()
 
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 

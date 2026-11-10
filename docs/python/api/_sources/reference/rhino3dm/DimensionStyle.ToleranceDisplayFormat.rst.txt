@@ -1,0 +1,38 @@
+rhino3dm.DimensionStyle.ToleranceDisplayFormat
+==============================================
+
+.. py:class:: rhino3dm.DimensionStyle.ToleranceDisplayFormat
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Style of tolerance display for dimensions
+
+
+   .. py:attribute:: Deviation
+      :value: 2
+
+
+      Distance +tol, -tol
+
+
+   .. py:attribute:: Limits
+      :value: 3
+
+
+      Distance upper and lower limits
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``ToleranceDisplayFormat.None`` is not Python syntax; ``ToleranceDisplayFormat['None']`` is the same member). No tolerance display
+
+
+   .. py:attribute:: Symmetrical
+      :value: 1
+
+
+      Symmetrical +/- tolerance
+

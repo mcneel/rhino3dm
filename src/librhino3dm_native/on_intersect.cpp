@@ -624,7 +624,7 @@ RH_C_FUNCTION ON_SimpleArray<ON_Polyline*>* ON_Intersect_MeshMesh1(const ON_Mesh
         ON_Polyline* pl = new ON_Polyline();
         const ON_MMX_Polyline& mmxpoly = overlapplines[i];
         int c = mmxpoly.Count();
-        for( int j=0; i<c; i++ )
+        for( int j=0; j<c; j++ )
           pl->Append(mmxpoly[j].m_A.m_P);
         pl->Clean(ON_ZERO_TOLERANCE);
         if( !pl->IsValid() )

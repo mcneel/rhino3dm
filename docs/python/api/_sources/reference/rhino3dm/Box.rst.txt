@@ -1,0 +1,208 @@
+rhino3dm.Box
+============
+
+.. py:class:: rhino3dm.Box
+              Box(arg: Box)
+              Box(bbox: BoundingBox)
+              Box(basePlane: Plane, xSize: Interval, ySize: Interval, zSize: Interval)
+              Box(basePlane: Plane, points: collections.abc.Sequence[Point3d])
+              Box(basePlane: Plane, boundingbox: BoundingBox)
+
+   Represents the value of a plane and three intervals in an orthogonal, oriented box that is not necessarily parallel to the world Y, X, Z axes.
+
+
+   .. py:method:: Clone() -> Box
+
+      Returns a deep copy of this instance.
+
+      :returns: A plane with the same values as this item.
+
+
+
+   .. py:method:: ClosestPoint(point: Point3d) -> Point3d
+                  ClosestPoint(point: Point3d, includeInterior: bool) -> Point3d
+
+      Finds the closest point on or in the Box. The box should be Valid for this to work.
+
+      :param point: Sample point.
+      :param includeInterior: If false, the point is projected onto the boundary faces only, otherwise the interior of the box is also taken into consideration.
+
+      :returns: The point on or in the box that is closest to the sample point.
+
+
+
+   .. py:method:: Contains(point: Point3d) -> bool
+                  Contains(point: Point3d, strict: bool) -> bool
+                  Contains(box: BoundingBox) -> bool
+                  Contains(box: BoundingBox, strict: bool) -> bool
+                  Contains(box: Box) -> bool
+                  Contains(box: Box, strict: bool) -> bool
+
+      Determines whether a BoundingBox is inside this Box (strict inclusion, if strict is true). Invalid boxes contain nothing. Invalid bounding boxes are never contained.
+
+      :param box: BoundingBox to test.
+      :param strict: If true, the BoundingBox needs to be strictly inside this Box, i.e. all corners of the BoundingBox are strictly inside this Box. If false, the BoundingBox can be touching this Box's boundary, i.e. all corners of the BoundingBox are non-strictly inside this Box.
+
+      :returns: true if the box is (strictly, if strict is true) inside this Box. false if this Box or the BoundingBox are invalid.
+
+
+
+   .. py:method:: EpsilonEquals(other: Box, epsilon: float) -> bool
+
+      Check that all values in Box other are within epsilon of the values in this Box.
+
+
+
+   .. py:method:: FurthestPoint(point: Point3d) -> Point3d
+
+      Finds the furthest point on the boundary of this Box. The Box should be Valid for this to work properly.
+
+      :param point: Sample point.
+
+      :returns: The point on boundary of the the box that is furthest from the sample point.
+
+
+
+   .. py:method:: GetCorners() -> list[Point3d]
+
+      Gets an array of the 8 corner points of this box, or an empty array if this box is not valid.
+
+      :returns: An array of 0 or 8 corners.
+
+
+
+   .. py:method:: Inflate(amount: float) -> None
+                  Inflate(xAmount: float, yAmount: float, zAmount: float) -> None
+
+      Inflates the box by a given offset in each direction. Inflating with negative amounts may result in decreasing boxes. InValid boxes cannot be inflated.
+
+      :param xAmount: Amount (in model units) to inflate this box in the x direction.
+      :param yAmount: Amount (in model units) to inflate this box in the y direction.
+      :param zAmount: Amount (in model units) to inflate this box in the z direction.
+
+
+
+   .. py:method:: MakeValid() -> bool
+
+      DO NOT USE THIS FUNCTION If some of the box's values (Plane origin or axis, intervals bounds) are unset, do nothing. Else, make the Box valid by reversing the non-increasing intervals of this box. This is almost never what you want because it only makes ``Empty``\ Empty boxes not empty and with non-zero length.
+
+      :returns: true if the box was made valid, or if it was valid to begin with. false if the box remains unchanged.
+
+      Deprecated since 9.0.
+
+
+
+   .. py:method:: PointAt(x: float, y: float, z: float) -> Point3d
+
+      Evaluates the box at the given unitized parameters.
+
+      The box is parametrized with a side length of 1x1x1.
+
+      :param x: Unitized parameter (between 0 and 1 is inside the box) along box X direction.
+      :param y: Unitized parameter (between 0 and 1 is inside the box) along box Y direction.
+      :param z: Unitized parameter (between 0 and 1 is inside the box) along box Z direction.
+
+      :returns: The point at (x,y,z).
+
+
+
+   .. py:method:: RepositionBasePlane(origin: Point3d) -> None
+
+      Repositions the origin of the Base plane for this box without affecting the physical dimensions.
+
+      :param origin: The new base plane origin.
+
+
+
+   .. py:method:: Transform(xform: Transform) -> bool
+
+      Transforms this Box using a Transformation matrix. If the Transform is not a Similarity, the dimensions of the resulting box cannot be trusted.
+
+      :param xform: Transformation matrix to apply to this Box.
+
+      :returns: true if the Box was successfully transformed, false otherwise.
+
+
+
+   .. py:property:: Area
+      :type: float
+
+
+      Gets the total surface area of this box, or ``RhinoMath.UnsetValue`` for an invalid box.
+
+
+   .. py:property:: BoundingBox
+      :type: BoundingBox
+
+
+      Gets the world axis aligned Bounding box for this oriented box.
+
+
+   .. py:property:: Center
+      :type: Point3d
+
+
+      Gets the point that is in the center of the box.
+
+
+   .. py:attribute:: Empty
+      :type:  Box
+      :value: Ellipsis
+
+
+      object, /) -> Box
+
+      :type: (arg
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Gets the validity of this Box. Boxes are invalid when the base plane or any of the dimension intervals are invalid or decreasing.
+
+
+   .. py:property:: Plane
+      :type: Plane
+
+
+      Gets or sets the orientation plane for this Box.
+
+
+   .. py:attribute:: Unset
+      :type:  Box
+      :value: Ellipsis
+
+
+      object, /) -> Box
+
+      :type: (arg
+
+
+   .. py:property:: Volume
+      :type: float
+
+
+      Gets the total volume of this box, or ``RhinoMath.UnsetValue`` for an invalid box.
+
+
+   .. py:property:: X
+      :type: Interval
+
+
+      Gets or sets the Interval that describes the dimension of the Box along the orientation plane X-Axis. Otherwise known as the Width of the Box.
+
+
+   .. py:property:: Y
+      :type: Interval
+
+
+      Gets or sets the Interval that describes the dimension of the Box along the orientation plane Y-Axis. Otherwise known as the Depth of the Box.
+
+
+   .. py:property:: Z
+      :type: Interval
+
+
+      Gets or sets the Interval that describes the dimension of the Box along the orientation plane Z-Axis. Otherwise known as the Height of the Box.
+

@@ -1,0 +1,45 @@
+rhino3dm.SubDEndCapStyle
+========================
+
+.. py:class:: rhino3dm.SubDEndCapStyle
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   ON\_SubDEndCapStyle enumerates the type of end caps functions like ON\_SubD::CreateCylinder will create. Use ON\_SubDEndCapStyleFromUnsigned(integer value) to convert integer values to an ON\_SubDEndCapStyle. Use ON\_SubDEndCapStyleToString(end\_cap\_style) to convert ON\_SubDEndCapStyle values to string descriptions.
+
+
+   .. py:attribute:: Ngon
+      :value: 4
+
+
+      Ends are capped with a n-gon. This is a poor choice when there are a large number of edges in the end boundary.
+
+
+   .. py:attribute:: None_
+      :value: 1
+
+
+      RhinoCommon's ``None`` (``SubDEndCapStyle.None`` is not Python syntax; ``SubDEndCapStyle['None']`` is the same member). Ends are not capped.
+
+
+   .. py:attribute:: Quads
+      :value: 3
+
+
+      When the end has an even number of edges, is will be capped with quads. Otherwise it will be capped with triangles.
+
+
+   .. py:attribute:: Triangles
+      :value: 2
+
+
+      Ends are capped with triangles.
+
+
+   .. py:attribute:: Unset
+      :value: 0
+
+
+      Used to indicate the end cap style is not set.
+

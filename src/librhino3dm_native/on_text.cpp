@@ -113,8 +113,10 @@ RH_C_FUNCTION void ON_V6_Annotation_GetTextString(const ON_Annotation* constAnno
         const ON_TextContent* text_content = constAnnotation->Text();
         if(nullptr != text_content)
           (*wstring) = text_content->PlatformRichTextFromRuns();
-        else
-          //to support retrieving RichText on Linux
+        // Only Windows and Apple have a rich text style
+        // (ON::RichTextStyleFromCurrentPlatform), so elsewhere the runs give "";
+        // use the RTF stored with the annotation
+        if (wstring->IsEmpty())
           (*wstring) = constAnnotation->RichText().Array();
       }
       else
@@ -312,6 +314,16 @@ RH_C_FUNCTION void ON_V6_Annotation_WrapText(ON_Annotation* annotation)
         text->WrapText(width);
       }
     }
+  }
+}
+
+RH_C_FUNCTION void ON_V6_Annotation_WrapText2(ON_Annotation* annotation, double width)
+{
+  if (nullptr != annotation && width == width && width > 0.0)
+  {
+    ON_TextContent* text = annotation->Text();
+    if (nullptr != text)
+      text->WrapText(width);
   }
 }
 
@@ -2472,6 +2484,8 @@ RH_C_FUNCTION void ON_TextRun_SetIsListOrdered(ON_TextRun* ptrTextRun, bool orde
 
 RH_C_FUNCTION bool ON_TextContext_FormatDistanceAndTolerance(double distance, ON::LengthUnitSystem units_in, const ON_DimStyle* dimstyle, bool alternate, ON_wString* formatted_string)
 {
+  if (nullptr == dimstyle)
+    dimstyle = &ON_DimStyle::Default;
   if (formatted_string)
     return ON_TextContent::FormatDistanceAndTolerance(distance, units_in, dimstyle, alternate, *formatted_string);
   return false;

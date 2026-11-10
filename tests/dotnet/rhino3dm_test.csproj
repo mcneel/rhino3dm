@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
@@ -15,7 +15,17 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
     <PackageReference Include="NUnit.Analyzers" Version="3.6.1" />
     <PackageReference Include="coverlet.collector" Version="3.2.0" />
-    <PackageReference Include="Rhino3dm" Version="8.15.0-beta" />
+  </ItemGroup>
+
+  <!-- this tree's Rhino3dm, not a published package. librhino3dm_native comes with it when it
+       has been built into src/build/<platform>/ (Rhino3dm.csproj copies it to the output);
+       tools/dev/round.sh dotnet builds it fresh in a container instead -->
+  <ItemGroup Condition="'$(Rhino3dmVersion)' == ''">
+    <ProjectReference Include="../../src/dotnet/Rhino3dm.csproj" />
+  </ItemGroup>
+  <!-- CI tests the package it built instead: -p:Rhino3dmVersion=<version> (workflow_ci.yml test_dotnet) -->
+  <ItemGroup Condition="'$(Rhino3dmVersion)' != ''">
+    <PackageReference Include="Rhino3dm" Version="$(Rhino3dmVersion)" />
   </ItemGroup>
 
 </Project>

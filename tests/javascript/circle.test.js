@@ -7,8 +7,8 @@ beforeEach( async() => {
 
 test('circleClosestParameter', async () => {
 
-    const circle = new rhino.Circle(5)
-    const result = circle.closestParameter([0, 0, 0])
+    const circle = rhino.Circle.create(5)
+    const result = rhino.Circle.closestParameter(circle, { X: 0, Y: 0, Z: 0 })
     expect(result[0]).toBe(true)
 
 })

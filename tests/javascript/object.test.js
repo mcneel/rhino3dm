@@ -17,12 +17,12 @@ test('objectUserString', async () => {
     file3dm.applicationDetails = 'rhino3dm-tests'
     file3dm.applicationUrl = 'https://rhino3d.com'
 
-    circle = new rhino.Circle([0, 0, 0], 5)
+    circle = rhino.Circle.create({ X: 0, Y: 0, Z: 0 }, 5)
 
     oa = new rhino.ObjectAttributes()
     oa.setUserString(key, value)
 
-    file3dm.objects().addCircle(circle, oa)
+    file3dm.objects.addCircle(circle, oa)
 
     const bufferWrite = file3dm.toByteArray()
     fs.writeFileSync('test_js_objectUserString.3dm', bufferWrite)
@@ -31,9 +31,10 @@ test('objectUserString', async () => {
     const arr = new Uint8Array(bufferRead)
     const file3dmRead = rhino.File3dm.fromByteArray(arr)
 
-    const obj = file3dmRead.objects().get(0)
+    // D17: no index on the object table; iterate
+    const obj = [...file3dmRead.objects][0]
 
-    valueRead = obj.attributes().getUserString(key)
+    valueRead = obj.attributes.getUserString(key)
 
     expect(valueRead === value).toBe(true)
 

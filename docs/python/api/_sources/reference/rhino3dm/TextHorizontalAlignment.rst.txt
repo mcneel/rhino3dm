@@ -1,0 +1,45 @@
+rhino3dm.TextHorizontalAlignment
+================================
+
+.. py:class:: rhino3dm.TextHorizontalAlignment
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Horizontal location of text attach point relative to text
+
+
+   .. py:attribute:: Auto
+      :value: 3
+
+
+      Used for Leaders only Attach point adjusts to Right or Left depending on leader tail direction in view If tail direction is to the Left, alignment is Right If tail direction is to the Right, alignment is Left
+
+
+   .. py:attribute:: Center
+      :value: 1
+
+
+      Attach point at center of text horizontal advance (not glyph bounding box)
+
+
+   .. py:attribute:: Justify
+      :value: 4
+
+
+      Stretch each line to fill the wrap rectangle width by distributing slack across word gaps. Only meaningful when text wrapping is enabled and a non-zero wrap width is set; with wrapping off, behaves as Left. The final line of a paragraph (or any line ending in a hard break) is rendered Left.
+
+
+   .. py:attribute:: Left
+      :value: 0
+
+
+      Attach at left of text lines (Independent of glyphs being displayed.)
+
+
+   .. py:attribute:: Right
+      :value: 2
+
+
+      Attach point at right text horizontal advance (not glyph bounding box)
+

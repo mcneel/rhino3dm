@@ -2368,6 +2368,9 @@ namespace Rhino.FileIO
       if (typeof(T) == typeof(PageViewGroup))
         return ModelComponentType.PageViewGroup;
 
+      if (typeof(T) == typeof(Markup))
+        return ModelComponentType.Markup;
+
       if (typeof(T) == typeof(LightObject))
         return ModelComponentType.RenderLight;
 #endif
@@ -2384,6 +2387,9 @@ namespace Rhino.FileIO
 
       if (typeof(T) == typeof(File3dmObject))
         return ModelComponentType.ModelGeometry;
+
+      if (typeof(T) == typeof(File3dmEmbeddedFile))
+        return ModelComponentType.EmbeddedFile;
 
 #if RHINO_SDK
       if (typeof(RhinoObject).IsAssignableFrom(typeof(T)))
@@ -4172,6 +4178,29 @@ namespace Rhino.FileIO
       GC.KeepAlive(material);
       return rc;
     }
+
+    /// <summary>
+    /// Finds the render material an object with the given attributes uses, following the
+    /// attributes' material source (the layer, the object or the parent).
+    /// </summary>
+    /// <param name="attributes">The object attributes.</param>
+    /// <returns>
+    /// The material from this table, or a copy of the default material when the attributes
+    /// resolve to no material in this table.
+    /// </returns>
+    /// <since>9.2</since>
+    public DocObjects.Material FindFromAttributes(ObjectAttributes attributes)
+    {
+      if (attributes == null)
+        throw new ArgumentNullException(nameof(attributes));
+      int index = UnsafeNativeMethods.ONX_Model_MaterialIndexFromAttributes(m_parent.ConstPointer(), attributes.ConstPointer());
+      GC.KeepAlive(m_parent);
+      GC.KeepAlive(attributes);
+      if (index >= 0)
+        return FindIndex(index);
+      IntPtr ptr_material = UnsafeNativeMethods.ON_Material_NewSystemMaterial(index);
+      return IntPtr.Zero == ptr_material ? null : new DocObjects.Material(ptr_material);
+    }
   }
 
   /// <summary>
@@ -4227,6 +4256,47 @@ namespace Rhino.FileIO
     public Linetype FindIndex(int index)
     {
       return __FindIndexInternal(index);
+    }
+
+    /// <summary>
+    /// Finds the linetype an object with the given attributes uses, following the
+    /// attributes' linetype source (the layer, the object or the parent).
+    /// </summary>
+    /// <param name="attributes">The object attributes.</param>
+    /// <returns>
+    /// The linetype from this table, or a copy of a built-in linetype (such as
+    /// <see cref="Linetype.Continuous"/>) when the attributes resolve to one.
+    /// </returns>
+    /// <since>9.2</since>
+    public Linetype FromAttributes(ObjectAttributes attributes)
+    {
+      if (attributes == null)
+        throw new ArgumentNullException(nameof(attributes));
+      int index = UnsafeNativeMethods.ONX_Model_LinePatternIndexFromAttributes(m_parent.ConstPointer(), attributes.ConstPointer());
+      GC.KeepAlive(m_parent);
+      GC.KeepAlive(attributes);
+      return FromResolvedIndex(index);
+    }
+
+    /// <summary>
+    /// Finds the linetype of the layer with the given index.
+    /// </summary>
+    /// <param name="layerIndex">The index of the layer.</param>
+    /// <returns>
+    /// The linetype from this table, or a copy of a built-in linetype (such as
+    /// <see cref="Linetype.Continuous"/>) when the layer uses one.
+    /// </returns>
+    /// <since>9.2</since>
+    public Linetype FromLayerIndex(int layerIndex)
+    {
+      int index = UnsafeNativeMethods.ONX_Model_LinePatternIndexFromLayerIndex(m_parent.ConstPointer(), layerIndex);
+      GC.KeepAlive(m_parent);
+      return FromResolvedIndex(index);
+    }
+
+    Linetype FromResolvedIndex(int index)
+    {
+      return index >= 0 ? FindIndex(index) : Linetype.NewBuiltIn(index);
     }
   }
 
@@ -4566,6 +4636,18 @@ namespace Rhino.FileIO
       {
         return ModelComponentType.InstanceDefinition;
       }
+    }
+
+    /// <summary>
+    /// Retrieves an instance definition based on Index. This search type of search is discouraged.
+    /// We are moving towards using only IDs for all tables.
+    /// </summary>
+    /// <param name="index">The index to search for.</param>
+    /// <returns>An instance definition, or null if none was found.</returns>
+    /// <since>9.2</since>
+    public InstanceDefinitionGeometry FindIndex(int index)
+    {
+      return __FindIndexInternal(index);
     }
 
     /// <summary>

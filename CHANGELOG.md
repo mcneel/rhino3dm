@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.2.0-beta.0] - unreleased
+
+rhino3dm vNext: the Python and JavaScript bindings are generated from RhinoCommon, so their API is RhinoCommon's (names, signatures, return shapes). What changes for an 8.x script, per language: [`docs/migrating-to-9.md`](docs/migrating-to-9.md).
+
+diff: https://github.com/mcneel/rhino3dm/compare/9.0.0-beta...9.2.0-beta.0
+
+### Changed
+
+- openNURBS submodule to 9.2 (`2bd2e66e`); rhino3dm takes the openNURBS minor version.
+- (js) wasm32 is the default build again, as in 8.x: the package's main module runs in every current browser, Safari and iOS included, and in Node 22+, and it is faster than memory64. The memory64 build ships in `wasm64/` (Chrome 133+, Firefox 134+, Node 24+), as in 8.x, for models that need more than 4 GB. openNURBS supports wasm32 since RH-100167 (RH3DM-215). `script/setup.py -p js` builds wasm32; `--wasm64` builds memory64.
+- (py, js) Bindings generated from RhinoCommon (rhino 9.x `db884416462`); the hand-written bindings are gone, except members RhinoCommon lacks (`api/exceptions.toml`).
+- (py, js) The typings (`__init__.pyi`, `rhino3dm.d.ts`) are generated from the built bindings and RhinoCommon's doc comments, so they describe this API, docstrings included (`tools/docs`). The Python stub passes `mypy --strict` and matches the module's names; the TypeScript passes `tsc --strict`.
+- (py) Fixed: `Extrusion.ToBrep()` and `TextEntity.Transform(xform)` raised `TypeError` (a derived overload hid the base class's); `Transform.ChangeBasis` keyword arguments are RhinoCommon's names (`X0`, not `X0_cs`).
+- (py, js) Where RhinoCommon returns a null array, Python gets `None` and JS `null` (`BoundingBox.GetCorners`/`GetEdges` of an invalid box, `Polyline.GetSegments` below two points).
+- (py, js) Overloads that differ from another only in their `out` parameters, which Python and JS could never select, have names of their own: `NurbsCurvePointList.GetPoint4d`, `NurbsSurfacePointList.GetPoint4d`, `TextureMapping.TryGetMappingBoxCapped`/`TryGetMappingCylinderCapped`/`TryGetMappingPlaneCapped`, `Transform.DecomposeAffineFull`.
+- (js) Value-type methods that change the value (`Point3d.transform`, `Vector3d.unitize`, `Plane.rotate`, `BoundingBox.inflate`, ...) change the object passed in and return what RhinoCommon returns, as in C# and Python.
+- (py, js) `str()` / `ToString()` print numbers as RhinoCommon does on .NET Core: scientific from `1E+17` (a float's from `1E+09`), so `1e15` prints `1000000000000000`.
+- (py, js) `CachedTextureCoordinates` is a `CommonObject`, as in RhinoCommon; its `IsValid`, `IsValidWithLog` and `HasUserData` raise, as it wraps no `ON_Object`.
+- (js) `PointCloud.toThreejsBuffers(true)` and `createFromThreejsBuffers(buffers, true)` rotate the normals with the points.
+- (js) Value types are built with `new` again (`new rhino.Circle(plane, radius)`), as in RhinoCommon; the result is the same plain object as `rhino.Circle.create(...)`.
+- (js) `rhino3dm.d.ts` declares `[Symbol.iterator]` on the iterable classes, so TypeScript accepts `for (const layer of doc.layers)`.
+- (py) Enum values named `None` are also `E.None_` (`E.None` is not Python syntax).
+- (py) `len(attributes.Decals)`; (js) `attributes.decals.count`.
+- (py) The Python module is built with nanobind 2.7 instead of pybind11 (the `src/lib/pybind11` submodule is gone). On Python 3.12+ it is one stable-ABI (`abi3`) module, and it supports free-threaded CPython (3.14t) without re-enabling the GIL. Enums are integer-like (`int(e)`, `e == 2` work); passing a plain int where an enum is expected is still a `TypeError`. Buffers (`PointCloud`, NURBS control points and knots) are zero-copy views via the buffer protocol, as in 8.x.
+
 ## [9.0.0-beta] - 2026.10.07
 
 First 9.x pre-release. Rebases rhino3dm on Rhino 9: the .NET and native C layers are re-synced from the Rhino 9.x branch, openNURBS moves to 9.1, and the sync is now checked by CI.

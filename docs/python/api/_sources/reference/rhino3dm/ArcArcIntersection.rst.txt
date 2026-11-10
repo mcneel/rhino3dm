@@ -1,0 +1,38 @@
+rhino3dm.ArcArcIntersection
+===========================
+
+.. py:class:: rhino3dm.ArcArcIntersection
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Represents all possible cases of a Arc\|Arc intersection event.
+
+
+   .. py:attribute:: Multiple
+      :value: 2
+
+
+      Arcs intersect at two points.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``ArcArcIntersection.None`` is not Python syntax; ``ArcArcIntersection['None']`` is the same member). Arcs do not intersect.
+
+
+   .. py:attribute:: Overlap
+      :value: 3
+
+
+      Arcs are cocircular and overlap.
+
+
+   .. py:attribute:: Single
+      :value: 1
+
+
+      Arcs touch at a one point.
+

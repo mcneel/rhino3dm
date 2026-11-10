@@ -1,0 +1,223 @@
+rhino3dm.File3dmSettings
+========================
+
+.. py:class:: rhino3dm.File3dmSettings
+
+   General settings in a 3dm file.
+
+
+   .. py:property:: ActiveViewId
+      :type: uuid.UUID
+
+
+      The viewport id of the view that is active when the model is opened. When this is nil Rhino activates the first view in the view table.
+
+
+   .. py:property:: CurrentColor
+      :type: tuple[int, int, int, int]
+
+
+      The colour new objects are created with.
+
+
+   .. py:property:: CurrentDimensionStyleId
+      :type: uuid.UUID
+
+
+      The id of the dimension style new annotation uses. When this is nil Rhino falls back to the obsolete V5 index, which selects the first style in the table - so a template that leaves it nil can open with the wrong annotation style current.
+
+
+   .. py:property:: CurrentHatchPatternId
+      :type: uuid.UUID
+
+
+      The id of the current hatch pattern.
+
+
+   .. py:property:: CurrentLayerId
+      :type: uuid.UUID
+
+
+      The id of the layer new objects are created on.
+
+
+   .. py:property:: CurrentLinePatternId
+      :type: uuid.UUID
+
+
+      The id of the current line pattern (linetype).
+
+
+   .. py:property:: CurrentLinetypeSource
+      :type: ObjectLinetypeSource
+
+
+      the layer, the object or the parent.
+
+      :type: The source new objects take their linetype from
+
+
+   .. py:property:: CurrentPlotColor
+      :type: tuple[int, int, int, int]
+
+
+      The plot colour new objects are created with.
+
+
+   .. py:property:: CurrentRenderMaterialId
+      :type: uuid.UUID
+
+
+      The id of the current render material.
+
+
+   .. py:property:: CurrentTextStyleId
+      :type: uuid.UUID
+
+
+      The id of the current text style.
+
+
+   .. py:property:: CurrentWireDensity
+      :type: int
+
+
+      The surface isocurve density new objects are created with. -1 draws no isocurves, 0 draws the surface edges only, and n > 0 draws n isocurves per span.
+
+
+   .. py:property:: GridDefaults
+      :type: ConstructionPlaneGridDefaults
+
+
+      grid and snap spacing, line counts, and whether the grid, its axes and the world axes icon are drawn.
+
+      :type: The construction plane grid defaults new views inherit
+
+
+   .. py:property:: InstanceDefinitionLinkUpdate
+      :type: int
+
+
+      How instance definition links are updated when the model is opened.
+
+
+   .. py:property:: LinetypeDisplayScale
+      :type: float
+
+
+      The document-wide linetype pattern display scale.
+
+
+   .. py:property:: ModelAbsoluteTolerance
+      :type: float
+
+
+      Gets or sets the model space absolute tolerance.
+
+
+   .. py:property:: ModelAngleToleranceDegrees
+      :type: float
+
+
+      Gets or sets the model space angle tolerance.
+
+
+   .. py:property:: ModelAngleToleranceRadians
+      :type: float
+
+
+      Gets or sets the model space angle tolerance.
+
+
+   .. py:property:: ModelBasepoint
+      :type: Point3d
+
+
+      Gets or sets the model base point that is used when the file is read as an instance definition.
+
+      This point is mapped to the origin in the instance definition.
+
+
+   .. py:property:: ModelDistanceDisplayPrecision
+      :type: int
+
+
+      Gets or sets the model space distance display precision. In decimal mode this is the number of decimal places; in fractional modes the denominator is (1/2)^precision. Valid values are >= 0 and <= 7.
+
+
+   .. py:property:: ModelRelativeTolerance
+      :type: float
+
+
+      Gets or sets the model space relative tolerance.
+
+
+   .. py:property:: ModelUnitSystem
+      :type: UnitSystem
+
+
+      Gets or sets the model unit system, using ``Rhino.UnitSystem`` enumeration.
+
+
+   .. py:property:: ModelUrl
+      :type: str
+
+
+      Gets or sets a Uniform Resource Locator (URL) direction for the model.
+
+
+   .. py:property:: PageAbsoluteTolerance
+      :type: float
+
+
+      Gets or sets the page space absolute tolerance.
+
+
+   .. py:property:: PageAngleToleranceDegrees
+      :type: float
+
+
+      Gets or sets the page space angle tolerance.
+
+
+   .. py:property:: PageAngleToleranceRadians
+      :type: float
+
+
+      Gets or sets the page space angle tolerance.
+
+
+   .. py:property:: PageDistanceDisplayPrecision
+      :type: int
+
+
+      Gets or sets the page space distance display precision. In decimal mode this is the number of decimal places; in fractional modes the denominator is (1/2)^precision. Valid values are >= 0 and <= 7.
+
+
+   .. py:property:: PageRelativeTolerance
+      :type: float
+
+
+      Gets or sets the page space relative tolerance.
+
+
+   .. py:property:: PageUnitSystem
+      :type: UnitSystem
+
+
+      Gets or sets the page unit system, using ``Rhino.UnitSystem`` enumeration.
+
+
+   .. py:property:: RenderSettings
+      :type: RenderSettings
+
+
+      Gets or sets the render settings.
+
+
+   .. py:property:: SaveTextureBitmapsInFile
+      :type: bool
+
+
+      Whether texture bitmaps are embedded in the model when it is saved.
+

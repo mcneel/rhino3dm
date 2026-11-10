@@ -1,0 +1,52 @@
+rhino3dm.DimensionStyle.TextFit
+===============================
+
+.. py:class:: rhino3dm.DimensionStyle.TextFit
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Text display position inside or outside extension lines
+
+
+   .. py:attribute:: Auto
+      :value: 0
+
+
+      Auto - Display inside when space permits
+
+
+   .. py:attribute:: TextHintLeft
+      :value: 5
+
+
+      Move text outside to the left of extensions when it won't fit inside
+
+
+   .. py:attribute:: TextHintRight
+      :value: 4
+
+
+      Move text outside to the right of extensions when it won't fit inside
+
+
+   .. py:attribute:: TextInside
+      :value: 1
+
+
+      Force text inside extensions
+
+
+   .. py:attribute:: TextLeft
+      :value: 3
+
+
+      Force text outside to the left of extensions
+
+
+   .. py:attribute:: TextRight
+      :value: 2
+
+
+      Force text outside to the right of extensions
+

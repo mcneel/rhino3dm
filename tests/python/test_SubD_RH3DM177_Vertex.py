@@ -32,8 +32,8 @@ class TestVertexIdentityAndTopology(fixture.SubDFixtureTestCase):
         ids = [v.Id for v in self.subd.Vertices]
         self.assertEqual(len(set(ids)), spec.SUBD["vertex_count"])
         for vertex in self.subd.Vertices:
-            self.assertEqual(self.subd.Vertices[vertex.Id].Id, vertex.Id)
-            self.assertEqual(vertex.Index, vertex.Id)
+            self.assertEqual(self.subd.Vertices.Find(vertex.Id).Id, vertex.Id)
+            # 8.x's vertex.Index was the Id; RhinoCommon has only Id.
 
     def test_edge_and_face_counts(self):
         for name, vertex in self.vertices.items():
@@ -44,10 +44,11 @@ class TestVertexIdentityAndTopology(fixture.SubDFixtureTestCase):
     def test_sub_iterators_agree_with_the_indexed_accessor(self):
         for name, vertex in self.vertices.items():
             with self.subTest(vertex=name):
-                self.assertEqual(vertex.Edges.Count, vertex.EdgeCount)
-                self.assertEqual(vertex.Faces.Count, vertex.FaceCount)
+                # vertex.Edges / vertex.Faces are lists (D26).
+                self.assertEqual(len(vertex.Edges), vertex.EdgeCount)
+                self.assertEqual(len(vertex.Faces), vertex.FaceCount)
                 self.assertEqual([e.Id for e in vertex.Edges],
-                                 [vertex.Edge(i).Id for i in range(vertex.EdgeCount)])
+                                 [vertex.EdgeAt(i).Id for i in range(vertex.EdgeCount)])
 
     def test_attached_edges_are_the_authored_ones(self):
         for name, vertex in self.vertices.items():
@@ -68,19 +69,20 @@ class TestVertexIdentityAndTopology(fixture.SubDFixtureTestCase):
         for name, vertex in self.vertices.items():
             with self.subTest(vertex=name):
                 for edge in vertex.Edges:
-                    self.assertIn(name, {fixture.vertex_name(edge.Vertex(0)),
-                                         fixture.vertex_name(edge.Vertex(1))})
+                    self.assertIn(name, {fixture.vertex_name(edge.VertexFrom),
+                                         fixture.vertex_name(edge.VertexTo)})
 
 
 class TestVertexLinkedList(fixture.SubDFixtureTestCase):
     """Next/Previous walk the SubD's own vertex list, not the control net."""
 
     def test_next_from_the_head_visits_every_vertex(self):
-        head = self.subd.Vertices.First()
+        # First, Next and Previous are properties in RhinoCommon.
+        head = self.subd.Vertices.First
         seen = [head.Id]
         vertex = head
         for _ in range(spec.SUBD["vertex_count"] - 1):
-            vertex = vertex.Next()
+            vertex = vertex.Next
             seen.append(vertex.Id)
         self.assertEqual(len(set(seen)), spec.SUBD["vertex_count"])
         self.assertEqual(set(seen), {v.Id for v in self.subd.Vertices})
@@ -88,8 +90,9 @@ class TestVertexLinkedList(fixture.SubDFixtureTestCase):
     def test_next_and_previous_are_inverses(self):
         # Stepping off either end of the list would dereference null, so this
         # only ever steps forward and back from the head.
-        head = self.subd.Vertices.First()
-        self.assertEqual(head.Next().Previous(), head)
+        head = self.subd.Vertices.First
+        # By Id: a new component object per access, no == yet (D25).
+        self.assertEqual(head.Next.Previous.Id, head.Id)
 
 
 class TestVertexGeometry(fixture.SubDFixtureTestCase):
@@ -109,7 +112,7 @@ class TestVertexGeometry(fixture.SubDFixtureTestCase):
         for name, vertex in self.vertices.items():
             expected = spec.VERTICES[name]["surface_point"]
             with self.subTest(vertex=name):
-                point = vertex.SurfacePoint
+                point = vertex.SurfacePoint()   # a method in RhinoCommon
                 if expected is not None:
                     self.assertPointEqual(point, expected,
                                           "%s.SurfacePoint" % name)

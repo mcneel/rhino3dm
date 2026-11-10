@@ -1,0 +1,57 @@
+rhino3dm.DimensionStyle.ClippingArrowType
+=========================================
+
+.. py:class:: rhino3dm.DimensionStyle.ClippingArrowType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated values for arrowhead shapes.
+
+
+   .. py:attribute:: Arrow
+      :value: 3
+
+
+
+   .. py:attribute:: Line
+      :value: 8
+
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``ClippingArrowType.None`` is not Python syntax; ``ClippingArrowType['None']`` is the same member).
+
+
+   .. py:attribute:: OffsetArrow
+      :value: 4
+
+
+
+   .. py:attribute:: OffsetTriangle
+      :value: 2
+
+
+
+   .. py:attribute:: OpenArrow
+      :value: 5
+
+
+
+   .. py:attribute:: Rectangle
+      :value: 6
+
+
+
+   .. py:attribute:: Ribbon
+      :value: 7
+
+
+
+   .. py:attribute:: Triangle
+      :value: 1
+
+

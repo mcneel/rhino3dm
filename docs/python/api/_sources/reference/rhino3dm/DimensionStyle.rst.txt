@@ -1,0 +1,670 @@
+rhino3dm.DimensionStyle
+=======================
+
+.. toctree::
+   :hidden:
+
+   /reference/rhino3dm/DimensionStyle.AngleDisplayFormat
+   /reference/rhino3dm/DimensionStyle.ArrowFit
+   /reference/rhino3dm/DimensionStyle.ArrowType
+   /reference/rhino3dm/DimensionStyle.CenterMarkStyle
+   /reference/rhino3dm/DimensionStyle.ClippingArrowType
+   /reference/rhino3dm/DimensionStyle.Field
+   /reference/rhino3dm/DimensionStyle.LeaderContentAngleStyle
+   /reference/rhino3dm/DimensionStyle.LeaderCurveStyle
+   /reference/rhino3dm/DimensionStyle.LengthDisplay
+   /reference/rhino3dm/DimensionStyle.MaskFrame
+   /reference/rhino3dm/DimensionStyle.MaskType
+   /reference/rhino3dm/DimensionStyle.StackDisplayFormat
+   /reference/rhino3dm/DimensionStyle.TextFit
+   /reference/rhino3dm/DimensionStyle.TextLocation
+   /reference/rhino3dm/DimensionStyle.ToleranceDisplayFormat
+   /reference/rhino3dm/DimensionStyle.ZeroSuppression
+
+.. py:class:: rhino3dm.DimensionStyle
+
+   Bases: :py:obj:`ModelComponent`
+
+
+   Can also be considered an annotation style since it is used for more than just dimensions
+
+
+   .. py:method:: AlternateDimensionLengthDisplayUnit(model_serial_number: int) -> UnitSystem
+
+
+   .. py:method:: ClearAllFieldOverrides() -> None
+
+      Sets all the fields in this DimensionStyle to be not overridden Does not change any dimstyle\_id's or parent\_id's
+
+
+
+   .. py:method:: ClearFieldOverride(field: DimensionStyle) -> None
+
+      Set the field as not overridden
+
+
+
+   .. py:method:: CopyFrom(source: DimensionStyle) -> None
+
+      Copy settings from source dimension style without changing the name, Id or index of this DimensionStyle.
+
+      :param source: DimensionStyle to copy settings from.
+
+
+
+   .. py:method:: DeleteAllUserStrings() -> None
+
+
+   .. py:method:: DimensionLengthDisplayUnit(model_serial_number: int) -> UnitSystem
+
+
+   .. py:method:: Duplicate() -> DimensionStyle
+
+      Construct a deep (full) copy of this object.
+
+      :returns: An object of the same type as this, with the same properties and behavior.
+
+
+
+   .. py:method:: GetUserString(key: str) -> str
+
+      Gets user string from this geometry.
+
+      :param key: id used to retrieve the string.
+
+      :returns: string associated with the key if successful. null if no key was found.
+
+
+
+   .. py:method:: GetUserStrings() -> list[Any]
+
+      Gets a copy of all (user key string, user value string) pairs attached to this geometry.
+
+      :returns: A new collection.
+
+
+
+   .. py:method:: IsChildOf(parentId: uuid.UUID) -> bool
+
+      Tests if this DimensionStyle is a child of a specific DimensionStyle
+
+      :returns: True if this is a child of the DimensionStyle with Parent False otherwise.
+
+
+
+   .. py:method:: IsFieldOverriden(field: DimensionStyle) -> bool
+
+      Returns:
+      True if the field corresponding to field\_id is overridden in this AnnotationStyle False if the field is not overridden
+
+
+
+   .. py:method:: ScaleLengthValues(scale: float) -> None
+
+      Scales all length values by 'scale'
+
+
+
+   .. py:method:: SetFieldOverride(field: DimensionStyle) -> None
+
+      Set a field as overridden
+
+
+
+   .. py:method:: SetUserString(key: str, value: str) -> bool
+
+      Attach a user string (key,value combination) to this geometry.
+
+      :param key: id used to retrieve this string.
+      :param value: string associated with key.
+
+      :returns: true on success.
+
+
+
+   .. py:property:: AlternateBelowLine
+      :type: bool
+
+
+
+   .. py:property:: AlternateDimensionLengthDisplay
+      :type: DimensionStyle
+
+
+
+   .. py:property:: AlternateLengthFactor
+      :type: float
+
+
+
+   .. py:property:: AlternateLengthResolution
+      :type: int
+
+
+
+   .. py:property:: AlternatePrefix
+      :type: str
+
+
+
+   .. py:property:: AlternateRoundoff
+      :type: float
+
+
+
+   .. py:property:: AlternateSuffix
+      :type: str
+
+
+
+   .. py:property:: AlternateToleranceResolution
+      :type: int
+
+
+
+   .. py:property:: AlternateUnitsDisplay
+      :type: bool
+
+
+
+   .. py:property:: AlternateZeroSuppress
+      :type: DimensionStyle
+
+
+
+   .. py:property:: AngleFormat
+      :type: DimensionStyle
+
+
+
+   .. py:property:: AngleResolution
+      :type: int
+
+
+
+   .. py:property:: AngleZeroSuppress
+      :type: DimensionStyle
+
+
+
+   .. py:property:: AngularRoundoff
+      :type: float
+
+
+
+   .. py:property:: ArcLengthSymbol
+      :type: int
+
+
+
+   .. py:property:: ArrowBlockId1
+      :type: uuid.UUID
+
+
+
+   .. py:property:: ArrowBlockId2
+      :type: uuid.UUID
+
+
+
+   .. py:property:: ArrowLength
+      :type: float
+
+
+
+   .. py:property:: ArrowType1
+      :type: DimensionStyle
+
+
+
+   .. py:property:: ArrowType2
+      :type: DimensionStyle
+
+
+
+   .. py:property:: BaselineSpacing
+      :type: float
+
+
+
+   .. py:property:: CenterMarkType
+      :type: DimensionStyle
+
+
+
+   .. py:property:: CentermarkSize
+      :type: float
+
+
+
+   .. py:property:: ClippingArrowLength
+      :type: float
+
+
+
+   .. py:property:: ClippingArrowType1
+      :type: DimensionStyle
+
+
+
+   .. py:property:: ClippingArrowType2
+      :type: DimensionStyle
+
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.DimStyle``.
+
+
+   .. py:property:: DimRadialTextAngleType
+      :type: DimensionStyle
+
+
+
+   .. py:property:: DimRadialTextLocation
+      :type: DimensionStyle
+
+
+
+   .. py:property:: DimRadialTextOrientation
+      :type: TextOrientation
+
+
+
+   .. py:property:: DimTextAngleType
+      :type: DimensionStyle
+
+
+
+   .. py:property:: DimTextLocation
+      :type: DimensionStyle
+
+
+
+   .. py:property:: DimTextOrientation
+      :type: TextOrientation
+
+
+
+   .. py:property:: DimensionLengthDisplay
+      :type: DimensionStyle
+
+
+
+   .. py:property:: DimensionLineExtension
+      :type: float
+
+
+
+   .. py:property:: DimensionScale
+      :type: float
+
+
+
+   .. py:property:: DrawForward
+      :type: bool
+
+
+
+   .. py:property:: DrawTextMask
+      :type: bool
+
+
+
+   .. py:property:: ExtensionLineExtension
+      :type: float
+
+
+
+   .. py:property:: ExtensionLineOffset
+      :type: float
+
+
+
+   .. py:property:: FitArrow
+      :type: DimensionStyle
+
+
+
+   .. py:property:: FitText
+      :type: DimensionStyle
+
+
+
+   .. py:property:: FixedExtensionLength
+      :type: float
+
+
+
+   .. py:property:: FixedExtensionOn
+      :type: bool
+
+
+
+   .. py:property:: Font
+      :type: Font
+
+
+
+   .. py:property:: ForceDimensionLineBetweenExtensionLines
+      :type: bool
+
+
+
+   .. py:property:: HasFieldOverrides
+      :type: bool
+
+
+      Checks if any fields in this DimensionStyle are overrides
+
+
+   .. py:property:: IsChild
+      :type: bool
+
+
+      Tests if this DimensionStyle is a child of any other DimensionStyle
+
+
+   .. py:property:: IsDeleted
+      :type: bool
+
+
+      true if the component is deleted. Deleted components are kept by the document for undo purposes.
+
+
+   .. py:property:: IsReference
+      :type: bool
+
+
+      Gets a value indicting whether this component is a referenced component. Referenced components are part of referenced documents.
+
+
+   .. py:property:: LeaderArrowBlockId
+      :type: uuid.UUID
+
+
+
+   .. py:property:: LeaderArrowLength
+      :type: float
+
+
+
+   .. py:property:: LeaderArrowType
+      :type: DimensionStyle
+
+
+
+   .. py:property:: LeaderContentAngleType
+      :type: DimensionStyle
+
+
+      Style of leader content angle Horizontal Aligned Rotated
+
+
+   .. py:property:: LeaderCurveType
+      :type: DimensionStyle
+
+
+
+   .. py:property:: LeaderHasLanding
+      :type: bool
+
+
+
+   .. py:property:: LeaderLandingLength
+      :type: float
+
+
+
+   .. py:property:: LeaderTextHorizontalAlignment
+      :type: TextHorizontalAlignment
+
+
+
+   .. py:property:: LeaderTextOrientation
+      :type: TextOrientation
+
+
+
+   .. py:property:: LeaderTextRotationRadians
+      :type: float
+
+
+      Angle of leader text for Rotated style
+
+
+   .. py:property:: LeaderTextVerticalAlignment
+      :type: TextVerticalAlignment
+
+
+
+   .. py:property:: LengthFactor
+      :type: float
+
+
+
+   .. py:property:: LengthResolution
+      :type: int
+
+
+
+   .. py:property:: LineSpaceScale
+      :type: float
+
+
+
+   .. py:property:: MaskColor
+      :type: tuple[int, int, int, int]
+
+
+
+   .. py:property:: MaskColorSource
+      :type: DimensionStyle
+
+
+
+   .. py:property:: MaskFrameType
+      :type: DimensionStyle
+
+
+
+   .. py:property:: MaskOffset
+      :type: float
+
+
+
+   .. py:property:: ParentId
+      :type: uuid.UUID
+
+
+      Get or Set the Id of this DimensionStyle's parent. If ParentId is Guid.Empty, this DimensionStyle has no parent
+
+
+   .. py:property:: Prefix
+      :type: str
+
+
+
+   .. py:property:: Roundoff
+      :type: float
+
+
+
+   .. py:property:: ScaleLeftLengthMillimeters
+      :type: float
+
+
+
+   .. py:property:: ScaleRightLengthMillimeters
+      :type: float
+
+
+
+   .. py:property:: StackFractionFormat
+      :type: DimensionStyle
+
+
+
+   .. py:property:: StackHeightScale
+      :type: float
+
+
+
+   .. py:property:: Suffix
+      :type: str
+
+
+
+   .. py:property:: SuppressArrow1
+      :type: bool
+
+
+
+   .. py:property:: SuppressArrow2
+      :type: bool
+
+
+
+   .. py:property:: SuppressDimensionLine1
+      :type: bool
+
+
+      Suppresses the dimension line and arrowhead between the first extension line and the dimension text.
+
+
+   .. py:property:: SuppressDimensionLine2
+      :type: bool
+
+
+      Suppresses the dimension line and arrowhead between the second extension line and the dimension text.
+
+
+   .. py:property:: SuppressExtension1
+      :type: bool
+
+
+
+   .. py:property:: SuppressExtension2
+      :type: bool
+
+
+
+   .. py:property:: TextGap
+      :type: float
+
+
+
+   .. py:property:: TextHeight
+      :type: float
+
+
+
+   .. py:property:: TextHorizontalAlignment
+      :type: TextHorizontalAlignment
+
+
+
+   .. py:property:: TextMoveLeader
+      :type: int
+
+
+
+   .. py:property:: TextOrientation
+      :type: TextOrientation
+
+
+
+   .. py:property:: TextRotation
+      :type: float
+
+
+
+   .. py:property:: TextUnderlined
+      :type: bool
+
+
+
+   .. py:property:: TextVerticalAlignment
+      :type: TextVerticalAlignment
+
+
+
+   .. py:property:: ToleranceFormat
+      :type: DimensionStyle
+
+
+
+   .. py:property:: ToleranceHeightScale
+      :type: float
+
+
+
+   .. py:property:: ToleranceLowerValue
+      :type: float
+
+
+
+   .. py:property:: ToleranceResolution
+      :type: int
+
+
+
+   .. py:property:: ToleranceUpperValue
+      :type: float
+
+
+
+   .. py:property:: ToleranceZeroSuppress
+      :type: DimensionStyle
+
+
+
+   .. py:property:: UnitSystem
+      :type: UnitSystem
+
+
+      The dimension style's own unit system. This is what the style's lengths - text height, arrow size and so on - are expressed in, and openNURBS uses it internally to get scales right when annotation moves between model space, page space and instance definitions whose unit systems differ. A style that reports ``UnitSystem.None`` has no unit system of its own, and unknown scales resolve to 1.
+
+
+   .. py:property:: UseKerning
+      :type: bool
+
+
+
+   .. py:property:: UserStringCount
+      :type: int
+
+
+      Gets the amount of user strings.
+
+
+   .. py:property:: ZeroSuppress
+      :type: DimensionStyle
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rhino3dm.DimensionStyle.AngleDisplayFormat
+   rhino3dm.DimensionStyle.ArrowFit
+   rhino3dm.DimensionStyle.ArrowType
+   rhino3dm.DimensionStyle.CenterMarkStyle
+   rhino3dm.DimensionStyle.ClippingArrowType
+   rhino3dm.DimensionStyle.Field
+   rhino3dm.DimensionStyle.LeaderContentAngleStyle
+   rhino3dm.DimensionStyle.LeaderCurveStyle
+   rhino3dm.DimensionStyle.LengthDisplay
+   rhino3dm.DimensionStyle.MaskFrame
+   rhino3dm.DimensionStyle.MaskType
+   rhino3dm.DimensionStyle.StackDisplayFormat
+   rhino3dm.DimensionStyle.TextFit
+   rhino3dm.DimensionStyle.TextLocation
+   rhino3dm.DimensionStyle.ToleranceDisplayFormat
+   rhino3dm.DimensionStyle.ZeroSuppression
+
+

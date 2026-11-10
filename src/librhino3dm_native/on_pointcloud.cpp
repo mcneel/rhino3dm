@@ -51,15 +51,22 @@ RH_C_FUNCTION ON_PointCloud* ON_PointCloud_CreateFromMesh(const ON_Mesh* pMesh)
   return rc;
 }
 
-RH_C_FUNCTION void ON_PointCloud_FixPointCloud(ON_PointCloud* pPointCloud, bool ensureNormals, bool ensureColors, bool ensureHidden, bool ensureExtra)
+// Gives every per-point array the cloud has (or that ensure* asks for) one entry per point.
+// insertedAt >= 0: a point was just inserted into m_P at that index, so an array one entry short
+// gets its new entry THERE and its other entries stay with their points; otherwise arrays are
+// padded at the end.
+static void ON_PointCloud_FixPointCloudAt(ON_PointCloud* pPointCloud, bool ensureNormals, bool ensureColors, bool ensureHidden, bool ensureExtra, int insertedAt)
 {
   if (pPointCloud)
   {
     const int pointCount = pPointCloud->m_P.Count();
+    const bool inserted = (insertedAt >= 0) && (insertedAt < pointCount);
 
     if ((pPointCloud->m_N.Count() > 0) || ensureNormals)
     {
-      if (pPointCloud->m_N.Count() != pointCount)
+      if (inserted && pPointCloud->m_N.Count() == pointCount - 1)
+        pPointCloud->m_N.Insert(insertedAt, ON_3dVector::ZeroVector);
+      else if (pPointCloud->m_N.Count() != pointCount)
       {
         pPointCloud->m_N.Reserve(pointCount);
         pPointCloud->m_N.SetCount(pointCount);
@@ -68,7 +75,9 @@ RH_C_FUNCTION void ON_PointCloud_FixPointCloud(ON_PointCloud* pPointCloud, bool 
 
     if ((pPointCloud->m_C.Count() > 0) || ensureColors)
     {
-      if (pPointCloud->m_C.Count() != pointCount)
+      if (inserted && pPointCloud->m_C.Count() == pointCount - 1)
+        pPointCloud->m_C.Insert(insertedAt, ON_Color(0, 0, 0));
+      else if (pPointCloud->m_C.Count() != pointCount)
       {
         pPointCloud->m_C.Reserve(pointCount);
         pPointCloud->m_C.SetCount(pointCount);
@@ -77,7 +86,9 @@ RH_C_FUNCTION void ON_PointCloud_FixPointCloud(ON_PointCloud* pPointCloud, bool 
 
     if ((pPointCloud->m_H.Count() > 0) || ensureHidden)
     {
-      if (pPointCloud->m_H.Count() != pointCount)
+      if (inserted && pPointCloud->m_H.Count() == pointCount - 1)
+        pPointCloud->m_H.Insert(insertedAt, false);
+      else if (pPointCloud->m_H.Count() != pointCount)
       {
         pPointCloud->m_H.Reserve(pointCount);
         pPointCloud->m_H.SetCount(pointCount);
@@ -86,13 +97,20 @@ RH_C_FUNCTION void ON_PointCloud_FixPointCloud(ON_PointCloud* pPointCloud, bool 
 
     if ((pPointCloud->m_V.Count() > 0) || ensureExtra)
     {
-      if (pPointCloud->m_V.Count() != pointCount)
+      if (inserted && pPointCloud->m_V.Count() == pointCount - 1)
+        pPointCloud->m_V.Insert(insertedAt, 0.0);
+      else if (pPointCloud->m_V.Count() != pointCount)
       {
         pPointCloud->m_V.Reserve(pointCount);
         pPointCloud->m_V.SetCount(pointCount);
       }
     }
   }
+}
+
+RH_C_FUNCTION void ON_PointCloud_FixPointCloud(ON_PointCloud* pPointCloud, bool ensureNormals, bool ensureColors, bool ensureHidden, bool ensureExtra)
+{
+  ON_PointCloud_FixPointCloudAt(pPointCloud, ensureNormals, ensureColors, ensureHidden, ensureExtra, -1);
 }
 
 RH_C_FUNCTION void ON_PointCloud_MergeCloud(ON_PointCloud* pPointCloud, const ON_PointCloud* pConstOtherPointCloud)
@@ -654,7 +672,7 @@ RH_C_FUNCTION bool ON_PointCloud_InsertPoint1(ON_PointCloud* pPointCloud, int in
   {
     const ON_3dPoint* _point = (const ON_3dPoint*)(&point);
     pPointCloud->m_P.Insert(index, *_point);
-    ON_PointCloud_FixPointCloud(pPointCloud, false, false, false, false);
+    ON_PointCloud_FixPointCloudAt(pPointCloud, false, false, false, false, index);
     pPointCloud->InvalidateBoundingBox();
 
     rc = true;
@@ -669,7 +687,7 @@ RH_C_FUNCTION bool ON_PointCloud_InsertPoint2(ON_PointCloud* pPointCloud, int in
   {
     const ON_3dPoint* _point = (const ON_3dPoint*)(&point);
     pPointCloud->m_P.Insert(index, *_point);
-    ON_PointCloud_FixPointCloud(pPointCloud, false, true, false, false);
+    ON_PointCloud_FixPointCloudAt(pPointCloud, false, true, false, false, index);
     pPointCloud->InvalidateBoundingBox();
 
     if (pPointCloud->m_C.Count() > index)
@@ -683,11 +701,11 @@ RH_C_FUNCTION bool ON_PointCloud_InsertPoint2(ON_PointCloud* pPointCloud, int in
 RH_C_FUNCTION bool ON_PointCloud_InsertPoint3(ON_PointCloud* pPointCloud, int index, ON_3DPOINT_STRUCT point, ON_3DVECTOR_STRUCT normal)
 {
   bool rc = false;
-  if (pPointCloud)
+  if (pPointCloud && index >= 0)
   {
     const ON_3dPoint* _point = (const ON_3dPoint*)(&point);
     pPointCloud->m_P.Insert(index, *_point);
-    ON_PointCloud_FixPointCloud(pPointCloud, true, false, false, false);
+    ON_PointCloud_FixPointCloudAt(pPointCloud, true, false, false, false, index);
     pPointCloud->InvalidateBoundingBox();
 
     if (pPointCloud->m_N.Count() > index)
@@ -707,7 +725,7 @@ RH_C_FUNCTION bool ON_PointCloud_InsertPoint4(ON_PointCloud* pPointCloud, int in
   {
     const ON_3dPoint* _point = (const ON_3dPoint*)(&point);
     pPointCloud->m_P.Insert(index, *_point);
-    ON_PointCloud_FixPointCloud(pPointCloud, true, true, false, false);
+    ON_PointCloud_FixPointCloudAt(pPointCloud, true, true, false, false, index);
     pPointCloud->InvalidateBoundingBox();
 
     if (pPointCloud->m_N.Count() > index)
@@ -732,7 +750,7 @@ RH_C_FUNCTION bool ON_PointCloud_InsertPoint5(ON_PointCloud* pPointCloud, int in
   {
     const ON_3dPoint* _point = (const ON_3dPoint*)(&point);
     pPointCloud->m_P.Insert(index, *_point);
-    ON_PointCloud_FixPointCloud(pPointCloud, true, true, false, true);
+    ON_PointCloud_FixPointCloudAt(pPointCloud, true, true, false, true, index);
     pPointCloud->InvalidateBoundingBox();
 
     if (pPointCloud->m_N.Count() > index)
@@ -757,6 +775,9 @@ RH_C_FUNCTION void ON_PointCloud_AppendPoints(ON_PointCloud* pPointCloud, int co
 {
   if (pPointCloud && points && (count > 0))
   {
+    // an array this call adds gets one entry per point already there first, so the new entries
+    // land on the new points
+    ON_PointCloud_FixPointCloud(pPointCloud, nullptr != normals, false, false, false);
     pPointCloud->m_P.Append(count, points);
     if (normals)
       pPointCloud->m_N.Append(count, normals);
@@ -770,6 +791,9 @@ RH_C_FUNCTION void ON_PointCloud_AppendPoints2(ON_PointCloud* pPointCloud, int c
 {
   if (pPointCloud && points && colors && (count > 0))
   {
+    // an array this call adds gets one entry per point already there first, so the new entries
+    // land on the new points
+    ON_PointCloud_FixPointCloud(pPointCloud, false, true, false, false);
     pPointCloud->m_P.Append(count, points);
     pPointCloud->m_C.Append(count, reinterpret_cast<const ON_Color*>(colors));
 
@@ -782,6 +806,9 @@ RH_C_FUNCTION void ON_PointCloud_AppendPoints4(ON_PointCloud* pPointCloud, int c
 {
   if (pPointCloud && points && normals && argbColors && (count > 0))
   {
+    // an array this call adds gets one entry per point already there first, so the new entries
+    // land on the new points
+    ON_PointCloud_FixPointCloud(pPointCloud, true, true, false, false);
     pPointCloud->m_P.Append(count, points);
     pPointCloud->m_N.Append(count, normals);
 
@@ -801,6 +828,9 @@ RH_C_FUNCTION void ON_PointCloud_AppendPoints5(ON_PointCloud* pPointCloud, int c
 {
   if (pPointCloud && points && normals && argbColors && values && (count > 0))
   {
+    // an array this call adds gets one entry per point already there first, so the new entries
+    // land on the new points
+    ON_PointCloud_FixPointCloud(pPointCloud, true, true, false, true);
     pPointCloud->m_P.Append(count, points);
     pPointCloud->m_N.Append(count, normals);
     pPointCloud->m_V.Append(count, values);
@@ -835,9 +865,11 @@ RH_C_FUNCTION void ON_PointCloud_InsertPoints(ON_PointCloud* pPointCloud, int in
 
     pPointCloud->m_P.SetCount(newcount);
     ON_3dPoint* pPoints = pPointCloud->m_P.Array();
+    // Shift the tail [index, oldcount) up by count to open the gap at index.
+    // The ranges overlap, so memmove.
     const ON_3dPoint* pSource = pPoints + index;
-    ON_3dPoint* pDest = pPoints + oldcount;
-    ::memcpy(pDest, pSource, (oldcount - index) * sizeof(ON_3dPoint));
+    ON_3dPoint* pDest = pPoints + index + count;
+    ::memmove(pDest, pSource, (oldcount - index) * sizeof(ON_3dPoint));
 
     bool insertNormals = (pPointCloud->m_N.Count() > 0);
     bool insertColors = (pPointCloud->m_C.Count() > 0);

@@ -1,0 +1,63 @@
+rhino3dm.PageSettings
+=====================
+
+.. py:class:: rhino3dm.PageSettings
+
+   The paper size and margins of a layout, in millimeters. Only meaningful for a view whose ``ViewInfo.ViewType`` is ``ViewType.PageView``.
+
+
+   .. py:property:: BottomMarginMillimeters
+      :type: float
+
+
+      Bottom margin in millimeters.
+
+
+   .. py:property:: HeightMillimeters
+      :type: float
+
+
+      Paper height in millimeters.
+
+
+   .. py:property:: LeftMarginMillimeters
+      :type: float
+
+
+      Left margin in millimeters.
+
+
+   .. py:property:: PageNumber
+      :type: int
+
+
+      The page number of this layout.
+
+
+   .. py:property:: PrinterName
+      :type: str
+
+
+      Name of the printer this layout targets, if any.
+
+
+   .. py:property:: RightMarginMillimeters
+      :type: float
+
+
+      Right margin in millimeters.
+
+
+   .. py:property:: TopMarginMillimeters
+      :type: float
+
+
+      Top margin in millimeters.
+
+
+   .. py:property:: WidthMillimeters
+      :type: float
+
+
+      Paper width in millimeters.
+

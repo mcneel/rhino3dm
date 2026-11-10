@@ -1,0 +1,58 @@
+rhino3dm.Group
+==============
+
+.. py:class:: rhino3dm.Group
+
+   Bases: :py:obj:`ModelComponent`
+
+
+   Base class for all components in a model (document) and manages the index, id and other information common to this type of objects.
+
+   This class parallels the C++ ON\_ModelComponent.
+
+
+   .. py:method:: DeleteAllUserStrings() -> None
+
+
+   .. py:method:: GetUserString(key: str) -> str
+
+      Gets user string from this geometry.
+
+      :param key: id used to retrieve the string.
+
+      :returns: string associated with the key if successful. null if no key was found.
+
+
+
+   .. py:method:: GetUserStrings() -> list[Any]
+
+      Gets a copy of all (user key string, user value string) pairs attached to this geometry.
+
+      :returns: A new collection.
+
+
+
+   .. py:method:: SetUserString(key: str, value: str) -> bool
+
+      Attach a user string (key,value combination) to this geometry.
+
+      :param key: id used to retrieve this string.
+      :param value: string associated with key.
+
+      :returns: true on success.
+
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.Group``.
+
+
+   .. py:property:: UserStringCount
+      :type: int
+
+
+      Gets the amount of user strings.
+

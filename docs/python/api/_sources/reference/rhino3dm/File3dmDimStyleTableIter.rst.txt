@@ -1,0 +1,4 @@
+rhino3dm.File3dmDimStyleTableIter
+=================================
+
+.. py:class:: rhino3dm.File3dmDimStyleTableIter

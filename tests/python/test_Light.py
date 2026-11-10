@@ -1,7 +1,12 @@
 import unittest
 import rhino3dm
+import os
+import sys
+import helpers
 
 #objective
+
+
 class TestLight(unittest.TestCase):
 
     def test_lightGetSpotlightRadii(self):
@@ -19,6 +24,17 @@ class TestLight(unittest.TestCase):
         self.assertTrue(slr[0])
         self.assertAlmostEqual(slr[1], light.SpotAngleRadians, 1)
         self.assertAlmostEqual(slr[2], light.SpotAngleRadians, 1)
+
+    def test_lightStyleDecidesPointSpotAndLinear(self):
+        """IsPointLight, IsSpotLight and IsLinearLight follow LightStyle."""
+        light = rhino3dm.Light()
+        light.LightStyle = rhino3dm.LightStyle.WorldPoint
+        self.assertIs(light.IsPointLight, True)
+        self.assertIs(light.IsSpotLight, False)
+        self.assertIs(light.IsLinearLight, False)
+        light.LightStyle = rhino3dm.LightStyle.WorldSpot
+        self.assertIs(light.IsSpotLight, True)
+        self.assertIs(light.IsPointLight, False)
 
 
 if __name__ == '__main__':

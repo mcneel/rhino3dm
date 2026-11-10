@@ -1,0 +1,60 @@
+rhino3dm.PostEffectData
+=======================
+
+.. py:class:: rhino3dm.PostEffectData
+
+   This is a wrapper around the data ('on', 'shown', 'state' parameters, etc.) of a post effect.
+
+
+   .. py:method:: DataCRC(current_remainder: int) -> int
+
+      Get a CRC representing the state of the entire post effect.
+
+
+
+   .. py:method:: GetParameter(param_name: str) -> object
+
+      Get an arbitrary parameter from this post effect by its name. If the parameter is not known to the post effect, the method will fail. Returns a variant object if successful or null on failure.
+
+
+
+   .. py:method:: SetParameter(param_name: str, param_value: object) -> bool
+
+      Set an arbitrary parameter to the post effect by its name. If the parameter is not known to the post effect, the method will fail. Returns true if successful or false on failure.
+
+
+
+   .. py:property:: Id
+      :type: uuid.UUID
+
+
+      Returns the unique id of this post effect.
+
+
+   .. py:property:: LocalName
+      :type: str
+
+
+      Returns the localized name of this post effect.
+
+
+   .. py:property:: On
+      :type: bool
+
+
+      The 'on' state of this post effect.
+
+
+   .. py:property:: Shown
+      :type: bool
+
+
+      The 'shown' state of this post effect.
+
+
+   .. py:property:: Type
+      :type: PostEffectType
+
+
+      Returns the type of this post effect.
+

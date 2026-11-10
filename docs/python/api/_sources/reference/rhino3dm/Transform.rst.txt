@@ -1,0 +1,677 @@
+rhino3dm.Transform
+==================
+
+.. py:class:: rhino3dm.Transform
+              Transform(diagonalValue: float)
+              Transform(arg: Transform)
+              Transform(arg: collections.abc.Sequence[Any], /)
+
+   Represents the values in a 4x4 transform matrix.
+
+   This is parallel to C++ ON\_Xform.
+
+
+   .. py:method:: Affineize() -> None
+
+      Replaces the last row with (0 0 0 1), discarding any perspective part of this transform
+
+
+
+   .. py:method:: ChangeBasis(plane0: Plane, plane1: Plane) -> Transform
+                  ChangeBasis(X0: Vector3d, Y0: Vector3d, Z0: Vector3d, X1: Vector3d, Y1: Vector3d, Z1: Vector3d) -> Transform
+                  ChangeBasis(P0: Point3d, X0: Vector3d, Y0: Vector3d, Z0: Vector3d, P1: Point3d, X1: Vector3d, Y1: Vector3d, Z1: Vector3d) -> Transform
+      :staticmethod:
+
+
+      Gets a change of basis transformation. The change of basis transformation is not the same as the rotation transformation that rotates one orthonormal frame to another.
+
+      Change of basis transformations and rotation transformations are often confused. This is a change of basis transformation. If Q = P0 + a0\*X0 + b0\*Y0 + c0\*Z0 = P1 + a1\*X1 + b1\*Y1 + c1\*Z1, then this transform will map the point (a0,b0,c0) to (a1,b1,c1).
+
+      :param P0: Initial center.
+      :param X0: Initial basis X (can be any 3d basis).
+      :param Y0: Initial basis Y (can be any 3d basis).
+      :param Z0: Initial basis Z (can be any 3d basis).
+      :param P1: Final center.
+      :param X1: Final basis X (can be any 3d basis).
+      :param Y1: Final basis Y (can be any 3d basis).
+      :param Z1: Final basis Z (can be any 3d basis).
+
+      :returns: A change of basis transformation if success, ``Transform.Unset`` on failure.
+
+
+
+   .. py:method:: Clone() -> Transform
+
+      Returns a deep copy of the transform. For languages that treat structures as value types, this can be accomplished by a simple assignment.
+
+      :returns: A deep copy of this data structure.
+
+
+
+   .. py:method:: CompareTo(other: Transform) -> int
+
+      Compares this transform with another transform.
+
+      M33 has highest value, then M32, etc..
+
+      :param other: Another transform.
+
+      :returns: -1 if this < other; 0 if both are equal; 1 otherwise.
+
+
+
+   .. py:method:: DecomposeAffine() -> tuple[bool, Transform, Vector3d]
+
+      Decomposes an affine transformation. A transformation is affine if it is valid and its last row is [0, 0, 0, 1]. An affine transformation can be broken into a linear transformation and a translation. Note, a perspective transformation is not affine.
+
+      If X.DecomposeAffine(L, T) is true then X == L\* Translation(T). DecomposeAffine(L, T) may fail for affine transformations if L is not invertible, and is more computationally expensive then X.DecomposeAffine(T, L).
+
+      :returns: True if successful decomposition.
+
+
+
+   .. py:method:: DecomposeAffineFull() -> tuple[bool, Vector3d, Transform, Transform, Vector3d]
+
+      An affine transformation can be decomposed into a Symmetric, Rotation and Translation. Then the Symmetric component may be further decomposed as non-uniform scale in an orthonormal coordinate system.
+
+      :returns: True if successful decomposition.
+
+
+
+   .. py:method:: DecomposeRigid(tolerance: float) -> tuple[TransformRigidType, Vector3d, Transform]
+
+      Decomposes a rigid transformation. The transformation must be affine.
+
+      If X.DecomposeRigid(T, R) is 1, then X ~ Translation(T)\*R. If X.DecomposeRigid(T, R) is -1, then X ~ Transform(-1) \* Translation(T)\*R. DecomposeRigid will find the closest rotation to the linear part of this transformation.
+
+      :param tolerance: The evaluation tolerance.
+
+      :returns: The rigid type.
+
+
+
+   .. py:method:: DecomposeSimilarity(tolerance: float) -> tuple[TransformSimilarityType, Vector3d, float, Transform]
+
+      Decomposes a similarity transformation. The transformation must be affine. A similarity transformation can be broken into a sequence of a dilation, translation, rotation, and a reflection.
+
+      If X.DecomposeSimilarity(T, d, R, tol) !=0 then X ~ Translation(T)\*Diagonal(d)\*R note when d gt;0 the transformation is orientation preserving. If dilation lt; 0 then Diagonal(dilation) is actually a reflection combined with a true dilation, or Diagonal(dilation) = Diagonal(-1) \* Diagonal(\|diagonal\|).
+
+      :param tolerance: The evaluation tolerance.
+
+      :returns: The similarity type.
+
+
+
+   .. py:method:: DecomposeSymmetric() -> tuple[bool, Transform, Vector3d]
+
+      A Symmetric linear transformation can be decomposed A = Q \* Diag \* Q ^ T, where Diag is a diagonal transformation. Diag[i][i] is an eigenvalue of A and the i-th column of Q is a corresponding unit length eigenvector. Note, this transformation must be Linear and Symmetric.
+
+      If success, this== Q\*Diagonal(diagonal) \* QT, where QT == Q.Transpose(). If L.IsLinear and LT==L.Transpose then LT\*L is symmetric and is a common source of symmetric transformations.
+
+      :returns: true if successful, false otherwise.
+
+
+
+   .. py:method:: DecomposeTextureMapping() -> tuple[Vector3d, Vector3d, Vector3d]
+
+      Decomposition of a uvw transform into components
+
+
+
+   .. py:method:: Diagonal(diagonal: Vector3d) -> Transform
+                  Diagonal(d0: float, d1: float, d2: float) -> Transform
+      :staticmethod:
+
+
+      Constructs a new transformation with diagonal (d0,d1,d2,1.0).
+
+      :param d0: Transform.M00 value.
+      :param d1: Transform.M11 value.
+      :param d2: Transform.M22 value.
+
+      :returns: A transformation with diagonal (d0,d1,d2,1.0).
+
+
+
+   .. py:method:: Equals(other: Transform) -> bool
+
+      Determines if another transform equals this transform value.
+
+      :param other: Another transform.
+
+      :returns: true if other has the same value as this transform; otherwise, false.
+
+
+
+   .. py:method:: GetEulerZYZ() -> tuple[bool, float, float, float]
+
+      Find the Euler angles for a rotation transformation.
+
+      Note, alpha and gamma are in the range (-pi, pi] while beta in the range [0, pi]
+
+      :returns: If true, then this = RotationZYZ(alpha, beta, gamma) = R\_z(alpha) \* R\_y(beta) \* R\_z(gamma) where R\_\*(angle) is rotation of angle radians about the corresponding \*-world coordinate axis. If false, then this is not a rotation.
+
+
+
+   .. py:method:: GetHashCode() -> int
+
+      Gets a non-unique hashing code for this transform.
+
+      :returns: A number that can be used to hash this transform in a dictionary.
+
+
+
+   .. py:method:: GetYawPitchRoll() -> tuple[bool, float, float, float]
+
+      Find the Tait-Byran angles (also loosely called Euler angles) for a rotation transformation.
+
+      :returns: If true, then this = RotationZYX(yaw, pitch, roll) = R\_z(yaw) \* R\_y(pitch) \* R\_x(roll) where R\_\*(angle) is rotation of angle radians about the corresponding world coordinate axis. If false, then this is not a rotation.
+
+
+
+   .. py:method:: IsRigid(tolerance: float) -> TransformRigidType
+
+      Gets a value indicating whether or not the Transform is rigid. A rigid transformation can be broken into a proper rotation and a translation, while an isometry transformation could also include a reflection.
+
+      :param tolerance: The evaluation tolerance.
+
+      :returns: The rigid type.
+
+
+
+   .. py:method:: IsSimilarity(tolerance: float) -> TransformSimilarityType
+
+      Gets a value indicating whether or not the Transform maintains similarity. A similarity transformation can be broken into a sequence of a dilation, translation, rotation, and a reflection.
+
+      :param tolerance: The evaluation tolerance.
+
+      :returns: The similarity type.
+
+
+
+   .. py:method:: IsUniformlyScaled() -> bool
+
+      Determines if this transform is uniformly scaled - that is, a similarity transformation that scales all directions equally and preserves angles, mapping circles to circles. This includes pure rotations, translations and mirroring.
+
+      :returns: True if uniformly scaled, false otherwise.
+
+
+
+   .. py:method:: IsZeroTransformationWithTolerance(zeroTolerance: float) -> bool
+
+      True if all values are 0 within tolerance, except for M33 which is exactly 1.
+
+      :param zeroTolerance: The tolerance for 0 elements.
+
+      :returns: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1
+                An element x of the matrix is "zero" if fabs(x) ≤ zeroTolerance. IsZeroTransformation is the same as IsZeroTransformationWithTolerance(0.0)
+      :rtype: True if the transformation matrix is ON\_Xform::ZeroTransformation, with xform[3][3] equal to 1
+
+
+
+   .. py:method:: IsZeroTransformaton(zeroTolerance: float) -> bool
+
+      True if all values are 0 within tolerance, except for M33 which is exactly 1.
+
+      :param zeroTolerance: The zero tolerance.
+
+      :returns: Returns true if all values are 0 within tolerance, except for M33 which is exactly 1.
+
+      Deprecated since 7.1.
+
+
+
+   .. py:method:: Linearize() -> None
+
+      Affinitize() and replaces the last column with (0 0 0 1)^T, discarding any translation part of this transform.
+
+
+
+   .. py:method:: Mirror(pointOnMirrorPlane: Point3d, normalToMirrorPlane: Vector3d) -> Transform
+                  Mirror(mirrorPlane: Plane) -> Transform
+      :staticmethod:
+
+
+      Constructs a new Mirror transformation.
+
+      :param mirrorPlane: Plane that defines the mirror orientation and position.
+
+      :returns: A transformation matrix which mirrors geometry in a specified plane.
+
+
+
+   .. py:method:: Multiply(a: Transform, b: Transform) -> Transform
+      :staticmethod:
+
+
+      Multiplies (combines) two transformations.
+
+      This is the same as the \* operator between two transformations.
+
+      :param a: First transformation.
+      :param b: Second transformation.
+
+      :returns: A transformation matrix that combines the effect of both input transformations. The resulting Transform gives the same result as though you'd first apply B then A.
+
+
+
+   .. py:method:: Orthogonalize(tolerance: float) -> bool
+
+      Force the linear part of this transformation to be a rotation (or a rotation with reflection). Use DecomposeRigid(T,R) to find the nearest rotation.
+
+      :param tolerance: The evaluation tolerance
+
+      :returns: true if successful, false otherwise.
+
+
+
+   .. py:method:: PlanarProjection(plane: Plane) -> Transform
+      :staticmethod:
+
+
+      Constructs a projection transformation.
+
+      :param plane: Plane onto which everything will be perpendicularly projected.
+
+      :returns: A transformation matrix which projects geometry onto a specified plane.
+
+
+
+   .. py:method:: PlaneToPlane(plane0: Plane, plane1: Plane) -> Transform
+      :staticmethod:
+
+
+      Create a rotation transformation that orients plane0 to plane1. If you want to orient objects from one plane to another, use this form of transformation.
+
+      :param plane0: The plane to orient from.
+      :param plane1: the plane to orient to.
+
+      :returns: The translation transformation if successful, Transform.Unset on failure.
+
+
+
+   .. py:method:: Rotation(sinAngle: float, cosAngle: float, rotationAxis: Vector3d, rotationCenter: Point3d) -> Transform
+                  Rotation(angleRadians: float, rotationCenter: Point3d) -> Transform
+                  Rotation(angleRadians: float, rotationAxis: Vector3d, rotationCenter: Point3d) -> Transform
+                  Rotation(startDirection: Vector3d, endDirection: Vector3d, rotationCenter: Point3d) -> Transform
+                  Rotation(x0: Vector3d, y0: Vector3d, z0: Vector3d, x1: Vector3d, y1: Vector3d, z1: Vector3d) -> Transform
+      :staticmethod:
+
+
+      Constructs a transformation that maps X0 to X1, Y0 to Y1, Z0 to Z1. The frames should be right hand orthonormal frames (unit vectors with Z = X x Y). The resulting rotation fixes the origin (0,0,0), maps initial X to final X, initial Y to final Y, and initial Z to final Z.
+
+      :param x0: Initial frame X.
+      :param y0: Initial frame Y.
+      :param z0: Initial frame Z.
+      :param x1: Final frame X.
+      :param y1: Final frame Y.
+      :param z1: Final frame Z.
+
+      :returns: A rotation transformation matrix.
+
+
+
+   .. py:method:: RotationZYX(yaw: float, pitch: float, roll: float) -> Transform
+      :staticmethod:
+
+
+      Create rotation transformation From Tait-Byran angles (also loosely known as Euler angles).
+
+      RotationZYX(yaw, pitch, roll) = R\_z(yaw) \* R\_y(pitch) \* R\_x(roll) where R\_\*(angle) is rotation of angle radians about the corresponding world coordinate axis.
+
+      :param yaw: Angle, in radians, to rotate about the Z axis.
+      :param pitch: Angle, in radians, to rotate about the Y axis.
+      :param roll: Angle, in radians, to rotate about the X axis.
+
+      :returns: A transform matrix from Tait-Byran angles.
+
+
+
+   .. py:method:: RotationZYZ(alpha: float, beta: float, gamma: float) -> Transform
+      :staticmethod:
+
+
+      Create rotation transformation From Euler angles.
+
+      RotationZYZ(alpha, beta, gamma) = R\_z(alpha) \* R\_y(beta) \* R\_z(gamma) where R\_\*(angle) is rotation of angle radians about the corresponding \*-world coordinate axis. Note, alpha and gamma are in the range (-pi, pi] while beta in the range [0, pi]
+
+      :param alpha: Angle, in radians, to rotate about the Z axis.
+      :param beta: Angle, in radians, to rotate about the Y axis.
+      :param gamma: Angle, in radians, to rotate about the X axis.
+
+      :returns: A transform matrix from Euler angles.
+
+
+
+   .. py:method:: Scale(anchor: Point3d, scaleFactor: float) -> Transform
+                  Scale(plane: Plane, xScaleFactor: float, yScaleFactor: float, zScaleFactor: float) -> Transform
+      :staticmethod:
+
+
+      Constructs a new non-uniform scaling transformation with a specified scaling anchor point.
+
+      :param plane: Defines the center and orientation of the scaling operation.
+      :param xScaleFactor: Scaling factor along the anchor plane X-Axis direction.
+      :param yScaleFactor: Scaling factor along the anchor plane Y-Axis direction.
+      :param zScaleFactor: Scaling factor along the anchor plane Z-Axis direction.
+
+      :returns: A transformation matrix which scales geometry non-uniformly.
+
+
+
+   .. py:method:: Shear(plane: Plane, x: Vector3d, y: Vector3d, z: Vector3d) -> Transform
+      :staticmethod:
+
+
+      Constructs a Shear transformation.
+
+      :param plane: Base plane for shear.
+      :param x: Shearing vector along plane x-axis.
+      :param y: Shearing vector along plane y-axis.
+      :param z: Shearing vector along plane z-axis.
+
+      :returns: A transformation matrix which shear geometry.
+
+
+
+   .. py:method:: TextureMapping(offset: Vector3d, repeat: Vector3d, rotation: Vector3d) -> Transform
+      :staticmethod:
+
+
+      Construct a UVW Transform from components.
+
+
+
+   .. py:method:: ToDoubleArray(rowDominant: bool) -> list[float]
+
+      Return the matrix as a linear array of 16 double values.
+
+      :param rowDominant: If true, returns { M00, M01, M02...}. If false, returns { M00, M10, M20...}.
+
+      :returns: An array of 16 doubles.
+
+
+
+   .. py:method:: ToFloatArray(rowDominant: bool) -> list[float]
+
+      Return the matrix as a linear array of 16 float values.
+
+      :param rowDominant: If true, returns { M00, M01, M02...}. If false, returns { M00, M10, M20...}.
+
+      :returns: An array of 16 floats.
+
+
+
+   .. py:method:: ToString() -> str
+
+      Returns a string representation of this transform.
+
+      :returns: A textual representation.
+
+
+
+   .. py:method:: TransformBoundingBox(bbox: BoundingBox) -> BoundingBox
+
+      Computes a new bounding box that is the smallest axis aligned bounding box that contains the transformed result of its 8 original corner points.
+
+      :returns: A new bounding box.
+
+
+
+   .. py:method:: TransformList(points: collections.abc.Sequence[Point3d]) -> list[Point3d]
+
+      Given a list, an array or any enumerable set of points, computes a new array of transformed points.
+
+      :param points: A list, an array or any enumerable set of points to be left untouched and copied.
+
+      :returns: A new array.
+
+
+
+   .. py:method:: Translation(motion: Vector3d) -> Transform
+                  Translation(dx: float, dy: float, dz: float) -> Transform
+      :staticmethod:
+
+
+      Constructs a new translation (move) transformation. Right column is (dx, dy, dz, 1.0).
+
+      :param dx: Distance to translate (move) geometry along the world X axis.
+      :param dy: Distance to translate (move) geometry along the world Y axis.
+      :param dz: Distance to translate (move) geometry along the world Z axis.
+
+      :returns: A transform matrix which moves geometry with the specified distances.
+
+
+
+   .. py:method:: Transpose() -> Transform
+
+      Flip row/column values
+
+
+
+   .. py:method:: TryGetInverse() -> tuple[bool, Transform]
+
+      Attempts to get the inverse transform of this transform.
+
+      :returns: true on success. If false is returned and this Transform is Invalid, inserveTransform will be set to this Transform. If false is returned and this Transform is Valid, inverseTransform will be set to a pseudo inverse.
+
+
+
+   .. py:property:: Determinant
+      :type: float
+
+
+      The determinant of this 4x4 matrix.
+
+
+   .. py:attribute:: Identity
+      :type:  Transform
+      :value: Ellipsis
+
+
+      object, /) -> Transform
+
+      :type: (arg
+
+
+   .. py:property:: IsAffine
+      :type: bool
+
+
+      Tests for an affine transformation. A transformation is affine if it is valid and its last row is [0, 0, 0, 1]. An affine transformation can be broken into a linear transformation and a translation.
+
+
+   .. py:property:: IsIdentity
+      :type: bool
+
+
+      Return true if this Transform is the identity transform
+
+
+   .. py:property:: IsLinear
+      :type: bool
+
+
+      Tests for a linear transformation. A transformation is affine if it is valid and its last row is [0, 0, 0, 1]. If in addition its last column is ( 0, 0, 0, 1)^T then it is linear. An affine transformation can be broken into a linear transformation and a translation.
+
+
+   .. py:property:: IsRotation
+      :type: bool
+
+
+      Returns true if this is a proper rotation.
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Gets a value indicating whether or not this Transform is a valid matrix. A valid transform matrix is not allowed to have any invalid numbers.
+
+
+   .. py:property:: IsZero
+      :type: bool
+
+
+      True if matrix is Zero4x4, ZeroTransformation, or some other type of zero. The value xform[3][3] can be anything.
+
+
+   .. py:property:: IsZero4x4
+      :type: bool
+
+
+      True if all values are 0
+
+
+   .. py:property:: IsZeroTransformation
+      :type: bool
+
+
+      True if all values are 0, except for M33 which is 1.
+
+
+   .. py:property:: M00
+      :type: float
+
+
+      Gets or sets this[0,0].
+
+
+   .. py:property:: M01
+      :type: float
+
+
+      Gets or sets this[0,1].
+
+
+   .. py:property:: M02
+      :type: float
+
+
+      Gets or sets this[0,2].
+
+
+   .. py:property:: M03
+      :type: float
+
+
+      Gets or sets this[0,3].
+
+
+   .. py:property:: M10
+      :type: float
+
+
+      Gets or sets this[1,0].
+
+
+   .. py:property:: M11
+      :type: float
+
+
+      Gets or sets this[1,1].
+
+
+   .. py:property:: M12
+      :type: float
+
+
+      Gets or sets this[1,2].
+
+
+   .. py:property:: M13
+      :type: float
+
+
+      Gets or sets this[1,3].
+
+
+   .. py:property:: M20
+      :type: float
+
+
+      Gets or sets this[2,0].
+
+
+   .. py:property:: M21
+      :type: float
+
+
+      Gets or sets this[2,1].
+
+
+   .. py:property:: M22
+      :type: float
+
+
+      Gets or sets this[2,2].
+
+
+   .. py:property:: M23
+      :type: float
+
+
+      Gets or sets this[2,3].
+
+
+   .. py:property:: M30
+      :type: float
+
+
+      Gets or sets this[3,0].
+
+
+   .. py:property:: M31
+      :type: float
+
+
+      Gets or sets this[3,1].
+
+
+   .. py:property:: M32
+      :type: float
+
+
+      Gets or sets this[3,2].
+
+
+   .. py:property:: M33
+      :type: float
+
+
+      Gets or sets this[3,3].
+
+
+   .. py:property:: RigidType
+      :type: TransformRigidType
+
+
+      Gets a value indicating whether or not the Transform is rigid. A rigid transformation can be broken into a proper rotation and a translation, while an isometry transformation could also include a reflection.
+
+
+   .. py:property:: SimilarityType
+      :type: TransformSimilarityType
+
+
+      Gets a value indicating whether or not the Transform maintains similarity. The easiest way to think of Similarity is that any circle, when transformed, remains a circle. Whereas a non-similarity Transform deforms circles into ellipses.
+
+
+   .. py:attribute:: Unset
+      :type:  Transform
+      :value: Ellipsis
+
+
+      object, /) -> Transform
+
+      :type: (arg
+
+
+   .. py:attribute:: ZeroTransformation
+      :type:  Transform
+      :value: Ellipsis
+
+
+      object, /) -> Transform
+
+      :type: (arg
+

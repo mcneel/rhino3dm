@@ -1,0 +1,45 @@
+rhino3dm.DecalMapping
+=====================
+
+.. py:class:: rhino3dm.DecalMapping
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Enum where members are also (and must be) ints
+
+
+   .. py:attribute:: Cylindrical
+      :value: 1
+
+
+      Cylindrical mapping. Uses origin, up, across, height, radius, latitude start and stop.
+
+
+   .. py:attribute:: None_
+      :value: -1
+
+
+      RhinoCommon's ``None`` (``DecalMapping.None`` is not Python syntax; ``DecalMapping['None']`` is the same member). No mapping
+
+
+   .. py:attribute:: Planar
+      :value: 0
+
+
+      Planar mapping. Uses projection, origin, up and across vectors (not unitized).
+
+
+   .. py:attribute:: Spherical
+      :value: 2
+
+
+      Spherical mapping. Uses origin, up, across, radius, latitude/longitude start and stop.
+
+
+   .. py:attribute:: UV
+      :value: 3
+
+
+      UV mapping.
+

@@ -1,0 +1,126 @@
+rhino3dm.MeshTextureCoordinateList
+==================================
+
+.. py:class:: rhino3dm.MeshTextureCoordinateList
+
+   Provides access to the Vertex Texture coordinates of a Mesh.
+
+
+   .. py:method:: Add(s: float, t: float) -> int
+                  Add(tc: Point2f) -> int
+                  Add(tc: Point3d) -> int
+
+      Adds a new texture coordinate to the end of the Texture list.
+
+      :param tc: Texture coordinate to add.
+
+      :returns: The index of the newly added texture coordinate.
+
+
+
+   .. py:method:: AddRange(textureCoordinates: collections.abc.Sequence[Point2f]) -> bool
+
+      Appends an array of texture coordinates.
+
+      :param textureCoordinates: Texture coordinates to append.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Clear() -> None
+
+      Clears the Texture Coordinate list on the mesh.
+
+
+
+   .. py:method:: Destroy() -> None
+
+      Releases all memory allocated to store texture coordinates. The list capacity will be 0 after this call.
+
+      Subsequent calls can add new items.
+
+
+
+   .. py:method:: NormalizeTextureCoordinates() -> bool
+
+      Scales the texture coordinates so the texture domains are [0,1] and eliminate any texture rotations.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: ReverseTextureCoordinates(direction: int) -> bool
+
+      Reverses one coordinate direction of the texture coordinates.
+
+      The region of the bitmap the texture uses does not change. Either Us or Vs direction is flipped.
+
+      :param direction: 0 = first texture coordinate is reversed.
+                        1 = second texture coordinate is reversed.
+
+      :returns: true if operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: SetTextureCoordinate(index: int, s: float, t: float) -> bool
+                  SetTextureCoordinate(index: int, tc: Point2f) -> bool
+                  SetTextureCoordinate(index: int, tc: Point3f) -> bool
+
+      Sets or adds a texture coordinate to the Texture Coordinate List.
+
+      If [index] is less than [Count], the existing coordinate at [index] will be modified.
+
+      If [index] equals [Count], a new coordinate is appended to the end of the coordinate list.
+
+      If [index] is larger than [Count], the function will return false.
+
+      :param index: Index of texture coordinate to set.
+      :param tc: Texture coordinate point.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: SetTextureCoordinates(mapping: TextureMapping) -> bool
+                  SetTextureCoordinates(textureCoordinates: collections.abc.Sequence[Point2f]) -> bool
+
+      Sets all texture coordinates in one go.
+
+      :param textureCoordinates: Texture coordinates to assign to the mesh.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: ToFloatArray() -> list[float]
+
+      Copies all vertices to a linear array of float in u,v order
+
+      :returns: The float array.
+
+
+
+   .. py:method:: TransposeTextureCoordinates() -> bool
+
+      Transposes texture coordinates.
+
+      The region of the bitmap the texture uses does not change. All texture coordinates rows (Us) become columns (Vs), and vice versa.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:property:: Capacity
+      :type: int
+
+
+      Gets or sets the total number of texture coordinates the internal data structure can hold without resizing.
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets or sets the number of texture coordinates.
+

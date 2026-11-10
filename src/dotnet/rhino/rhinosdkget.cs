@@ -1253,7 +1253,12 @@ namespace Rhino.Input
       using (var sh = new StringHolder())
       {
         IntPtr ptr_string = sh.NonConstPointer();
+#if ON_RUNTIME_APPLE_IOS
+        // RV-1522: iOS has no dialog service and no parent window handles.
+        IntPtr ptr_parent = IntPtr.Zero;
+#else
         IntPtr ptr_parent = Dialogs.Service.ObjectToWindowHandle(parent, true);
+#endif
         UnsafeNativeMethods.CRhinoGetFileDialog_Get((int)mode, defaultName, title, ptr_parent, (int)fileTypes, ptr_string);
         return sh.ToString();
       }

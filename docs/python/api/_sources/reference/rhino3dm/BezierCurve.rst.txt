@@ -1,0 +1,169 @@
+rhino3dm.BezierCurve
+====================
+
+.. py:class:: rhino3dm.BezierCurve
+
+   Represents a Bezier curve.
+
+   Note: as an exception, the bezier curve is not derived from ``Curve``.
+
+
+   .. py:method:: ChangeDimension(desiredDimension: int) -> bool
+
+      Change dimension of bezier.
+
+      :returns: true if successful. false if desired\_dimension < 1
+
+
+
+   .. py:method:: CurvatureAt(t: float) -> Vector3d
+
+      Evaluate the curvature vector at a curve parameter.
+
+      No error handling.
+
+      :param t: Evaluation parameter.
+
+      :returns: Curvature vector of the curve at the parameter t.
+
+
+
+   .. py:method:: GetBoundingBox(accurate: bool) -> BoundingBox
+
+      Bounding box solver. Gets the world axis aligned bounding box for the curve.
+
+      :param accurate: If true, a physically accurate bounding box will be computed. If not, a bounding box estimate will be computed. For some geometry types there is no difference between the estimate and the accurate bounding box. Estimated bounding boxes can be computed much (much) faster than accurate (or "tight") bounding boxes. Estimated bounding boxes are always similar to or larger than accurate bounding boxes.
+
+      :returns: The bounding box of the geometry in world coordinates or BoundingBox.Empty if not bounding box could be found.
+
+
+
+   .. py:method:: GetControlVertex2d(index: int) -> Point2d
+
+      Get location of a control vertex.
+
+      :param index: Control vertex index (0 <= index < ControlVertexCount)
+
+      :returns: If the bezier is rational, the euclidean location is returned.
+
+      :raises ArgumentOutOfRangeException: when index is out of range
+
+
+
+   .. py:method:: GetControlVertex3d(index: int) -> Point3d
+
+      Gets the 3D location of a control vertex at the specified index.
+
+      :param index: Control vertex index (0 <= index < ControlVertexCount).
+
+      :returns: The 3D location of the control vertex. If the Bezier is rational, the euclidean location is returned. Returns ``Point3d.Unset`` if the index is out of range or the control vertex cannot be retrieved.
+
+      :raises ArgumentOutOfRangeException: Thrown when index is out of range.
+
+
+
+   .. py:method:: GetControlVertex4d(index: int) -> Point4d
+
+      Gets the homogeneous (4D) value of a control vertex at the specified index.
+
+      :param index: Control vertex index (0 <= index < ControlVertexCount).
+
+      :returns: The homogeneous value of the control vertex. If the Bezier is not rational, the weight is 1. Returns ``Point4d.Unset`` if the index is out of range or the control vertex cannot be retrieved.
+
+      :raises ArgumentOutOfRangeException: Thrown when index is out of range.
+
+
+
+   .. py:method:: IncreaseDegree(desiredDegree: int) -> bool
+
+      Increase degree of bezier
+
+      :returns: true if successful. false if desiredDegree < current degree.
+
+
+
+   .. py:method:: MakeNonRational() -> bool
+
+      Make bezier non-rational
+
+      :returns: true if successful
+
+
+
+   .. py:method:: MakeRational() -> bool
+
+      Make bezier rational
+
+      :returns: true if successful
+
+
+
+   .. py:method:: PointAt(t: float) -> Point3d
+
+      Evaluates point at a curve parameter.
+
+      No error handling.
+
+      :param t: Evaluation parameter.
+
+      :returns: Point (location of curve at the parameter t).
+
+
+
+   .. py:method:: Split(t: float) -> tuple[bool, BezierCurve, BezierCurve]
+
+      Divides the Bezier curve at the specified parameter.
+
+      :param t: parameter must satisfy 0 < t < 1
+
+      :returns: true on success
+
+
+
+   .. py:method:: TangentAt(t: float) -> Vector3d
+
+      Evaluates the unit tangent vector at a curve parameter.
+
+      No error handling.
+
+      :param t: Evaluation parameter.
+
+      :returns: Unit tangent vector of the curve at the parameter t.
+
+
+
+   .. py:method:: ToNurbsCurve() -> NurbsCurve
+
+      Constructs a NURBS curve representation of this curve.
+
+      :returns: NURBS representation of the curve on success, null on failure.
+
+
+
+   .. py:property:: ControlVertexCount
+      :type: int
+
+
+      Number of control vertices in this curve
+
+
+   .. py:property:: Dimension
+      :type: int
+
+
+      Dimension of Bezier
+
+
+   .. py:property:: IsRational
+      :type: bool
+
+
+      Gets a value indicating whether or not the curve is rational. Rational curves have control-points with custom weights.
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Tests an object to see if it is valid.
+

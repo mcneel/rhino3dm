@@ -1,0 +1,40 @@
+rhino3dm.Font.FontStyle
+=======================
+
+.. py:class:: rhino3dm.Font.FontStyle
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Vertical angle of font Upright, Italic, or Oblique
+
+
+   .. py:attribute:: Italic
+      :value: 2
+
+
+      The face is sloped so the top is to the right of the base. Face names sometimes use the word "oblique" for italic faces.
+
+
+   .. py:attribute:: Oblique
+      :value: 3
+
+
+      Face names sometimes use the word "oblique" for italic faces.
+
+      :type: The face is sloped so the top is to the left of the base. This is extremely rare. NOTE WELL
+
+
+   .. py:attribute:: Unset
+      :value: 0
+
+
+      Not set.
+
+
+   .. py:attribute:: Upright
+      :value: 1
+
+
+      Default font style.
+

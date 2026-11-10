@@ -6,9 +6,10 @@ class TestObject(unittest.TestCase):
     def test_objectValidWithLog(self):
 
         file3dm = rhino3dm.File3dm.Read('../models/mesh.3dm')
-        obj = file3dm.Objects[0].Geometry
+        obj = list(file3dm.Objects)[0].Geometry
 
-        isValid = obj.IsValidWithLog
+        # RhinoCommon's IsValidWithLog(out string log) is a method: (valid, log); 8.x had a property
+        isValid = obj.IsValidWithLog()
         
         self.assertTrue(type(isValid) == tuple)
         self.assertTrue(len(isValid) == 2)
@@ -26,11 +27,11 @@ class TestObject(unittest.TestCase):
     def test_objectGetUserStrings(self):
 
         file3dm = rhino3dm.File3dm.Read('../models/object_UserStrings.3dm')
-        obj = file3dm.Objects[0]
+        obj = list(file3dm.Objects)[0]
 
         self.assertTrue(obj.Attributes.UserStringCount > 0)
 
-        userStrings = obj.Attributes.GetUserStrings2()
+        userStrings = obj.Attributes.GetUserStrings()
 
         self.assertTrue(type(userStrings) == list)
         self.assertTrue(type(userStrings[0]) == list)

@@ -81,6 +81,51 @@ namespace Rhino.DocObjects
       m_id = id;
       m__parent = onxModel;
     }
+
+    // A copy of the built-in linetype with the given (negative) index, or null.
+    internal static Linetype NewBuiltIn(int index)
+    {
+      IntPtr ptr_linetype = UnsafeNativeMethods.ON_Linetype_NewBuiltIn(index);
+      return IntPtr.Zero == ptr_linetype ? null : new Linetype(ptr_linetype);
+    }
+    #endregion
+
+    #region built-in linetypes
+    /// <summary>Gets a copy of the built-in "Continuous" linetype.</summary>
+    /// <since>9.2</since>
+    public static Linetype Continuous => NewBuiltIn(-1);
+
+    /// <summary>Gets a copy of the built-in "By Layer" linetype.</summary>
+    /// <since>9.2</since>
+    public static Linetype ByLayer => NewBuiltIn(-2);
+
+    /// <summary>Gets a copy of the built-in "By Parent" linetype.</summary>
+    /// <since>9.2</since>
+    public static Linetype ByParent => NewBuiltIn(-3);
+
+    /// <summary>Gets a copy of the built-in "Hidden" linetype.</summary>
+    /// <since>9.2</since>
+    public static Linetype Hidden => NewBuiltIn(-4);
+
+    /// <summary>Gets a copy of the built-in "Dashed" linetype.</summary>
+    /// <since>9.2</since>
+    public static Linetype Dashed => NewBuiltIn(-5);
+
+    /// <summary>Gets a copy of the built-in "DashDot" linetype.</summary>
+    /// <since>9.2</since>
+    public static Linetype DashDot => NewBuiltIn(-6);
+
+    /// <summary>Gets a copy of the built-in "Center" linetype.</summary>
+    /// <since>9.2</since>
+    public static Linetype Center => NewBuiltIn(-7);
+
+    /// <summary>Gets a copy of the built-in "Border" linetype.</summary>
+    /// <since>9.2</since>
+    public static Linetype Border => NewBuiltIn(-8);
+
+    /// <summary>Gets a copy of the built-in "Dots" linetype.</summary>
+    /// <since>9.2</since>
+    public static Linetype Dots => NewBuiltIn(-9);
     #endregion
 
     /// <since>5.0</since>
@@ -435,6 +480,20 @@ namespace Rhino.DocObjects
       GC.KeepAlive(this);
     }
 
+    /// <summary>
+    /// Removes all segments from the pattern, unless the pattern is locked
+    /// (the built-in linetypes, such as <see cref="Continuous"/>, have locked patterns).
+    /// </summary>
+    /// <returns>true if the linetype has no pattern set afterwards.</returns>
+    /// <since>9.2</since>
+    public bool ClearPattern()
+    {
+      IntPtr pThis = NonConstPointer();
+      bool rc = UnsafeNativeMethods.ON_Linetype_ClearPattern(pThis);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
     /// <summary>Adds a segment to the pattern.</summary>
     /// <param name="length">The length of the segment to be added.</param>
     /// <param name="isSolid">
@@ -621,7 +680,9 @@ namespace Rhino.DocObjects
     {
       IntPtr ptrThis = NonConstPointer();
       IntPtr constPtrCurve = shapeCurve.ConstPointer();
-      return UnsafeNativeMethods.ON_Linetype_AddShape1(ptrThis, constPtrCurve, offset);
+      bool rc = UnsafeNativeMethods.ON_Linetype_AddShape1(ptrThis, constPtrCurve, offset);
+      GC.KeepAlive(shapeCurve);
+      return rc;
     }
 
     /// <summary>
@@ -635,7 +696,9 @@ namespace Rhino.DocObjects
     {
       IntPtr ptrThis = NonConstPointer();
       IntPtr constPtrText = text.ConstPointer();
-      return UnsafeNativeMethods.ON_Linetype_AddShape2(ptrThis, constPtrText, offset);
+      bool rc = UnsafeNativeMethods.ON_Linetype_AddShape2(ptrThis, constPtrText, offset);
+      GC.KeepAlive(text);
+      return rc;
     }
 
     /// <summary>

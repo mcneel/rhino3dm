@@ -1,0 +1,141 @@
+rhino3dm.Point4d
+================
+
+.. py:class:: rhino3dm.Point4d
+              Point4d(x: float, y: float, z: float, w: float)
+              Point4d(point: Point3d)
+              Point4d(arg: Point4d)
+              Point4d(arg: collections.abc.Sequence[Any], /)
+
+   Represents the four coordinates of a point in four-dimensional space.
+
+   The W (fourth) dimension is often considered the weight of the point as seen in 3D space.
+
+
+   .. py:method:: Add(point1: Point4d, point2: Point4d) -> Point4d
+      :staticmethod:
+
+
+      Sums two ``Point4d`` together.
+
+      (Provided for languages that do not support operator overloading. You can use the + operator otherwise)
+
+      :param point1: First point.
+      :param point2: Second point.
+
+      :returns: A new point that results from the weighted addition of point1 and point2.
+
+
+
+   .. py:method:: Encode() -> dict[str, Any]
+
+      This object as a JSON-compatible dict (rhino3dm only; inverse: ``Decode``).
+
+      :returns: geometry and other objects are stored as their 3dm archive, base64 encoded, with the archive version.
+      :rtype: A dict of numbers and strings
+
+
+
+   .. py:method:: EpsilonEquals(other: Point4d, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: Equals(point: Point4d) -> bool
+
+      Determines whether the specified point has same value as the present point.
+
+      :param point: The specified point.
+
+      :returns: true if point has the same value as this; otherwise false.
+
+
+
+   .. py:method:: Multiply(point: Point4d, d: float) -> Point4d
+      :staticmethod:
+
+
+      Multiplies a point by a number.
+
+      (Provided for languages that do not support operator overloading. You can use the \* operator otherwise)
+
+      :param point: A point.
+      :param d: A number.
+
+      :returns: A new point that results from the coordinate-wise multiplication of point with d.
+
+
+
+   .. py:method:: Subtract(point1: Point4d, point2: Point4d) -> Point4d
+      :staticmethod:
+
+
+      Subtracts the second point from the first point.
+
+      (Provided for languages that do not support operator overloading. You can use the - operator otherwise)
+
+      :param point1: First point.
+      :param point2: Second point.
+
+      :returns: A new point that results from the weighted subtraction of point2 from point1.
+
+
+
+   .. py:method:: ToString() -> str
+
+
+   .. py:method:: Transform(xform: Transform) -> None
+
+      Transforms the present point in place. The transformation matrix acts on the left of the point. i.e.,
+
+      result = transformation\*point
+
+      :param xform: Transformation to apply.
+
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Returns an indication regarding the validity of this point.
+
+
+   .. py:attribute:: Unset
+      :type:  Point4d
+      :value: Ellipsis
+
+
+      object, /) -> Point4d
+
+      :type: (arg
+
+
+   .. py:property:: W
+      :type: float
+
+
+      Gets or sets the W (fourth) coordinate -or weight- of this point.
+
+
+   .. py:property:: X
+      :type: float
+
+
+      Gets or sets the X (first) coordinate of this point.
+
+
+   .. py:property:: Y
+      :type: float
+
+
+      Gets or sets the Y (second) coordinate of this point.
+
+
+   .. py:property:: Z
+      :type: float
+
+
+      Gets or sets the Z (third) coordinate of this point.
+

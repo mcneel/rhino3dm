@@ -1,0 +1,31 @@
+rhino3dm.MeshingParameterTextureRange
+=====================================
+
+.. py:class:: rhino3dm.MeshingParameterTextureRange
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines how to pack render/meshes textures.
+
+
+   .. py:attribute:: PackedScaledNormalized
+      :value: 2
+
+
+      Each face is assigned a texture range that is a sub-rectangle of [0,1]x[0,1]. The sub-rectangles are mutually disjoint and packed into [0,1]x[0,1] in a way that minimizes distortion and maximizes the coverage of [0,1]x[0,1]. When the surface or surfaces being meshed are trimmed, this option takes into account only the region of the base surface the mesh covers and uses as much of [0,1]x[0,1] as possible. (default)
+
+
+   .. py:attribute:: UnpackedUnscaledNormalized
+      :value: 1
+
+
+      Each face has a normalized texture range [0,1]x[0,1]. The normalized coordinate is calculated using the entire surface domain. For meshes of trimmed surfaces when the active area is a small subset of the entire surface, there will be large regions of unused texture space in [0,1]x[0,1]. When the 3d region being meshed is far from being square-ish, there will be a substantial amount of distortion mapping [0,1]x[0,1] texture space to the 3d mesh.
+
+
+   .. py:attribute:: Unset
+      :value: 0
+
+
+      This value is not set.
+

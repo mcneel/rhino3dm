@@ -32,36 +32,31 @@ class TestEdgeIdentityAndTopology(fixture.SubDFixtureTestCase):
         ids = [e.Id for e in self.subd.Edges]
         self.assertEqual(len(set(ids)), spec.SUBD["edge_count"])
         for edge in self.subd.Edges:
-            self.assertEqual(self.subd.Edges[edge.Id].Id, edge.Id)
-            self.assertEqual(edge.Index, edge.Id)
+            self.assertEqual(self.subd.Edges.Find(edge.Id).Id, edge.Id)
+            # 8.x's edge.Index was the Id; RhinoCommon has only Id.
 
     def test_vertex_and_face_counts(self):
         for name, edge in self.edges.items():
             with self.subTest(edge=name):
-                self.assertEqual(edge.VertexCount, spec.EDGE_VERTEX_COUNT)
+                self.assertEqual(len(edge.Vertices), spec.EDGE_VERTEX_COUNT)   # 8.x: VertexCount
                 # Every edge of a closed box is interior, so it has two faces.
                 self.assertEqual(edge.FaceCount, spec.EDGE_FACE_COUNT)
 
     def test_endpoints_are_the_authored_pair(self):
         for name, edge in self.edges.items():
             with self.subTest(edge=name):
-                got = {fixture.vertex_name(edge.Vertex(0)),
-                       fixture.vertex_name(edge.Vertex(1))}
+                got = {fixture.vertex_name(edge.VertexFrom),
+                       fixture.vertex_name(edge.VertexTo)}
                 self.assertEqual(got, set(name))
-
-    def test_vertex_id_agrees_with_vertex(self):
-        for name, edge in self.edges.items():
-            with self.subTest(edge=name):
-                for i in (0, 1):
-                    self.assertEqual(edge.VertexId(i), edge.Vertex(i).Id)
 
     def test_sub_iterators_agree_with_the_indexed_accessors(self):
         for name, edge in self.edges.items():
             with self.subTest(edge=name):
-                self.assertEqual(edge.Vertices.Count, edge.VertexCount)
-                self.assertEqual(edge.Faces.Count, edge.FaceCount)
+                # edge.Vertices / edge.Faces are lists (D26).
+                self.assertEqual(len(edge.Vertices), 2)
+                self.assertEqual(len(edge.Faces), edge.FaceCount)
                 self.assertEqual([v.Id for v in edge.Vertices],
-                                 [edge.Vertex(i).Id for i in range(edge.VertexCount)])
+                                 [edge.VertexFrom.Id, edge.VertexTo.Id])
 
     def test_adjacent_faces_report_this_edge(self):
         for name, edge in self.edges.items():
@@ -84,9 +79,10 @@ class TestEdgeGeometry(fixture.SubDFixtureTestCase):
         for name, edge in self.edges.items():
             with self.subTest(edge=name):
                 for i in (0, 1):
+                    end = fixture.edge_vertex(edge, i)
                     self.assertPointEqual(
-                        edge.ControlNetPoint(i),
-                        spec.VERTEX_POINTS[fixture.vertex_name(edge.Vertex(i))],
+                        end.ControlNetPoint,   # 8.x: edge.ControlNetPoint(i)
+                        spec.VERTEX_POINTS[fixture.vertex_name(end)],
                         "%s.ControlNetPoint(%d)" % (name, i))
 
     def test_control_net_direction_runs_from_end_0_to_end_1(self):
@@ -95,10 +91,10 @@ class TestEdgeGeometry(fixture.SubDFixtureTestCase):
         # endpoint opennurbs happened to store first.
         for name, edge in self.edges.items():
             with self.subTest(edge=name):
-                p0 = spec.VERTEX_POINTS[fixture.vertex_name(edge.Vertex(0))]
-                p1 = spec.VERTEX_POINTS[fixture.vertex_name(edge.Vertex(1))]
+                p0 = spec.VERTEX_POINTS[fixture.vertex_name(edge.VertexFrom)]
+                p1 = spec.VERTEX_POINTS[fixture.vertex_name(edge.VertexTo)]
                 expected = tuple(b - a for a, b in zip(p0, p1))
-                direction = edge.ControlNetDirection
+                direction = edge.ControlNetLine.Direction   # 8.x: ControlNetDirection
                 self.assertPointEqual(direction, expected,
                                       "%s.ControlNetDirection" % name)
                 length = (direction.X ** 2 + direction.Y ** 2 + direction.Z ** 2) ** 0.5
@@ -107,8 +103,8 @@ class TestEdgeGeometry(fixture.SubDFixtureTestCase):
     def test_control_net_centre_point_is_the_midpoint(self):
         for name, edge in self.edges.items():
             with self.subTest(edge=name):
-                p0 = spec.VERTEX_POINTS[fixture.vertex_name(edge.Vertex(0))]
-                p1 = spec.VERTEX_POINTS[fixture.vertex_name(edge.Vertex(1))]
+                p0 = spec.VERTEX_POINTS[fixture.vertex_name(edge.VertexFrom)]
+                p1 = spec.VERTEX_POINTS[fixture.vertex_name(edge.VertexTo)]
                 midpoint = tuple((a + b) / 2.0 for a, b in zip(p0, p1))
                 self.assertPointEqual(edge.ControlNetCenterPoint, midpoint,
                                       "%s.ControlNetCenterPoint" % name)
@@ -182,7 +178,7 @@ class TestEdgeTagsAndCreases(fixture.SubDFixtureTestCase):
     def test_dart_count_matches_the_dart_vertices_on_the_edge(self):
         for name, edge in self.edges.items():
             with self.subTest(edge=name):
-                darts = sum(1 for i in (0, 1) if edge.Vertex(i).IsDart)
+                darts = sum(1 for v in (edge.VertexFrom, edge.VertexTo) if v.IsDart)
                 self.assertEqual(edge.DartCount, darts)
 
     def test_is_sharp_and_end_sharpness(self):
@@ -191,9 +187,9 @@ class TestEdgeTagsAndCreases(fixture.SubDFixtureTestCase):
             with self.subTest(edge=name):
                 self.assertEqual(edge.IsSharp, expected["is_sharp"])
                 for i in (0, 1):
-                    at = fixture.vertex_name(edge.Vertex(i))
+                    at = fixture.vertex_name(fixture.edge_vertex(edge, i))
                     self.assertAlmostEqual(
-                        edge.EndSharpness(i), expected["sharpness"][at],
+                        edge.EndSharpness(i, False), expected["sharpness"][at],
                         delta=spec.VALUE_TOL,
                         msg="%s.EndSharpness at %s" % (name, at))
 

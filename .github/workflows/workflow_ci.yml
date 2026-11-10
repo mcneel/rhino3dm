@@ -6,7 +6,16 @@ on:
   push:
   pull_request:
 
+# read-only token: CI only checks out, diffs and moves artifacts (which use their own token)
+permissions:
+  contents: read
+  pull-requests: read   # tj-actions/changed-files can list a PR's files through the API
+
 env:
+  # oldest macOS the wheels and the native library run on, as in 8.x: the macos-15 runner builds
+  # them, and this sets the wheel tag (macosx_14_0) and CMake's CMAKE_OSX_DEPLOYMENT_TARGET.
+  # 14.0 also covers std::to_chars for doubles (macOS 13.3+), which the generated bindings use
+  MACOSX_DEPLOYMENT_TARGET: '14.0'
   RETENTION_DAYS: 15
 
 jobs:
@@ -66,10 +75,12 @@ jobs:
           files: |
             .github/workflows/workflow_ci.yml
             Current_Development_Tools.md
+            api/**
             script/**
             setup.py
             src/CMakeLists.txt
             src/librhino3dm_native/CMakeLists.txt
+            tools/extract/**
       - name: List all changed files
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
@@ -244,8 +255,10 @@ jobs:
         run: git submodule update --init --recursive
       - name: bootstrap
         run: python3 script/bootstrap.py -p js
+      # the ES module is built as released (no -d): a debug build keeps emscripten's environment
+      # check, which stops this browser-only module from loading in node for the smoke test below
       - name: setup js module
-        run: python3 script/setup.py -p js -o -v -d -m
+        run: python3 script/setup.py -p js -o -v -m
       - name: build js module
         run: python3 script/build.py -p js -o -v
       - name: copy files
@@ -253,6 +266,10 @@ jobs:
         run: |
           mkdir src/build/javascript/artifacts
           mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts/rhino3dm.module.js
+          # the module's own wasm (Release); the debug build below writes a different rhino3dm.wasm.
+          # Only the smoke test uses it: the package files list leaves it out, and in the release
+          # workflow both builds are Release, so their wasm is the same
+          mv src/build/javascript/artifacts_js/rhino3dm.wasm src/build/javascript/artifacts/rhino3dm.module.wasm
           cp package.json src/build/javascript/artifacts
           cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts/README.md
           cp src/js/rhino3dm.d.ts src/build/javascript/artifacts/rhino3dm.d.ts
@@ -276,6 +293,44 @@ jobs:
           name: rhino3dm.js
           retention-days: ${{ env.RETENTION_DAYS }}
 
+  # The memory64 variant the release ships in wasm64/. Its own job, in parallel with build_js,
+  # so it adds runner minutes but not wall-clock time: one debug build, no ES module.
+  build_js_wasm64:
+    name: build rhino3dm.js wasm64
+    runs-on: ubuntu-latest
+    needs: [check_bindings, check_workflow, check_build_scripts, check_tests_js]
+    if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' || needs.check_tests_js.outputs.any_changed == 'true' }}
+    container:
+      image: emscripten/emsdk:5.0.7
+    steps:
+      - name: info
+        run: python3 --version && emcc --version && cmake --version
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: safe dir
+        run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
+      - name: update submodules
+        run: git submodule update --init --recursive
+      - name: bootstrap
+        run: python3 script/bootstrap.py -p js
+      - name: setup js wasm64
+        run: python3 script/setup.py -p js -o -v -d -w
+      - name: build js wasm64
+        run: python3 script/build.py -p js -o -v
+      - name: copy files
+        shell: bash
+        run: |
+          mkdir src/build/javascript/artifacts
+          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts
+          mv src/build/javascript/artifacts_js/rhino3dm.wasm src/build/javascript/artifacts
+          cp package.json src/build/javascript/artifacts
+      - name: artifacts
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          path: src/build/javascript/artifacts
+          name: rhino3dm.js-wasm64
+          retention-days: ${{ env.RETENTION_DAYS }}
+
   build_py_all_bdist:
     name: build python ${{ matrix.python-version }} ${{ matrix.target }} ${{ matrix.os }} bdist
     runs-on: ${{ matrix.os }}
@@ -283,7 +338,7 @@ jobs:
     if: ${{ needs.check_bindings.outputs.any_changed == 'true' || needs.check_workflow.outputs.any_changed == 'true' || needs.check_build_scripts.outputs.any_changed == 'true' || needs.check_tests_py.outputs.any_changed == 'true' }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2022, windows-11-arm, macos-14, macos-15]
+        os: [ubuntu-latest, windows-2022, windows-11-arm, macos-15]
         python-version: ['3.12']
         include:
           - os: ubuntu-latest
@@ -294,8 +349,6 @@ jobs:
             target: windows
             # native ARM64 python (not emulated x64) — see setup-python step
             architecture: arm64
-          - os: macos-14
-            target: macos
           - os: macos-15
             target: macos
       fail-fast: false
@@ -334,8 +387,9 @@ jobs:
       - name: setup python
         uses: actions/setup-python@v5.4.0
         with:
-          # Semantic version range syntax or exact version of a Python version
-          python-version: '3.9'
+          # Semantic version range syntax or exact version of a Python version. Not 3.9: it is end
+          # of life (2025-10) and setup-python has no build of it for ubuntu-latest (26.04)
+          python-version: '3.12'
       - name: info
         run: python --version && cmake --version
       - name: install dependencies
@@ -396,6 +450,10 @@ jobs:
         run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
       - name: update submodules
         run: ls && git submodule update --init --recursive
+      - name: setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
       - name: bootstrap
         run: python3 script/bootstrap.py -p linux
       - name: setup
@@ -407,6 +465,11 @@ jobs:
       # Catches a C# member being synced without its backing C export.
       - name: validate native surface
         run: python3 tools/extract/validate.py src/build/linux/librhino3dm_native.so
+      # AutoNativeMethods.cs is gitignored and produced by methodgen during
+      # setup, so the manifest reconciliation can only run after that -- here,
+      # not as a standalone job on a bare checkout.
+      - name: reconcile api manifest
+        run: cd tools/extract && python3 reconcile.py
       - name: pack dotnet
         run: dotnet pack src/dotnet/Rhino3dm.csproj -c Debug
       - name: artifacts
@@ -429,6 +492,10 @@ jobs:
         run: python3 --version && cmake --version && dotnet --version && git --version
       - name: checkout
         uses: actions/checkout@v4.1.1
+      - name: setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
       - name: safe directory
         run: git config --global --add safe.directory /__w/rhino3dm/rhino3dm
       - name: download artifact
@@ -444,9 +511,9 @@ jobs:
           VERSION=${NAME:9}
           dotnet nuget add source $(pwd)/tests/dotnet/lib/dotnet/bin/Debug
           cd tests/dotnet
-          dotnet add package Rhino3dm -v ${VERSION}
-          dotnet build
-          dotnet test
+          # the test project references src/dotnet; this tests the package built above instead
+          dotnet build -p:Rhino3dmVersion=${VERSION}
+          dotnet test --no-build -p:Rhino3dmVersion=${VERSION}
 
   test_python_bdist:
     name: test py ${{ matrix.python-version }} ${{ matrix.target }} ${{ matrix.os }} bdist
@@ -454,7 +521,7 @@ jobs:
     needs: [build_py_all_bdist]
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2022, windows-11-arm, macos-14, macos-15]
+        os: [ubuntu-latest, windows-2022, windows-11-arm, macos-15]
         python-version: ['3.12']
         include:
           - os: ubuntu-latest
@@ -465,8 +532,6 @@ jobs:
             target: windows
             # native ARM64 python (not emulated x64) — see setup-python step
             architecture: arm64
-          - os: macos-14
-            target: macos
           - os: macos-15
             target: macos
       fail-fast: false
@@ -508,10 +573,40 @@ jobs:
         with:
           name: rhino3dm.js
           path: tests/javascript/lib
-      # The default build is WASM64 (memory64) as of 9.0, which needs node >= 24
-      # (BCD: chrome 133, firefox 134, node 24, safari preview). ubuntu-latest's
-      # bundled node is unpinned and too old; without this the module fails to
-      # instantiate with "CompileError: invalid table elements limits flags".
+      # The default build is wasm32 again since 9.2 (memory64 is the release's wasm64/
+      # variant). Test it on Node 22, the oldest Node package.json allows; ubuntu-latest's
+      # bundled node is unpinned. A memory64 module would fail here with
+      # "CompileError: invalid table elements limits flags", so this also guards the default.
+      - name: setup node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: test javascript
+        run: |
+          ls tests/javascript/lib
+          cd tests/javascript
+          npm i
+          npm test
+      - name: test es6 module build
+        run: cd tests/javascript && node module.smoke.mjs
+      # npm pack, then the package as users load it: Node require, Node import, a webpack 5 bundle
+      - name: test npm package
+        run: bash tests/javascript/package/run.sh tests/javascript/lib
+      
+
+  test_javascript_wasm64:
+    name: test javascript wasm64
+    runs-on: ubuntu-latest
+    needs: [build_js_wasm64]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: download artifact
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: rhino3dm.js-wasm64
+          path: tests/javascript/lib
+      # memory64 runs unflagged on Node 24+
       - name: setup node 24
         uses: actions/setup-node@v4
         with:
@@ -522,6 +617,3 @@ jobs:
           cd tests/javascript
           npm i
           npm test
-      
-
-

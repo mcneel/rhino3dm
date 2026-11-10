@@ -2186,6 +2186,7 @@ enum Settings3dmInt : int
 {
   CurrentWireDensity = 0,
   IdefLinkUpdate = 1,
+  CurrentLinetypeSource = 2,
 };
 
 RH_C_FUNCTION int ON_3dmSettings_GetInt(const ON_3dmSettings* pConstSettings, enum Settings3dmInt which)
@@ -2196,6 +2197,7 @@ RH_C_FUNCTION int ON_3dmSettings_GetInt(const ON_3dmSettings* pConstSettings, en
   {
   case Settings3dmInt::CurrentWireDensity: return pConstSettings->m_current_wire_density;
   case Settings3dmInt::IdefLinkUpdate:     return (int)pConstSettings->m_IO_settings.m_idef_link_update;
+  case Settings3dmInt::CurrentLinetypeSource: return (int)pConstSettings->m_current_linetype_source;
   }
   return 0;
 }
@@ -2212,6 +2214,9 @@ RH_C_FUNCTION void ON_3dmSettings_SetInt(ON_3dmSettings* pSettings, enum Setting
   case Settings3dmInt::IdefLinkUpdate:
     // a plain int on this branch, not an enum
     pSettings->m_IO_settings.m_idef_link_update = value;
+    break;
+  case Settings3dmInt::CurrentLinetypeSource:
+    pSettings->m_current_linetype_source = ON::ObjectLinetypeSource(value);
     break;
   }
 }

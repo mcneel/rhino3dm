@@ -1,0 +1,4 @@
+rhino3dm.File3dmLayerTableIter
+==============================
+
+.. py:class:: rhino3dm.File3dmLayerTableIter

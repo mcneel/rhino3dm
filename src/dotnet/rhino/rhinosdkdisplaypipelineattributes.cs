@@ -46,6 +46,7 @@ namespace Rhino.Display
     internal DisplayPipelineAttributes(DisplayPipelineAttributes other)
     {
       m_ptr_attributes = UnsafeNativeMethods.CDisplayPipelineAttributes_New2(other.ConstPointer());
+      GC.KeepAlive(other);
     }
 
     internal DisplayPipelineAttributes(DisplayModeDescription parent)
@@ -405,7 +406,17 @@ namespace Rhino.Display
         get { return m_parent.GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowGridOnTop); }
         set { m_parent.SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowGridOnTop, value); }
       }
-      //bool m_bShowTransGrid;
+
+      /// <summary>
+      /// Draw the grid after transparent objects, using GridTransparency.
+      /// This is the "Use transparent grid" grid appearance.
+      /// </summary>
+      /// <since>9.0</since>
+      public bool ShowTransparentGrid
+      {
+        get { return m_parent.GetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowTransGrid); }
+        set { m_parent.SetBool(UnsafeNativeMethods.DisplayPipelineAttributesBool.ShowTransGrid, value); }
+      }
 
       /// <since>5.0</since>
       public bool BlendGrid

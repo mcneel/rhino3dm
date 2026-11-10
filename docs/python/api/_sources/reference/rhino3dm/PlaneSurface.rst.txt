@@ -1,0 +1,61 @@
+rhino3dm.PlaneSurface
+=====================
+
+.. py:class:: rhino3dm.PlaneSurface
+              PlaneSurface(plane: Plane)
+              PlaneSurface(plane: Plane, xExtents: Interval, yExtents: Interval)
+
+   Bases: :py:obj:`Surface`
+
+
+   Represents a plane surface.
+
+
+   .. py:method:: CreateThroughBox(lineInPlane: Line, vectorInPlane: Vector3d, box: BoundingBox) -> PlaneSurface
+                  CreateThroughBox(plane: Plane, box: BoundingBox) -> PlaneSurface
+      :staticmethod:
+
+
+      Create a plane that contains the intersection of a bounding box.
+
+      :param plane: An original plane value.
+      :param box: A box to use for extension boundary.
+
+      :returns: A new plane surface on success, or null on error.
+
+
+
+   .. py:method:: GetExtents(direction: int) -> Interval
+
+      Gets the extents of the plane surface.
+
+      :param direction: The direction, where 0 gets plane surface's x coordinate extents and 1 gets plane surface's y coordinate extents.
+
+      :returns: An increasing interval.
+
+
+
+   .. py:method:: SetExtents(direction: int, extents: Interval, syncDomain: bool) -> None
+
+      Sets the extents of the plane surface.
+
+      :param direction: The direction, where 0 sets plane surface's x coordinate extents and 1 sets plane surface's y coordinate extents.
+      :param extents: An increasing interval.
+      :param syncDomain: If true, the corresponding evaluation interval domain is set so that it matches the extents interval. If false, the corresponding evaluation interval domain is not changed.
+
+
+
+   .. py:method:: ToMesh() -> Mesh
+
+      Computes a polygon mesh of the surface made of one quad.
+
+      :returns: A polygon mesh of the surface.
+
+
+
+   .. py:property:: Plane
+      :type: Plane
+
+
+      Gets or sets the plane surface's plane.
+

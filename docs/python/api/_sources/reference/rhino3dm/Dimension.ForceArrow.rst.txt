@@ -1,0 +1,25 @@
+rhino3dm.Dimension.ForceArrow
+=============================
+
+.. py:class:: rhino3dm.Dimension.ForceArrow
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   OBSOLETE enum do not use.
+
+
+   .. py:attribute:: Auto
+      :value: 0
+
+
+
+   .. py:attribute:: Inside
+      :value: 1
+
+
+
+   .. py:attribute:: Outside
+      :value: 2
+
+

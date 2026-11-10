@@ -1,0 +1,253 @@
+rhino3dm.ModelComponent
+=======================
+
+.. py:class:: rhino3dm.ModelComponent
+
+   Bases: :py:obj:`CommonObject`
+
+
+   Base class for all components in a model (document) and manages the index, id and other information common to this type of objects.
+
+   This class parallels the C++ ON\_ModelComponent.
+
+
+   .. py:method:: ClearId() -> None
+
+      Resets the HasId property of the model component to false, if possible.
+
+      :raises InvalidOperationException: If the ID is locked.
+
+
+
+   .. py:method:: ClearIndex() -> None
+
+      Resets the HasIndex property of the model component to false, if possible.
+
+      :raises InvalidOperationException: If the index is locked.
+
+
+
+   .. py:method:: ClearName() -> None
+
+      Resets the HasName property of the model component to false, if possible.
+
+      :raises InvalidOperationException: If the name is locked.
+
+
+
+   .. py:method:: DataCRC(currentRemainder: int) -> int
+
+      Increments the Cyclic Redundancy Check value by this instance.
+
+      :param currentRemainder: The current remainder value.
+
+      :returns: The updated remainder value.
+
+
+
+   .. py:method:: IsValidComponentName(name: str) -> bool
+      :staticmethod:
+
+
+      Tests for a valid model component name.
+
+      :param name: The string to validate.
+
+      :returns: true if the string is a valid model component name, false otherwise.
+
+
+
+   .. py:method:: LockId() -> None
+
+      Locks the component Id property.
+
+
+
+   .. py:method:: LockIndex() -> None
+
+      Locks the component Index property.
+
+
+
+   .. py:method:: LockName() -> None
+
+      Locks the component Name property.
+
+
+
+   .. py:method:: ModelComponentTypeIgnoresCase(type: ModelComponentType) -> bool
+      :staticmethod:
+
+
+      Informs the developer if a particular model component type will require case-ignoring searching within a document. This is currently true with groups; false otherwise.
+
+      :param type: True if the component ignores case.
+
+
+
+   .. py:method:: ModelComponentTypeIncludesParent(type: ModelComponentType) -> bool
+      :staticmethod:
+
+
+      Informs the developer if a particular model component type will include the hash of the parent.
+
+      :param type: True if the component includes parent hash.
+
+
+
+   .. py:method:: ModelComponentTypeRequiresUniqueName(type: ModelComponentType) -> bool
+      :staticmethod:
+
+
+      Informs the developer if a particular model component type will require uniqueness within a document. This is currently true with render materials and model geometry; false otherwise.
+
+      :param type: The type to check.
+
+      :returns: true with render materials and model geometry; false otherwise.
+
+
+
+   .. py:property:: DeletedName
+      :type: str
+
+
+      Gets the name of a component that is deleted.
+
+
+   .. py:property:: HasId
+      :type: bool
+
+
+      Returns a value indicating whether the component has an ID.
+
+
+   .. py:property:: HasIndex
+      :type: bool
+
+
+      Returns a value indicating whether the component has an Index.
+
+
+   .. py:property:: HasName
+      :type: bool
+
+
+      Returns a value indicating whether the component has a Name.
+
+
+   .. py:property:: Id
+      :type: uuid.UUID
+
+
+      Gets or sets the ID of the current instance.
+
+      :raises InvalidOperationException: When setting the ID failed. This usually happened because the instance ID is already locked.
+
+
+   .. py:property:: IdIsLocked
+      :type: bool
+
+
+      Returns a value indicating whether the component ID is already locked.
+
+
+   .. py:property:: Index
+      :type: int
+
+
+      Gets or sets the model component index attribute.
+
+      :raises InvalidOperationException: When setting the Index failed. This usually happens because the instance Index is already locked.
+
+
+   .. py:property:: IndexIsLocked
+      :type: bool
+
+
+      Returns a value indicating whether the component Index is already locked.
+
+
+   .. py:property:: InstanceDefinitionModelSerialNumber
+      :type: int
+
+
+      When a component is in a model as part of the information required for a linked instance definition, this value identifies the linked instance definition reference model.
+
+      Reference components are not saved in .3dm archives. Typically this value is set and locked by the code that adds a component to a model. This value is not saved in .3dm archives.
+
+
+   .. py:property:: IsComponentStatusLocked
+      :type: bool
+
+
+      The component status itself can be locked. This returns an indication.
+
+
+   .. py:property:: IsDeleted
+      :type: bool
+
+
+      true if the component is deleted. Deleted components are kept by the document for undo purposes.
+
+
+   .. py:property:: IsReference
+      :type: bool
+
+
+      Gets a value indicting whether this component is a referenced component. Referenced components are part of referenced documents.
+
+
+   .. py:property:: IsSystemComponent
+      :type: bool
+
+
+      True if this model component is a system constant.
+
+      An incomplete list of system constant model components is below:
+
+      - ON\_ModelComponent::Unset - ON\_InstanceDefinition::Empty - ON\_Linetype::Unset - ON\_Linetype::Continuous - ON\_Linetype::ByLayer - ON\_Linetype::ByParent - ON\_Layer::Unset - ON\_Layer::Default - ON\_TextStyle::Unset - ON\_TextStyle::Default - ON\_TextStyle::ByLayer - ON\_TextStyle::ByParent - ON\_DimStyle::Unset - ON\_DimStyle::Default - ON\_DimStyle::DefaultInchDecimal - ON\_DimStyle::DefaultInchFractional - ON\_DimStyle::DefaultFootInchArchitecture - ON\_DimStyle::DefaultMillimeterSmall - ON\_DimStyle::DefaultMillimeterLarge - ON\_DimStyle::DefaultMillimeterArchitecture
+
+
+   .. py:property:: ModelSerialNumber
+      :type: int
+
+
+      A value identifying the model that manages this component.
+
+      If the component is being managed by a model, this value identifies the model. In Rhino, this value is the document runtime serial number. Typically this value is set and locked by the code that adds a component to a model. This value is not saved in .3dm archives.
+
+
+   .. py:property:: Name
+      :type: str
+
+
+      Gets or sets the name
+
+      :raises InvalidOperationException: When setting the Name failed. This usually happens because the instance Name is already locked.
+
+
+   .. py:property:: NameIsLocked
+      :type: bool
+
+
+      Returns a value indicating whether the component Name is already locked.
+
+
+   .. py:attribute:: NamePathSeparator
+      :type:  str
+      :value: Ellipsis
+
+
+      object, /) -> str
+
+      :type: (arg
+
+
+   .. py:property:: ReferenceModelSerialNumber
+      :type: int
+
+
+      When a component is in a model for reference, this value identifies the reference model.
+
+      Reference components are not saved in .3dm archives. Typically this value is set and locked by the code that adds a component to a model. This value is not saved in .3dm archives.
+

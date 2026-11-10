@@ -1,0 +1,294 @@
+rhino3dm.TextureMapping
+=======================
+
+.. py:class:: rhino3dm.TextureMapping
+
+   Bases: :py:obj:`ModelComponent`
+
+
+   Represents a texture mapping.
+
+
+   .. py:method:: CreateBoxMapping(plane: Plane, dx: Interval, dy: Interval, dz: Interval, capped: bool) -> TextureMapping
+      :staticmethod:
+
+
+      Create a box projection texture mapping.
+
+      When m\_texture\_space = divided, the box is mapped to texture space as follows: If the box is not capped, then each side maps to 1/4 of the texture map. v=1+---------+---------+---------+---------+ \| x=dx[1] \| y=dy[1] \| x=dx[0] \| y=dy[0] \| \| Front \| Right \| Back \| Left \| \| --y-> \| <-x-- \| <-y-- \| --x-> \| v=0+---------+---------+---------+---------+ 0/4 <=u<= 1/4 <=u<= 2/4 <=u<= 3/4 <=u<= 4/4 If the box is capped, then each side and cap gets 1/6 of the texture map. v=1+---------+---------+---------+---------+---------+---------+ \| x=dx[1] \| y=dy[1] \| x=dx[0] \| y=dy[0] \| z=dx[1] \| z=dz[0] \| \| Front \| Right \| Back \| Left \| Top \| Bottom \| \| --y-> \| <x-- \| <-y-- \| --x-> \| --x-> \| --x-> \| v=0+---------+---------+---------+---------+---------+---------+ 0/6 <=u<= 1/6 <=u<= 2/6 <=u<= 3/6 <=u<= 4/6 <=u<= 5/6 <=u<= 6/6
+
+      :param plane: The sides of the box the box are parallel to the plane's coordinate planes. The dx, dy, dz intervals determine the location of the sides.
+      :param dx: Determines the location of the front and back planes. The vector plane.xaxis is perpendicular to these planes and they pass through plane.PointAt(dx[0],0,0) and plane.PointAt(dx[1],0,0), respectively.
+      :param dy: Determines the location of the left and right planes. The vector plane.yaxis is perpendicular to these planes and they pass through plane.PointAt(0,dy[0],0) and plane.PointAt(0,dy[1],0), respectively.
+      :param dz: Determines the location of the top and bottom planes. The vector plane.zaxis is perpendicular to these planes and they pass through plane.PointAt(0,0,dz[0]) and plane.PointAt(0,0,dz[1]), respectively.
+      :param capped: If true, the box is treated as a finite capped box.
+
+      :returns: TextureMapping instance if input is valid
+
+
+
+   .. py:method:: CreateCustomMeshMapping(mesh: Mesh) -> TextureMapping
+      :staticmethod:
+
+
+      Create custom mesh mapping
+
+      :param mesh: Mesh with texture coordinates
+
+      :returns: TextureMapping instance
+
+
+
+   .. py:method:: CreateCylinderMapping(cylinder: Cylinder, capped: bool) -> TextureMapping
+      :staticmethod:
+
+
+      Create a cylindrical projection texture mapping.
+
+      When the cylinder is capped and m\_texture\_space = divided, the cylinder is mapped to texture space as follows: The side is mapped to 0 <= "u" <= 2/3. The bottom is mapped to 2/3 <= "u" <= 5/6. The top is mapped to 5/6 <= "u" <= 5/6. This is the same convention box mapping uses.
+
+      :param cylinder: cylinder in world space used to define a cylindrical coordinate system. The angular parameter maps (0,2pi) to texture "u" (0,1), The height parameter maps (height[0],height[1]) to texture "v" (0,1), and the radial parameter maps (0,r) to texture "w" (0,1).
+      :param capped: If true, the cylinder is treated as a finite capped cylinder
+
+      :returns: TextureMapping instance if input is valid
+
+
+
+   .. py:method:: CreateOcsMapping(plane: Plane) -> TextureMapping
+      :staticmethod:
+
+
+      Create a Ocs texture mapping. Note that OCS mappings must be placed on mapping channel ON\_ObjectRenderingAttributes::OCSMappingChannelId() otherwise they will not work.
+
+      :param plane: A plane to use for mapping.
+
+
+
+   .. py:method:: CreatePlaneMapping(plane: Plane, dx: Interval, dy: Interval, dz: Interval, capped: bool) -> TextureMapping
+                  CreatePlaneMapping(plane: Plane, dx: Interval, dy: Interval, dz: Interval) -> TextureMapping
+      :staticmethod:
+
+
+      Create a planar UV projection texture mapping
+
+      :param plane: A plane to use for mapping.
+      :param dx: portion of the plane's x axis that is mapped to [0,1] (can be a decreasing interval)
+      :param dy: portion of the plane's y axis that is mapped to [0,1] (can be a decreasing interval)
+      :param dz: portion of the plane's z axis that is mapped to [0,1] (can be a decreasing interval)
+
+      :returns: TextureMapping instance if input is valid
+
+
+
+   .. py:method:: CreateSphereMapping(sphere: Sphere) -> TextureMapping
+      :staticmethod:
+
+
+      Create a spherical projection texture mapping.
+
+      :param sphere: sphere in world space used to define a spherical coordinate system. The longitude parameter maps (0,2pi) to texture "u" (0,1). The latitude parameter maps (-pi/2,+pi/2) to texture "v" (0,1). The radial parameter maps (0,r) to texture "w" (0,1).
+
+      :returns: TextureMapping instance if input is valid
+
+
+
+   .. py:method:: CreateSurfaceParameterMapping() -> TextureMapping
+      :staticmethod:
+
+
+      Create a mapping that will convert surface parameters into normalized(0,1)x(0,1) texture coordinates.
+
+      :returns: TextureMapping instance or null if failed.
+
+
+
+   .. py:method:: Evaluate(p: Point3d, n: Vector3d) -> tuple[int, Point3d]
+                  Evaluate(p: Point3d, n: Vector3d, pXform: Transform, nXform: Transform) -> tuple[int, Point3d]
+
+      Evaluate the mapping to get a texture coordinate
+
+      :param p: Vertex location
+      :param n: If the mapping projection is ray\_projection, then this is the vertex unit normal. Otherwise n is ignored.
+      :param pXform: Transformation to be applied to P before performing the mapping calculation.
+      :param nXform: Transformation to be applied to N before performing the mapping calculation. One way to calculate nXxform is to use the call pXform::GetVectorTransform(nXform).
+
+      :returns: 1 = cylinder wall, 2 = bottom cap, 3 = top cap Box mapping: 1 = front, 2 = right, 3 = back, 4 = left, 5 = bottom, 6 = top
+      :rtype: Nonzero if evaluation is successful. When the mapping is a box or capped cylinder mapping, the value indicates which side was evaluated. Cylinder mapping
+
+
+
+   .. py:method:: GetUserString(key: str) -> str
+
+      The named string attached to this object (rhino3dm only).
+
+      :param key: The string's name.
+
+      :returns: The text, empty when the key is not set.
+
+
+
+   .. py:method:: GetUserStrings() -> list[Any]
+
+      Every named string attached to this object (rhino3dm only).
+
+      :returns: A list of ``[key, value]`` pairs.
+
+
+
+   .. py:method:: SetUserString(key: str, value: str) -> bool
+
+      Attaches a named string to this object (rhino3dm only).
+
+      :param key: The string's name.
+      :param value: The text; an empty string removes the key.
+
+      :returns: True on success.
+
+
+
+   .. py:method:: TryGetMappingBox() -> tuple[bool, Plane, Interval, Interval, Interval]
+
+      Get a box projection from the texture mapping.
+
+      Generally, GetMappingBox will not return the same parameters passed to SetBoxMapping. However, the location of the box will be the same.
+
+      :returns: Returns true if a valid box is returned.
+
+
+
+   .. py:method:: TryGetMappingBoxCapped() -> tuple[bool, Plane, Interval, Interval, Interval, bool]
+
+      Get a box projection from the texture mapping, including capped information
+
+      Generally, GetMappingBox will not return the same parameters passed to SetBoxMapping. However, the location of the box will be the same.
+
+      :returns: Returns true if a valid box is returned.
+
+
+
+   .. py:method:: TryGetMappingCylinder() -> tuple[bool, Cylinder]
+
+      Get a cylindrical projection parameters from this texture mapping.
+
+      Generally, GetMappingCylinder will not return the same parameters passed to SetCylinderMapping. However, the location of the cylinder will be the same. If this mapping is not cylindrical, the cylinder will approximate the actual mapping primitive.
+
+      :returns: Returns true if a valid cylinder is returned.
+
+
+
+   .. py:method:: TryGetMappingCylinderCapped() -> tuple[bool, Cylinder, bool]
+
+      Get a cylindrical projection parameters from this texture mapping.
+
+      Generally, GetMappingCylinder will not return the same parameters passed to SetCylinderMapping. However, the location of the cylinder will be the same. If this mapping is not cylindrical, the cylinder will approximate the actual mapping primitive.
+
+      :returns: Returns true if a valid cylinder is returned.
+
+
+
+   .. py:method:: TryGetMappingPlane() -> tuple[bool, Plane, Interval, Interval, Interval]
+
+      Get plane mapping parameters from this texture mapping.
+
+      NOTE WELL: Generally, GetMappingPlane will not return the same parameters passed to SetPlaneMapping. However, the location of the plane will be the same.
+
+      :returns: Return true if valid plane mapping parameters were returned.
+
+
+
+   .. py:method:: TryGetMappingPlaneCapped() -> tuple[bool, Plane, Interval, Interval, Interval, bool]
+
+      Get plane mapping parameters from this texture mapping, including capping information
+
+      NOTE WELL: Generally, GetMappingPlane will not return the same parameters passed to SetPlaneMapping. However, the location of the plane will be the same.
+
+      :returns: Return true if valid plane mapping parameters were returned.
+
+
+
+   .. py:method:: TryGetMappingSphere() -> tuple[bool, Sphere]
+
+      Get a spherical projection parameters from this texture mapping.
+
+      Generally, GetMappingShere will not return the same parameters passed to SetSphereMapping. However, the location of the sphere will be the same. If this mapping is not cylindrical, the cylinder will approximate the actual mapping primitive.
+
+      :returns: Returns true if a valid sphere is returned.
+
+
+
+   .. py:property:: Capped
+      :type: bool
+
+
+      // The m\_bCapped applies to planar, cylinder and box mappings. If m\_bCapped is false, the cylinder or box is "infinite", if m\_bCapped is true, they are finite. In planar mappings, m\_bCapped=false means "the Z texture coordinate will always be 0.0" this is now the default behaviour in Rhino 5.0 - it's what users expect apparently.
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.TextureMapping``.
+
+
+   .. py:property:: Id
+      :type: uuid.UUID
+
+
+      The unique Id for this texture mapping object.
+
+
+   .. py:property:: MappingType
+      :type: TextureMappingType
+
+
+      Texture mapping type associated with this Mapping object.
+
+
+   .. py:property:: NormalTransform
+      :type: Transform
+
+
+      For primitive based mappings, these transformations are used to map the world coordinate (x,y,z) point P and surface normal N before it is projected to the normalized mapping primitive. The surface normal transformation, m\_Nxyz, is always calculated from m\_Pxyz. It is a runtime setting that is not saved in 3dm files. If m\_type is srfp\_mapping, then m\_Pxyz and m\_Nxyz are ignored.
+
+
+   .. py:property:: PrimativeTransform
+      :type: Transform
+
+
+      For primitive based mappings, these transformations are used to map the world coordinate (x,y,z) point P and surface normal N before it is projected to the normalized mapping primitive. The surface normal transformation, m\_Nxyz, is always calculated from m\_Pxyz. It is a runtime setting that is not saved in 3dm files. If m\_type is srfp\_mapping, then m\_Pxyz and m\_Nxyz are ignored.
+
+
+   .. py:property:: PrimitiveTransform
+      :type: Transform
+
+
+      For primitive based mappings, these transformations are used to map the world coordinate (x,y,z) point P and surface normal N before it is projected to the normalized mapping primitive. The surface normal transformation, m\_Nxyz, is always calculated from m\_Pxyz. It is a runtime setting that is not saved in 3dm files. If m\_type is srfp\_mapping, then m\_Pxyz and m\_Nxyz are ignored.
+
+
+   .. py:property:: Projection
+      :type: Projection
+
+
+      See Projection
+
+
+   .. py:property:: TextureSpace
+      :type: TextureSpace
+
+
+      See TextureSpace
+
+
+   .. py:property:: UserStringCount
+      :type: int
+
+
+      The number of named strings attached to this object (rhino3dm only).
+
+
+   .. py:property:: UvwTransform
+      :type: Transform
+
+
+      Transform applied to mapping coordinate (u,v,w) to convert it into a texture coordinate.
+

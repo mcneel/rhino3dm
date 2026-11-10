@@ -1,0 +1,43 @@
+rhino3dm.Ellipse
+================
+
+.. py:class:: rhino3dm.Ellipse
+              Ellipse(plane: Plane, radius1: float, radius2: float)
+              Ellipse(center: Point3d, second: Point3d, third: Point3d)
+
+   Represents the values of a plane and the two semi-axes radii in an ellipse.
+
+
+   .. py:method:: EpsilonEquals(other: Ellipse, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:property:: Center
+      :type: Point3d
+
+
+      Gets or sets the center of the ellipse.
+
+
+   .. py:property:: Plane
+      :type: Plane
+
+
+      Gets or sets the base plane of the ellipse.
+
+
+   .. py:property:: Radius1
+      :type: float
+
+
+      Gets or sets the radius of the ellipse along the base plane X semi-axis.
+
+
+   .. py:property:: Radius2
+      :type: float
+
+
+      Gets or sets the radius of the ellipse along the base plane Y semi-axis.
+

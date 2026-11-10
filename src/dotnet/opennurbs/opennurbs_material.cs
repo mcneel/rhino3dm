@@ -237,8 +237,17 @@ namespace Rhino.DocObjects
     /// <since>7.0</since>
     public double Anisotropic
     {
-      get { return UnsafeNativeMethods.ON_Material_PBR_Anisotropic(m_material.ConstPointer()); }
-      set { UnsafeNativeMethods.ON_Material_PBR_SetAnisotropic(m_material.NonConstPointer(), value); }
+      get
+      {
+        double rc = UnsafeNativeMethods.ON_Material_PBR_Anisotropic(m_material.ConstPointer());
+        GC.KeepAlive(m_material);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_PBR_SetAnisotropic(m_material.NonConstPointer(), value);
+        GC.KeepAlive(m_material);
+      }
     }
 
     /// <since>7.0</since>

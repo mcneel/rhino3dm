@@ -1,0 +1,105 @@
+rhino3dm.File3dmLayerTable
+==========================
+
+.. py:class:: rhino3dm.File3dmLayerTable
+
+   Provides access to layers in the 3dm file.
+
+
+   .. py:method:: Add(item: Layer) -> None
+
+      Adds an item.
+
+      :param item: The item to add.
+
+
+
+   .. py:method:: AddDefaultLayer(name: str, color: tuple[int, int, int, int]) -> int
+
+      Easy way to add a default layer to the model.
+
+      Note, the layer name will be modified as needed in the model and manifest.
+
+      :param name: Layer name.
+      :param color: Layer color.
+
+      :returns: The layer's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.
+
+
+
+   .. py:method:: AddLayer(name: str, color: tuple[int, int, int, int]) -> int
+                  AddLayer(name: str, color: tuple[int, int, int, int], parentId: uuid.UUID) -> int
+
+      Add a new layer to the model.
+
+      :param name: Layer name.
+      :param color: Layer color.
+      :param parentId: The id of the parent layer, can be Guid.Empty.
+
+      :returns: The layer's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.
+
+
+
+   .. py:method:: Delete(item: Layer | None) -> bool
+                  Delete(index: int) -> None
+
+      Flags a component as deleted.
+
+      :param index: The index of the item to flag.
+
+      :returns: True on success.
+
+
+
+   .. py:method:: Dump() -> str
+
+      Prepares a text dump of object table.
+
+      :returns: A string containing the dump.
+
+
+
+   .. py:method:: FindId(id: uuid.UUID) -> Layer
+
+      Uses the guid to find a model component. Deleted objects cannot be found by id. The guid is the value that is stored in the .Id property. In a single document, no two active objects have the same guid. If an object is replaced with a new object, then the guid persists. For example, if the \_Move command moves an object, then the moved object inherits its guid from the starting object. If the Copy command copies an object, then the copy gets a new guid. This guid persists through file saving/opening operations. This function will not find grip objects.
+
+      :param id: ID of model component to search for.
+
+      :returns: Reference to the rhino object with the objectId or null if no such object could be found.
+
+
+
+   .. py:method:: FindIndex(index: int) -> Layer
+
+      Retrieves a Layer object based on Index. This search type of search is discouraged. We are moving towards using only IDs for all tables.
+
+      :param index: The index to search for.
+
+      :returns: A Layer object, or null if none was found.
+
+
+
+   .. py:method:: FindName(name: str, parentId: uuid.UUID) -> Layer
+
+      Finds a Layer given its name.
+
+      :param name: The name of the Layer to be searched.
+      :param parentId: The id of the parent Layer to be searched.
+
+      :returns: A Layer, or null on error.
+
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.Layer``.
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Returns the count of all items, including deleted ones.
+

@@ -1,0 +1,31 @@
+rhino3dm.LineSphereIntersection
+===============================
+
+.. py:class:: rhino3dm.LineSphereIntersection
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Represents all possible cases of a Line\|Sphere intersection event.
+
+
+   .. py:attribute:: Multiple
+      :value: 2
+
+
+      Two intersections.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``LineSphereIntersection.None`` is not Python syntax; ``LineSphereIntersection['None']`` is the same member). No intersections.
+
+
+   .. py:attribute:: Single
+      :value: 1
+
+
+      One intersection.
+

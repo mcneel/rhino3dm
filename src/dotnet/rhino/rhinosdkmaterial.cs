@@ -292,6 +292,7 @@ namespace Rhino.DocObjects
       var material_ref_attr_pointer = value.ConstPointer;
       var material_ref_pointer = UnsafeNativeMethods.ON_3dmObjectAttributes_MaterialRef(material_ref_attr_pointer, key);
       UnsafeNativeMethods.ON_3dmObjectAttributes_AddMaterialRef(non_const_pointer, material_ref_pointer);
+      GC.KeepAlive(value);
     }
     /// <summary>
     /// Removes all items from this dictionary.
@@ -664,6 +665,22 @@ namespace Rhino.DocObjects
     }
 
 
+    /// <since>6.0</since>
+    public Guid RenderMaterialInstanceId
+    {
+      get
+      {
+        Guid rc = UnsafeNativeMethods.ON_Material_GetRdkMaterialInstanceId(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+      set
+      {
+        UnsafeNativeMethods.ON_Material_SetRdkMaterialInstanceId(NonConstPointer(), value);
+        GC.KeepAlive(this);
+      }
+    }
+
 #if RHINO_SDK
     internal Material(int index, RhinoDoc doc) : base()
     {
@@ -680,22 +697,6 @@ namespace Rhino.DocObjects
         if (g_default_material == null || !g_default_material.IsDocumentControlled)
           g_default_material = new Material(true);
         return g_default_material;
-      }
-    }
-
-    /// <since>6.0</since>
-    public Guid RenderMaterialInstanceId
-    {
-      get
-      {
-        Guid rc = UnsafeNativeMethods.Rdk_RenderContent_MaterialInstanceId(ConstPointer());
-        GC.KeepAlive(this);
-        return rc;
-      }
-      set
-      {
-        UnsafeNativeMethods.Rdk_RenderContent_SetMaterialInstanceId(NonConstPointer(), value);
-        GC.KeepAlive(this);
       }
     }
 
@@ -996,6 +997,26 @@ namespace Rhino.DocObjects
     public static double MaxShine
     {
       get { return 255.0; }
+    }
+
+    /// <summary>
+    /// Compares all the settings that affect the appearance of two materials (colors,
+    /// reflection, textures, plug-in id), ignoring index, id, name and render material instance id.
+    /// </summary>
+    /// <param name="material1">The first material.</param>
+    /// <param name="material2">The second material.</param>
+    /// <returns>0 when the materials look the same; otherwise a negative or positive value for ordering.</returns>
+    /// <since>9.2</since>
+    public static int CompareAppearance(Material material1, Material material2)
+    {
+      if (material1 == null)
+        throw new ArgumentNullException(nameof(material1));
+      if (material2 == null)
+        throw new ArgumentNullException(nameof(material2));
+      int rc = UnsafeNativeMethods.ON_Material_CompareAppearance(material1.ConstPointer(), material2.ConstPointer());
+      GC.KeepAlive(material1);
+      GC.KeepAlive(material2);
+      return rc;
     }
 
     /// <summary>

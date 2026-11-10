@@ -1,6 +1,9 @@
 import os
 import unittest
 import rhino3dm
+import sys
+import helpers
+import uuid
 
 
 # RH3DM-170: headless (ONX_Model based) cached texture coordinates.
@@ -53,18 +56,18 @@ class TestMeshCachedTextureCoordinates(unittest.TestCase):
         object_id = file3dm.Objects.AddMesh(mesh, attributes)
 
         # Should run without throwing regardless of whether coordinates get cached.
-        result = mesh.SetCachedTextureCoordinatesFromMaterial(file3dm, object_id, material)
-        self.assertIn(result, (True, False))
+        # D65: RhinoCommon's setter returns nothing
+        self.assertIsNone(mesh.SetCachedTextureCoordinatesFromMaterial(file3dm, object_id, material))
 
         texture = material.GetBitmapTexture()
         self.assertIsNotNone(texture)
 
-        tc = mesh.GetCachedTextureCoordinatesFromTexture(file3dm, object_id, texture)
+        tc = mesh.GetCachedTextureCoordinates(file3dm, object_id, texture)
         # Without object-level texture mappings there is nothing to cache -> None.
         # If something was cached it must be a well-formed set over all vertices.
         if tc is not None:
             self.assertEqual(len(tc), len(mesh.Vertices))
-            self.assertIn(tc.Dimension, (2, 3))
+            self.assertIn(tc.Dim, (2, 3))
 
     def test_get_with_unrelated_texture_returns_none(self):
         file3dm = rhino3dm.File3dm()
@@ -73,7 +76,7 @@ class TestMeshCachedTextureCoordinates(unittest.TestCase):
 
         unrelated = rhino3dm.Texture()
         unrelated.FileName = "unrelated.png"
-        tc = mesh.GetCachedTextureCoordinatesFromTexture(file3dm, object_id, unrelated)
+        tc = mesh.GetCachedTextureCoordinates(file3dm, object_id, unrelated)
         self.assertIsNone(tc)
 
     @unittest.skipIf(_fixture_path() is None, "meshWithTexture.3dm fixture not present")
@@ -94,17 +97,74 @@ class TestMeshCachedTextureCoordinates(unittest.TestCase):
             if texture is None:
                 continue
 
-            geometry.SetCachedTextureCoordinatesFromMaterial(file3dm, obj.Attributes.Id, material)
-            tc = geometry.GetCachedTextureCoordinatesFromTexture(file3dm, obj.Attributes.Id, texture)
+            geometry.SetCachedTextureCoordinatesFromMaterial(file3dm, obj.Attributes.ObjectId, material)
+            tc = geometry.GetCachedTextureCoordinates(file3dm, obj.Attributes.ObjectId, texture)
             if tc is not None:
                 found = True
                 self.assertEqual(len(tc), len(geometry.Vertices))
-                self.assertIn(tc.Dimension, (2, 3))
+                self.assertIn(tc.Dim, (2, 3))
                 success, u, v, w = tc.TryGetAt(0)
                 self.assertTrue(success)
                 self.assertTrue(all(isinstance(c, float) for c in (u, v, w)))
 
         self.assertTrue(found, "fixture present but no cached texture coordinates were produced")
+
+    def test_cachedTextureCoordinatesAreAReadOnlyViewIntoTheMesh(self):
+        """GetCachedTextureCoordinates returns None for an unknown mapping id, and a read-only view for a cached one (D27)."""
+        f = helpers.read_model('meshWithTexture.3dm')
+        meshes = [o.Geometry for o in f.Objects if isinstance(o.Geometry, rhino3dm.Mesh)]
+        self.assertTrue(meshes, 'no mesh in meshWithTexture.3dm')
+        self.assertIsNone(meshes[0].GetCachedTextureCoordinates(uuid.uuid4()))
+        # a cache, when the file carries one under one of its ids
+        ids = {o.Attributes.ObjectId for o in f.Objects}
+        for m in meshes:
+            for mid in ids:
+                tc = m.GetCachedTextureCoordinates(mid)
+                if tc is not None:
+                    self.assertIs(tc.IsReadOnly, True)
+                    self.assertGreaterEqual(tc.Count, 0)
+                    self.assertIn(tc.Dim, (2, 3))
+                    self.assertEqual(tc.TryGetAt(-1), (False, -1.0, -1.0, -1.0))   # RhinoCommon's -1 defaults
+                    return
+
+    def test_meshCachedTextureCoordinatesFromMaterial(self):
+        """SetCachedTextureCoordinatesFromMaterial caches coordinates that GetCachedTextureCoordinates then returns."""
+        f = helpers.read_model('meshWithTexture.3dm')
+        meshes = [(k, o) for k, o in enumerate(f.Objects) if isinstance(o.Geometry, rhino3dm.Mesh)]
+        self.assertEqual([k for k, _ in meshes], [0])
+        for _, o in meshes:
+            mat = f.Materials.FindIndex(o.Attributes.MaterialIndex)
+            self.assertIsNotNone(mat)
+            self.assertIsNotNone(mat.GetBitmapTexture())
+            mesh = o.Geometry
+            self.assertIsNone(mesh.SetCachedTextureCoordinatesFromMaterial(f, o.Attributes.ObjectId, mat))
+            tc = mesh.GetCachedTextureCoordinates(f, o.Attributes.ObjectId, mat.GetBitmapTexture())
+            self.assertIsNotNone(tc)
+            self.assertEqual(tc.Count, 92)
+
+    def test_cachedTextureCoordinatesIndexOfAndContains(self):
+        """CachedTextureCoordinates.IndexOf(point) and Contains(point) find a texture coordinate by value."""
+        f = helpers.read_model('meshWithTexture.3dm')
+        o = next(o for o in f.Objects if isinstance(o.Geometry, rhino3dm.Mesh))
+        mat = f.Materials.FindIndex(o.Attributes.MaterialIndex)
+        m = o.Geometry                       # one reference: each .Geometry is a new copy
+        m.SetCachedTextureCoordinatesFromMaterial(f, o.Attributes.ObjectId, mat)
+        tc = m.GetCachedTextureCoordinates(f, o.Attributes.ObjectId, mat.GetBitmapTexture())
+        q = tc[3]
+        self.assertEqual(tc.IndexOf(q), 3)
+        self.assertIs(tc.Contains(q), True)
+        self.assertIs(tc.Contains(rhino3dm.Point3d(9e9, 0, 0)), False)
+
+    def test_meshSetCachedTextureCoordinatesReturnsTheTransform(self):
+        """SetCachedTextureCoordinates(mapping, transform) uses the caller's transform and returns it, as C#'s ref argument."""
+        mesh = helpers.quad_mesh()
+        I = rhino3dm.Interval
+        tm = rhino3dm.TextureMapping.CreatePlaneMapping(rhino3dm.Plane.WorldXY, I(0, 1), I(0, 1), I(0, 1))
+        xf = rhino3dm.Transform.Translation(rhino3dm.Vector3d(0.5, 0, 0))
+        (back,) = mesh.SetCachedTextureCoordinates(tm, xf)
+        self.assertTrue(rhino3dm.Transform.Equals(back, xf))
+        xs = [c.X for c in mesh.GetCachedTextureCoordinates(tm.Id)]
+        self.assertGreater(len(xs), 0)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,186 @@
+rhino3dm.ViewInfo
+=================
+
+.. py:class:: rhino3dm.ViewInfo
+
+   Represents the name and orientation of a View (and named view).
+
+   views can be thought of as cameras.
+
+
+   .. py:method:: GetPageSettings() -> PageSettings
+
+      Gets the paper size and margins of this view. Only meaningful when ``ViewType`` is ``ViewType.PageView``.
+
+
+
+   .. py:method:: GetWindowPosition() -> tuple[float, float, float, float]
+
+      Gets the position of the view window in the frame window, expressed as fractions (0 to 1) of the frame window size.
+
+
+
+   .. py:method:: SetConstructionPlane(constructionPlane: ConstructionPlane) -> None
+
+      Sets the view's construction plane, including its grid settings.
+
+      :param constructionPlane: The construction plane to store on the view.
+
+
+
+   .. py:method:: SetPageSettings(pageSettings: PageSettings) -> None
+
+      Sets the paper size and margins of this view. Set ``ViewType`` to ``ViewType.PageView`` as well, or the page settings are ignored.
+
+
+
+   .. py:method:: SetWindowPosition(left: float, right: float, top: float, bottom: float) -> None
+
+      Sets the position of the view window in the frame window, expressed as fractions (0 to 1) of the frame window size. The ``Maximized`` state is preserved.
+
+      :param left: Left edge fraction.
+      :param right: Right edge fraction.
+      :param top: Top edge fraction.
+      :param bottom: Bottom edge fraction.
+
+
+
+   .. py:property:: DisplayModeId
+      :type: uuid.UUID
+
+
+      The id of the display mode this view opens in - wireframe, shaded, rendered, or any custom display mode. ``Display.DisplayModeDescription`` holds the standard ids. A nil id means the view has no display mode of its own and opens in wireframe, which is what every template generated without this property did.
+
+
+   .. py:property:: FocalBlurAperture
+      :type: float
+
+
+      Gets or sets the Focal blur aperture of the active viewport
+
+
+   .. py:property:: FocalBlurDistance
+      :type: float
+
+
+      Gets or sets the Focal blur distance of the active viewport
+
+
+   .. py:property:: FocalBlurJitter
+      :type: float
+
+
+      Gets or sets the Focal blur jitter of the active viewport
+
+
+   .. py:property:: FocalBlurMode
+      :type: ViewInfoFocalBlurModes
+
+
+      Gets or sets the Focal blur mode of the active viewport
+
+
+   .. py:property:: FocalBlurSampleCount
+      :type: int
+
+
+      Gets or sets the Focal blur sample count of the active viewport
+
+
+   .. py:property:: LockedProjection
+      :type: bool
+
+
+      Whether the view's projection is locked against changes.
+
+
+   .. py:property:: Maximized
+      :type: bool
+
+
+      Gets or sets whether the view window is maximized in the frame window. Together with the window position (see ``GetWindowPosition``) this is stored in the 3dm file and controls the viewport layout when the file is opened.
+
+
+   .. py:property:: Name
+      :type: str
+
+
+      Gets or sets the name of the view.
+
+
+   .. py:property:: NamedViewId
+      :type: uuid.UUID
+
+
+      Returns a unique id if this is a named view otherwise an empty Guid.
+
+
+   .. py:property:: SectionBehavior
+      :type: ViewSectionBehavior
+
+
+      How a view will interact with clipping planes
+
+
+   .. py:property:: ShowConstructionAxes
+      :type: bool
+
+
+      Whether the construction plane x and y axes are drawn in this view.
+
+
+   .. py:property:: ShowConstructionGrid
+      :type: bool
+
+
+      Whether the construction plane grid is drawn in this view.
+
+
+   .. py:property:: ShowConstructionZAxis
+      :type: bool
+
+
+      Whether the construction plane z axis is drawn in this view.
+
+
+   .. py:property:: ShowWallpaperInGrayScale
+      :type: bool
+
+
+      True if wallpaper (if any) is to be shown in gray scale in this view.
+
+
+   .. py:property:: ShowWorldAxes
+      :type: bool
+
+
+      Whether the world axes icon is drawn in the corner of this view.
+
+
+   .. py:property:: ViewType
+      :type: ViewType
+
+
+      Whether this view is a model view, a layout page, a nested (detail) view, or one of the special editor views. A page view must be an orthographic top view; see ``PageSettings`` for its paper size.
+
+
+   .. py:property:: Viewport
+      :type: ViewportInfo
+
+
+      Gets the viewport, or viewing frustum, associated with this view.
+
+
+   .. py:property:: WallpaperFilename
+      :type: str
+
+
+      Get filename for wallpaper set to this view, if any.
+
+
+   .. py:property:: WallpaperHidden
+      :type: bool
+
+
+      True if wallpaper (if any) is to be hidden from this view.
+

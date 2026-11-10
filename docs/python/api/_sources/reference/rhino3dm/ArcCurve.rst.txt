@@ -1,0 +1,58 @@
+rhino3dm.ArcCurve
+=================
+
+.. py:class:: rhino3dm.ArcCurve
+              ArcCurve(arc: Arc)
+              ArcCurve(arc: Arc, t0: float, t1: float)
+              ArcCurve(other: ArcCurve | None)
+              ArcCurve(circle: Circle)
+              ArcCurve(circle: Circle, t0: float, t1: float)
+
+   Bases: :py:obj:`Curve`
+
+
+   Represent arcs and circles.
+
+   ArcCurve.IsCircle returns true if the curve is a complete circle.
+
+   Details:
+
+   an ArcCurve is a sub-curve of a circle, with a constant speed parameterization. The parameterization is an affine linear reparameterization of the underlying arc m\_arc onto the domain m\_t.
+
+   A valid ArcCurve has Radius()>0 and 0<AngleRadians()<=2\*PI and a strictly increasing Domain.
+
+
+   .. py:property:: AngleDegrees
+      :type: float
+
+
+      Gets the angles of this arc in degrees.
+
+
+   .. py:property:: AngleRadians
+      :type: float
+
+
+      Gets the angles of this arc in radians.
+
+
+   .. py:property:: Arc
+      :type: Arc
+
+
+      Gets the arc that is contained within this ArcCurve.
+
+
+   .. py:property:: IsCompleteCircle
+      :type: bool
+
+
+      Gets a value indicating whether or not this curve can be represented by a complete circle.
+
+
+   .. py:property:: Radius
+      :type: float
+
+
+      Gets the radius of this ArcCurve.
+

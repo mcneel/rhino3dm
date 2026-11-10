@@ -1,0 +1,14 @@
+rhino3dm.BrepSurfaceList
+========================
+
+.. py:class:: rhino3dm.BrepSurfaceList
+
+   Provides access to all the underlying surfaces in a Brep object.
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the number of surfaces in a brep.
+

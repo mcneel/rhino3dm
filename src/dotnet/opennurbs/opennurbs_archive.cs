@@ -17,16 +17,17 @@ namespace Rhino.Collections
   /// </summary>
   /// <remarks>
   /// <para>This is the layout of this object:</para>
-  /// <para>.</para>
-  /// <para>BEGINCHUNK (TCODE_ANONYMOUS_CHUNK)</para>
-  /// <para>|- version (int)</para>
-  /// <para>|- entry count (int)</para>
-  /// <para>   for entry count entries</para>
-  /// <para>   |- BEGINCHUNK (TCODE_ANONYMOUS_CHUNK)</para>
-  /// <para>   |- key (string)</para>
-  /// <para>   |- entry contents</para>
-  /// <para>   |- ENDCHUNK (TCODE_ANONYMOUS_CHUNK)</para>
-  /// <para>ENDCHUNK (TCODE_ANONYMOUS_CHUNK)</para>
+  /// <code language="none">
+  /// BEGINCHUNK (TCODE_ANONYMOUS_CHUNK)
+  /// |- version (int)
+  /// |- entry count (int)
+  ///    for entry count entries
+  ///    |- BEGINCHUNK (TCODE_ANONYMOUS_CHUNK)
+  ///    |- key (string)
+  ///    |- entry contents
+  ///    |- ENDCHUNK (TCODE_ANONYMOUS_CHUNK)
+  /// ENDCHUNK (TCODE_ANONYMOUS_CHUNK)
+  /// </code>
   /// </remarks>
   [Serializable]
   public class ArchivableDictionary : ICloneable, IDictionary<string, object>, ISerializable

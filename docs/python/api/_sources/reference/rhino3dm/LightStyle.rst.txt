@@ -1,0 +1,80 @@
+rhino3dm.LightStyle
+===================
+
+.. py:class:: rhino3dm.LightStyle
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated values to represent light styles or types, such as directional or spotlight.
+
+
+   .. py:attribute:: Ambient
+      :value: 10
+
+
+      Ambient light.
+
+
+   .. py:attribute:: CameraDirectional
+      :value: 4
+
+
+      Light location and direction in camera coordinates. +x points to right, +y points up, +z points towards camera.
+
+
+   .. py:attribute:: CameraPoint
+      :value: 5
+
+
+      Light location and direction in camera coordinates. +x points to right, +y points up, +z points towards camera.
+
+
+   .. py:attribute:: CameraSpot
+      :value: 6
+
+
+      Light location and direction in camera coordinates. +x points to right, +y points up, +z points towards camera.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``LightStyle.None`` is not Python syntax; ``LightStyle['None']`` is the same member). No light type. This is the default value of the enumeration type.
+
+
+   .. py:attribute:: WorldDirectional
+      :value: 7
+
+
+      Light location and direction in world coordinates.
+
+
+   .. py:attribute:: WorldLinear
+      :value: 11
+
+
+      Linear light in world coordinates.
+
+
+   .. py:attribute:: WorldPoint
+      :value: 8
+
+
+      Light location and direction in world coordinates.
+
+
+   .. py:attribute:: WorldRectangular
+      :value: 12
+
+
+      Rectangular light in world coordinates.
+
+
+   .. py:attribute:: WorldSpot
+      :value: 9
+
+
+      Light location and direction in world coordinates.
+

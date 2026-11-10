@@ -1,0 +1,16 @@
+rhino3dm.File3dmRenderTextures
+==============================
+
+.. py:class:: rhino3dm.File3dmRenderTextures
+
+   .. py:method:: Add(texture: File3dmRenderTexture) -> None
+
+      Adds a render texture to the model (rhino3dm only).
+
+
+
+   .. py:method:: Find(g: uuid.UUID) -> File3dmRenderTexture
+
+      Finds a texture by its id, if possible. Returns null on failure.
+
+

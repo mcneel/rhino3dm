@@ -356,6 +356,144 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Multiplies a <see cref="Point2f"/> by a scalar.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the * operator otherwise)</para>
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <param name="t">A number.</param>
+    /// <returns>A new point that is coordinate-wise multiplied by t.</returns>
+    public static Point2f Multiply(Point2f point, float t)
+    {
+      return new Point2f(point.m_x * t, point.m_y * t);
+    }
+
+    /// <summary>
+    /// Multiplies a <see cref="Point2f"/> by a scalar.
+    /// </summary>
+    /// <param name="t">A number.</param>
+    /// <param name="point">A point.</param>
+    /// <returns>A new point that is coordinate-wise multiplied by t.</returns>
+    public static Point2f operator *(float t, Point2f point)
+    {
+      return new Point2f(point.m_x * t, point.m_y * t);
+    }
+
+    /// <summary>
+    /// Multiplies a <see cref="Point2f"/> by a scalar.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the * operator otherwise)</para>
+    /// </summary>
+    /// <param name="t">A number.</param>
+    /// <param name="point">A point.</param>
+    /// <returns>A new point that is coordinate-wise multiplied by t.</returns>
+    public static Point2f Multiply(float t, Point2f point)
+    {
+      return new Point2f(point.m_x * t, point.m_y * t);
+    }
+
+    /// <summary>
+    /// Divides a <see cref="Point2f"/> by a scalar.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the / operator otherwise)</para>
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <param name="t">A number.</param>
+    /// <returns>A new point that is coordinate-wise divided by t.</returns>
+    public static Point2f Divide(Point2f point, float t)
+    {
+      return new Point2f(point.m_x / t, point.m_y / t);
+    }
+
+    /// <summary>
+    /// Sums up a point and a vector, and returns a new point.
+    /// </summary>
+    /// <param name="vector">A vector.</param>
+    /// <param name="point">A point.</param>
+    /// <returns>A new point that results from the addition of point and vector.</returns>
+    public static Point2f operator +(Vector2f vector, Point2f point)
+    {
+      return new Point2f(point.m_x + vector.m_x, point.m_y + vector.m_y);
+    }
+
+    /// <summary>
+    /// Sums up a point and a vector, and returns a new point.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the + operator otherwise)</para>
+    /// </summary>
+    /// <param name="vector">A vector.</param>
+    /// <param name="point">A point.</param>
+    /// <returns>A new point that results from the addition of point and vector.</returns>
+    public static Point2f Add(Vector2f vector, Point2f point)
+    {
+      return new Point2f(point.m_x + vector.m_x, point.m_y + vector.m_y);
+    }
+
+    /// <summary>
+    /// Sums up a point and a vector, and returns a new point.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the + operator otherwise)</para>
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <param name="vector">A vector.</param>
+    /// <returns>A new point that results from the addition of point and vector.</returns>
+    public static Point2f Add(Point2f point, Vector2f vector)
+    {
+      return new Point2f(point.m_x + vector.m_x, point.m_y + vector.m_y);
+    }
+
+    /// <summary>
+    /// Subtracts a vector from a point.
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <param name="vector">A vector.</param>
+    /// <returns>A new point that is the difference of point minus vector.</returns>
+    public static Point2f operator -(Point2f point, Vector2f vector)
+    {
+      return new Point2f(point.m_x - vector.m_x, point.m_y - vector.m_y);
+    }
+
+    /// <summary>
+    /// Subtracts a vector from a point.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the - operator otherwise)</para>
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <param name="vector">A vector.</param>
+    /// <returns>A new point that is the difference of point minus vector.</returns>
+    public static Point2f Subtract(Point2f point, Vector2f vector)
+    {
+      return new Point2f(point.m_x - vector.m_x, point.m_y - vector.m_y);
+    }
+
+    /// <summary>
+    /// Subtracts the second point from the first point.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the - operator otherwise)</para>
+    /// </summary>
+    /// <param name="point1">A point (minuend).</param>
+    /// <param name="point2">A point (subtrahend).</param>
+    /// <returns>A new vector that is point1 coordinate-wise subtracted by point2.</returns>
+    public static Vector2f Subtract(Point2f point1, Point2f point2)
+    {
+      return new Vector2f(point1.m_x - point2.m_x, point1.m_y - point2.m_y);
+    }
+
+    /// <summary>
+    /// Computes the additive inverse of all coordinates in the point, and returns the new point.
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <returns>A point value that, when summed with the point input, yields the origin.</returns>
+    public static Point2f operator -(Point2f point)
+    {
+      return new Point2f(-point.m_x, -point.m_y);
+    }
+
+    /// <summary>
+    /// Computes the additive inverse of all coordinates in the point, and returns the new point.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the - unary operator otherwise)</para>
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <returns>A point value that, when summed with the point input, yields the origin.</returns>
+    public static Point2f Negate(Point2f point)
+    {
+      return new Point2f(-point.m_x, -point.m_y);
+    }
+
+    /// <summary>
     /// Computes the distance between two points.
     /// </summary>
     /// <param name="other">Other point for distance measurement.</param>
@@ -758,6 +896,97 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Adds a point to another point.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the + operator otherwise)</para>
+    /// </summary>
+    /// <param name="point1">A point.</param>
+    /// <param name="point2">Another point.</param>
+    /// <returns>A new point that is the sum of point1 plus point2.</returns>
+    public static Point3f Add(Point3f point1, Point3f point2)
+    {
+      return new Point3f(point1.m_x + point2.m_x, point1.m_y + point2.m_y, point1.m_z + point2.m_z);
+    }
+
+    /// <summary>
+    /// Sums up a point and a vector, and returns a new point.
+    /// </summary>
+    /// <param name="vector">A vector.</param>
+    /// <param name="point">A point.</param>
+    /// <returns>A new point that results from the addition of point and vector.</returns>
+    public static Point3f operator +(Vector3f vector, Point3f point)
+    {
+      return new Point3f(point.m_x + vector.m_x, point.m_y + vector.m_y, point.m_z + vector.m_z);
+    }
+
+    /// <summary>
+    /// Sums up a point and a vector, and returns a new point.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the + operator otherwise)</para>
+    /// </summary>
+    /// <param name="vector">A vector.</param>
+    /// <param name="point">A point.</param>
+    /// <returns>A new point that results from the addition of point and vector.</returns>
+    public static Point3f Add(Vector3f vector, Point3f point)
+    {
+      return new Point3f(point.m_x + vector.m_x, point.m_y + vector.m_y, point.m_z + vector.m_z);
+    }
+
+    /// <summary>
+    /// Sums up a point and a vector, and returns a new point.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the + operator otherwise)</para>
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <param name="vector">A vector.</param>
+    /// <returns>A new point that results from the addition of point and vector.</returns>
+    public static Point3f Add(Point3f point, Vector3f vector)
+    {
+      return new Point3f(point.m_x + vector.m_x, point.m_y + vector.m_y, point.m_z + vector.m_z);
+    }
+
+    /// <summary>
+    /// Subtracts a vector from a point.
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <param name="vector">A vector.</param>
+    /// <returns>A new point that is the difference of point minus vector.</returns>
+    public static Point3f operator -(Point3f point, Vector3f vector)
+    {
+      return new Point3f(point.m_x - vector.m_x, point.m_y - vector.m_y, point.m_z - vector.m_z);
+    }
+
+    /// <summary>
+    /// Subtracts a vector from a point.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the - operator otherwise)</para>
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <param name="vector">A vector.</param>
+    /// <returns>A new point that is the difference of point minus vector.</returns>
+    public static Point3f Subtract(Point3f point, Vector3f vector)
+    {
+      return new Point3f(point.m_x - vector.m_x, point.m_y - vector.m_y, point.m_z - vector.m_z);
+    }
+
+    /// <summary>
+    /// Computes the additive inverse of all coordinates in the point, and returns the new point.
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <returns>A point value that, when summed with the point input, yields the <see cref="Origin"/>.</returns>
+    public static Point3f operator -(Point3f point)
+    {
+      return new Point3f(-point.m_x, -point.m_y, -point.m_z);
+    }
+
+    /// <summary>
+    /// Computes the additive inverse of all coordinates in the point, and returns the new point.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the - unary operator otherwise)</para>
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <returns>A point value that, when summed with the point input, yields the <see cref="Origin"/>.</returns>
+    public static Point3f Negate(Point3f point)
+    {
+      return new Point3f(-point.m_x, -point.m_y, -point.m_z);
+    }
+
+    /// <summary>
     /// Subtracts a point from another point.
     /// <para>(Provided for languages that do not support operator overloading. You can use the - operator otherwise)</para>
     /// </summary>
@@ -814,6 +1043,53 @@ namespace Rhino.Geometry
     public static Point3f operator *(float value, Point3f point)
     {
       return new Point3f(point.m_x * value, point.m_y * value, point.m_z * value);
+    }
+
+    /// <summary>
+    /// Multiplies a point by a factor.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the * operator otherwise)</para>
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <param name="value">A value.</param>
+    /// <returns>A new point that is coordinate-wise multiplied by value.</returns>
+    public static Point3f Multiply(Point3f point, float value)
+    {
+      return new Point3f(point.m_x * value, point.m_y * value, point.m_z * value);
+    }
+
+    /// <summary>
+    /// Multiplies a point by a factor.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the * operator otherwise)</para>
+    /// </summary>
+    /// <param name="value">A value.</param>
+    /// <param name="point">A point.</param>
+    /// <returns>A new point that is coordinate-wise multiplied by value.</returns>
+    public static Point3f Multiply(float value, Point3f point)
+    {
+      return new Point3f(point.m_x * value, point.m_y * value, point.m_z * value);
+    }
+
+    /// <summary>
+    /// Divides a point by a factor.
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <param name="value">A value.</param>
+    /// <returns>A new point that is coordinate-wise divided by value.</returns>
+    public static Point3f operator /(Point3f point, float value)
+    {
+      return new Point3f(point.m_x / value, point.m_y / value, point.m_z / value);
+    }
+
+    /// <summary>
+    /// Divides a point by a factor.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the / operator otherwise)</para>
+    /// </summary>
+    /// <param name="point">A point.</param>
+    /// <param name="value">A value.</param>
+    /// <returns>A new point that is coordinate-wise divided by value.</returns>
+    public static Point3f Divide(Point3f point, float value)
+    {
+      return new Point3f(point.m_x / value, point.m_y / value, point.m_z / value);
     }
   }
 
@@ -1262,6 +1538,98 @@ namespace Rhino.Geometry
     public static double Multiply(Vector2f point1, Vector2f point2)
     {
       return point1 * point2;
+    }
+
+    /// <summary>
+    /// Multiplies a vector by a number, having the effect of scaling it.
+    /// </summary>
+    /// <param name="vector">A vector.</param>
+    /// <param name="t">A number.</param>
+    /// <returns>A new vector that is the original vector coordinate-wise multiplied by t.</returns>
+    public static Vector2f operator *(Vector2f vector, float t)
+    {
+      return new Vector2f(vector.m_x * t, vector.m_y * t);
+    }
+
+    /// <summary>
+    /// Multiplies a vector by a number, having the effect of scaling it.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the * operator otherwise)</para>
+    /// </summary>
+    /// <param name="vector">A vector.</param>
+    /// <param name="t">A number.</param>
+    /// <returns>A new vector that is the original vector coordinate-wise multiplied by t.</returns>
+    public static Vector2f Multiply(Vector2f vector, float t)
+    {
+      return new Vector2f(vector.m_x * t, vector.m_y * t);
+    }
+
+    /// <summary>
+    /// Multiplies a vector by a number, having the effect of scaling it.
+    /// </summary>
+    /// <param name="t">A number.</param>
+    /// <param name="vector">A vector.</param>
+    /// <returns>A new vector that is the original vector coordinate-wise multiplied by t.</returns>
+    public static Vector2f operator *(float t, Vector2f vector)
+    {
+      return new Vector2f(vector.m_x * t, vector.m_y * t);
+    }
+
+    /// <summary>
+    /// Multiplies a vector by a number, having the effect of scaling it.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the * operator otherwise)</para>
+    /// </summary>
+    /// <param name="t">A number.</param>
+    /// <param name="vector">A vector.</param>
+    /// <returns>A new vector that is the original vector coordinate-wise multiplied by t.</returns>
+    public static Vector2f Multiply(float t, Vector2f vector)
+    {
+      return new Vector2f(vector.m_x * t, vector.m_y * t);
+    }
+
+    /// <summary>
+    /// Divides a <see cref="Vector2f"/> by a number, having the effect of shrinking it, t times.
+    /// </summary>
+    /// <param name="vector">A vector.</param>
+    /// <param name="t">A number.</param>
+    /// <returns>A new vector that is component-wise divided by t.</returns>
+    public static Vector2f operator /(Vector2f vector, float t)
+    {
+      return new Vector2f(vector.m_x / t, vector.m_y / t);
+    }
+
+    /// <summary>
+    /// Divides a <see cref="Vector2f"/> by a number, having the effect of shrinking it, t times.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the / operator otherwise)</para>
+    /// </summary>
+    /// <param name="vector">A vector.</param>
+    /// <param name="t">A number.</param>
+    /// <returns>A new vector that is component-wise divided by t.</returns>
+    public static Vector2f Divide(Vector2f vector, float t)
+    {
+      return new Vector2f(vector.m_x / t, vector.m_y / t);
+    }
+
+    /// <summary>
+    /// Divides a <see cref="Vector2f"/> by a number, having the effect of shrinking it, t times.
+    /// </summary>
+    /// <param name="vector">A vector.</param>
+    /// <param name="t">A number.</param>
+    /// <returns>A new vector that is component-wise divided by t.</returns>
+    public static Vector2f operator /(Vector2f vector, double t)
+    {
+      return new Vector2f((float)(vector.m_x / t), (float)(vector.m_y / t));
+    }
+
+    /// <summary>
+    /// Divides a <see cref="Vector2f"/> by a number, having the effect of shrinking it, t times.
+    /// <para>(Provided for languages that do not support operator overloading. You can use the / operator otherwise)</para>
+    /// </summary>
+    /// <param name="vector">A vector.</param>
+    /// <param name="t">A number.</param>
+    /// <returns>A new vector that is component-wise divided by t.</returns>
+    public static Vector2f Divide(Vector2f vector, double t)
+    {
+      return new Vector2f((float)(vector.m_x / t), (float)(vector.m_y / t));
     }
 
     /// <summary>

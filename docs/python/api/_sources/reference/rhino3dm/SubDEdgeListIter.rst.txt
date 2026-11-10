@@ -1,0 +1,4 @@
+rhino3dm.SubDEdgeListIter
+=========================
+
+.. py:class:: rhino3dm.SubDEdgeListIter

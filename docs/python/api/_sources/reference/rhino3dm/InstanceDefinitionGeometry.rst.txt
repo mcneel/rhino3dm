@@ -1,0 +1,147 @@
+rhino3dm.InstanceDefinitionGeometry
+===================================
+
+.. py:class:: rhino3dm.InstanceDefinitionGeometry
+
+   Bases: :py:obj:`ModelComponent`
+
+
+   Represents a block definition in a File3dm. This is the same as Rhino.DocObjects.InstanceDefinition, but not associated with a RhinoDoc.
+
+
+   .. py:method:: DeleteAllUserStrings() -> None
+
+      Deletes all user strings attached to this geometry.
+
+
+
+   .. py:method:: GetObjectIds() -> list[Any]
+
+      Returns the unique identifiers of all objects that are part of this instance definition's geometry table.
+
+      :returns: An array of ``Guid`` values representing the object IDs in the instance geometry table.
+
+
+
+   .. py:method:: GetUserString(key: str) -> str
+
+      Gets user string from this geometry.
+
+      :param key: id used to retrieve the string.
+
+      :returns: string associated with the key if successful. null if no key was found.
+
+
+
+   .. py:method:: GetUserStrings() -> list[Any]
+
+      Gets a copy of all (user key string, user value string) pairs attached to this geometry.
+
+      :returns: A new collection.
+
+
+
+   .. py:method:: IsInstanceGeometryId(id: uuid.UUID) -> bool
+
+      Determines whether an id is in this instance definition's geometry id list.
+
+      :param id: The id to look for.
+
+      :returns: true if ``id`` is in the list returned by ``GetObjectIds``.
+
+
+
+   .. py:method:: SetUserString(key: str, value: str) -> bool
+
+      Attach a user string (key,value combination) to this geometry.
+
+      :param key: id used to retrieve this string.
+      :param value: string associated with key.
+
+      :returns: true on success.
+
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.InstanceDefinition``.
+
+
+   .. py:property:: Description
+      :type: str
+
+
+      Gets or sets the description of the definition.
+
+
+   .. py:property:: IsLinkedType
+      :type: bool
+
+
+      Returns true if this instance definition is linked to an external source archive, that is, if its ``UpdateType`` is ``InstanceDefinitionUpdateType.Linked`` or ``InstanceDefinitionUpdateType.LinkedAndEmbedded``.
+
+
+   .. py:property:: LayerStyle
+      :type: InstanceDefinitionLayerStyle
+
+
+      Specifies how model components (layers, materials, dimension styles, etc.) from linked instance definition files appear in the active model.
+
+
+   .. py:property:: SkipNestedLinkedDefinitions
+      :type: bool
+
+
+      This property applies when an instance definition is linked. If true, when reading the file that defines the content of the linked instance definition, skip any linked instance definitions found in that file. If false, when reading the file that defines the content of the linked instance definition, recursively load linked instance definitions found in that file.
+
+
+   .. py:property:: SourceArchive
+      :type: str
+
+
+      Gets the full file path for linked instance definitions.
+
+
+   .. py:property:: SourceArchiveRelativePath
+      :type: str
+
+
+      Gets the source archive path for linked instance definitions relative to the file that contains this definition. Empty if the definition is not linked or no relative path is stored.
+
+
+   .. py:property:: UnitSystem
+      :type: UnitSystem
+
+
+      Gets the unit system of the instance definition. If the instance definition was imported from another 3dm file, the unit system may differ from that of the document.
+
+
+   .. py:property:: UpdateType
+      :type: InstanceDefinitionUpdateType
+
+
+      Gets the relationship between this instance definition's geometry and the source archive that contains the original definition.
+
+
+   .. py:property:: Url
+      :type: str
+
+
+      Gets or sets the URL or hyperlink of the definition.
+
+
+   .. py:property:: UrlDescription
+      :type: str
+
+
+      Gets or sets the description of the URL or hyperlink of the definition.
+
+
+   .. py:property:: UserStringCount
+      :type: int
+
+
+      Gets the amount of user strings.
+

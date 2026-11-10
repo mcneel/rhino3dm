@@ -1,0 +1,219 @@
+rhino3dm.Vector2d
+=================
+
+.. py:class:: rhino3dm.Vector2d
+              Vector2d(x: float, y: float)
+              Vector2d(arg: collections.abc.Sequence[Any], /)
+
+   Represents the two components of a vector in two-dimensional space, using ``double``-precision floating point numbers.
+
+
+   .. py:method:: Add(vector1: Vector2d, vector2: Vector2d) -> Vector2d
+      :staticmethod:
+
+
+      Sums up two vectors.
+
+      (Provided for languages that do not support operator overloading. You can use the + operator otherwise)
+
+      :param vector1: A vector.
+      :param vector2: A second vector.
+
+      :returns: A new vector that results from the component-wise addition of the two vectors.
+
+
+
+   .. py:method:: CompareTo(other: Vector2d) -> int
+
+      Compares this ``Vector2d`` with another ``Vector2d``.
+
+      Components evaluation priority is first X, then Y.
+
+      :param other: The other ``Vector2d`` to use in comparison.
+
+      :returns: if this is identical to other
+                -1: if this.X < other.X
+                -1: if this.X == other.X and this.Y < other.Y
+                +1: otherwise.
+      :rtype: 0
+
+
+
+   .. py:method:: Divide(vector: Vector2d, t: float) -> Vector2d
+      :staticmethod:
+
+
+      Divides a ``Vector2d`` by a number, having the effect of shrinking it.
+
+      (Provided for languages that do not support operator overloading. You can use the / operator otherwise)
+
+      :param vector: A vector.
+      :param t: A number.
+
+      :returns: A new vector that is component-wise divided by t.
+
+
+
+   .. py:method:: Encode() -> dict[str, Any]
+
+      This object as a JSON-compatible dict (rhino3dm only; inverse: ``Decode``).
+
+      :returns: geometry and other objects are stored as their 3dm archive, base64 encoded, with the archive version.
+      :rtype: A dict of numbers and strings
+
+
+
+   .. py:method:: EpsilonEquals(other: Vector2d, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: Equals(vector: Vector2d) -> bool
+
+      Determines whether the specified vector has the same value as the present vector.
+
+      :param vector: The specified vector.
+
+      :returns: true if vector has the same components as this; otherwise false.
+
+
+
+   .. py:method:: IsTiny(tolerance: float) -> bool
+                  IsTiny() -> bool
+
+      Uses RhinoMath.ZeroTolerance for IsTiny calculation.
+
+      :returns: true if vector is very small, otherwise false.
+
+
+
+   .. py:method:: Multiply(vector: Vector2d, t: float) -> Vector2d
+                  Multiply(t: float, vector: Vector2d) -> Vector2d
+                  Multiply(vector1: Vector2d, vector2: Vector2d) -> float
+      :staticmethod:
+
+
+      Multiplies two vectors together, returning the dot product (or inner product).
+
+      (Provided for languages that do not support operator overloading. You can use the \* operator otherwise)
+
+      :param vector1: A vector.
+      :param vector2: A second vector.
+
+      :returns: A value that results from the evaluation of v1.X\*v2.X + v1.Y\*v2.Y.
+                This value equals v1.Length \* v2.Length \* cos(alpha), where alpha is the angle between vectors.
+
+
+
+   .. py:method:: Negate(vector: Vector2d) -> Vector2d
+      :staticmethod:
+
+
+      Computes the reversed vector.
+
+      (Provided for languages that do not support operator overloading. You can use the - unary operator otherwise)
+
+      :param vector: A vector to negate.
+
+      :returns: A new vector where all components were multiplied by -1.
+
+
+
+   .. py:method:: Rotate(angleRadians: float) -> bool
+
+      Rotates this vector.
+
+      :param angleRadians: Angle of rotation (in radians).
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Subtract(vector1: Vector2d, vector2: Vector2d) -> Vector2d
+      :staticmethod:
+
+
+      Subtracts the second vector from the first one.
+
+      (Provided for languages that do not support operator overloading. You can use the - operator otherwise)
+
+      :param vector1: A vector.
+      :param vector2: A second vector.
+
+      :returns: A new vector that results from the component-wise difference of vector1 - vector2.
+
+
+
+   .. py:method:: ToString() -> str
+
+      Constructs a string representation of the current vector.
+
+      :returns: A string in the form X,Y.
+
+
+
+   .. py:method:: Unitize() -> bool
+
+      Unitizes the vector in place. A unit vector has length 1 unit.
+
+      An invalid or zero length vector cannot be unitized.
+
+      :returns: true on success or false on failure.
+
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Gets a value indicating whether this vector is valid. A valid vector must be formed of valid component values for x, y and z.
+
+
+   .. py:property:: Length
+      :type: float
+
+
+      Computes the length (or magnitude, or size) of this vector. This is an application of Pythagoras' theorem.
+
+
+   .. py:property:: SquareLength
+      :type: float
+
+
+      Returns the square of the length of the vector.
+
+
+   .. py:attribute:: Unset
+      :type:  Vector2d
+      :value: Ellipsis
+
+
+      object, /) -> Vector2d
+
+      :type: (arg
+
+
+   .. py:property:: X
+      :type: float
+
+
+      Gets or sets the X (first) component of this vector.
+
+
+   .. py:property:: Y
+      :type: float
+
+
+      Gets or sets the Y (second) component of this vector.
+
+
+   .. py:attribute:: Zero
+      :type:  Vector2d
+      :value: Ellipsis
+
+
+      object, /) -> Vector2d
+
+      :type: (arg
+

@@ -1,0 +1,61 @@
+rhino3dm.TextEntity
+===================
+
+.. py:class:: rhino3dm.TextEntity
+
+   Bases: :py:obj:`AnnotationBase`
+
+
+   Provides a common base class to all annotation geometry.
+
+   This class refers to the geometric element that is independent from the document.
+
+
+   .. py:method:: Create(text: str, plane: Plane, style: DimensionStyle, wrapped: bool, rectWidth: float, rotationRadians: float) -> TextEntity
+      :staticmethod:
+
+
+      Create Text geometry or null if input is invalid
+
+
+
+   .. py:method:: CreateWithRichText(richTextString: str, plane: Plane, style: DimensionStyle, wrapped: bool, rectWidth: float, rotationRadians: float) -> TextEntity
+      :staticmethod:
+
+
+      Create RichText geometry or null if input is invalid
+
+
+
+   .. py:method:: GetTextTransform(viewport: ViewportInfo, textscale: float, dimstyle: DimensionStyle) -> Transform
+                  GetTextTransform(textscale: float, dimstyle: DimensionStyle) -> Transform
+
+      Get the transform for this text object's text geometry
+
+
+
+   .. py:method:: Transform(transform: Transform, style: DimensionStyle | None) -> bool
+                  Transform(xform: Transform) -> bool
+
+      Transforms the geometry. If the input Transform has a SimilarityType of OrientationReversing, you may want to consider flipping the transformed geometry after calling this function when it makes sense. For example, you may want to call Flip() on a Brep after transforming it.
+
+      :param xform: Transformation to apply to geometry.
+
+      :returns: true if geometry successfully transformed.
+
+
+
+   .. py:property:: TextHorizontalAlignment
+      :type: TextHorizontalAlignment
+
+
+
+   .. py:property:: TextOrientation
+      :type: TextOrientation
+
+
+
+   .. py:property:: TextVerticalAlignment
+      :type: TextVerticalAlignment
+
+

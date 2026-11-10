@@ -885,6 +885,7 @@ namespace Rhino.Runtime
     public void Set(string name, Geometry.MeshingParameters value)
     {
       UnsafeNativeMethods.CRhParameterDictionary_SetMeshParams(m_pNamedParams, name, value.ConstPointer());
+      GC.KeepAlive(value);
     }
   }
 
@@ -2114,7 +2115,9 @@ namespace Rhino.Runtime
     {
       // Don't directly call the function on our dictionary and instead indirectly call
       // through C++. This allows for cross AppDomain calls
-      return UnsafeNativeMethods.RHC_RhExecuteNamedCallback(name, args.m_pNamedParams);
+      bool rc = UnsafeNativeMethods.RHC_RhExecuteNamedCallback(name, args.m_pNamedParams);
+      GC.KeepAlive(args);
+      return rc;
     }
 
     [MonoPInvokeCallback(typeof(NamedCallback))]
@@ -3310,6 +3313,7 @@ namespace Rhino.Runtime
       {
         IntPtr pString = sh.NonConstPointer();
         UnsafeNativeMethods.ON_Object_Dump(pConstThis, pString);
+        GC.KeepAlive(geometry);
         return sh.ToString();
       }
     }
@@ -3329,6 +3333,7 @@ namespace Rhino.Runtime
       {
         IntPtr pString = sh.NonConstPointer();
         UnsafeNativeMethods.ON_BezierCurve_Dump(pConstThis, pString);
+        GC.KeepAlive(bezierCurve);
         return sh.ToString();
       }
     }
@@ -3347,6 +3352,7 @@ namespace Rhino.Runtime
       using (var log = new TextLog())
       {
         UnsafeNativeMethods.RH_RhinoDescribeGeometry(ptr, 0, log.NonConstPointer());
+        GC.KeepAlive(geometry);
         return log.ToString();
       }
     }

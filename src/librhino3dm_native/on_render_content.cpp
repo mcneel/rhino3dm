@@ -225,12 +225,68 @@ RH_C_FUNCTION ON_UUID ON_RenderContent_FindChild(const ON_RenderContent* rc, con
   return ON_nil_uuid;
 }
 
+RH_C_FUNCTION bool ON_RenderContent_SetChild(ON_RenderContent* rc, const ON_RenderContent* child, const RHMONO_STRING* csn)
+{
+  if ((nullptr != rc) && (nullptr != child) && (nullptr != csn))
+  {
+    INPUTSTRINGCOERCE(_csn, csn);
+    return rc->SetChild(*child, _csn); // Sets a copy of the child.
+  }
+
+  return false;
+}
+
+RH_C_FUNCTION bool ON_RenderContent_SetChildSlotOn(ON_RenderContent* rc, const RHMONO_STRING* csn, bool on)
+{
+  if ((nullptr != rc) && (nullptr != csn))
+  {
+    INPUTSTRINGCOERCE(_csn, csn);
+    return rc->SetChildSlotOn(on, _csn);
+  }
+
+  return false;
+}
+
+RH_C_FUNCTION double ON_RenderContent_ChildSlotAmount(const ON_RenderContent* rc, const RHMONO_STRING* csn)
+{
+  if ((nullptr != rc) && (nullptr != csn))
+  {
+    INPUTSTRINGCOERCE(_csn, csn);
+    // 0.0 when the slot has no amount, as Rhino.Render.RenderContent.ChildSlotAmount.
+    return rc->ChildSlotAmount(_csn, 0.0);
+  }
+
+  return 0.0;
+}
+
+RH_C_FUNCTION bool ON_RenderContent_SetChildSlotAmount(ON_RenderContent* rc, const RHMONO_STRING* csn, double amount)
+{
+  if ((nullptr != rc) && (nullptr != csn))
+  {
+    INPUTSTRINGCOERCE(_csn, csn);
+    return rc->SetChildSlotAmount(amount, _csn);
+  }
+
+  return false;
+}
+
 RH_C_FUNCTION void ON_RenderContent_XML(const ON_RenderContent* rc, bool recursive, ON_wString* string)
 {
   if ((nullptr != rc) && (nullptr != string))
   {
     *string = rc->XML(recursive);
   }
+}
+
+RH_C_FUNCTION bool ON_RenderContent_SetXML(ON_RenderContent* rc, const RHMONO_STRING* xml)
+{
+  if ((nullptr != rc) && (nullptr != xml))
+  {
+    INPUTSTRINGCOERCE(_xml, xml);
+    return rc->SetXML(_xml);
+  }
+
+  return false;
 }
 
 RH_C_FUNCTION bool ON_RenderContent_GetParameter(const ON_RenderContent* rc, const RHMONO_STRING* param, ON_XMLVariant* variant)

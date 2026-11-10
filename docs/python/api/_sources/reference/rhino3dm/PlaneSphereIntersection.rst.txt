@@ -1,0 +1,31 @@
+rhino3dm.PlaneSphereIntersection
+================================
+
+.. py:class:: rhino3dm.PlaneSphereIntersection
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Represents all possible cases of a Plane\|Sphere intersection event.
+
+
+   .. py:attribute:: Circle
+      :value: 2
+
+
+      Circular intersection.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``PlaneSphereIntersection.None`` is not Python syntax; ``PlaneSphereIntersection['None']`` is the same member). No intersections.
+
+
+   .. py:attribute:: Point
+      :value: 1
+
+
+      Tangent intersection.
+

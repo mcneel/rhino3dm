@@ -196,6 +196,27 @@ namespace Rhino.Render
     }
 
     /// <summary>
+    /// Linear workflow pre-process gamma enabled state.
+    /// </summary>
+    /// <since>9.2</since>
+    public bool PreProcessGammaOn
+    {
+      get
+      {
+        using (var v = GetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessGammaOn))
+          return v.ToBool();
+      }
+
+      set
+      {
+        using (var v = new Variant(value))
+        {
+          SetValue(UnsafeNativeMethods.LinearWorkflowSetting.PreProcessGammaOn, v);
+        }
+      }
+    }
+
+    /// <summary>
     /// Linear workflow pre-process gamma value. This is currently the same as the post-process gamma value.
     /// </summary>
     /// <since>6.0</since>

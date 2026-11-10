@@ -1,0 +1,30 @@
+rhino3dm.RenderChannels
+=======================
+
+.. toctree::
+   :hidden:
+
+   /reference/rhino3dm/RenderChannels.Modes
+
+.. py:class:: rhino3dm.RenderChannels
+
+   Render Channels. This corresponds to the user's settings in the Rendering panel.
+
+
+   .. py:property:: CustomList
+      :type: list[Any]
+
+
+
+   .. py:property:: Mode
+      :type: RenderChannels
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rhino3dm.RenderChannels.Modes
+
+

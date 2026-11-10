@@ -1,0 +1,25 @@
+rhino3dm.Decals
+===============
+
+.. py:class:: rhino3dm.Decals
+
+   Represents all the decals of an object.
+
+
+   .. py:method:: Clear() -> None
+
+      Deprecated since 8.0.
+
+
+
+   .. py:method:: Remove(decal: Decal | None) -> bool
+
+      Remove a single decal from the collection.
+
+
+
+   .. py:method:: RemoveAllDecals() -> None
+
+      Remove all the decals from the collection.
+
+

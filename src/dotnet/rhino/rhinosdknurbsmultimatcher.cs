@@ -320,6 +320,7 @@ namespace Rhino.Geometry
     {
       int rc = (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_AddConstraint(m_ptr, target_curve.NonConstPointer(), (uint)continuity);
       GC.KeepAlive(this);
+      GC.KeepAlive(target_curve);
       return rc;
     }
 
@@ -331,6 +332,7 @@ namespace Rhino.Geometry
       if (side < 0) return -1;
       int rc = (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_AddConstraintSide(m_ptr, (uint)side, target_curve.NonConstPointer(), (uint)continuity);
       GC.KeepAlive(this);
+      GC.KeepAlive(target_curve);
       return rc;
     }
 
@@ -341,6 +343,7 @@ namespace Rhino.Geometry
     {
       int rc = (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_EditConstraint(m_ptr, target_curve.NonConstPointer(), (uint)continuity);
       GC.KeepAlive(this);
+      GC.KeepAlive(target_curve);
       return rc;
     }
 
@@ -353,6 +356,7 @@ namespace Rhino.Geometry
       IntPtr target_curve_ptr = target_curve == null ? IntPtr.Zero : target_curve.NonConstPointer();
       int rc = (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_EditConstraintSide(m_ptr, (uint)side, target_curve_ptr, (uint)continuity);
       GC.KeepAlive(this);
+      GC.KeepAlive(target_curve);
       return rc;
     }
 
@@ -363,6 +367,7 @@ namespace Rhino.Geometry
     {
       int rc = (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_RemoveConstraintFromCurve(m_ptr, target_curve.NonConstPointer());
       GC.KeepAlive(this);
+      GC.KeepAlive(target_curve);
       return rc;
     }
 
@@ -384,6 +389,7 @@ namespace Rhino.Geometry
     {
       int rc = (int)UnsafeNativeMethods.RHC_TlMultiMatchSrf_EditInitialSurface(m_ptr, new_surface.NonConstPointer());
       GC.KeepAlive(this);
+      GC.KeepAlive(new_surface);
       return rc;
     }
 

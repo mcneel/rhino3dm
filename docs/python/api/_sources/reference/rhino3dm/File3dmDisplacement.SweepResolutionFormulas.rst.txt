@@ -1,0 +1,24 @@
+rhino3dm.File3dmDisplacement.SweepResolutionFormulas
+====================================================
+
+.. py:class:: rhino3dm.File3dmDisplacement.SweepResolutionFormulas
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Formula to use to calculate sweep resolution from initial quality.
+
+
+   .. py:attribute:: AbsoluteToleranceDependent
+      :value: 1
+
+
+      Formula used in Rhino 5. Dependent on absolute tolerance.
+
+
+   .. py:attribute:: Default
+      :value: 0
+
+
+      Default formula.
+

@@ -1,0 +1,35 @@
+rhino3dm.Projection
+===================
+
+.. py:class:: rhino3dm.Projection
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   When a mapping primitive, like a plane, sphere, box, or cylinder, is used, there are two projection options. If m\_type = srfp\_mapping, then m\_projection is ignored.
+
+
+   .. py:attribute:: ClosestPoint
+      :value: 1
+
+
+      world xyz maps to the point on the mapping primitive that is closest to xyz. In this case, ON\_TextureMapping::Evaluate ignores the vector argument.
+
+      :type: ClosestPoint
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``Projection.None`` is not Python syntax; ``Projection['None']`` is the same member). None
+
+
+   .. py:attribute:: Ray
+      :value: 2
+
+
+      world xyz + world vector defines a world line. The world line is intersected with the mapping primitive and the intersection point that is closest to the world xyz point is used to calculate the mapping parameters.
+
+      :type: Ray
+

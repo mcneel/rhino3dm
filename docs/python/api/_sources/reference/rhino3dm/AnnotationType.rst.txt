@@ -1,0 +1,94 @@
+rhino3dm.AnnotationType
+=======================
+
+.. py:class:: rhino3dm.AnnotationType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   ON::AnnotationType identifies the type of an annotation object derived from ON\_Annotation.
+
+
+   .. py:attribute:: Aligned
+      :value: 1
+
+
+      Linear distance between two points with dimension line parallel to the dimensioned points.
+
+
+   .. py:attribute:: Angular
+      :value: 2
+
+
+      Angle between two lines.
+
+
+   .. py:attribute:: Angular3pt
+      :value: 11
+
+
+      Angular3pt. Angle defined by 3 points.
+
+
+   .. py:attribute:: ArcLen
+      :value: 7
+
+
+      Arc length of a curve.
+
+
+   .. py:attribute:: CenterMark
+      :value: 8
+
+
+      Center mark dimension. Typically used to document the center of an arc or circle.
+
+
+   .. py:attribute:: Diameter
+      :value: 3
+
+
+      Arc or circle diameter dimension.
+
+
+   .. py:attribute:: Leader
+      :value: 10
+
+
+      Leader. Text and a curve with an arrow head.
+
+
+   .. py:attribute:: Ordinate
+      :value: 6
+
+
+      Ordinate dimension. Typically used to document an offset distance between the center of a circle and a reference point.
+
+
+   .. py:attribute:: Radius
+      :value: 4
+
+
+      Arc or circle radius dimension.
+
+
+   .. py:attribute:: Rotated
+      :value: 5
+
+
+      Linear distance between two points with dimension line horizontal, vertical or rotated by a specified amount.
+
+
+   .. py:attribute:: Text
+      :value: 9
+
+
+      Text. Stand alone text with a wide variety of uses.
+
+
+   .. py:attribute:: Unset
+      :value: 0
+
+
+      Not a valid annotation type.
+

@@ -1,63 +1,16 @@
-#include "bindings.h"
-
+// Triage F (Luis 2026-10-28; docs/vnext/rhino3dm-only-triage.md F; api/exceptions.toml
+// [[hand_kept]]): the JSON forms Rhino.Compute exchanges, the old bindings' dictionaries key
+// for key.
+//   F1 CommonObject / File3dm Encode, Decode: kept until a portable JSON API is upstream
+//   F2 the value types' (and MeshingParameters') Encode, Decode
+//   F4 ArchivableDictionary EncodeDict, DecodeDict: a dict in RhinoCommon's ArchivableDictionary
+//      binary form
+// Hand-maintained members of BoundingBox; the generated binding is bnd_boundingbox_gen.h (tools/generate/bnd_gen.py).
 #pragma once
 
-#if defined(ON_PYTHON_COMPILE)
-void initBoundingBoxBindings(rh3dmpymodule& m);
-#else
-void initBoundingBoxBindings(void* m);
-#endif
+#include "bnd_common.h"
+#include "bnd_boundingbox_gen.h"
 
-class BND_BoundingBox
-{
-public:
-  ON_BoundingBox m_bbox;
-public:
-  BND_BoundingBox(const ON_3dPoint& min, const ON_3dPoint& max);
-  BND_BoundingBox(double minX, double minY, double minZ, double maxX, double maxY, double maxZ);
-  //public BoundingBox(System.Collections.Generic.IEnumerable<Point3d> points)
-  //public BoundingBox(System.Collections.Generic.IEnumerable<Point3d> points, Transform xform)
-  BND_BoundingBox(const ON_BoundingBox& bbox);
-  //static BoundingBox Empty
-  bool IsValid() const { return m_bbox.IsValid(); }
-  ON_3dPoint Min() const { return m_bbox.Min(); }
-  ON_3dPoint Max() const { return m_bbox.Max(); }
-  ON_3dPoint Center() const { return m_bbox.Center(); }
-  double Area() const { return m_bbox.Area(); }
-  double Volume() const { return m_bbox.Volume(); }
-  ON_3dVector Diagonal() const { return m_bbox.Diagonal(); }
-  //ON_3dPoint PointAt(double tx, double ty, double tz) const
-  ON_3dPoint ClosestPoint(ON_3dPoint point) const { return m_bbox.ClosestPoint(point); }
-  //ON_3dPoint ClosestPoint(ON_3dPoint point, bool includeInterior) const
-  //ON_3dPoint FurthestPoint(ON_3dPoint point) const
-  void Inflate(double amount) { Inflate3(amount, amount, amount); }
-  void Inflate3(double xAmount, double yAmount, double zAmount);
-  bool Contains(ON_3dPoint point) const { return m_bbox.IsPointIn(point); }
-  //bool Contains(ON_3dPoint point, bool strict)
-  //bool Contains(BoundingBox box)
-  //bool Contains(BoundingBox box, bool strict)
-  //bool MakeValid()
-  //ON_3dPoint Corner(bool minX, bool minY, bool minZ)
-  int IsDegenerate(double tolerance) const { return m_bbox.IsDegenerate(tolerance); }
-  //ON_3dPoint[] GetCorners()
-  //Line[] GetEdges()
-  bool Transform(const class BND_Transform& xform);
-  class BND_Brep* ToBrep() const;
-  //void Union(const BND_BoundingBox& other) { m_bbox.Union(other.m_bbox); }
-  //public void Union(Point3d point)
-  static BND_BoundingBox Union(const BND_BoundingBox& a, const BND_BoundingBox& b);
-  //public static BoundingBox Intersection(BoundingBox a, BoundingBox b)
-  //public static BoundingBox Union(BoundingBox box, Point3d point)
-
-#if defined(__EMSCRIPTEN__)
-  emscripten::val toJSON(emscripten::val key);
-  emscripten::val Encode() const;
-  static BND_BoundingBox* Decode(emscripten::val jsonObject);
-#endif
-
-#if defined(ON_PYTHON_COMPILE)
-  py::dict Encode() const;
-  static BND_BoundingBox* Decode(py::dict jsonObject);
-#endif
-
-};
+// F2
+BND_DICT BND_BoundingBox_Encode(const BND_BoundingBox& box);
+BND_BoundingBox BND_BoundingBox_Decode(BND_DICT jsonObject);

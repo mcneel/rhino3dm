@@ -1,0 +1,108 @@
+rhino3dm.TextureProjectionModes
+===============================
+
+.. py:class:: rhino3dm.TextureProjectionModes
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Enum describing how texture is projected onto geometry
+
+
+   .. py:attribute:: EnvironmentMapBox
+      :value: 5
+
+
+      Box type environment mapping
+
+
+   .. py:attribute:: EnvironmentMapCube
+      :value: 8
+
+
+      Cube type environment mapping
+
+
+   .. py:attribute:: EnvironmentMapEmap
+      :value: 12
+
+
+      Emap type environment mapping
+
+
+   .. py:attribute:: EnvironmentMapHCrossCube
+      :value: 10
+
+
+      Horizontal cross type environment mapping
+
+
+   .. py:attribute:: EnvironmentMapHemispherical
+      :value: 11
+
+
+      Hemispherical environment mapping
+
+
+   .. py:attribute:: EnvironmentMapLightProbe
+      :value: 6
+
+
+      Light probe type environment mapping
+
+
+   .. py:attribute:: EnvironmentMapSpherical
+      :value: 7
+
+
+      Spherical environment mapping
+
+
+   .. py:attribute:: EnvironmentMapVCrossCube
+      :value: 9
+
+
+      Vertical cross cube type environment mapping
+
+
+   .. py:attribute:: MappingChannel
+      :value: 1
+
+
+      Uses a texture mapping to generate texture coordinates
+
+
+   .. py:attribute:: ScreenBased
+      :value: 2
+
+
+      Screen based
+
+
+   .. py:attribute:: SurfaceParameterization
+      :value: 13
+
+
+      Surface parameterization
+
+
+   .. py:attribute:: Undefined
+      :value: 0
+
+
+      Not valid projection type
+
+
+   .. py:attribute:: Wcs
+      :value: 3
+
+
+      World coordinate system projection
+
+
+   .. py:attribute:: WcsBox
+      :value: 4
+
+
+      Box type world coordinate system projection
+

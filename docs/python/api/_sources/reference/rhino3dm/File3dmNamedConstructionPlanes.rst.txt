@@ -1,0 +1,38 @@
+rhino3dm.File3dmNamedConstructionPlanes
+=======================================
+
+.. py:class:: rhino3dm.File3dmNamedConstructionPlanes
+
+   Provides access to named construction planes in the 3dm file.
+
+
+   .. py:method:: Add(cplane: ConstructionPlane) -> None
+
+      Adds a named construction plane to the table.
+
+      :param cplane: The construction plane to add.
+
+
+
+   .. py:method:: Clear() -> None
+
+      Removes all named construction planes from the table.
+
+
+
+   .. py:method:: Delete(index: int) -> bool
+
+      Remove a named construction plane from the table.
+
+      :param index: Zero based array index.
+
+      :returns: true if successful.
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Number of named construction planes in the table.
+

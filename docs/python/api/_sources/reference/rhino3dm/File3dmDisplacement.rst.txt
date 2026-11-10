@@ -1,0 +1,209 @@
+rhino3dm.File3dmDisplacement
+============================
+
+.. toctree::
+   :hidden:
+
+   /reference/rhino3dm/File3dmDisplacement.SweepResolutionFormulas
+
+.. py:class:: rhino3dm.File3dmDisplacement
+
+   Represents the displacement attached to file3dm object attributes.
+
+
+   .. py:method:: AddSubItem(face_index: int, on: bool, texture: uuid.UUID, mapping_channel: int, black_point: float, white_point: float) -> bool
+
+      Adds a new sub-item to the displacement. face\_index is the index of the face on the polysurface/SubD. on is the override for File3dmDisplacement.On. texture is the override for File3dmDisplacement.TextureId. mapping\_channel is the override for File3dmDisplacement.MappingChannel. black\_point is the override for File3dmDisplacement.BlackPoint. white\_point is the override for File3dmDisplacement.WhitePoint.
+
+
+
+   .. py:method:: DeleteAllSubItems() -> None
+
+      Deletes all the sub-items from the displacement.
+
+
+
+   .. py:method:: DeleteSubItem(face_index: int) -> None
+
+      Deletes a sub-item by its face index. face\_index is the index of the face on the polysurface/SubD.
+
+
+
+   .. py:method:: GetSubItemFaceIndexes() -> list[Any]
+
+      Gets all the sub-items on the displacement. Sub-items can exist to override the top-level parameters for polysurface/SubD faces. Sub-items are identified by the face index that they apply to. An array of the face indexes of each sub-item on the displacement.
+
+
+
+   .. py:method:: SetSubItemBlackPoint(face_index: int, black_point: float) -> None
+
+      Sets the override for displacement 'black-point'. face\_index is the index of the face on the polysurface/SubD.
+
+
+
+   .. py:method:: SetSubItemMappingChannel(face_index: int, chan: int) -> None
+
+      Sets the override for displacement 'mapping channel'. face\_index is the index of the face on the polysurface/SubD.
+
+
+
+   .. py:method:: SetSubItemOn(face_index: int, on: bool) -> None
+
+      Sets the override for displacement 'on'. face\_index is the index of the face on the polysurface/SubD.
+
+
+
+   .. py:method:: SetSubItemTexture(face_index: int, texture_id: uuid.UUID) -> None
+
+      Sets the override for displacement 'texture'. face\_index is the index of the face on the polysurface/SubD.
+
+
+
+   .. py:method:: SetSubItemWhitePoint(face_index: int, white_point: float) -> None
+
+      Sets the override for displacement 'white-point'. face\_index is the index of the face on the polysurface/SubD.
+
+
+
+   .. py:method:: SubItemBlackPoint(face_index: int) -> float
+
+      Gets the override for displacement 'black-point'. face\_index is the index of the face on the polysurface/SubD.
+
+
+
+   .. py:method:: SubItemMappingChannel(face_index: int) -> int
+
+      Gets the override for displacement 'mapping channel'. face\_index is the index of the face on the polysurface/SubD.
+
+
+
+   .. py:method:: SubItemOn(face_index: int) -> bool
+
+      Gets the override for displacement 'on'. face\_index is the index of the face on the polysurface/SubD.
+
+
+
+   .. py:method:: SubItemTexture(face_index: int) -> uuid.UUID
+
+      Gets the override for displacement 'texture'. face\_index is the index of the face on the polysurface/SubD.
+
+
+
+   .. py:method:: SubItemWhitePoint(face_index: int) -> float
+
+      Gets the override for displacement 'white-point'. face\_index is the index of the face on the polysurface/SubD.
+
+
+
+   .. py:property:: BlackPoint
+      :type: float
+
+
+      Specifies the amount of displacement for the black color in the texture.
+
+
+   .. py:property:: Fairing
+      :type: int
+
+
+      Specifies the number of steps for the fairing process. Fairing straightens rough feature edges.
+
+
+   .. py:property:: FairingOn
+      :type: bool
+
+
+      Specifies whether or not to perform a fairing step. Fairing straightens rough feature edges.
+
+
+   .. py:property:: FinalMaxFaces
+      :type: int
+
+
+      Specifies how many faces the reduction post process should target.
+
+
+   .. py:property:: FinalMaxFacesOn
+      :type: bool
+
+
+      Specifies whether to perform a mesh reduction as a post process to simplify the result of displacement.
+
+
+   .. py:property:: InitialQuality
+      :type: int
+
+
+      Specifies how densely the object is initially subdivided. The lower the value, the higher the resolution of the displaced mesh.
+
+
+   .. py:property:: MappingChannel
+      :type: int
+
+
+      Specifies which texture mapping channel is used for the displacement texture.
+
+
+   .. py:property:: MeshMemoryLimit
+      :type: int
+
+
+      Specifies in megabytes how much memory can be allocated for use by the displacement mesh.
+
+
+   .. py:property:: On
+      :type: bool
+
+
+      Specifies whether the displacement feature is enabled or not.
+
+
+   .. py:property:: PostWeldAngle
+      :type: float
+
+
+      Specifies the maximum angle between face normals of adjacent faces that will get welded together.
+
+
+   .. py:property:: RefineSensitivity
+      :type: float
+
+
+      Specifies how sensitive the divider for contrasts is on the displacement texture. Specify 1 to split all mesh edges on each refine step. Specify 0.99 to make even slight contrasts on the displacement texture cause edges to be split. Specifying 0.01 only splits edges where heavy contrast exists.
+
+
+   .. py:property:: RefineSteps
+      :type: int
+
+
+      Specifies the number of refinement passes
+
+
+   .. py:property:: SweepResolutionFormula
+      :type: File3dmDisplacement
+
+
+      Specifies which formula is used to calculate sweep resolution from initial quality.
+
+
+   .. py:property:: TextureId
+      :type: uuid.UUID
+
+
+      Specifies which texture is used for computing the displacement amount.
+
+
+   .. py:property:: WhitePoint
+      :type: float
+
+
+      Specifies the amount of displacement for the white color in the texture.
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rhino3dm.File3dmDisplacement.SweepResolutionFormulas
+
+

@@ -1,0 +1,139 @@
+rhino3dm.PhysicallyBasedMaterial
+================================
+
+.. toctree::
+   :hidden:
+
+   /reference/rhino3dm/PhysicallyBasedMaterial.BRDFs
+
+.. py:class:: rhino3dm.PhysicallyBasedMaterial
+
+   .. py:method:: SetTexture(texture: Texture, which: TextureType) -> bool
+
+      Set the texture that corresponds with the specified texture type for this material.
+
+      :param texture: An instance of Rhino.DocObjects.Texture
+      :param which: Use Rhino.DocObjects.TextureType
+
+
+
+   .. py:method:: SynchronizeLegacyMaterial() -> None
+
+
+   .. py:property:: Alpha
+      :type: float
+
+
+
+   .. py:property:: Anisotropic
+      :type: float
+
+
+
+   .. py:property:: AnisotropicRotation
+      :type: float
+
+
+
+   .. py:property:: BRDF
+      :type: PhysicallyBasedMaterial
+
+
+
+   .. py:property:: BaseColor
+      :type: Color4f
+
+
+
+   .. py:property:: Clearcoat
+      :type: float
+
+
+
+   .. py:property:: ClearcoatRoughness
+      :type: float
+
+
+
+   .. py:property:: Emission
+      :type: Color4f
+
+
+
+   .. py:property:: Metallic
+      :type: float
+
+
+
+   .. py:property:: Opacity
+      :type: float
+
+
+
+   .. py:property:: OpacityIOR
+      :type: float
+
+
+
+   .. py:property:: OpacityRoughness
+      :type: float
+
+
+
+   .. py:property:: ReflectiveIOR
+      :type: float
+
+
+
+   .. py:property:: Roughness
+      :type: float
+
+
+
+   .. py:property:: Sheen
+      :type: float
+
+
+
+   .. py:property:: SheenTint
+      :type: float
+
+
+
+   .. py:property:: Specular
+      :type: float
+
+
+
+   .. py:property:: SpecularTint
+      :type: float
+
+
+
+   .. py:property:: Subsurface
+      :type: float
+
+
+
+   .. py:property:: SubsurfaceScatteringColor
+      :type: Color4f
+
+
+
+   .. py:property:: SubsurfaceScatteringRadius
+      :type: float
+
+
+
+   .. py:property:: UseBaseColorTextureAlphaForObjectAlphaTransparencyTexture
+      :type: bool
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rhino3dm.PhysicallyBasedMaterial.BRDFs
+
+

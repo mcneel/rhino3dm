@@ -1,0 +1,42 @@
+rhino3dm.File3dmThickening
+==========================
+
+.. py:class:: rhino3dm.File3dmThickening
+
+   Represents the thickening attached to file3dm object attributes.
+
+
+   .. py:property:: BothSides
+      :type: bool
+
+
+      Specifies whether to thicken to both sides of the surface.
+
+
+   .. py:property:: Distance
+      :type: float
+
+
+      Specifies how thick meshes will be made.
+
+
+   .. py:property:: OffsetOnly
+      :type: bool
+
+
+      Specifies whether to only offset the original surface.
+
+
+   .. py:property:: On
+      :type: bool
+
+
+      Specifies whether the feature is enabled or not.
+
+
+   .. py:property:: Solid
+      :type: bool
+
+
+      Specifies whether to make open meshes solid by adding walls when thickening.
+

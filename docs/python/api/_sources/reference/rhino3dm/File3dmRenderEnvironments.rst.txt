@@ -1,0 +1,16 @@
+rhino3dm.File3dmRenderEnvironments
+==================================
+
+.. py:class:: rhino3dm.File3dmRenderEnvironments
+
+   .. py:method:: Add(environment: File3dmRenderEnvironment) -> None
+
+      Adds a render environment to the model (rhino3dm only).
+
+
+
+   .. py:method:: Find(g: uuid.UUID) -> File3dmRenderEnvironment
+
+      Finds an environment by its id, if possible. Returns null on failure.
+
+

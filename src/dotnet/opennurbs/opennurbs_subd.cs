@@ -425,6 +425,250 @@ namespace Rhino.Geometry
       return rc;
     }
 
+    /// <summary>
+    /// Create a new SubD from a mesh.
+    /// </summary>
+    /// <param name="mesh">The input mesh.</param>
+    /// <returns>A new SubD if successful, or null on failure.</returns>
+    /// <since>7.0</since>
+    public static SubD CreateFromMesh(Mesh mesh)
+    {
+      return CreateFromMesh(mesh, null);
+    }
+
+    /// <summary>
+    /// Create a new SubD from a mesh.
+    /// </summary>
+    /// <param name="mesh">The input mesh.</param>
+    /// <param name="options">The SubD creation options.</param>
+    /// <returns>A new SubD if successful, or null on failure.</returns>
+    /// <since>7.0</since>
+    public static SubD CreateFromMesh(Mesh mesh, SubDCreationOptions options)
+    {
+      IntPtr const_ptr_mesh = mesh.ConstPointer();
+      IntPtr const_ptr_options = options != null ? options.ConstPointer() : IntPtr.Zero;
+      IntPtr ptr_subd = UnsafeNativeMethods.ON_SubD_CreateFromMesh(const_ptr_mesh, const_ptr_options);
+      if (IntPtr.Zero != ptr_subd)
+        return new SubD(ptr_subd, null);
+      GC.KeepAlive(mesh);
+      GC.KeepAlive(options);
+      return null;
+    }
+
+    /// <summary>
+    /// Deletes components from this SubD.
+    /// <para>
+    /// Deleting a vertex deletes every edge and face attached to it. Deleting an edge
+    /// deletes every face attached to it. Deleting a face deletes only that face.
+    /// </para>
+    /// </summary>
+    /// <param name="components">The components to delete.</param>
+    /// <param name="markDeletedFaceEdges">
+    /// If true, edges that survive the deletion of a face they bounded get their runtime
+    /// mark set, so the caller can find the boundary of the hole that was opened.
+    /// </param>
+    /// <returns>True if the deletion succeeded.</returns>
+    /// <since>8.36</since>
+    public bool DeleteComponents(IEnumerable<SubDComponent> components, bool markDeletedFaceEdges)
+    {
+      if (null == components)
+        throw new ArgumentNullException(nameof(components));
+
+      IntPtr ptr_this = NonConstPointer();
+      bool rc;
+      using (var ciArray = new INTERNAL_ComponentIndexArray())
+      {
+        foreach (var component in components)
+          ciArray.Add(ComponentIndexOf(component));
+        if (0 == ciArray.Count)
+          return true; // nothing to delete
+        rc = UnsafeNativeMethods.ON_SubD_DeleteComponents(ptr_this, ciArray.NonConstPointer(), markDeletedFaceEdges);
+      }
+      GC.KeepAlive(components);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Deletes components from this SubD, leaving the edges that bounded any deleted face
+    /// unmarked. See
+    /// <see cref="DeleteComponents(IEnumerable{SubDComponent}, bool)"/>.
+    /// </summary>
+    /// <param name="components">The components to delete.</param>
+    /// <returns>True if the deletion succeeded.</returns>
+    /// <since>8.36</since>
+    public bool DeleteComponents(IEnumerable<SubDComponent> components)
+    {
+      return DeleteComponents(components, false);
+    }
+
+    /// <summary>
+    /// Deletes components from this SubD, identified by component index.
+    /// </summary>
+    /// <param name="componentIndices">The component indices to delete.</param>
+    /// <param name="markDeletedFaceEdges">
+    /// If true, edges that survive the deletion of a face they bounded get their runtime
+    /// mark set.
+    /// </param>
+    /// <returns>True if the deletion succeeded.</returns>
+    /// <since>8.36</since>
+    public bool DeleteComponents(IEnumerable<ComponentIndex> componentIndices, bool markDeletedFaceEdges)
+    {
+      if (null == componentIndices)
+        throw new ArgumentNullException(nameof(componentIndices));
+
+      IntPtr ptr_this = NonConstPointer();
+      bool rc;
+      using (var ciArray = new INTERNAL_ComponentIndexArray())
+      {
+        foreach (var ci in componentIndices)
+          ciArray.Add(ci);
+        if (0 == ciArray.Count)
+          return true; // nothing to delete
+        rc = UnsafeNativeMethods.ON_SubD_DeleteComponents(ptr_this, ciArray.NonConstPointer(), markDeletedFaceEdges);
+      }
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    // Every SubDComponent knows its own component index; this keeps the callers above from
+    // having to switch on the concrete type.
+    static ComponentIndex ComponentIndexOf(SubDComponent component)
+    {
+      if (null == component)
+        throw new ArgumentNullException(nameof(component));
+      var vertex = component as SubDVertex;
+      if (null != vertex)
+        return vertex.ComponentIndex();
+      var edge = component as SubDEdge;
+      if (null != edge)
+        return edge.ComponentIndex();
+      var face = component as SubDFace;
+      if (null != face)
+        return face.ComponentIndex();
+      throw new NotSupportedException("Unknown SubDComponent type.");
+    }
+
+    /// <summary>
+    /// Creates a SubD box.
+    /// </summary>
+    /// <param name="corners">
+    /// The eight box corners. The first four are the bottom face, in order around it, and
+    /// the last four are the top face, in the same order.
+    /// </param>
+    /// <param name="edgeSharpness">
+    /// The sharpness to give the edges where box sides meet.
+    /// <see cref="SubDEdgeSharpness.SmoothValue"/> leaves them smooth and
+    /// <see cref="SubDEdgeSharpness.CreaseValue"/> makes them creases.
+    /// </param>
+    /// <param name="faceCountX">Number of faces along the first bottom edge.</param>
+    /// <param name="faceCountY">Number of faces along the second bottom edge.</param>
+    /// <param name="faceCountZ">Number of faces from the bottom face to the top face.</param>
+    /// <returns>A new SubD box, or null if the input is not valid.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public static SubD CreateSubDBox(IEnumerable<Point3d> corners, double edgeSharpness, uint faceCountX, uint faceCountY, uint faceCountZ)
+    {
+      if (null == corners)
+        throw new ArgumentNullException(nameof(corners));
+
+      Point3d[] pts = corners as Point3d[] ?? corners.ToArray();
+      if (8 != pts.Length)
+        throw new ArgumentException("corners must have exactly 8 points.", nameof(corners));
+
+      IntPtr ptr_subd = UnsafeNativeMethods.ON_SubD_CreateSubDBox(pts, edgeSharpness, faceCountX, faceCountY, faceCountZ);
+      if (IntPtr.Zero == ptr_subd)
+        return null;
+      return new SubD(ptr_subd, null);
+    }
+
+    /// <summary>
+    /// Creates a SubD box from a <see cref="Box"/>.
+    /// </summary>
+    /// <param name="box">The box to build from. It must be valid.</param>
+    /// <param name="edgeSharpness">
+    /// The sharpness to give the edges where box sides meet. See
+    /// <see cref="CreateSubDBox(IEnumerable{Point3d}, double, uint, uint, uint)"/>.
+    /// </param>
+    /// <param name="faceCountX">Number of faces in the box X direction.</param>
+    /// <param name="faceCountY">Number of faces in the box Y direction.</param>
+    /// <param name="faceCountZ">Number of faces in the box Z direction.</param>
+    /// <returns>A new SubD box, or null if the input is not valid.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public static SubD CreateSubDBox(Box box, double edgeSharpness, uint faceCountX, uint faceCountY, uint faceCountZ)
+    {
+      if (!box.IsValid)
+        throw new ArgumentException("box is not valid.", nameof(box));
+
+      // ON_SubD::CreateSubDBox wants the bottom face first, then the top face in the same
+      // order. Box.GetCorners() already returns them that way.
+      return CreateSubDBox(box.GetCorners(), edgeSharpness, faceCountX, faceCountY, faceCountZ);
+    }
+
+    /// <summary>
+    /// The number of errors the SubD code has trapped since the process started.
+    /// <para>
+    /// This is a diagnostic counter, not a per-SubD property. Sample it before and after an
+    /// operation to find out whether that operation hit an internal error, which usually
+    /// means the SubD is not valid.
+    /// </para>
+    /// </summary>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public static uint ErrorCount
+    {
+      get { return UnsafeNativeMethods.ON_SubD_ErrorCount(); }
+    }
+
+    /// <summary>
+    /// Gets the number of sharp edges in this SubD.
+    /// See <see cref="SubDEdge.IsSharp"/> for what makes an edge sharp.
+    /// </summary>
+    /// <returns>The number of sharp edges.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    [ConstOperation]
+    public uint SharpEdgeCount()
+    {
+      SubDEdgeSharpness range = default(SubDEdgeSharpness);
+      return SharpEdgeCount(out range);
+    }
+
+    /// <summary>
+    /// Gets the number of sharp edges in this SubD, and the range of sharpness values used.
+    /// </summary>
+    /// <param name="sharpnessRange">
+    /// The smallest and largest sharpness found on the sharp edges. If there are no sharp
+    /// edges, this is <see cref="SubDEdgeSharpness.Smooth"/>.
+    /// </param>
+    /// <returns>The number of sharp edges.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    [ConstOperation]
+    public uint SharpEdgeCount(out SubDEdgeSharpness sharpnessRange)
+    {
+      sharpnessRange = default(SubDEdgeSharpness);
+      IntPtr const_ptr_this = ConstPointer();
+      uint rc = UnsafeNativeMethods.ON_SubD_SharpEdgeCount(const_ptr_this, ref sharpnessRange);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Converts every sharp edge in this SubD to a smooth edge.
+    /// </summary>
+    /// <returns>The number of edges that were changed.</returns>
+    /// <since>8.36</since>
+    [CLSCompliant(false)]
+    public uint ClearEdgeSharpness()
+    {
+      IntPtr ptr_this = NonConstPointer();
+      uint rc = UnsafeNativeMethods.ON_SubD_ClearEdgeSharpness(ptr_this);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
 #if RHINO_SDK
 
     /// <summary>
@@ -540,36 +784,6 @@ namespace Rhino.Geometry
     {
       SubDToBrepOptions options = SubDToBrepOptions.Default;
       return ToBrep(options);
-    }
-
-    /// <summary>
-    /// Create a new SubD from a mesh.
-    /// </summary>
-    /// <param name="mesh">The input mesh.</param>
-    /// <returns>A new SubD if successful, or null on failure.</returns>
-    /// <since>7.0</since>
-    public static SubD CreateFromMesh(Mesh mesh)
-    {
-      return CreateFromMesh(mesh, null);
-    }
-
-    /// <summary>
-    /// Create a new SubD from a mesh.
-    /// </summary>
-    /// <param name="mesh">The input mesh.</param>
-    /// <param name="options">The SubD creation options.</param>
-    /// <returns>A new SubD if successful, or null on failure.</returns>
-    /// <since>7.0</since>
-    public static SubD CreateFromMesh(Mesh mesh, SubDCreationOptions options)
-    {
-      IntPtr const_ptr_mesh = mesh.ConstPointer();
-      IntPtr const_ptr_options = options != null ? options.ConstPointer() : IntPtr.Zero;
-      IntPtr ptr_subd = UnsafeNativeMethods.ON_SubD_CreateFromMesh(const_ptr_mesh, const_ptr_options);
-      if (IntPtr.Zero != ptr_subd)
-        return new SubD(ptr_subd, null);
-      GC.KeepAlive(mesh);
-      GC.KeepAlive(options);
-      return null;
     }
 
     /// <summary>
@@ -718,82 +932,6 @@ namespace Rhino.Geometry
 #endif
 
     /// <summary>
-    /// Deletes components from this SubD.
-    /// <para>
-    /// Deleting a vertex deletes every edge and face attached to it. Deleting an edge
-    /// deletes every face attached to it. Deleting a face deletes only that face.
-    /// </para>
-    /// </summary>
-    /// <param name="components">The components to delete.</param>
-    /// <param name="markDeletedFaceEdges">
-    /// If true, edges that survive the deletion of a face they bounded get their runtime
-    /// mark set, so the caller can find the boundary of the hole that was opened.
-    /// </param>
-    /// <returns>True if the deletion succeeded.</returns>
-    /// <since>8.36</since>
-    public bool DeleteComponents(IEnumerable<SubDComponent> components, bool markDeletedFaceEdges)
-    {
-      if (null == components)
-        throw new ArgumentNullException(nameof(components));
-
-      IntPtr ptr_this = NonConstPointer();
-      bool rc;
-      using (var ciArray = new INTERNAL_ComponentIndexArray())
-      {
-        foreach (var component in components)
-          ciArray.Add(ComponentIndexOf(component));
-        if (0 == ciArray.Count)
-          return true; // nothing to delete
-        rc = UnsafeNativeMethods.ON_SubD_DeleteComponents(ptr_this, ciArray.NonConstPointer(), markDeletedFaceEdges);
-      }
-      GC.KeepAlive(components);
-      GC.KeepAlive(this);
-      return rc;
-    }
-
-    /// <summary>
-    /// Deletes components from this SubD, leaving the edges that bounded any deleted face
-    /// unmarked. See
-    /// <see cref="DeleteComponents(IEnumerable{SubDComponent}, bool)"/>.
-    /// </summary>
-    /// <param name="components">The components to delete.</param>
-    /// <returns>True if the deletion succeeded.</returns>
-    /// <since>8.36</since>
-    public bool DeleteComponents(IEnumerable<SubDComponent> components)
-    {
-      return DeleteComponents(components, false);
-    }
-
-    /// <summary>
-    /// Deletes components from this SubD, identified by component index.
-    /// </summary>
-    /// <param name="componentIndices">The component indices to delete.</param>
-    /// <param name="markDeletedFaceEdges">
-    /// If true, edges that survive the deletion of a face they bounded get their runtime
-    /// mark set.
-    /// </param>
-    /// <returns>True if the deletion succeeded.</returns>
-    /// <since>8.36</since>
-    public bool DeleteComponents(IEnumerable<ComponentIndex> componentIndices, bool markDeletedFaceEdges)
-    {
-      if (null == componentIndices)
-        throw new ArgumentNullException(nameof(componentIndices));
-
-      IntPtr ptr_this = NonConstPointer();
-      bool rc;
-      using (var ciArray = new INTERNAL_ComponentIndexArray())
-      {
-        foreach (var ci in componentIndices)
-          ciArray.Add(ci);
-        if (0 == ciArray.Count)
-          return true; // nothing to delete
-        rc = UnsafeNativeMethods.ON_SubD_DeleteComponents(ptr_this, ciArray.NonConstPointer(), markDeletedFaceEdges);
-      }
-      GC.KeepAlive(this);
-      return rc;
-    }
-
-    /// <summary>
     /// Dissolves the given edges and vertices, merging the faces around them, and deletes
     /// the given faces.
     /// <para>
@@ -850,144 +988,6 @@ namespace Rhino.Geometry
           return 0;
         rc = UnsafeNativeMethods.ON_SubD_DissolveOrDelete(ptr_this, ciArray.NonConstPointer());
       }
-      GC.KeepAlive(this);
-      return rc;
-    }
-
-    // Every SubDComponent knows its own component index; this keeps the callers above from
-    // having to switch on the concrete type.
-    static ComponentIndex ComponentIndexOf(SubDComponent component)
-    {
-      if (null == component)
-        throw new ArgumentNullException(nameof(component));
-      var vertex = component as SubDVertex;
-      if (null != vertex)
-        return vertex.ComponentIndex();
-      var edge = component as SubDEdge;
-      if (null != edge)
-        return edge.ComponentIndex();
-      var face = component as SubDFace;
-      if (null != face)
-        return face.ComponentIndex();
-      throw new NotSupportedException("Unknown SubDComponent type.");
-    }
-
-    /// <summary>
-    /// Creates a SubD box.
-    /// </summary>
-    /// <param name="corners">
-    /// The eight box corners. The first four are the bottom face, in order around it, and
-    /// the last four are the top face, in the same order.
-    /// </param>
-    /// <param name="edgeSharpness">
-    /// The sharpness to give the edges where box sides meet.
-    /// <see cref="SubDEdgeSharpness.SmoothValue"/> leaves them smooth and
-    /// <see cref="SubDEdgeSharpness.CreaseValue"/> makes them creases.
-    /// </param>
-    /// <param name="faceCountX">Number of faces along the first bottom edge.</param>
-    /// <param name="faceCountY">Number of faces along the second bottom edge.</param>
-    /// <param name="faceCountZ">Number of faces from the bottom face to the top face.</param>
-    /// <returns>A new SubD box, or null if the input is not valid.</returns>
-    /// <since>8.36</since>
-    [CLSCompliant(false)]
-    public static SubD CreateSubDBox(IEnumerable<Point3d> corners, double edgeSharpness, uint faceCountX, uint faceCountY, uint faceCountZ)
-    {
-      if (null == corners)
-        throw new ArgumentNullException(nameof(corners));
-
-      Point3d[] pts = corners as Point3d[] ?? corners.ToArray();
-      if (8 != pts.Length)
-        throw new ArgumentException("corners must have exactly 8 points.", nameof(corners));
-
-      IntPtr ptr_subd = UnsafeNativeMethods.ON_SubD_CreateSubDBox(pts, edgeSharpness, faceCountX, faceCountY, faceCountZ);
-      if (IntPtr.Zero == ptr_subd)
-        return null;
-      return new SubD(ptr_subd, null);
-    }
-
-    /// <summary>
-    /// Creates a SubD box from a <see cref="Box"/>.
-    /// </summary>
-    /// <param name="box">The box to build from. It must be valid.</param>
-    /// <param name="edgeSharpness">
-    /// The sharpness to give the edges where box sides meet. See
-    /// <see cref="CreateSubDBox(IEnumerable{Point3d}, double, uint, uint, uint)"/>.
-    /// </param>
-    /// <param name="faceCountX">Number of faces in the box X direction.</param>
-    /// <param name="faceCountY">Number of faces in the box Y direction.</param>
-    /// <param name="faceCountZ">Number of faces in the box Z direction.</param>
-    /// <returns>A new SubD box, or null if the input is not valid.</returns>
-    /// <since>8.36</since>
-    [CLSCompliant(false)]
-    public static SubD CreateSubDBox(Box box, double edgeSharpness, uint faceCountX, uint faceCountY, uint faceCountZ)
-    {
-      if (!box.IsValid)
-        throw new ArgumentException("box is not valid.", nameof(box));
-
-      // ON_SubD::CreateSubDBox wants the bottom face first, then the top face in the same
-      // order. Box.GetCorners() already returns them that way.
-      return CreateSubDBox(box.GetCorners(), edgeSharpness, faceCountX, faceCountY, faceCountZ);
-    }
-
-    /// <summary>
-    /// The number of errors the SubD code has trapped since the process started.
-    /// <para>
-    /// This is a diagnostic counter, not a per-SubD property. Sample it before and after an
-    /// operation to find out whether that operation hit an internal error, which usually
-    /// means the SubD is not valid.
-    /// </para>
-    /// </summary>
-    /// <since>8.36</since>
-    [CLSCompliant(false)]
-    public static uint ErrorCount
-    {
-      get { return UnsafeNativeMethods.ON_SubD_ErrorCount(); }
-    }
-
-    /// <summary>
-    /// Gets the number of sharp edges in this SubD.
-    /// See <see cref="SubDEdge.IsSharp"/> for what makes an edge sharp.
-    /// </summary>
-    /// <returns>The number of sharp edges.</returns>
-    /// <since>8.36</since>
-    [CLSCompliant(false)]
-    [ConstOperation]
-    public uint SharpEdgeCount()
-    {
-      SubDEdgeSharpness range = default(SubDEdgeSharpness);
-      return SharpEdgeCount(out range);
-    }
-
-    /// <summary>
-    /// Gets the number of sharp edges in this SubD, and the range of sharpness values used.
-    /// </summary>
-    /// <param name="sharpnessRange">
-    /// The smallest and largest sharpness found on the sharp edges. If there are no sharp
-    /// edges, this is <see cref="SubDEdgeSharpness.Smooth"/>.
-    /// </param>
-    /// <returns>The number of sharp edges.</returns>
-    /// <since>8.36</since>
-    [CLSCompliant(false)]
-    [ConstOperation]
-    public uint SharpEdgeCount(out SubDEdgeSharpness sharpnessRange)
-    {
-      sharpnessRange = default(SubDEdgeSharpness);
-      IntPtr const_ptr_this = ConstPointer();
-      uint rc = UnsafeNativeMethods.ON_SubD_SharpEdgeCount(const_ptr_this, ref sharpnessRange);
-      GC.KeepAlive(this);
-      return rc;
-    }
-
-    /// <summary>
-    /// Converts every sharp edge in this SubD to a smooth edge.
-    /// </summary>
-    /// <returns>The number of edges that were changed.</returns>
-    /// <since>8.36</since>
-    [CLSCompliant(false)]
-    public uint ClearEdgeSharpness()
-    {
-      IntPtr ptr_this = NonConstPointer();
-      uint rc = UnsafeNativeMethods.ON_SubD_ClearEdgeSharpness(ptr_this);
       GC.KeepAlive(this);
       return rc;
     }
@@ -3166,23 +3166,6 @@ namespace Rhino.Geometry
     }
 
 
-#if RHINO_SDK
-    /// <summary>
-    /// Get the limit surface point location at the center of the face
-    /// </summary>
-    /// <since>7.0</since>
-    public Point3d LimitSurfaceCenterPoint
-    {
-      get
-      {
-        Point3d res = Point3d.Unset;
-        var const_face_ptr = ConstPointer();
-        UnsafeNativeMethods.ON_SubDFace_LimitSurfaceCenterPoint(const_face_ptr, ref res);
-        GC.KeepAlive(this);
-        return res;
-      }
-    }
-
     /// <summary>
     /// The face's control net center point is the average of the face's
     /// vertex control net points. This is the same point as the face's
@@ -3199,25 +3182,6 @@ namespace Rhino.Geometry
         Point3d res = Point3d.Unset;
         var const_face_ptr = ConstPointer();
         UnsafeNativeMethods.ON_SubDFace_ControlNetCenterPoint(const_face_ptr, ref res);
-        GC.KeepAlive(this);
-        return res;
-      }
-    }
-
-    /// <summary>
-    /// Get the limit surface normal vector at the center of the face.
-    /// </summary>
-    /// <returns>
-    /// Limit surface normal vector at the face's center. 
-    /// </returns>
-    /// <since>8.0</since>
-    public Vector3d SurfaceCenterNormal
-    {
-      get
-      {
-        Vector3d res = Vector3d.Unset;
-        var const_face_ptr = ConstPointer();
-        UnsafeNativeMethods.ON_SubDFace_SurfaceCenterNormal(const_face_ptr, ref res);
         GC.KeepAlive(this);
         return res;
       }
@@ -3248,23 +3212,190 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
-    /// Get the limit surface tangent plane at the center of the face. 
-    /// The plane's origin is the point on the limit surface at the center of the face.
-    /// The plane's z axis is the limit surface normal vector at the center of the face.
+    /// Gets true if the face has edges.
     /// </summary>
-    /// <returns>
-    /// Limit surface tanget plane at the face's center. 
-    /// </returns>
-    /// <since>8.0</since>
-    public Plane SurfaceCenterFrame
+    /// <since>9.2</since>
+    public bool HasEdges
     {
       get
       {
-        Plane plane = Plane.Unset;
-        IntPtr const_face_ptr = ConstPointer();
-        UnsafeNativeMethods.ON_SubDFace_SurfaceCenterFrame(const_face_ptr, ref plane);
+        var const_ptr_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SubDFace_HasEdges(const_ptr_this);
         GC.KeepAlive(this);
-        return plane;
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets true if at least one of the face's edges is sharp.
+    /// </summary>
+    /// <since>9.2</since>
+    public bool HasSharpEdges
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SubDFace_HasSharpEdges(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets the number of the face's edges that are sharp.
+    /// </summary>
+    /// <since>9.2</since>
+    [CLSCompliant(false)]
+    public uint SharpEdgeCount
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        uint rc = UnsafeNativeMethods.ON_SubDFace_SharpEdgeCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets the largest sharpness of the face's edges (0.0 when none is sharp).
+    /// </summary>
+    /// <since>9.2</since>
+    public double MaximumEdgeSharpness
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        double rc = UnsafeNativeMethods.ON_SubDFace_MaximumEdgeSharpness(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets true if the face's control net polygon is convex with respect to the plane ControlNetCenterFrame.
+    /// False also for a degenerate face (a zero <see cref="ControlNetCenterNormal"/>): test that first
+    /// when "not convex" and "cannot tell" must be told apart.
+    /// </summary>
+    /// <since>9.2</since>
+    public bool IsConvex
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SubDFace_IsConvex(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Determines whether the face's control net polygon is planar.
+    /// False also for a degenerate face (a zero <see cref="ControlNetCenterNormal"/> or an invalid
+    /// <see cref="ControlNetCenterPoint"/>): test those first when "not planar" and "cannot tell" must be told apart.
+    /// </summary>
+    /// <param name="planarTolerance">Distance tolerance.</param>
+    /// <returns>True if the control net polygon is planar.</returns>
+    /// <since>9.2</since>
+    public bool IsPlanar(double planarTolerance)
+    {
+      var const_ptr_this = ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_SubDFace_IsPlanar(const_ptr_this, planarTolerance);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the face's per-face material channel index (0 when none is set).
+    /// </summary>
+    /// <since>9.2</since>
+    public int MaterialChannelIndex
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        int rc = UnsafeNativeMethods.ON_SubDFace_MaterialChannelIndex(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets the face's subdivision point: the center point after one subdivision.
+    /// </summary>
+    /// <since>9.2</since>
+    public Point3d SubdivisionPoint
+    {
+      get
+      {
+        Point3d rc = Point3d.Unset;
+        var const_ptr_this = ConstPointer();
+        UnsafeNativeMethods.ON_SubDFace_SubdivisionPoint(const_ptr_this, ref rc);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets true if the face has custom texture points.
+    /// </summary>
+    /// <since>9.2</since>
+    public bool TexturePointsAreSet
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SubDFace_TexturePointsAreSet(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets the number of texture points the face can hold.
+    /// </summary>
+    /// <since>9.2</since>
+    [CLSCompliant(false)]
+    public uint TexturePointsCapacity
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        uint rc = UnsafeNativeMethods.ON_SubDFace_TexturePointsCapacity(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets one of the face's texture points.
+    /// </summary>
+    /// <param name="index">Index of the face corner.</param>
+    /// <returns>The texture point, or Point3d.Unset if none is set.</returns>
+    /// <since>9.2</since>
+    [CLSCompliant(false)]
+    public Point3d TexturePoint(uint index)
+    {
+      Point3d rc = Point3d.Unset;
+      var const_ptr_this = ConstPointer();
+      UnsafeNativeMethods.ON_SubDFace_TexturePoint(const_ptr_this, index, ref rc);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the average of the face's texture points.
+    /// </summary>
+    /// <since>9.2</since>
+    public Point3d TextureCenterPoint
+    {
+      get
+      {
+        Point3d rc = Point3d.Unset;
+        var const_ptr_this = ConstPointer();
+        UnsafeNativeMethods.ON_SubDFace_TextureCenterPoint(const_ptr_this, ref rc);
+        GC.KeepAlive(this);
+        return rc;
       }
     }
 
@@ -3287,6 +3418,63 @@ namespace Rhino.Geometry
         Plane plane = Plane.Unset;
         IntPtr const_face_ptr = ConstPointer();
         UnsafeNativeMethods.ON_SubDFace_ControlNetCenterFrame(const_face_ptr, ref plane);
+        GC.KeepAlive(this);
+        return plane;
+      }
+    }
+
+#if RHINO_SDK
+    /// <summary>
+    /// Get the limit surface point location at the center of the face
+    /// </summary>
+    /// <since>7.0</since>
+    public Point3d LimitSurfaceCenterPoint
+    {
+      get
+      {
+        Point3d res = Point3d.Unset;
+        var const_face_ptr = ConstPointer();
+        UnsafeNativeMethods.ON_SubDFace_LimitSurfaceCenterPoint(const_face_ptr, ref res);
+        GC.KeepAlive(this);
+        return res;
+      }
+    }
+
+    /// <summary>
+    /// Get the limit surface normal vector at the center of the face.
+    /// </summary>
+    /// <returns>
+    /// Limit surface normal vector at the face's center. 
+    /// </returns>
+    /// <since>8.0</since>
+    public Vector3d SurfaceCenterNormal
+    {
+      get
+      {
+        Vector3d res = Vector3d.Unset;
+        var const_face_ptr = ConstPointer();
+        UnsafeNativeMethods.ON_SubDFace_SurfaceCenterNormal(const_face_ptr, ref res);
+        GC.KeepAlive(this);
+        return res;
+      }
+    }
+
+    /// <summary>
+    /// Get the limit surface tangent plane at the center of the face. 
+    /// The plane's origin is the point on the limit surface at the center of the face.
+    /// The plane's z axis is the limit surface normal vector at the center of the face.
+    /// </summary>
+    /// <returns>
+    /// Limit surface tanget plane at the face's center. 
+    /// </returns>
+    /// <since>8.0</since>
+    public Plane SurfaceCenterFrame
+    {
+      get
+      {
+        Plane plane = Plane.Unset;
+        IntPtr const_face_ptr = ConstPointer();
+        UnsafeNativeMethods.ON_SubDFace_SurfaceCenterFrame(const_face_ptr, ref plane);
         GC.KeepAlive(this);
         return plane;
       }
@@ -3650,6 +3838,95 @@ namespace Rhino.Geometry
         return false;
       }
     }
+
+    /// <summary>
+    /// Gets true if the vertex is smooth (its tag is Smooth).
+    /// </summary>
+    /// <since>9.2</since>
+    public bool IsSmooth
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SubDVertex_IsSmooth(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets true if the vertex is a crease vertex (its tag is Crease).
+    /// </summary>
+    /// <since>9.2</since>
+    public bool IsCrease
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SubDVertex_IsCrease(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets true if the vertex is a corner vertex (its tag is Corner).
+    /// </summary>
+    /// <since>9.2</since>
+    public bool IsCorner
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SubDVertex_IsCorner(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets true if the vertex is a dart vertex (its tag is Dart).
+    /// </summary>
+    /// <since>9.2</since>
+    public bool IsDart
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SubDVertex_IsDart(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Determines whether the vertex is sharp: a smooth, dart or crease vertex attached to at least one sharp edge.
+    /// </summary>
+    /// <param name="endCheck">If false, looks for attached edges with any nonzero sharpness; if true, for attached edges with nonzero sharpness at this vertex.</param>
+    /// <returns>True if the vertex is sharp.</returns>
+    /// <since>9.2</since>
+    public bool IsSharp(bool endCheck)
+    {
+      var const_ptr_this = ConstPointer();
+      bool rc = UnsafeNativeMethods.ON_SubDVertex_IsSharp(const_ptr_this, endCheck);
+      GC.KeepAlive(this);
+      return rc;
+    }
+
+    /// <summary>
+    /// Gets the vertex sharpness: the maximum end sharpness at this vertex of the attached sharp edges when the vertex is sharp, otherwise 0.0.
+    /// </summary>
+    /// <since>9.2</since>
+    public double VertexSharpness
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        double rc = UnsafeNativeMethods.ON_SubDVertex_VertexSharpness(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
   }
 
   /// <summary> Single edge of a SubD </summary>
@@ -3836,6 +4113,130 @@ namespace Rhino.Geometry
         GC.KeepAlive(this);
         return rc;
       }
+    }
+
+    /// <summary>
+    /// Gets true if the edge is smooth (its tag is Smooth or SmoothX).
+    /// </summary>
+    /// <since>9.2</since>
+    public bool IsSmooth
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SubDEdge_IsSmooth(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets true if the edge is a crease (its tag is Crease).
+    /// </summary>
+    /// <since>9.2</since>
+    public bool IsCrease
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SubDEdge_IsCrease(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets true if the edge is a crease and both of its end vertices are crease or corner vertices.
+    /// </summary>
+    /// <since>9.2</since>
+    public bool IsHardCrease
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SubDEdge_IsHardCrease(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets true if the edge is a crease and at least one of its end vertices is a dart vertex.
+    /// </summary>
+    /// <since>9.2</since>
+    public bool IsDartCrease
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        bool rc = UnsafeNativeMethods.ON_SubDEdge_IsDartCrease(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets the number of the edge's end vertices that are dart vertices (0, 1 or 2).
+    /// </summary>
+    /// <since>9.2</since>
+    [CLSCompliant(false)]
+    public uint DartCount
+    {
+      get
+      {
+        var const_ptr_this = ConstPointer();
+        uint rc = UnsafeNativeMethods.ON_SubDEdge_DartCount(const_ptr_this);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets the edge's subdivision point: where its midpoint lands after one subdivision.
+    /// </summary>
+    /// <since>9.2</since>
+    public Point3d SubdivisionPoint
+    {
+      get
+      {
+        Point3d rc = Point3d.Unset;
+        var const_ptr_this = ConstPointer();
+        UnsafeNativeMethods.ON_SubDEdge_SubdivisionPoint(const_ptr_this, ref rc);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets the average of the edge's two control net points.
+    /// </summary>
+    /// <since>9.2</since>
+    public Point3d ControlNetCenterPoint
+    {
+      get
+      {
+        Point3d rc = Point3d.Unset;
+        var const_ptr_this = ConstPointer();
+        UnsafeNativeMethods.ON_SubDEdge_ControlNetCenterPoint(const_ptr_this, ref rc);
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Gets the normal of the control net polygon of one of the faces attached to this edge.
+    /// </summary>
+    /// <param name="edgeFaceIndex">Index of the attached face (0 &lt;= edgeFaceIndex &lt; FaceCount).</param>
+    /// <returns>The face's control net center normal, or Vector3d.Unset if the input is not valid.</returns>
+    /// <since>9.2</since>
+    [CLSCompliant(false)]
+    public Vector3d ControlNetCenterNormal(uint edgeFaceIndex)
+    {
+      Vector3d rc = Vector3d.Unset;
+      var const_ptr_this = ConstPointer();
+      UnsafeNativeMethods.ON_SubDEdge_ControlNetCenterNormal(const_ptr_this, edgeFaceIndex, ref rc);
+      GC.KeepAlive(this);
+      return rc;
     }
 
 #endregion

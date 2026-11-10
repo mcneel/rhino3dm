@@ -1,0 +1,79 @@
+rhino3dm.Color4f
+================
+
+.. py:class:: rhino3dm.Color4f
+              Color4f(arg: Color4f)
+              Color4f(red: float, green: float, blue: float, alpha: float)
+              Color4f(argb: int)
+
+   Color defined by 4 floating point values.
+
+
+   .. py:method:: ApplyGamma(col: Color4f, gamma: float) -> Color4f
+      :staticmethod:
+
+
+
+   .. py:method:: BlendTo(t: float, col: Color4f) -> Color4f
+
+
+   .. py:method:: FromArgb(a: float, r: float, g: float, b: float) -> Color4f
+                  FromArgb(a: float, color: Color4f) -> Color4f
+      :staticmethod:
+
+
+
+   .. py:property:: A
+      :type: float
+
+
+
+   .. py:property:: B
+      :type: float
+
+
+
+   .. py:attribute:: Black
+      :type:  Color4f
+      :value: Ellipsis
+
+
+      object, /) -> Color4f
+
+      :type: (arg
+
+
+   .. py:attribute:: Empty
+      :type:  Color4f
+      :value: Ellipsis
+
+
+      object, /) -> Color4f
+
+      :type: (arg
+
+
+   .. py:property:: G
+      :type: float
+
+
+
+   .. py:property:: L
+      :type: float
+
+
+
+   .. py:property:: R
+      :type: float
+
+
+
+   .. py:attribute:: White
+      :type:  Color4f
+      :value: Ellipsis
+
+
+      object, /) -> Color4f
+
+      :type: (arg
+

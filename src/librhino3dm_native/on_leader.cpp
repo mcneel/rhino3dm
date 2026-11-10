@@ -68,3 +68,15 @@ RH_C_FUNCTION const ON_NurbsCurve* ON_V6_Leader_Curve(const ON_Leader* constLead
   return curve;
 }
 
+RH_C_FUNCTION bool ON_V6_Leader_GetTextPoint2d(const ON_Leader* constLeader, const ON_DimStyle* dimstyle, double leaderscale, ON_2dPoint* point)
+{
+  if (nullptr == constLeader || nullptr == point)
+    return false;
+  return constLeader->GetTextPoint2d(dimstyle, leaderscale, *point);
+}
+
+RH_C_FUNCTION void ON_Arrowhead_GetPoints(ON_Arrowhead::arrow_type arrowType, ON_2dPointArray* points)
+{
+  if (points)
+    ON_Arrowhead::GetPoints(arrowType, *points);
+}

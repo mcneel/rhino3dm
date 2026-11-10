@@ -1,0 +1,770 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rhino3dm.SubDEdgeSharpness &mdash; rhino3dm.py 9.2.0-beta.0</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f348fe97"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="rhino3dm.SubDEdgeTag" href="SubDEdgeTag.html" />
+    <link rel="prev" title="rhino3dm.SubDEdgeListIter" href="SubDEdgeListIter.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            rhino3dm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../migrating.html">Migrating to rhino3dm 9.2 (Python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../migrating-members.html">Renamed and removed members (Python)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">rhino3dm</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="index.html#attributes">Attributes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#classes">Classes</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="ActiveSpace.html">rhino3dm.ActiveSpace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="AngularDimension.html">rhino3dm.AngularDimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="AnnotationBase.html">rhino3dm.AnnotationBase</a></li>
+<li class="toctree-l4"><a class="reference internal" href="AnnotationType.html">rhino3dm.AnnotationType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="AntialiasLevel.html">rhino3dm.AntialiasLevel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Arc.html">rhino3dm.Arc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ArcArcIntersection.html">rhino3dm.ArcArcIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ArcCurve.html">rhino3dm.ArcCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ArchivableDictionary.html">rhino3dm.ArchivableDictionary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Arrowhead.html">rhino3dm.Arrowhead</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BackgroundStyle.html">rhino3dm.BackgroundStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BasepointZero.html">rhino3dm.BasepointZero</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BezierCurve.html">rhino3dm.BezierCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Bitmap.html">rhino3dm.Bitmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BoundingBox.html">rhino3dm.BoundingBox</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Box.html">rhino3dm.Box</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Brep.html">rhino3dm.Brep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepEdge.html">rhino3dm.BrepEdge</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepEdgeList.html">rhino3dm.BrepEdgeList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepFace.html">rhino3dm.BrepFace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepFaceList.html">rhino3dm.BrepFaceList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepLoop.html">rhino3dm.BrepLoop</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepLoopList.html">rhino3dm.BrepLoopList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepLoopType.html">rhino3dm.BrepLoopType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepSolidOrientation.html">rhino3dm.BrepSolidOrientation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepSurfaceList.html">rhino3dm.BrepSurfaceList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepTrim.html">rhino3dm.BrepTrim</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepTrimList.html">rhino3dm.BrepTrimList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepTrimType.html">rhino3dm.BrepTrimType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepVertex.html">rhino3dm.BrepVertex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepVertexList.html">rhino3dm.BrepVertexList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CachedTextureCoordinates.html">rhino3dm.CachedTextureCoordinates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Centermark.html">rhino3dm.Centermark</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Circle.html">rhino3dm.Circle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CircleCircleIntersection.html">rhino3dm.CircleCircleIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Color4f.html">rhino3dm.Color4f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CommonObject.html">rhino3dm.CommonObject</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ComponentIndex.html">rhino3dm.ComponentIndex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ComponentIndexType.html">rhino3dm.ComponentIndexType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Cone.html">rhino3dm.Cone</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ConstructionPlane.html">rhino3dm.ConstructionPlane</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ConstructionPlaneGridDefaults.html">rhino3dm.ConstructionPlaneGridDefaults</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Continuity.html">rhino3dm.Continuity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ControlPoint.html">rhino3dm.ControlPoint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CoordinateSystem.html">rhino3dm.CoordinateSystem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Curve.html">rhino3dm.Curve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CurveEnd.html">rhino3dm.CurveEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CurveEvaluationSide.html">rhino3dm.CurveEvaluationSide</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CurveOrientation.html">rhino3dm.CurveOrientation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CurveProxy.html">rhino3dm.CurveProxy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Cylinder.html">rhino3dm.Cylinder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DateTimeKind.html">rhino3dm.DateTimeKind</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Decal.html">rhino3dm.Decal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DecalMapping.html">rhino3dm.DecalMapping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DecalProjection.html">rhino3dm.DecalProjection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Decals.html">rhino3dm.Decals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DecalsIter.html">rhino3dm.DecalsIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Dimension.html">rhino3dm.Dimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DimensionStyle.html">rhino3dm.DimensionStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Dithering.html">rhino3dm.Dithering</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DracoColorFormat.html">rhino3dm.DracoColorFormat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DracoCompression.html">rhino3dm.DracoCompression</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DracoCompressionOptions.html">rhino3dm.DracoCompressionOptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="EarthAnchorPoint.html">rhino3dm.EarthAnchorPoint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="EarthCoordinateSystem.html">rhino3dm.EarthCoordinateSystem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="EdgeAdjacency.html">rhino3dm.EdgeAdjacency</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Ellipse.html">rhino3dm.Ellipse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Environment.html">rhino3dm.Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Extrusion.html">rhino3dm.Extrusion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dm.html">rhino3dm.File3dm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmBitmapTable.html">rhino3dm.File3dmBitmapTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmBitmapTableIter.html">rhino3dm.File3dmBitmapTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmCurvePiping.html">rhino3dm.File3dmCurvePiping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmDimStyleTable.html">rhino3dm.File3dmDimStyleTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmDimStyleTableIter.html">rhino3dm.File3dmDimStyleTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmDisplacement.html">rhino3dm.File3dmDisplacement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmEdgeSoftening.html">rhino3dm.File3dmEdgeSoftening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmEmbeddedFile.html">rhino3dm.File3dmEmbeddedFile</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmEmbeddedFiles.html">rhino3dm.File3dmEmbeddedFiles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmEmbeddedFilesIter.html">rhino3dm.File3dmEmbeddedFilesIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmGroupTable.html">rhino3dm.File3dmGroupTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmGroupTableIter.html">rhino3dm.File3dmGroupTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmHatchPatternTable.html">rhino3dm.File3dmHatchPatternTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmHatchPatternTableIter.html">rhino3dm.File3dmHatchPatternTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmInstanceDefinitionTable.html">rhino3dm.File3dmInstanceDefinitionTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmInstanceDefinitionTableIter.html">rhino3dm.File3dmInstanceDefinitionTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmLayerTable.html">rhino3dm.File3dmLayerTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmLayerTableIter.html">rhino3dm.File3dmLayerTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmLinetypeTable.html">rhino3dm.File3dmLinetypeTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmLinetypeTableIter.html">rhino3dm.File3dmLinetypeTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmMaterialTable.html">rhino3dm.File3dmMaterialTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmMaterialTableIter.html">rhino3dm.File3dmMaterialTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmMeshModifiers.html">rhino3dm.File3dmMeshModifiers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmNamedConstructionPlanes.html">rhino3dm.File3dmNamedConstructionPlanes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmNotes.html">rhino3dm.File3dmNotes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmObject.html">rhino3dm.File3dmObject</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmObjectTable.html">rhino3dm.File3dmObjectTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmObjectTableIter.html">rhino3dm.File3dmObjectTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmPlugInData.html">rhino3dm.File3dmPlugInData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmPlugInDataTable.html">rhino3dm.File3dmPlugInDataTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderContent.html">rhino3dm.File3dmRenderContent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderEnvironment.html">rhino3dm.File3dmRenderEnvironment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderEnvironments.html">rhino3dm.File3dmRenderEnvironments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderEnvironmentsIter.html">rhino3dm.File3dmRenderEnvironmentsIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderMaterial.html">rhino3dm.File3dmRenderMaterial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderMaterials.html">rhino3dm.File3dmRenderMaterials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderMaterialsIter.html">rhino3dm.File3dmRenderMaterialsIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderTexture.html">rhino3dm.File3dmRenderTexture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderTextures.html">rhino3dm.File3dmRenderTextures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderTexturesIter.html">rhino3dm.File3dmRenderTexturesIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmSettings.html">rhino3dm.File3dmSettings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmShutLining.html">rhino3dm.File3dmShutLining</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmStringTable.html">rhino3dm.File3dmStringTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmThickening.html">rhino3dm.File3dmThickening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmViewTable.html">rhino3dm.File3dmViewTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmWriteOptions.html">rhino3dm.File3dmWriteOptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="FileReference.html">rhino3dm.FileReference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="FileReferenceStatus.html">rhino3dm.FileReferenceStatus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Font.html">rhino3dm.Font</a></li>
+<li class="toctree-l4"><a class="reference internal" href="GeometryBase.html">rhino3dm.GeometryBase</a></li>
+<li class="toctree-l4"><a class="reference internal" href="GroundPlane.html">rhino3dm.GroundPlane</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Group.html">rhino3dm.Group</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Hatch.html">rhino3dm.Hatch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="HatchPattern.html">rhino3dm.HatchPattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="HatchPatternFillType.html">rhino3dm.HatchPatternFillType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="InstanceDefinitionGeometry.html">rhino3dm.InstanceDefinitionGeometry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="InstanceDefinitionLayerStyle.html">rhino3dm.InstanceDefinitionLayerStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="InstanceDefinitionUpdateType.html">rhino3dm.InstanceDefinitionUpdateType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="InstanceReferenceGeometry.html">rhino3dm.InstanceReferenceGeometry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Intersection.html">rhino3dm.Intersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Interval.html">rhino3dm.Interval</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IsoStatus.html">rhino3dm.IsoStatus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ItemColorSource.html">rhino3dm.ItemColorSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="KnotStyle.html">rhino3dm.KnotStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Layer.html">rhino3dm.Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Leader.html">rhino3dm.Leader</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Light.html">rhino3dm.Light</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LightStyle.html">rhino3dm.LightStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Line.html">rhino3dm.Line</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineCapStyle.html">rhino3dm.LineCapStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineCircleIntersection.html">rhino3dm.LineCircleIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineCurve.html">rhino3dm.LineCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineCylinderIntersection.html">rhino3dm.LineCylinderIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineJoinStyle.html">rhino3dm.LineJoinStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineSphereIntersection.html">rhino3dm.LineSphereIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LinearDimension.html">rhino3dm.LinearDimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LinearWorkflow.html">rhino3dm.LinearWorkflow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Linetype.html">rhino3dm.Linetype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ManifestTable.html">rhino3dm.ManifestTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ManifestTableIter.html">rhino3dm.ManifestTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Material.html">rhino3dm.Material</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Mesh.html">rhino3dm.Mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshFace.html">rhino3dm.MeshFace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshFaceList.html">rhino3dm.MeshFaceList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshTextureCoordinateList.html">rhino3dm.MeshTextureCoordinateList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshTopologyEdgeList.html">rhino3dm.MeshTopologyEdgeList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshType.html">rhino3dm.MeshType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshVertexColorList.html">rhino3dm.MeshVertexColorList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshVertexList.html">rhino3dm.MeshVertexList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshVertexNormalList.html">rhino3dm.MeshVertexNormalList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshingParameterTextureRange.html">rhino3dm.MeshingParameterTextureRange</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshingParameters.html">rhino3dm.MeshingParameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ModelComponent.html">rhino3dm.ModelComponent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ModelComponentType.html">rhino3dm.ModelComponentType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsCurve.html">rhino3dm.NurbsCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsCurveKnotList.html">rhino3dm.NurbsCurveKnotList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsCurvePointList.html">rhino3dm.NurbsCurvePointList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsSurface.html">rhino3dm.NurbsSurface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsSurfaceKnotList.html">rhino3dm.NurbsSurfaceKnotList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsSurfacePointList.html">rhino3dm.NurbsSurfacePointList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectAttributes.html">rhino3dm.ObjectAttributes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectColorSource.html">rhino3dm.ObjectColorSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectDecoration.html">rhino3dm.ObjectDecoration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectLinetypeSource.html">rhino3dm.ObjectLinetypeSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectMaterialSource.html">rhino3dm.ObjectMaterialSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectMode.html">rhino3dm.ObjectMode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectPlotColorSource.html">rhino3dm.ObjectPlotColorSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectPlotWeightSource.html">rhino3dm.ObjectPlotWeightSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectSectionAttributesSource.html">rhino3dm.ObjectSectionAttributesSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectType.html">rhino3dm.ObjectType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="OrdinateDimension.html">rhino3dm.OrdinateDimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PageSettings.html">rhino3dm.PageSettings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PhysicallyBasedMaterial.html">rhino3dm.PhysicallyBasedMaterial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Plane.html">rhino3dm.Plane</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PlaneCircleIntersection.html">rhino3dm.PlaneCircleIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PlaneSphereIntersection.html">rhino3dm.PlaneSphereIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PlaneSurface.html">rhino3dm.PlaneSurface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point.html">rhino3dm.Point</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point2d.html">rhino3dm.Point2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point2f.html">rhino3dm.Point2f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point3d.html">rhino3dm.Point3d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point3dList.html">rhino3dm.Point3dList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point3f.html">rhino3dm.Point3f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point4d.html">rhino3dm.Point4d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PointCloud.html">rhino3dm.PointCloud</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PointCloudItem.html">rhino3dm.PointCloudItem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PolyCurve.html">rhino3dm.PolyCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Polyline.html">rhino3dm.Polyline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PolylineCurve.html">rhino3dm.PolylineCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PostEffectCollection.html">rhino3dm.PostEffectCollection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PostEffectCollectionIter.html">rhino3dm.PostEffectCollectionIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PostEffectData.html">rhino3dm.PostEffectData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PostEffectType.html">rhino3dm.PostEffectType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Projection.html">rhino3dm.Projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RadialDimension.html">rhino3dm.RadialDimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RenderChannels.html">rhino3dm.RenderChannels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RenderSettings.html">rhino3dm.RenderSettings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RevSurface.html">rhino3dm.RevSurface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RhinoMath.html">rhino3dm.RhinoMath</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SafeFrame.html">rhino3dm.SafeFrame</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SectionLabelStyle.html">rhino3dm.SectionLabelStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Skylight.html">rhino3dm.Skylight</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Sphere.html">rhino3dm.Sphere</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SphereSphereIntersection.html">rhino3dm.SphereSphereIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubD.html">rhino3dm.SubD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDComponent.html">rhino3dm.SubDComponent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDComponentLocation.html">rhino3dm.SubDComponentLocation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEdge.html">rhino3dm.SubDEdge</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEdgeList.html">rhino3dm.SubDEdgeList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEdgeListIter.html">rhino3dm.SubDEdgeListIter</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">rhino3dm.SubDEdgeSharpness</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEdgeTag.html">rhino3dm.SubDEdgeTag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEndCapStyle.html">rhino3dm.SubDEndCapStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDFace.html">rhino3dm.SubDFace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDFaceList.html">rhino3dm.SubDFaceList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDFaceListIter.html">rhino3dm.SubDFaceListIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDTextureCoordinateType.html">rhino3dm.SubDTextureCoordinateType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDVertex.html">rhino3dm.SubDVertex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDVertexList.html">rhino3dm.SubDVertexList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDVertexListIter.html">rhino3dm.SubDVertexListIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDVertexTag.html">rhino3dm.SubDVertexTag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Sun.html">rhino3dm.Sun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Surface.html">rhino3dm.Surface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SurfaceProxy.html">rhino3dm.SurfaceProxy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextDot.html">rhino3dm.TextDot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextEntity.html">rhino3dm.TextEntity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextHorizontalAlignment.html">rhino3dm.TextHorizontalAlignment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextJustification.html">rhino3dm.TextJustification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextOrientation.html">rhino3dm.TextOrientation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextRunType.html">rhino3dm.TextRunType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextVerticalAlignment.html">rhino3dm.TextVerticalAlignment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Texture.html">rhino3dm.Texture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureCombineMode.html">rhino3dm.TextureCombineMode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureFilter.html">rhino3dm.TextureFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureMapping.html">rhino3dm.TextureMapping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureMappingType.html">rhino3dm.TextureMappingType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureProjectionModes.html">rhino3dm.TextureProjectionModes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureSpace.html">rhino3dm.TextureSpace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureType.html">rhino3dm.TextureType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureUvwWrapping.html">rhino3dm.TextureUvwWrapping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Torus.html">rhino3dm.Torus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Transform.html">rhino3dm.Transform</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TransformRigidType.html">rhino3dm.TransformRigidType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TransformSimilarityType.html">rhino3dm.TransformSimilarityType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="UnitSystem.html">rhino3dm.UnitSystem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Vector2d.html">rhino3dm.Vector2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Vector3d.html">rhino3dm.Vector3d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Vector3f.html">rhino3dm.Vector3f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ViewInfo.html">rhino3dm.ViewInfo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ViewInfoFocalBlurModes.html">rhino3dm.ViewInfoFocalBlurModes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ViewSectionBehavior.html">rhino3dm.ViewSectionBehavior</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ViewType.html">rhino3dm.ViewType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ViewportInfo.html">rhino3dm.ViewportInfo</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rhino3dm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="index.html">rhino3dm</a></li>
+      <li class="breadcrumb-item active">rhino3dm.SubDEdgeSharpness</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/reference/rhino3dm/SubDEdgeSharpness.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="rhino3dm-subdedgesharpness">
+<h1>rhino3dm.SubDEdgeSharpness<a class="headerlink" href="#rhino3dm-subdedgesharpness" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.SubDEdgeSharpness">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">SubDEdgeSharpness</span></span><a class="headerlink" href="#rhino3dm.SubDEdgeSharpness" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="SubDEdgeSharpness">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SubDEdgeSharpness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sharpness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#SubDEdgeSharpness" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SubDEdgeSharpness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sharpness0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharpness1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SubDEdgeSharpness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sharpnessInterval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Interval.html#Interval" title="Interval"><span class="pre">Interval</span></a></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Sharpness values for the two ends of a SubD edge.</p>
+<p>A sharp SubD edge is an edge where the limit surface makes a tighter “fillet radius” around the edge than a smooth edge would, while still staying smooth, unlike a crease edge. It is achieved by applying the crease edge subdivision rules for the number of subdivisions given by the sharpness value, and the smooth edge subdivision rules after that. Sharpness can differ at the two ends of an edge.</p>
+<p>This is a value type wrapping two floats, and the default value is <code class="docutils literal notranslate"><span class="pre">Smooth</span></code>. It is passed to and from the unmanaged library by value.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.EndSharpness">
+<span class="sig-name descname"><span class="pre">EndSharpness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endIndex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#SubDEdgeSharpness.EndSharpness" title="Link to this definition"></a></dt>
+<dd><p>Gets the sharpness at the start or the end of the edge.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>endIndex</strong> – 0 for the start of the edge, 1 for the end.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The sharpness, or NaN if endIndex is out of range.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.EqualDelta">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EqualDelta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#SubDEdgeSharpness.EqualDelta" title="Link to this definition"></a></dt>
+<dd><p>Determines whether two sharpnesses have the same <code class="docutils literal notranslate"><span class="pre">Delta</span></code> and meet with the same value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s0</strong> – The sharpness of the first edge.</p></li>
+<li><p><strong>s1</strong> – The sharpness of the second edge.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.EqualEndSharpness">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EqualEndSharpness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#SubDEdgeSharpness.EqualEndSharpness" title="Link to this definition"></a></dt>
+<dd><p>Determines whether two sharpnesses meet with the same value, that is, whether s0.``EndSharpness``EndSharpness(1) equals s1.EndSharpness(0).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s0</strong> – The sharpness of the first edge.</p></li>
+<li><p><strong>s1</strong> – The sharpness of the second edge.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.EqualTrend">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EqualTrend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#SubDEdgeSharpness.EqualTrend" title="Link to this definition"></a></dt>
+<dd><p>Determines whether two sharpnesses have the same <code class="docutils literal notranslate"><span class="pre">Trend</span></code> and meet with the same value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s0</strong> – The sharpness of the first edge.</p></li>
+<li><p><strong>s1</strong> – The sharpness of the second edge.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.Equals">
+<span class="sig-name descname"><span class="pre">Equals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#SubDEdgeSharpness.Equals" title="Link to this definition"></a></dt>
+<dd><p>Determines whether this sharpness has the same end values as another one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – The sharpness to compare with.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.FromConstantPercentage">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FromConstantPercentage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">percentage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></span></span><a class="headerlink" href="#SubDEdgeSharpness.FromConstantPercentage" title="Link to this definition"></a></dt>
+<dd><p>Creates a sharpness with the same value at both ends, from a percentage. This is useful in user interface code that expresses sharpness as a percentage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>percentage</strong> – Between 0.0 and 100.0, or <code class="docutils literal notranslate"><span class="pre">MaxValue</span></code> for a crease.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A sharpness with constant value (percentage * <code class="docutils literal notranslate"><span class="pre">MaximumValue</span></code> / 100.0), <code class="docutils literal notranslate"><span class="pre">Crease</span></code> if percentage is <code class="docutils literal notranslate"><span class="pre">MaxValue</span></code>, or <code class="docutils literal notranslate"><span class="pre">Nan</span></code> if percentage is out of range.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.FromIntervalPercentage">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FromIntervalPercentage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">percentage0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentage1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></span></span><a class="headerlink" href="#SubDEdgeSharpness.FromIntervalPercentage" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FromIntervalPercentage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">percentageInterval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Interval.html#Interval" title="Interval"><span class="pre">Interval</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></span></span></dt>
+<dd><p>Creates a sharpness that varies from one end of the edge to the other, from percentages. This is useful in user interface code that expresses sharpness as a percentage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>percentageInterval</strong> – Percentages at the start and end of the edge, each between 0.0 and 100.0, or <code class="docutils literal notranslate"><span class="pre">MaxValue</span></code> for a crease.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>See <code class="docutils literal notranslate"><span class="pre">FromIntervalPercentage</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.IsValidValue">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsValidValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">candidateValue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creaseResult</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#SubDEdgeSharpness.IsValidValue" title="Link to this definition"></a></dt>
+<dd><p>Determines whether a value can be used as an edge end sharpness.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>candidateValue</strong> – The value to check.</p></li>
+<li><p><strong>creaseResult</strong> – The value to return when candidateValue is <code class="docutils literal notranslate"><span class="pre">CreaseValue</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.Reversed">
+<span class="sig-name descname"><span class="pre">Reversed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></span></span><a class="headerlink" href="#SubDEdgeSharpness.Reversed" title="Link to this definition"></a></dt>
+<dd><p>Gets this sharpness with its two end values swapped.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.Sanitize">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Sanitize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sharpness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#SubDEdgeSharpness.Sanitize" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Sanitize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sharpness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalidInputResult</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span></dt>
+<dd><p>Verifies that sharpness is between 0.0 and <code class="docutils literal notranslate"><span class="pre">MaximumValue</span></code>, and snaps it to an integer when it is within <code class="docutils literal notranslate"><span class="pre">Tolerance</span></code> of one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sharpness</strong> – The value to sanitize.</p></li>
+<li><p><strong>invalidInputResult</strong> – The value to return when sharpness is not valid.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A usable sharpness value, or invalidInputResult if sharpness is not valid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.SharpnessFromNormalizedValue">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SharpnessFromNormalizedValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">normalizedSliderValue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#SubDEdgeSharpness.SharpnessFromNormalizedValue" title="Link to this definition"></a></dt>
+<dd><p>Converts a normalized slider value to an edge end sharpness value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>normalizedSliderValue</strong> – Between 0.0 and 1.0.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>normalizedSliderValue scaled to the range 0.0 to <code class="docutils literal notranslate"><span class="pre">MaximumValue</span></code>, or NaN if it is out of range.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.SharpnessFromSliderValue">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SharpnessFromSliderValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sliderDomain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Interval.html#Interval" title="Interval"><span class="pre">Interval</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sliderValue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalidInputResult</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#SubDEdgeSharpness.SharpnessFromSliderValue" title="Link to this definition"></a></dt>
+<dd><p>Converts a user facing slider value to an edge end sharpness value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sliderDomain</strong> – The non empty domain of the slider, often <code class="docutils literal notranslate"><span class="pre">Interval.ZeroToOne</span></code>.</p></li>
+<li><p><strong>sliderValue</strong> – A value in sliderDomain. sliderDomain.T0 maps to 0.0 and sliderDomain.T1 maps to <code class="docutils literal notranslate"><span class="pre">MaximumValue</span></code>.</p></li>
+<li><p><strong>invalidInputResult</strong> – The value to return when the input is not valid.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.Subdivided">
+<span class="sig-name descname"><span class="pre">Subdivided</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endIndex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></span></span><a class="headerlink" href="#SubDEdgeSharpness.Subdivided" title="Link to this definition"></a></dt>
+<dd><p>Gets the sharpness this edge would have after one subdivision.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>endIndex</strong> – 0 for the start of the edge, 1 for the end.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The subdivided sharpness, or <code class="docutils literal notranslate"><span class="pre">Smooth</span></code> if endIndex is out of range.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.ToPercentage">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ToPercentage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sharpness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creasePercentage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#SubDEdgeSharpness.ToPercentage" title="Link to this definition"></a></dt>
+<dd><p>Converts a sharpness value to a percentage between 0.0 and 100.0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sharpness</strong> – Between 0.0 and <code class="docutils literal notranslate"><span class="pre">MaximumValue</span></code>, or <code class="docutils literal notranslate"><span class="pre">CreaseValue</span></code>.</p></li>
+<li><p><strong>creasePercentage</strong> – The value to return when sharpness is <code class="docutils literal notranslate"><span class="pre">CreaseValue</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>100.0 * sharpness / <code class="docutils literal notranslate"><span class="pre">MaximumValue</span></code>, creasePercentage for <code class="docutils literal notranslate"><span class="pre">CreaseValue</span></code>, or NaN if sharpness is not valid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.Union">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Union</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sharpness0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharpness1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></span></span><a class="headerlink" href="#SubDEdgeSharpness.Union" title="Link to this definition"></a></dt>
+<dd><p>Gets the union of two sharpness ranges, ignoring the ones that are zero, a crease, or not valid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sharpness0</strong> – The first sharpness.</p></li>
+<li><p><strong>sharpness1</strong> – The second sharpness.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The union of the nonzero valid inputs, or <code class="docutils literal notranslate"><span class="pre">Smooth</span></code> if there are none.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.Average">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Average</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#SubDEdgeSharpness.Average" title="Link to this definition"></a></dt>
+<dd><p>Gets the average of the two end sharpness values.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.Crease">
+<span class="sig-name descname"><span class="pre">Crease</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Ellipsis</span></em><a class="headerlink" href="#SubDEdgeSharpness.Crease" title="Link to this definition"></a></dt>
+<dd><p>object, /) -&gt; SubDEdgeSharpness</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(arg</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.Delta">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Delta</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#SubDEdgeSharpness.Delta" title="Link to this definition"></a></dt>
+<dd><p>Gets <code class="docutils literal notranslate"><span class="pre">EndSharpness</span></code>EndSharpness(1) - EndSharpness(0), or NaN if this is neither valid nor a crease.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.IsConstant">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsConstant</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#SubDEdgeSharpness.IsConstant" title="Link to this definition"></a></dt>
+<dd><p>Gets true if both ends have the same valid sharpness value. <code class="docutils literal notranslate"><span class="pre">Crease</span></code> and <code class="docutils literal notranslate"><span class="pre">Nan</span></code> are both false; see <code class="docutils literal notranslate"><span class="pre">IsConstantOrCrease</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.IsConstantOrCrease">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsConstantOrCrease</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#SubDEdgeSharpness.IsConstantOrCrease" title="Link to this definition"></a></dt>
+<dd><p>Gets true if both ends have the same valid sharpness value, or if this is <code class="docutils literal notranslate"><span class="pre">Crease</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.IsCrease">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsCrease</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#SubDEdgeSharpness.IsCrease" title="Link to this definition"></a></dt>
+<dd><p>Gets true if this is <code class="docutils literal notranslate"><span class="pre">Crease</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.IsCreaseOrSharp">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsCreaseOrSharp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#SubDEdgeSharpness.IsCreaseOrSharp" title="Link to this definition"></a></dt>
+<dd><p>Gets (<code class="docutils literal notranslate"><span class="pre">IsCrease</span></code> || <code class="docutils literal notranslate"><span class="pre">IsSharp</span></code>).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.IsDecreasing">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsDecreasing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#SubDEdgeSharpness.IsDecreasing" title="Link to this definition"></a></dt>
+<dd><p>Gets true if <code class="docutils literal notranslate"><span class="pre">EndSharpness</span></code>EndSharpness(0) is greater than EndSharpness(1).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.IsIncreasing">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsIncreasing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#SubDEdgeSharpness.IsIncreasing" title="Link to this definition"></a></dt>
+<dd><p>Gets true if <code class="docutils literal notranslate"><span class="pre">EndSharpness</span></code>EndSharpness(0) is less than EndSharpness(1).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.IsNotValid">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsNotValid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#SubDEdgeSharpness.IsNotValid" title="Link to this definition"></a></dt>
+<dd><p>Gets the opposite of <code class="docutils literal notranslate"><span class="pre">IsValid</span></code>. <code class="docutils literal notranslate"><span class="pre">Crease</span></code> and <code class="docutils literal notranslate"><span class="pre">Nan</span></code> are both true.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.IsNotValidNorCrease">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsNotValidNorCrease</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#SubDEdgeSharpness.IsNotValidNorCrease" title="Link to this definition"></a></dt>
+<dd><p>Gets the opposite of <code class="docutils literal notranslate"><span class="pre">IsValidOrCrease</span></code>. <code class="docutils literal notranslate"><span class="pre">Nan</span></code> is true and <code class="docutils literal notranslate"><span class="pre">Crease</span></code> is false.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.IsSharp">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsSharp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#SubDEdgeSharpness.IsSharp" title="Link to this definition"></a></dt>
+<dd><p>a crease edge is not a sharp edge.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Gets true if both ends are valid and at least one is greater than 0.0. <code class="docutils literal notranslate"><span class="pre">Crease</span></code> and <code class="docutils literal notranslate"><span class="pre">Nan</span></code> are both false</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.IsValid">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsValid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#SubDEdgeSharpness.IsValid" title="Link to this definition"></a></dt>
+<dd><p>Gets true if both ends are between 0.0 and <code class="docutils literal notranslate"><span class="pre">MaximumValue</span></code>. <code class="docutils literal notranslate"><span class="pre">Crease</span></code> and <code class="docutils literal notranslate"><span class="pre">Nan</span></code> are both false; see <code class="docutils literal notranslate"><span class="pre">IsValidOrCrease</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.IsValidOrCrease">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsValidOrCrease</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#SubDEdgeSharpness.IsValidOrCrease" title="Link to this definition"></a></dt>
+<dd><p>Gets true if both ends are between 0.0 and <code class="docutils literal notranslate"><span class="pre">MaximumValue</span></code>, or if this is <code class="docutils literal notranslate"><span class="pre">Crease</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.IsVariable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsVariable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#SubDEdgeSharpness.IsVariable" title="Link to this definition"></a></dt>
+<dd><p>Gets true if this is valid and the two ends differ. <code class="docutils literal notranslate"><span class="pre">Crease</span></code> and <code class="docutils literal notranslate"><span class="pre">Nan</span></code> are both false.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.IsZero">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsZero</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#SubDEdgeSharpness.IsZero" title="Link to this definition"></a></dt>
+<dd><p>Gets true if both ends are 0.0, which is the sharpness of a smooth edge.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.Maximum">
+<span class="sig-name descname"><span class="pre">Maximum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Ellipsis</span></em><a class="headerlink" href="#SubDEdgeSharpness.Maximum" title="Link to this definition"></a></dt>
+<dd><p>object, /) -&gt; SubDEdgeSharpness</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(arg</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.MaximumEndSharpness">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MaximumEndSharpness</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#SubDEdgeSharpness.MaximumEndSharpness" title="Link to this definition"></a></dt>
+<dd><p>Gets the larger of the two end sharpness values.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.MinimumEndSharpness">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MinimumEndSharpness</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#SubDEdgeSharpness.MinimumEndSharpness" title="Link to this definition"></a></dt>
+<dd><p>Gets the smaller of the two end sharpness values.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.Nan">
+<span class="sig-name descname"><span class="pre">Nan</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Ellipsis</span></em><a class="headerlink" href="#SubDEdgeSharpness.Nan" title="Link to this definition"></a></dt>
+<dd><p>object, /) -&gt; SubDEdgeSharpness</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(arg</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.Smooth">
+<span class="sig-name descname"><span class="pre">Smooth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#SubDEdgeSharpness" title="SubDEdgeSharpness"><span class="pre">SubDEdgeSharpness</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Ellipsis</span></em><a class="headerlink" href="#SubDEdgeSharpness.Smooth" title="Link to this definition"></a></dt>
+<dd><p>object, /) -&gt; SubDEdgeSharpness</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(arg</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="SubDEdgeSharpness.Trend">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Trend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#SubDEdgeSharpness.Trend" title="Link to this definition"></a></dt>
+<dd><p>Gets +1 if the sharpness increases along the edge, -1 if it decreases, and 0 if it is constant. Returns <code class="docutils literal notranslate"><span class="pre">RhinoMath.UnsetIntIndex</span></code> if this is not valid.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="SubDEdgeListIter.html" class="btn btn-neutral float-left" title="rhino3dm.SubDEdgeListIter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="SubDEdgeTag.html" class="btn btn-neutral float-right" title="rhino3dm.SubDEdgeTag" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Robert McNeel &amp; Associates.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -51,13 +51,13 @@ class TestHardCreases(fixture.SubDFixtureTestCase):
     def test_a_crease_is_never_also_sharp(self):
         # Sharpness has no meaning on a crease: EndSharpness returns 0 there,
         # which is what stops an importer double-counting a hard crease as a
-        # weighted edge.
+        # weighted edge. (useCreaseSharpness=False is 8.x's EndSharpness(i).)
         for name in (spec.canon(e) for e in spec.CREASE_EDGES):
             with self.subTest(edge=name):
                 edge = self.edges[name]
                 self.assertFalse(edge.IsSharp)
-                self.assertEqual(edge.EndSharpness(0), 0.0)
-                self.assertEqual(edge.EndSharpness(1), 0.0)
+                self.assertEqual(edge.EndSharpness(0, False), 0.0)
+                self.assertEqual(edge.EndSharpness(1, False), 0.0)
 
     def test_hard_crease_versus_dart_crease(self):
         # AE is the one crease that runs into a dart (E), so it is a dart crease
@@ -103,7 +103,7 @@ class TestSoftCreases(fixture.SubDFixtureTestCase):
         self.assertEqual(len(sharp), spec.SUBD["sharp_edge_count"])
         # SubD.SharpEdgeCount answers the same question without a walk, which is
         # how an importer decides whether a SubD carries soft creases at all.
-        self.assertEqual(self.subd.SharpEdgeCount, spec.SUBD["sharp_edge_count"])
+        self.assertEqual(self.subd.SharpEdgeCount(), spec.SUBD["sharp_edge_count"])  # a method (D60)
 
     def test_a_sharp_edge_is_smooth_tagged(self):
         # A soft crease is not a crease tag. An importer keying only on the tag
@@ -141,15 +141,15 @@ class TestSoftCreases(fixture.SubDFixtureTestCase):
             with self.subTest(edge=name):
                 edge = self.edges[name]
                 self.assertFalse(edge.IsSharp)
-                self.assertEqual(edge.EndSharpness(0), 0.0)
-                self.assertEqual(edge.EndSharpness(1), 0.0)
+                self.assertEqual(edge.EndSharpness(0, False), 0.0)
+                self.assertEqual(edge.EndSharpness(1, False), 0.0)
 
     def test_sharpness_is_within_the_opennurbs_range(self):
         for name, edge in self.edges.items():
             with self.subTest(edge=name):
                 for i in (0, 1):
-                    self.assertGreaterEqual(edge.EndSharpness(i), 0.0)
-                    self.assertLessEqual(edge.EndSharpness(i), BLENDER_CREASE_SCALE)
+                    self.assertGreaterEqual(edge.EndSharpness(i, False), 0.0)
+                    self.assertLessEqual(edge.EndSharpness(i, False), BLENDER_CREASE_SCALE)
 
     def test_sharp_edges_reach_the_evaluator(self):
         # Each of the three sharp edges averages >= 1, and opennurbs collapses
@@ -167,8 +167,8 @@ class TestSoftCreases(fixture.SubDFixtureTestCase):
         """EndSharpness of an edge at the end sitting on a named vertex."""
         edge = self.edge(edge_name)
         for i in (0, 1):
-            if fixture.vertex_name(edge.Vertex(i)) == vertex_name:
-                return edge.EndSharpness(i)
+            if fixture.vertex_name(fixture.edge_vertex(edge, i)) == vertex_name:
+                return edge.EndSharpness(i, False)
         raise AssertionError("%s has no end at %s" % (edge_name, vertex_name))
 
 
@@ -243,11 +243,11 @@ class TestImporterWalk(fixture.SubDFixtureTestCase):
         """[(endpoint ids, blender crease 0..1, is_hard)] for every creased edge."""
         table = []
         for edge in self.subd.Edges:
-            endpoints = (edge.VertexId(0), edge.VertexId(1))
+            endpoints = (edge.VertexFrom.Id, edge.VertexTo.Id)   # 8.x: VertexId(0/1)
             if edge.IsCrease:
                 table.append((endpoints, 1.0, True))
             elif edge.IsSharp:
-                weight = max(edge.EndSharpness(0), edge.EndSharpness(1))
+                weight = max(edge.EndSharpness(0, False), edge.EndSharpness(1, False))
                 table.append((endpoints, weight / BLENDER_CREASE_SCALE, False))
         return table
 
@@ -263,7 +263,7 @@ class TestImporterWalk(fixture.SubDFixtureTestCase):
     def test_the_walk_reads_the_authored_weights(self):
         by_endpoints = {}
         for endpoints, weight, hard in self._crease_table():
-            names = frozenset(fixture.vertex_name(self.subd.Vertices[i])
+            names = frozenset(fixture.vertex_name(self.subd.Vertices.Find(i))
                               for i in endpoints)
             by_endpoints["".join(sorted(names))] = (weight, hard)
 
@@ -278,7 +278,7 @@ class TestImporterWalk(fixture.SubDFixtureTestCase):
         for name in spec.SMOOTH_EDGES:
             with self.subTest(edge=name):
                 edge = self.edge(name)
-                self.assertNotIn(frozenset((edge.VertexId(0), edge.VertexId(1))),
+                self.assertNotIn(frozenset((edge.VertexFrom.Id, edge.VertexTo.Id)),
                                  listed)
 
 

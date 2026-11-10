@@ -1,0 +1,378 @@
+# Every deliberate divergence between rhino3dm and its upstream spec
+# (rhino/src4/DotNetSDK/rhinocommon), in one reviewable place.
+#
+# api/manifest.json records what upstream OFFERS; this file records where
+# rhino3dm intentionally departs from it. Together they make the sync
+# auditable: anything that differs and is not listed here is drift.
+#
+# Categories:
+#   [[local_file]]       exists only in rhino3dm, never synced from rhino
+#   [[no_sync]]          upstream file exists but is never copied over this one
+#   [[line_exception]]   synced, then a recorded local edit is re-applied
+#   [[unadopted]]        upstream portable surface deliberately not shipped
+
+schema = 1
+
+# -----------------------------------------------------------------------------
+# Files that exist only in rhino3dm. Their RH_C_FUNCTION exports are absent
+# from api/manifest.json by construction (7 functions as of 2026-10-07).
+# -----------------------------------------------------------------------------
+
+[[local_file]]
+path = "src/librhino3dm_native/rdk_content.cpp"
+reason = "portable RDK content access written for rhino3dm; rhino's rdk layer (c_rdk/) needs the RDK runtime"
+
+[[local_file]]
+path = "src/librhino3dm_native/rdk_decals_portable.cpp"
+reason = "portable decal read/write for rhino3dm; rhino's implementation lives in c_rdk/ and needs the RDK runtime"
+
+# -----------------------------------------------------------------------------
+# Upstream counterpart exists, but the rhino3dm copy is never overwritten.
+# -----------------------------------------------------------------------------
+
+[[no_sync]]
+path = "src/librhino3dm_native/stdafx.h"
+reason = "different opennurbs include path (../lib/opennurbs/), no RHINO_CORE_COMPONENT, and a local `#define ASSERT(x) ((void)0)` shim (ASSERT comes from rhino4/AfxMac.h in Rhino)"
+
+[[no_sync]]
+path = "src/librhino3dm_native/plugin_linking_pragmas.h"
+reason = "wraps the MSVC `#pragma comment(lib,...)` block in #if !defined(ON_CMAKE_BUILD); upstreaming would change rhino's own CMake builds (opennurbs/CMakeLists.txt defines ON_CMAKE_BUILD)"
+
+[[no_sync]]
+path = "src/librhino3dm_native/CMakeLists.txt"
+reason = "rhino3dm's build definition; upstream's c/CMakeLists.txt builds against Rhino's opennurbs"
+
+[[no_sync]]
+path = "src/dotnet/Properties/AssemblyInfo.cs"
+reason = "product identity (version set by script/bump_version.py from src/version.txt)"
+
+# -----------------------------------------------------------------------------
+# Synced, then a recorded local edit is re-applied. The only line-level
+# exception left after RH3DM-213/214 reduced the list from 9.
+# -----------------------------------------------------------------------------
+
+[[line_exception]]
+path = "src/dotnet/opennurbs/opennurbs_viewport.cs"
+edit = "local ViewportInfo.NonConstPointer() override"
+reason = "RH-83697 design divergence; rhino3dm viewports are not document-owned"
+
+[[line_exception]]
+path = "src/librhino3dm_native/on_text.cpp"
+edit = "ON_V6_Annotation_GetTextString: fall back to ON_Annotation::RichText() when PlatformRichTextFromRuns() is empty"
+reason = "only Windows and Apple have a rich text style (ON::RichTextStyleFromCurrentPlatform), so on Linux and WASM RichText was \"\" (pilot #83; 8.x's hand binding had the fallback). Sent upstream: delete once rhino carries it"
+
+# The same edit, for the generated JS/Python bindings: specgen reads upstream,
+# which lacks the override, so the record it would produce is supplied here
+# (tools/generate/gen_registry.py apply_spec_patches; pilot #75). The generator
+# refuses the patch once upstream carries the override -- then delete this.
+[[spec_patch]]
+type = "Rhino.DocObjects.ViewportInfo"
+parent_view = "ViewInfo"
+nonconst = "NonConstViewportPointer"
+nonconst_native = "ON_3dmView_ViewportPointer"
+reason = "ViewInfo.Viewport edits write through to the view (ViewportInfo.NonConstPointer -> vi.NonConstViewportPointer()); upstream copies on write, so a camera set before File3dm.Views.Add was lost (RH-83697, docs/vnext/RH-83697-viewport-fix-proposal.md)"
+
+# -----------------------------------------------------------------------------
+# Upstream portable surface deliberately not shipped. Kept summary-level here;
+# the per-function list is derivable (manifest portable set minus
+# AutoNativeMethods) and reported by tools/extract/report.py.
+# -----------------------------------------------------------------------------
+
+[[unadopted]]
+scope = "61 new .cs files from the rhino 9.x sync (41 RDK, 5 UI, ...)"
+reason = "rhino3dm carries 11 of 69 RDK files by design; adopt on demand. Exceptions already adopted: opennurbs_lengthunit.cs, opennurbs_textrun.cs (sync depends on them)"
+
+[[unadopted]]
+scope = "66 portable C exports present in the manifest but not in rhino3dm's copied subset (e.g. the on_markup.cpp family)"
+reason = "surface rhino3dm has not yet adopted; this is the drift report the manifest exists to surface, re-counted on every regeneration"
+
+# -----------------------------------------------------------------------------
+# Members that exist only in a binding language. Hand-written forever; the
+# generated surface appends them from this list so nothing is silent.
+# Seeded from the actual registrations in src/bindings (grep toThreejs/
+# createFromThreejs), NOT from rhino3dm.d.ts, which is not a source of truth.
+# -----------------------------------------------------------------------------
+
+[[js_extra]]
+type = "Rhino.Geometry.Mesh"
+js = "toThreejsJSON"
+reason = "three.js interop; no RhinoCommon counterpart"
+
+[[js_extra]]
+type = "Rhino.Geometry.Mesh"
+js = "toThreejsJSONRotate"
+reason = "three.js interop (Y-up rotation variant)"
+
+[[js_extra]]
+type = "Rhino.Geometry.Mesh"
+js = "toThreejsBuffers"
+reason = "three.js interop; zero-copy typed-array buffers"
+
+[[js_extra]]
+type = "Rhino.Geometry.Mesh"
+js = "toThreejsJSONMerged"
+kind = "static"
+reason = "three.js interop; merges meshes before export"
+
+[[js_extra]]
+type = "Rhino.Geometry.Mesh"
+js = "createFromThreejsJSON"
+kind = "static"
+reason = "three.js interop; inverse of toThreejsJSON"
+
+[[js_extra]]
+type = "Rhino.Geometry.PointCloud"
+js = "toThreejsJSON"
+reason = "three.js interop; no RhinoCommon counterpart"
+
+[[js_extra]]
+type = "Rhino.Geometry.PointCloud"
+js = "toThreejsBuffers"
+reason = "three.js interop; zero-copy typed-array buffers"
+
+[[js_extra]]
+type = "Rhino.Geometry.PointCloud"
+js = "createFromThreejsJSON"
+kind = "static"
+reason = "three.js interop; inverse of toThreejsJSON"
+
+# -----------------------------------------------------------------------------
+# rhino3dm-only API kept hand-written (D19 decisions: "keep"). A whole class, or
+# the listed members of one. tools/generate/old_coverage.py fills the Decision
+# column of docs/vnext/rhino3dm-only-members.md from these.
+# -----------------------------------------------------------------------------
+
+[[hand_kept]]
+class = "Bitmap"
+decided = "Luis, 2026-10-15"
+vnext = "src/bindings/bnd_bitmapx.* (Bitmap), with the review fixes (G90)"
+reason = "RhinoCommon's BitmapEntry has no working member for a File3dm (its pointer throws NotImplementedException; FileName/Save are RHINO_SDK only: pilot #37); the old ON_Bitmap wrapper is the only bitmap access"
+
+[[hand_kept]]
+class = "File3dmBitmapTable"
+decided = "Luis, 2026-10-15"
+vnext = "src/bindings/bnd_bitmapx.* (File3dmBitmapTable), with the review fixes (G90)"
+reason = "RhinoCommon's BitmapTable is RHINO_SDK only; File3dmManifestTable yields BitmapEntry for images (pilot #37)"
+
+# ---- Rhino-only in RhinoCommon (Luis 2026-10-16): kept until upstream makes them portable
+
+[[hand_kept]]
+class = "EmbeddedFile"
+members = ["fromByteArray"]
+decided = "Luis, 2026-10-18"
+vnext = "File3dmEmbeddedFile.fromByteArray (hand member, JS only, G124)"
+reason = "JS only: builds an embedded file from bytes (WASM has no host file system to read the file from); RhinoCommon's File3dmEmbeddedFile has no such factory"
+
+[[hand_kept]]
+class = "File3dm"
+members = ["destroy", "getEmbeddedFileAsBase64Strict"]
+decided = "Luis, 2026-10-18"
+vnext = "File3dm.destroy = embind's delete() (hand alias, JS only, G124: the old one freed the model twice); File3dm.getEmbeddedFileAsBase64Strict (G123)"
+reason = "JS only: destroy() frees the model's contents explicitly (embind objects are not collected promptly); getEmbeddedFileAsBase64Strict returns an embedded file's bytes as base64 (no host file system in WASM). No RhinoCommon counterparts"
+
+
+# ---- triage F, serialization and file interop (Luis 2026-10-28): built as hand members
+# (gen_registry.HAND_MEMBERS, src/hand/: plain C++ registered in every binding, G123)
+
+[[hand_kept]]
+class = "CommonObject"
+members = ["Encode", "Decode"]
+decided = "Luis, 2026-10-28"
+reason = "F1: the JSON form Rhino.Compute exchanges (an opennurbs archive in a dict); kept by hand until the portable JSON API is upstream"
+upstream = "a portable JSON Encode/Decode for CommonObject and File3dm in RhinoCommon (design first)"
+
+[[hand_kept]]
+class = "File3dm"
+members = ["Encode", "Decode"]
+decided = "Luis, 2026-10-28"
+reason = "F1: the JSON form of a whole model; kept by hand until the portable JSON API is upstream"
+upstream = "a portable JSON Encode/Decode for CommonObject and File3dm in RhinoCommon (design first)"
+
+[[hand_kept]]
+class = "BoundingBox"
+members = ["Encode", "Decode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Circle"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "MeshingParameters"
+members = ["Encode", "Decode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form Rhino.Compute sends meshing parameters in; no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Plane"
+members = ["Encode", "Decode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Sphere"
+members = ["Encode", "Decode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Point2d"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Point2f"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Point3d"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Point3f"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Point4d"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Vector2d"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Vector3d"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "Vector3f"
+members = ["Encode"]
+decided = "Luis, 2026-10-28"
+reason = "F2: the JSON form of a value (Rhino.Compute); no RhinoCommon counterpart"
+
+[[hand_kept]]
+class = "CommonObject"
+members = ["RdkXml"]
+decided = "Luis, 2026-10-28"
+reason = "F3: an object's RDK user data as XML (added 2018, 93c21a63); kept after review"
+
+[[hand_kept]]
+class = "File3dm"
+members = ["RdkXml", "GetEmbeddedFileAsBase64"]
+decided = "Luis, 2026-10-28"
+reason = "F3 RdkXml: the model's RDK document data as XML; F4 GetEmbeddedFileAsBase64: an embedded file's bytes without a host file system"
+
+[[hand_kept]]
+class = "File3dmRdkDocumentData"
+members = ["RdkXml"]
+decided = "Luis, 2026-10-28"
+vnext = "File3dmPlugInData.RdkXml (hand member, G123): the plug-in data entry the old class was"
+reason = "F3: the RDK document data as XML; kept after review"
+
+[[hand_kept]]
+class = "File3dmRenderContentTable"
+members = ["Add"]
+decided = "Luis, 2026-10-28 (upstream); hand-kept for 9.2, 2026-10-29"
+vnext = "File3dmRenderMaterials.Add / File3dmRenderEnvironments.Add / File3dmRenderTextures.Add (hand members, G124): on the kind's collection, where FindId went (H1)"
+upstream = "RhinoCommon has no way to add render content to a File3dm (File3dmRenderMaterial() is commented out since 2022)"
+reason = "copies a render content (e.g. from another model) into the model"
+
+[[hand_kept]]
+class = "PointCloud"
+members = ["addPointValue", "insertPointValue", "addRangePointsValues"]
+decided = "Luis, 2026-10-30"
+vnext = "PointCloud: Python Add(point, value) / Insert(index, point, value) / AddRange(points, values) overloads, JS addPointValue / insertPointValue / addRangePointsValues (hand members, G126); every channel stays aligned (pilot #64)"
+upstream = "U38: RhinoCommon PointCloud.Add(Point3d, double), Insert(int, Point3d, double), AddRange(IEnumerable<Point3d>, IEnumerable<double>)"
+reason = "a point with a value but no normal or color; RhinoCommon carries a value only with both"
+
+[[hand_kept]]
+class = "File3dmGroupTable"
+members = ["deleteId"]
+decided = "Luis, 2026-10-30"
+vnext = "File3dmGroupTable: Python Delete(id) overload, JS deleteId (hand member, G126)"
+upstream = "U38: RhinoCommon File3dmGroupTable / File3dmCommonComponentTable Delete(Guid)"
+reason = "delete a group by id; RhinoCommon deletes by group or by index"
+
+[[hand_kept]]
+class = "SubDFace"
+members = ["Edges", "Vertices"]
+decided = "Luis, 2026-10-30 (option B: neighbouring components, Pierre)"
+vnext = "SubDFace.Edges / Vertices (hand properties, G129): lists of the generated components, as RhinoCommon's vertex.Edges (Luis 2026-10-30, option 1). JS: an array property (`face.edges`), the old one a function returning an iterator (`face.edges()`)"
+reason = "a component's neighbours in one call; RhinoCommon has only EdgeAt(i) / VertexAt(i)"
+
+[[hand_kept]]
+class = "SubDEdge"
+members = ["Faces", "Vertices"]
+decided = "Luis, 2026-10-30 (option B)"
+vnext = "SubDEdge.Faces / Vertices (hand properties, G129)"
+reason = "as SubDFace.Edges"
+
+[[hand_kept]]
+class = "SubDVertex"
+members = ["Faces"]
+decided = "Luis, 2026-10-30 (option B)"
+vnext = "SubDVertex.Faces (hand property, G129); vertex.Edges is RhinoCommon's (generated)"
+reason = "as SubDFace.Edges"
+
+[[hand_kept]]
+class = "SubDComponent"
+members = ["Equals", "GetHashCode"]
+decided = "Luis, 2026-11-03 (D25: RhinoCommon has them, build them)"
+vnext = "SubDComponent.Equals / GetHashCode (hand methods; Python also ==, != and __hash__): same component type, Id and owning SubD, as RhinoCommon (its ComponentDirection test always holds: generated components are referenced forward). JS: equals(other), getHashCode()"
+reason = "RhinoCommon members (opennurbs_subd.cs, since 8.36) whose bodies are pure C# over the managed ParentSubD reference; the generator does not translate pure class bodies. Retire if it learns to"
+
+[[hand_kept]]
+class = "Mesh"
+members = ["toThreejsBuffers"]
+decided = "Luis, 2026-10-08 (three.js interop; again 2026-10-28)"
+vnext = "Mesh.toThreejsBuffers + its inverse createFromThreejsBuffers (hand members, JS only, G131); the old one computed normals on the caller's mesh, this one on a copy"
+reason = "three.js BufferGeometry typed arrays (3DMLoader's fast path)"
+
+[[hand_kept]]
+class = "PointCloud"
+members = ["toThreejsBuffers"]
+decided = "Luis, 2026-10-08 (three.js interop)"
+vnext = "PointCloud.toThreejsBuffers + createFromThreejsBuffers (hand members, JS only, G131)"
+reason = "as Mesh.toThreejsBuffers"
+
+[[hand_kept]]
+class = "Mesh"
+members = ["toThreejsJSON", "toThreejsJSONRotate", "toThreejsJSONMerged", "createFromThreejsJSON"]
+decided = "Luis, 2026-10-31 (ship deprecated in 9.2, remove later)"
+vnext = "Mesh hand members, JS only (G133): 8.x's output and decoding, each warning once (console.warn) that toThreejsBuffers / createFromThreejsBuffers replace it; normals computed on a copy, an out-of-range face index throws"
+reason = "deprecated: 3DMLoader's JSON fallback, for callers not yet on the buffers"
+
+[[hand_kept]]
+class = "PointCloud"
+members = ["toThreejsJSON", "createFromThreejsJSON"]
+decided = "Luis, 2026-10-31 (ship deprecated in 9.2, remove later)"
+vnext = "PointCloud hand members, JS only (G133), deprecated as Mesh's"
+reason = "as Mesh.toThreejsJSON"
+
+[[hand_kept]]
+class = "ArchivableDictionary"
+members = ["EncodeDict", "DecodeDict"]
+decided = "Luis, 2026-10-28"
+reason = "F4: a dict of rhino3dm values to and from its JSON form (Rhino.Compute)"
+
+[[hand_kept]]
+class = "EmbeddedFile"
+members = ["Read"]
+decided = "Luis, 2026-10-28"
+reason = "F4: reads a file from disk into an embedded file; RhinoCommon's File3dmEmbeddedFile has no such factory"

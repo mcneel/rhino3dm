@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "description": "Checks the packed rhino3dm npm package as its users load it: run.sh",
+  "devDependencies": {
+    "webpack": "5.97.1",
+    "webpack-cli": "5.1.4"
+  }
+}

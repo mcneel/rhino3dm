@@ -1,0 +1,45 @@
+rhino3dm.BrepFace.ShrinkDisableSide
+===================================
+
+.. py:class:: rhino3dm.BrepFace.ShrinkDisableSide
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines bitwise mask flags indicating what side of a surface to not shrink.
+
+
+   .. py:attribute:: DoNotShrinkEastSide
+      :value: 4
+
+
+      Do not shrink on the east side of domain.
+
+
+   .. py:attribute:: DoNotShrinkNorthSide
+      :value: 8
+
+
+      Do not shrink on the north side of domain.
+
+
+   .. py:attribute:: DoNotShrinkSouthSide
+      :value: 2
+
+
+      Do not shrink on the south side of domain.
+
+
+   .. py:attribute:: DoNotShrinkWestSide
+      :value: 1
+
+
+      Do not shrink on the west side of domain.
+
+
+   .. py:attribute:: ShrinkAllSides
+      :value: 0
+
+
+      Shrink on all four sides.
+

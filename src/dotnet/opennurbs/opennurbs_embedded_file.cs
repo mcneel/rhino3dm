@@ -60,6 +60,26 @@ namespace Rhino.FileIO
     /// <since>8.0</since>
     public File3dmEmbeddedFiles(File3dm f) { _file3dm = f; }
 
+    /// <summary>
+    /// Gets the number of embedded files in the model.
+    /// </summary>
+    /// <since>9.2</since>
+    public int Count
+    {
+      get { return _file3dm.Manifest.ActiveObjectCount(ModelComponentType.EmbeddedFile); }
+    }
+
+    /// <summary>
+    /// Retrieves an embedded file based on Index.
+    /// </summary>
+    /// <param name="index">The index to search for.</param>
+    /// <returns>An embedded file, or null if none was found.</returns>
+    /// <since>9.2</since>
+    public File3dmEmbeddedFile FindIndex(int index)
+    {
+      return _file3dm.Manifest.FindIndex<File3dmEmbeddedFile>(index);
+    }
+
     /// <summary></summary>
     /// <since>8.0</since>
     public IEnumerator<File3dmEmbeddedFile> GetEnumerator()
@@ -139,6 +159,33 @@ namespace Rhino.FileIO
         GC.KeepAlive(this);
         return rc;
       }
+    }
+
+    /// <summary>
+    /// Gets the length of the loaded data, or zero if the embedded file is not loaded.
+    /// </summary>
+    /// <since>9.2</since>
+    [CLSCompliant(false)]
+    public ulong Length
+    {
+      get
+      {
+        ulong rc = UnsafeNativeMethods.ON_EmbeddedFile_Length(ConstPointer());
+        GC.KeepAlive(this);
+        return rc;
+      }
+    }
+
+    /// <summary>
+    /// Clears the embedded file data.
+    /// </summary>
+    /// <returns>true if successful, else false.</returns>
+    /// <since>9.2</since>
+    public bool Clear()
+    {
+      bool rc = UnsafeNativeMethods.ON_EmbeddedFile_Clear(NonConstPointer());
+      GC.KeepAlive(this);
+      return rc;
     }
 
     /// <summary>

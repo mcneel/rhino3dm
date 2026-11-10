@@ -695,6 +695,7 @@ namespace Rhino.Geometry
         IntPtr ptr_curves = curveArray.ConstPointer();
         IntPtr ptr_breps = brepArray.NonConstPointer();
         bool rc = UnsafeNativeMethods.TLC_CutUpSurfaceMulti(ptr_surface, ptr_curves, useEdgeCurves, tolerance, ptr_breps);
+        GC.KeepAlive(surface);
         return rc ? brepArray.ToNonConstArray() : new Brep[0];
       }
     }
@@ -808,20 +809,20 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="corners">
     /// 8 points defining the box corners arranged as the vN labels indicate.
-    /// <pre>
-    /// <para>v7_______e6____v6</para>
-    /// <para>|\             |\</para>
-    /// <para>| e7           | e5</para>
-    /// <para>|  \ ______e4_____\</para>
-    /// <para>e11 v4         |   v5</para>
-    /// <para>|   |        e10   |</para>
-    /// <para>|   |          |   |</para>
-    /// <para>v3--|---e2----v2   e9</para>
-    /// <para> \  e8          \  |</para>
-    /// <para> e3 |            e1|</para>
-    /// <para>   \|             \|</para>
-    /// <para>    v0_____e0______v1</para>
-    /// </pre>
+    /// <code language="none">
+    /// v7_______e6____v6
+    /// |\             |\
+    /// | e7           | e5
+    /// |  \ ______e4_____\
+    /// e11 v4         |   v5
+    /// |   |        e10   |
+    /// |   |          |   |
+    /// v3--|---e2----v2   e9
+    ///  \  e8          \  |
+    ///  e3 |            e1|
+    ///    \|             \|
+    ///     v0_____e0______v1
+    /// </code>
     /// </param>
     /// <returns>A new brep, or null on error.</returns>
     /// <since>5.0</since>
@@ -2278,6 +2279,10 @@ namespace Rhino.Geometry
     /// <param name="rev1">If false, edge1 will be used in its natural direction. If true, edge1 will be used in the reversed direction.</param>
     /// <param name="continuity1">Continuity for the blend at the end.</param>
     /// <returns>Array of Breps if successful.</returns>
+    /// <remarks>
+    /// Same as the overload that takes <see cref="BlendSurfaceOptions"/>, with the default options except
+    /// for continuity, and the absolute tolerance of the active document.
+    /// </remarks>
     /// <since>6.0</since>
     public static Brep[] CreateBlendSurface(BrepFace face0, BrepEdge edge0, Interval domain0, bool rev0, BlendContinuity continuity0,
                                             BrepFace face1, BrepEdge edge1, Interval domain1, bool rev1, BlendContinuity continuity1)
@@ -2299,6 +2304,55 @@ namespace Rhino.Geometry
           ptr_const_face0, ptr_const_edge0, domain0, rev0, (int)continuity0,
           ptr_const_face1, ptr_const_edge1, domain1, rev1, (int)continuity1,
           ptr_breps);
+
+        Runtime.CommonObject.GcProtect(face0, edge0, face1, edge1);
+        return breps.ToNonConstArray();
+      }
+    }
+
+    /// <summary>
+    /// Makes the surface blend the BlendSrf command makes between two surface edges.
+    /// </summary>
+    /// <param name="face0">First face to blend from.</param>
+    /// <param name="edge0">Edge of face0 to blend from.</param>
+    /// <param name="domain0">The part of edge0 to use, in edge0's parameters.</param>
+    /// <param name="rev0">If false, edge0 will be used in its natural direction. If true, edge0 will be used in the reversed direction.</param>
+    /// <param name="face1">Second face to blend from.</param>
+    /// <param name="edge1">Edge of face1 to blend from.</param>
+    /// <param name="domain1">The part of edge1 to use, in edge1's parameters.</param>
+    /// <param name="rev1">If false, edge1 will be used in its natural direction. If true, edge1 will be used in the reversed direction.</param>
+    /// <param name="options">Continuity and the other BlendSrf settings.</param>
+    /// <param name="tolerance">Fitting tolerance. BlendSrf uses the document's absolute tolerance.</param>
+    /// <returns>Array of Breps if successful, an empty array if not.</returns>
+    /// <remarks>
+    /// When the whole of two closed edges is used, the blend is closed, and the seams and directions
+    /// are matched the way BlendSrf matches them automatically. rev0 and rev1 are not used in that case.
+    /// </remarks>
+    public static Brep[] CreateBlendSurface(BrepFace face0, BrepEdge edge0, Interval domain0, bool rev0,
+                                            BrepFace face1, BrepEdge edge1, Interval domain1, bool rev1,
+                                            BlendSurfaceOptions options, double tolerance)
+    {
+      if (face0 == null) throw new ArgumentNullException(nameof(face0));
+      if (edge0 == null) throw new ArgumentNullException(nameof(edge0));
+      if (face1 == null) throw new ArgumentNullException(nameof(face1));
+      if (edge1 == null) throw new ArgumentNullException(nameof(edge1));
+      if (options == null) throw new ArgumentNullException(nameof(options));
+
+      var ptr_const_face0 = face0.ConstPointer();
+      var ptr_const_edge0 = edge0.ConstPointer();
+      var ptr_const_face1 = face1.ConstPointer();
+      var ptr_const_edge1 = edge1.ConstPointer();
+
+      using (var breps = new SimpleArrayBrepPointer())
+      {
+        var ptr_breps = breps.NonConstPointer();
+        UnsafeNativeMethods.RHC_RhinoSdkBlend_SurfaceBlend2(
+          ptr_const_face0, ptr_const_edge0, domain0, rev0,
+          ptr_const_face1, ptr_const_edge1, domain1, rev1,
+          (int)options.Continuity0, (int)options.Continuity1, options.Bulge0, options.Bulge1,
+          options.SameHeight, options.InteriorShapes, options.Refine,
+          options.PlanarSections, options.PlanarSectionDirection,
+          tolerance, ptr_breps);
 
         Runtime.CommonObject.GcProtect(face0, edge0, face1, edge1);
         return breps.ToNonConstArray();
@@ -3730,6 +3784,7 @@ namespace Rhino.Geometry
               settings.InternalTolerance,
               ref g0internal, ref g0, ref g1, ref g2,
               warningWrapper.NonConstPointer, errorWrapper.NonConstPointer);
+            GC.KeepAlive(settings.InitialSurface);
           }
           finally
           {
@@ -6024,6 +6079,87 @@ namespace Rhino.Geometry
     }
 
     /// <summary>
+    /// Measures how far apart two Breps are where they overlap, such as a surface and its refit.
+    /// Both directions are measured, at about 10000 samples on each Brep.
+    /// </summary>
+    /// <param name="brepA">The first Brep.</param>
+    /// <param name="brepB">The second Brep.</param>
+    /// <param name="tolerance">
+    /// A sample past a naked edge of the other Brep by no more than tolerance still has a counterpart.
+    /// The maximum is refined until its location changes by less than tolerance/1000.
+    /// </param>
+    /// <returns>The deviation, or null if a Brep has no faces or tolerance is not positive.</returns>
+    public static BrepDeviation ComputeDeviation(Brep brepA, Brep brepB, double tolerance)
+    {
+      return ComputeDeviation(brepA, brepB, tolerance, null);
+    }
+
+    /// <summary>
+    /// Measures how far apart two Breps are where they overlap, such as a surface and its refit.
+    /// See <see cref="BrepDeviationMeasure"/>.
+    /// </summary>
+    /// <param name="brepA">The first Brep.</param>
+    /// <param name="brepB">The second Brep.</param>
+    /// <param name="tolerance">
+    /// A sample past a naked edge of the other Brep by no more than tolerance still has a counterpart.
+    /// The maximum is refined until its location changes by less than tolerance/1000.
+    /// </param>
+    /// <param name="options">See <see cref="BrepDeviationOptions"/>. Null for the defaults.</param>
+    /// <returns>
+    /// The deviation, or null if a Brep has no faces, tolerance is not positive,
+    /// <see cref="BrepDeviationOptions.SampleCount"/> is less than 1, or the computation was cancelled.
+    /// </returns>
+    /// <remarks>
+    /// The maximum is refined from the largest samples, so a peak narrower than the sample spacing can be
+    /// missed. A bound on the error cannot be given.
+    /// The faces of each Brep are sampled on a grid within the bounding box of their outer loop, with cells
+    /// of about equal length along the isocurves, and their edges other than seams at about equal lengths.
+    /// The mean is over the face samples only.
+    /// </remarks>
+    public static BrepDeviation ComputeDeviation(Brep brepA, Brep brepB, double tolerance, BrepDeviationOptions options)
+    {
+      if (brepA == null) throw new ArgumentNullException(nameof(brepA));
+      if (brepB == null) throw new ArgumentNullException(nameof(brepB));
+      if (options == null) options = new BrepDeviationOptions();
+
+      // Not Runtime.Interop.MarshalProgressAndCancelToken: see Intersect.Intersection.GeometryPlane.
+      ThreadTerminator terminator = null;
+      var registration = default(CancellationTokenRegistration);
+      if (options.CancellationToken.CanBeCanceled)
+      {
+        terminator = new ThreadTerminator();
+        registration = options.CancellationToken.Register(terminator.RequestCancel);
+      }
+      ProgressReporter reporter = null;
+      if (options.ProgressReporter != null)
+      {
+        reporter = new ProgressReporter(options.ProgressReporter);
+        reporter.Enable();
+      }
+      IntPtr ptr_deviation = UnsafeNativeMethods.CRhinoBrepDeviation_New();
+      try
+      {
+        bool rc = UnsafeNativeMethods.RHC_RhinoBrepDeviation(brepA.ConstPointer(), brepB.ConstPointer(), tolerance,
+          options.BothDirections, options.SampleCount, options.KeepSamples, options.SampleMesh,
+          terminator != null ? terminator.NonConstPointer() : IntPtr.Zero, reporter != null ? reporter.SerialNumber : 0, ptr_deviation);
+        GC.KeepAlive(brepA);
+        GC.KeepAlive(brepB);
+        if (!rc)
+          return null;
+        return new BrepDeviation(new BrepDeviationMeasure(ptr_deviation, false),
+          options.BothDirections ? new BrepDeviationMeasure(ptr_deviation, true) : null);
+      }
+      finally
+      {
+        UnsafeNativeMethods.CRhinoBrepDeviation_Delete(ptr_deviation);
+        // Dispose waits for a callback that is running, so none runs after the terminator is deleted.
+        registration.Dispose();
+        if (terminator != null) terminator.Dispose();
+        if (reporter != null) reporter.Disable();
+      }
+    }
+
+    /// <summary>
     /// Find the indices of all brep faces, edges and vertices that are within tolerance of a test-point.
     /// </summary>
     /// <param name="point">Test point.</param>
@@ -7326,6 +7462,241 @@ namespace Rhino.Geometry
     /// </summary>
     Concave = 2
   }
+
+#if RHINO_SDK
+  /// <summary>
+  /// Options for <see cref="Brep.ComputeDeviation(Brep, Brep, double, BrepDeviationOptions)"/>.
+  /// </summary>
+  public sealed class BrepDeviationOptions
+  {
+    /// <summary>
+    /// If true, the deviation is also measured from brepB to brepA. The default is true.
+    /// </summary>
+    public bool BothDirections { get; set; } = true;
+
+    /// <summary>
+    /// About this many points are sampled on each Brep that is measured from, spaced by length along the
+    /// isocurves of its faces and along its edges. The time taken is about proportional to it. The default
+    /// is 10000.
+    /// </summary>
+    public int SampleCount { get; set; } = 10000;
+
+    /// <summary>
+    /// If true, <see cref="BrepDeviationMeasure.Samples"/> holds every sample. The default is false.
+    /// </summary>
+    public bool KeepSamples { get; set; }
+
+    /// <summary>
+    /// If true, <see cref="BrepDeviationMeasure.Mesh"/> and <see cref="BrepDeviationMeasure.VertexDeviations"/>
+    /// hold the face samples as a mesh, with the deviation at each vertex. The default is false.
+    /// </summary>
+    public bool SampleMesh { get; set; }
+
+    /// <summary>
+    /// Checked between samples.
+    /// </summary>
+    public CancellationToken CancellationToken { get; set; }
+
+    /// <summary>
+    /// Receives the fraction done. Can be null.
+    /// </summary>
+    public IProgress<double> ProgressReporter { get; set; }
+  }
+
+  /// <summary>
+  /// A point that <see cref="Brep.ComputeDeviation(Brep, Brep, double, BrepDeviationOptions)"/> sampled on the
+  /// measured Brep.
+  /// </summary>
+  public sealed class BrepDeviationSample
+  {
+    // An empty sample when ptrConstSample is IntPtr.Zero.
+    internal BrepDeviationSample(IntPtr ptrConstSample)
+    {
+      Line line = Line.Unset;
+      bool hasCounterpart = false;
+      ComponentIndex component = ComponentIndex.Unset, counterpartComponent = ComponentIndex.Unset;
+      Point2d parameters = Point2d.Unset, counterpartParameters = Point2d.Unset;
+      UnsafeNativeMethods.CRhinoBrepDeviationSample_Get(ptrConstSample, ref line, ref hasCounterpart, ref component, ref parameters,
+        ref counterpartComponent, ref counterpartParameters);
+      // Native reports an empty sample with NaN points.
+      Line = line.From.IsValid ? line : Line.Unset;
+      HasCounterpart = hasCounterpart;
+      Component = component;
+      Parameters = parameters;
+      CounterpartComponent = counterpartComponent;
+      CounterpartParameters = counterpartParameters;
+    }
+
+    /// <summary>
+    /// From the point towards the other Brep. Its length is the deviation. Line.Unset in an empty sample. Not
+    /// valid where the deviation is zero, so test <see cref="Deviation"/>, not Line.IsValid.
+    /// </summary>
+    public Line Line { get; }
+
+    /// <summary>
+    /// The length of <see cref="Line"/>. NaN in an empty sample.
+    /// </summary>
+    public double Deviation
+    {
+      get { return Line.From.IsValid ? Line.Length : double.NaN; }
+    }
+
+    /// <summary>
+    /// False where the other Brep does not overlap the measured one.
+    /// </summary>
+    public bool HasCounterpart { get; }
+
+    /// <summary>
+    /// The face or edge of the measured Brep that the point is on. ComponentIndex.Unset in an empty sample.
+    /// </summary>
+    public ComponentIndex Component { get; }
+
+    /// <summary>
+    /// The point's parameters on <see cref="Component"/>: (s,t) on a face, s on an edge, with t unset.
+    /// When <see cref="BrepDeviationMeasure.Maximum"/> is moved to an edge, s is the parameter of the closest
+    /// point on the edge, within the tolerance of the line's start.
+    /// </summary>
+    public Point2d Parameters { get; }
+
+    /// <summary>
+    /// The face, edge or vertex of the other Brep closest to the point. When the line ends on the tangent plane
+    /// of a face at a naked edge, that face. ComponentIndex.Unset in an empty sample.
+    /// </summary>
+    public ComponentIndex CounterpartComponent { get; }
+
+    /// <summary>
+    /// The parameters on <see cref="CounterpartComponent"/>: (s,t) on a face, s on an edge with t unset, both
+    /// unset at a vertex. When the line ends on the tangent plane of a face at a naked edge, the parameters of
+    /// the edge's point on that face.
+    /// </summary>
+    public Point2d CounterpartParameters { get; }
+  }
+
+  /// <summary>
+  /// The result of <see cref="Brep.ComputeDeviation(Brep, Brep, double, BrepDeviationOptions)"/>.
+  /// </summary>
+  public sealed class BrepDeviation
+  {
+    internal BrepDeviation(BrepDeviationMeasure aToB, BrepDeviationMeasure bToA)
+    {
+      AToB = aToB;
+      BToA = bToA;
+    }
+
+    /// <summary>
+    /// Measured at samples on brepA.
+    /// </summary>
+    public BrepDeviationMeasure AToB { get; }
+
+    /// <summary>
+    /// Measured at samples on brepB. Null when <see cref="BrepDeviationOptions.BothDirections"/> was false.
+    /// </summary>
+    public BrepDeviationMeasure BToA { get; }
+
+    /// <summary>
+    /// The <see cref="BrepDeviationMeasure.Maximum"/> of the two directions with the larger deviation. An empty
+    /// sample when no sample has a counterpart.
+    /// </summary>
+    public BrepDeviationSample Maximum
+    {
+      get
+      {
+        double a = AToB.Maximum.Deviation, b = BToA?.Maximum.Deviation ?? double.NaN;
+        return (b > a || (double.IsNaN(a) && !double.IsNaN(b))) ? BToA.Maximum : AToB.Maximum;
+      }
+    }
+  }
+
+  /// <summary>
+  /// The deviation from one Brep to another, measured at points sampled on the first. The deviation at a
+  /// sample is its distance to the closest point of the other Brep. When the sample is past a naked edge
+  /// of the other Brep by no more than the tolerance, it is the distance along the normal of the edge's face,
+  /// and the sample's line ends on that face's tangent plane at the edge, off the other Brep by no more
+  /// than the tolerance.
+  /// A sample has no counterpart when that closest point is on a naked edge of the other Brep and the
+  /// sample is past the edge by more than the tolerance, measured in the tangent plane of the edge's face.
+  /// These samples are where the Breps do not overlap. They are counted, but are not part of
+  /// <see cref="Maximum"/> or <see cref="MeanDeviation"/>.
+  /// </summary>
+  public sealed class BrepDeviationMeasure
+  {
+    internal BrepDeviationMeasure(IntPtr ptrConstDeviation, bool bToA)
+    {
+      double mean = double.NaN;
+      int overlapCount = 0, outsideCount = 0;
+      UnsafeNativeMethods.CRhinoBrepDeviation_GetMeasure(ptrConstDeviation, bToA, ref mean, ref overlapCount, ref outsideCount);
+      MeanDeviation = mean;
+      OverlapCount = overlapCount;
+      OutsideCount = outsideCount;
+      Maximum = new BrepDeviationSample(UnsafeNativeMethods.CRhinoBrepDeviation_Maximum(ptrConstDeviation, bToA, false));
+      MaximumOutside = new BrepDeviationSample(UnsafeNativeMethods.CRhinoBrepDeviation_Maximum(ptrConstDeviation, bToA, true));
+
+      var samples = new BrepDeviationSample[UnsafeNativeMethods.CRhinoBrepDeviation_SampleCount(ptrConstDeviation, bToA)];
+      for (int i = 0; i < samples.Length; i++)
+        samples[i] = new BrepDeviationSample(UnsafeNativeMethods.CRhinoBrepDeviation_Sample(ptrConstDeviation, bToA, i));
+      Samples = Array.AsReadOnly(samples);
+
+      IntPtr ptrMesh = UnsafeNativeMethods.CRhinoBrepDeviation_DuplicateMesh(ptrConstDeviation, bToA);
+      Mesh = IntPtr.Zero != ptrMesh ? GeometryBase.CreateGeometryHelper(ptrMesh, null) as Mesh : null;
+      using (var deviations = new SimpleArrayDouble())
+      {
+        UnsafeNativeMethods.CRhinoBrepDeviation_GetVertexDeviations(ptrConstDeviation, bToA, deviations.NonConstPointer());
+        VertexDeviations = Array.AsReadOnly(deviations.ToArray());
+      }
+    }
+
+    /// <summary>
+    /// The sample with a counterpart with the largest deviation, refined to a local maximum. Its
+    /// <see cref="BrepDeviationSample.Component"/> is an edge when it is within the tolerance of an edge of the
+    /// measured Brep, other than a seam, and a face otherwise. An empty sample when no sample has a counterpart.
+    /// </summary>
+    public BrepDeviationSample Maximum { get; }
+
+    /// <summary>
+    /// The mean deviation of the face samples with a counterpart, weighted by area. NaN when there are none.
+    /// </summary>
+    public double MeanDeviation { get; }
+
+    /// <summary>
+    /// The number of samples with a counterpart.
+    /// </summary>
+    public int OverlapCount { get; }
+
+    /// <summary>
+    /// The number of samples without a counterpart.
+    /// </summary>
+    public int OutsideCount { get; }
+
+    /// <summary>
+    /// The sample without a counterpart with the largest deviation. Not refined. An empty sample when there are
+    /// none.
+    /// </summary>
+    public BrepDeviationSample MaximumOutside { get; }
+
+    /// <summary>
+    /// When <see cref="BrepDeviationOptions.KeepSamples"/> was true, every sample. Otherwise empty. The
+    /// mesh's extra vertices are not samples.
+    /// </summary>
+    public IReadOnlyList<BrepDeviationSample> Samples { get; }
+
+    /// <summary>
+    /// When <see cref="BrepDeviationOptions.SampleMesh"/> was true, the face samples as a mesh. Each face's
+    /// samples are a grid, joined into quads. Points on the sides of the grid, and where the face's trims cross
+    /// the grid lines, are added so the mesh reaches the sides and the trims, with straight segments between
+    /// those points. They are evaluated and refined from like samples, also when SampleMesh is false, but are
+    /// not samples. A trim feature smaller than a grid cell can be covered by the mesh or missed by it. Edge
+    /// samples are not in the mesh. The point of <see cref="Maximum"/> is a vertex when its face has mesh
+    /// faces, and no vertex deviation is larger than its. Otherwise, or when the mesh has no faces, null.
+    /// </summary>
+    public Mesh Mesh { get; }
+
+    /// <summary>
+    /// The deviation at each vertex of <see cref="Mesh"/>, NaN where the vertex has no counterpart or its
+    /// closest point on the other Brep was not found. Empty when there is no mesh.
+    /// </summary>
+    public IReadOnlyList<double> VertexDeviations { get; }
+  }
+#endif
 
   /// <summary>
   /// Brep vertex information

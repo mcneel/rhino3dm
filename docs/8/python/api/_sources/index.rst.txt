@@ -1,0 +1,177 @@
+.. rhino3dm documentation master file, created by
+   sphinx-quickstart on Fri Oct 19 16:07:18 2018.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to the rhino3dm.py documentation!
+=========================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   AnnotationBase
+   Arc
+   ArcCurve
+   ArchivableDictionary
+   Arrowhead
+   BezierCurve
+   Bitmap
+   BND_SubD
+   BoundingBox
+   Box
+   Brep
+   BrepEdge
+   BrepEdgeList
+   BrepFace
+   BrepFaceList
+   BrepLoop
+   BrepLoopList
+   BrepSurfaceList
+   BrepTrim
+   BrepTrimList
+   BrepVertex
+   BrepVertexList
+   CachedTextureCoordinates
+   Centermark
+   Circle
+   CommonObject
+   ComponentIndex
+   Cone
+   ConstructionPlane
+   Curve
+   CurvePiping
+   CurveProxy
+   Cylinder
+   Decal
+   DimAngular
+   Dimension
+   DimensionStyle
+   DimLinear
+   DimOrdinate
+   DimRadial
+   Displacement
+   Dithering
+   DracoCompression
+   DracoCompressionOptions
+   EarthAnchorPoint
+   EdgeSoftening
+   Ellipse
+   EmbeddedFile
+   Environment
+   Extrusion
+   File3dm
+   File3dmBitmapTable
+   File3dmDecalTable
+   File3dmDimStyleTable
+   File3dmEmbeddedFileTable
+   File3dmGroupTable
+   File3dmInstanceDefinitionTable
+   File3dmLayerTable
+   File3dmLinetypeTable
+   File3dmMaterialTable
+   File3dmMeshModifiers
+   File3dmObject
+   File3dmObjectTable
+   File3dmPlugInData
+   File3dmPlugInDataTable
+   File3dmPostEffectTable
+   File3dmRdkDocumentData
+   File3dmRenderContentTable
+   File3dmSettings
+   File3dmShutLiningCurveTable
+   File3dmStringTable
+   File3dmViewTable
+   File3dmWriteOptions
+   FileReference
+   Font
+   GeometryBase
+   GroundPlane
+   Group
+   Hatch
+   InstanceDefinition
+   InstanceReference
+   Intersection
+   Interval
+   Layer
+   Leader
+   Light
+   Line
+   LinearWorkflow
+   LineCurve
+   Linetype
+   Material
+   Mesh
+   MeshFaceList
+   MeshingParameters
+   MeshNormalList
+   MeshTextureCoordinateList
+   MeshTopologyEdgeList
+   MeshVertexColorList
+   MeshVertexList
+   ModelComponent
+   NurbsCurve
+   NurbsCurveKnotList
+   NurbsCurvePointList
+   NurbsSurface
+   NurbsSurfaceKnotList
+   NurbsSurfacePointList
+   ObjectAttributes
+   ObjectTable
+   PhysicallyBasedMaterial
+   Plane
+   PlaneSurface
+   Point
+   Point2d
+   Point2f
+   Point3d
+   Point3dList
+   Point3f
+   Point4d
+   PointCloud
+   PointCloudItem
+   PointGrid
+   PolyCurve
+   Polyline
+   PolylineCurve
+   PostEffect
+   RenderChannels
+   RenderContent
+   RenderEnvironment
+   RenderEnvironments
+   RenderMaterial
+   RenderSettings
+   RenderTexture
+   RevSurface
+   RhinoDoc
+   SafeFrame
+   ShutLining
+   ShutLiningCurve
+   Skylight
+   Sphere
+   SubD
+   SubDEdge
+   SubDFace
+   SubDVertex
+   Sun
+   Surface
+   SurfaceProxy
+   Text
+   TextDot
+   Texture
+   TextureMapping
+   Thickening
+   Transform
+   Vector2d
+   Vector3d
+   Vector3f
+   ViewInfo
+   ViewportInfo
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

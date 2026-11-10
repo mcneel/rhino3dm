@@ -1,0 +1,19 @@
+rhino3dm.Arrowhead
+==================
+
+.. py:class:: rhino3dm.Arrowhead
+
+   Arrowhead used by annotation
+
+
+   .. py:method:: GetPoints(arrowType: DimensionStyle) -> list[Point2d]
+      :staticmethod:
+
+
+      Gets the outline points of a built-in arrowhead shape at size 1, in the arrowhead's own coordinates (the triangle shapes have their tip at the origin).
+
+      :param arrowType: The arrowhead shape.
+
+      :returns: The outline points; empty for ``ArrowType.None`` and ``ArrowType.UserBlock``.
+
+

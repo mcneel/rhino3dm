@@ -15,26 +15,25 @@ endif()
 
 if (${RHINO3DM_PY})
   message("Python Compile")
-  if(PYTHON_BINDING_LIB STREQUAL "NANOBIND")
-    message("Using nanobind")
-    add_compile_definitions( NANOBIND )
-    if (CMAKE_VERSION VERSION_LESS 3.18)
-      set(DEV_MODULE Development)
-    else()
-      set(DEV_MODULE Development.Module)
-    endif()
-    find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
-
-    if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-      set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
-      set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-    endif()
-    
-    add_subdirectory(lib/nanobind)
+  # Python is nanobind (M2, docs/vnext/nanobind-port.md)
+  if (CMAKE_VERSION VERSION_LESS 3.18)
+    set(DEV_MODULE Development)
   else()
-    message("Using pybind11")
-    add_subdirectory(lib/pybind11)
+    set(DEV_MODULE Development.Module)
   endif()
+  # Development.SABIModule (CMake 3.26+): what nanobind's STABLE_ABI needs to build an abi3 module
+  # on Python 3.12+; OPTIONAL, so 3.10 / 3.11 (no abi3 for them) still configure
+  if (NOT CMAKE_VERSION VERSION_LESS 3.26)
+    set(SABI_MODULE OPTIONAL_COMPONENTS Development.SABIModule)
+  endif()
+  find_package(Python 3.10 COMPONENTS Interpreter ${DEV_MODULE} ${SABI_MODULE} REQUIRED)
+
+  if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+  endif()
+  
+  add_subdirectory(lib/nanobind)
 endif()
 
 if (NODE)
@@ -47,9 +46,17 @@ if (MODULE)
   message("MODULE evaluates to True")
 endif()
 
-# Add draco add_library
-include_directories(${PROJECT_NAME} PUBLIC lib/draco/src ${CMAKE_BINARY_DIR})
+# Draco: only the mesh / point-cloud encode-decode subset (bnd_draco.cpp and RhinoCommon's c/draco.cpp
+# use nothing else), listed by tools/dev/draco_subset.py; lib/draco_config supplies draco_features.h
+# (Draco's own CMake would generate it). The src/lib/draco submodule stays as the source.
+include("${CMAKE_CURRENT_SOURCE_DIR}/draco_sources.cmake")
+include_directories(${draco_subset_INCLUDE})
+add_library(draco_subset STATIC ${draco_subset_SRC})
+set_target_properties(draco_subset PROPERTIES POSITION_INDEPENDENT_CODE ON
+  CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
 
+# the bindings (M3 layout): per class, bnd_<class>_gen.* (tools/generate/bnd_gen.py) beside the
+# hand-maintained bnd_<class>.*, plus the core (bindings.*, bnd_common.*, ...)
 file(GLOB bindings_SRC "bindings/*.h" "bindings/*.cpp")
 file(GLOB zlib_SRC "lib/opennurbs/zlib/*.h" "lib/opennurbs/zlib/*.c")
 
@@ -81,11 +88,10 @@ if(${RHINO3DM_JS})
   # (MDN browser-compat-data, checked 2026-10-07): Chrome 133, Firefox 134,
   # Node 24; Safari still Technology Preview only.
   #
-  # WASM64 is the DEFAULT as of 9.0 (script/setup.py passes -D WASM64=TRUE unless
-  # --wasm32 is given). This is not a preference: opennurbs 9.x packs a type tag
-  # into the low bits of SubD component pointers and requires 64-bit pointers, so
-  # a wasm32 build does not compile. Awaiting RH3DM-215; once that is resolved the
-  # default should be revisited, since Safari and Node < 24 cannot run memory64.
+  # wasm32 is the DEFAULT again since 9.2, as in 8.x (script/setup.py passes
+  # -D WASM64=TRUE only with --wasm64): it runs in every browser and on Node 22,
+  # and it is faster than memory64. The release ships memory64 in the package's
+  # wasm64/ folder. opennurbs supports wasm32 since RH-100167 (RH3DM-215).
   if(WASM64)
     message("WASM64 (memory64) build")
     # -sMEMORY64 is a codegen/target flag (wasm32 -> wasm64): it must be applied
@@ -105,8 +111,18 @@ if(${RHINO3DM_JS})
   # compile flags so every object doesn't emit a "linker setting ignored during
   # compilation" / "linker input unused" warning.
   set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sMODULARIZE=1 -sEXPORT_NAME=rhino3dm -sALLOW_MEMORY_GROWTH=1 -lembind")
+  # C++ exceptions as JS errors (Luis, 2026-10-17): without exception support a C++ throw -- every
+  # RhinoCommon guard (an index out of range), a dispatcher's "no overload matches" -- ABORTED the
+  # whole module. WebAssembly exception handling (Chrome 95, Firefox 100, Safari 15.2, Node 17)
+  # raises a catchable error instead; the helpers let JS read its message (getExceptionMessage).
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fwasm-exceptions")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fwasm-exceptions")
+  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fwasm-exceptions -sEXPORTED_RUNTIME_METHODS=getExceptionMessage,incrementExceptionRefcount,decrementExceptionRefcount")
   if(MODULE)
-    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sEXPORT_ES6=1")
+    # the ES module is the browser build (package.json "browser"/"import" exports; Node gets
+    # rhino3dm.js): without Node support it has no `node:` or `ws` imports, which bundlers
+    # (webpack 5) cannot resolve for the web. Its .wasm is byte-identical to rhino3dm.js's.
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sEXPORT_ES6=1 -sENVIRONMENT=web,worker")
   endif()
 endif()
 
@@ -145,8 +161,38 @@ add_definitions(-DOPENNURBS_ZLIB_LIB_DIR)
 # yields a malformed string -> MSVC C4081). The native librhino3dm_native build already
 # defines this; mirror it here for the JS/Python build.
 add_definitions(-DON_CMAKE_BUILD)
+# No fused multiply-add contraction: the bindings must reproduce RhinoCommon's (.NET) results
+# bit for bit (tests/parity), and a contracted a*b+c rounds once instead of twice. GCC on aarch64
+# and Apple clang contract by default; MSVC does not unless /fp:contract
+if(NOT MSVC)
+  add_compile_options(-ffp-contract=off)
+endif()
 add_definitions(-DUNICODE)
 add_definitions(-DON_INCLUDE_DRACO)
+# The generated bindings call the flat C layer (RhinoCommon's c/), so those C
+# translation units compile INTO the module. RHINO3DM_BUILD is per-source: the
+# C layer needs it, nothing else does.
+# The C-layer files the generated code needs are listed by the generator
+# (bindings/clayer_sources_gen.cmake): the files DEFINING every flat C function
+# it calls, plus the transitive closure of free-function helpers those call
+# (struct converters etc.). Only CLASS-based helpers, which a source scan
+# cannot follow, are listed here.
+include("${CMAKE_CURRENT_SOURCE_DIR}/bindings/clayer_sources_gen.cmake")
+set(pilot_clayer_SRC ${generated_clayer_SRC}
+  "${CMAKE_CURRENT_SOURCE_DIR}/librhino3dm_native/stringholder.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/librhino3dm_native/on_progress_reporter.cpp")
+list(REMOVE_DUPLICATES pilot_clayer_SRC)
+# base64.cpp: the C layer's copy (reached through draco.cpp, G107) and the hand bindings' copy
+# (bindings/base64.cpp) define the same functions -- the module links the hand bindings' one
+list(REMOVE_ITEM pilot_clayer_SRC "${CMAKE_CURRENT_SOURCE_DIR}/librhino3dm_native/base64.cpp")
+# RhinoCommon's c/draco.cpp (synced verbatim but for include paths) defines classes named BND_Draco and
+# BND_DracoCompressionOptions; the second is also the generated binding of RhinoCommon's
+# DracoCompressionOptions. Compile the C layer's under other names (its exports are extern "C"; callers
+# hold opaque pointers) -- the generator reads the C signatures with the same names
+# (tools/generate/gen_registry.py C_CLASS_RENAMES).
+set_property(SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/librhino3dm_native/draco.cpp" APPEND PROPERTY COMPILE_DEFINITIONS
+  BND_Draco=RH3DM_CL_Draco BND_DracoCompressionOptions=RH3DM_CL_DracoCompressionOptions)
+
 if(${RHINO3DM_JS})
   # opennurbs (>= 8.32) is emscripten-aware: it auto-defines ON_RUNTIME_WASM,
   # ON_LITTLE_ENDIAN, and selects ON_64BIT_RUNTIME / ON_32BIT_RUNTIME from the
@@ -155,24 +201,26 @@ if(${RHINO3DM_JS})
 
   set(CMAKE_EXECUTABLE_SUFFIX ".js")
 
-  add_subdirectory(lib/draco)
-  add_executable(rhino3dm ${bindings_SRC} ${zlib_SRC} ${opennurbs_SRC} ${uuid_SRC})
-  target_link_libraries( rhino3dm ${PROJECT_SOURCE_DIR}/build/javascript/draco_wasm/libdraco.a)
+  set_property(SOURCE ${pilot_clayer_SRC} APPEND PROPERTY COMPILE_DEFINITIONS RHINO3DM_BUILD)
+
+  add_executable(rhino3dm ${bindings_SRC} ${zlib_SRC} ${opennurbs_SRC} ${uuid_SRC} ${pilot_clayer_SRC})
+  # what embind cannot express (G101: views hold their parent, static properties, for...of)
+  target_link_options(rhino3dm PRIVATE "--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/bindings/bnd_pre_gen.js"
+                                       "--post-js=${CMAKE_CURRENT_SOURCE_DIR}/bindings/bnd_post_gen.js")
+  set_property(TARGET rhino3dm APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/bindings/bnd_pre_gen.js")
+  set_property(TARGET rhino3dm APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/bindings/bnd_post_gen.js")
+  target_link_libraries(rhino3dm draco_subset)
 endif()
 
 if (${RHINO3DM_PY})
   if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_definitions(-DON_RUNTIME_LINUX)
     add_definitions(-DON_CLANG_CONSTRUCTOR_BUG)
-    if(PYTHON_BINDING_LIB STREQUAL "NANOBIND")
-      #need to build nanobind to link it?
-      nanobind_build_library(nanobind)
-      nanobind_add_module(_rhino3dm NB_STATIC ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC} ${uuid_SRC})
-      target_link_libraries(_rhino3dm PRIVATE nanobind-static)
-    else()
-      pybind11_add_module(_rhino3dm ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC} ${uuid_SRC})
-      target_link_libraries(_rhino3dm PRIVATE pybind11::module)
-    endif()
+    set_property(SOURCE ${pilot_clayer_SRC} APPEND PROPERTY COMPILE_DEFINITIONS RHINO3DM_BUILD)
+    # M2 (Luis 2026-11-03): one abi3 wheel for Python 3.12+ (nanobind applies STABLE_ABI only from
+    # 3.12) and the free-threaded build (FREE_THREADED applies only on a free-threaded interpreter)
+    nanobind_add_module(_rhino3dm NB_STATIC STABLE_ABI FREE_THREADED ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC} ${uuid_SRC} ${pilot_clayer_SRC})
+    # (nanobind_add_module links its own library: nanobind-static, or the abi3 / free-threaded variant)
     # Hide all symbols by default to prevent conflicts with other libraries (e.g., OpenVDB's zlib)
     set_target_properties(_rhino3dm PROPERTIES
       CXX_VISIBILITY_PRESET hidden
@@ -188,8 +236,6 @@ if (${RHINO3DM_PY})
     add_subdirectory(lib/opennurbs/freetype263 freetype263)
     target_include_directories(_rhino3dm PRIVATE lib/opennurbs/freetype263/include)
     target_link_libraries(_rhino3dm PRIVATE opennurbs_public_freetype ${CMAKE_DL_LIBS})
-    #pybind11_add_module(_rhino3dm ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC} ${uuid_SRC})
-    #target_link_libraries(_rhino3dm -luuid)
   else()
     add_library(zlib_static STATIC ${zlib_SRC})
     set_target_properties(zlib_static PROPERTIES 
@@ -203,15 +249,13 @@ if (${RHINO3DM_PY})
       C_VISIBILITY_PRESET hidden
       VISIBILITY_INLINES_HIDDEN ON
     )
-    if(PYTHON_BINDING_LIB STREQUAL "NANOBIND")
-      #need to build nanobind to link it?
-      nanobind_build_library(nanobind)
-      nanobind_add_module(_rhino3dm NB_STATIC ${bindings_SRC})
-      target_link_libraries(_rhino3dm PRIVATE nanobind-static)
-    else()
-      pybind11_add_module(_rhino3dm ${bindings_SRC})
-      target_link_libraries(_rhino3dm PRIVATE pybind11::module)
-    endif()
+    # the C layer the generated bindings call (M3: these targets had built only the old bindings;
+    # not yet built on macOS / Windows -- M4)
+    set_property(SOURCE ${pilot_clayer_SRC} APPEND PROPERTY COMPILE_DEFINITIONS RHINO3DM_BUILD)
+    # M2 (Luis 2026-11-03): one abi3 wheel for Python 3.12+ (nanobind applies STABLE_ABI only from
+    # 3.12) and the free-threaded build (FREE_THREADED applies only on a free-threaded interpreter)
+    nanobind_add_module(_rhino3dm NB_STATIC STABLE_ABI FREE_THREADED ${bindings_SRC} ${pilot_clayer_SRC})
+    # (nanobind_add_module links its own library: nanobind-static, or the abi3 / free-threaded variant)
     
     target_link_libraries(_rhino3dm PRIVATE zlib_static)
     target_link_libraries(_rhino3dm PRIVATE opennurbs_static)
@@ -223,13 +267,7 @@ if (${RHINO3DM_PY})
     )
   endif()
 
-  add_subdirectory(lib/draco)
-  if (MSVC)
-    target_link_libraries(_rhino3dm PRIVATE debug lib/draco/Debug/draco)
-    target_link_libraries(_rhino3dm PRIVATE optimized ${CMAKE_BINARY_DIR}/draco_static/Release/draco.lib)
-  else()
-    target_link_libraries(_rhino3dm PRIVATE draco_static)
-  endif()
+  target_link_libraries(_rhino3dm PRIVATE draco_subset)
 endif()
 
 if (MSVC)

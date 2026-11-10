@@ -1,0 +1,114 @@
+rhino3dm.RevSurface
+===================
+
+.. py:class:: rhino3dm.RevSurface
+
+   Bases: :py:obj:`Surface`
+
+
+   Represents a surface of revolution.
+
+   Revolutions can be incomplete (they can form arcs).
+
+
+   .. py:method:: AxisAndCurveCoplanar() -> bool
+
+      Detemines if the axis of revolution and the curve are co-planar.
+
+      :returns: true if the axis of revolution and the curve are co-planar, false otherwise.
+
+
+
+   .. py:method:: Create(revoluteCurve: Curve, axisOfRevolution: Line, startAngleRadians: float, endAngleRadians: float) -> RevSurface
+                  Create(revoluteCurve: Curve, axisOfRevolution: Line) -> RevSurface
+                  Create(revoluteLine: Line, axisOfRevolution: Line, startAngleRadians: float, endAngleRadians: float) -> RevSurface
+                  Create(revoluteLine: Line, axisOfRevolution: Line) -> RevSurface
+      :staticmethod:
+
+
+      Constructs a new surface of revolution from a generatrix line and an axis.
+
+      If the operation succeeds, results can be (truncated) cones, cylinders and circular hyperboloids.
+
+      :param revoluteLine: A generatrix.
+      :param axisOfRevolution: An axis.
+
+      :returns: A new surface of revolution, or null if any of the inputs is invalid or on error.
+
+
+
+   .. py:method:: CreateFromCone(cone: Cone) -> RevSurface
+      :staticmethod:
+
+
+      Constructs a new surface of revolution from the values of a cone.
+
+      :param cone: A cone.
+
+      :returns: A new surface of revolution, or null if any of the inputs is invalid or on error.
+
+
+
+   .. py:method:: CreateFromCylinder(cylinder: Cylinder) -> RevSurface
+      :staticmethod:
+
+
+      Constructs a new surface of revolution from the values of a cylinder.
+
+      :param cylinder: A cylinder.
+
+      :returns: A new surface of revolution, or null if any of the inputs is invalid or on error.
+
+
+
+   .. py:method:: CreateFromSphere(sphere: Sphere) -> RevSurface
+      :staticmethod:
+
+
+      Constructs a new surface of revolution from the values of a sphere.
+
+      :param sphere: A sphere.
+
+      :returns: A new surface of revolution, or null if any of the inputs is invalid or on error.
+
+
+
+   .. py:method:: CreateFromTorus(torus: Torus) -> RevSurface
+      :staticmethod:
+
+
+      Constructs a new surface of revolution from the values of a torus.
+
+      :param torus: A torus.
+
+      :returns: A new surface of revolution, or null if any of the inputs is invalid or on error.
+
+
+
+   .. py:property:: Angle
+      :type: Interval
+
+
+      Gets the start and end angles of revolution in radians. The interval angle must be increasing and satisfy RhinoMath.ZeroTolerance < Angle.Length<= 2.0 \* System.Math.PI.
+
+
+   .. py:property:: Axis
+      :type: Line
+
+
+      Gets the axis of revolution.
+
+
+   .. py:property:: Interval
+      :type: Interval
+
+
+      Interval specifies the parameterization for the angular parameter. Interval must be an increasing interval. The parameter Interval[0] corresponds to Angle[0] and the parameter Interval[1] corresponds to Angle[1].
+
+
+   .. py:property:: IsTransposed
+      :type: bool
+
+
+      If false, the "u" parameter is the angle parameter and the "v" parameter is the curve parameter. If true, the "u" parameter is the curve parameter and the "v" parameter is the angle parameter.
+

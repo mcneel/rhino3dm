@@ -1,0 +1,358 @@
+rhino3dm.File3dmObjectTable
+===========================
+
+.. py:class:: rhino3dm.File3dmObjectTable
+
+   Represents a simple object table for a file that is open externally.
+
+   This class mimics Rhino.DocObjects.Tables.ObjectTable while providing external access to the file.
+
+
+   .. py:method:: Add(item: File3dmObject) -> None
+                  Add(item: GeometryBase, attributes: ObjectAttributes | None) -> uuid.UUID
+
+      Duplicates the object, then adds a copy of the object to the document.
+
+      :param item: The item to duplicate and add.
+      :param attributes: The attributes to link with geometry.
+
+
+
+   .. py:method:: AddAngularDimension(dimension: AngularDimension, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddAngularDimension(dimension: AngularDimension) -> uuid.UUID
+
+      Adds a angular dimension object to the 3dm file object table.
+
+      :param dimension: Dimension object to add.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddArc(arc: Arc, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddArc(arc: Arc) -> uuid.UUID
+
+      Adds a curve object to the document representing an arc.
+
+      :param arc: An arc.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddBrep(brep: Brep, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddBrep(brep: Brep) -> uuid.UUID
+
+      Adds a brep object to Rhino.
+
+      :param brep: A duplicate of this brep is added to Rhino.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddCircle(circle: Circle, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddCircle(circle: Circle) -> uuid.UUID
+
+      Adds a curve object to the document representing a circle.
+
+      :param circle: A circle to add.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddCurve(curve: Curve, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddCurve(curve: Curve) -> uuid.UUID
+
+      Adds a curve object to the table.
+
+      :param curve: A curve to add.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddEllipse(ellipse: Ellipse, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddEllipse(ellipse: Ellipse) -> uuid.UUID
+
+      Adds a curve object to the document representing an ellipse.
+
+      :param ellipse: An ellipse to add.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddExtrusion(extrusion: Extrusion, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddExtrusion(extrusion: Extrusion) -> uuid.UUID
+
+      Adds an extrusion object to Rhino.
+
+      :param extrusion: A duplicate of this extrusion is added to Rhino.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddHatch(hatch: Hatch, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddHatch(hatch: Hatch) -> uuid.UUID
+
+      Adds a hatch to the document.
+
+      :param hatch: A hatch.
+
+      :returns: A unique identifier for the hatch, or ``Guid.Empty`` on failure.
+
+
+
+   .. py:method:: AddInstanceObject(instanceReference: InstanceReferenceGeometry, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddInstanceObject(instanceDefinitionIndex: int, instanceXform: Transform, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddInstanceObject(instanceReference: InstanceReferenceGeometry) -> uuid.UUID
+                  AddInstanceObject(instanceDefinitionIndex: int, instanceXform: Transform) -> uuid.UUID
+
+      Adds an instance reference geometry object to the table.
+
+      :param instanceDefinitionIndex: The index of the instance definition geometry object.
+      :param instanceXform: The transformation.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddLeader(text: str, plane: Plane, points: collections.abc.Sequence[Point2d], attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddLeader(text: str, plane: Plane, points: collections.abc.Sequence[Point2d]) -> uuid.UUID
+
+      Adds an annotation leader to the document.
+
+      :param text: The text.
+      :param plane: A plane.
+      :param points: A list, an array or any enumerable set of 2d points.
+
+      :returns: A unique identifier for the object; or ``Guid.Empty`` on failure.
+
+
+
+   .. py:method:: AddLine(from_: Point3d, to: Point3d, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddLine(line: Line, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddLine(from_: Point3d, to: Point3d) -> uuid.UUID
+                  AddLine(line: Line) -> uuid.UUID
+
+      Adds a line object to Rhino.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddLinearDimension(dimension: LinearDimension, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddLinearDimension(dimension: LinearDimension) -> uuid.UUID
+
+      Adds a linear dimension to the 3dm file object table.
+
+      :param dimension: A dimension.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddMesh(mesh: Mesh, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddMesh(mesh: Mesh) -> uuid.UUID
+
+      Adds a mesh object to Rhino.
+
+      :param mesh: A duplicate of this mesh is added to Rhino.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddOrdinateDimension(dimension: OrdinateDimension, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddOrdinateDimension(dimension: OrdinateDimension) -> uuid.UUID
+
+      Adds an ordinate dimension object to the 3dm file object table.
+
+      :param dimension: Dimension object to add.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddPoint(point: Point3d, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddPoint(point: Point3d) -> uuid.UUID
+                  AddPoint(point: Point3f) -> uuid.UUID
+                  AddPoint(point: Point3f, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddPoint(x: float, y: float, z: float) -> uuid.UUID
+
+      Adds a point object to the table.
+
+      :param x: X component of point coordinate.
+      :param y: Y component of point coordinate.
+      :param z: Z component of point coordinate.
+
+      :returns: id of new object.
+
+
+
+   .. py:method:: AddPointCloud(points: collections.abc.Sequence[Point3d], attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddPointCloud(cloud: PointCloud, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddPointCloud(points: collections.abc.Sequence[Point3d]) -> uuid.UUID
+                  AddPointCloud(cloud: PointCloud) -> uuid.UUID
+
+      Adds a point cloud object to the document.
+
+      :param cloud: PointCloud to add.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddPolyline(points: collections.abc.Sequence[Point3d], attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddPolyline(points: collections.abc.Sequence[Point3d]) -> uuid.UUID
+
+      Adds a polyline object to Rhino.
+
+      :param points: A list, an array or any enumerable set of ``Point3d``.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddRadialDimension(dimension: RadialDimension, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddRadialDimension(dimension: RadialDimension) -> uuid.UUID
+
+      Adds a radial dimension object to the 3dm file object table.
+
+      :param dimension: Dimension object to add.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddSphere(sphere: Sphere, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddSphere(sphere: Sphere) -> uuid.UUID
+
+      Adds a surface object to the document representing a sphere.
+
+      :param sphere: A sphere to add.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddSubD(subd: SubD, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddSubD(subd: SubD) -> uuid.UUID
+
+      Adds a SubD to the document
+
+      :param subd: the Subd to add
+
+      :returns: A unique identifier for the SubD, or ``Guid.Empty`` on failure
+
+
+
+   .. py:method:: AddSurface(surface: Surface, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddSurface(surface: Surface) -> uuid.UUID
+
+      Adds a surface object to Rhino.
+
+      :param surface: A duplicate of this surface is added to Rhino.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: AddText(text: str, plane: Plane, height: float, fontName: str, bold: bool, italic: bool, justification: TextJustification, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddText(text: str, plane: Plane, height: float, fontName: str, bold: bool, italic: bool, justification: TextJustification) -> uuid.UUID
+
+      Adds an annotation text object to the document.
+
+      :param text: Text string.
+      :param plane: Plane of text.
+      :param height: Height of text.
+      :param fontName: Name of FontFace.
+      :param bold: Bold flag.
+      :param italic: Italic flag.
+      :param justification: The justification of the text.
+
+      :returns: The Guid of the newly added object or Guid.Empty on failure.
+
+
+
+   .. py:method:: AddTextDot(dot: TextDot, attributes: ObjectAttributes | None) -> uuid.UUID
+                  AddTextDot(dot: TextDot) -> uuid.UUID
+                  AddTextDot(text: str, location: Point3d) -> uuid.UUID
+                  AddTextDot(text: str, location: Point3d, attributes: ObjectAttributes | None) -> uuid.UUID
+
+      Adds a text dot object to the table.
+
+      :param text: The text.
+      :param location: The location.
+      :param attributes: Attributes to link with curve.
+
+      :returns: A unique identifier for the object.
+
+
+
+   .. py:method:: Delete(item: File3dmObject | None) -> bool
+                  Delete(objectId: uuid.UUID) -> bool
+                  Delete(index: int) -> None
+
+      Flags a component as deleted.
+
+      :param index: The index of the item to flag.
+
+      :returns: True on success.
+
+
+
+   .. py:method:: Dump() -> str
+
+      Prepares a text dump of object table.
+
+      :returns: A string containing the dump.
+
+
+
+   .. py:method:: FindByGroup(group: Group) -> list[Any]
+
+      Finds all File3dmObject that are in a given group.
+
+      :param group: A group instance.
+
+      :returns: Array of objects that belong to the specified group or empty array if no objects could be found.
+
+      :raises ArgumentNullException: If group is null.
+
+
+
+   .. py:method:: FindId(id: uuid.UUID) -> File3dmObject
+
+      Uses the guid to find a model component. Deleted objects cannot be found by id. The guid is the value that is stored in the .Id property. In a single document, no two active objects have the same guid. If an object is replaced with a new object, then the guid persists. For example, if the \_Move command moves an object, then the moved object inherits its guid from the starting object. If the Copy command copies an object, then the copy gets a new guid. This guid persists through file saving/opening operations. This function will not find grip objects.
+
+      :param id: ID of model component to search for.
+
+      :returns: Reference to the rhino object with the objectId or null if no such object could be found.
+
+
+
+   .. py:method:: GetBoundingBox() -> BoundingBox
+
+      Gets the bounding box containing every object in this table.
+
+      :returns: The computed bounding box.
+
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.ModelGeometry``.
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Returns the total amount of items in the object table, including lights.
+

@@ -1,0 +1,333 @@
+rhino3dm.Mesh
+=============
+
+.. py:class:: rhino3dm.Mesh
+
+   Bases: :py:obj:`GeometryBase`
+
+
+   Represents a geometry type that is defined by vertices and faces.
+
+   This is often called a face-vertex mesh.
+
+
+   .. py:method:: Append(other: Mesh | None) -> None
+
+      Appends a copy of another mesh to this one and updates indices of appended mesh parts.
+
+      :param other: Mesh to append to this one.
+
+
+
+   .. py:method:: ClearSurfaceData() -> None
+
+      Removes surface parameters, curvature parameters and surface statistics from the mesh.
+
+
+
+   .. py:method:: ClearTextureData() -> None
+
+      Removes all texture coordinate information from this mesh.
+
+
+
+   .. py:method:: Compact() -> bool
+
+      Removes any unreferenced objects from arrays, re-indexes as needed and shrinks arrays to minimum required size.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: CopyFrom(other: Mesh) -> None
+
+      Copies mesh values into this mesh from another mesh.
+
+      :param other: The other mesh to copy from.
+
+      :raises ArgumentNullException: If other is null.
+
+
+
+   .. py:method:: CreateFromSubDControlNet(subd: SubD) -> Mesh
+      :staticmethod:
+
+
+      Create a mesh from a SubD control net
+
+      :returns: mesh representing control net on success, null on failure
+
+
+
+   .. py:method:: CreateFromSubDControlNetWithTextureCoordinates(subd: SubD) -> Mesh
+      :staticmethod:
+
+
+      Create a mesh from a SubD control net including texture coordinates
+
+      :returns: mesh representing control net on success, null on failure
+
+
+
+   .. py:method:: CreateFromSurfaceControlNet(surface: Surface) -> Mesh
+      :staticmethod:
+
+
+      Calculate a mesh representation of a surface's control net.
+
+      :param surface: The surface.
+
+      :returns: Mesh representing the surface control net on success, null on failure
+
+
+
+   .. py:method:: CreatePartitions(maximumVertexCount: int, maximumTriangleCount: int) -> bool
+
+      In ancient times (or modern smart phone times), some rendering engines were only able to process small batches of triangles and the CreatePartitions() function was provided to partition the mesh into subsets of vertices and faces that those rendering engines could handle.
+
+      :returns: true on success
+
+
+
+   .. py:method:: CreateQuickHull3D(points: collections.abc.Sequence[Point3d]) -> Mesh
+                  CreateQuickHull3D(pointCloud: PointCloud) -> Mesh
+      :staticmethod:
+
+
+      Attempts to create a 3d convex hull mesh from an input point cloud using the QuickHull algorithm. Hull faces whose shared edges are not clearly convex are merged, so faces of the resulting mesh may be triangles, quads, or larger convex polygons (returned as mesh ngons).
+
+      :param pointCloud: The point cloud to be covered with the convex hull. At least four points are required, and they must not be coincident, colinear, or coplanar.
+
+      :returns: A valid mesh if successful. If there were too few input points, or the input was degenerate (coincident, colinear, or coplanar), the result is null.
+
+
+
+   .. py:method:: DestroyPartition() -> None
+
+      Destroys mesh partition.
+
+
+
+   .. py:method:: DestroyTopology() -> None
+
+      Removes topology data, forcing all topology information to be recomputed.
+
+
+
+   .. py:method:: DestroyTree() -> None
+
+      Destroys the mesh vertex access tree.
+
+
+
+   .. py:method:: Duplicate() -> Mesh
+
+      Constructs a copy of this mesh. This is the same as ``DuplicateMesh``.
+
+      :returns: A mesh.
+
+
+
+   .. py:method:: DuplicateMesh() -> Mesh
+
+      Constructs a copy of this mesh. This is the same as ``Duplicate``.
+
+
+
+   .. py:method:: EvaluateMeshGeometry(surface: Surface) -> bool
+
+      If the mesh has SurfaceParameters, the surface is evaluated at these parameters and the mesh geometry is updated.
+
+      :param surface: An input surface.
+
+      :returns: true if the operation succeeded; false otherwise.
+
+
+
+   .. py:method:: Flip(vertexNormals: bool, faceNormals: bool, faceOrientation: bool, ngonsBoundaryDirection: bool) -> None
+                  Flip(vertexNormals: bool, faceNormals: bool, faceOrientation: bool) -> None
+
+      Reverses the direction of the mesh.
+
+      :param vertexNormals: If true, vertex normals will be reversed.
+      :param faceNormals: If true, face normals will be reversed.
+      :param faceOrientation: If true, face orientations will be reversed.
+
+
+
+   .. py:method:: GetCachedTextureCoordinates(file: File3dm, objectId: uuid.UUID, texture: Texture) -> CachedTextureCoordinates
+                  GetCachedTextureCoordinates(textureMappingId: uuid.UUID) -> CachedTextureCoordinates
+
+      Call this method to get cached texture coordinates for a texture mapping with the specified Id.
+
+      :param textureMappingId: Texture mapping Id
+
+      :returns: Object which allows access to coordinates and other props.
+
+
+
+   .. py:method:: GetNakedEdgePointStatus() -> list[bool]
+
+      Returns an array of Boolean values equal in length to the number of vertices in this mesh. Each value corresponds to a mesh vertex and is set to true if the vertex is not completely surrounded by faces.
+
+      :returns: An array of true/false flags that, at each index, reveals if the corresponding vertex is completely surrounded by faces.
+
+
+
+   .. py:method:: GetNgonAndFacesCount() -> int
+
+      Retrieves the count of items that ``GetNgonAndFacesEnumerable`` will provide.
+
+      :returns: The amount of faces that are not part of an ngon + the amount of ngons.
+
+
+
+   .. py:method:: InvalidateCachedTextureCoordinates(bOnlyInvalidateCachedSurfaceParameterMapping: bool) -> None
+
+      Invalidates all cached texture coordinates. Call this function when you have made changes that will affect the texture coordinates on the mesh.
+
+      :param bOnlyInvalidateCachedSurfaceParameterMapping: If true then only cached surface parameter mapping texture coordinates will be invalidated. Use this after making changes to the m\_S array.
+
+
+
+   .. py:method:: IsManifold() -> bool
+                  IsManifold(topologicalTest: bool) -> tuple[bool, bool, bool]
+
+      Gets a value indicating whether or not the mesh is manifold. A manifold mesh does not have any edge that borders more than two faces.
+
+      :param topologicalTest: If true, the query treats coincident vertices as the same.
+
+      :returns: true if every mesh "edge" has at most two adjacent faces.
+
+
+
+   .. py:method:: SetCachedTextureCoordinates(tm: TextureMapping, xf: Transform) -> tuple[Any, Ellipsis]
+
+
+   .. py:method:: SetCachedTextureCoordinatesFromMaterial(file: File3dm, objectId: uuid.UUID, material: Material) -> None
+
+      Sets up cached texture coordinate set for each texture in the material. Textures in the Material define which mapping channels are used and the object with the specified id in the file defines what texture mapping is used for each mapping channel. After this method is called all necessary texture coordinate sets are cached and correct texture coordinates for each texture can be fetched using GetCachedTextureCoordinates(File3dm file, Guid objectId, Rhino.DocObjects.Texture texture)
+
+      If any texture coordinates are already cached they will not be re-computed.
+
+      :param file: File that contains the object and its texture mappings
+      :param objectId: Id of the object in the file that defines texture mappings
+      :param material: Material with textures that define mapping channels
+
+
+
+   .. py:method:: SetSurfaceParametersFromTextureCoordinates() -> bool
+
+      If the mesh does not have surface evaluation parameters, has texture coordinates, and the surface parameters can be set in a way so the existing texture coordinates can be computed from the surface parameters, then this function sets the surface parameters. This is useful when meshes that have texture coordinates and do not have surface parameters want to set the surface parameters in a way so that the texture mapping of type TextureMappingType.SurfaceParameters will restore the texture coordinates.
+
+      :returns: true - successful false - failure - no changes made to the mesh
+
+
+
+   .. py:method:: SetTextureCoordinates(tm: TextureMapping, xf: Transform, lazy: bool) -> None
+                  SetTextureCoordinates(tm: TextureMapping, xf: Transform, lazy: bool, seamCheck: bool) -> None
+
+      Sets texture coordinates using the given texture mapping and transform.
+
+      :param tm: Texture mapping
+      :param xf: Transform to apply to the texture mapping
+      :param lazy: If true and the mesh's texture coordinates were already computed from this same mapping and transform, no calculation is performed. If false, texture coordinates are always recalculated.
+      :param seamCheck: If true then some mesh edges might be unwelded to better represent UV discontinuities in the texture mapping. This only happens for the following mappings: Box, Sphere, Cylinder
+
+
+
+   .. py:method:: SolidOrientation() -> int
+
+      Determines orientation of a "solid" mesh.
+
+      :returns: +1 = mesh is solid with outward facing normals.
+                -1 = mesh is solid with inward facing normals.
+                0 = mesh is not solid.
+
+
+
+   .. py:property:: Faces
+      :type: MeshFaceList
+
+
+      Gets access to the mesh face list.
+
+
+   .. py:property:: HasCachedTextureCoordinates
+      :type: bool
+
+
+      Will return true if SetCachedTextureCoordinates has been called; otherwise will return false.
+
+
+   .. py:property:: HasPrincipalCurvatures
+      :type: bool
+
+
+      HasPrincipalCurvatures
+
+
+   .. py:property:: IsClosed
+      :type: bool
+
+
+      Returns true if every mesh "edge" has two or more faces.
+
+
+   .. py:property:: IsOriented
+      :type: bool
+
+
+      Returns true if the mesh is manifold and every pair of faces that share an "edge" have compatible orientations.
+
+
+   .. py:property:: IsSolid
+      :type: bool
+
+
+      Returns true if the mesh is solid. A "solid" is a closed oriented manifold.
+
+
+   .. py:property:: Normals
+      :type: MeshVertexNormalList
+
+
+      Gets access to the vertex normal collection in this mesh.
+
+
+   .. py:property:: PartitionCount
+      :type: int
+
+
+      Number of partition information chunks stored on this mesh based on the last call to CreatePartitions
+
+
+   .. py:property:: TextureCoordinates
+      :type: MeshTextureCoordinateList
+
+
+      Gets access to the vertex texture coordinate collection in this mesh.
+
+
+   .. py:property:: TopologyEdges
+      :type: MeshTopologyEdgeList
+
+
+      Gets the ``Collections.MeshTopologyEdgeList`` object associated with this mesh.
+
+      This object stores edge connectivity.
+
+
+   .. py:property:: VertexColors
+      :type: MeshVertexColorList
+
+
+      Gets access to the (optional) vertex color collection in this mesh.
+
+
+   .. py:property:: Vertices
+      :type: MeshVertexList
+
+
+      Gets access to the vertices set of this mesh.
+

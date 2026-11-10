@@ -1,0 +1,77 @@
+rhino3dm.ManifestTable
+======================
+
+.. py:class:: rhino3dm.ManifestTable
+
+   Maintains an index to every model component that is in the 3dm file. This is the "more comprehensive" table that contains all objects in all other tables.
+
+
+   .. py:method:: ActiveObjectCount(type: ModelComponentType) -> int
+
+      Total number of items in the manifest, including deleted items.
+
+
+
+   .. py:method:: FindId(id: uuid.UUID, type: ModelComponentType) -> ModelComponent
+                  FindId(id: uuid.UUID) -> ModelComponent
+
+      Uses the guid to find a model component. Deleted objects cannot be found by id. The guid is the value that is stored in the .Id property. In a single document, no two active objects have the same guid. If an object is replaced with a new object, then the guid persists. For example, if the \_Move command moves an object, then the moved object inherits its guid from the starting object. If the Copy command copies an object, then the copy gets a new guid. This guid persists through file saving/opening operations. This function will not find grip objects.
+
+      :param id: ID of model component to search for.
+
+      :returns: Reference to the rhino object with the objectId or null if no such object could be found.
+
+
+
+   .. py:method:: FindIndex(index: int, type: ModelComponentType) -> ModelComponent
+
+      Uses the index to find a model component. The index is the value that is stored in the .Index property.
+
+      :param index: Index of model component to search for.
+      :param type: The type to be searched. Cannot be ``ModelComponentType.Unset``.
+
+      :returns: Reference to the rhino object or null if no such object could be found.
+
+
+
+   .. py:method:: FindName(name: str, type: ModelComponentType, parentId: object) -> ModelComponent
+
+      Uses the name to find a model component. The name is the value that is stored in the .Name property. Deleted objects have no name.
+
+      :param name: Name of model component to search for.
+      :param type: The type to be searched. Cannot be ``ModelComponentType.Unset``.
+
+      :returns: Reference to the rhino object or null if no such object could be found.
+
+
+
+   .. py:method:: GetEnumerator(type: ModelComponentType) -> ManifestTableIter
+
+      Returns an enumerators that yields all model components, including default ones, relating to a particular type.
+
+      :param type: The model component type.
+
+      :returns: An enumerator.
+
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.Mixed``.
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Total number of items in the manifest, including deleted items.
+
+
+   .. py:property:: LongCount
+      :type: int
+
+
+      Total number of items in the manifest, including deleted items.
+

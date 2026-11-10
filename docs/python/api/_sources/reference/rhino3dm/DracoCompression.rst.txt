@@ -1,0 +1,108 @@
+rhino3dm.DracoCompression
+=========================
+
+.. py:class:: rhino3dm.DracoCompression
+
+   Google Draco compression for mesh and point cloud data
+
+
+   .. py:method:: Compress(mesh: Mesh, options: DracoCompressionOptions | None) -> DracoCompression
+                  Compress(pointCloud: PointCloud, options: DracoCompressionOptions | None) -> DracoCompression
+                  Compress(mesh: Mesh) -> DracoCompression
+                  Compress(pointCloud: PointCloud) -> DracoCompression
+      :staticmethod:
+
+
+      Compress a point cloud
+
+      :param pointCloud: point cloud to compress
+
+      :returns: instance of class representing the compressed data
+
+
+
+   .. py:method:: DecompressBase64String(encoded: str) -> GeometryBase
+      :staticmethod:
+
+
+      Decompress base64 encoded version of Draco data into either a mesh or point cloud
+
+      :param encoded: compressed Draco data
+
+      :returns: Mesh or point cloud on success. null on failure
+
+
+
+   .. py:method:: DecompressByteArray(bytes: DracoCompression.DecompressByteArray.bytes) -> GeometryBase
+      :staticmethod:
+
+
+      Decompress data into either a mesh or point cloud.
+
+      :param bytes: compressed Draco data
+
+      :returns: Mesh or point cloud on success. null on failure
+
+
+
+   .. py:method:: DecompressFile(path: str) -> GeometryBase
+      :staticmethod:
+
+
+      Read compressed data from disk and decompress to RhinoCommon geometry
+
+      :param path: path to read from
+
+      :returns: Mesh or point cloud on success. null on failure
+
+
+
+   .. py:method:: ToBase64String() -> str
+
+      Convert byte array of Draco compressed data into a base64 encoded string
+
+
+
+   .. py:method:: ToByteArray() -> bytes
+
+      Gets the Draco compressed data as a byte array
+
+
+
+   .. py:method:: Write(path: str) -> bool
+
+      Write the compressed data to disk
+
+      :param path: path to write to
+
+      :returns: true on success
+
+
+
+   .. py:property:: NormalAttributePosition
+      :type: int
+
+
+      The attribute position for normals when compressed
+
+
+   .. py:property:: TextureCoordinatesAttributePosition
+      :type: int
+
+
+      The attribute position for texture coordinates when compressed
+
+
+   .. py:property:: VertexAttributePosition
+      :type: int
+
+
+      The attribute position for vertices when compressed
+
+
+   .. py:property:: VertexColorAttributePosition
+      :type: int
+
+
+      The attribute position for vertex colors when compressed
+

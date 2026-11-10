@@ -1,0 +1,32 @@
+rhino3dm.Centermark
+===================
+
+.. py:class:: rhino3dm.Centermark
+              Centermark(plane: Plane, centerPoint: Point3d, radius: float)
+
+   Bases: :py:obj:`Dimension`
+
+
+   Represents a center mark dimension.
+
+
+   .. py:method:: AdjustFromPoints(plane: Plane, centerPoint: Point3d) -> bool
+
+      Update dimension geometry from point locations.
+
+      :param plane: Dimension's plane.
+      :param centerPoint: Dimension's center point.
+
+      :returns: True if successful, false otherwise.
+
+
+
+   .. py:method:: GetDisplayLines(style: DimensionStyle, scale: float) -> tuple[bool, list[Line]]
+
+
+   .. py:property:: Radius
+      :type: float
+
+
+      Gets or sets the center mark's radius.
+

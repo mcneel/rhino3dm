@@ -1,0 +1,27 @@
+rhino3dm.Skylight
+=================
+
+.. py:class:: rhino3dm.Skylight
+              Skylight(src: Skylight)
+
+   .. py:property:: CustomEnvironment
+      :type: uuid.UUID
+
+
+
+   .. py:property:: CustomEnvironmentOn
+      :type: bool
+
+
+
+   .. py:property:: Enabled
+      :type: bool
+
+
+
+   .. py:property:: ShadowIntensity
+      :type: float
+
+
+      ShadowIntensity is currently unused.
+

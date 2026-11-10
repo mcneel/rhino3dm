@@ -1,0 +1,49 @@
+rhino3dm.File3dmEdgeSoftening
+=============================
+
+.. py:class:: rhino3dm.File3dmEdgeSoftening
+
+   Represents the edge softening attached to file3dm object attributes.
+
+
+   .. py:property:: Chamfer
+      :type: bool
+
+
+      Specifies whether to chamfer the edges.
+
+
+   .. py:property:: EdgeAngleThreshold
+      :type: float
+
+
+      Threshold angle (in degrees) which controls whether an edge is softened or not. The angle refers to the angles between the adjacent faces of an edge.
+
+
+   .. py:property:: Faceted
+      :type: bool
+
+
+      Specifies whether the edges are faceted.
+
+
+   .. py:property:: ForceSoftening
+      :type: bool
+
+
+      Specifies whether to soften edges despite too large a radius.
+
+
+   .. py:property:: On
+      :type: bool
+
+
+      Specifies whether edge softening is enabled or not.
+
+
+   .. py:property:: Softening
+      :type: float
+
+
+      The softening radius.
+

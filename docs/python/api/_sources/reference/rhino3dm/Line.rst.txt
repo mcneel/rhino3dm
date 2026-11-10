@@ -1,0 +1,263 @@
+rhino3dm.Line
+=============
+
+.. py:class:: rhino3dm.Line
+              Line(from_: Point3d, to: Point3d)
+              Line(start: Point3d, span: Vector3d)
+              Line(start: Point3d, direction: Vector3d, length: float)
+              Line(x0: float, y0: float, z0: float, x1: float, y1: float, z1: float)
+
+   Represents the value of start and end points in a single line segment.
+
+
+   .. py:method:: ClosestParameter(testPoint: Point3d) -> float
+
+      Finds the parameter on the infinite line segment that is closest to a test point.
+
+      :param testPoint: Point to project onto the line.
+
+      :returns: The parameter on the line that is closest to testPoint.
+
+
+
+   .. py:method:: ClosestPoint(testPoint: Point3d, limitToFiniteSegment: bool) -> Point3d
+
+      Finds the point on the (in)finite line segment that is closest to a test point.
+
+      :param testPoint: Point to project onto the line.
+      :param limitToFiniteSegment: If true, the projection is limited to the finite line segment.
+
+      :returns: The point on the (in)finite line that is closest to testPoint.
+
+
+
+   .. py:method:: DistanceTo(testPoint: Point3d, limitToFiniteSegment: bool) -> float
+
+      Compute the shortest distance between this line segment and a test point.
+
+      :param testPoint: Point for distance computation.
+      :param limitToFiniteSegment: If true, the distance is limited to the finite line segment.
+
+      :returns: The shortest distance between this line segment and testPoint.
+
+
+
+   .. py:method:: EpsilonEquals(other: Line, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: Equals(other: Line) -> bool
+
+      Determines whether a line has the same value as this line.
+
+      :param other: A line.
+
+      :returns: true if other has the same coordinates as this; otherwise false.
+
+
+
+   .. py:method:: Extend(startLength: float, endLength: float) -> bool
+
+      Extend the line by custom distances on both sides.
+
+      :param startLength: Distance to extend the line at the start point. Positive distance result in longer lines.
+      :param endLength: Distance to extend the line at the end point. Positive distance result in longer lines.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: ExtendThroughBox(box: BoundingBox) -> bool
+                  ExtendThroughBox(box: BoundingBox, additionalLength: float) -> bool
+                  ExtendThroughBox(box: Box) -> bool
+                  ExtendThroughBox(box: Box, additionalLength: float) -> bool
+
+      Ensure the line extends all the way through a box. Note, this does not result in the shortest possible line that overlaps the box.
+
+      :param box: Box to extend through.
+      :param additionalLength: Additional length to append at both sides of the line.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Flip() -> None
+
+      Flip the endpoints of the line segment.
+
+
+
+   .. py:method:: MaximumDistanceTo(testPoint: Point3d) -> float
+                  MaximumDistanceTo(testLine: Line) -> float
+
+      Finds the largest distance between this line as a finite segment and another finite segment.
+
+      :param testLine: A line to test.
+
+      :returns: The maximum distance.
+
+
+
+   .. py:method:: MinimumDistanceTo(testPoint: Point3d) -> float
+                  MinimumDistanceTo(testLine: Line) -> float
+
+      Finds the shortest distance between this line as a finite segment and another finite segment.
+
+      :param testLine: A line to test.
+
+      :returns: The minimum distance.
+
+
+
+   .. py:method:: PointAt(t: float) -> Point3d
+
+      Evaluates the line at the specified parameter.
+
+      :param t: Parameter to evaluate line segment at. Line parameters are normalized parameters.
+
+      :returns: The point at the specified parameter.
+
+
+
+   .. py:method:: PointAtLength(distance: float) -> Point3d
+
+      Computes a point located at a specific metric distance from the line origin (``From``).
+
+      If line start and end coincide, then the start point is always returned.
+
+      :param distance: A positive, 0, or a negative value that will be the distance from ``From``.
+
+      :returns: The newly found point.
+
+
+
+   .. py:method:: ToString() -> str
+
+      Constructs the string representation of this line, in the form "From,To".
+
+      :returns: A text string.
+
+
+
+   .. py:method:: Transform(xform: Transform) -> bool
+
+      Transform the line using a Transformation matrix.
+
+      :param xform: Transform to apply to this line.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: TryGetPlane() -> tuple[bool, Plane]
+
+      Gets a plane that contains the line. The origin of the plane is at the start of the line. If possible, a plane parallel to the world XY, YZ, or ZX plane is returned.
+
+      :returns: true on success.
+
+
+
+   .. py:property:: BoundingBox
+      :type: BoundingBox
+
+
+      Gets the line's 3d axis aligned bounding box.
+
+
+   .. py:property:: Direction
+      :type: Vector3d
+
+
+      Gets the direction of this line segment. The length of the direction vector equals the length of the line segment.
+
+
+   .. py:property:: From
+      :type: Point3d
+
+
+      Start point of line segment.
+
+
+   .. py:property:: FromX
+      :type: float
+
+
+      Gets or sets the X coordinate of the line From point.
+
+
+   .. py:property:: FromY
+      :type: float
+
+
+      Gets or sets the Y coordinate of the line From point.
+
+
+   .. py:property:: FromZ
+      :type: float
+
+
+      Gets or sets the Z coordinate of the line From point.
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Gets a value indicating whether or not this line is valid. Valid lines must have valid start and end points, and the points must not be equal.
+
+
+   .. py:property:: Length
+      :type: float
+
+
+      Gets or sets the length of this line segment. Note that a negative length will invert the line segment without making the actual length negative. The line From point will remain fixed when a new Length is set.
+
+
+   .. py:property:: To
+      :type: Point3d
+
+
+      End point of line segment.
+
+
+   .. py:property:: ToX
+      :type: float
+
+
+      Gets or sets the X coordinate of the line To point.
+
+
+   .. py:property:: ToY
+      :type: float
+
+
+      Gets or sets the Y coordinate of the line To point.
+
+
+   .. py:property:: ToZ
+      :type: float
+
+
+      Gets or sets the Z coordinate of the line To point.
+
+
+   .. py:property:: UnitTangent
+      :type: Vector3d
+
+
+      Gets the tangent of the line segment. Note that tangent vectors are always unit vectors.
+
+      Sets only the direction of the line, the length is maintained.
+
+
+   .. py:attribute:: Unset
+      :type:  Line
+      :value: Ellipsis
+
+
+      object, /) -> Line
+
+      :type: (arg
+

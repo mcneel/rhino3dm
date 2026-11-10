@@ -1,0 +1,54 @@
+rhino3dm.File3dmBitmapTable
+===========================
+
+.. py:class:: rhino3dm.File3dmBitmapTable
+
+   The bitmaps embedded in a .3dm file (rhino3dm only).
+
+
+   .. py:method:: Add(bitmap: Bitmap) -> Bitmap
+
+      Adds a copy of a bitmap to the model.
+
+      :param bitmap: The bitmap to add.
+
+      :returns: The model's copy, or None when the model does not take it.
+
+
+
+   .. py:method:: Delete(id: uuid.UUID) -> bool
+
+      Removes the bitmap with this id.
+
+      :param id: The bitmap's id.
+
+      :returns: True when a bitmap was removed.
+
+
+
+   .. py:method:: FindId(id: uuid.UUID) -> Bitmap
+
+      The bitmap with this id.
+
+      :param id: The bitmap's id.
+
+      :returns: The bitmap, or None when there is none.
+
+
+
+   .. py:method:: FindIndex(index: int) -> Bitmap
+
+      The bitmap at a position in the table (bitmaps have no model index: the position among the file's bitmaps).
+
+      :param index: 0 to ``Count - 1``.
+
+      :returns: The bitmap, or None when the index is out of range.
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      The number of bitmaps.
+

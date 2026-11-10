@@ -1,0 +1,38 @@
+rhino3dm.SubDEdgeTag
+====================
+
+.. py:class:: rhino3dm.SubDEdgeTag
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   ON\_SubDEdgeTag identifies the type of subdivision edge. Different tags use different subdivision algorithms to calculate the subdivision point.
+
+
+   .. py:attribute:: Crease
+      :value: 2
+
+
+      Both of the edge's vertices must be tagged as ON\_SubDVertexTag::Dart, ON\_SubDVertexTag::Crease, or ON\_SubDVertexTag::Corner. (The vertex tags can be different.) The edge can have any number of faces. The edge's subdivision point is (A1+A2)/2 where Ai = ON\_SubDEdge.Vertex(i)->ControlNetPoint().
+
+
+   .. py:attribute:: Smooth
+      :value: 1
+
+
+      At least one the edge's vertices must be tagged as ON\_SubDVertexTag::Smooth. The edge must have exactly two faces. The edge's subdivision point is (A1 + A2 + S(f1) + S(f2))/4, where Ai = ON\_SubDEdge.Vertex(i)->ControlNetPoint() and S(fi) = ON\_SubDEdge.Face(i)->SubdivisionPoint().
+
+
+   .. py:attribute:: SmoothX
+      :value: 4
+
+
+      This tag appears only on level 0 edges that have exactly two neighboring faces and both of the edge's vertices are tagged as ON\_SubDVertexTag::Dart, ON\_SubDVertexTag::Crease, or ON\_SubDVertexTag::Corner. The level 1 subdivision point for a level 0 edge tagged as ON\_SubDEdgeTag::SmoothX is the standard smooth edge subdivision point. When subdivided, the new subdivision vertex will be tagged as ON\_SubDVertexTag::Smooth and the subdivided edges will be tagged as ON\_SubDEdgeTag::Smooth. The tag ON\_SubDEdgeTag::SmoothX can only appear on a level 0 edge. This tag exists because the ON\_SubD subdivision algorithm requires any edge with both end vertices tagged as not smooth must be subdivided at its midpoint. Sector iterators treat "SmoothX" edges as smooth. Both edge m\_sector\_coefficient[] values must be set so the smooth subdivided edges will be valid.
+
+
+   .. py:attribute:: Unset
+      :value: 0
+
+
+      Not a valid edge tag and the default value for ON\_SubDEdge.m\_edge\_tag. This encourages developers to thoughtfully initialize ON\_SubDEdge.m\_edge\_tag. or use ON\_SubD.UpdateAllTagsAndSectorCoefficients() to automatically set the m\_edge\_tag values at an appropriate time.
+

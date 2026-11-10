@@ -1,0 +1,23 @@
+rhino3dm.BrepVertexList
+=======================
+
+.. py:class:: rhino3dm.BrepVertexList
+
+   Provides access to all the Vertices in a Brep object
+
+
+   .. py:method:: Add() -> BrepVertex
+                  Add(point: Point3d, vertexTolerance: float) -> BrepVertex
+
+      Create and add a new vertex to this list
+
+      :param vertexTolerance: Use RhinoMath.UnsetTolerance if you are unsure
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the number of brep vertices.
+

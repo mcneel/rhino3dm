@@ -1,0 +1,38 @@
+rhino3dm.TextureCombineMode
+===========================
+
+.. py:class:: rhino3dm.TextureCombineMode
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Determines how this texture is combined with others in a material's texture list.
+
+
+   .. py:attribute:: Blend
+      :value: 3
+
+
+      Blend texture with others in the material To "add" a texture, set BlendAmount = +1 To "subtract" a texture, set BlendAmount = -1
+
+
+   .. py:attribute:: Decal
+      :value: 2
+
+
+      Decal
+
+
+   .. py:attribute:: Modulate
+      :value: 1
+
+
+      Modulate with material diffuse color
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``TextureCombineMode.None`` is not Python syntax; ``TextureCombineMode['None']`` is the same member).
+

@@ -1,0 +1,38 @@
+rhino3dm.InstanceDefinitionUpdateType
+=====================================
+
+.. py:class:: rhino3dm.InstanceDefinitionUpdateType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   The possible relationships between the instance definition geometry and the archive containing the original definition.
+
+
+   .. py:attribute:: Embedded
+      :value: 1
+
+
+      This instance definition geometry was imported from another archive and is embedded. If the source archive changes, the user is asked if they want to update the instance definition.
+
+
+   .. py:attribute:: Linked
+      :value: 3
+
+
+      This instance definition geometry was imported from another archive and is not embedded. If the source archive changes, the instance definition is automatically updated. If the source archive is not available, the instance definition is not valid.
+
+
+   .. py:attribute:: LinkedAndEmbedded
+      :value: 2
+
+
+      This instance definition geometry was imported from another archive and is embedded. If the source archive changes, the instance definition is automatically updated. If the soruce archive is not available, the instance definition is still valid.
+
+
+   .. py:attribute:: Static
+      :value: 0
+
+
+      The Rhino user interface uses the term "Embedded" for Static update types. This instance definition is never updated. If m\_source\_archive is set, it records the origin of the instance definition geometry, but m\_source\_archive is never used to update the instance definition.
+

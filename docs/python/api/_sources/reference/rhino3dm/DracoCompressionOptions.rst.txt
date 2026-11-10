@@ -1,0 +1,63 @@
+rhino3dm.DracoCompressionOptions
+================================
+
+.. py:class:: rhino3dm.DracoCompressionOptions
+
+   Options for applying Draco compression
+
+
+   .. py:property:: CompressionLevel
+      :type: int
+
+
+      Compression level. 0 if fastest, but least compression. 10 is slowest, but best compression
+
+
+   .. py:property:: IncludeNormals
+      :type: bool
+
+
+      Include vertex normals in the compressed data.
+
+
+   .. py:property:: IncludeTextureCoordinates
+      :type: bool
+
+
+      Include texture coordinates in the compressed data.
+
+
+   .. py:property:: IncludeVertexColors
+      :type: bool
+
+
+      Include vertex colors in the compressed data.
+
+
+   .. py:property:: NormalQuantizationBits
+      :type: int
+
+
+      Sets the quantization compression options for normal values. The values will be quantized in a box defined by the maximum extent of the values. I.e., the actual precision of this option depends on the scale of the attribute values.
+
+
+   .. py:property:: PositionQuantizationBits
+      :type: int
+
+
+      Sets the quantization compression options for position values. The values will be quantized in a box defined by the maximum extent of the values. I.e., the actual precision of this option depends on the scale of the attribute values.
+
+
+   .. py:property:: TextureCoordintateQuantizationBits
+      :type: int
+
+
+      Sets the quantization compression options for texture coordinate values. The values will be quantized in a box defined by the maximum extent of the values. I.e., the actual precision of this option depends on the scale of the attribute values.
+
+
+   .. py:property:: VertexColorFormat
+      :type: DracoColorFormat
+
+
+      Color format of vertex colors in compressed data
+

@@ -1,0 +1,258 @@
+rhino3dm.Sphere
+===============
+
+.. py:class:: rhino3dm.Sphere
+              Sphere(center: Point3d, radius: float)
+              Sphere(equatorialPlane: Plane, radius: float)
+
+   Represents the plane and radius values of a sphere.
+
+
+   .. py:method:: ClosestParameter(testPoint: Point3d) -> tuple[bool, float, float]
+
+      Finds the angle parameters on this sphere that are closest to a test point.
+
+      :param testPoint: Point to project onto the sphere.
+
+      :returns: true on success, false on failure. This function will fail if the point it coincident with the sphere center.
+
+
+
+   .. py:method:: ClosestPoint(testPoint: Point3d) -> Point3d
+
+      Returns point on sphere that is closest to given point.
+
+      :param testPoint: Point to project onto Sphere.
+
+      :returns: Point on sphere surface closest to testPoint.
+
+
+
+   .. py:method:: Decode(jsonObject: dict[str, Any]) -> Sphere
+      :staticmethod:
+
+
+      The object a dict from ``Encode`` describes (rhino3dm only).
+
+      :param jsonObject: A dict as ``Encode`` returns it.
+
+
+
+   .. py:method:: Encode() -> dict[str, Any]
+
+      This object as a JSON-compatible dict (rhino3dm only; inverse: ``Decode``).
+
+      :returns: geometry and other objects are stored as their 3dm archive, base64 encoded, with the archive version.
+      :rtype: A dict of numbers and strings
+
+
+
+   .. py:method:: EpsilonEquals(other: Sphere, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: LatitudeDegrees(degrees: float) -> Circle
+
+      Computes the parallel at a specific latitude angle.
+
+      The angle is specified in degrees.
+
+      :param degrees: An angle in degrees for the meridian.
+
+      :returns: A circle.
+
+
+
+   .. py:method:: LatitudeRadians(radians: float) -> Circle
+
+      Computes the parallel at a specific latitude angle.
+
+      The angle is specified in radians.
+
+      :param radians: An angle in radians for the parallel.
+
+      :returns: A circle.
+
+
+
+   .. py:method:: LongitudeDegrees(degrees: float) -> Circle
+
+      Computes the meridian at a specific longitude angle.
+
+      The angle is specified in degrees.
+
+      :param degrees: An angle in degrees.
+
+      :returns: A circle.
+
+
+
+   .. py:method:: LongitudeRadians(radians: float) -> Circle
+
+      Computes the meridian at a specific longitude angle.
+
+      The angle is specified in radians.
+
+      :param radians: An angle in radians.
+
+      :returns: A circle.
+
+
+
+   .. py:method:: NormalAt(longitudeRadians: float, latitudeRadians: float) -> Vector3d
+
+      Computes the normal at a specific angular location on the sphere.
+
+      :param longitudeRadians: A number within the interval [0, 2pi].
+      :param latitudeRadians: A number within the interval [-pi/2, pi/2].
+
+      :returns: A vector.
+
+
+
+   .. py:method:: PointAt(longitudeRadians: float, latitudeRadians: float) -> Point3d
+
+      Evaluates the sphere at specific longitude and latitude angles.
+
+      :param longitudeRadians: A number within the interval [0, 2pi].
+      :param latitudeRadians: A number within the interval [-pi/2,pi/2].
+
+      :returns: A point value.
+
+
+
+   .. py:method:: Rotate(sinAngle: float, cosAngle: float, axisOfRotation: Vector3d) -> bool
+                  Rotate(angleRadians: float, axisOfRotation: Vector3d) -> bool
+                  Rotate(sinAngle: float, cosAngle: float, axisOfRotation: Vector3d, centerOfRotation: Point3d) -> bool
+                  Rotate(angleRadians: float, axisOfRotation: Vector3d, centerOfRotation: Point3d) -> bool
+
+      Rotates this sphere about a point and an axis.
+
+      :param angleRadians: Rotation angle (in Radians)
+      :param axisOfRotation: Axis of rotation.
+      :param centerOfRotation: Center of rotation.
+
+      :returns: true on success; false on failure.
+
+
+
+   .. py:method:: ToBrep() -> Brep
+
+      Converts this sphere is it Brep representation
+
+
+
+   .. py:method:: ToNurbsSurface() -> NurbsSurface
+
+      Converts this sphere to its NurbsSurface representation. This is synonymous with calling NurbsSurface.CreateFromSphere().
+
+      :returns: A nurbs surface representation of this sphere or null.
+
+
+
+   .. py:method:: ToRevSurface() -> RevSurface
+
+      Converts this Sphere to a RevSurface representation. This is synonymous with calling RevSurface.CreateFromSphere().
+
+      :returns: A surface of revolution representation of this sphere or null.
+
+
+
+   .. py:method:: Transform(xform: Transform) -> bool
+
+      Transforms this sphere. Note that non-similarity preserving transformations cannot be applied to a sphere as that would result in an ellipsoid.
+
+      :param xform: Transformation matrix to apply.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Translate(delta: Vector3d) -> bool
+
+      Moves this sphere along a motion vector.
+
+      :param delta: Motion vector.
+
+      :returns: true on success; false on failure.
+
+
+
+   .. py:property:: BoundingBox
+      :type: BoundingBox
+
+
+      Gets the world aligned bounding box for this Sphere. If the Sphere is Invalid, an empty box is returned.
+
+
+   .. py:property:: Center
+      :type: Point3d
+
+
+      Gets or sets the center point of the sphere.
+
+
+   .. py:property:: Diameter
+      :type: float
+
+
+      Gets or sets the diameter for this sphere.
+
+
+   .. py:property:: EquatorialPlane
+      :type: Plane
+
+
+      Gets or sets the Equatorial plane for this sphere.
+
+
+   .. py:property:: EquitorialPlane
+      :type: Plane
+
+
+      Gets or sets the Equatorial plane for this sphere.
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Gets a value that indicates whether the sphere is valid.
+
+
+   .. py:property:: NorthPole
+      :type: Point3d
+
+
+      Gets the point at the North Pole of the sphere.
+
+      This is the parameterization singularity that can be obtained, at V value +Math.Pi/2.
+
+
+   .. py:property:: Radius
+      :type: float
+
+
+      Gets or sets the Radius for this sphere.
+
+
+   .. py:property:: SouthPole
+      :type: Point3d
+
+
+      Gets the point at the South Pole of the sphere.
+
+      This is the parameterization singularity that can be obtained, at V value -Math.Pi/2.
+
+
+   .. py:attribute:: Unset
+      :type:  Sphere
+      :value: Ellipsis
+
+
+      object, /) -> Sphere
+
+      :type: (arg
+

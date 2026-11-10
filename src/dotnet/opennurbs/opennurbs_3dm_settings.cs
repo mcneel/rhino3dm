@@ -1211,6 +1211,7 @@ namespace Rhino.DocObjects
     internal EarthAnchorPoint(Rhino.FileIO.File3dm file3dm)
     {
       m_ptr = UnsafeNativeMethods.ONX_Model_GetEarthAnchorPoint(file3dm.ConstPointer());
+      GC.KeepAlive(file3dm);
     }
 
 #if RHINO_SDK
@@ -4150,6 +4151,29 @@ namespace Rhino.FileIO
         IntPtr ptr_this = NonConstPointer();
         UnsafeNativeMethods.ON_3dmSettings_SetInt(ptr_this,
           UnsafeNativeMethods.Settings3dmInt.IdefLinkUpdate, value);
+        GC.KeepAlive(this);
+      }
+    }
+
+    /// <summary>
+    /// The source new objects take their linetype from: the layer, the object or the parent.
+    /// </summary>
+    /// <since>9.2</since>
+    public DocObjects.ObjectLinetypeSource CurrentLinetypeSource
+    {
+      get
+      {
+        IntPtr ptr_const_this = ConstPointer();
+        int rc = UnsafeNativeMethods.ON_3dmSettings_GetInt(ptr_const_this,
+          UnsafeNativeMethods.Settings3dmInt.CurrentLinetypeSource);
+        GC.KeepAlive(this);
+        return (DocObjects.ObjectLinetypeSource)rc;
+      }
+      set
+      {
+        IntPtr ptr_this = NonConstPointer();
+        UnsafeNativeMethods.ON_3dmSettings_SetInt(ptr_this,
+          UnsafeNativeMethods.Settings3dmInt.CurrentLinetypeSource, (int)value);
         GC.KeepAlive(this);
       }
     }

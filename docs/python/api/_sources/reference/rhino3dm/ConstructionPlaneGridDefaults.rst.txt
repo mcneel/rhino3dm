@@ -1,0 +1,60 @@
+rhino3dm.ConstructionPlaneGridDefaults
+======================================
+
+.. py:class:: rhino3dm.ConstructionPlaneGridDefaults
+
+   Default grid settings for a document
+
+
+   .. py:property:: GridLineCount
+      :type: int
+
+
+      Number of grid lines in each direction
+
+
+   .. py:property:: GridSpacing
+      :type: float
+
+
+      Distance between grid lines
+
+
+   .. py:property:: GridThickFrequency
+      :type: int
+
+
+      all lines are thick, 2: every other is thick, ...
+
+      :type: This line frequency. 0
+
+      :type: none, 1
+
+
+   .. py:property:: ShowGrid
+      :type: bool
+
+
+      Show the grid
+
+
+   .. py:property:: ShowGridAxes
+      :type: bool
+
+
+      Show the grid axes
+
+
+   .. py:property:: ShowWorldAxes
+      :type: bool
+
+
+      Show the world axes icon in the corner
+
+
+   .. py:property:: SnapSpacing
+      :type: float
+
+
+      When grid snap is enabled, the distance between snap points. Typically this is the same distance as grid spacing
+

@@ -1,0 +1,45 @@
+rhino3dm.MeshType
+=================
+
+.. py:class:: rhino3dm.MeshType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated values for various mesh types.
+
+
+   .. py:attribute:: Analysis
+      :value: 2
+
+
+      The analysis mesh.
+
+
+   .. py:attribute:: Any
+      :value: 4
+
+
+      Any mesh that is available.
+
+
+   .. py:attribute:: Default
+      :value: 0
+
+
+      The default mesh.
+
+
+   .. py:attribute:: Preview
+      :value: 3
+
+
+      The preview mesh.
+
+
+   .. py:attribute:: Render
+      :value: 1
+
+
+      The render mesh.
+

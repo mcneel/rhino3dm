@@ -1,0 +1,31 @@
+rhino3dm.LineJoinStyle
+======================
+
+.. py:class:: rhino3dm.LineJoinStyle
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Shape to be used at the corners of curves
+
+
+   .. py:attribute:: Bevel
+      :value: 2
+
+
+      Beveled corner where outer edges are connected without extending
+
+
+   .. py:attribute:: Miter
+      :value: 1
+
+
+      Sharp corners where outer edges are extended to a point where they meet
+
+
+   .. py:attribute:: Round
+      :value: 0
+
+
+      Rounds corners
+

@@ -1,0 +1,121 @@
+rhino3dm.Continuity
+===================
+
+.. py:class:: rhino3dm.Continuity
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Provides enumerated values for continuity along geometry, such as continuous first derivative or continuous unit tangent and curvature.
+
+
+   .. py:attribute:: C0_continuous
+      :value: 1
+
+
+      Test for parametric continuity. In particular, all types of curves are considered infinitely continuous at the start/end of the evaluation domain.
+
+      :type: Continuous Function
+
+
+   .. py:attribute:: C0_locus_continuous
+      :value: 6
+
+
+      Continuity tests using the following enum values are identical to tests using the preceding enum values on the INTERIOR of a curve's domain. At the END of a curve a "locus" test is performed in place of a parametric test. In particular, at the END of a domain, all open curves are locus discontinuous. At the END of a domain, all closed curves are at least C0\_locus\_continuous. By convention all Curves are considered locus continuous at the START of the evaluation domain. This convention is not strictly correct, but it was adopted to make iterative kink finding tools easier to use and so that locus discontinuities are reported once at the end parameter of a curve rather than twice.
+
+      :type: Locus continuous function
+
+
+   .. py:attribute:: C1_continuous
+      :value: 2
+
+
+      Test for parametric continuity. In particular, all types of curves are considered infinitely continuous at the start/end of the evaluation domain.
+
+      :type: Continuous first derivative
+
+
+   .. py:attribute:: C1_locus_continuous
+      :value: 7
+
+
+      Continuity tests using the following enum values are identical to tests using the preceding enum values on the INTERIOR of a curve's domain. At the END of a curve a "locus" test is performed in place of a parametric test. In particular, at the END of a domain, all open curves are locus discontinuous. At the END of a domain, all closed curves are at least C0\_locus\_continuous. By convention all Curves are considered locus continuous at the START of the evaluation domain. This convention is not strictly correct, but it was adopted to make iterative kink finding tools easier to use and so that locus discontinuities are reported once at the end parameter of a curve rather than twice.
+
+      :type: Locus continuous first derivative
+
+
+   .. py:attribute:: C2_continuous
+      :value: 3
+
+
+      Test for parametric continuity. In particular, all types of curves are considered infinitely continuous at the start/end of the evaluation domain.
+
+      :type: Continuous first derivative and second derivative
+
+
+   .. py:attribute:: C2_locus_continuous
+      :value: 8
+
+
+      Continuity tests using the following enum values are identical to tests using the preceding enum values on the INTERIOR of a curve's domain. At the END of a curve a "locus" test is performed in place of a parametric test. In particular, at the END of a domain, all open curves are locus discontinuous. At the END of a domain, all closed curves are at least C0\_locus\_continuous. By convention all Curves are considered locus continuous at the START of the evaluation domain. This convention is not strictly correct, but it was adopted to make iterative kink finding tools easier to use and so that locus discontinuities are reported once at the end parameter of a curve rather than twice.
+
+      :type: Locus continuous first and second derivative
+
+
+   .. py:attribute:: Cinfinity_continuous
+      :value: 11
+
+
+      Analytic discontinuity. Cinfinity\_continuous is a euphemism for "at a knot".
+
+
+   .. py:attribute:: G1_continuous
+      :value: 4
+
+
+      Test for parametric continuity. In particular, all types of curves are considered infinitely continuous at the start/end of the evaluation domain.
+
+      :type: Continuous unit tangent
+
+
+   .. py:attribute:: G1_locus_continuous
+      :value: 9
+
+
+      Continuity tests using the following enum values are identical to tests using the preceding enum values on the INTERIOR of a curve's domain. At the END of a curve a "locus" test is performed in place of a parametric test. In particular, at the END of a domain, all open curves are locus discontinuous. At the END of a domain, all closed curves are at least C0\_locus\_continuous. By convention all Curves are considered locus continuous at the START of the evaluation domain. This convention is not strictly correct, but it was adopted to make iterative kink finding tools easier to use and so that locus discontinuities are reported once at the end parameter of a curve rather than twice.
+
+      :type: Locus continuous unit tangent
+
+
+   .. py:attribute:: G2_continuous
+      :value: 5
+
+
+      Test for parametric continuity. In particular, all types of curves are considered infinitely continuous at the start/end of the evaluation domain.
+
+      :type: Continuous unit tangent and curvature
+
+
+   .. py:attribute:: G2_locus_continuous
+      :value: 10
+
+
+      Continuity tests using the following enum values are identical to tests using the preceding enum values on the INTERIOR of a curve's domain. At the END of a curve a "locus" test is performed in place of a parametric test. In particular, at the END of a domain, all open curves are locus discontinuous. At the END of a domain, all closed curves are at least C0\_locus\_continuous. By convention all Curves are considered locus continuous at the START of the evaluation domain. This convention is not strictly correct, but it was adopted to make iterative kink finding tools easier to use and so that locus discontinuities are reported once at the end parameter of a curve rather than twice.
+
+      :type: Locus continuous unit tangent and curvature
+
+
+   .. py:attribute:: Gsmooth_continuous
+      :value: 12
+
+
+      Aesthetic discontinuity
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``Continuity.None`` is not Python syntax; ``Continuity['None']`` is the same member). There is no continuity.
+

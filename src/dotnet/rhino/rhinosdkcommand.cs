@@ -1262,6 +1262,7 @@ namespace Rhino.DocObjects
       IntPtr pThis = NonConstPointer();
       IntPtr pConstObjRef = value.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoHistory_SetObjRef(pThis, id, pConstObjRef);
+      GC.KeepAlive(value);
       GC.KeepAlive(this);
       return rc;
     }
@@ -1271,6 +1272,7 @@ namespace Rhino.DocObjects
       IntPtr pThis = NonConstPointer();
       IntPtr pConstObjRef = objref.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoHistory_SetPoint3dOnObject(pThis, id, pConstObjRef, value);
+      GC.KeepAlive(objref);
       GC.KeepAlive(this);
       return rc;
     }
@@ -1300,6 +1302,7 @@ namespace Rhino.DocObjects
       IntPtr pThis = NonConstPointer();
       IntPtr pConstCurve = value.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoHistory_SetCurve(pThis, id, pConstCurve);
+      GC.KeepAlive(value);
       GC.KeepAlive(this);
       return rc;
     }
@@ -1309,6 +1312,7 @@ namespace Rhino.DocObjects
       IntPtr pThis = NonConstPointer();
       IntPtr pConstSurface = value.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoHistory_SetSurface(pThis, id, pConstSurface);
+      GC.KeepAlive(value);
       GC.KeepAlive(this);
       return rc;
     }
@@ -1318,6 +1322,7 @@ namespace Rhino.DocObjects
       IntPtr pThis = NonConstPointer();
       IntPtr pConstBrep = value.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoHistory_SetBrep(pThis, id, pConstBrep);
+      GC.KeepAlive(value);
       GC.KeepAlive(this);
       return rc;
     }
@@ -1327,6 +1332,7 @@ namespace Rhino.DocObjects
       IntPtr pThis = NonConstPointer();
       IntPtr pConstMesh = value.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoHistory_SetMesh(pThis, id, pConstMesh);
+      GC.KeepAlive(value);
       GC.KeepAlive(this);
       return rc;
     }

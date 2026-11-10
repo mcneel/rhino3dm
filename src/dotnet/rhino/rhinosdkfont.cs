@@ -536,7 +536,9 @@ namespace Rhino.DocObjects.Tables
     /// <since>6.0</since>
     public int FindOrCreate(string face, bool bold, bool italic, DimensionStyle template_style)
     {
-      return UnsafeNativeMethods.CRhinoDimStyleTable_FindOrCreate(Document.RuntimeSerialNumber, face, bold, italic, template_style.ConstPointer());
+      int rc = UnsafeNativeMethods.CRhinoDimStyleTable_FindOrCreate(Document.RuntimeSerialNumber, face, bold, italic, template_style.ConstPointer());
+      GC.KeepAlive(template_style);
+      return rc;
     }
 
 #region enumerator

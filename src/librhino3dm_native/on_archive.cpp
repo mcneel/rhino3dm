@@ -2947,6 +2947,31 @@ RH_C_FUNCTION int ONX_Model_AddMaterial(ONX_Model* pModel, ON_Material* material
   return material_index;
 }
 
+// The index of the line pattern the attributes resolve to: a model line pattern (>= 0) or a
+// built-in one (< 0). Anything that is not a line pattern resolves to ON_Linetype::Continuous.
+RH_C_FUNCTION int ONX_Model_LinePatternIndexFromAttributes(const ONX_Model* pConstModel, const ON_3dmObjectAttributes* pConstAttributes)
+{
+  if (nullptr == pConstModel || nullptr == pConstAttributes)
+    return ON_Linetype::Continuous.Index();
+  return ON_Linetype::FromModelComponentRef(pConstModel->LinePatternFromAttributes(*pConstAttributes), &ON_Linetype::Continuous)->Index();
+}
+
+RH_C_FUNCTION int ONX_Model_LinePatternIndexFromLayerIndex(const ONX_Model* pConstModel, int layerIndex)
+{
+  if (nullptr == pConstModel)
+    return ON_Linetype::Continuous.Index();
+  return ON_Linetype::FromModelComponentRef(pConstModel->LinePatternFromLayerIndex(layerIndex), &ON_Linetype::Continuous)->Index();
+}
+
+// The index of the render material the attributes resolve to: a model material (>= 0) or a
+// system one (< 0, ON_Material::Default).
+RH_C_FUNCTION int ONX_Model_MaterialIndexFromAttributes(const ONX_Model* pConstModel, const ON_3dmObjectAttributes* pConstAttributes)
+{
+  if (nullptr == pConstModel || nullptr == pConstAttributes)
+    return ON_Material::Default.Index();
+  return ON_Material::FromModelComponentRef(pConstModel->MaterialFromAttributes(*pConstAttributes), &ON_Material::Default)->Index();
+}
+
 #if !defined(RHINO3DM_BUILD)
 RH_C_FUNCTION bool ONX_Model_GetPreviewImage(const ONX_Model* constModel, CRhinoDib* pRhinoDib)
 {

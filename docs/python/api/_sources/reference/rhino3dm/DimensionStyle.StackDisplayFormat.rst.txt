@@ -1,0 +1,31 @@
+rhino3dm.DimensionStyle.StackDisplayFormat
+==========================================
+
+.. py:class:: rhino3dm.DimensionStyle.StackDisplayFormat
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Format of stacked fractions
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``StackDisplayFormat.None`` is not Python syntax; ``StackDisplayFormat['None']`` is the same member). No stacking
+
+
+   .. py:attribute:: StackDiagonal
+      :value: 2
+
+
+      Stack with angled line
+
+
+   .. py:attribute:: StackHorizontal
+      :value: 1
+
+
+      Stack with horizontal line
+

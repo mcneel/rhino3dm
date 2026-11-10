@@ -1,0 +1,120 @@
+rhino3dm.NurbsCurvePointList
+============================
+
+.. py:class:: rhino3dm.NurbsCurvePointList
+
+   Provides access to the control points of a NURBS curve.
+
+
+   .. py:method:: ChangeEndWeights(w0: float, w1: float) -> bool
+
+      Use a combination of scaling and reparameterization to change the end weights to the specified values.
+
+      The domain, Euclidean locations of the control points, and locus of the curve do not change, but the weights, homogeneous CV values and internal knot values may change. If w0 and w1 are 1 and the curve is not rational, the curve is not changed.
+
+      :param w0: Weight for first control point.
+      :param w1: Weight for last control point.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: GetPoint(index: int) -> tuple[bool, Point3d]
+
+      Gets a world 3-D, or Euclidean, control point at the given index. The 4-D representation is (x, y, z, 1.0).
+
+      :param index: Index of control point to get.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: GetPoint4d(index: int) -> tuple[bool, Point4d]
+
+      Gets a homogeneous control point at the given index, where the 4-D representation is (x, y, z, w). The world 3-D, or Euclidean, representation is (x/w, y/w, z/w).
+
+      For expert use only. If you do not understand homogeneous coordinates, then use the override that returns world 3-D, or Euclidean, coordinates.
+
+      :param index: Index of control point to get.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: GetWeight(index: int) -> float
+
+      Gets the weight of a control point at the given index. Note, if the curve is non-rational, the weight will be 1.0.
+
+      :param index: Index of control point to get.
+
+      :returns: The control point weight if successful, Rhino.Math.UnsetValue otherwise.
+
+
+
+   .. py:method:: MakeNonRational() -> bool
+
+      Converts the curve to a Non-rational NURBS curve. Non-rational curves have unweighted control points.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: MakeRational() -> bool
+
+      Converts the curve to a Rational NURBS curve. Rational NURBS curves have weighted control points.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: SetPoint(index: int, point: Point3d) -> bool
+                  SetPoint(index: int, point: Point4d) -> bool
+                  SetPoint(index: int, point: Point3d, weight: float) -> bool
+                  SetPoint(index: int, x: float, y: float, z: float) -> bool
+                  SetPoint(index: int, x: float, y: float, z: float, weight: float) -> bool
+
+      Sets a homogeneous control point at the given index, where the 4-D representation is (x, y, z, w). The world 3-D, or Euclidean, representation is (x/w, y/w, z/w).
+
+      For expert use only. If you do not understand homogeneous coordinates, then use an override that accepts world 3-D, or Euclidean, coordinates as input.
+
+      :param index: Index of control point to set.
+      :param x: X coordinate of control point.
+      :param y: Y coordinate of control point.
+      :param z: Z coordinate of control point.
+      :param weight: Weight of control point.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: SetWeight(index: int, weight: float) -> bool
+
+      Sets the weight of a control point at the given index Note, if the curve is non-rational, it will be converted to rational.
+
+      :param index: Index of control point to set.
+      :param weight: The control point weight.
+
+      :returns: true if successful, false otherwise.
+
+
+
+   .. py:property:: ControlPolygonLength
+      :type: float
+
+
+      Gets the length of the polyline connecting all control points.
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the number of control points in this curve.
+
+
+   .. py:property:: PointSize
+      :type: int
+
+
+      Returns the control point size, or the number of doubles per control point. For rational curves, PointSize = Curve.Dimension + 1. For non-rational curves, PointSize = Curve.Dimension.
+

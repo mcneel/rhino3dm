@@ -1447,13 +1447,15 @@ namespace Rhino.DocObjects.Tables
     /// <since>9.0</since>
     public bool ModifySourceArchive(int idefIndex, FileReference sourceArchive, InstanceDefinitionUpdateType updateType, InstanceDefinitionLayerStyle layerStyle, bool quiet)
     {
-      return UnsafeNativeMethods.CRhinoInstanceDefinitionTable_SetSourceArchive2(
+      bool rc = UnsafeNativeMethods.CRhinoInstanceDefinitionTable_SetSourceArchive2(
         m_doc.RuntimeSerialNumber,
         idefIndex,
         sourceArchive.ConstPtr(),
         (int)updateType,
         (int)layerStyle,
         quiet);
+      GC.KeepAlive(sourceArchive);
+      return rc;
     }
 
     /// <summary>

@@ -390,26 +390,32 @@ namespace Rhino.Geometry
       }
     }
 
+    // RH-99722
+    private static bool MakeSmallCaps(double smallCapsScale)
+    {
+      return smallCapsScale > RhinoMath.ZeroTolerance && 1.0 != smallCapsScale;
+    }
+
     /// <summary>
     /// Creates planar breps from the outline curves.
     /// </summary>
-    /// <param name="dimstyle"></param>
-    /// <param name="smallCapsScale"> Set to create small caps out of lower case letters.</param>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
+    /// <param name="smallCapsScale"> Scale factor for drawing lower case letters as small caps, relative to the text height. Use 1.0 for no small caps.</param>
     /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
     /// <returns>An array of planar breps.</returns>
     /// <since>6.0</since>
     [ConstOperation]
     public Brep[] CreateSurfaces(DimensionStyle dimstyle, double smallCapsScale = 1.0, double spacing = 0.0)
     {
-      return CreateSurfaces(dimstyle, 1.0 != smallCapsScale, smallCapsScale, spacing);
+      return CreateSurfaces(dimstyle, MakeSmallCaps(smallCapsScale), smallCapsScale, spacing);
     }
 
     /// <summary>
     /// Creates planar breps from the outline curves.
     /// </summary>
-    /// <param name="dimstyle"></param>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
     /// <param name="makeSmallCaps"> Set to true to create small caps out of lower case letters.</param>
-    /// <param name="smallCapsScale"> Set to create small caps out of lower case letters.</param>
+    /// <param name="smallCapsScale"> If makeSmallCaps is true, the scale factor for lower case letters, relative to the text height. Values greater than 1.0 are allowed.</param>
     /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
     /// <returns>An array of planar breps.</returns>
     /// <since>9.0</since>
@@ -430,6 +436,7 @@ namespace Rhino.Geometry
         IntPtr ptr_breps = breps.NonConstPointer();
         var const_ptr_dimstyle = dimstyle.ConstPointer();
         UnsafeNativeMethods.RHC_RhinoGetPlanarBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, makeSmallCaps, smallCapsScale, spacing, ptr_breps, IntPtr.Zero);
+        GC.KeepAlive(dimstyle);
         GC.KeepAlive(this);
         return breps.ToNonConstArray();
       }
@@ -439,26 +446,26 @@ namespace Rhino.Geometry
     /// Creates planar Breps from text outline curves. Breps are grouped such that each element
     /// in the list being returned represents a single character.
     /// </summary>
-    /// <param name="dimstyle"></param>
-    /// <param name="smallCapsScale"></param>
-    /// <param name="spacing"></param>
-    /// <returns></returns>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
+    /// <param name="smallCapsScale"> Scale factor for drawing lower case letters as small caps, relative to the text height. Use 1.0 for no small caps.</param>
+    /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
+    /// <returns>A list of planar brep arrays, one array per character.</returns>
     /// <since>8.0</since>
     [ConstOperation]
     public System.Collections.Generic.List<Brep[]> CreateSurfacesGrouped(DimensionStyle dimstyle, double smallCapsScale, double spacing)
     {
-      return CreateSurfacesGrouped(dimstyle, 1.0 != smallCapsScale, smallCapsScale, spacing);
+      return CreateSurfacesGrouped(dimstyle, MakeSmallCaps(smallCapsScale), smallCapsScale, spacing);
     }
 
     /// <summary>
     /// Creates planar Breps from text outline curves. Breps are grouped such that each element
     /// in the list being returned represents a single character.
     /// </summary>
-    /// <param name="dimstyle"></param>
-    /// <param name="makeSmallCaps"></param>
-    /// <param name="smallCapsScale"></param>
-    /// <param name="spacing"></param>
-    /// <returns></returns>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
+    /// <param name="makeSmallCaps"> Set to true to create small caps out of lower case letters.</param>
+    /// <param name="smallCapsScale"> If makeSmallCaps is true, the scale factor for lower case letters, relative to the text height. Values greater than 1.0 are allowed.</param>
+    /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
+    /// <returns>A list of planar brep arrays, one array per character.</returns>
     /// <since>9.0</since>
     [ConstOperation]
     public System.Collections.Generic.List<Brep[]> CreateSurfacesGrouped(DimensionStyle dimstyle, bool makeSmallCaps, double smallCapsScale, double spacing)
@@ -510,28 +517,28 @@ namespace Rhino.Geometry
     /// Creates 3d Breps from text outline curves. Breps are grouped such that each element
     /// in the list being returned represents a single character.
     /// </summary>
-    /// <param name="dimstyle"></param>
-    /// <param name="smallCapsScale"></param>
-    /// <param name="height"></param>
-    /// <param name="spacing"></param>
-    /// <returns></returns>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
+    /// <param name="smallCapsScale"> Scale factor for drawing lower case letters as small caps, relative to the text height. Use 1.0 for no small caps.</param>
+    /// <param name="height"> Height in direction perpendicular to plane of text.</param>
+    /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
+    /// <returns>A list of brep arrays, one array per character.</returns>
     /// <since>8.0</since>
     [ConstOperation]
     public System.Collections.Generic.List<Brep[]> CreatePolysurfacesGrouped(DimensionStyle dimstyle, double smallCapsScale, double height, double spacing)
     {
-      return CreatePolysurfacesGrouped(dimstyle, 1.0 != smallCapsScale, smallCapsScale, height, spacing);
+      return CreatePolysurfacesGrouped(dimstyle, MakeSmallCaps(smallCapsScale), smallCapsScale, height, spacing);
     }
 
     /// <summary>
     /// Creates 3d Breps from text outline curves. Breps are grouped such that each element
     /// in the list being returned represents a single character.
     /// </summary>
-    /// <param name="dimstyle"></param>
-    /// <param name="makeSmallCaps"></param>
-    /// <param name="smallCapsScale"></param>
-    /// <param name="height"></param>
-    /// <param name="spacing"></param>
-    /// <returns></returns>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
+    /// <param name="makeSmallCaps"> Set to true to create small caps out of lower case letters.</param>
+    /// <param name="smallCapsScale"> If makeSmallCaps is true, the scale factor for lower case letters, relative to the text height. Values greater than 1.0 are allowed.</param>
+    /// <param name="height"> Height in direction perpendicular to plane of text.</param>
+    /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
+    /// <returns>A list of brep arrays, one array per character.</returns>
     /// <since>9.0</since>
     [ConstOperation]
     public System.Collections.Generic.List<Brep[]> CreatePolysurfacesGrouped(DimensionStyle dimstyle, bool makeSmallCaps, double smallCapsScale, double height, double spacing)
@@ -582,27 +589,27 @@ namespace Rhino.Geometry
     /// <summary>
     /// Creates breps from the outline curves with specified height.
     /// </summary>
-    /// <param name="dimstyle"></param>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
     /// <param name="height"> Height in direction perpendicular to plane of text.</param>
-    /// <param name="smallCapsScale"> Set to create small caps out of lower case letters.</param>
+    /// <param name="smallCapsScale"> Scale factor for drawing lower case letters as small caps, relative to the text height. Use 1.0 for no small caps.</param>
     /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
-    /// <returns>An array of planar breps.</returns>
+    /// <returns>An array of breps.</returns>
     /// <since>6.0</since>
     [ConstOperation]
     public Brep[] CreatePolySurfaces(DimensionStyle dimstyle, double height, double smallCapsScale = 1.0, double spacing = 0.0)
     {
-      return CreatePolySurfaces(dimstyle, height, 1.0 != smallCapsScale, smallCapsScale, spacing);
+      return CreatePolySurfaces(dimstyle, height, MakeSmallCaps(smallCapsScale), smallCapsScale, spacing);
     }
 
     /// <summary>
     /// Creates breps from the outline curves with specified height.
     /// </summary>
-    /// <param name="dimstyle"></param>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
     /// <param name="height"> Height in direction perpendicular to plane of text.</param>
     /// <param name="makeSmallCaps"> Set to true to create small caps out of lower case letters.</param>
-    /// <param name="smallCapsScale"> Set to create small caps out of lower case letters.</param>
+    /// <param name="smallCapsScale"> If makeSmallCaps is true, the scale factor for lower case letters, relative to the text height. Values greater than 1.0 are allowed.</param>
     /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
-    /// <returns>An array of planar breps.</returns>
+    /// <returns>An array of breps.</returns>
     /// <since>9.0</since>
     [ConstOperation]
     public Brep[] CreatePolySurfaces(DimensionStyle dimstyle, double height, bool makeSmallCaps, double smallCapsScale, double spacing)
@@ -621,6 +628,7 @@ namespace Rhino.Geometry
         IntPtr ptr_breps = breps.NonConstPointer();
         var const_ptr_dimstyle = dimstyle.ConstPointer();
         UnsafeNativeMethods.RHC_RhinoGet3dBrepsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, makeSmallCaps, smallCapsScale, height, spacing, ptr_breps, IntPtr.Zero);
+        GC.KeepAlive(dimstyle);
         GC.KeepAlive(this);
         return breps.ToNonConstArray();
       }
@@ -628,31 +636,31 @@ namespace Rhino.Geometry
 
 
     /// <summary>
-    /// Creates 3d Breps from text outline curves. Breps are grouped such that each element
+    /// Creates extrusions from text outline curves. Extrusions are grouped such that each element
     /// in the list being returned represents a single character.
     /// </summary>
-    /// <param name="dimstyle"></param>
-    /// <param name="smallCapsScale"></param>
-    /// <param name="height"></param>
-    /// <param name="spacing"></param>
-    /// <returns></returns>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
+    /// <param name="smallCapsScale"> Scale factor for drawing lower case letters as small caps, relative to the text height. Use 1.0 for no small caps.</param>
+    /// <param name="height"> Height in direction perpendicular to plane of text.</param>
+    /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
+    /// <returns>A list of extrusion arrays, one array per character.</returns>
     /// <since>8.0</since>
     [ConstOperation]
     public System.Collections.Generic.List<Extrusion[]> CreateExtrusionsGrouped(DimensionStyle dimstyle, double smallCapsScale, double height, double spacing)
     {
-      return CreateExtrusionsGrouped(dimstyle, 1.0 != smallCapsScale, smallCapsScale, height, spacing);
+      return CreateExtrusionsGrouped(dimstyle, MakeSmallCaps(smallCapsScale), smallCapsScale, height, spacing);
     }
 
     /// <summary>
-    /// Creates 3d Breps from text outline curves. Breps are grouped such that each element
+    /// Creates extrusions from text outline curves. Extrusions are grouped such that each element
     /// in the list being returned represents a single character.
     /// </summary>
-    /// <param name="dimstyle"></param>
-    /// <param name="makeSmallCaps"></param>
-    /// <param name="smallCapsScale"></param>
-    /// <param name="height"></param>
-    /// <param name="spacing"></param>
-    /// <returns></returns>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
+    /// <param name="makeSmallCaps"> Set to true to create small caps out of lower case letters.</param>
+    /// <param name="smallCapsScale"> If makeSmallCaps is true, the scale factor for lower case letters, relative to the text height. Values greater than 1.0 are allowed.</param>
+    /// <param name="height"> Height in direction perpendicular to plane of text.</param>
+    /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
+    /// <returns>A list of extrusion arrays, one array per character.</returns>
     /// <since>9.0</since>
     [ConstOperation]
     public System.Collections.Generic.List<Extrusion[]> CreateExtrusionsGrouped(DimensionStyle dimstyle, bool makeSmallCaps, 
@@ -704,27 +712,27 @@ namespace Rhino.Geometry
     /// <summary>
     /// Creates extrusions from the outline curves with specified height.
     /// </summary>
-    /// <param name="dimstyle"></param>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
     /// <param name="height"> Height in direction perpendicular to plane of text.</param>
-    /// <param name="smallCapsScale"> Set to create small caps out of lower case letters.</param>
+    /// <param name="smallCapsScale"> Scale factor for drawing lower case letters as small caps, relative to the text height. Use 1.0 for no small caps.</param>
     /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
-    /// <returns>An array of planar breps.</returns>
+    /// <returns>An array of extrusions.</returns>
     /// <since>6.0</since>
     [ConstOperation]
     public Extrusion[] CreateExtrusions(DimensionStyle dimstyle, double height, double smallCapsScale = 1.0, double spacing = 0.0)
     {
-      return CreateExtrusions(dimstyle, height, 1.0 != smallCapsScale, smallCapsScale, spacing);
+      return CreateExtrusions(dimstyle, height, MakeSmallCaps(smallCapsScale), smallCapsScale, spacing);
     }
 
     /// <summary>
     /// Creates extrusions from the outline curves with specified height.
     /// </summary>
-    /// <param name="dimstyle"></param>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
     /// <param name="height"> Height in direction perpendicular to plane of text.</param>
     /// <param name="makeSmallCaps"> Set to true to create small caps out of lower case letters.</param>
-    /// <param name="smallCapsScale"> Set to create small caps out of lower case letters.</param>
+    /// <param name="smallCapsScale"> If makeSmallCaps is true, the scale factor for lower case letters, relative to the text height. Values greater than 1.0 are allowed.</param>
     /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
-    /// <returns>An array of planar breps.</returns>
+    /// <returns>An array of extrusions.</returns>
     /// <since>9.0</since>
     [ConstOperation]
     public Extrusion[] CreateExtrusions(DimensionStyle dimstyle, double height, bool makeSmallCaps, double smallCapsScale, double spacing)
@@ -743,6 +751,7 @@ namespace Rhino.Geometry
         IntPtr ptr_extrusions = extrusions.NonConstPointer();
         var const_ptr_dimstyle = dimstyle.ConstPointer();
         UnsafeNativeMethods.RHC_RhinoGetExtrusionsFromText(const_ptr_parent, const_ptr_this, const_ptr_dimstyle, makeSmallCaps, smallCapsScale, height, spacing, ptr_extrusions, IntPtr.Zero);
+        GC.KeepAlive(dimstyle);
         GC.KeepAlive(this);
         return extrusions.ToNonConstArray();
       }
@@ -751,25 +760,25 @@ namespace Rhino.Geometry
     /// <summary>
     /// Returns the outline curves.
     /// </summary>
-    /// <param name="dimstyle"></param>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
     /// <param name="allowOpen"> Set to true to prevent forced closing of open curves retrieved from glyphs.</param>
-    /// <param name="smallCapsScale"> Set to create small caps out of lower case letters.</param>
+    /// <param name="smallCapsScale"> Scale factor for drawing lower case letters as small caps, relative to the text height. Use 1.0 for no small caps.</param>
     /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
     /// <returns>An array of curves that forms the outline or content of this text entity.</returns>
     /// <since>6.0</since>
     [ConstOperation]
     public Curve[] CreateCurves(DimensionStyle dimstyle, bool allowOpen, double smallCapsScale = 1.0, double spacing = 0.0)
     {
-      return CreateCurves(dimstyle, allowOpen, 1.0 == smallCapsScale, smallCapsScale, spacing);
+      return CreateCurves(dimstyle, allowOpen, MakeSmallCaps(smallCapsScale), smallCapsScale, spacing);
     }
 
     /// <summary>
     /// Returns the outline curves.
     /// </summary>
-    /// <param name="dimstyle"></param>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
     /// <param name="allowOpen"> Set to true to prevent forced closing of open curves retrieved from glyphs.</param>
-    /// <param name="makeSmallCaps"> Set to create small caps out of lower case letters.</param>
-    /// <param name="smallCapsScale"> If makeSmallCaps is true, this will be the scale factor for small caps.</param>
+    /// <param name="makeSmallCaps"> Set to true to create small caps out of lower case letters.</param>
+    /// <param name="smallCapsScale"> If makeSmallCaps is true, the scale factor for lower case letters, relative to the text height. Values greater than 1.0 are allowed.</param>
     /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
     /// <returns>An array of curves that forms the outline or content of this text entity.</returns>
     /// <since>9.0</since>
@@ -800,27 +809,27 @@ namespace Rhino.Geometry
     /// Creates planar curve from text outline curves. Curves are grouped such that each element
     /// in the list being returned represents a single character.
     /// </summary>
-    /// <param name="dimstyle"></param>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
     /// <param name="allowOpen"> Set to true to prevent forced closing of open curves retrieved from glyphs.</param>
-    /// <param name="smallCapsScale"></param>
-    /// <param name="spacing"></param>
-    /// <returns></returns>
+    /// <param name="smallCapsScale"> Scale factor for drawing lower case letters as small caps, relative to the text height. Use 1.0 for no small caps.</param>
+    /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
+    /// <returns>A list of curve arrays, one array per character.</returns>
     /// <since>8.0</since>
     public System.Collections.Generic.List<Curve[]> CreateCurvesGrouped(DimensionStyle dimstyle, bool allowOpen, double smallCapsScale, double spacing)
     {
-      return CreateCurvesGrouped(dimstyle, allowOpen, 1.0 == smallCapsScale, smallCapsScale, spacing);
+      return CreateCurvesGrouped(dimstyle, allowOpen, MakeSmallCaps(smallCapsScale), smallCapsScale, spacing);
     }
 
     /// <summary>
     /// Creates planar curve from text outline curves. Curves are grouped such that each element
     /// in the list being returned represents a single character.
     /// </summary>
-    /// <param name="dimstyle"></param>
+    /// <param name="dimstyle"> The dimension style used to evaluate the text.</param>
     /// <param name="allowOpen"> Set to true to prevent forced closing of open curves retrieved from glyphs.</param>
-    /// <param name="makeSmallCaps"></param>
-    /// <param name="smallCapsScale"></param>
-    /// <param name="spacing"></param>
-    /// <returns></returns>
+    /// <param name="makeSmallCaps"> Set to true to create small caps out of lower case letters.</param>
+    /// <param name="smallCapsScale"> If makeSmallCaps is true, the scale factor for lower case letters, relative to the text height. Values greater than 1.0 are allowed.</param>
+    /// <param name="spacing"> Set to add additional spacing between glyph output.</param>
+    /// <returns>A list of curve arrays, one array per character.</returns>
     /// <since>9.0</since>
     public System.Collections.Generic.List<Curve[]> CreateCurvesGrouped(DimensionStyle dimstyle, bool allowOpen, bool makeSmallCaps, double smallCapsScale, double spacing)
     {

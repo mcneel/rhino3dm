@@ -325,6 +325,7 @@ namespace Rhino.DocObjects
       uint docID = doc.RuntimeSerialNumber;
       IntPtr const_ptr_sectionerAttributes = sectionerAttributes.ConstPointer();
       IntPtr ptr_sectionStyle = UnsafeNativeMethods.ON_3dmObjectAtributes_ComputedSectionStyle(const_ptr_this, docID, const_ptr_sectionerAttributes, computeColors, viewport_id);
+      GC.KeepAlive(sectionerAttributes);
       if (ptr_sectionStyle == IntPtr.Zero) return null;
       return new SectionStyle(ptr_sectionStyle);
     }
@@ -1236,6 +1237,38 @@ namespace Rhino.DocObjects
         GC.KeepAlive(this);
         return rc;
       }
+    }
+
+    /// <summary>
+    /// Gets the draw color of an object in a file, which is based on the object's color source:
+    /// the layer's color, the object's color, or the color of its material (the base color
+    /// of a physically based material, else the diffuse color).
+    /// Unlike the document overload in Rhino, black and white are never switched to suit
+    /// a viewport background.
+    /// </summary>
+    /// <param name="file">The file that contains the object's layer and material.</param>
+    /// <returns>The draw color.</returns>
+    /// <since>9.1</since>
+    public System.Drawing.Color DrawColor(FileIO.File3dm file)
+    {
+      return DrawColor(file, Guid.Empty);
+    }
+
+    /// <summary>
+    /// Gets the draw color of an object in a file, which is based on the object's color source.
+    /// See <see cref="DrawColor(FileIO.File3dm)"/>.
+    /// </summary>
+    /// <param name="file">The file that contains the object's layer and material.</param>
+    /// <param name="viewportId">The id of the viewport, for a layer's per-viewport color.</param>
+    /// <returns>The draw color.</returns>
+    /// <since>9.1</since>
+    public System.Drawing.Color DrawColor(FileIO.File3dm file, Guid viewportId)
+    {
+      IntPtr const_ptr_this = ConstPointer();
+      int argb = UnsafeNativeMethods.ON_3dmObjectAttributes_DrawColor(const_ptr_this, file.ConstPointer(), viewportId);
+      GC.KeepAlive(this);
+      GC.KeepAlive(file);
+      return System.Drawing.Color.FromArgb(argb);
     }
 
 

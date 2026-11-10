@@ -1,0 +1,24 @@
+rhino3dm.ViewSectionBehavior
+============================
+
+.. py:class:: rhino3dm.ViewSectionBehavior
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines how views work with clipping planes.
+
+
+   .. py:attribute:: ClipAndSection
+      :value: 0
+
+
+      Default - show geometry on unclipped side of clipping plane and show section
+
+
+   .. py:attribute:: SectionOnly
+      :value: 1
+
+
+      Only show the section at the intersection of a clipping plane
+

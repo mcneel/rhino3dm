@@ -1,0 +1,131 @@
+rhino3dm.NurbsSurfacePointList
+==============================
+
+.. py:class:: rhino3dm.NurbsSurfacePointList
+
+   Provides access to the control points of a NURBS surface.
+
+
+   .. py:method:: GetControlPoint(u: int, v: int) -> ControlPoint
+
+      Gets the control point at the given (u, v) index.
+
+      :param u: Index of control point in the surface U direction.
+      :param v: Index of control point in the surface V direction.
+
+      :returns: The control point at the given (u, v) index.
+
+
+
+   .. py:method:: GetGrevillePoint(u: int, v: int) -> Point2d
+
+      Gets the 2-D Greville point associated with the control point at the given (u, v) index.
+
+      :param u: Index of control point in the surface U direction.
+      :param v: Index of control point in the surface V direction.
+
+      :returns: A Surface UV coordinate on success, Point2d.Unset on failure.
+
+
+
+   .. py:method:: GetPoint(u: int, v: int) -> tuple[bool, Point3d]
+
+      Gets a world 3-D, or Euclidean, control point at the given (u, v) index. The 4-D representation is (x, y, z, 1.0).
+
+      :param u: Index of control point in the surface U direction.
+      :param v: Index of control point in the surface V direction.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: GetPoint4d(u: int, v: int) -> tuple[bool, Point4d]
+
+      Gets a homogeneous control point at the given (u, v) index, where the 4-D representation is (x, y, z, w). The world 3-D, or Euclidean, representation is (x/w, y/w, z/w).
+
+      For expert use only. If you do not understand homogeneous coordinates, then use the override that returns world 3-D, or Euclidean, coordinates.
+
+      :param u: Index of control point in the surface U direction.
+      :param v: Index of control point in the surface V direction.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: GetWeight(u: int, v: int) -> float
+
+      Gets the weight of a control point at the given (u, v) index. Note, if the surface is non-rational, the weight will be 1.0.
+
+      :param u: Index of control-point along surface U direction.
+      :param v: Index of control-point along surface V direction.
+
+      :returns: The control point weight if successful, Rhino.Math.UnsetValue otherwise.
+
+
+
+   .. py:method:: SetControlPoint(u: int, v: int, cp: ControlPoint) -> bool
+                  SetControlPoint(u: int, v: int, cp: Point3d) -> bool
+
+      Sets the control point at the given (u, v) index.
+
+      :param u: Index of control point in the surface U direction.
+      :param v: Index of control point in the surface V direction.
+      :param cp: The control point to set.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: SetPoint(u: int, v: int, point: Point3d) -> bool
+                  SetPoint(u: int, v: int, point: Point4d) -> bool
+                  SetPoint(u: int, v: int, point: Point3d, weight: float) -> bool
+                  SetPoint(u: int, v: int, x: float, y: float, z: float) -> bool
+                  SetPoint(u: int, v: int, x: float, y: float, z: float, weight: float) -> bool
+
+      Sets a homogeneous control point at the given (u, v) index, where the 4-D representation is (x, y, z, w). The world 3-D, or Euclidean, representation is (x/w, y/w, z/w).
+
+      For expert use only. If you do not understand homogeneous coordinates, then use an override that accepts world 3-D, or Euclidean, coordinates as input.
+
+      :param u: Index of control point in the surface U direction.
+      :param v: Index of control point in the surface V direction.
+      :param x: X coordinate of control point.
+      :param y: Y coordinate of control point.
+      :param z: Z coordinate of control point.
+      :param weight: Weight of control point.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: SetWeight(u: int, v: int, weight: float) -> bool
+
+      Sets the weight of a control point at the given (u, v) index. Note, if the surface is non-rational, it will be converted to rational.
+
+      :param u: Index of control-point along surface U direction.
+      :param v: Index of control-point along surface V direction.
+      :param weight: The control point weight.
+
+      :returns: true if successful, false otherwise.
+
+
+
+   .. py:property:: CountU
+      :type: int
+
+
+      Gets the number of control points in the U direction of this surface.
+
+
+   .. py:property:: CountV
+      :type: int
+
+
+      Gets the number of control points in the V direction of this surface.
+
+
+   .. py:property:: PointSize
+      :type: int
+
+
+      Returns the control point size, or the number of doubles per control point. For rational curves, PointSize = Surface.Dimension + 1. For non-rational curves, PointSize = Surface.Dimension.
+

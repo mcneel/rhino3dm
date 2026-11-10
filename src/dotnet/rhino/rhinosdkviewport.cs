@@ -735,6 +735,7 @@ namespace Rhino.Display
       IntPtr const_ptr_viewport = projection.ConstPointer();
       bool rc = UnsafeNativeMethods.CRhinoViewport_SetVP(ptr_this, const_ptr_viewport, updateTargetLocation);
       GC.KeepAlive(this);
+      GC.KeepAlive(projection);
       return rc;
     }
 

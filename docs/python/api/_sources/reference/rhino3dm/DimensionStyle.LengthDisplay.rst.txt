@@ -1,0 +1,80 @@
+rhino3dm.DimensionStyle.LengthDisplay
+=====================================
+
+.. py:class:: rhino3dm.DimensionStyle.LengthDisplay
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Dimension display length unit system and style
+
+
+   .. py:attribute:: Centimeters
+      :value: 4
+
+
+      Decimal Centimeters
+
+
+   .. py:attribute:: FeetAndInches
+      :value: 2
+
+
+      Feet and Inches ( 14.75 inches displays as 1'-2-3/4" )
+
+
+   .. py:attribute:: FeetDecimal
+      :value: 8
+
+
+      Decimal Feet
+
+
+   .. py:attribute:: InchesDecimal
+      :value: 7
+
+
+      Decimal Inches
+
+
+   .. py:attribute:: InchesFractional
+      :value: 1
+
+
+      Fractional Inches ( 1.75 inches displays as 1-3/4 )
+
+
+   .. py:attribute:: Kilometers
+      :value: 6
+
+
+      Decimal Kilometers
+
+
+   .. py:attribute:: Meters
+      :value: 5
+
+
+      Decimal Meters
+
+
+   .. py:attribute:: Miles
+      :value: 9
+
+
+      Decimal Miles
+
+
+   .. py:attribute:: Millmeters
+      :value: 3
+
+
+      Decimal Millimeters
+
+
+   .. py:attribute:: ModelUnits
+      :value: 0
+
+
+      Decimal current model units
+

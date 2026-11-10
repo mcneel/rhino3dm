@@ -1,0 +1,31 @@
+rhino3dm.FileReferenceStatus
+============================
+
+.. py:class:: rhino3dm.FileReferenceStatus
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Enumerates a list of file statuses.
+
+
+   .. py:attribute:: FileNotFound
+      :value: 2
+
+
+      Unable to locate file.
+
+
+   .. py:attribute:: FullPathValid
+      :value: 1
+
+
+      Full path is valid.
+
+
+   .. py:attribute:: Unknown
+      :value: 0
+
+
+      Status of a the full path is not known.
+

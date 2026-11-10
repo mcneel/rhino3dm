@@ -1,0 +1,38 @@
+rhino3dm.ObjectColorSource
+==========================
+
+.. py:class:: rhino3dm.ObjectColorSource
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated values for the source of display color of single objects.
+
+
+   .. py:attribute:: ColorFromLayer
+      :value: 0
+
+
+      use color assigned to layer.
+
+
+   .. py:attribute:: ColorFromMaterial
+      :value: 2
+
+
+      use diffuse render material color.
+
+
+   .. py:attribute:: ColorFromObject
+      :value: 1
+
+
+      use color assigned to object.
+
+
+   .. py:attribute:: ColorFromParent
+      :value: 3
+
+
+      for objects with parents (like objects in instance references, use parent linetype) if no parent, treat as color\_from\_layer.
+

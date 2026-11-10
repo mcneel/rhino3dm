@@ -1,0 +1,80 @@
+rhino3dm.DimensionStyle.MaskFrame
+=================================
+
+.. py:class:: rhino3dm.DimensionStyle.MaskFrame
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Draw a frame stroke around the text mask area
+
+
+   .. py:attribute:: CapsuleFrame
+      :value: 2
+
+
+      Text mask frame outline capsule drawn
+
+
+   .. py:attribute:: CircleFrame
+      :value: 3
+
+
+      Text mask frame outline circle drawn
+
+
+   .. py:attribute:: DiamondFrame
+      :value: 5
+
+
+      Text mask frame outline square rotated 45 degrees
+
+
+   .. py:attribute:: HexagonCapsuleFrame
+      :value: 8
+
+
+      Text mask frame outline as an elongated hexagon
+
+
+   .. py:attribute:: HexagonFrame
+      :value: 7
+
+
+      Text mask frame outline as a hexagon
+
+
+   .. py:attribute:: NoFrame
+      :value: 0
+
+
+      Text mask frame not drawn
+
+
+   .. py:attribute:: RectFrame
+      :value: 1
+
+
+      Text mask frame outline rectangle drawn
+
+
+   .. py:attribute:: RoundRectFrame
+      :value: 9
+
+
+      Text mask frame outline as a rounded rectangle
+
+
+   .. py:attribute:: SquareFrame
+      :value: 4
+
+
+      Text mask frame outline square drawn
+
+
+   .. py:attribute:: TriangleFrame
+      :value: 6
+
+
+      Text mask frame outline triangle drawn
+

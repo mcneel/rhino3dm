@@ -1,0 +1,27 @@
+rhino3dm.DimensionStyle.LeaderCurveStyle
+========================================
+
+.. py:class:: rhino3dm.DimensionStyle.LeaderCurveStyle
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Type of leader curve
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``LeaderCurveStyle.None`` is not Python syntax; ``LeaderCurveStyle['None']`` is the same member).
+
+
+   .. py:attribute:: Polyline
+      :value: 1
+
+
+
+   .. py:attribute:: Spline
+      :value: 2
+
+

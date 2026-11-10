@@ -8,10 +8,10 @@ beforeAll(async () => {
 
 function makeMesh(rhino, n) {
     const m = new rhino.Mesh()
-    const v = m.vertices()
+    const v = m.vertices
     for (let i = 0; i < n; i++) v.add((i % 100) * 0.1, Math.floor(i / 100) * 0.1, (i % 5) * 0.05)
-    const f = m.faces()
-    for (let i = 0; i + 3 < n; i += 4) f.addQuadFace(i, i + 1, i + 2, i + 3)
+    const f = m.faces
+    for (let i = 0; i + 3 < n; i += 4) f.addFace(i, i + 1, i + 2, i + 3)
     return m
 }
 
@@ -23,11 +23,11 @@ function makeMesh(rhino, n) {
 // Fixed by the deep-copy copy ctor of BND_3dmObjectAttributes.
 test('add instance definitions with large meshes does not crash (RH-86691)', async () => {
     const file = new rhino.File3dm()
-    const idefs = file.instanceDefinitions()
+    const idefs = file.instanceDefinitions
     for (let k = 0; k < 3; k++) {
         const mesh = makeMesh(rhino, 20000)
         const attr = new rhino.ObjectAttributes()
-        const idx = idefs.add('idef' + k, '', '', '', [0, 0, 0], [mesh], [attr])
+        const idx = idefs.add('idef' + k, '', '', '', { X: 0, Y: 0, Z: 0 }, [mesh], [attr])
         expect(idx).toBeGreaterThanOrEqual(0)
     }
     expect(idefs.count).toBe(3)

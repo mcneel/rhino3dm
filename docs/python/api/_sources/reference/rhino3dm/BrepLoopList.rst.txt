@@ -1,0 +1,45 @@
+rhino3dm.BrepLoopList
+=====================
+
+.. py:class:: rhino3dm.BrepLoopList
+
+   Provides access to all the Loops in a Brep object.
+
+
+   .. py:method:: Add(loopType: BrepLoopType) -> BrepLoop
+                  Add(loopType: BrepLoopType, face: BrepFace) -> BrepLoop
+
+      Create a new boundary loop on a face. After you get this BrepLoop, you still need to create the vertices, edges, and trims that define the loop.
+
+      :returns: New loop that needs to be filled in
+
+
+
+   .. py:method:: AddOuterLoop(faceIndex: int) -> BrepLoop
+
+      Create a new outer boundary loop that runs along the sides of the face's surface. All the necessary trims, edges, and vertices are created and added to the brep.
+
+      :param faceIndex: index of face that needs an outer boundary that runs along the sides of its surface.
+
+      :returns: New outer boundary loop that is complete.
+
+
+
+   .. py:method:: AddPlanarFaceLoop(faceIndex: int, loopType: BrepLoopType, boundaryCurves: collections.abc.Sequence[Curve] | None) -> BrepLoop
+
+      Add a planar trimming loop to a planar face
+
+      :param faceIndex: index of planar face. The underlying surface must be a PlaneSurface
+      :param loopType: type of loop to add. If loopType is Unknown, then the loop direction is tested and the new loops type will be set to Outer or Inner. If the loopType is Outer, then the direction of the new loop is tested and flipped if it is clockwise. If the loopType is Inner, then the direction of the new loop is tested and flipped if it is counter-clockwise.
+      :param boundaryCurves: list of 3d curves that form a simple (no self intersections) closed curve. These curves define the 3d edge geometry and should be near the planar surface.
+
+      :returns: new loop if successful
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the number of brep loops.
+

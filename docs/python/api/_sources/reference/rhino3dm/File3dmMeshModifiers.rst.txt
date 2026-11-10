@@ -1,0 +1,72 @@
+rhino3dm.File3dmMeshModifiers
+=============================
+
+.. py:class:: rhino3dm.File3dmMeshModifiers
+
+   Represents the mesh modifiers attached to file3dm object attributes.
+
+
+   .. py:method:: CreateCurvePiping() -> File3dmCurvePiping
+
+      Returns the object's curve piping information, creating it with default values if none is present.
+
+
+
+   .. py:method:: CreateDisplacement() -> File3dmDisplacement
+
+      Returns the object's displacement information, creating it with default values if none is present.
+
+
+
+   .. py:method:: CreateEdgeSoftening() -> File3dmEdgeSoftening
+
+      Returns the object's edge softening information, creating it with default values if none is present.
+
+
+
+   .. py:method:: CreateShutLining() -> File3dmShutLining
+
+      Returns the object's shut-lining information, creating it with default values if none is present.
+
+
+
+   .. py:method:: CreateThickening() -> File3dmThickening
+
+      Returns the object's thickening information, creating it with default values if none is present.
+
+
+
+   .. py:property:: CurvePiping
+      :type: File3dmCurvePiping
+
+
+      Returns an object that provides access to curve piping information. If no curve piping information is present, the method returns null.
+
+
+   .. py:property:: Displacement
+      :type: File3dmDisplacement
+
+
+      Returns an object that provides access to displacement information. If no displacement information is present, the method returns null.
+
+
+   .. py:property:: EdgeSoftening
+      :type: File3dmEdgeSoftening
+
+
+      Returns an object that provides access to edge softening information. If no edge softening information is present, the method returns null.
+
+
+   .. py:property:: ShutLining
+      :type: File3dmShutLining
+
+
+      Returns an object that provides access to shut-lining information. If no shutlining information is present, the method returns null.
+
+
+   .. py:property:: Thickening
+      :type: File3dmThickening
+
+
+      Returns an object that provides access to thickening information. If no thickening information is present, the method returns null.
+

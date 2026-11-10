@@ -1,0 +1,174 @@
+rhino3dm.BrepFace
+=================
+
+.. toctree::
+   :hidden:
+
+   /reference/rhino3dm/BrepFace.ShrinkDisableSide
+
+.. py:class:: rhino3dm.BrepFace
+
+   Bases: :py:obj:`SurfaceProxy`
+
+
+   Provides strongly-typed access to brep faces.
+
+   A Brep face is composed of one surface and trimming curves.
+
+
+   .. py:method:: AdjacentEdges() -> list[Any]
+
+      Gets the indices of all the BrepEdges that delineate this Face.
+
+
+
+   .. py:method:: AdjacentFaces() -> list[Any]
+
+      Gets the indices of all the BrepFaces that surround (are adjacent to) this face.
+
+
+
+   .. py:method:: ClearMaterialChannelIndex() -> None
+
+      Clear this face's rendering material channel index.
+
+
+
+   .. py:method:: CreateExtrusion(pathCurve: Curve, cap: bool) -> Brep
+
+      Extrude a face in a Brep.
+
+      :param pathCurve: The path to extrude along. Note, the direction of the extrusion will follow the direction of the curve.
+      :param cap: If true, the extrusion is capped with a translation of the face being extruded
+
+      :returns: A Brep on success or null on failure.
+
+
+
+   .. py:method:: DuplicateFace(duplicateMeshes: bool) -> Brep
+
+      Duplicate a face from the brep to create new single face brep.
+
+      :param duplicateMeshes: If true, shading meshes will be copied as well.
+
+      :returns: A new single-face brep synonymous with the current Face.
+
+
+
+   .. py:method:: DuplicateSurface() -> Surface
+
+      Gets a copy to the untrimmed surface that this face is based on.
+
+      :returns: A copy of this face's underlying surface.
+
+
+
+   .. py:method:: GetMesh(meshType: MeshType) -> Mesh
+
+      Obtains a reference to a specified type of mesh for this brep face.
+
+      :param meshType: The mesh type.
+
+      :returns: A mesh.
+
+
+
+   .. py:method:: SetMesh(meshType: MeshType, mesh: Mesh) -> bool
+
+      Sets a reference to a specified type of mesh for this brep face.
+
+      :param meshType: The mesh type.
+      :param mesh: The new mesh.
+
+      :returns: true if the operation succeeded; otherwise false.
+
+
+
+   .. py:method:: ShrinkFace(disableSide: BrepFace) -> bool
+
+      Shrinks the underlying untrimmed surface of this Brep face close to trimming boundaries. Shrinking a surface is like extending smoothly, only backwards. knot of full multiplicity are added where you want the surface to be cut off. Then the remaining control points are thrown away.
+
+      :param disableSide: The side(s) of the surface to not shrink.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: UnderlyingSurface() -> Surface
+
+      Gets the untrimmed surface that is the base of this face.
+
+      :returns: A surface, or null on error.
+
+
+
+   .. py:property:: FaceIndex
+      :type: int
+
+
+      Index of face in Brep.Faces array.
+
+
+   .. py:property:: Id
+      :type: uuid.UUID
+
+
+      Gets or sets the persistent id of this Brep face. By default, the id is Guid.Zero. Note, Rhino does not set this id. Thus, the property is available for use as a way of tracking Brep faces.
+
+
+   .. py:property:: IsSurface
+      :type: bool
+
+
+      Gets a value indicating whether the face is synonymous with the underlying surface. If a Face has no trimming curves then it is considered a Surface.
+
+
+   .. py:property:: Loops
+      :type: BrepLoopList
+
+
+      Loops in this face.
+
+
+   .. py:property:: MaterialChannelIndex
+      :type: int
+
+
+      This face's rendering material channel index.
+
+
+   .. py:property:: OrientationIsReversed
+      :type: bool
+
+
+      true if face orientation is opposite of natural surface orientation.
+
+
+   .. py:property:: OuterLoop
+      :type: BrepLoop
+
+
+      Every face has a single outer loop.
+
+
+   .. py:property:: PerFaceColor
+      :type: tuple[int, int, int, int]
+
+
+      If per-face color is "Empty", then this face does not have a custom color
+
+
+   .. py:property:: SurfaceIndex
+      :type: int
+
+
+      Surface index of the 3d surface geometry used by this face or -1
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rhino3dm.BrepFace.ShrinkDisableSide
+
+

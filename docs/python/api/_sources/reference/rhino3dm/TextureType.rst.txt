@@ -1,0 +1,206 @@
+rhino3dm.TextureType
+====================
+
+.. py:class:: rhino3dm.TextureType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   The TextureType controls how the pixels in the bitmap are interpreted.
+
+
+   .. py:attribute:: Bitmap
+      :value: 1
+
+
+      Deprecated - this should be diffuse
+
+
+   .. py:attribute:: Bump
+      :value: 2
+
+
+      bump map
+
+
+   .. py:attribute:: Diffuse
+      :value: 1
+
+
+      The diffuse color of the material, ideally the albedo.
+
+
+   .. py:attribute:: Emap
+      :value: 86
+
+
+      Emap/Environment texture
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``TextureType.None`` is not Python syntax; ``TextureType['None']`` is the same member).
+
+
+   .. py:attribute:: Opacity
+      :value: 3
+
+
+      value = alpha
+
+
+   .. py:attribute:: PBR_Alpha
+      :value: 30
+
+
+      Physically based materials only - clearcoat normal or bump (normal map, RGB)
+
+
+   .. py:attribute:: PBR_AmbientOcclusion
+      :value: 26
+
+
+      Physically based materials only - occlusion (greyscale)
+
+
+   .. py:attribute:: PBR_Anisotropic
+      :value: 17
+
+
+      Physically based materials only - anisotropic (greyscale)
+
+
+   .. py:attribute:: PBR_Anisotropic_Rotation
+      :value: 18
+
+
+      Physically based materials only - anisotropic rotation 0 = 0, 255 = 360
+
+
+   .. py:attribute:: PBR_BaseColor
+      :value: 1
+
+
+      Physically based materials only - base color. Re-uses diffuse texture slot.
+
+
+   .. py:attribute:: PBR_Clearcoat
+      :value: 21
+
+
+      Physically based materials only - clearcoat (greyscale)
+
+
+   .. py:attribute:: PBR_ClearcoatBump
+      :value: 29
+
+
+      Physically based materials only - clearcoat normal or bump (normal map, RGB)
+
+
+   .. py:attribute:: PBR_ClearcoatRoughness
+      :value: 22
+
+
+      Physically based materials only - clearcoat roughness (greyscale)
+
+
+   .. py:attribute:: PBR_Displacement
+      :value: 28
+
+
+      Physically based materials only - normal 8-bit RGB, alpha is ignored
+
+
+   .. py:attribute:: PBR_Emission
+      :value: 25
+
+
+      Physically based materials only - emission (greyscale)
+
+
+   .. py:attribute:: PBR_Metallic
+      :value: 13
+
+
+      Physically based materials only - metallic (greyscale)
+
+
+   .. py:attribute:: PBR_OpacityIor
+      :value: 23
+
+
+      Physically based materials only - ior (greyscale - remaps from 1.0 to 2.0)
+
+
+   .. py:attribute:: PBR_OpacityRoughness
+      :value: 24
+
+
+      Physically based materials only - transparency roughness (greyscale)
+
+
+   .. py:attribute:: PBR_Roughness
+      :value: 16
+
+
+      Physically based materials only - roughness (greyscale)
+
+
+   .. py:attribute:: PBR_Sheen
+      :value: 19
+
+
+      Physically based materials only - sheen (greyscale)
+
+
+   .. py:attribute:: PBR_SheenTint
+      :value: 20
+
+
+      Physically based materials only - sheen tint (greyscale)
+
+
+   .. py:attribute:: PBR_Specular
+      :value: 14
+
+
+      Physically based materials only - specular (greyscale)
+
+
+   .. py:attribute:: PBR_SpecularTint
+      :value: 15
+
+
+      Physically based materials only - specular tint (greyscale)
+
+
+   .. py:attribute:: PBR_Subsurface
+      :value: 10
+
+
+      Physically based materials only - subsurface (greyscale)
+
+
+   .. py:attribute:: PBR_SubsurfaceScattering
+      :value: 11
+
+
+      Physically based materials only - subsurface scattering
+
+
+   .. py:attribute:: PBR_SubsurfaceScatteringRadius
+      :value: 12
+
+
+      Physically based materials only - subsurface scattering radius (greyscale)
+
+
+   .. py:attribute:: Transparency
+      :value: 3
+
+
+      Deprecated - see Opacity. This has always actually meant opacity in Rhino, so there is nothing to change.
+

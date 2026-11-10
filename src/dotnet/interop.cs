@@ -472,6 +472,7 @@ namespace Rhino.Runtime
       {
         System.Reflection.MethodInfo mi = on_brep_type.GetMethod("WrapNativePointer", new[] { typeof(IntPtr), typeof(bool), typeof(bool) });
         IntPtr ptr_new_brep = UnsafeNativeMethods.ON_Brep_New(const_ptr_source);
+        GC.KeepAlive(source);
         rc = mi.Invoke(null, new object[] { ptr_new_brep, false, true });
       }
       return rc;
@@ -494,6 +495,7 @@ namespace Rhino.Runtime
       {
         System.Reflection.MethodInfo mi = on_type.GetMethod("WrapNativePointer", new[] { typeof(IntPtr), typeof(bool), typeof(bool) });
         IntPtr ptr_new_surface = UnsafeNativeMethods.ON_Surface_DuplicateSurface(const_ptr_source);
+        GC.KeepAlive(source);
         rc = mi.Invoke(null, new object[] { ptr_new_surface, false, true });
       }
       return rc;
@@ -516,6 +518,7 @@ namespace Rhino.Runtime
       {
         System.Reflection.MethodInfo mi = on_type.GetMethod("WrapNativePointer", new[] { typeof(IntPtr), typeof(bool), typeof(bool) });
         IntPtr ptr_new_mesh = UnsafeNativeMethods.ON_Mesh_New(const_ptr_source);
+        GC.KeepAlive(source);
         rc = mi.Invoke(null, new object[] { ptr_new_mesh, false, true });
       }
       return rc;
@@ -538,6 +541,7 @@ namespace Rhino.Runtime
       {
         System.Reflection.MethodInfo mi = on_type.GetMethod("WrapNativePointer", new[] { typeof(IntPtr), typeof(bool), typeof(bool) });
         IntPtr ptr_new_curve = UnsafeNativeMethods.ON_Curve_DuplicateCurve(const_ptr_source);
+        GC.KeepAlive(source);
         rc = mi.Invoke(null, new object[] { ptr_new_curve, false, true });
       }
       return rc;

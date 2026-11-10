@@ -1,0 +1,45 @@
+rhino3dm.PlaneCircleIntersection
+================================
+
+.. py:class:: rhino3dm.PlaneCircleIntersection
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Represents all possible cases of a Plane\|Circle intersection event.
+
+
+   .. py:attribute:: Coincident
+      :value: 4
+
+
+      Circle and plane are co-planar, they intersect everywhere.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``PlaneCircleIntersection.None`` is not Python syntax; ``PlaneCircleIntersection['None']`` is the same member). No intersections. Either because radius is too small or because circle plane is parallel but not coincident with the intersection plane.
+
+
+   .. py:attribute:: Parallel
+      :value: 3
+
+
+      Circle and plane are planar but not coincident. Parallel indicates no intersection took place.
+
+
+   .. py:attribute:: Secant
+      :value: 2
+
+
+      Secant (two point) intersection.
+
+
+   .. py:attribute:: Tangent
+      :value: 1
+
+
+      Tangent (one point) intersection.
+

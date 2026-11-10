@@ -1,0 +1,436 @@
+rhino3dm.Brep
+=============
+
+.. py:class:: rhino3dm.Brep
+
+   Bases: :py:obj:`GeometryBase`
+
+
+   /// Boundary Representation. A surface or polysurface along with trim curve information.
+
+
+   .. py:method:: AddEdgeCurve(curve: Curve) -> int
+
+      Add a 3d curve used by the brep edges
+
+      :returns: Index used to reference this geometry in the edge curve list
+
+
+
+   .. py:method:: AddSurface(surface: Surface) -> int
+
+      Adds a 3D surface used by BrepFace.
+
+      :param surface: A copy of the surface is added to this brep.
+
+      :returns: Index that should be used to reference the geometry.
+                -1 is returned if the input is not acceptable.
+
+
+
+   .. py:method:: AddTrimCurve(curve: Curve) -> int
+
+      Add a 2d curve used by the brep trims
+
+      :returns: Index used to reference this geometry in the trimming curve list
+
+
+
+   .. py:method:: Append(other: Brep) -> None
+
+      Appends a copy of another brep to this and updates indices of appended brep parts. Duplicates are not removed
+
+
+
+   .. py:method:: Compact() -> None
+
+      Deletes any unreferenced objects from arrays, re-indexes as needed, and shrinks arrays to minimum required size. Uses CUllUnused\* members to delete any unreferenced objects from arrays.
+
+
+
+   .. py:method:: CreateFromBox(box: BoundingBox) -> Brep
+                  CreateFromBox(corners: collections.abc.Sequence[Point3d]) -> Brep
+                  CreateFromBox(box: Box) -> Brep
+      :staticmethod:
+
+
+      Constructs new brep that matches a bounding box.
+
+      :param box: A box to use for creation.
+
+      :returns: A new brep; or null on failure.
+
+
+
+   .. py:method:: CreateFromCone(cone: Cone, capBottom: bool) -> Brep
+      :staticmethod:
+
+
+      Constructs a Brep representation of the cone with a single face for the cone, an edge along the cone seam, and vertices at the base and apex ends of this seam edge. The optional cap is a single face with one circular edge starting and ending at the base vertex.
+
+      :param cone: A cone value.
+      :param capBottom: if true the base of the cone should be capped.
+
+      :returns: A Brep if successful, null on error.
+
+
+
+   .. py:method:: CreateFromCylinder(cylinder: Cylinder, capBottom: bool, capTop: bool) -> Brep
+      :staticmethod:
+
+
+      Constructs a Brep definition of a cylinder.
+
+      :param cylinder: cylinder.IsFinite() must be true.
+      :param capBottom: if true end at cylinder.m\_height[0] should be capped.
+      :param capTop: if true end at cylinder.m\_height[1] should be capped.
+
+      :returns: A Brep representation of the cylinder with a single face for the cylinder, an edge along the cylinder seam, and vertices at the bottom and top ends of this seam edge. The optional bottom/top caps are single faces with one circular edge starting and ending at the bottom/top vertex.
+
+
+
+   .. py:method:: CreateFromMesh(mesh: Mesh, trimmedTriangles: bool) -> Brep
+      :staticmethod:
+
+
+      Create a brep representation of a mesh
+
+      :param trimmedTriangles: if true, triangles in the mesh will be represented by trimmed planes in the brep. If false, triangles in the mesh will be represented by untrimmed singular bilinear NURBS surfaces in the brep.
+
+
+
+   .. py:method:: CreateFromRevSurface(surface: RevSurface, capStart: bool, capEnd: bool) -> Brep
+      :staticmethod:
+
+
+      Constructs a brep form of a surface of revolution.
+
+      :param surface: The surface of revolution.
+      :param capStart: if true, the start of the revolute is not on the axis of revolution, and the surface of revolution is closed, then a circular cap will be added to close of the hole at the start of the revolute.
+      :param capEnd: if true, the end of the revolute is not on the axis of revolution, and the surface of revolution is closed, then a circular cap will be added to close of the hole at the end of the revolute.
+
+      :returns: A Brep if successful, null on error.
+
+
+
+   .. py:method:: CreateFromSphere(sphere: Sphere) -> Brep
+      :staticmethod:
+
+
+      Constructs a Brep definition of a sphere.
+
+      :param sphere: The input sphere provides the orienting plane and radius.
+
+      :returns: A Brep if successful, null on error.
+
+
+
+   .. py:method:: CreateFromSurface(surface: Surface | None) -> Brep
+      :staticmethod:
+
+
+      Constructs a Brep from a surface. The resulting Brep has an outer boundary made from four trims. The trims are ordered so that they run along the south, east, north, and then west side of the surface's parameter space.
+
+      :param surface: A surface to convert.
+
+      :returns: Resulting brep or null on failure.
+
+
+
+   .. py:method:: CreateFromTorus(torus: Torus) -> Brep
+      :staticmethod:
+
+
+      Constructs a Brep definition of a torus.
+
+      :param torus: The torus.
+
+      :returns: A Brep representation of the torus if successful, null otherwise.
+
+
+
+   .. py:method:: CreateQuadSphere(sphere: Sphere) -> Brep
+      :staticmethod:
+
+
+      Constructs a Brep definition of a quad sphere.
+
+      :param sphere: The input sphere provides the orienting plane and radius.
+
+      :returns: A Brep if successful, null on error.
+
+
+
+   .. py:method:: CreateTrimmedPlane(plane: Plane, curves: collections.abc.Sequence[Curve] | None) -> Brep
+                  CreateTrimmedPlane(plane: Plane, curve: Curve) -> Brep
+      :staticmethod:
+
+
+      Create a Brep trimmed plane.
+
+      :param plane: Plane that will be trimmed.
+      :param curve: A simple (no self intersections) closed curve that defines the outer boundary of the trimmed plane.
+
+      :returns: Resulting brep or null on failure.
+
+
+
+   .. py:method:: CullUnused2dCurves() -> bool
+
+      Culls 3d curves not referenced by an edge.
+
+      :returns: true if operation succeeded; false otherwise.
+
+
+
+   .. py:method:: CullUnused3dCurves() -> bool
+
+      Culls 2d curves not referenced by a trim.
+
+      :returns: true if operation succeeded; false otherwise.
+
+
+
+   .. py:method:: CullUnusedEdges() -> bool
+
+      Culls edges with m\_edge\_index == -1.
+
+      :returns: true if operation succeeded; false otherwise.
+
+
+
+   .. py:method:: CullUnusedFaces() -> bool
+
+      Culls faces with m\_face\_index == -1.
+
+      :returns: true if operation succeeded; false otherwise.
+
+
+
+   .. py:method:: CullUnusedLoops() -> bool
+
+      Culls loops with m\_loop\_index == -1.
+
+      :returns: true if operation succeeded; false otherwise.
+
+
+
+   .. py:method:: CullUnusedSurfaces() -> bool
+
+      Culls surfaces not referenced by a face.
+
+      :returns: true if operation succeeded; false otherwise.
+
+
+
+   .. py:method:: CullUnusedTrims() -> bool
+
+      Culls trims with m\_trim\_index == -1.
+
+      :returns: true if operation succeeded; false otherwise.
+
+
+
+   .. py:method:: CullUnusedVertices() -> bool
+
+      Culls vertices with m\_vertex\_index == -1.
+
+      :returns: true if operation succeeded; false otherwise.
+
+
+
+   .. py:method:: Duplicate() -> Brep
+
+      Copies this brep.
+
+      :returns: A brep.
+
+
+
+   .. py:method:: DuplicateBrep() -> Brep
+
+      Same as ``Duplicate``, but already performs a cast to a brep.
+
+      This cast always succeeds.
+
+      :returns: A brep.
+
+
+
+   .. py:method:: DuplicateSubBrep(faceIndices: collections.abc.Sequence[int]) -> Brep
+
+      Copy a subset of this Brep into another Brep.
+
+      :param faceIndices: array of face indices in this brep to copy. (If any values in faceIndices are out of range or if faceIndices contains duplicates, this function will return null.)
+
+      :returns: A brep, or null on error.
+
+
+
+   .. py:method:: DuplicateVertices() -> list[Any]
+
+      Duplicate all the corner vertices of this Brep.
+
+      :returns: An array or corner vertices.
+
+
+
+   .. py:method:: Flip() -> None
+
+      Reverses entire brep orientation of all faces.
+
+
+
+   .. py:method:: IsDuplicate(other: Brep, tolerance: float) -> bool
+
+      See if this and other are same brep geometry.
+
+      :param other: other brep.
+      :param tolerance: tolerance to use when comparing control points.
+
+      :returns: true if breps are the same.
+
+
+
+   .. py:method:: IsOrientedManifold() -> tuple[bool, bool, bool]
+
+      Test a Brep to see if it is an oriented manifold. Non manifold Breps have at least one edge that is shared among three or more faces.
+
+      :returns: If the Brep is a manifold, true is returned. Otherwise false is returned.
+
+
+
+   .. py:method:: IsValidGeometry() -> tuple[bool, str]
+
+      Expert user function that tests the brep to see if its geometry information is valid. The value of brep.IsValidTopology() must be true before brep.IsValidGeometry() can be safely called.
+
+      :returns: A value that indicates whether the geometry is valid.
+
+
+
+   .. py:method:: IsValidTolerancesAndFlags() -> tuple[bool, str]
+
+      Expert user function that tests the brep to see if its tolerances and flags are valid. The values of brep.IsValidTopology() and brep.IsValidGeometry() must be true before brep.IsValidTolerancesAndFlags() can be safely called.
+
+      :returns: A value that indicates
+
+
+
+   .. py:method:: IsValidTopology() -> tuple[bool, str]
+
+      Tests the brep to see if its topology information is valid.
+
+      :returns: true if the topology is valid; false otherwise.
+
+
+
+   .. py:method:: SetTolerancesBoxesAndFlags(bLazy: bool, bSetVertexTolerances: bool, bSetEdgeTolerances: bool, bSetTrimTolerances: bool, bSetTrimIsoFlags: bool, bSetTrimTypeFlags: bool, bSetLoopTypeFlags: bool, bSetTrimBoxes: bool) -> None
+                  SetTolerancesBoxesAndFlags() -> None
+
+      Set tolerances and flags in a Brep.
+
+
+
+   .. py:method:: SetTrimIsoFlags() -> None
+
+      This function can be used to set the BrepTrim::m\_iso flag. It is intended to be used when creating a Brep from a definition that does not include compatible parameter space type information.
+
+
+
+   .. py:method:: SetVertices() -> None
+
+      This function can be used to compute vertex information for a b-rep when everything but the Vertices array is properly filled in. It is intended to be used when creating a Brep from a definition that does not include explicit vertex information.
+
+
+
+   .. py:method:: Standardize() -> None
+
+      Standardizes all trims, edges, and faces in the brep. After standardizing, there may be unused curves and surfaces in the brep. Call Brep.Compact to remove these unused curves and surfaces.
+
+
+
+   .. py:method:: TryConvertBrep(geometry: GeometryBase) -> Brep
+      :staticmethod:
+
+
+      Attempts to convert a generic Geometry object into a Brep.
+
+      :param geometry: Geometry to convert, not all types of GeometryBase can be represented by BReps.
+
+      :returns: Brep if a brep form could be created or null if this is not possible. If geometry was of type Brep to begin with, the same object is returned, i.e. it is not duplicated.
+
+
+
+   .. py:property:: Edges
+      :type: BrepEdgeList
+
+
+      Gets the brep edges list accessor.
+
+
+   .. py:property:: Faces
+      :type: BrepFaceList
+
+
+      Gets the brep faces list accessor.
+
+
+   .. py:property:: IsManifold
+      :type: bool
+
+
+      Gets a value indicating whether or not the Brep is manifold. Non manifold breps have at least one edge that is shared among three or more faces.
+
+
+   .. py:property:: IsSolid
+      :type: bool
+
+
+      Determines whether this brep is a solid, or a closed oriented manifold.
+
+
+   .. py:property:: IsSurface
+      :type: bool
+
+
+      Returns true if the Brep has a single face and that face is geometrically the same as the underlying surface. I.e., the face has trivial trimming.
+
+      In this case, the surface is the first face surface. The flag Brep.Faces[0].OrientationIsReversed records the correspondence between the surface's natural parametric orientation and the orientation of the Brep.
+
+      trivial trimming here means that there is only one loop curve in the brep and that loop curve is the same as the underlying surface boundary.
+
+
+   .. py:property:: Loops
+      :type: BrepLoopList
+
+
+      Gets the brep loop list accessor.
+
+
+   .. py:property:: SolidOrientation
+      :type: BrepSolidOrientation
+
+
+      Gets the solid orientation state of this Brep.
+
+
+   .. py:property:: Surfaces
+      :type: BrepSurfaceList
+
+
+      Parametric surfaces used by faces
+
+
+   .. py:property:: Trims
+      :type: BrepTrimList
+
+
+      Gets the brep trims list accessor.
+
+
+   .. py:property:: Vertices
+      :type: BrepVertexList
+
+
+      Gets the brep vertices list accessor.
+

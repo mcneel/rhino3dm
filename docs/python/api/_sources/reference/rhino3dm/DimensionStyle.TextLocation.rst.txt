@@ -1,0 +1,31 @@
+rhino3dm.DimensionStyle.TextLocation
+====================================
+
+.. py:class:: rhino3dm.DimensionStyle.TextLocation
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   The location of text in linear, angular, radial, and ordinate dimensions.
+
+
+   .. py:attribute:: AboveDimLine
+      :value: 0
+
+
+      Text is above dimension line.
+
+
+   .. py:attribute:: BelowDimLine
+      :value: 2
+
+
+      Text is below dimension line.
+
+
+   .. py:attribute:: InDimLine
+      :value: 1
+
+
+      Text is centered in dimension line.
+

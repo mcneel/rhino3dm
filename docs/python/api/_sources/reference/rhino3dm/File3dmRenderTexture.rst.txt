@@ -1,0 +1,25 @@
+rhino3dm.File3dmRenderTexture
+=============================
+
+.. py:class:: rhino3dm.File3dmRenderTexture
+
+   Bases: :py:obj:`File3dmRenderContent`
+
+
+   Base class for all components in a model (document) and manages the index, id and other information common to this type of objects.
+
+   This class parallels the C++ ON\_ModelComponent.
+
+
+   .. py:method:: ToTexture() -> Texture
+
+      Get a simulated texture that approximates this texture's appearance.
+
+
+
+   .. py:property:: Filename
+      :type: str
+
+
+      If the texture has a file name, returns that file name. Otherwise returns an empty string.
+

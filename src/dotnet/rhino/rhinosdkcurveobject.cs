@@ -96,6 +96,7 @@ namespace Rhino.DocObjects.Custom
       Guid type_id = GetType().GUID;
       IntPtr pConstCurve = curve.ConstPointer();
       m_pRhinoObject = UnsafeNativeMethods.CRhinoCustomObject_New2(type_id, pConstCurve);
+      GC.KeepAlive(curve);
     }
 
     ~CustomCurveObject() { Dispose(false); }

@@ -1,0 +1,116 @@
+rhino3dm.Leader
+===============
+
+.. py:class:: rhino3dm.Leader
+
+   Bases: :py:obj:`AnnotationBase`
+
+
+   Leader geometry class
+
+
+   .. py:method:: Create(text: str, plane: Plane, dimstyle: DimensionStyle, points: collections.abc.Sequence[Point3d]) -> Leader
+      :staticmethod:
+
+
+      Creates a Leader geometry object
+
+
+
+   .. py:method:: CreateWithRichText(richText: str, plane: Plane, dimstyle: DimensionStyle, points: collections.abc.Sequence[Point3d]) -> Leader
+      :staticmethod:
+
+
+      Creates a Leader geometry object
+
+
+
+   .. py:method:: GetTextPoint2d(dimstyle: DimensionStyle, leaderScale: float) -> Point2d
+
+      Gets the point, in the leader's plane coordinates, where the text attaches to the leader.
+
+      :param dimstyle: The dimension style that sets the text gap and landing.
+      :param leaderScale: The scale applied to the dimension style's lengths.
+
+      :returns: The text point, or ``Point2d.Unset`` if it cannot be computed.
+
+
+
+   .. py:property:: LeaderArrowBlockId
+      :type: uuid.UUID
+
+
+      Id of the block used as the arrow for the leader when the arrow type is 'User arrow'
+
+
+   .. py:property:: LeaderArrowSize
+      :type: float
+
+
+      The size of the leader arrow
+
+
+   .. py:property:: LeaderArrowType
+      :type: DimensionStyle
+
+
+      The arrowhead type for the leader
+
+
+   .. py:property:: LeaderContentAngleStyle
+      :type: DimensionStyle
+
+
+      Angle for text of leader text
+
+
+   .. py:property:: LeaderCurveStyle
+      :type: DimensionStyle
+
+
+      polyline or spline
+
+      :type: The style of the leader curve
+
+
+   .. py:property:: LeaderHasLanding
+      :type: bool
+
+
+      Returns true if the leader has a landing line
+
+
+   .. py:property:: LeaderLandingLength
+      :type: float
+
+
+      Gets or sets the length of the landing line
+
+
+   .. py:property:: LeaderTextHorizontalAlignment
+      :type: TextHorizontalAlignment
+
+
+      Gets or sets the horizontal alignment of the leader's text
+
+
+   .. py:property:: LeaderTextVerticalAlignment
+      :type: TextVerticalAlignment
+
+
+      Gets or sets the vertical alignment of the leader's text
+
+
+   .. py:property:: Points2D
+      :type: list[Point2d]
+
+
+      Get or set the 2d points defining the curve used by this leader
+
+
+   .. py:property:: Points3D
+      :type: list[Point3d]
+
+
+      Get or set the 3d points defining the curve used by this leader
+

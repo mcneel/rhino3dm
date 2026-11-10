@@ -19,7 +19,7 @@ class TestPointVectorStr(unittest.TestCase):
 
     def test_strDistinctFromRepr(self):
         p = rhino3dm.Point3d(1, 2, 3)
-        self.assertEqual(repr(p), "Point3d(1, 2, 3)")
+        self.assertEqual(repr(p), "Point3d(1.0, 2.0, 3.0)")
         self.assertNotEqual(str(p), repr(p))
 
     def test_strNonIntegerValues(self):

@@ -352,6 +352,7 @@ namespace Rhino.DocObjects
           throw new NotSupportedException("Setting the texture failed.");
         }
         GC.KeepAlive(this);
+        GC.KeepAlive(value);
       }
     }
 

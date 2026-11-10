@@ -1,0 +1,38 @@
+rhino3dm.File3dmCurvePiping.CapTypes
+====================================
+
+.. py:class:: rhino3dm.File3dmCurvePiping.CapTypes
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines how the pipe is capped at the ends.
+
+
+   .. py:attribute:: Box
+      :value: 2
+
+
+      A simple construction will cap the pipe.
+
+
+   .. py:attribute:: Dome
+      :value: 3
+
+
+      A meridians-and-parallels hemisphere construction will cap the pipe.
+
+
+   .. py:attribute:: Flat
+      :value: 1
+
+
+      A flat surface will cap the pipe.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``CapTypes.None`` is not Python syntax; ``CapTypes['None']`` is the same member). No capping.
+

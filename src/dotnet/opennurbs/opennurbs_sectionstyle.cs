@@ -375,6 +375,7 @@ namespace Rhino.DocObjects
       IntPtr ptr_this = NonConstPointer();
       IntPtr const_ptr_linetype = linetype.ConstPointer();
       UnsafeNativeMethods.ON_SectionStyle_SetCustomLinetype(ptr_this, const_ptr_linetype);
+      GC.KeepAlive(linetype);
       GC.KeepAlive(this);
     }
 

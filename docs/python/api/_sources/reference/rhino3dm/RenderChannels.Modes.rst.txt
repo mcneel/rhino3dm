@@ -1,0 +1,24 @@
+rhino3dm.RenderChannels.Modes
+=============================
+
+.. py:class:: rhino3dm.RenderChannels.Modes
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Mode.
+
+
+   .. py:attribute:: Automatic
+      :value: 0
+
+
+      Render-channels are managed automatically
+
+
+   .. py:attribute:: Custom
+      :value: 1
+
+
+      Render-channels are specified by the user
+

@@ -1,0 +1,38 @@
+rhino3dm.Dithering
+==================
+
+.. toctree::
+   :hidden:
+
+   /reference/rhino3dm/Dithering.Methods
+
+.. py:class:: rhino3dm.Dithering
+              Dithering(d: Dithering)
+
+   This is the interface to dithering settings.
+
+
+   .. py:property:: Enabled
+      :type: bool
+
+
+
+   .. py:property:: Method
+      :type: Dithering
+
+
+
+   .. py:property:: On
+      :type: bool
+
+
+      Deprecated since 8.0.
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rhino3dm.Dithering.Methods
+
+

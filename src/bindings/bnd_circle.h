@@ -1,55 +1,14 @@
-#include "bindings.h"
-
+// Triage F (Luis 2026-10-28; docs/vnext/rhino3dm-only-triage.md F; api/exceptions.toml
+// [[hand_kept]]): the JSON forms Rhino.Compute exchanges, the old bindings' dictionaries key
+// for key.
+//   F1 CommonObject / File3dm Encode, Decode: kept until a portable JSON API is upstream
+//   F2 the value types' (and MeshingParameters') Encode, Decode
+//   F4 ArchivableDictionary EncodeDict, DecodeDict: a dict in RhinoCommon's ArchivableDictionary
+//      binary form
+// Hand-maintained members of Circle; the generated binding is bnd_circle_gen.h (tools/generate/bnd_gen.py).
 #pragma once
 
-#if defined(ON_PYTHON_COMPILE)
-void initCircleBindings(rh3dmpymodule& m);
-#else
-void initCircleBindings(void* m);
-#endif
+#include "bnd_common.h"
+#include "bnd_circle_gen.h"
 
-class BND_Circle
-{
-public:
-  ON_Circle m_circle;
-public:
-  //public static Circle TryFitCircleTT(Curve c1, Curve c2, double t1, double t2)
-  //public static Circle TryFitCircleTTT(Curve c1, Curve c2, Curve c3, double t1, double t2, double t3)
-  //static public Circle Unset
-  BND_Circle(ON_Circle c) : m_circle(c) {}
-  BND_Circle(double radius);
-  BND_Circle(const class BND_Plane& plane, double radius);
-  BND_Circle(ON_3dPoint center, double radius);
-  //public Circle(Arc arc)
-  //public Circle(ON_3dPoint point1, ON_3dPoint point2, ON_3dPoint point3)
-  //public Circle(Plane plane, Point3d center, double radius)
-  //public Circle(Point3d startPoint, Vector3d tangentAtP, Point3d pointOnCircle)
-  bool IsValid() const { return m_circle.IsValid(); }
-  double Radius() const { return m_circle.radius; }
-  void SetRadius(double r) { m_circle.radius = r; }
-  double Diameter() const { return m_circle.radius * 2; }
-  void SetDiameter(double d) { m_circle.radius = d * 0.5; }
-  BND_Plane Plane() const;
-  void SetPlane(BND_Plane& plane);
-  ON_3dPoint Center() const { return m_circle.Center(); }
-  void SetCenter(ON_3dPoint center);
-  ON_3dVector Normal() const { return m_circle.Normal(); }
-  double Circumference() const { return m_circle.Circumference(); }
-  BND_BoundingBox BoundingBox() const;
-  bool IsInPlane(BND_Plane plane, double tolerance) const;
-  ON_3dPoint PointAt(double t) const;
-  ON_3dVector TangentAt(double t) const { return m_circle.TangentAt(t); }
-  ON_3dVector DerivativeAt(int derivative, double t) const { return m_circle.DerivativeAt(derivative, t); }
-  BND_TUPLE ClosestParameter(ON_3dPoint testPoint) const;
-  ON_3dPoint ClosestPoint(ON_3dPoint testPoint) const { return m_circle.ClosestPointTo(testPoint); }
-  bool Transform(BND_Transform xform);
-  bool Rotate(double sinAngle, double cosAngle, ON_3dVector axis) { return m_circle.Rotate(sinAngle, cosAngle, axis); }
-  bool Rotate(double sinAngle, double cosAngle, ON_3dVector axis, ON_3dPoint point) { return m_circle.Rotate(sinAngle, cosAngle, axis, point); }
-  bool Rotate(double angle, ON_3dVector axis) { return m_circle.Rotate(angle, axis); }
-  bool Rotate(double angle, ON_3dVector axis, ON_3dPoint point) { return m_circle.Rotate(angle, axis, point); }
-  bool Translate(ON_3dVector delta) { return m_circle.Translate(delta); }
-  void Reverse() { m_circle.Reverse(); }
-  class BND_NurbsCurve* ToNurbsCurve() const;
-
-  BND_DICT Encode() const;
-};
+BND_DICT BND_Circle_Encode(const BND_Circle& circle);

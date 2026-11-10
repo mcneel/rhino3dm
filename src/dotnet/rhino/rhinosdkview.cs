@@ -193,6 +193,23 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// Redraws this view without regenerating its contents, when possible.
+    /// </summary>
+    /// <remarks>
+    /// Use this when only what display conduits draw in the DrawOverlay channel has
+    /// changed. If nothing in the document or view has changed since the last frame,
+    /// the previously captured frame is reused and only the overlays are drawn on top
+    /// of it, which is much faster than <see cref="Redraw"/> for expensive scenes such
+    /// as layouts with many details. If something has changed, the view is fully
+    /// redrawn, the same as <see cref="Redraw"/>.
+    /// </remarks>
+    /// <since>9.0</since>
+    public void RedrawOverlays()
+    {
+      UnsafeNativeMethods.CRhinoView_RedrawOverlays(m_runtime_serial_number);
+    }
+
+    /// <summary>
     /// Gets or sets the 'drawing enabled' flag. By default, drawing is enabled.
     /// <para>There are some rare situations where scripts want to disable drawing for a while.</para>
     /// </summary>
@@ -398,7 +415,9 @@ namespace Rhino.Display
       using(var dib = new Runtime.InteropWrappers.RhinoDib())
       {
         var dib_pointer = dib.NonConstPointer;
-        if (UnsafeNativeMethods.CRhinoView_CaptureToBitmap(m_runtime_serial_number, dib_pointer, size.Width, size.Height, const_ptr_attributes))
+        bool rc = UnsafeNativeMethods.CRhinoView_CaptureToBitmap(m_runtime_serial_number, dib_pointer, size.Width, size.Height, const_ptr_attributes);
+        GC.KeepAlive(attributes);
+        if (rc)
         {
           var bitmap = dib.ToBitmap();
           return bitmap;

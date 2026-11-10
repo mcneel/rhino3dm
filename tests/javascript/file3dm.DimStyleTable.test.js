@@ -16,17 +16,18 @@ test('DeleteDimStyle', async () => {
   const ds1 = new rhino.DimensionStyle()
   const ds2 = new rhino.DimensionStyle()
 
-  // .dimstyles().add() is void
-  file3dm.dimstyles().add(ds1)
-  file3dm.dimstyles().add(ds2)
+  // .dimStyles.add() is void
+  file3dm.dimStyles.add(ds1)
+  file3dm.dimStyles.add(ds2)
 
-  const qtyDimStyles1 = file3dm.dimstyles().count
+  const qtyDimStyles1 = file3dm.dimStyles.count
 
-  const id1 = file3dm.dimstyles().get(0).id
+  const item1 = file3dm.dimStyles.get(0)
 
-  file3dm.dimstyles().delete(id1)
+  // D14: delete(item), the id form is gone
+  file3dm.dimStyles.delete(item1)
 
-  const qtyDimStyles2 = file3dm.dimstyles().count
+  const qtyDimStyles2 = file3dm.dimStyles.count
 
   expect(qtyDimStyles1 === 2 && qtyDimStyles2 === 1).toBe(true)
 

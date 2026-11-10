@@ -1,0 +1,24 @@
+rhino3dm.TextureFilter
+======================
+
+.. py:class:: rhino3dm.TextureFilter
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Determines how the color of the image pixel is calculated when the image pixel corresponds to multiple texture bitmap pixels.
+
+
+   .. py:attribute:: Linear
+      :value: 1
+
+
+      Weighted average of corresponding texture pixels.
+
+
+   .. py:attribute:: Nearest
+      :value: 0
+
+
+      Nearest texture pixel is used.
+

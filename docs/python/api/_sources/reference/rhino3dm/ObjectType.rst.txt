@@ -1,0 +1,220 @@
+rhino3dm.ObjectType
+===================
+
+.. py:class:: rhino3dm.ObjectType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines binary mask values for each object type that can be found in a document.
+
+
+   .. py:attribute:: Annotation
+      :value: 512
+
+
+      An annotation.
+
+
+   .. py:attribute:: AnyObject
+      :value: 4294967295
+
+
+      All bits set.
+
+
+   .. py:attribute:: Brep
+      :value: 16
+
+
+      A brep.
+
+
+   .. py:attribute:: BrepLoop
+      :value: 524288
+
+
+      A brep loop.
+
+
+   .. py:attribute:: BrepVertex
+      :value: 1048576
+
+
+      a brep vertex.
+
+
+   .. py:attribute:: Cage
+      :value: 134217728
+
+
+      A cage.
+
+
+   .. py:attribute:: ClipPlane
+      :value: 536870912
+
+
+      A clipping plane.
+
+
+   .. py:attribute:: Curve
+      :value: 4
+
+
+      A curve.
+
+
+   .. py:attribute:: Detail
+      :value: 32768
+
+
+      A detail.
+
+
+   .. py:attribute:: EdgeFilter
+      :value: 4194304
+
+
+      Selection filter value - not a real object type.
+
+
+   .. py:attribute:: Extrusion
+      :value: 1073741824
+
+
+      An extrusion.
+
+
+   .. py:attribute:: Grip
+      :value: 16384
+
+
+      Selection filter value - not a real object type.
+
+
+   .. py:attribute:: Hatch
+      :value: 65536
+
+
+      A hatch.
+
+
+   .. py:attribute:: InstanceDefinition
+      :value: 2048
+
+
+      A block definition.
+
+
+   .. py:attribute:: InstanceReference
+      :value: 4096
+
+
+      A block reference.
+
+
+   .. py:attribute:: Light
+      :value: 256
+
+
+      A rendering light.
+
+
+   .. py:attribute:: Mesh
+      :value: 32
+
+
+      A mesh.
+
+
+   .. py:attribute:: MeshEdge
+      :value: 33554432
+
+
+      A mesh edge.
+
+
+   .. py:attribute:: MeshFace
+      :value: 67108864
+
+
+      A mesh face.
+
+
+   .. py:attribute:: MeshVertex
+      :value: 16777216
+
+
+      A mesh vertex.
+
+
+   .. py:attribute:: MorphControl
+      :value: 131072
+
+
+      A morph control.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``ObjectType.None`` is not Python syntax; ``ObjectType['None']`` is the same member). Nothing.
+
+
+   .. py:attribute:: Phantom
+      :value: 268435456
+
+
+      A phantom object.
+
+
+   .. py:attribute:: Point
+      :value: 1
+
+
+      A point.
+
+
+   .. py:attribute:: PointSet
+      :value: 2
+
+
+      A point set or cloud.
+
+
+   .. py:attribute:: PolyedgeFilter
+      :value: 8388608
+
+
+      Selection filter value - not a real object type.
+
+
+   .. py:attribute:: PolysrfFilter
+      :value: 2097152
+
+
+      Selection filter value - not a real object type.
+
+
+   .. py:attribute:: SubD
+      :value: 262144
+
+
+      A SubD object.
+
+
+   .. py:attribute:: Surface
+      :value: 8
+
+
+      A surface.
+
+
+   .. py:attribute:: TextDot
+      :value: 8192
+
+
+      A text dot.
+

@@ -675,6 +675,7 @@ namespace Rhino.Input.Custom
       IntPtr ptrThis = NonConstPointer();
       IntPtr constPtrObjRef = objref.ConstPointer();
       UnsafeNativeMethods.CRhinoGetObject_AppendToPickList(ptrThis, constPtrObjRef);
+      GC.KeepAlive(objref);
       GC.KeepAlive(this);
     }
 

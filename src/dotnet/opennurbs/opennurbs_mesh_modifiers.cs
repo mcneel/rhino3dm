@@ -373,6 +373,7 @@ namespace Rhino.FileIO
     public void DeleteAllSubItems()
     {
       UnsafeNativeMethods.ON_3dmObjectAttributes_Displacement_DeleteAllSubItems(m_attr.ConstPointer());
+      GC.KeepAlive(m_attr);
     }
 
     /// <summary>
@@ -995,6 +996,20 @@ namespace Rhino.FileIO
     }
 
     /// <summary>
+    /// Adds a curve to the shut-lining that follows the curve object with the given id.
+    /// If the shut-lining already has a curve that follows that object, no curve is added.
+    /// </summary>
+    /// <param name="curveId">The id of a curve object in the model.</param>
+    /// <returns>curveId on success, Guid.Empty if curveId is Guid.Empty.</returns>
+    /// <since>9.2</since>
+    public Guid AddCurve(Guid curveId)
+    {
+      Guid rc = UnsafeNativeMethods.ON_3dmObjectAttributes_ShutLining_AddCurve2(m_attr.NonConstPointer(), curveId);
+      GC.KeepAlive(m_attr);
+      return rc;
+    }
+
+    /// <summary>
     /// Deletes all the curves from the shut-lining.
     /// </summary>
     /// <since>8.0</since>
@@ -1136,7 +1151,9 @@ namespace Rhino.FileIO
     {
       get
       {
-        if (!UnsafeNativeMethods.ON_3dmObjectAttributes_HasDisplacement(m_attr.ConstPointer()))
+        bool has = UnsafeNativeMethods.ON_3dmObjectAttributes_HasDisplacement(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        if (!has)
           return null;
 
         return m_displacement ?? (m_displacement = new File3dmDisplacement(m_attr));
@@ -1152,7 +1169,9 @@ namespace Rhino.FileIO
     {
       get
       {
-        if (!UnsafeNativeMethods.ON_3dmObjectAttributes_HasEdgeSoftening(m_attr.ConstPointer()))
+        bool has = UnsafeNativeMethods.ON_3dmObjectAttributes_HasEdgeSoftening(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        if (!has)
           return null;
 
         return m_edge_softening ?? (m_edge_softening = new File3dmEdgeSoftening(m_attr));
@@ -1168,7 +1187,9 @@ namespace Rhino.FileIO
     {
       get
       {
-        if (!UnsafeNativeMethods.ON_3dmObjectAttributes_HasThickening(m_attr.ConstPointer()))
+        bool has = UnsafeNativeMethods.ON_3dmObjectAttributes_HasThickening(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        if (!has)
           return null;
 
         return m_thickening ?? (m_thickening = new File3dmThickening(m_attr));
@@ -1184,7 +1205,9 @@ namespace Rhino.FileIO
     {
       get
       {
-        if (!UnsafeNativeMethods.ON_3dmObjectAttributes_HasCurvePiping(m_attr.ConstPointer()))
+        bool has = UnsafeNativeMethods.ON_3dmObjectAttributes_HasCurvePiping(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        if (!has)
           return null;
 
         return m_curve_piping ?? (m_curve_piping = new File3dmCurvePiping(m_attr));
@@ -1200,11 +1223,68 @@ namespace Rhino.FileIO
     {
       get
       {
-        if (!UnsafeNativeMethods.ON_3dmObjectAttributes_HasShutLining(m_attr.ConstPointer()))
+        bool has = UnsafeNativeMethods.ON_3dmObjectAttributes_HasShutLining(m_attr.ConstPointer());
+        GC.KeepAlive(m_attr);
+        if (!has)
           return null;
 
         return m_shut_lining ?? (m_shut_lining = new File3dmShutLining(m_attr));
       }
+    }
+
+    /// <summary>
+    /// Returns the object's displacement information, creating it with default values if none is present.
+    /// </summary>
+    /// <since>9.2</since>
+    public File3dmDisplacement CreateDisplacement()
+    {
+      UnsafeNativeMethods.ON_3dmObjectAttributes_CreateDisplacement(m_attr.NonConstPointer());
+      GC.KeepAlive(m_attr);
+      return m_displacement ?? (m_displacement = new File3dmDisplacement(m_attr));
+    }
+
+    /// <summary>
+    /// Returns the object's edge softening information, creating it with default values if none is present.
+    /// </summary>
+    /// <since>9.2</since>
+    public File3dmEdgeSoftening CreateEdgeSoftening()
+    {
+      UnsafeNativeMethods.ON_3dmObjectAttributes_CreateEdgeSoftening(m_attr.NonConstPointer());
+      GC.KeepAlive(m_attr);
+      return m_edge_softening ?? (m_edge_softening = new File3dmEdgeSoftening(m_attr));
+    }
+
+    /// <summary>
+    /// Returns the object's thickening information, creating it with default values if none is present.
+    /// </summary>
+    /// <since>9.2</since>
+    public File3dmThickening CreateThickening()
+    {
+      UnsafeNativeMethods.ON_3dmObjectAttributes_CreateThickening(m_attr.NonConstPointer());
+      GC.KeepAlive(m_attr);
+      return m_thickening ?? (m_thickening = new File3dmThickening(m_attr));
+    }
+
+    /// <summary>
+    /// Returns the object's curve piping information, creating it with default values if none is present.
+    /// </summary>
+    /// <since>9.2</since>
+    public File3dmCurvePiping CreateCurvePiping()
+    {
+      UnsafeNativeMethods.ON_3dmObjectAttributes_CreateCurvePiping(m_attr.NonConstPointer());
+      GC.KeepAlive(m_attr);
+      return m_curve_piping ?? (m_curve_piping = new File3dmCurvePiping(m_attr));
+    }
+
+    /// <summary>
+    /// Returns the object's shut-lining information, creating it with default values if none is present.
+    /// </summary>
+    /// <since>9.2</since>
+    public File3dmShutLining CreateShutLining()
+    {
+      UnsafeNativeMethods.ON_3dmObjectAttributes_CreateShutLining(m_attr.NonConstPointer());
+      GC.KeepAlive(m_attr);
+      return m_shut_lining ?? (m_shut_lining = new File3dmShutLining(m_attr));
     }
   }
 }

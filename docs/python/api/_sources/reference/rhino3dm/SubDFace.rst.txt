@@ -1,0 +1,194 @@
+rhino3dm.SubDFace
+=================
+
+.. py:class:: rhino3dm.SubDFace
+
+   Bases: :py:obj:`SubDComponent`
+
+
+   Single face of a SubD
+
+
+   .. py:method:: ClearSavedSubdivisionPoints(clearNeighborhood: bool) -> None
+
+      Discards the cached subdivision and surface points for this face, so they are recomputed on next use.
+
+      :param clearNeighborhood: If true, the cached points of the neighboring components are discarded too. Moving a control net point changes the surface around it, not just at it, so pass true after an edit unless you know only this face is affected.
+
+
+
+   .. py:method:: ComponentIndex() -> ComponentIndex
+
+      Gets the component index of this face.
+
+      :returns: The component index.
+
+
+
+   .. py:method:: EdgeAt(index: int) -> SubDEdge
+
+      Get an edge at a given index
+
+
+
+   .. py:method:: EdgeDirectionMatchesFaceOrientation(index: int) -> bool
+
+      Check if a given edge in this face has the same direction as the face orientation
+
+
+
+   .. py:method:: IsPlanar(planarTolerance: float) -> bool
+
+      Determines whether the face's control net polygon is planar. False also for a degenerate face (a zero ``ControlNetCenterNormal`` or an invalid ``ControlNetCenterPoint``): test those first when "not planar" and "cannot tell" must be told apart.
+
+      :param planarTolerance: Distance tolerance.
+
+      :returns: True if the control net polygon is planar.
+
+
+
+   .. py:method:: TexturePoint(index: int) -> Point3d
+
+      Gets one of the face's texture points.
+
+      :param index: Index of the face corner.
+
+      :returns: The texture point, or Point3d.Unset if none is set.
+
+
+
+   .. py:method:: VertexAt(index: int) -> SubDVertex
+
+      Get a vertex that this face uses by index
+
+
+
+   .. py:property:: ControlNetCenterFrame
+      :type: Plane
+
+
+      The face's control net center frame is a plane with normal equal to ControlNetCenterNormal and origin equal to ControlNetCenterPoint. The x and y axes of the frame have no predictable relationship to the face or SubD control net topology.
+
+
+   .. py:property:: ControlNetCenterNormal
+      :type: Vector3d
+
+
+      When the face's control net polygon is planar, the face's control net normal is a unit vector perpendicular to the plane that points outwards. If the control net polygon is not planar, the control net normal is control net normal is a unit vector that is the average of the control polygon's corner normals.
+
+
+   .. py:property:: ControlNetCenterPoint
+      :type: Point3d
+
+
+      The face's control net center point is the average of the face's vertex control net points. This is the same point as the face's subdivision point.
+
+
+   .. py:property:: EdgeCount
+      :type: int
+
+
+      Number of edges for this face. Note that EdgeCount is always the same as VertexCount. Two properties are provided simply for clarity.
+
+
+   .. py:property:: Edges
+      :type: list[Any]
+
+
+      The face's edges, in order around the face (rhino3dm only).
+
+
+   .. py:property:: HasEdges
+      :type: bool
+
+
+      Gets true if the face has edges.
+
+
+   .. py:property:: HasSharpEdges
+      :type: bool
+
+
+      Gets true if at least one of the face's edges is sharp.
+
+
+   .. py:property:: IsConvex
+      :type: bool
+
+
+      test that first when "not convex" and "cannot tell" must be told apart.
+
+      :type: Gets true if the face's control net polygon is convex with respect to the plane ControlNetCenterFrame. False also for a degenerate face (a zero ``ControlNetCenterNormal``)
+
+
+   .. py:property:: MaterialChannelIndex
+      :type: int
+
+
+      Gets the face's per-face material channel index (0 when none is set).
+
+
+   .. py:property:: MaximumEdgeSharpness
+      :type: float
+
+
+      Gets the largest sharpness of the face's edges (0.0 when none is sharp).
+
+
+   .. py:property:: PerFaceColor
+      :type: tuple[int, int, int, int]
+
+
+      If per-face color is "Empty", then this face does not have a custom color
+
+
+   .. py:property:: SharpEdgeCount
+      :type: int
+
+
+      Gets the number of the face's edges that are sharp.
+
+
+   .. py:property:: SubdivisionPoint
+      :type: Point3d
+
+
+      the center point after one subdivision.
+
+      :type: Gets the face's subdivision point
+
+
+   .. py:property:: TextureCenterPoint
+      :type: Point3d
+
+
+      Gets the average of the face's texture points.
+
+
+   .. py:property:: TexturePointsAreSet
+      :type: bool
+
+
+      Gets true if the face has custom texture points.
+
+
+   .. py:property:: TexturePointsCapacity
+      :type: int
+
+
+      Gets the number of texture points the face can hold.
+
+
+   .. py:property:: VertexCount
+      :type: int
+
+
+      Number of vertices for this face. Note that EdgeCount is always the same as VertexCount. Two properties are provided simply for clarity.
+
+
+   .. py:property:: Vertices
+      :type: list[Any]
+
+
+      The face's vertices, in order around the face (rhino3dm only).
+

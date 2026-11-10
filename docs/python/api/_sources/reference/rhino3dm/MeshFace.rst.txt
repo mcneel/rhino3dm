@@ -1,0 +1,149 @@
+rhino3dm.MeshFace
+=================
+
+.. py:class:: rhino3dm.MeshFace
+              MeshFace(a: int, b: int, c: int)
+              MeshFace(a: int, b: int, c: int, d: int)
+
+   Represents the values of the four indices of a mesh face quad.
+
+   If the third and fourth values are the same, this face represents a triangle.
+
+
+   .. py:method:: CompareTo(other: MeshFace) -> int
+
+      Compares this ``MeshFace`` with another ``MeshFace`` and returns a value of 1, 0, or -1, referring to dictionary order.
+
+      Index evaluation priority is first A, then B, then C, then D.
+
+      :param other: The other ``MeshFace`` to use in comparison.
+
+      :returns: if this is identical to other
+                -1: if this < other. Priority is for index of corner A first, then B, then C, then D.
+                +1: otherwise.
+      :rtype: 0
+
+
+
+   .. py:method:: Equals(other: MeshFace) -> bool
+
+      Returns a value indicating whether the other mesh face has precisely the same value as the current one.
+
+      :param other: The other mesh face for comparison.
+
+      :returns: true if the other face is, also orderly, equal to the present one; otherwise false.
+
+
+
+   .. py:method:: Flip() -> MeshFace
+
+      Reverses the orientation of the face by swapping corners. The first corner is always maintained.
+
+
+
+   .. py:method:: GetHashCode() -> int
+
+      Returns a runtime-stable hash code for the current mesh face. You are not allowed to rely on persistence of this hash code in serialization, but for each version of RhinoCommon, this hash code will be the same for each mesh face.
+
+      :returns: A non-unique integer that represents this mesh face.
+
+
+
+   .. py:method:: IsValid() -> bool
+                  IsValid(vertexCount: int) -> bool
+                  IsValid(points: collections.abc.Sequence[Point3d]) -> bool
+
+      Gets a value indicating whether or not this mesh face is considered to be valid. Unlike the simple IsValid function, this function takes actual point locations into account.
+
+      :param points: Array of vertices with which to validate the face.
+
+      :returns: true if the face is considered valid, false if not.
+
+
+
+   .. py:method:: IsValidEx(points: collections.abc.Sequence[Point3d]) -> bool
+
+
+   .. py:method:: Repair(points: collections.abc.Sequence[Point3d]) -> bool
+
+      Attempts to repair this mesh face by taking both face indexes and actual vertex locations into account.
+
+      This function assumes the face is invalid and attempts to repair unconditionally. It is only worthwhile to call Repair on faces where IsValid returns false.
+
+      :param points: Array of vertices with which to consider when repairing the face.
+
+      :returns: true if the face was repaired, false if not.
+
+
+
+   .. py:method:: Set(a: int, b: int, c: int) -> None
+                  Set(a: int, b: int, c: int, d: int) -> None
+
+      Sets all the corners for this face as a quad.
+
+      :param a: Index of first corner.
+      :param b: Index of second corner.
+      :param c: Index of third corner.
+      :param d: Index of fourth corner.
+
+
+
+   .. py:method:: ToString() -> str
+
+      Returns a string representation for this ``MeshFace``. This is to provide a meaningful visualization of this structure and is subject to change in newer releases.
+
+      :returns: The string representation.
+
+
+
+   .. py:property:: A
+      :type: int
+
+
+      Gets or sets the first corner index of the mesh face.
+
+
+   .. py:property:: B
+      :type: int
+
+
+      Gets or sets the second corner index of the mesh face.
+
+
+   .. py:property:: C
+      :type: int
+
+
+      Gets or sets the third corner index of the mesh face.
+
+
+   .. py:property:: D
+      :type: int
+
+
+      Gets or sets the fourth corner index of the mesh face. If D equals C, the mesh face is considered to be a triangle rather than a quad.
+
+
+   .. py:property:: IsQuad
+      :type: bool
+
+
+      Gets a value indicating whether or not this mesh face is a quad. A mesh face is considered to be a triangle when C does not equal D, thus it is possible for an Invalid mesh face to also be a quad.
+
+
+   .. py:property:: IsTriangle
+      :type: bool
+
+
+      Gets a value indicating whether or not this mesh face is a triangle. A mesh face is considered to be a triangle when C equals D, thus it is possible for an Invalid mesh face to also be a triangle.
+
+
+   .. py:attribute:: Unset
+      :type:  MeshFace
+      :value: Ellipsis
+
+
+      object, /) -> MeshFace
+
+      :type: (arg
+

@@ -2666,6 +2666,8 @@ namespace Rhino.DocObjects
         }
 
         UnsafeNativeMethods.Rdk_CustomRenderMeshes_IManager_CustomMeshes((int)mt, primitives.NonConstPointer(), vp_ptr, Document.RuntimeSerialNumber, Id, ref f, null == plugin ? IntPtr.Zero : plugin.NonConstPointer(), attrs == null ? IntPtr.Zero : attrs.ConstPointer(), IntPtr.Zero);
+        GC.KeepAlive(vp);
+        GC.KeepAlive(attrs);
 
         flags = (RenderMeshProvider.Flags)f;
 
@@ -3525,7 +3527,9 @@ namespace Rhino.DocObjects
     public bool SetHistory(HistoryRecord history)
     {
       var p_this = NonConstPointer_I_KnowWhatImDoing();
-      return UnsafeNativeMethods.CRhinoObject_SetHistory(p_this, history.Handle);
+      bool rc = UnsafeNativeMethods.CRhinoObject_SetHistory(p_this, history.Handle);
+      GC.KeepAlive(history);
+      return rc;
     }
 
     /// <summary>
@@ -3986,6 +3990,23 @@ namespace Rhino.DocObjects
     {
       var ptr_brep_trim = UnsafeNativeMethods.CRhinoObjRef_Trim(m_ptr);
       return ObjRefToGeometryHelper(ptr_brep_trim) as BrepTrim;
+    }
+
+    /// <summary>
+    /// If the referenced geometry is a brep vertex, this returns the brep vertex.
+    /// </summary>
+    /// <returns>A boundary representation vertex; or null if the referenced geometry is not a brep vertex, or on error.</returns>
+    /// <since>9.0</since>
+    public BrepVertex Vertex()
+    {
+      // 13-Oct-2026 Dale Fugier, https://mcneel.myjetbrains.com/youtrack/issue/RH-49202
+      ComponentIndex ci = GeometryComponentIndex;
+      if (ci.ComponentIndexType != ComponentIndexType.BrepVertex)
+        return null;
+      Brep brep = Brep();
+      if (null == brep || ci.Index < 0 || ci.Index >= brep.Vertices.Count)
+        return null;
+      return brep.Vertices[ci.Index];
     }
 
     /// <summary>

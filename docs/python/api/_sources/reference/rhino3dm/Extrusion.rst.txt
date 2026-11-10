@@ -1,0 +1,308 @@
+rhino3dm.Extrusion
+==================
+
+.. py:class:: rhino3dm.Extrusion
+
+   Bases: :py:obj:`Surface`
+
+
+   Represents an extrusion, or objects such as beams or linearly extruded elements, that can be represented by profile curves and two miter planes at the extremes.
+
+
+   .. py:method:: AddInnerProfile(innerProfile: Curve) -> bool
+
+      Adds an inner profile.
+
+      :param innerProfile: Closed curve in the XY plane or a 2d curve.
+
+      :returns: true if the profile was set.
+
+
+
+   .. py:method:: Create(curve: Curve, plane: Plane, height: float, cap: bool) -> Extrusion
+                  Create(planarCurve: Curve, height: float, cap: bool) -> Extrusion
+      :staticmethod:
+
+
+      Creates an extrusion of a 3d curve (which must be planar) and a height.
+
+      :param planarCurve: Planar curve used as profile
+      :param height: If the height > 0, the bottom of the extrusion will be in plane and the top will be height units above the plane. If the height < 0, the top of the extrusion will be in plane and the bottom will be height units below the plane. The plane used is the one that is returned from the curve's TryGetPlane function.
+      :param cap: If the curve is closed and cap is true, then the resulting extrusion is capped.
+
+      :returns: If the input is valid, then a new extrusion is returned. Otherwise null is returned
+
+
+
+   .. py:method:: CreateBoxExtrusion(box: Box, cap: bool) -> Extrusion
+      :staticmethod:
+
+
+      Gets an extrusion from a box.
+
+      :param box: IsValid must be true.
+      :param cap: If true, the base and the top of the box will be capped. Defaults to true.
+
+      :returns: Extrusion on success. null on failure.
+
+
+
+   .. py:method:: CreateCylinderExtrusion(cylinder: Cylinder, capBottom: bool, capTop: bool) -> Extrusion
+      :staticmethod:
+
+
+      Gets an extrusion form of a cylinder.
+
+      :param cylinder: IsFinite must be true.
+      :param capBottom: If true, the end at cylinder.Height1 will be capped.
+      :param capTop: If true, the end at cylinder.Height2 will be capped.
+
+      :returns: Extrusion on success. null on failure.
+
+
+
+   .. py:method:: CreatePipeExtrusion(cylinder: Cylinder, otherRadius: float, capTop: bool, capBottom: bool) -> Extrusion
+      :staticmethod:
+
+
+      Gets an extrusion form of a pipe.
+
+      :param cylinder: IsFinite must be true.
+      :param otherRadius: If cylinder.Radius is less than other radius, then the cylinder will be the inside of the pipe.
+      :param capTop: If true, the end at cylinder.Height2 will be capped.
+      :param capBottom: If true, the end at cylinder.Height1 will be capped.
+
+      :returns: Extrusion on success. null on failure.
+
+
+
+   .. py:method:: GetBrepFormComponentIndex(extrusionComponentIndex: ComponentIndex) -> ComponentIndex
+
+      Convert a component index that identifies a part of this extrusion to a component index that identifies a part of the Brep created by Extrusion.ToBrep(false).
+
+      :param extrusionComponentIndex: The extrusion component index.
+
+      :returns: The Brep component index if successful. Otherwise, ``ComponentIndex.Unset`` is returned.
+
+
+
+   .. py:method:: GetMesh(meshType: MeshType) -> Mesh
+
+      Obtains a reference to a specified type of mesh for this extrusion.
+
+      :param meshType: The mesh type.
+
+      :returns: A mesh.
+
+
+
+   .. py:method:: GetPathPlane(s: float) -> Plane
+
+      Gets the 3D plane perpendicular to the path at a normalized path parameter.
+
+      When no mitering is happening, GetPathPlane() and GetProfilePlane() return the same plane.
+
+      :param s: 0.0 = starting profile 1.0 = ending profile.
+
+      :returns: A plane. The plane is Invalid on failure.
+
+
+
+   .. py:method:: GetProfilePlane(s: float) -> Plane
+
+      Gets the 3D plane containing the profile curve at a normalized path parameter.
+
+      When no mitering is happening, GetPathPlane() and GetProfilePlane() return the same plane.
+
+      :param s: 0.0 = starting profile 1.0 = ending profile.
+
+      :returns: A plane. The plane is Invalid on failure.
+
+
+
+   .. py:method:: GetProfileTransformation(s: float) -> Transform
+
+      Gets the transformation that maps the XY profile curve to its 3d location.
+
+      :param s: 0.0 = starting profile 1.0 = ending profile.
+
+      :returns: A Transformation. The transform is Invalid on failure.
+
+
+
+   .. py:method:: PathLineCurve() -> LineCurve
+
+      Gets the line-like curve that is the conceptual axis of the extrusion.
+
+      :returns: The path as a line curve.
+
+
+
+   .. py:method:: Profile3d(ci: ComponentIndex) -> Curve
+                  Profile3d(profileIndex: int, s: float) -> Curve
+
+      Gets a transversal isocurve of the extruded profile.
+
+      :param profileIndex: 0 <= profileIndex < ProfileCount The outer profile has index 0.
+      :param s: 0.0 <= s <= 1.0 A relative parameter controlling which profile is returned. 0 = bottom profile and 1 = top profile.
+
+      :returns: The profile.
+
+
+
+   .. py:method:: ProfileIndex(profileParameter: float) -> int
+
+      Gets the index of the profile curve at a domain related to a parameter.
+
+      :param profileParameter: Parameter on profile curve.
+
+      :returns: -1 if profileParameter does not correspond to a point on the profile curve. When the profileParameter corresponds to the end of one profile and the beginning of the next profile, the index of the next profile is returned.
+
+
+
+   .. py:method:: SetMesh(mesh: Mesh | None, meshType: MeshType) -> bool
+
+      Sets a specified type of mesh for this extrusion.
+
+      :param mesh: The mesh.
+      :param meshType: The mesh type.
+
+      :returns: True on success.
+
+
+
+   .. py:method:: SetOuterProfile(outerProfile: Curve, cap: bool) -> bool
+
+      Sets the outer profile of the extrusion.
+
+      :param outerProfile: curve in the XY plane or a 2D curve.
+      :param cap: If outerProfile is a closed curve, then cap determines if the extrusion has end caps. If outerProfile is an open curve, cap is ignored.
+
+      :returns: true if the profile was set. If the outer profile is closed, then the extrusion may also have inner profiles. If the outer profile is open, the extrusion may not have inner profiles. If the extrusion already has a profile, the set will fail.
+
+
+
+   .. py:method:: SetPathAndUp(a: Point3d, b: Point3d, up: Vector3d) -> bool
+
+      Allows to set the two points at the extremes and the up vector.
+
+      :param a: The start point.
+      :param b: The end point.
+      :param up: The up vector.
+
+      :returns: true if the operation succeeded; otherwise false. Setting up=a-b will make the operation fail.
+
+
+
+   .. py:method:: ToBrep(splitKinkyFaces: bool) -> Brep
+                  ToBrep() -> Brep
+
+      Converts the surface into a Brep.
+
+      :returns: A Brep with a similar shape like this surface or null.
+
+
+
+   .. py:method:: WallEdge(ci: ComponentIndex) -> Curve
+
+      Gets one of the longitudinal curves along the beam or extrusion.
+
+      :param ci: The index of this profile.
+
+      :returns: The profile.
+
+
+
+   .. py:method:: WallSurface(ci: ComponentIndex) -> Surface
+
+      Gets one of the longitudinal surfaces of the extrusion.
+
+      :param ci: The index specifying which precise item to retrieve.
+
+      :returns: The surface.
+
+
+
+   .. py:property:: CapCount
+      :type: int
+
+
+      Gets the amount of capping surfaces.
+
+
+   .. py:property:: IsCappedAtBottom
+      :type: bool
+
+
+      Gets a value indicating whether the surface that fills the bottom profile is existing.
+
+
+   .. py:property:: IsCappedAtTop
+      :type: bool
+
+
+      Gets a value indicating whether the surface that fills the top profile is existing.
+
+
+   .. py:property:: IsMiteredAtEnd
+      :type: bool
+
+
+      Gets a value indicating whether a miter plane at the end is defined.
+
+
+   .. py:property:: IsMiteredAtStart
+      :type: bool
+
+
+      Returns a value indicating whether a miter plane at start is defined.
+
+
+   .. py:property:: IsSolid
+      :type: bool
+
+
+      Gets a value indicating whether there is no gap among all surfaces constructing this object.
+
+
+   .. py:property:: MiterPlaneNormalAtEnd
+      :type: Vector3d
+
+
+      Gets or sets the normal of the miter plane at the end in profile coordinates. In profile coordinates, 0,0,1 always maps to the extrusion axis
+
+
+   .. py:property:: MiterPlaneNormalAtStart
+      :type: Vector3d
+
+
+      Gets or sets the normal of the miter plane at the start in profile coordinates. In profile coordinates, 0,0,1 always maps to the extrusion axis
+
+
+   .. py:property:: PathEnd
+      :type: Point3d
+
+
+      Gets the end point of the path.
+
+
+   .. py:property:: PathStart
+      :type: Point3d
+
+
+      Gets the start point of the path.
+
+
+   .. py:property:: PathTangent
+      :type: Vector3d
+
+
+      Gets the up vector of the path.
+
+
+   .. py:property:: ProfileCount
+      :type: int
+
+
+      Gets the amount of profile curves.
+

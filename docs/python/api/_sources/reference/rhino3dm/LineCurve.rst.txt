@@ -1,0 +1,22 @@
+rhino3dm.LineCurve
+==================
+
+.. py:class:: rhino3dm.LineCurve
+              LineCurve(line: Line)
+              LineCurve(line: Line, t0: float, t1: float)
+              LineCurve(other: LineCurve | None)
+              LineCurve(from_: Point2d, to: Point2d)
+              LineCurve(from_: Point3d, to: Point3d)
+
+   Bases: :py:obj:`Curve`
+
+
+   Represents a linear curve.
+
+
+   .. py:property:: Line
+      :type: Line
+
+
+      Gets or sets the Line value inside this curve.
+

@@ -1,0 +1,25 @@
+rhino3dm.DateTimeKind
+=====================
+
+.. py:class:: rhino3dm.DateTimeKind
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Enum where members are also (and must be) ints
+
+
+   .. py:attribute:: Local
+      :value: 2
+
+
+
+   .. py:attribute:: Unspecified
+      :value: 0
+
+
+
+   .. py:attribute:: Utc
+      :value: 1
+
+

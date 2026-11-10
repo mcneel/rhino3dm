@@ -1,0 +1,249 @@
+# Docs for the members rhino3dm adds to RhinoCommon's API (no RhinoCommon doc comment to take them
+# from): tools/docs reads this after api/docs.json. Keys are `Class.Member`, `Class.Member(args)` for
+# one overload, or `*.Member` for every class. Fields: summary, params (table), returns, since.
+# Value types' default, copy and sequence constructors are documented by tools/docs/pyi.py itself.
+
+["*.Encode"]
+summary = "This object as a JSON-compatible dict (rhino3dm only; inverse: `Decode`)."
+returns = "A dict of numbers and strings: geometry and other objects are stored as their 3dm archive, base64 encoded, with the archive version."
+
+["*.Decode"]
+summary = "The object a dict from `Encode` describes (rhino3dm only)."
+params = { jsonObject = "A dict as `Encode` returns it." }
+
+["BoundingBox.Encode"]
+summary = "This box as a JSON-compatible dict: `{'Min': {'X', 'Y', 'Z'}, 'Max': {...}}` (rhino3dm only; inverse: `BoundingBox.Decode`)."
+
+["Plane.Encode"]
+summary = "This plane as a JSON-compatible dict: `Origin`, `XAxis`, `YAxis`, `ZAxis`, each `{'X', 'Y', 'Z'}` (rhino3dm only; inverse: `Plane.Decode`)."
+
+["Circle.Encode"]
+summary = "This circle as a JSON-compatible dict: `{'radius': float, 'plane': <Plane.Encode>}` (rhino3dm only)."
+
+["MeshingParameters.Encode"]
+summary = "These settings as a JSON-compatible dict, one key per property (rhino3dm only; inverse: `MeshingParameters.Decode`)."
+
+["File3dm.Encode"]
+summary = "The model as a .3dm file, base64 encoded (rhino3dm only; inverse: `File3dm.Decode`)."
+params = { options = "How to write the file (version, what to include); the default when omitted." }
+returns = "The .3dm bytes as a base64 string."
+
+["File3dm.Decode"]
+summary = "A model read from a base64-encoded .3dm file, as `File3dm.Encode` writes it (rhino3dm only)."
+params = { buffer = "The .3dm bytes, base64 encoded." }
+returns = "The model, or None when the bytes are not a .3dm file."
+
+["File3dm.Bitmaps"]
+summary = "The model's embedded bitmaps (rhino3dm only)."
+
+["File3dm.GetEmbeddedFileAsBase64"]
+summary = "The bytes of a file embedded in the model, base64 encoded (rhino3dm only)."
+params = { path = "The embedded file's path, or (not strict) just its name.", strict = "True: the path must match exactly, case included. False (the default): the path or the file name matches, ignoring case." }
+returns = "The file's bytes as a base64 string, empty when no embedded file matches."
+remarks = "Finds only the files Rhino's renderer embedded, not ones added with EmbeddedFiles.Add. To read any embedded file, take it from File3dm.EmbeddedFiles and call its ToByteArray()."
+
+["*.RdkXml"]
+summary = "The object's render data (RDK) as XML (rhino3dm only)."
+returns = "The XML text, empty when the object has none."
+
+["*.SetUserString"]
+summary = "Attaches a named string to this object (rhino3dm only)."
+params = { key = "The string's name.", value = "The text; an empty string removes the key." }
+returns = "True on success."
+
+["*.GetUserString"]
+summary = "The named string attached to this object (rhino3dm only)."
+params = { key = "The string's name." }
+returns = "The text, empty when the key is not set."
+
+["*.UserStringCount"]
+summary = "The number of named strings attached to this object (rhino3dm only)."
+
+["*.GetUserStrings"]
+summary = "Every named string attached to this object (rhino3dm only)."
+returns = "A list of `[key, value]` pairs."
+
+["PointCloud.Add(point, value)"]
+summary = "Appends a point with a value (rhino3dm only; RhinoCommon takes the value with a normal and a color)."
+params = { point = "The point.", value = "The point's value." }
+
+["PointCloud.AddRange(points, values)"]
+summary = "Appends points with their values (rhino3dm only)."
+params = { points = "The points.", values = "One value per point." }
+
+["PointCloud.Insert(index, point, value)"]
+summary = "Inserts a point with a value (rhino3dm only)."
+params = { index = "Where the point goes: 0 to `Count`.", point = "The point.", value = "The point's value." }
+
+["SubDFace.Edges"]
+summary = "The face's edges, in order around the face (rhino3dm only)."
+
+["SubDFace.Vertices"]
+summary = "The face's vertices, in order around the face (rhino3dm only)."
+
+["SubDEdge.Faces"]
+summary = "The faces attached to this edge (rhino3dm only)."
+
+["SubDEdge.Vertices"]
+summary = "The edge's two vertices, start then end (rhino3dm only)."
+
+["SubDVertex.Faces"]
+summary = "The faces attached to this vertex (rhino3dm only)."
+
+["File3dmGroupTable.Delete(id)"]
+summary = "Removes the group with this id (rhino3dm only)."
+params = { id = "The group's id." }
+returns = "True when a group was removed."
+
+["File3dmEmbeddedFiles.Add(embeddedFile)"]
+summary = "Adds a copy of an embedded file to the model, under its file name (rhino3dm only)."
+params = { embeddedFile = "The embedded file, from File3dmEmbeddedFile.Read (or, in JS, fromByteArray)." }
+returns = "true when it was added; false when the embedded file has no data."
+
+["File3dmEmbeddedFile.ToByteArray"]
+summary = "The embedded file's bytes (rhino3dm only): empty when it has no data. JS gets a Uint8Array, Python bytes."
+
+["File3dmEmbeddedFile.Read"]
+summary = "An embedded file loaded from disk, ready to add to a model (rhino3dm only)."
+params = { fileName = "The file to load." }
+returns = "The embedded file, or None when the file cannot be read."
+
+["File3dmRenderMaterials.Add"]
+summary = "Adds a render material to the model (rhino3dm only)."
+
+["File3dmRenderEnvironments.Add"]
+summary = "Adds a render environment to the model (rhino3dm only)."
+
+["File3dmRenderTextures.Add"]
+summary = "Adds a render texture to the model (rhino3dm only)."
+
+["Bitmap"]
+summary = "An image stored in a .3dm file (rhino3dm only; RhinoCommon has no file bitmap class)."
+
+["Bitmap.__init__"]
+summary = "An empty bitmap."
+
+["Bitmap.Width"]
+summary = "The image width in pixels."
+
+["Bitmap.Height"]
+summary = "The image height in pixels."
+
+["Bitmap.BitsPerPixel"]
+summary = "The bits per pixel."
+
+["Bitmap.SizeOfScan"]
+summary = "The bytes in one row of pixels."
+
+["Bitmap.SizeOfImage"]
+summary = "The bytes of image data."
+
+["Bitmap.FileFullPath"]
+summary = "The full path of the image file the bitmap came from."
+
+["File3dmBitmapTable"]
+summary = "The bitmaps embedded in a .3dm file (rhino3dm only)."
+
+["File3dmBitmapTable.Count"]
+summary = "The number of bitmaps."
+
+["File3dmBitmapTable.Add"]
+summary = "Adds a copy of a bitmap to the model."
+params = { bitmap = "The bitmap to add." }
+returns = "The model's copy, or None when the model does not take it."
+
+["File3dmBitmapTable.Delete"]
+summary = "Removes the bitmap with this id."
+params = { id = "The bitmap's id." }
+returns = "True when a bitmap was removed."
+
+["File3dmBitmapTable.FindIndex"]
+summary = "The bitmap at a position in the table (bitmaps have no model index: the position among the file's bitmaps)."
+params = { index = "0 to `Count - 1`." }
+returns = "The bitmap, or None when the index is out of range."
+
+["File3dmBitmapTable.FindId"]
+summary = "The bitmap with this id."
+params = { id = "The bitmap's id." }
+returns = "The bitmap, or None when there is none."
+
+["ArchivableDictionary.EncodeDict"]
+summary = "A dict of values as an ArchivableDictionary, in `Encode`'s JSON form (rhino3dm only; inverse: `ArchivableDictionary.DecodeDict`)."
+params = { dict = "A dict of strings, numbers, booleans, points, vectors, and other rhino3dm objects." }
+
+["ArchivableDictionary.DecodeDict"]
+summary = "The dict an `EncodeDict` result describes (rhino3dm only)."
+params = { jsonObject = "A dict as `EncodeDict` returns it." }
+
+# ---- JS only: `ts` is the TypeScript declaration (tools/docs/dts.py) -----------------------------
+
+["Mesh.toThreejsBuffers"]
+summary = "The mesh as three.js BufferGeometry attributes (JS only): typed arrays to wrap in `THREE.BufferAttribute`. Quads are split into two triangles; normals are computed on a copy when the mesh has none."
+params = { rotateToYUp = "True: rotate Rhino's Z-up to three.js's Y-up." }
+ts = "toThreejsBuffers(rotateToYUp: boolean): { position: Float32Array, normal: Float32Array, index: Uint32Array, vertexCount: number, uv?: Float32Array, color?: Float32Array }"
+
+["Mesh.createFromThreejsBuffers"]
+summary = "A mesh from three.js BufferGeometry attributes (JS only; inverse: `toThreejsBuffers`). Without `index`, every three vertices are a triangle."
+params = { buffers = "`position` (required), and optionally `index`, `normal`, `uv`, `color`: typed arrays or plain arrays.", rotateFromYUp = "True: rotate three.js's Y-up back to Rhino's Z-up." }
+ts = "static createFromThreejsBuffers(buffers: { position: ArrayLike<number>, index?: ArrayLike<number>, normal?: ArrayLike<number>, uv?: ArrayLike<number>, color?: ArrayLike<number> }, rotateFromYUp: boolean): Mesh"
+
+["Mesh.toThreejsJSON"]
+summary = "The mesh as three.js BufferGeometry JSON (JS only)."
+deprecated = "9.2: use `toThreejsBuffers(false)`"
+ts = "toThreejsJSON(): any"
+
+["Mesh.toThreejsJSONRotate"]
+summary = "The mesh as three.js BufferGeometry JSON, optionally rotated to Y-up (JS only)."
+deprecated = "9.2: use `toThreejsBuffers(rotateToYUp)`"
+ts = "toThreejsJSONRotate(rotateToYUp: boolean): any"
+
+["Mesh.toThreejsJSONMerged"]
+summary = "Several meshes as one three.js BufferGeometry JSON (JS only)."
+deprecated = "9.2: append the meshes into one and use `toThreejsBuffers`"
+ts = "static toThreejsJSONMerged(meshes: Mesh[], rotateYUp: boolean): any"
+
+["Mesh.createFromThreejsJSON"]
+summary = "A mesh from three.js BufferGeometry JSON (JS only)."
+deprecated = "9.2: use `createFromThreejsBuffers(buffers, true)`"
+ts = "static createFromThreejsJSON(data: any): Mesh | null"
+
+["PointCloud.toThreejsBuffers"]
+summary = "The point cloud as three.js BufferGeometry attributes (JS only)."
+params = { rotateToYUp = "True: rotate Rhino's Z-up to three.js's Y-up." }
+ts = "toThreejsBuffers(rotateToYUp: boolean): { position: Float32Array, pointCount: number, color?: Float32Array, normal?: Float32Array }"
+
+["PointCloud.createFromThreejsBuffers"]
+summary = "A point cloud from three.js BufferGeometry attributes (JS only; inverse: `toThreejsBuffers`)."
+params = { buffers = "`position` (required), and optionally `color`, `normal`.", rotateFromYUp = "True: rotate three.js's Y-up back to Rhino's Z-up." }
+ts = "static createFromThreejsBuffers(buffers: { position: ArrayLike<number>, color?: ArrayLike<number>, normal?: ArrayLike<number> }, rotateFromYUp: boolean): PointCloud"
+
+["PointCloud.toThreejsJSON"]
+summary = "The point cloud as three.js BufferGeometry JSON (JS only)."
+deprecated = "9.2: use `toThreejsBuffers(false)`"
+ts = "toThreejsJSON(): any"
+
+["PointCloud.createFromThreejsJSON"]
+summary = "A point cloud from three.js BufferGeometry JSON (JS only)."
+deprecated = "9.2: use `createFromThreejsBuffers(buffers, true)`"
+ts = "static createFromThreejsJSON(data: any): PointCloud | null"
+
+["*.toJSON"]
+summary = "`encode()`'s object, for `JSON.stringify` (JS only)."
+ts = "toJSON(key?: any): Record<string, any>"
+
+["File3dm.fromByteArray"]
+summary = "A model read from .3dm file bytes."
+params = { bytes = "The file's bytes." }
+ts = "static fromByteArray(bytes: Uint8Array): File3dm | null"
+
+["File3dmEmbeddedFile.fromByteArray"]
+summary = "An embedded file from its bytes, named `filename` when given: the name it is embedded under (JS only). Add it with `file3dm.embeddedFiles.add(embeddedFile)`."
+params = { bytes = "The file's bytes.", filename = "The name to embed it under." }
+ts = ["static fromByteArray(bytes: Uint8Array): File3dmEmbeddedFile | null", "static fromByteArray(bytes: Uint8Array, filename: string): File3dmEmbeddedFile | null"]
+
+["Decals.__len__"]
+summary = "The number of decals iteration yields: the visible ones (rhino3dm only; RhinoCommon's Decals is enumerable only)."
+
+["Decals.count"]
+summary = "The number of decals iteration yields: the visible ones (rhino3dm only)."
+ts = "readonly count: number"

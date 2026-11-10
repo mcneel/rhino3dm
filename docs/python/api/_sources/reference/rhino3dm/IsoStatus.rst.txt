@@ -1,0 +1,61 @@
+rhino3dm.IsoStatus
+==================
+
+.. py:class:: rhino3dm.IsoStatus
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated values for isoparametric curve direction on a surface, such as X or Y, and curve sides, such as North or West boundary.
+
+   Note: odd values are all x-constant; even values > 0 are all y-constant.
+
+
+   .. py:attribute:: East
+      :value: 5
+
+
+      curve is a "x" = constant isoparametric curve along the east side of the surface's domain.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``IsoStatus.None`` is not Python syntax; ``IsoStatus['None']`` is the same member). curve is not an isoparametric curve.
+
+
+   .. py:attribute:: North
+      :value: 6
+
+
+      curve is a "y" = constant isoparametric curve along the north side of the surface's domain.
+
+
+   .. py:attribute:: South
+      :value: 4
+
+
+      curve is a "y" = constant isoparametric curve along the south side of the surface's domain.
+
+
+   .. py:attribute:: West
+      :value: 3
+
+
+      curve is a "x" = constant isoparametric curve along the west side of the surface's domain.
+
+
+   .. py:attribute:: X
+      :value: 1
+
+
+      curve is a "x" = constant (vertical) isoparametric curve in the interior of the surface's domain.
+
+
+   .. py:attribute:: Y
+      :value: 2
+
+
+      curve is a "y" = constant (horizontal) isoparametric curve in the interior of the surface's domain.
+

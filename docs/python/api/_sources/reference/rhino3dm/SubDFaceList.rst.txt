@@ -1,0 +1,39 @@
+rhino3dm.SubDFaceList
+=====================
+
+.. py:class:: rhino3dm.SubDFaceList
+
+   All faces in a SubD
+
+
+   .. py:method:: ClearPerFaceColors() -> int
+
+      Removes all per face color overrides on the active level.
+
+      Per face colors are a mutable property on ``SubDFace`` and are set with ``SubDFace.PerFaceColor``.
+
+      :returns: Number of changed faces.
+
+
+
+   .. py:method:: Find(id: int) -> SubDFace
+
+      Find a face in this SubD with a given id
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the number of SubD faces.
+
+
+   .. py:property:: HasPerFaceColors
+      :type: bool
+
+
+      True if one or more faces on the active level have per face color overrides.
+
+      Per face colors are a mutable property on ``SubDFace`` and are set with ``SubDFace.PerFaceColor``.
+

@@ -5,6 +5,9 @@ none of the children own: the SubD object itself, the nine component-iterator
 instantiations, the two tag enums, and the lifetime guarantee that makes any of
 it usable from a Blender importer that drops the File3dm once it has read it.
 
+9.x: the nine iterators are RhinoCommon's three SubD lists plus six Python
+lists of neighbours; their First/Next/Last/Current cursor is gone (D26).
+
 Run standalone:
 
     python test_SubD_RH3DM178_SubD.py -v
@@ -33,9 +36,9 @@ class TestEmptySubD(unittest.TestCase):
 
     def test_default_construction(self):
         subd = rhino3dm.SubD()
-        self.assertEqual(subd.FaceCount, 0)
-        self.assertEqual(subd.EdgeCount, 0)
-        self.assertEqual(subd.VertexCount, 0)
+        self.assertEqual(subd.Faces.Count, 0)   # 8.x: FaceCount etc.
+        self.assertEqual(subd.Edges.Count, 0)
+        self.assertEqual(subd.Vertices.Count, 0)
 
     def test_empty_iterators_are_empty(self):
         subd = rhino3dm.SubD()
@@ -56,22 +59,22 @@ class TestEmptySubD(unittest.TestCase):
 class TestSubDObject(fixture.SubDFixtureTestCase):
 
     def test_component_counts(self):
-        self.assertEqual(self.subd.FaceCount, spec.SUBD["face_count"])
-        self.assertEqual(self.subd.EdgeCount, spec.SUBD["edge_count"])
-        self.assertEqual(self.subd.VertexCount, spec.SUBD["vertex_count"])
+        self.assertEqual(self.subd.Faces.Count, spec.SUBD["face_count"])   # 8.x: FaceCount etc.
+        self.assertEqual(self.subd.Edges.Count, spec.SUBD["edge_count"])
+        self.assertEqual(self.subd.Vertices.Count, spec.SUBD["vertex_count"])
 
     def test_is_solid(self):
         self.assertEqual(self.subd.IsSolid, spec.SUBD["is_solid"])
 
     def test_sharp_edge_count(self):
-        self.assertEqual(self.subd.SharpEdgeCount, spec.SUBD["sharp_edge_count"])
+        self.assertEqual(self.subd.SharpEdgeCount(), spec.SUBD["sharp_edge_count"])  # a method (D60)
 
     def test_clear_evaluation_cache_keeps_the_subd_usable(self):
         # F is an ordinary smooth vertex, so its limit point really is computed
         # and really is cached.
-        before = self.vertices["F"].SurfacePoint
+        before = self.vertices["F"].SurfacePoint()   # a method in RhinoCommon
         self.subd.ClearEvaluationCache()
-        after = fixture.vertices_by_name(self.subd)["F"].SurfacePoint
+        after = fixture.vertices_by_name(self.subd)["F"].SurfacePoint()
         self.assertPointEqual(after, (before.X, before.Y, before.Z),
                               "SurfacePoint after ClearEvaluationCache")
 
@@ -88,17 +91,18 @@ class TestSubDObject(fixture.SubDFixtureTestCase):
         expected = spec.SUBD["subdivided_once"]
         subd = fixture.read_subd()  # mutating, so work on a fresh read
         self.assertTrue(subd.Subdivide(1), "SubD.Subdivide(1) returned False")
-        self.assertEqual(subd.FaceCount, expected["face_count"])
-        self.assertEqual(subd.EdgeCount, expected["edge_count"])
-        self.assertEqual(subd.VertexCount, expected["vertex_count"])
+        self.assertEqual(subd.Faces.Count, expected["face_count"])
+        self.assertEqual(subd.Edges.Count, expected["edge_count"])
+        self.assertEqual(subd.Vertices.Count, expected["vertex_count"])
 
 
 class TestComponentIterators(fixture.SubDFixtureTestCase):
     """The nine BND_SubDComponentIterator instantiations.
 
     Three rooted on the SubD, and six rooted on a component. They differ in one
-    visible way: ``[]`` on a SubD-rooted iterator looks a component up by Id,
-    while on a component-rooted one it indexes by position around the component.
+    visible way: a SubD-rooted list looks a component up by Id with ``Find``
+    (8.x: ``[]``), while a component-rooted one is a Python list indexed by
+    position around the component.
     """
 
     def subd_rooted(self):
@@ -122,8 +126,11 @@ class TestComponentIterators(fixture.SubDFixtureTestCase):
         self.assertEqual(len(cases), 9)
         for label, iterator, expected in cases:
             with self.subTest(iterator=label):
-                self.assertEqual(iterator.Count, expected)
                 self.assertEqual(len(iterator), expected)
+        # Only the SubD lists have Count; the neighbours are lists (D26).
+        for label, iterator, expected in self.subd_rooted():
+            with self.subTest(iterator=label):
+                self.assertEqual(iterator.Count, expected)
 
     def test_all_nine_iterators_yield_every_component_once(self):
         for label, iterator, expected in list(self.subd_rooted()) + list(self.component_rooted()):
@@ -135,36 +142,16 @@ class TestComponentIterators(fixture.SubDFixtureTestCase):
                 self.assertEqual(len({c.Id for c in items}), expected)
 
     def test_iteration_starts_at_the_first_component(self):
-        for label, iterator, _ in self.subd_rooted():
-            with self.subTest(iterator=label):
-                self.assertEqual(list(iterator)[0].Id, iterator.First().Id)
-
-    def test_cursor_walks_first_to_last(self):
-        # First/Next/Current/Last are the cursor the JS binding has to use, and
-        # they have to agree with __iter__ on the same iterator.
-        for label, iterator, expected in self.subd_rooted():
-            with self.subTest(iterator=label):
-                ids = [iterator.First().Id]
-                self.assertEqual(iterator.Current().Id, ids[0])
-                for _ in range(expected - 1):
-                    ids.append(iterator.Next().Id)
-                self.assertEqual(len(set(ids)), expected)
-                self.assertEqual(iterator.Current().Id, ids[-1])
-                self.assertEqual(iterator.Last().Id, ids[-1])
-
-    def test_current_index_starts_at_zero(self):
-        for label, iterator, _ in self.subd_rooted():
-            with self.subTest(iterator=label):
-                iterator.First()
-                self.assertEqual(iterator.CurrentIndex, 0)
-                iterator.Next()
-                self.assertEqual(iterator.CurrentIndex, 1)
+        # Only the vertex list keeps First (a property); faces and edges lost
+        # theirs with the cursor (D26).
+        vertices = self.subd.Vertices
+        self.assertEqual(list(vertices)[0].Id, vertices.First.Id)
 
     def test_subd_rooted_lookup_is_by_id(self):
         for label, iterator, _ in self.subd_rooted():
             with self.subTest(iterator=label):
                 for component in iterator:
-                    self.assertEqual(iterator[component.Id].Id, component.Id)
+                    self.assertEqual(iterator.Find(component.Id).Id, component.Id)
 
     def test_component_rooted_lookup_is_by_position(self):
         for label, iterator, expected in self.component_rooted():
@@ -173,24 +160,16 @@ class TestComponentIterators(fixture.SubDFixtureTestCase):
                 by_iteration = [c.Id for c in iterator]
                 self.assertEqual(by_position, by_iteration)
 
-    def test_id_and_index_alias_the_same_value(self):
-        # Both are the component Id in the current binding; a Blender importer
-        # keying on either has to get the same component back.
-        for label, iterator, _ in self.subd_rooted():
-            with self.subTest(iterator=label):
-                for component in iterator:
-                    self.assertEqual(component.Index, component.Id)
-
 
 class TestComponentIdentity(fixture.SubDFixtureTestCase):
 
     def test_same_component_two_ways_is_equal(self):
         face = self.faces["front"]
-        self.assertEqual(face, self.subd.Faces[face.Id])
-        edge = face.Edges.First()
-        self.assertEqual(edge, self.subd.Edges[edge.Id])
-        vertex = face.Vertices.First()
-        self.assertEqual(vertex, self.subd.Vertices[vertex.Id])
+        self.assertEqual(face, self.subd.Faces.Find(face.Id))
+        edge = face.Edges[0]
+        self.assertEqual(edge, self.subd.Edges.Find(edge.Id))
+        vertex = face.Vertices[0]
+        self.assertEqual(vertex, self.subd.Vertices.Find(vertex.Id))
 
     def test_different_components_are_not_equal(self):
         self.assertNotEqual(self.faces["front"], self.faces["back"])
@@ -221,23 +200,23 @@ class TestComponentLifetime(unittest.TestCase):
 
     def test_components_survive_their_model(self):
         model = rhino3dm.File3dm.Read(fixture.fixture_path())
-        subd = model.Objects[0].Geometry
+        subd = list(model.Objects)[0].Geometry
         vertices = fixture.vertices_by_name(subd)
         edges = fixture.edges_by_name(subd)
         vertex = vertices["A"]                      # from a temporary iterator
         edge = edges[spec.canon("DH")]
-        face = subd.Faces.First().Edges.First().Faces.First()  # chain of temporaries
-        expected_endpoints = {fixture.vertex_name(edge.Vertex(0)),
-                              fixture.vertex_name(edge.Vertex(1))}
+        face = list(subd.Faces)[0].Edges[0].Faces[0]  # chain of temporaries
+        expected_endpoints = {fixture.vertex_name(edge.VertexFrom),
+                              fixture.vertex_name(edge.VertexTo)}
 
         del model, subd, vertices, edges
         gc.collect()
 
-        self.assertEqual(vertex.Edges.Count, spec.VERTEX_EDGE_COUNT)
-        self.assertEqual(vertex.Faces.Count, spec.VERTEX_FACE_COUNT)
-        self.assertEqual({fixture.vertex_name(edge.Vertex(0)),
-                          fixture.vertex_name(edge.Vertex(1))}, expected_endpoints)
-        self.assertEqual(edge.EndSharpness(0) + edge.EndSharpness(1),
+        self.assertEqual(len(vertex.Edges), spec.VERTEX_EDGE_COUNT)
+        self.assertEqual(len(vertex.Faces), spec.VERTEX_FACE_COUNT)
+        self.assertEqual({fixture.vertex_name(edge.VertexFrom),
+                          fixture.vertex_name(edge.VertexTo)}, expected_endpoints)
+        self.assertEqual(edge.EndSharpness(0, False) + edge.EndSharpness(1, False),
                          sum(spec.EDGES_BY_KEY[spec.canon("DH")]["sharpness"].values()))
         self.assertEqual(face.EdgeCount, spec.FACE_EDGE_COUNT)
 

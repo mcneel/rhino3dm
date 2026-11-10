@@ -442,6 +442,7 @@ namespace Rhino.Geometry
       { 
         IntPtr ptr_const_mesh = mesh.ConstPointer();
         IntPtr ptr = UnsafeNativeMethods.ON_PointCloud_CreateFromMesh(ptr_const_mesh);
+        GC.KeepAlive(mesh);
         if (ptr != IntPtr.Zero)
           rc = new PointCloud(ptr, null);
       }

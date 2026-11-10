@@ -1,0 +1,31 @@
+rhino3dm.LineCapStyle
+=====================
+
+.. py:class:: rhino3dm.LineCapStyle
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Shape to be used at the ends of open curves
+
+
+   .. py:attribute:: Flat
+      :value: 1
+
+
+      Also known as butt. Ends are flat and do not extend
+
+
+   .. py:attribute:: Round
+      :value: 0
+
+
+      Ends are extended by a half circle with diameter equal to the curve width
+
+
+   .. py:attribute:: Square
+      :value: 2
+
+
+      Ends are flat and extended by half of the curve width
+

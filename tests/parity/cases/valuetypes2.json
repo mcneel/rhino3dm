@@ -1,0 +1,54 @@
+{
+  "about": "Parity cases for the second wave of translated value types (Plane, Line, BoundingBox, Circle, Arc, Sphere, Point2d) and value-type members that call native C functions (Unitize, IsParallelTo, ClosestParameter). Objects are built from {\"new\": T, \"args\": [...]} with EACH binding's own constructors -- for generated value types those are translated from RhinoCommon, so construction is under test too. Out-parameters come back as a list [return, out1, ...].",
+  "cases": [
+    {"id": "plane.normal",              "type": "Plane", "self": {"new": "Plane", "args": [{"Point3d": [1, 2, 3]}, {"Vector3d": [0, 0, 2]}]}, "member": "Normal"},
+    {"id": "plane.xaxis.from_normal",   "type": "Plane", "self": {"new": "Plane", "args": [{"Point3d": [1, 2, 3]}, {"Vector3d": [1, 1, 1]}]}, "member": "XAxis", "note": "native ON_Plane_CreateFromNormal picks the frame"},
+    {"id": "plane.from3points.yaxis",   "type": "Plane", "self": {"new": "Plane", "args": [{"Point3d": [0, 0, 0]}, {"Point3d": [2, 0, 0]}, {"Point3d": [1, 3, 0]}]}, "member": "YAxis"},
+    {"id": "plane.distanceto",          "type": "Plane", "self": {"new": "Plane", "args": [{"Point3d": [1, 2, 3]}, {"Vector3d": [0, 0, 2]}]}, "member": "DistanceTo", "args": [{"Point3d": [5, 5, 10]}]},
+    {"id": "plane.isvalid",             "type": "Plane", "self": {"new": "Plane", "args": [{"Point3d": [1, 2, 3]}, {"Vector3d": [0, 0, 2]}]}, "member": "IsValid"},
+    {"id": "plane.worldxy",             "type": "Plane", "member": "WorldXY"},
+    {"id": "plane.closestparameter",    "type": "Plane", "self": {"new": "Plane", "args": [{"Point3d": [1, 2, 3]}, {"Vector3d": [0, 0, 2]}]}, "member": "ClosestParameter", "args": [{"Point3d": [4, 6, 9]}]},
+
+    {"id": "line.direction",            "type": "Line", "self": {"new": "Line", "args": [{"Point3d": [1, 1, 0]}, {"Point3d": [4, 5, 0]}]}, "member": "Direction"},
+    {"id": "line.unittangent",          "type": "Line", "self": {"new": "Line", "args": [{"Point3d": [1, 1, 0]}, {"Point3d": [4, 5, 0]}]}, "member": "UnitTangent"},
+    {"id": "line.pointat",              "type": "Line", "self": {"new": "Line", "args": [{"Point3d": [1, 1, 0]}, {"Point3d": [4, 5, 0]}]}, "member": "PointAt", "args": [0.25]},
+    {"id": "line.closestpoint.segment", "type": "Line", "self": {"new": "Line", "args": [{"Point3d": [0, 0, 0]}, {"Point3d": [10, 0, 0]}]}, "member": "ClosestPoint", "args": [{"Point3d": [15, 3, 0]}, true]},
+    {"id": "line.closestpoint.infinite","type": "Line", "self": {"new": "Line", "args": [{"Point3d": [0, 0, 0]}, {"Point3d": [10, 0, 0]}]}, "member": "ClosestPoint", "args": [{"Point3d": [15, 3, 0]}, false]},
+    {"id": "line.closestparameter",     "type": "Line", "self": {"new": "Line", "args": [{"Point3d": [0, 0, 0]}, {"Point3d": [10, 0, 0]}]}, "member": "ClosestParameter", "args": [{"Point3d": [15, 3, 0]}]},
+    {"id": "line.mindistanceto",        "type": "Line", "self": {"new": "Line", "args": [{"Point3d": [0, 0, 0]}, {"Point3d": [10, 0, 0]}]}, "member": "MinimumDistanceTo", "args": [{"Point3d": [15, 3, 0]}]},
+
+    {"id": "bbox.center",               "type": "BoundingBox", "self": {"new": "BoundingBox", "args": [{"Point3d": [0, 0, 0]}, {"Point3d": [2, 4, 6]}]}, "member": "Center"},
+    {"id": "bbox.diagonal",             "type": "BoundingBox", "self": {"new": "BoundingBox", "args": [{"Point3d": [0, 0, 0]}, {"Point3d": [2, 4, 6]}]}, "member": "Diagonal"},
+    {"id": "bbox.volume",               "type": "BoundingBox", "self": {"new": "BoundingBox", "args": [{"Point3d": [0, 0, 0]}, {"Point3d": [2, 4, 6]}]}, "member": "Volume"},
+    {"id": "bbox.area",                 "type": "BoundingBox", "self": {"new": "BoundingBox", "args": [{"Point3d": [0, 0, 0]}, {"Point3d": [2, 4, 6]}]}, "member": "Area"},
+    {"id": "bbox.contains",             "type": "BoundingBox", "self": {"new": "BoundingBox", "args": [{"Point3d": [0, 0, 0]}, {"Point3d": [2, 4, 6]}]}, "member": "Contains", "args": [{"Point3d": [1, 1, 1]}]},
+    {"id": "bbox.contains.strict_edge", "type": "BoundingBox", "self": {"new": "BoundingBox", "args": [{"Point3d": [0, 0, 0]}, {"Point3d": [2, 4, 6]}]}, "member": "Contains", "args": [{"Point3d": [2, 1, 1]}, true]},
+    {"id": "bbox.isdegenerate",         "type": "BoundingBox", "self": {"new": "BoundingBox", "args": [{"Point3d": [0, 0, 0]}, {"Point3d": [2, 0, 6]}]}, "member": "IsDegenerate", "args": [0.001]},
+    {"id": "bbox.inverted.isvalid",     "type": "BoundingBox", "self": {"new": "BoundingBox", "args": [{"Point3d": [2, 4, 6]}, {"Point3d": [0, 0, 0]}]}, "member": "IsValid"},
+
+    {"id": "circle.circumference",      "type": "Circle", "self": {"new": "Circle", "args": [{"Point3d": [1, 1, 0]}, 2.5]}, "member": "Circumference"},
+    {"id": "circle.tangentat",          "type": "Circle", "self": {"new": "Circle", "args": [{"Point3d": [1, 1, 0]}, 2.5]}, "member": "TangentAt", "args": [0.7]},
+    {"id": "circle.closestparameter",   "type": "Circle", "self": {"new": "Circle", "args": [{"Point3d": [1, 1, 0]}, 2.5]}, "member": "ClosestParameter", "args": [{"Point3d": [5, 4, 0]}]},
+    {"id": "circle.from3points.radius", "type": "Circle", "self": {"new": "Circle", "args": [{"Point3d": [0, 0, 0]}, {"Point3d": [2, 0, 0]}, {"Point3d": [1, 1, 0]}]}, "member": "Radius"},
+
+    {"id": "arc.length",                "type": "Arc", "self": {"new": "Arc", "args": [{"Point3d": [0, 0, 0]}, 3.0, 1.5]}, "member": "Length"},
+    {"id": "arc.angledegrees",          "type": "Arc", "self": {"new": "Arc", "args": [{"Point3d": [0, 0, 0]}, 3.0, 1.5]}, "member": "AngleDegrees"},
+    {"id": "arc.isvalid",               "type": "Arc", "self": {"new": "Arc", "args": [{"Point3d": [0, 0, 0]}, 3.0, 1.5]}, "member": "IsValid"},
+    {"id": "arc.closestparameter",      "type": "Arc", "self": {"new": "Arc", "args": [{"Point3d": [0, 0, 0]}, 3.0, 1.5]}, "member": "ClosestParameter", "args": [{"Point3d": [5, 5, 0]}]},
+
+    {"id": "sphere.tobrep",             "type": "Sphere", "self": {"new": "Sphere", "args": [{"Point3d": [1, 2, 3]}, 4.0]}, "member": "ToBrep", "args": [], "note": "value type -> class bridge (Brep.CreateFromSphere(this))"},
+    {"id": "boundingbox.tobrep",        "type": "BoundingBox", "self": {"new": "BoundingBox", "args": [{"Point3d": [0, 0, 0]}, {"Point3d": [1, 2, 3]}]}, "member": "ToBrep", "args": []},
+    {"id": "box.volume",                "type": "Box", "self": {"new": "Box", "args": [{"new": "Plane", "args": [{"Point3d": [1, 2, 3]}, {"Vector3d": [0, 0, 1]}]}, {"Interval": [0, 2]}, {"Interval": [0, 3]}, {"Interval": [0, 4]}]}, "member": "Volume"},
+    {"id": "box.center",                "type": "Box", "self": {"new": "Box", "args": [{"new": "Plane", "args": [{"Point3d": [1, 2, 3]}, {"Vector3d": [0, 0, 1]}]}, {"Interval": [0, 2]}, {"Interval": [0, 3]}, {"Interval": [0, 4]}]}, "member": "Center"},
+    {"id": "sphere.diameter",           "type": "Sphere", "self": {"new": "Sphere", "args": [{"Point3d": [1, 2, 3]}, 4.0]}, "member": "Diameter"},
+    {"id": "sphere.normalat",           "type": "Sphere", "self": {"new": "Sphere", "args": [{"Point3d": [1, 2, 3]}, 4.0]}, "member": "NormalAt", "args": [0.4, 0.3]},
+    {"id": "sphere.closestparameter",   "type": "Sphere", "self": {"new": "Sphere", "args": [{"Point3d": [1, 2, 3]}, 4.0]}, "member": "ClosestParameter", "args": [{"Point3d": [9, 2, 3]}]},
+
+    {"id": "vector3d.unitize",          "type": "Vector3d", "self": [3, 4, 0], "member": "Unitize", "args": [], "mutates": true, "note": "native ON_3dVector_Unitize(ref this)"},
+    {"id": "vector3d.unitize.zero",     "type": "Vector3d", "self": [0, 0, 0], "member": "Unitize", "args": [], "mutates": true},
+    {"id": "vector3d.isparallelto",     "type": "Vector3d", "self": [1, 0, 0], "member": "IsParallelTo", "args": [{"Vector3d": [-2, 0, 0]}], "note": "-1 = antiparallel"},
+    {"id": "vector3d.perpendicularto",  "type": "Vector3d", "self": [0, 0, 0], "member": "PerpendicularTo", "args": [{"Vector3d": [0, 0, 1]}], "mutates": true},
+
+    {"id": "point2d.maxcoordinate",     "type": "Point2d", "self": [-7, 2], "member": "MaximumCoordinate"}
+  ]
+}

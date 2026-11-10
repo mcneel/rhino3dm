@@ -1,0 +1,31 @@
+rhino3dm.CurveEvaluationSide
+============================
+
+.. py:class:: rhino3dm.CurveEvaluationSide
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated values for the options that defines a curve evaluation side when evaluating kinks.
+
+
+   .. py:attribute:: Above
+      :value: 1
+
+
+      The above evaluation side.
+
+
+   .. py:attribute:: Below
+      :value: -1
+
+
+      The below evaluation side.
+
+
+   .. py:attribute:: Default
+      :value: 0
+
+
+      The default evaluation side.
+

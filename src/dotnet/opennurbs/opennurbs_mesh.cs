@@ -2567,20 +2567,20 @@ namespace Rhino.Geometry
     /// </summary>
     /// <param name="corners">
     /// 8 points defining the box corners arranged as the vN labels indicate.
-    /// <pre>
-    /// <para>v7_____________v6</para>
-    /// <para>|\             |\</para>
-    /// <para>| \            | \</para>
-    /// <para>|  \ _____________\</para>
-    /// <para>|   v4         |   v5</para>
-    /// <para>|   |          |   |</para>
-    /// <para>|   |          |   |</para>
-    /// <para>v3--|----------v2  |</para>
-    /// <para> \  |           \  |</para>
-    /// <para>  \ |            \ |</para>
-    /// <para>   \|             \|</para>
-    /// <para>    v0_____________v1</para>
-    /// </pre>
+    /// <code language="none">
+    /// v7_____________v6
+    /// |\             |\
+    /// | \            | \
+    /// |  \ _____________\
+    /// |   v4         |   v5
+    /// |   |          |   |
+    /// |   |          |   |
+    /// v3--|----------v2  |
+    ///  \  |           \  |
+    ///   \ |            \ |
+    ///    \|             \|
+    ///     v0_____________v1
+    /// </code>
     /// </param>
     /// <param name="xCount">Number of faces in x-direction.</param>
     /// <param name="yCount">Number of faces in y-direction.</param>
@@ -3600,6 +3600,7 @@ namespace Rhino.Geometry
         GC.KeepAlive(outerBoundary);
         GC.KeepAlive(innerBoundaryCurves);
         GC.KeepAlive(innerBothSideCurves);
+        GC.KeepAlive(pullbackSurface);
         if (outer_boundary_curve != null)
           outer_boundary_curve.Dispose();
 
@@ -3681,6 +3682,10 @@ namespace Rhino.Geometry
       using (var input2 = (which != UnsafeNativeMethods.MeshBooleanIntDiffConst.Union) ? new SimpleArrayMeshPointer() : null)
       using (var output = new SimpleArrayMeshPointer())
       using (var map = wantInputMap ? new SimpleArrayInt() : null)
+      using (var open_cut_ends = options.RequestOpenCutEnds ? new SimpleArrayPoint3d() : null)
+      using (var unmerged_pairs = options.RequestReport ? new SimpleArray2dex() : null)
+      using (var open_results = options.RequestReport ? new SimpleArrayInt() : null)
+      using (var failed_pairs = options.RequestReport ? new SimpleArray2dex() : null)
       {
         foreach (Mesh mesh in firstSet)
         {
@@ -3709,15 +3714,21 @@ namespace Rhino.Geometry
         Interop.MarshalProgressAndCancelToken(options.CancellationToken, options.ProgressReporter,
           out IntPtr ptrTerminator, out int progressInt, out ProgressReporter reporter, out ThreadTerminator terminator);
 
-        int commandResult = 0;
+        int commandResult = (int)Commands.Result.Failure;
         Mesh[] rc = null;
         try
         {
           if (UnsafeNativeMethods.RHC_RhinoMeshBooleanIntDiffUni(const_ptr_input1, const_ptr_input2,
-            options.Tolerance, options.Tolerance, ptr_output, which, text_log_ptr, ptrTerminator, progressInt, ref commandResult, ptr_map))
+            options.Tolerance, options.Tolerance, ptr_output, which, text_log_ptr, ptrTerminator, progressInt, ref commandResult, ptr_map,
+            open_cut_ends?.NonConstPointer() ?? IntPtr.Zero, unmerged_pairs?.NonConstPointer() ?? IntPtr.Zero,
+            open_results?.NonConstPointer() ?? IntPtr.Zero, failed_pairs?.NonConstPointer() ?? IntPtr.Zero,
+            options.ResolveSelfIntersections))
           {
             rc = output.ToNonConstArray();
             result = (Commands.Result)commandResult;
+            // A union that merged nothing returns null, as a split that cut nothing does.
+            if (UnsafeNativeMethods.MeshBooleanIntDiffConst.Union == which && Commands.Result.Nothing == result)
+              rc = null;
 
             if (wantInputMap && rc != null)
             {
@@ -3740,12 +3751,18 @@ namespace Rhino.Geometry
               inputMap = rows.ToArray();
             }
           }
+          else
+            result = (Commands.Result)commandResult;
         }
         finally
         {
           if (terminator != null) terminator.Dispose();
           if (reporter != null) reporter.Disable();
         }
+        options.OpenCutEnds = open_cut_ends?.ToArray();
+        options.UnmergedResultPairs = unmerged_pairs?.ToArray();
+        options.OpenResults = open_results?.ToArray();
+        options.FailedInputPairs = failed_pairs?.ToArray();
         GC.KeepAlive(firstSet);
         GC.KeepAlive(secondSet);
         GC.KeepAlive(options);
@@ -4148,6 +4165,7 @@ namespace Rhino.Geometry
       if (null != mesh)
       {
         IntPtr ptr = UnsafeNativeMethods.RHC_RebuildMesh(mesh.ConstPointer(), preserveTextureCoordinates, preserveVertexColors);
+        GC.KeepAlive(mesh);
         if (ptr != IntPtr.Zero)
           rc = new Mesh(ptr, null);
       }
@@ -4736,6 +4754,7 @@ namespace Rhino.Geometry
     public void SetCachedTextureCoordinatesFromMaterial(RhinoObject rhinoObject, Rhino.DocObjects.Material material)
     {
       UnsafeNativeMethods.ON_Mesh_SetCachedTextureCoordinatesFromMaterial(NonConstPointer(), rhinoObject.ConstPointer(), material.ConstPointer());
+      GC.KeepAlive(material);
       GC.KeepAlive(this);
     }
 #endif
@@ -4753,6 +4772,53 @@ namespace Rhino.Geometry
     public CachedTextureCoordinates GetCachedTextureCoordinates(Guid textureMappingId)
     {
       return CachedTextureCoordinates.GetCachedTextureCoordinates(this, textureMappingId);
+    }
+
+    /// <summary>
+    /// Sets up cached texture coordinate set for each texture in the material.
+    /// Textures in the Material define which mapping channels are used and
+    /// the object with the specified id in the file defines what texture mapping
+    /// is used for each mapping channel.
+    /// After this method is called all necessary texture coordinate sets are cached
+    /// and correct texture coordinates for each texture can be fetched using
+    ///  GetCachedTextureCoordinates(File3dm file, Guid objectId, Rhino.DocObjects.Texture texture)
+    ///
+    /// If any texture coordinates are already cached they will not be re-computed.
+    /// </summary>
+    /// <param name="file">File that contains the object and its texture mappings</param>
+    /// <param name="objectId">Id of the object in the file that defines texture mappings</param>
+    /// <param name="material">Material with textures that define mapping channels</param>
+    /// <since>9.1</since>
+    public void SetCachedTextureCoordinatesFromMaterial(FileIO.File3dm file, Guid objectId, Rhino.DocObjects.Material material)
+    {
+      UnsafeNativeMethods.ON_Mesh_SetCachedTextureCoordinatesFromMaterial_ONX_Model(NonConstPointer(), file.ConstPointer(), objectId, material.ConstPointer());
+      GC.KeepAlive(file);
+      GC.KeepAlive(material);
+      GC.KeepAlive(this);
+    }
+
+    /// <summary>
+    /// Returns cached texture coordinate set based on the texture.
+    /// Make sure to set up cached texture coordinates for all textures in the material first by calling
+    ///  SetCachedTextureCoordinatesFromMaterial(File3dm file, Guid objectId, Rhino.DocObjects.Material material)
+    ///
+    /// If this function returns null then there are no texture coordinates available.
+    /// </summary>
+    /// <param name="file">File that contains the object and its texture mappings</param>
+    /// <param name="objectId">Id of the object in the file that defines texture mappings</param>
+    /// <param name="texture">Texture that defines the mapping channel</param>
+    /// <returns>Cached texture coordinates if available and otherwise null</returns>
+    /// <since>9.1</since>
+    public CachedTextureCoordinates GetCachedTextureCoordinates(FileIO.File3dm file, Guid objectId, Rhino.DocObjects.Texture texture)
+    {
+      var tc_pointer = UnsafeNativeMethods.ON_Mesh_GetCachedTextureCoordinates_ONX_Model(NonConstPointer(), file.ConstPointer(), objectId, texture.ConstPointer());
+      if (tc_pointer == IntPtr.Zero)
+        return null;
+      var tc = new CachedTextureCoordinates(tc_pointer);
+      GC.KeepAlive(file);
+      GC.KeepAlive(texture);
+      GC.KeepAlive(this);
+      return tc;
     }
 #if RHINO_SDK
     /// <summary>
@@ -4905,7 +4971,7 @@ namespace Rhino.Geometry
 #if RHINO_SDK
 
     /// <summary>
-    /// Determines if a point is inside a solid mesh.
+    /// Determines if a point is inside a closed mesh.
     /// </summary>
     /// <param name="point">3d point to test.</param>
     /// <param name="tolerance">
@@ -4919,11 +4985,12 @@ namespace Rhino.Geometry
     /// point is inside or the distance from point to a mesh face is &lt;= tolerance.
     /// </param>
     /// <returns>
-    /// true if point is inside the solid mesh, false if not.
+    /// true if point is inside the mesh, false if not.
     /// </returns>
     /// <remarks>
-    /// The caller is responsible for making certain the mesh is valid, closed, and 2-manifold before
-    /// calling this function. If the mesh is not, the behavior is undetermined.
+    /// The mesh must be closed and manifold; this function returns false for any other mesh.
+    /// Inside means enclosed by the mesh, so a consistent face orientation is not required
+    /// and reversing the faces does not change the answer.
     /// </remarks>
     /// <since>5.0</since>
     [ConstOperation]
@@ -5593,6 +5660,7 @@ namespace Rhino.Geometry
         using (var input_meshes = new SimpleArrayMeshPointer())
         using (var splitters = new SimpleArrayMeshPointer())
         using (var on_meshes = new SimpleArrayMeshPointer())
+        using (var open_cut_ends = options.RequestOpenCutEnds ? new SimpleArrayPoint3d() : null)
         {
           input_meshes.Add(this, true);
           foreach (var mesh in meshes)
@@ -5605,7 +5673,9 @@ namespace Rhino.Geometry
           IntPtr ptr_result_meshes = on_meshes.NonConstPointer();
           int results = UnsafeNativeMethods.RHC_RhinoMeshBooleanSplit2(const_ptr_input_meshes, const_ptr_splitters, tolerance, splitAtCoplanar,
             ptr_result_meshes, createNgons,
-            textLog?.NonConstPointer() ?? IntPtr.Zero, ptrTerminator, progressInt, completeOpenCuts);
+            textLog?.NonConstPointer() ?? IntPtr.Zero, ptrTerminator, progressInt, completeOpenCuts,
+            open_cut_ends?.NonConstPointer() ?? IntPtr.Zero);
+          options.OpenCutEnds = open_cut_ends?.ToArray();
           GC.KeepAlive(meshes);
           GC.KeepAlive(textLog);
           GC.KeepAlive(progress);
@@ -5702,12 +5772,15 @@ namespace Rhino.Geometry
       try
       {
         IntPtr ptr_mesh_array = meshes.NonConstPointer();
+        using var open_cut_ends = options.RequestOpenCutEnds ? new SimpleArrayPoint3d() : null;
         int rc = UnsafeNativeMethods.RHC_RhinoMeshSelfSplit(const_ptr_this, ptr_mesh_array, tolerance, splitAtCoplanar, createNgons,
-          textLog?.NonConstPointer() ?? IntPtr.Zero, ptrTerminator, progressInt, completeOpenCuts);
+          textLog?.NonConstPointer() ?? IntPtr.Zero, ptrTerminator, progressInt, completeOpenCuts,
+          open_cut_ends?.NonConstPointer() ?? IntPtr.Zero);
+        options.OpenCutEnds = open_cut_ends?.ToArray();
         GC.KeepAlive(this);
         GC.KeepAlive(textLog);
         GC.KeepAlive(progress);
-        if (rc == 0) return null;
+        if (rc <= 0) return null;
         return meshes.ToNonConstArray();
       }
       finally
@@ -7695,15 +7768,32 @@ namespace Rhino.Geometry
     /// <para>Gets or sets whether cuts that stop inside the mesh are completed.</para>
     /// <para>An intersection curve that stops inside the mesh does not separate one side from the
     /// other, so the mesh is returned whole. When this is enabled, each such open end is joined to the
-    /// nearest border of the mesh, or to another cut, following edges the mesh already has.</para>
+    /// nearest border of the mesh, or to another cut, by the shortest path along existing edges or
+    /// straight across a quad or an n-gon between two of its vertices.</para>
     /// <para>This yields a best-effort cut where the intersection alone leaves the answer undetermined:
-    /// the added stretch follows existing edges rather than the cutter, so it is not an intersection
-    /// result. No vertex is moved and no face is added. Cuts that already close, or that already run
-    /// from border to border, are unaffected.</para>
+    /// the added stretch follows the mesh rather than the cutter, so it is not an intersection
+    /// result. No vertex is added or moved; faces crossed straight are re-tiled from their own vertices.
+    /// Cuts that already close, or that already run from border to border, are unaffected.</para>
     /// </summary>
     /// <value>The default value is false.</value>
     /// <since>9.0</since>
     public bool CompleteOpenCuts { get; set; } = false;
+
+    /// <summary>
+    /// <para>Gets or sets whether the operation reports where intersections stop inside a mesh it splits.</para>
+    /// <para>Such a cut separates nothing. When this is enabled, <see cref="OpenCutEnds"/> holds the ends
+    /// of those cuts after the call. Nothing is computed when it is disabled.</para>
+    /// </summary>
+    /// <value>The default value is false.</value>
+    /// <since>9.0</since>
+    public bool RequestOpenCutEnds { get; set; } = false;
+
+    /// <summary>
+    /// Gets the ends of the intersections that stop inside a mesh, as found by the last operation that
+    /// used these options: empty when there were none, null when <see cref="RequestOpenCutEnds"/> was disabled.
+    /// </summary>
+    /// <since>9.0</since>
+    public Point3d[] OpenCutEnds { get; internal set; }
   }
 
   /// <summary>
@@ -7711,6 +7801,50 @@ namespace Rhino.Geometry
   /// </summary>
   public class MeshBooleanOptions : MeshSplitOptions
   {
+    /// <summary>
+    /// <para>Gets or sets whether the operation reports the work it could not do.</para>
+    /// <para>When this is enabled, <see cref="UnmergedResultPairs"/>, <see cref="OpenResults"/> and
+    /// <see cref="FailedInputPairs"/> hold what the last operation that used these options found.
+    /// Nothing is collected when it is disabled.</para>
+    /// </summary>
+    /// <value>The default value is false.</value>
+    /// <since>9.0</since>
+    public bool RequestReport { get; set; } = false;
+
+    /// <summary>
+    /// Gets the pairs of union results that were left apart because joining them would have left naked
+    /// edges, as indices into the results: empty when there were none, null when <see cref="RequestReport"/>
+    /// was disabled.
+    /// </summary>
+    /// <since>9.0</since>
+    public IndexPair[] UnmergedResultPairs { get; internal set; }
+
+    /// <summary>
+    /// Gets the indices of the results that have naked edges although no input mesh had any: empty when
+    /// there were none, null when <see cref="RequestReport"/> was disabled.
+    /// </summary>
+    /// <since>9.0</since>
+    public int[] OpenResults { get; internal set; }
+
+    /// <summary>
+    /// Gets the pairs of input meshes whose operation with each other could not be computed. Indices count the
+    /// non-null input meshes; for the two-set operations the second set is counted after the first, and a union
+    /// pair is listed only when its meshes ended in different results. Empty when there were none, null when
+    /// <see cref="RequestReport"/> was disabled.
+    /// </summary>
+    /// <since>9.0</since>
+    public IndexPair[] FailedInputPairs { get; internal set; }
+
+    /// <summary>
+    /// <para>Gets or sets whether union, difference and intersection first read an input mesh that intersects
+    /// itself, or whose closed parts nest in each other or are wound inside out, as the solid it encloses.</para>
+    /// <para>When this is disabled, such inputs are still resolved when the result computed from the inputs as
+    /// given has naked or non-manifold edges it should not have, or could not be computed, and the result from
+    /// the resolved inputs has neither. Splitting is not affected.</para>
+    /// </summary>
+    /// <value>The default value is false.</value>
+    /// <since>9.0</since>
+    public bool ResolveSelfIntersections { get; set; } = false;
   }
 
 
@@ -8680,7 +8814,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Moves mesh vertices to neighboring vertices, within the specified distance.
     /// <para>This forces unaligned mesh vertices to the same location and is helpful to clean meshes for 3D printing.</para>
-    /// <para>All vertices are considered, not only those on naked edges. Use <paramref name="whichVertices"/> to restrict which ones are moved.</para>
+    /// <para>All vertices are considered, not only those on naked edges. Use <paramref name="whichVertices"/> to restrict which ones are moved, or <see cref="Align(double, bool, bool)"/> to move and align onto naked vertices only.</para>
     /// <para>See the <code>_AlignVertices</code> Rhino command for more information.</para>
     /// </summary>
     /// <param name="distance">Distance that should not be exceed when modifying the mesh.</param>
@@ -8695,7 +8829,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Moves mesh vertices to neighboring vertices, within the specified distance.
     /// <para>This forces unaligned mesh vertices to the same location and is helpful to clean meshes for 3D printing.</para>
-    /// <para>All vertices are considered, not only those on naked edges. Use <paramref name="whichVertices"/> to restrict which ones are moved.</para>
+    /// <para>All vertices are considered, not only those on naked edges. Use <paramref name="whichVertices"/> to restrict which ones are moved, or <see cref="Align(double, bool, bool)"/> to move and align onto naked vertices only.</para>
     /// <para>See the <code>_AlignVertices</code> Rhino command for more information.</para>
     /// </summary>
     /// <param name="distance">Distance that should not be exceed when modifying the mesh.</param>
@@ -8752,7 +8886,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Moves mesh vertices to neighboring vertices, within the specified distance.
     /// <para>This forces unaligned mesh vertices to the same location and is helpful to clean meshes for 3D printing.</para>
-    /// <para>All vertices are considered, not only those on naked edges. Use <paramref name="whichVertices"/> to restrict which ones are moved.</para>
+    /// <para>All vertices are considered, not only those on naked edges. Use <paramref name="whichVertices"/> to restrict which ones are moved, or <see cref="Align(IEnumerable{Mesh}, double, bool, bool)"/> to move and align onto naked vertices only.</para>
     /// <para>See the <code>_AlignVertices</code> Rhino command for more information.</para>
     /// </summary>
     /// <param name="meshes">The enumerable of meshes that need to have vertices adjusted.</param>
@@ -8768,7 +8902,7 @@ namespace Rhino.Geometry.Collections
     /// <summary>
     /// Moves mesh vertices to neighboring vertices, within the specified distance.
     /// <para>This forces unaligned mesh vertices to the same location and is helpful to clean meshes for 3D printing.</para>
-    /// <para>All vertices are considered, not only those on naked edges. Use <paramref name="whichVertices"/> to restrict which ones are moved.</para>
+    /// <para>All vertices are considered, not only those on naked edges. Use <paramref name="whichVertices"/> to restrict which ones are moved, or <see cref="Align(IEnumerable{Mesh}, double, bool, bool)"/> to move and align onto naked vertices only.</para>
     /// <para>See the <code>_AlignVertices</code> Rhino command for more information.</para>
     /// </summary>
     /// <param name="meshes">The enumerable of meshes that need to have vertices adjusted.</param>
@@ -13246,6 +13380,7 @@ namespace Rhino.Geometry.Collections
         IntPtr ptr_const_curvature = value.ConstPointer();
         UnsafeNativeMethods.ON_Mesh_SetSurfaceCurvature(ptr_mesh, ptr_const_curvature, index);
         GC.KeepAlive(m_mesh);
+        GC.KeepAlive(value);
       }
     }
 
@@ -13310,6 +13445,7 @@ namespace Rhino.Geometry.Collections
       IntPtr ptr_const_curvature = surfaceCurvature.ConstPointer();
       bool rc = UnsafeNativeMethods.ON_Mesh_SetSurfaceCurvature(ptr_mesh, ptr_const_curvature, index);
       GC.KeepAlive(m_mesh);
+      GC.KeepAlive(surfaceCurvature);
       return rc;
     }
 

@@ -16,10 +16,6 @@ from subprocess import Popen, PIPE
 import shlex
 import shutil
 import fileinput
-if sys.version_info[0] < 3:
-    import imp
-else:
-    from importlib.machinery import SourceFileLoader
 import time
 
 # ---------------------------------------------------- Globals ---------------------------------------------------------
@@ -35,10 +31,9 @@ src_folder = os.path.abspath(os.path.join(script_folder, "..", "src"))
 build_folder = os.path.abspath(os.path.join(src_folder, "build"))
 librhino3dm_native_folder = os.path.abspath(os.path.join(src_folder, "librhino3dm_native"))
 
-if sys.version_info[0] < 3:
-    bootstrap = imp.load_source('bootstrap', os.path.join(script_folder, "bootstrap.py"))
-else:
-    bootstrap = SourceFileLoader('bootstrap', os.path.join(script_folder, "bootstrap.py")).load_module()
+# bootstrap.py sits beside this script (SourceFileLoader.load_module is gone in Python 3.15)
+sys.path.insert(0, script_folder)
+import bootstrap
 
 # ---------------------------------------------------- Logging ---------------------------------------------------------
 # colors for terminal reporting
@@ -281,26 +276,9 @@ def setup_windows():
     
     global librhino3dm_native_folder
     
-    # 32 bit version...
-    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower()))
-    target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower(), "win32"))
-    target_file_name = "librhino3dm_native.vcxproj"
-
-    item_to_check = os.path.abspath(os.path.join(target_path, target_file_name))
-    if not overwrite_check(item_to_check):
-        return False
-
-    os.chdir(target_path)
- 
-    # generate the project files
-    print("")
-    if xcode_logging:
-        print("Generating vcxproj files for Windows 32-bit native build...")
-    else:
-        print(bcolors.BOLD + "Generating vcxproj files for Windows 32-bit native build..." + bcolors.ENDC)
-    librhino3dm_native_folder = librhino3dm_native_folder.replace('\\', '//')
-    command = ("cmake -G \"Visual Studio 17 2022\" -Tv142 -A Win32 " + librhino3dm_native_folder)
-    run_command(command)
+    # no 32-bit version: opennurbs 9 needs 64-bit pointers (SubD component pointers carry a type tag
+    # in their low bits; opennurbs_subd.h static_asserts it), so win32 does not compile (RH3DM-215)
+    check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower()))
 
     # 64 bit version...
     target_path = check_or_create_path(os.path.join(build_folder, platform_full_names.get("windows").lower(), "win64"))
@@ -517,33 +495,13 @@ def setup_js():
     if not overwrite_check(item_to_check):
         return False
     
-    # setup draco static lib makefiles
-    draco_path = check_or_create_path(os.path.join(target_path, "draco_wasm"))
-    os.chdir(draco_path)
-    try:
-        # For a WASM64 build, draco's objects must also be memory64 or they
-        # won't link against the wasm64 rhino3dm objects.
-        draco_flags = ' -DCMAKE_C_FLAGS=-sMEMORY64=1 -DCMAKE_CXX_FLAGS=-sMEMORY64=1' if wasm64 else ''
-        # Match draco's optimization level to the rhino3dm build: a -d (debug)
-        # build skips draco's default Release full-opt so iteration compiles
-        # faster. Release/published builds leave it optimized.
-        draco_flags += ' -DCMAKE_BUILD_TYPE=Debug' if debug else ''
-        command = "emcmake cmake " + os.path.join(src_folder, "lib/draco") + draco_flags
-        environment = os.environ
-        emcmake_path = shutil.which("emcmake")
-        emscripten_path = emcmake_path[:-len("emcmake")]
-        environment["EMSCRIPTEN"] = emscripten_path
-        p = subprocess.Popen(shlex.split(command), stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=popen_shell_mode, env=environment)
-        output, err = p.communicate()
-        output = output.decode('utf-8')
-        err = err.decode('utf-8')
-        if output:
-            if verbose: print(output)
-        elif err:
-            print_error_message(err)
-    except OSError:
+    # Draco is no longer configured here: rhino3dm's CMake compiles the encode/decode subset
+    # itself (src/draco_sources.cmake), with rhino3dm's own flags (memory64, debug).
+    emcmake_path = shutil.which("emcmake")
+    if not emcmake_path:
         print_error_message("could not find emcmake command.  Run the bootstrap.py --check emscripten")
         return False
+    os.environ["EMSCRIPTEN"] = emcmake_path[:-len("emcmake")]
 
 
     os.chdir(target_path)
@@ -559,13 +517,14 @@ def setup_js():
         print("generating node build")
         cmakecommand = cmakecommand + "-D NODE=TRUE "
 
+    # WASM64 is always passed: --overwrite keeps CMakeCache.txt, so a cached WASM64=TRUE
+    # from an earlier --wasm64 configure would otherwise survive into a wasm32 build.
     if wasm64:
         print("generating WASM64 (memory64) build")
         cmakecommand = cmakecommand + "-D WASM64=TRUE "
     else:
-        print_warning_message("generating a 32-bit wasm build. opennurbs 9.x SubD "
-                              "requires 64-bit pointers, so this is expected to fail "
-                              "to compile. See RH3DM-215.")
+        print("generating wasm32 build")
+        cmakecommand = cmakecommand + "-D WASM64=FALSE "
     try:
         if debug:
             print("generating debug build")
@@ -653,10 +612,9 @@ def main():
     parser.add_argument('--module', '-m', action='store_true',
                         help="generate a ES6 module build (wasm only)")
     parser.add_argument('--wasm64', '-w', action='store_true',
-                        help="(default since 9.0, retained for compatibility) generate a WASM64 (memory64) build")
+                        help="generate a WASM64 (memory64) build instead of the default wasm32 (wasm only)")
     parser.add_argument('--wasm32', action='store_true',
-                        help="generate a 32-bit wasm build instead of the default WASM64 (wasm only). "
-                             "Currently does not compile: opennurbs 9.x SubD requires 64-bit pointers (RH3DM-215)")
+                        help="(the default, retained for compatibility) generate a wasm32 build")
     parser.add_argument('--winarm64', action='store_true',
                         help="also generate a Windows ARM64 native build (windows only, opt-in; requires MSVC ARM64 build tools)")
     parser.add_argument('--library', '-l', action='store_true',
@@ -691,11 +649,11 @@ def main():
     module = args.module
 
     global wasm64
-    # WASM64 is the default as of 9.0. opennurbs 9.x packs a type tag into the low
-    # bits of SubD component pointers and requires 64-bit pointers, so a wasm32
-    # build does not compile. Tracked in RH3DM-215; --wasm32 is kept so the 32-bit
-    # build can be re-enabled the moment that is resolved.
-    wasm64 = not args.wasm32
+    # wasm32 is the default again since 9.2: it runs in every browser (Safari has
+    # memory64 only in Technology Preview) and on Node 22, and it is faster than
+    # memory64. opennurbs supports it since RH-100167 (RH3DM-215). --wasm64 builds
+    # the memory64 variant, shipped in the package's wasm64/ folder.
+    wasm64 = args.wasm64
 
     global winarm64
     winarm64 = args.winarm64

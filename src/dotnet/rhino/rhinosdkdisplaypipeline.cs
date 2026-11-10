@@ -1153,6 +1153,32 @@ namespace Rhino.Display
     }
 
     /// <summary>
+    /// If the pipeline is running on top of Direct3D 11, this function will
+    /// return a pointer to the ID3D11Device being used. IntPtr.Zero is returned
+    /// if the pipeline is running on some other GPU technology.
+    /// NOTE: AddRef is NOT called on this IUnknown instance.
+    /// </summary>
+    /// <returns>Pointer to an ID3D11Device, or IntPtr.Zero.</returns>
+    /// <since>9.0</since>
+    public IntPtr GetDirect3d11Device()
+    {
+      return UnsafeNativeMethods.CRhinoDisplayPipeline_GetDirect3d11Device(m_ptr);
+    }
+
+    /// <summary>
+    /// If the pipeline is running on top of Direct3D 11, this function will
+    /// return a pointer to the ID3D11DeviceContext1 actively being used.
+    /// IntPtr.Zero is returned if the pipeline is running on some other GPU technology.
+    /// NOTE: AddRef is NOT called on this IUnknown instance.
+    /// </summary>
+    /// <returns>Pointer to an ID3D11DeviceContext1, or IntPtr.Zero.</returns>
+    /// <since>9.0</since>
+    public IntPtr GetDirect3d11DeviceContext()
+    {
+      return UnsafeNativeMethods.CRhinoDisplayPipeline_GetDirect3d11DeviceContext(m_ptr);
+    }
+
+    /// <summary>
     /// Gets a value that indicates whether this pipeline is currently using an 
     /// engine that is performing stereo style drawing. Stereo drawing is for 
     /// providing an "enhanced 3-D" effect through stereo viewing devices.
@@ -2458,7 +2484,18 @@ namespace Rhino.Display
     }
 
     /// <summary>
-    /// Draws all the wireframe curves of a brep object.
+    /// Draws all the wireframe curves of a brep object with the color(s) defined by the display mode.
+    /// </summary>
+    /// <param name="brep">Brep to draw.</param>
+    public void DrawBrepWires(Brep brep)
+    {
+      // When ON_Color::UnsetColor is provided, drawing will fall
+      // back to the color(s) defined on the display pipeline.
+      DrawBrepWires(brep, InternalColors.ON_Color_Unset, 1);
+    }
+
+    /// <summary>
+    /// Draws all the wireframe curves of a brep object in the color provided.
     /// </summary>
     /// <param name="brep">Brep to draw.</param>
     /// <param name="color">Color of Wireframe curves.</param>
@@ -2815,6 +2852,7 @@ namespace Rhino.Display
         overridePoint.m_rotationRadians = RhinoMath.UnsetSingle;
       IntPtr cacheHandle = points.CacheHandle();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawDisplayPoints(m_ptr, nativePoints.Length, nativePoints, ref overridePoint, cacheHandle, ref ffoTransform);
+      GC.KeepAlive(points);
     }
 
     /// <summary>Draws a point with a given radius, style and color.</summary>
@@ -4638,6 +4676,7 @@ namespace Rhino.Display
         const_ptr_material = material.ConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedInstanceDefinition(ptr_this, const_ptr_idef, const_ptr_material);
       GC.KeepAlive(instanceDefinition);
+      GC.KeepAlive(material);
     }
 
     /// <summary>
@@ -4656,6 +4695,7 @@ namespace Rhino.Display
         const_ptr_material = material.ConstPointer();
       UnsafeNativeMethods.CRhinoDisplayPipeline_DrawShadedInstanceDefinition2(ptr_this, const_ptr_idef, const_ptr_material, ref xform);
       GC.KeepAlive(instanceDefinition);
+      GC.KeepAlive(material);
     }
 
     /// <since>6.0</since>
@@ -5229,6 +5269,7 @@ namespace Rhino.Display
         ptr_attributes,
         ref instanceTransform
         );
+      GC.KeepAlive(attributes);
 
       if (!rc)
       {
