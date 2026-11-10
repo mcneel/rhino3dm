@@ -218,9 +218,10 @@ if (${RHINO3DM_PY})
     add_definitions(-DON_CLANG_CONSTRUCTOR_BUG)
     set_property(SOURCE ${pilot_clayer_SRC} APPEND PROPERTY COMPILE_DEFINITIONS RHINO3DM_BUILD)
     # M2 (Luis 2026-11-03): one abi3 wheel for Python 3.12+ (nanobind applies STABLE_ABI only from
-    # 3.12) and the free-threaded build (FREE_THREADED applies only on a free-threaded interpreter)
-    nanobind_add_module(_rhino3dm NB_STATIC STABLE_ABI FREE_THREADED ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC} ${uuid_SRC} ${pilot_clayer_SRC})
-    # (nanobind_add_module links its own library: nanobind-static, or the abi3 / free-threaded variant)
+    # 3.12). No FREE_THREADED (Luis 2026-11-10): opennurbs is not safe for parallel use (const SubD
+    # members write scratch ids), so on a free-threaded interpreter the import turns the GIL back on
+    nanobind_add_module(_rhino3dm NB_STATIC STABLE_ABI ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC} ${uuid_SRC} ${pilot_clayer_SRC})
+    # (nanobind_add_module links its own library: nanobind-static, or its abi3 variant)
     # Hide all symbols by default to prevent conflicts with other libraries (e.g., OpenVDB's zlib)
     set_target_properties(_rhino3dm PROPERTIES
       CXX_VISIBILITY_PRESET hidden
@@ -253,9 +254,10 @@ if (${RHINO3DM_PY})
     # not yet built on macOS / Windows -- M4)
     set_property(SOURCE ${pilot_clayer_SRC} APPEND PROPERTY COMPILE_DEFINITIONS RHINO3DM_BUILD)
     # M2 (Luis 2026-11-03): one abi3 wheel for Python 3.12+ (nanobind applies STABLE_ABI only from
-    # 3.12) and the free-threaded build (FREE_THREADED applies only on a free-threaded interpreter)
-    nanobind_add_module(_rhino3dm NB_STATIC STABLE_ABI FREE_THREADED ${bindings_SRC} ${pilot_clayer_SRC})
-    # (nanobind_add_module links its own library: nanobind-static, or the abi3 / free-threaded variant)
+    # 3.12). No FREE_THREADED (Luis 2026-11-10): opennurbs is not safe for parallel use (const SubD
+    # members write scratch ids), so on a free-threaded interpreter the import turns the GIL back on
+    nanobind_add_module(_rhino3dm NB_STATIC STABLE_ABI ${bindings_SRC} ${pilot_clayer_SRC})
+    # (nanobind_add_module links its own library: nanobind-static, or its abi3 variant)
     
     target_link_libraries(_rhino3dm PRIVATE zlib_static)
     target_link_libraries(_rhino3dm PRIVATE opennurbs_static)
