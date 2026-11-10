@@ -250,7 +250,7 @@ for obj in model.Objects:
 * [API reference](https://mcneel.github.io/rhino3dm/python/api/index.html)
 * [RhinoCommon documentation](https://developer.rhino3d.com/api/rhinocommon/): rhino3dm follows its
   names and behaviour
-* [Samples](https://github.com/mcneel/rhino-developer-samples/tree/8/rhino3dm/py)
+* [Samples](https://github.com/mcneel/rhino-developer-samples/tree/9/rhino3dm/py)
 
 ## Platforms
 

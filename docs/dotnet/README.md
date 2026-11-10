@@ -83,7 +83,7 @@ foreach (var obj in model.Objects)
 ## Documentation
 
 - [RhinoCommon documentation](https://developer.rhino3d.com/api/rhinocommon/): the API reference
-- [Samples](https://github.com/mcneel/rhino-developer-samples/tree/8/rhino3dm/cs)
+- [Samples](https://github.com/mcneel/rhino-developer-samples/tree/9/rhino3dm/cs)
 
 ## Platforms
 
