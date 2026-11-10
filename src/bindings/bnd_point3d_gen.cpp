@@ -583,20 +583,20 @@ void initGenPoint3d(void)
       .class_function("create", optional_override([]() { return BND_Point3d(); }))
       .class_function("create", optional_override([](double a0, double a1, double a2) { return BND_Point3d(a0, a1, a2); }))
       .class_function("create", optional_override([](emscripten::val v0) -> emscripten::val {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Z") && v0["Z"].isNumber())) { BND_Vector3d a0 = v0.as<BND_Vector3d>(); return emscripten::val([&]() { return BND_Point3d(a0); }()); }
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && v0.hasOwnProperty("Y") && v0.hasOwnProperty("Z"))) { BND_Point3f a0 = v0.as<BND_Point3f>(); return emscripten::val([&]() { return BND_Point3d(a0); }()); }
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && v0.hasOwnProperty("Y") && v0.hasOwnProperty("Z") && v0.hasOwnProperty("W"))) { BND_Point4d a0 = v0.as<BND_Point4d>(); return emscripten::val([&]() { return BND_Point3d(a0); }()); }
+        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber())) { BND_Vector3d a0 = v0.as<BND_Vector3d>(); return emscripten::val([&]() { return BND_Point3d(a0); }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y,Z")) { BND_Point3f a0 = v0.as<BND_Point3f>(); return emscripten::val([&]() { return BND_Point3d(a0); }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y,Z,W")) { BND_Point4d a0 = v0.as<BND_Point4d>(); return emscripten::val([&]() { return BND_Point3d(a0); }()); }
         throw std::invalid_argument("Point3d.create: no overload matches the arguments"); }))
       .class_function("origin", optional_override([]() { return BND_Point3d::Origin(); }))
       .class_function("unset", optional_override([]() { return BND_Point3d::Unset(); }))
       .class_function("multiply", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Z") && v0["Z"].isNumber()) && v1.isNumber()) { BND_Point3d a0 = v0.as<BND_Point3d>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return a0 * a1; }()); }
-        if (v0.isNumber() && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Z") && v1["Z"].isNumber())) { double a0 = v0.as<double>(); BND_Point3d a1 = v1.as<BND_Point3d>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && v1.isNumber()) { BND_Point3d a0 = v0.as<BND_Point3d>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if (v0.isNumber() && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) { double a0 = v0.as<double>(); BND_Point3d a1 = v1.as<BND_Point3d>(); return emscripten::val([&]() { return a0 * a1; }()); }
         throw std::invalid_argument("Point3d.multiply: no overload matches the arguments"); }))
       .class_function("divide", optional_override([](BND_Point3d a0, double a1) { return a0 / a1; }))
       .class_function("add", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Z") && v0["Z"].isNumber()) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Z") && v1["Z"].isNumber())) { BND_Point3d a0 = v0.as<BND_Point3d>(); BND_Point3d a1 = v1.as<BND_Point3d>(); return emscripten::val([&]() { return a0 + a1; }()); }
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Z") && v0["Z"].isNumber()) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("X") && v1.hasOwnProperty("Y") && v1.hasOwnProperty("Z"))) { BND_Point3d a0 = v0.as<BND_Point3d>(); BND_Vector3f a1 = v1.as<BND_Vector3f>(); return emscripten::val([&]() { return a0 + a1; }()); }
+        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) { BND_Point3d a0 = v0.as<BND_Point3d>(); BND_Point3d a1 = v1.as<BND_Point3d>(); return emscripten::val([&]() { return a0 + a1; }()); }
+        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && RH3DM_JsHasFields(v1, "X,Y,Z")) { BND_Point3d a0 = v0.as<BND_Point3d>(); BND_Vector3f a1 = v1.as<BND_Vector3f>(); return emscripten::val([&]() { return a0 + a1; }()); }
         throw std::invalid_argument("Point3d.add: no overload matches the arguments"); }))
       .class_function("subtract", optional_override([](BND_Point3d a0, BND_Vector3d a1) { return a0 - a1; }))
       .class_function("negate", optional_override([](BND_Point3d a0) { return -a0; }))

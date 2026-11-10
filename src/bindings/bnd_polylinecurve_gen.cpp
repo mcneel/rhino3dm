@@ -84,7 +84,7 @@ void initGenPolylineCurve(void)
       .constructor<>()
       .constructor(optional_override([](emscripten::val v0) -> BND_PolylineCurve* {
         if ((v0.isNull() || v0.instanceof(emscripten::val::module_property("PolylineCurve")))) return new BND_PolylineCurve((v0.isNull() ? nullptr : v0.as<BND_PolylineCurve*>(emscripten::allow_raw_pointers())));
-        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (!RH3DM_JsSeqFirst(v0).isNull() && RH3DM_JsSeqFirst(v0).typeOf().as<std::string>() == "object" && RH3DM_JsSeqFirst(v0).hasOwnProperty("Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber())))) return new BND_PolylineCurve(RH3DM_JsSeq<BND_Point3d>(v0));
+        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber())))) return new BND_PolylineCurve(RH3DM_JsSeq<BND_Point3d>(v0));
         throw std::invalid_argument("PolylineCurve: no constructor matches the arguments"); }), allow_raw_pointers())
       .property("pointCount", &BND_PolylineCurve::Gen_PointCount)
       .function("parameter", &BND_PolylineCurve::Gen_Parameter)

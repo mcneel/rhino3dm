@@ -804,8 +804,8 @@ void initGenViewportInfo(void)
       .function("dollyCamera", &BND_ViewportInfo::Gen_DollyCamera)
       .function("dollyFrustum", &BND_ViewportInfo::Gen_DollyFrustum)
       .function("extents", optional_override([](BND_ViewportInfo& self, emscripten::val v0, emscripten::val v1) -> bool {
-        if (v0.isNumber() && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Min") && v1.hasOwnProperty("Max"))) return self.Gen_Extents(v0.as<double>(), v1.as<BND_BoundingBox>());
-        if (v0.isNumber() && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("EquatorialPlane") && v1.hasOwnProperty("Radius"))) return self.Gen_Extents_2(v0.as<double>(), v1.as<BND_Sphere>());
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "Min,Max")) return self.Gen_Extents(v0.as<double>(), v1.as<BND_BoundingBox>());
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "EquatorialPlane,Radius")) return self.Gen_Extents_2(v0.as<double>(), v1.as<BND_Sphere>());
         throw std::invalid_argument("ViewportInfo.extents: no overload matches the arguments"); }), allow_raw_pointers())
       .function("frustumCenterPoint", &BND_ViewportInfo::Gen_FrustumCenterPoint)
       .function("getBoundingBoxDepth", &BND_ViewportInfo::Gen_GetBoundingBoxDepth)
@@ -824,7 +824,7 @@ void initGenViewportInfo(void)
       .function("setFrustum", &BND_ViewportInfo::Gen_SetFrustum)
       .function("setFrustumNearFar", &BND_ViewportInfo::Gen_SetFrustumNearFar)
       .function("setFrustumNearFar", optional_override([](BND_ViewportInfo& self, emscripten::val v0, emscripten::val v1) -> bool {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Z") && v0["Z"].isNumber()) && v1.isNumber()) return self.Gen_SetFrustumNearFar_2(v0.as<BND_Point3d>(), v1.as<double>());
+        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && v1.isNumber()) return self.Gen_SetFrustumNearFar_2(v0.as<BND_Point3d>(), v1.as<double>());
         if (v0.isNumber() && v1.isNumber()) return self.Gen_SetFrustumNearFar_3(v0.as<double>(), v1.as<double>());
         throw std::invalid_argument("ViewportInfo.setFrustumNearFar: no overload matches the arguments"); }), allow_raw_pointers())
       .function("setFrustumNearFar", &BND_ViewportInfo::Gen_SetFrustumNearFar_4)
@@ -836,7 +836,7 @@ void initGenViewportInfo(void)
       .function("unlockFrustumSymmetry", &BND_ViewportInfo::Gen_UnlockFrustumSymmetry)
       .function("zoomToScreenRect", &BND_ViewportInfo::Gen_ZoomToScreenRect)
       .function("dollyExtents", optional_override([](BND_ViewportInfo& self, emscripten::val v0, emscripten::val v1) -> bool {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Min") && v0.hasOwnProperty("Max")) && v1.isNumber()) return self.Gen_DollyExtents(v0.as<BND_BoundingBox>(), v1.as<double>());
+        if (RH3DM_JsHasFields(v0, "Min,Max") && v1.isNumber()) return self.Gen_DollyExtents(v0.as<BND_BoundingBox>(), v1.as<double>());
         if (RH3DM_JsIsSeq(v0) && v1.isNumber()) return self.Gen_DollyExtents_2(RH3DM_JsSeqPtr<BND_GeometryBase>(v0), v1.as<double>());
         throw std::invalid_argument("ViewportInfo.dollyExtents: no overload matches the arguments"); }), allow_raw_pointers())
       .function("getDollyCameraVector", &BND_ViewportInfo::Gen_GetDollyCameraVector)

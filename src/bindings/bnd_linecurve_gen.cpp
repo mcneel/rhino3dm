@@ -58,13 +58,13 @@ void initGenLineCurve(void)
   class_<BND_LineCurve, base<BND_Curve>>("LineCurve")
       .constructor<>()
       .constructor(optional_override([](emscripten::val v0) -> BND_LineCurve* {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("From") && v0.hasOwnProperty("To"))) return new BND_LineCurve(v0.as<BND_Line>());
+        if (RH3DM_JsHasFields(v0, "From,To")) return new BND_LineCurve(v0.as<BND_Line>());
         if ((v0.isNull() || v0.instanceof(emscripten::val::module_property("LineCurve")))) return new BND_LineCurve((v0.isNull() ? nullptr : v0.as<BND_LineCurve*>(emscripten::allow_raw_pointers())));
         throw std::invalid_argument("LineCurve: no constructor matches the arguments"); }), allow_raw_pointers())
       .constructor<BND_Line, double, double>()
       .constructor(optional_override([](emscripten::val v0, emscripten::val v1) -> BND_LineCurve* {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && !v0.hasOwnProperty("Z")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("X") && !v1.hasOwnProperty("Z"))) return new BND_LineCurve(v0.as<BND_Point2d>(), v1.as<BND_Point2d>());
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Z") && v0["Z"].isNumber()) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Z") && v1["Z"].isNumber())) return new BND_LineCurve(v0.as<BND_Point3d>(), v1.as<BND_Point3d>());
+        if ((RH3DM_JsHasFields(v0, "X") && !v0.hasOwnProperty("Z")) && (RH3DM_JsHasFields(v1, "X") && !v1.hasOwnProperty("Z"))) return new BND_LineCurve(v0.as<BND_Point2d>(), v1.as<BND_Point2d>());
+        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) return new BND_LineCurve(v0.as<BND_Point3d>(), v1.as<BND_Point3d>());
         throw std::invalid_argument("LineCurve: no constructor matches the arguments"); }), allow_raw_pointers())
       .property("line", &BND_LineCurve::Gen_Line, &BND_LineCurve::Gen_set_Line)
       .class_function("createControlPointCurve", optional_override([](emscripten::val a0, int a1) -> BND_Curve* { return BND_Curve::Gen_CreateControlPointCurve(RH3DM_JsSeq<BND_Point3d>(a0), a1); }), allow_raw_pointers())

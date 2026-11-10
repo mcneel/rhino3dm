@@ -364,7 +364,7 @@ void initGenSubDEdgeSharpness(void)
       .class_function("create", optional_override([]() { return BND_SubDEdgeSharpness(); }))
       .class_function("create", optional_override([](emscripten::val v0) -> emscripten::val {
         if (v0.isNumber()) { double a0 = v0.as<double>(); return emscripten::val([&]() { return BND_SubDEdgeSharpness(a0); }()); }
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("T0"))) { BND_Interval a0 = v0.as<BND_Interval>(); return emscripten::val([&]() { return BND_SubDEdgeSharpness(a0); }()); }
+        if ((RH3DM_JsHasFields(v0, "T0"))) { BND_Interval a0 = v0.as<BND_Interval>(); return emscripten::val([&]() { return BND_SubDEdgeSharpness(a0); }()); }
         throw std::invalid_argument("SubDEdgeSharpness.create: no overload matches the arguments"); }))
       .class_function("create", optional_override([](double a0, double a1) { return BND_SubDEdgeSharpness(a0, a1); }))
       .class_function("fromConstantPercentage", optional_override([](double a0) { return BND_SubDEdgeSharpness::FromConstantPercentage(a0); }))

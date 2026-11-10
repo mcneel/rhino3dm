@@ -74,13 +74,13 @@ void initGenArcCurve(void)
   class_<BND_ArcCurve, base<BND_Curve>>("ArcCurve")
       .constructor<>()
       .constructor(optional_override([](emscripten::val v0) -> BND_ArcCurve* {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Plane") && v0.hasOwnProperty("Radius") && v0.hasOwnProperty("AngleDomain"))) return new BND_ArcCurve(v0.as<BND_Arc>());
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Plane") && v0.hasOwnProperty("Radius"))) return new BND_ArcCurve(v0.as<BND_Circle>());
+        if (RH3DM_JsHasFields(v0, "Plane,Radius,AngleDomain")) return new BND_ArcCurve(v0.as<BND_Arc>());
+        if (RH3DM_JsHasFields(v0, "Plane,Radius")) return new BND_ArcCurve(v0.as<BND_Circle>());
         if ((v0.isNull() || v0.instanceof(emscripten::val::module_property("ArcCurve")))) return new BND_ArcCurve((v0.isNull() ? nullptr : v0.as<BND_ArcCurve*>(emscripten::allow_raw_pointers())));
         throw std::invalid_argument("ArcCurve: no constructor matches the arguments"); }), allow_raw_pointers())
       .constructor(optional_override([](emscripten::val v0, emscripten::val v1, emscripten::val v2) -> BND_ArcCurve* {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Plane") && v0.hasOwnProperty("Radius") && v0.hasOwnProperty("AngleDomain")) && v1.isNumber() && v2.isNumber()) return new BND_ArcCurve(v0.as<BND_Arc>(), v1.as<double>(), v2.as<double>());
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Plane") && v0.hasOwnProperty("Radius")) && v1.isNumber() && v2.isNumber()) return new BND_ArcCurve(v0.as<BND_Circle>(), v1.as<double>(), v2.as<double>());
+        if (RH3DM_JsHasFields(v0, "Plane,Radius,AngleDomain") && v1.isNumber() && v2.isNumber()) return new BND_ArcCurve(v0.as<BND_Arc>(), v1.as<double>(), v2.as<double>());
+        if (RH3DM_JsHasFields(v0, "Plane,Radius") && v1.isNumber() && v2.isNumber()) return new BND_ArcCurve(v0.as<BND_Circle>(), v1.as<double>(), v2.as<double>());
         throw std::invalid_argument("ArcCurve: no constructor matches the arguments"); }), allow_raw_pointers())
       .property("angleDegrees", &BND_ArcCurve::Gen_AngleDegrees)
       .property("angleRadians", &BND_ArcCurve::Gen_AngleRadians)

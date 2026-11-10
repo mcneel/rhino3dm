@@ -140,7 +140,7 @@ void initGenMeshVertexColorList(void)
       .function("clear", &BND_MeshVertexColorList::Gen_Clear)
       .function("destroy", &BND_MeshVertexColorList::Gen_Destroy)
       .function("setColor", optional_override([](BND_MeshVertexColorList& self, emscripten::val v0, emscripten::val v1) -> bool {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("A") && v0.hasOwnProperty("B") && v0.hasOwnProperty("C") && v0.hasOwnProperty("D")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("r"))) return self.Gen_SetColor_2(v0.as<BND_MeshFace>(), v1.as<BND_Color>());
+        if (RH3DM_JsHasFields(v0, "A,B,C,D") && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("r"))) return self.Gen_SetColor_2(v0.as<BND_MeshFace>(), v1.as<BND_Color>());
         if (v0.isNumber() && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("r"))) return self.Gen_SetColor(v0.as<int>(), v1.as<BND_Color>());
         throw std::invalid_argument("MeshVertexColorList.setColor: no overload matches the arguments"); }), allow_raw_pointers())
       .function("toARGBArray", &BND_MeshVertexColorList::Gen_ToARGBArray)

@@ -1414,7 +1414,7 @@ def js_class_shape(t):
         # the shape key is the field set: a subset accepts a superset (js_shadowed)
         fs = VT_JS_FIELDS[t]
         return ('object:' + ','.join(sorted(fs)),
-                '(!{v}.isNull() && {v}.typeOf().as<std::string>() == "object" && %s)' % ' && '.join('{v}.hasOwnProperty("%s")' % f for f in fs),
+                'RH3DM_JsHasFields({v}, "%s")' % ','.join(fs),        # one call into JS (G152)
                 '{v}.as<%s>()' % t)
     if t in vt:
         lacks = ' && !{v}.hasOwnProperty("Z")' if t == 'BND_Point2d' else ''
@@ -1424,7 +1424,7 @@ def js_class_shape(t):
             lacks += ' && {v}["Z"].isNumber()'
         # `typeof null` is "object": checked first (PolyCurve.append(null) called hasOwnProperty on null)
         return ('object:' + vt[t],
-                '(!{v}.isNull() && {v}.typeOf().as<std::string>() == "object" && {v}.hasOwnProperty("%s")%s)' % (vt[t], lacks),
+                '(RH3DM_JsHasFields({v}, "%s")%s)' % (vt[t], lacks),
                 '{v}.as<%s>()' % t)
     # a string (and a uuid, a string in JS) and a color ({r, g, b, a} -- lowercase, so no point or
     # vector passes): checked, never `true` -- an unchecked argument let its overload take every

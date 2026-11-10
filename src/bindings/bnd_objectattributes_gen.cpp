@@ -707,8 +707,8 @@ void initGenObjectAttributes(void)
       .function("removeFromGroup", &BND_ObjectAttributes::Gen_RemoveFromGroup)
       .function("removeHideInDetailOverride", &BND_ObjectAttributes::Gen_RemoveHideInDetailOverride)
       .function("setObjectFrame", optional_override([](BND_ObjectAttributes& self, emscripten::val v0) -> void {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("M00") && v0.hasOwnProperty("M01") && v0.hasOwnProperty("M02") && v0.hasOwnProperty("M03") && v0.hasOwnProperty("M10") && v0.hasOwnProperty("M11") && v0.hasOwnProperty("M12") && v0.hasOwnProperty("M13") && v0.hasOwnProperty("M20") && v0.hasOwnProperty("M21") && v0.hasOwnProperty("M22") && v0.hasOwnProperty("M23") && v0.hasOwnProperty("M30") && v0.hasOwnProperty("M31") && v0.hasOwnProperty("M32") && v0.hasOwnProperty("M33"))) { self.Gen_SetObjectFrame(v0.as<BND_Transform>()); return; }
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Origin") && v0.hasOwnProperty("XAxis") && v0.hasOwnProperty("YAxis") && v0.hasOwnProperty("ZAxis"))) { self.Gen_SetObjectFrame_2(v0.as<BND_Plane>()); return; }
+        if (RH3DM_JsHasFields(v0, "M00,M01,M02,M03,M10,M11,M12,M13,M20,M21,M22,M23,M30,M31,M32,M33")) { self.Gen_SetObjectFrame(v0.as<BND_Transform>()); return; }
+        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis")) { self.Gen_SetObjectFrame_2(v0.as<BND_Plane>()); return; }
         throw std::invalid_argument("ObjectAttributes.setObjectFrame: no overload matches the arguments"); }), allow_raw_pointers())
       .function("setUserString", &BND_ObjectAttributes::Gen_SetUserString)
       .function("transform", &BND_ObjectAttributes::Gen_Transform)

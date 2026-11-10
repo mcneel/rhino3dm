@@ -359,9 +359,9 @@ void initGenVector2d(void)
       .class_function("create", optional_override([](double a0, double a1) { return BND_Vector2d(a0, a1); }))
       .class_function("Length", optional_override([](BND_Vector2d a0) { return a0.Length(); }))
       .class_function("multiply", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && v0.hasOwnProperty("Y")) && v1.isNumber()) { BND_Vector2d a0 = v0.as<BND_Vector2d>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return a0 * a1; }()); }
-        if (v0.isNumber() && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("X") && v1.hasOwnProperty("Y"))) { double a0 = v0.as<double>(); BND_Vector2d a1 = v1.as<BND_Vector2d>(); return emscripten::val([&]() { return a0 * a1; }()); }
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && v0.hasOwnProperty("Y")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("X") && v1.hasOwnProperty("Y"))) { BND_Vector2d a0 = v0.as<BND_Vector2d>(); BND_Vector2d a1 = v1.as<BND_Vector2d>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y") && v1.isNumber()) { BND_Vector2d a0 = v0.as<BND_Vector2d>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "X,Y")) { double a0 = v0.as<double>(); BND_Vector2d a1 = v1.as<BND_Vector2d>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y") && RH3DM_JsHasFields(v1, "X,Y")) { BND_Vector2d a0 = v0.as<BND_Vector2d>(); BND_Vector2d a1 = v1.as<BND_Vector2d>(); return emscripten::val([&]() { return a0 * a1; }()); }
         throw std::invalid_argument("Vector2d.multiply: no overload matches the arguments"); }))
       .class_function("divide", optional_override([](BND_Vector2d a0, double a1) { return a0 / a1; }))
       .class_function("add", optional_override([](BND_Vector2d a0, BND_Vector2d a1) { return a0 + a1; }))

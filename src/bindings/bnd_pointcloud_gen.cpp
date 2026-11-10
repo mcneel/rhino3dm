@@ -376,7 +376,7 @@ void initGenPointCloud(void)
   class_<BND_PointCloud, base<BND_GeometryBase>>("PointCloud")
       .constructor<>()
       .constructor(optional_override([](emscripten::val v0) -> BND_PointCloud* {
-        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (!RH3DM_JsSeqFirst(v0).isNull() && RH3DM_JsSeqFirst(v0).typeOf().as<std::string>() == "object" && RH3DM_JsSeqFirst(v0).hasOwnProperty("Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber())))) return new BND_PointCloud(RH3DM_JsSeq<BND_Point3d>(v0));
+        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber())))) return new BND_PointCloud(RH3DM_JsSeq<BND_Point3d>(v0));
         if (v0.instanceof(emscripten::val::module_property("PointCloud"))) return new BND_PointCloud(*v0.as<BND_PointCloud*>(emscripten::allow_raw_pointers()));
         throw std::invalid_argument("PointCloud: no constructor matches the arguments"); }), allow_raw_pointers())
       .function("addPointValue", &BND_PointCloud_AddValue, allow_raw_pointers())
@@ -395,15 +395,15 @@ void initGenPointCloud(void)
       .function("get", &BND_PointCloud::Gen_this, allow_raw_pointers())
       .function("add", &BND_PointCloud::Gen_Add)
       .function("add", optional_override([](BND_PointCloud& self, emscripten::val v0, emscripten::val v1) -> void {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Z") && v0["Z"].isNumber()) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Z") && v1["Z"].isNumber())) { self.Gen_Add_3(v0.as<BND_Point3d>(), v1.as<BND_Vector3d>()); return; }
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Z") && v0["Z"].isNumber()) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("r"))) { self.Gen_Add_2(v0.as<BND_Point3d>(), v1.as<BND_Color>()); return; }
+        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) { self.Gen_Add_3(v0.as<BND_Point3d>(), v1.as<BND_Vector3d>()); return; }
+        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("r"))) { self.Gen_Add_2(v0.as<BND_Point3d>(), v1.as<BND_Color>()); return; }
         throw std::invalid_argument("PointCloud.add: no overload matches the arguments"); }), allow_raw_pointers())
       .function("add", &BND_PointCloud::Gen_Add_4)
       .function("add", &BND_PointCloud::Gen_Add_5)
       .function("addRange", optional_override([](BND_PointCloud& self, emscripten::val a0) -> void { self.Gen_AddRange(RH3DM_JsSeq<BND_Point3d>(a0)); }), allow_raw_pointers())
       .function("addRange", optional_override([](BND_PointCloud& self, emscripten::val v0, emscripten::val v1) -> void {
-        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (!RH3DM_JsSeqFirst(v0).isNull() && RH3DM_JsSeqFirst(v0).typeOf().as<std::string>() == "object" && RH3DM_JsSeqFirst(v0).hasOwnProperty("Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber()))) && (RH3DM_JsIsSeq(v1) && (RH3DM_JsSeqFirst(v1).isUndefined() || (!RH3DM_JsSeqFirst(v1).isNull() && RH3DM_JsSeqFirst(v1).typeOf().as<std::string>() == "object" && RH3DM_JsSeqFirst(v1).hasOwnProperty("Z") && RH3DM_JsSeqFirst(v1)["Z"].isNumber())))) { self.Gen_AddRange_2(RH3DM_JsSeq<BND_Point3d>(v0), RH3DM_JsSeq<BND_Vector3d>(v1)); return; }
-        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (!RH3DM_JsSeqFirst(v0).isNull() && RH3DM_JsSeqFirst(v0).typeOf().as<std::string>() == "object" && RH3DM_JsSeqFirst(v0).hasOwnProperty("Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber()))) && (RH3DM_JsIsSeq(v1) && (RH3DM_JsSeqFirst(v1).isUndefined() || (!RH3DM_JsSeqFirst(v1).isNull() && RH3DM_JsSeqFirst(v1).typeOf().as<std::string>() == "object" && RH3DM_JsSeqFirst(v1).hasOwnProperty("r"))))) { self.Gen_AddRange_3(RH3DM_JsSeq<BND_Point3d>(v0), RH3DM_JsSeq<BND_Color>(v1)); return; }
+        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber()))) && (RH3DM_JsIsSeq(v1) && (RH3DM_JsSeqFirst(v1).isUndefined() || (RH3DM_JsHasFields(RH3DM_JsSeqFirst(v1), "Z") && RH3DM_JsSeqFirst(v1)["Z"].isNumber())))) { self.Gen_AddRange_2(RH3DM_JsSeq<BND_Point3d>(v0), RH3DM_JsSeq<BND_Vector3d>(v1)); return; }
+        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber()))) && (RH3DM_JsIsSeq(v1) && (RH3DM_JsSeqFirst(v1).isUndefined() || (!RH3DM_JsSeqFirst(v1).isNull() && RH3DM_JsSeqFirst(v1).typeOf().as<std::string>() == "object" && RH3DM_JsSeqFirst(v1).hasOwnProperty("r"))))) { self.Gen_AddRange_3(RH3DM_JsSeq<BND_Point3d>(v0), RH3DM_JsSeq<BND_Color>(v1)); return; }
         throw std::invalid_argument("PointCloud.addRange: no overload matches the arguments"); }), allow_raw_pointers())
       .function("clearColors", &BND_PointCloud::Gen_ClearColors)
       .function("clearHiddenFlags", &BND_PointCloud::Gen_ClearHiddenFlags)
@@ -413,8 +413,8 @@ void initGenPointCloud(void)
       .function("getRandomSubsample", &BND_PointCloud::Gen_GetRandomSubsample, allow_raw_pointers())
       .function("insert", &BND_PointCloud::Gen_Insert)
       .function("insert", optional_override([](BND_PointCloud& self, emscripten::val v0, emscripten::val v1, emscripten::val v2) -> void {
-        if (v0.isNumber() && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Z") && v1["Z"].isNumber()) && (!v2.isNull() && v2.typeOf().as<std::string>() == "object" && v2.hasOwnProperty("Z") && v2["Z"].isNumber())) { self.Gen_Insert_3(v0.as<int>(), v1.as<BND_Point3d>(), v2.as<BND_Vector3d>()); return; }
-        if (v0.isNumber() && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Z") && v1["Z"].isNumber()) && (!v2.isNull() && v2.typeOf().as<std::string>() == "object" && v2.hasOwnProperty("r"))) { self.Gen_Insert_2(v0.as<int>(), v1.as<BND_Point3d>(), v2.as<BND_Color>()); return; }
+        if (v0.isNumber() && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber()) && (RH3DM_JsHasFields(v2, "Z") && v2["Z"].isNumber())) { self.Gen_Insert_3(v0.as<int>(), v1.as<BND_Point3d>(), v2.as<BND_Vector3d>()); return; }
+        if (v0.isNumber() && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber()) && (!v2.isNull() && v2.typeOf().as<std::string>() == "object" && v2.hasOwnProperty("r"))) { self.Gen_Insert_2(v0.as<int>(), v1.as<BND_Point3d>(), v2.as<BND_Color>()); return; }
         throw std::invalid_argument("PointCloud.insert: no overload matches the arguments"); }), allow_raw_pointers())
       .function("insert", &BND_PointCloud::Gen_Insert_4)
       .function("insert", &BND_PointCloud::Gen_Insert_5)

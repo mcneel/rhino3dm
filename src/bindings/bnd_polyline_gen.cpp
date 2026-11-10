@@ -702,7 +702,7 @@ void initGenPolyline(void)
       .constructor<>()
       .constructor(optional_override([](emscripten::val v0) -> BND_Polyline* {
         if (v0.isNumber()) return new BND_Polyline(v0.as<int>());
-        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (!RH3DM_JsSeqFirst(v0).isNull() && RH3DM_JsSeqFirst(v0).typeOf().as<std::string>() == "object" && RH3DM_JsSeqFirst(v0).hasOwnProperty("Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber())))) return new BND_Polyline(RH3DM_JsSeq<BND_Point3d>(v0));
+        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber())))) return new BND_Polyline(RH3DM_JsSeq<BND_Point3d>(v0));
         throw std::invalid_argument("Polyline: no constructor matches the arguments"); }), allow_raw_pointers())
       .property("isValid", &BND_Polyline::IsValid)
       .property("segmentCount", &BND_Polyline::SegmentCount)

@@ -597,9 +597,9 @@ void initGenCurve(void)
       .function("changeClosedCurveSeam", &BND_Curve::Gen_ChangeClosedCurveSeam)
       .function("changeDimension", &BND_Curve::Gen_ChangeDimension)
       .function("closedCurveOrientation", optional_override([](BND_Curve& self, emscripten::val v0) -> RH3DM_CurveOrientation {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("M00") && v0.hasOwnProperty("M01") && v0.hasOwnProperty("M02") && v0.hasOwnProperty("M03") && v0.hasOwnProperty("M10") && v0.hasOwnProperty("M11") && v0.hasOwnProperty("M12") && v0.hasOwnProperty("M13") && v0.hasOwnProperty("M20") && v0.hasOwnProperty("M21") && v0.hasOwnProperty("M22") && v0.hasOwnProperty("M23") && v0.hasOwnProperty("M30") && v0.hasOwnProperty("M31") && v0.hasOwnProperty("M32") && v0.hasOwnProperty("M33"))) return self.Gen_ClosedCurveOrientation(v0.as<BND_Transform>());
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Origin") && v0.hasOwnProperty("XAxis") && v0.hasOwnProperty("YAxis") && v0.hasOwnProperty("ZAxis"))) return self.Gen_ClosedCurveOrientation_3(v0.as<BND_Plane>());
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Z") && v0["Z"].isNumber())) return self.Gen_ClosedCurveOrientation_4(v0.as<BND_Vector3d>());
+        if (RH3DM_JsHasFields(v0, "M00,M01,M02,M03,M10,M11,M12,M13,M20,M21,M22,M23,M30,M31,M32,M33")) return self.Gen_ClosedCurveOrientation(v0.as<BND_Transform>());
+        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis")) return self.Gen_ClosedCurveOrientation_3(v0.as<BND_Plane>());
+        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber())) return self.Gen_ClosedCurveOrientation_4(v0.as<BND_Vector3d>());
         throw std::invalid_argument("Curve.closedCurveOrientation: no overload matches the arguments"); }), allow_raw_pointers())
       .function("curvatureAt", &BND_Curve::Gen_CurvatureAt)
       .function("duplicate", &BND_Curve::Gen_Duplicate, allow_raw_pointers())
@@ -631,12 +631,12 @@ void initGenCurve(void)
       .function("trimInterval", &BND_Curve::Gen_TrimInterval)
       .function("tryGetArc", &BND_Curve::Gen_TryGetArc)
       .function("tryGetArc", optional_override([](BND_Curve& self, emscripten::val v0) -> BND_TUPLE {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Origin") && v0.hasOwnProperty("XAxis") && v0.hasOwnProperty("YAxis") && v0.hasOwnProperty("ZAxis"))) return self.Gen_TryGetArc_3(v0.as<BND_Plane>());
+        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis")) return self.Gen_TryGetArc_3(v0.as<BND_Plane>());
         if (v0.isNumber()) return self.Gen_TryGetArc_2(v0.as<double>());
         throw std::invalid_argument("Curve.tryGetArc: no overload matches the arguments"); }), allow_raw_pointers())
       .function("tryGetEllipse", &BND_Curve::Gen_TryGetEllipse)
       .function("tryGetEllipse", optional_override([](BND_Curve& self, emscripten::val v0) -> BND_TUPLE {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Origin") && v0.hasOwnProperty("XAxis") && v0.hasOwnProperty("YAxis") && v0.hasOwnProperty("ZAxis"))) return self.Gen_TryGetEllipse_3(v0.as<BND_Plane>());
+        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis")) return self.Gen_TryGetEllipse_3(v0.as<BND_Plane>());
         if (v0.isNumber()) return self.Gen_TryGetEllipse_2(v0.as<double>());
         throw std::invalid_argument("Curve.tryGetEllipse: no overload matches the arguments"); }), allow_raw_pointers())
       .function("tryGetPlane", &BND_Curve::Gen_TryGetPlane)

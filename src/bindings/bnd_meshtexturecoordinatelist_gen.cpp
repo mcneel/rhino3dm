@@ -184,20 +184,20 @@ void initGenMeshTextureCoordinateList(void)
       .function("reverseTextureCoordinates", &BND_MeshTextureCoordinateList::Gen_ReverseTextureCoordinates)
       .function("setTextureCoordinates", optional_override([](BND_MeshTextureCoordinateList& self, emscripten::val v0) -> bool {
         if (v0.instanceof(emscripten::val::module_property("TextureMapping"))) return self.Gen_SetTextureCoordinates(*v0.as<BND_TextureMapping*>(emscripten::allow_raw_pointers()));
-        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (!RH3DM_JsSeqFirst(v0).isNull() && RH3DM_JsSeqFirst(v0).typeOf().as<std::string>() == "object" && RH3DM_JsSeqFirst(v0).hasOwnProperty("X") && RH3DM_JsSeqFirst(v0).hasOwnProperty("Y"))))) return self.Gen_SetTextureCoordinates_2(RH3DM_JsSeq<BND_Point2f>(v0));
+        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "X,Y")))) return self.Gen_SetTextureCoordinates_2(RH3DM_JsSeq<BND_Point2f>(v0));
         throw std::invalid_argument("MeshTextureCoordinateList.setTextureCoordinates: no overload matches the arguments"); }), allow_raw_pointers())
       .function("transposeTextureCoordinates", &BND_MeshTextureCoordinateList::Gen_TransposeTextureCoordinates)
       .function("addRange", optional_override([](BND_MeshTextureCoordinateList& self, emscripten::val a0) -> bool { return self.Gen_AddRange(RH3DM_JsSeq<BND_Point2f>(a0)); }), allow_raw_pointers())
       .function("setTextureCoordinate", &BND_MeshTextureCoordinateList::Gen_SetTextureCoordinate_4)
       .function("toFloatArray", optional_override([](BND_MeshTextureCoordinateList& self) -> emscripten::val { return RH3DM_JsArray(self.Gen_ToFloatArray()); }), allow_raw_pointers())
       .function("setTextureCoordinate", optional_override([](BND_MeshTextureCoordinateList& self, emscripten::val v0, emscripten::val v1) -> bool {
-        if (v0.isNumber() && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("X") && v1.hasOwnProperty("Y") && v1.hasOwnProperty("Z"))) return self.Gen_SetTextureCoordinate_3(v0.as<int>(), v1.as<BND_Point3f>());
-        if (v0.isNumber() && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("X") && v1.hasOwnProperty("Y"))) return self.Gen_SetTextureCoordinate_2(v0.as<int>(), v1.as<BND_Point2f>());
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "X,Y,Z")) return self.Gen_SetTextureCoordinate_3(v0.as<int>(), v1.as<BND_Point3f>());
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "X,Y")) return self.Gen_SetTextureCoordinate_2(v0.as<int>(), v1.as<BND_Point2f>());
         throw std::invalid_argument("MeshTextureCoordinateList.setTextureCoordinate: no overload matches the arguments"); }), allow_raw_pointers())
       .function("add", &BND_MeshTextureCoordinateList::Gen_Add_4)
       .function("add", optional_override([](BND_MeshTextureCoordinateList& self, emscripten::val v0) -> int {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Z") && v0["Z"].isNumber())) return self.Gen_Add_3(v0.as<BND_Point3d>());
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && v0.hasOwnProperty("Y"))) return self.Gen_Add_2(v0.as<BND_Point2f>());
+        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber())) return self.Gen_Add_3(v0.as<BND_Point3d>());
+        if (RH3DM_JsHasFields(v0, "X,Y")) return self.Gen_Add_2(v0.as<BND_Point2f>());
         throw std::invalid_argument("MeshTextureCoordinateList.add: no overload matches the arguments"); }), allow_raw_pointers());
 }
 #endif

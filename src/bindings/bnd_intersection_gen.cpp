@@ -341,8 +341,8 @@ void initGenIntersection(void)
       .class_function("arcArc", &BND_Intersection::Gen_ArcArc)
       .class_function("circleCircle", &BND_Intersection::Gen_CircleCircle)
       .class_function("lineBox", optional_override([](emscripten::val v0, emscripten::val v1, emscripten::val v2) -> BND_TUPLE {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("From") && v0.hasOwnProperty("To")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Plane") && v1.hasOwnProperty("X") && v1.hasOwnProperty("Y") && v1.hasOwnProperty("Z")) && v2.isNumber()) return BND_Intersection::Gen_LineBox_2(v0.as<BND_Line>(), v1.as<BND_Box>(), v2.as<double>());
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("From") && v0.hasOwnProperty("To")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("Min") && v1.hasOwnProperty("Max")) && v2.isNumber()) return BND_Intersection::Gen_LineBox(v0.as<BND_Line>(), v1.as<BND_BoundingBox>(), v2.as<double>());
+        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "Plane,X,Y,Z") && v2.isNumber()) return BND_Intersection::Gen_LineBox_2(v0.as<BND_Line>(), v1.as<BND_Box>(), v2.as<double>());
+        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "Min,Max") && v2.isNumber()) return BND_Intersection::Gen_LineBox(v0.as<BND_Line>(), v1.as<BND_BoundingBox>(), v2.as<double>());
         throw std::invalid_argument("Intersection.lineBox: no overload matches the arguments"); }), allow_raw_pointers())
       .class_function("lineCircle", &BND_Intersection::Gen_LineCircle)
       .class_function("lineCylinder", &BND_Intersection::Gen_LineCylinder)

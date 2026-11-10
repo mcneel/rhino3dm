@@ -449,22 +449,22 @@ void initGenPoint2d(void)
       .class_function("create", optional_override([]() { return BND_Point2d(); }))
       .class_function("create", optional_override([](double a0, double a1) { return BND_Point2d(a0, a1); }))
       .class_function("create", optional_override([](emscripten::val v0) -> emscripten::val {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && v0.hasOwnProperty("Y"))) { BND_Vector2d a0 = v0.as<BND_Vector2d>(); return emscripten::val([&]() { return BND_Point2d(a0); }()); }
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("Z") && v0["Z"].isNumber())) { BND_Point3d a0 = v0.as<BND_Point3d>(); return emscripten::val([&]() { return BND_Point2d(a0); }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y")) { BND_Vector2d a0 = v0.as<BND_Vector2d>(); return emscripten::val([&]() { return BND_Point2d(a0); }()); }
+        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber())) { BND_Point3d a0 = v0.as<BND_Point3d>(); return emscripten::val([&]() { return BND_Point2d(a0); }()); }
         throw std::invalid_argument("Point2d.create: no overload matches the arguments"); }))
       .class_function("multiply", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && !v0.hasOwnProperty("Z")) && v1.isNumber()) { BND_Point2d a0 = v0.as<BND_Point2d>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return a0 * a1; }()); }
-        if (v0.isNumber() && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("X") && !v1.hasOwnProperty("Z"))) { double a0 = v0.as<double>(); BND_Point2d a1 = v1.as<BND_Point2d>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if ((RH3DM_JsHasFields(v0, "X") && !v0.hasOwnProperty("Z")) && v1.isNumber()) { BND_Point2d a0 = v0.as<BND_Point2d>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if (v0.isNumber() && (RH3DM_JsHasFields(v1, "X") && !v1.hasOwnProperty("Z"))) { double a0 = v0.as<double>(); BND_Point2d a1 = v1.as<BND_Point2d>(); return emscripten::val([&]() { return a0 * a1; }()); }
         throw std::invalid_argument("Point2d.multiply: no overload matches the arguments"); }))
       .class_function("divide", optional_override([](BND_Point2d a0, double a1) { return a0 / a1; }))
       .class_function("add", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && !v0.hasOwnProperty("Z")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("X") && v1.hasOwnProperty("Y"))) { BND_Point2d a0 = v0.as<BND_Point2d>(); BND_Vector2d a1 = v1.as<BND_Vector2d>(); return emscripten::val([&]() { return a0 + a1; }()); }
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && v0.hasOwnProperty("Y")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("X") && !v1.hasOwnProperty("Z"))) { BND_Vector2d a0 = v0.as<BND_Vector2d>(); BND_Point2d a1 = v1.as<BND_Point2d>(); return emscripten::val([&]() { return a0 + a1; }()); }
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && !v0.hasOwnProperty("Z")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("X") && !v1.hasOwnProperty("Z"))) { BND_Point2d a0 = v0.as<BND_Point2d>(); BND_Point2d a1 = v1.as<BND_Point2d>(); return emscripten::val([&]() { return a0 + a1; }()); }
+        if ((RH3DM_JsHasFields(v0, "X") && !v0.hasOwnProperty("Z")) && RH3DM_JsHasFields(v1, "X,Y")) { BND_Point2d a0 = v0.as<BND_Point2d>(); BND_Vector2d a1 = v1.as<BND_Vector2d>(); return emscripten::val([&]() { return a0 + a1; }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y") && (RH3DM_JsHasFields(v1, "X") && !v1.hasOwnProperty("Z"))) { BND_Vector2d a0 = v0.as<BND_Vector2d>(); BND_Point2d a1 = v1.as<BND_Point2d>(); return emscripten::val([&]() { return a0 + a1; }()); }
+        if ((RH3DM_JsHasFields(v0, "X") && !v0.hasOwnProperty("Z")) && (RH3DM_JsHasFields(v1, "X") && !v1.hasOwnProperty("Z"))) { BND_Point2d a0 = v0.as<BND_Point2d>(); BND_Point2d a1 = v1.as<BND_Point2d>(); return emscripten::val([&]() { return a0 + a1; }()); }
         throw std::invalid_argument("Point2d.add: no overload matches the arguments"); }))
       .class_function("subtract", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && !v0.hasOwnProperty("Z")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("X") && v1.hasOwnProperty("Y"))) { BND_Point2d a0 = v0.as<BND_Point2d>(); BND_Vector2d a1 = v1.as<BND_Vector2d>(); return emscripten::val([&]() { return a0 - a1; }()); }
-        if ((!v0.isNull() && v0.typeOf().as<std::string>() == "object" && v0.hasOwnProperty("X") && !v0.hasOwnProperty("Z")) && (!v1.isNull() && v1.typeOf().as<std::string>() == "object" && v1.hasOwnProperty("X") && !v1.hasOwnProperty("Z"))) { BND_Point2d a0 = v0.as<BND_Point2d>(); BND_Point2d a1 = v1.as<BND_Point2d>(); return emscripten::val([&]() { return a0 - a1; }()); }
+        if ((RH3DM_JsHasFields(v0, "X") && !v0.hasOwnProperty("Z")) && RH3DM_JsHasFields(v1, "X,Y")) { BND_Point2d a0 = v0.as<BND_Point2d>(); BND_Vector2d a1 = v1.as<BND_Vector2d>(); return emscripten::val([&]() { return a0 - a1; }()); }
+        if ((RH3DM_JsHasFields(v0, "X") && !v0.hasOwnProperty("Z")) && (RH3DM_JsHasFields(v1, "X") && !v1.hasOwnProperty("Z"))) { BND_Point2d a0 = v0.as<BND_Point2d>(); BND_Point2d a1 = v1.as<BND_Point2d>(); return emscripten::val([&]() { return a0 - a1; }()); }
         throw std::invalid_argument("Point2d.subtract: no overload matches the arguments"); }))
       .class_function("negate", optional_override([](BND_Point2d a0) { return -a0; }))
       .class_function("equals", optional_override([](BND_Point2d a0, BND_Point2d a1) { return a0 == a1; }))
