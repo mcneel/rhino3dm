@@ -10,12 +10,13 @@
     <RootNamespace>Rhino</RootNamespace>
     <Version>9.2.0-beta.0</Version>
     <PackageId>Rhino3dm</PackageId>
-    <Authors>mcneel</Authors>
-    <PackageTitle>.NET library based on OpenNURBS with a "RhinoCommon" style</PackageTitle>
-    <PackageDescription>rhino3dm is a set of libraries based on the OpenNURBS geometry library with a "RhinoCommon" style. This provides the ability to access and manipulate geometry through .NET, Python or JavaScript applications independent of Rhino.</PackageDescription>
+    <Authors>Robert McNeel &amp; Associates</Authors>
+    <PackageTitle>Read, write and create Rhino 3D models (.3dm files) in .NET</PackageTitle>
+    <PackageDescription>Read, write and create Rhino 3D models (.3dm files) in .NET. Rhino3dm is a subset of RhinoCommon for applications and web services on Windows, macOS and Linux.</PackageDescription>
     <RepositoryUrl>https://github.com/mcneel/rhino3dm</RepositoryUrl>
-    <PackageTags>rhino3d</PackageTags>
-    <Copyright>Copyright (c) 1997-2023 Robert McNeel &amp; Associates</Copyright>
+    <PackageProjectUrl>https://github.com/mcneel/rhino3dm</PackageProjectUrl>
+    <PackageTags>rhino;rhino3d;3dm;opennurbs;nurbs;cad;3d;geometry;rhinocommon</PackageTags>
+    <Copyright>Copyright (c) 1997-2026 Robert McNeel &amp; Associates</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
