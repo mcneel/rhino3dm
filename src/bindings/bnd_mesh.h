@@ -1,8 +1,8 @@
-// three.js interop (Luis 2026-10-08, decided again 2026-10-28 JS2/three.js): keep toThreejsBuffers on
-// Mesh and PointCloud, and add its inverse createFromThreejsBuffers, before the JSON family
-// (toThreejsJSON, ...) is deprecated. JS only: the buffers are typed arrays three.js takes as they are
-// (position / normal / uv / color Float32Array, index Uint32Array; a mesh's quads as two triangles).
+// three.js interop: toThreejsBuffers on Mesh and PointCloud, and its inverse createFromThreejsBuffers.
+// JS only. The buffers are typed arrays three.js uses directly (position / normal / uv / color
+// Float32Array, index Uint32Array; quads are split into two triangles).
 // Hand-maintained members of Mesh; the generated binding is bnd_mesh_gen.h (tools/generate/bnd_gen.py).
+
 #pragma once
 
 #include "bnd_common.h"
@@ -16,14 +16,12 @@ BND_DICT BND_Mesh_ToThreejsBuffers(const BND_Mesh& mesh, bool rotateToYUp);
 // `normal`, `uv` (2 a vertex), `color` (r, g, b in 0..1) are optional and must match the vertex count
 BND_Mesh* BND_Mesh_CreateFromThreejsBuffers(BND_DICT buffers, bool rotateFromYUp);
 
-// the deprecated JSON family (G133; Luis 2026-10-31: shipped deprecated in 9.2, removed later): rhino3dm
-// 8.x's members, each warning once (RH3DM_Deprecated) that the buffers above replace it. The objects are
-// BufferGeometry JSON as three.js' BufferGeometryLoader reads it: {data: {index: {type, array},
-// attributes: {position|normal|uv|color: {itemSize, type, array}}}}, plain arrays of numbers.
-// 8.x's behaviour is kept -- createFromThreejsJSON always turns a mesh from Y-up (a point cloud never),
-// colors are truncated to bytes and an RGBA color's alpha read as opacity -- except that the normals a
-// mesh lacks are computed on a copy (8.x computed them on the caller's mesh), and a face index outside
-// the vertices throws (8.x built a mesh that crashed later)
+// Deprecated: the three.js JSON members from rhino3dm 8.x. Each logs a one-time warning pointing to
+// the buffer functions above. The JSON is three.js BufferGeometry, as BufferGeometryLoader reads it:
+// {data: {index: {type, array}, attributes: {position|normal|uv|color: {itemSize, type, array}}}}.
+// Same behaviour as 8.x (createFromThreejsJSON turns meshes from Y-up to Z-up, but not point clouds;
+// colors are truncated to bytes; alpha is read as opacity), except that missing normals are computed
+// on a copy instead of the caller's mesh, and a face index outside the vertex range throws.
 BND_DICT BND_Mesh_ToThreejsJSON(const BND_Mesh& mesh);
 BND_DICT BND_Mesh_ToThreejsJSONRotate(const BND_Mesh& mesh, bool rotateToYUp);
 // the meshes appended into one (a single mesh: its own JSON)
