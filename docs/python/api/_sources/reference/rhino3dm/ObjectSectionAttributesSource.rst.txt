@@ -1,0 +1,38 @@
+rhino3dm.ObjectSectionAttributesSource
+======================================
+
+.. py:class:: rhino3dm.ObjectSectionAttributesSource
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   The source of sectioning attributes on an object.
+
+
+   .. py:attribute:: FromLayer
+      :value: 0
+
+
+      Section attributes defined by object's layer
+
+
+   .. py:attribute:: FromObject
+      :value: 1
+
+
+      Section attributes are specific to the object
+
+
+   .. py:attribute:: FromParent
+      :value: 2
+
+
+      Section attributes defined by object's parent
+
+
+   .. py:attribute:: FromSectioner
+      :value: 3
+
+
+      Section attributes defined by the cutting object
+

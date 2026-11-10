@@ -1,0 +1,4 @@
+rhino3dm.PostEffectCollectionIter
+=================================
+
+.. py:class:: rhino3dm.PostEffectCollectionIter

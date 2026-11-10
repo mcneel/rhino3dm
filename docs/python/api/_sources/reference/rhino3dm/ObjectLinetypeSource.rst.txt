@@ -1,0 +1,31 @@
+rhino3dm.ObjectLinetypeSource
+=============================
+
+.. py:class:: rhino3dm.ObjectLinetypeSource
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated values for the source of linetype of single objects.
+
+
+   .. py:attribute:: LinetypeFromLayer
+      :value: 0
+
+
+      use line style assigned to layer.
+
+
+   .. py:attribute:: LinetypeFromObject
+      :value: 1
+
+
+      use line style assigned to object.
+
+
+   .. py:attribute:: LinetypeFromParent
+      :value: 3
+
+
+      for objects with parents (like objects in instance references, use parent linetype) if not parent, treat as linetype\_from\_layer.
+

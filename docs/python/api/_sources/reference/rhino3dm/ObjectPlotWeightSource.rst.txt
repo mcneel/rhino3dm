@@ -1,0 +1,31 @@
+rhino3dm.ObjectPlotWeightSource
+===============================
+
+.. py:class:: rhino3dm.ObjectPlotWeightSource
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated values for the source of plotting/printing weight of single objects.
+
+
+   .. py:attribute:: PlotWeightFromLayer
+      :value: 0
+
+
+      use plot color assigned to layer.
+
+
+   .. py:attribute:: PlotWeightFromObject
+      :value: 1
+
+
+      use plot color assigned to object.
+
+
+   .. py:attribute:: PlotWeightFromParent
+      :value: 3
+
+
+      for objects with parents (like objects in instance references, use parent plot color) if no parent, treat as plot\_color\_from\_layer.
+

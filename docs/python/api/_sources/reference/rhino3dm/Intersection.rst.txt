@@ -1,0 +1,185 @@
+rhino3dm.Intersection
+=====================
+
+.. py:class:: rhino3dm.Intersection
+
+   Provides static methods for the computation of intersections, projections, sections and similar.
+
+
+   .. py:method:: ArcArc(arcA: Arc, arcB: Arc) -> tuple[ArcArcIntersection, Point3d, Point3d]
+      :staticmethod:
+
+
+      Intersects two arcs using exact calculations.
+
+      :param arcA: First arc to intersect.
+      :param arcB: Second arc to intersect.
+
+      :returns: The intersection type.
+
+
+
+   .. py:method:: CircleCircle(circleA: Circle, circleB: Circle) -> tuple[CircleCircleIntersection, Point3d, Point3d]
+      :staticmethod:
+
+
+      Intersects two circles using exact calculations.
+
+      :param circleA: First circle to intersect.
+      :param circleB: Second circle to intersect.
+
+      :returns: The intersection type.
+
+
+
+   .. py:method:: LineBox(line: Line, box: BoundingBox, tolerance: float) -> tuple[bool, Interval]
+                  LineBox(line: Line, box: Box, tolerance: float) -> tuple[bool, Interval]
+      :staticmethod:
+
+
+      Intersects an infinite line and an axis aligned bounding box.
+
+      :param line: Line for intersection.
+      :param box: BoundingBox to intersect.
+      :param tolerance: If tolerance > 0.0, then the intersection is performed against a box that has each side moved out by tolerance.
+
+      :returns: true if the line intersects the box, false if no intersection occurs.
+
+
+
+   .. py:method:: LineCircle(line: Line, circle: Circle) -> tuple[LineCircleIntersection, float, Point3d, float, Point3d]
+      :staticmethod:
+
+
+      Intersects a line with a circle using exact calculations.
+
+      :param line: Line for intersection.
+      :param circle: Circle for intersection.
+
+      :returns: If ``LineCircleIntersection.Single`` is returned, only t1 and point1 will have valid values. If ``LineCircleIntersection.Multiple`` is returned, t2 and point2 will also be filled out.
+
+
+
+   .. py:method:: LineCylinder(line: Line, cylinder: Cylinder) -> tuple[LineCylinderIntersection, Point3d, Point3d]
+      :staticmethod:
+
+
+      Intersects a line with a cylinder using exact calculations.
+
+      :param line: Line for intersection.
+      :param cylinder: Cylinder for intersection.
+
+      :returns: If None is returned, the first point is the point on the line closest to the cylinder and the second point is the point on the cylinder closest to the line.
+                If ``LineCylinderIntersection.Single`` is returned, the first point is the point on the line and the second point is the same point on the cylinder.
+
+
+
+   .. py:method:: LineLine(lineA: Line, lineB: Line) -> tuple[bool, float, float]
+                  LineLine(lineA: Line, lineB: Line, tolerance: float, finiteSegments: bool) -> tuple[bool, float, float]
+      :staticmethod:
+
+
+      Intersects two lines.
+
+      If the lines are exactly parallel, meaning the system of equations used to find a and b has no numerical solution, then false is returned. If the lines are nearly parallel, which is often numerically true even if you think the lines look exactly parallel, then the closest points are found and true is returned. So, if you care about weeding out "parallel" lines, then you need to do something like the following: ``bool rc = Intersect.LineLine(lineA, lineB, out a, out b, tolerance, segments); if (rc) { double angle_tol = RhinoMath.ToRadians(1.0); // or whatever double parallel_tol = Math.Cos(angle_tol); if ( Math.Abs(lineA.UnitTangent * lineB.UnitTangent) >= parallel_tol ) { ... do whatever you think is appropriate } }`` ``Dim rc As Boolean = Intersect.LineLine(lineA, lineB, a, b, tolerance, segments) If (rc) Then Dim angle_tol As Double = RhinoMath.ToRadians(1.0) 'or whatever Dim parallel_tolerance As Double = Math.Cos(angle_tol) If (Math.Abs(lineA.UnitTangent * lineB.UnitTangent) >= parallel_tolerance) Then ... do whatever you think is appropriate End If End If``
+
+      :param lineA: First line for intersection.
+      :param lineB: Second line for intersection.
+      :param tolerance: If tolerance > 0.0, then an intersection is reported only if the distance between the points is <= tolerance. If tolerance <= 0.0, then the closest point between the lines is reported.
+      :param finiteSegments: If true, the input lines are treated as finite segments. If false, the input lines are treated as infinite lines.
+
+      :returns: true if a closest point can be calculated and the result passes the tolerance parameter test; otherwise false.
+
+
+
+   .. py:method:: LinePlane(line: Line, plane: Plane) -> tuple[bool, float]
+      :staticmethod:
+
+
+      Intersects a line and a plane. This function only returns true if the intersection result is a single point (i.e. if the line is coincident with the plane then no intersection is assumed).
+
+      :param line: Line for intersection.
+      :param plane: Plane to intersect.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: LineSphere(line: Line, sphere: Sphere) -> tuple[LineSphereIntersection, Point3d, Point3d]
+      :staticmethod:
+
+
+      Intersects a line with a sphere using exact calculations.
+
+      :param line: Line for intersection.
+      :param sphere: Sphere for intersection.
+
+      :returns: If ``LineSphereIntersection.None`` is returned, the first point is the point on the line closest to the sphere and the second point is the point on the sphere closest to the line. If ``LineSphereIntersection.Single`` is returned, the first point is the point on the line and the second point is the same point on the sphere.
+
+
+
+   .. py:method:: PlaneCircle(plane: Plane, circle: Circle) -> tuple[PlaneCircleIntersection, float, float]
+      :staticmethod:
+
+
+      Intersects a plane with a circle using exact calculations.
+
+      :param plane: Plane to intersect.
+      :param circle: Circe to intersect.
+
+      :returns: The type of intersection that occurred.
+
+
+
+   .. py:method:: PlanePlane(planeA: Plane, planeB: Plane) -> tuple[bool, Line]
+      :staticmethod:
+
+
+      Intersects two planes and return the intersection line. If the planes are parallel or coincident, no intersection is assumed.
+
+      :param planeA: First plane for intersection.
+      :param planeB: Second plane for intersection.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: PlanePlanePlane(planeA: Plane, planeB: Plane, planeC: Plane) -> tuple[bool, Point3d]
+      :staticmethod:
+
+
+      Intersects three planes to find the single point they all share.
+
+      :param planeA: First plane for intersection.
+      :param planeB: Second plane for intersection.
+      :param planeC: Third plane for intersection.
+
+      :returns: true on success, false on failure. If at least two out of the three planes are parallel or coincident, failure is assumed.
+
+
+
+   .. py:method:: PlaneSphere(plane: Plane, sphere: Sphere) -> tuple[PlaneSphereIntersection, Circle]
+      :staticmethod:
+
+
+      Intersects a plane with a sphere using exact calculations.
+
+      :param plane: Plane to intersect.
+      :param sphere: Sphere to intersect.
+
+      :returns: If ``PlaneSphereIntersection.None`` is returned, the intersectionCircle has a radius of zero and the center point is the point on the plane closest to the sphere.
+
+
+
+   .. py:method:: SphereSphere(sphereA: Sphere, sphereB: Sphere) -> tuple[SphereSphereIntersection, Circle]
+      :staticmethod:
+
+
+      Intersects two spheres using exact calculations.
+
+      :param sphereA: First sphere to intersect.
+      :param sphereB: Second sphere to intersect.
+
+      :returns: The intersection type.
+
+

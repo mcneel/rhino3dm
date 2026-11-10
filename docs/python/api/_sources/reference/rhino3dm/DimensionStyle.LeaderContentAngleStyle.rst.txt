@@ -1,0 +1,31 @@
+rhino3dm.DimensionStyle.LeaderContentAngleStyle
+===============================================
+
+.. py:class:: rhino3dm.DimensionStyle.LeaderContentAngleStyle
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Angle for text or other leader or dimension content
+
+
+   .. py:attribute:: Aligned
+      :value: 1
+
+
+      Aligned with last leader direction or dimension line
+
+
+   .. py:attribute:: Horizontal
+      :value: 0
+
+
+      Annotation text is horizontal in annotation object's plane
+
+
+   .. py:attribute:: Rotated
+      :value: 2
+
+
+      Explicit angle
+

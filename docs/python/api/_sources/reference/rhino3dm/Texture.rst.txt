@@ -1,0 +1,187 @@
+rhino3dm.Texture
+================
+
+.. py:class:: rhino3dm.Texture
+
+   Bases: :py:obj:`CommonObject`
+
+
+   Represents a texture that is mapped on objects.
+
+
+   .. py:method:: GetAlphaBlendValues() -> tuple[float, float, float, float, float]
+
+      If the TextureCombineMode is Blend, then the blending function for alpha is determined by
+
+      new alpha = constant + a0\*(current alpha) + a1\*(texture alpha) + a2\*min(current alpha,texture alpha) + a3\*max(current alpha,texture alpha)
+
+
+
+   .. py:method:: SetAlphaBlendValues(constant: float, a0: float, a1: float, a2: float, a3: float) -> None
+
+      If the TextureCombineMode is Blend, then the blending function for alpha is determined by
+
+      new alpha = constant + a0\*(current alpha) + a1\*(texture alpha) + a2\*min(current alpha,texture alpha) + a3\*max(current alpha,texture alpha)
+
+
+
+   .. py:method:: SetRGBBlendValues(color: tuple[int, int, int, int], a0: float, a1: float, a2: float, a3: float) -> None
+
+      If the TextureCombineMode is Blend, then the blending function for RGB is determined by
+
+      new rgb = colorcolor + a0[0]\*(current RGB) + a1[1]\*(texture RGB) + a2[2]\*min(current RGB,texture RGB) + a3[3]\*max(current RGB,texture RGB)
+
+
+
+   .. py:property:: ApplyUvwTransform
+      :type: bool
+
+
+      If true then the UVW transform is applied to the texture otherwise the UVW transform is ignored.
+
+
+   .. py:property:: Enabled
+      :type: bool
+
+
+      If the texture is enabled then it will be visible in the rendered display otherwise it will not.
+
+
+   .. py:property:: FileName
+      :type: str
+
+
+      Gets or sets a file name that is used by this texture.
+
+      NOTE: We are moving away from string-based FileName, and suggest the usage of the new FileReference class.
+
+      Also, this filename may well not be a path that makes sense on a user's computer because it was a path initially set on a different user's computer. If you want to get a workable path for this user, use the BitmapTable.Find function using this property.
+
+
+   .. py:property:: FileReference
+      :type: FileReference
+
+
+      Gets or sets a copy of the file reference that is used by this texture. After the get or the set method complete, you own the copy you received or passed in, and can Dispose() of it.
+
+
+   .. py:property:: Id
+      :type: uuid.UUID
+
+
+      Gets the globally unique identifier of this texture.
+
+
+   .. py:property:: MagFilter
+      :type: TextureFilter
+
+
+      The MagFilter setting controls how the color of the image pixel is calculated when the image pixel corresponds to a fraction of a texture bitmap pixel.
+
+
+   .. py:property:: MappingChannelId
+      :type: int
+
+
+
+   .. py:property:: MinFilter
+      :type: TextureFilter
+
+
+      The MinFilter setting controls how the color of the image pixel is calculated when the image pixel corresponds to multiple texture bitmap pixels.
+
+
+   .. py:property:: Offset
+      :type: Vector2d
+
+
+      Helper for access to the offset value encoded in UvwTransform
+
+
+   .. py:property:: ProjectionMode
+      :type: TextureProjectionModes
+
+
+      How texture is projected onto geometry
+
+
+   .. py:property:: Repeat
+      :type: Vector2d
+
+
+      Helper for access to the repeat value encoded in UvwTransform
+
+
+   .. py:property:: Rotation
+      :type: float
+
+
+      Helper for access to the rotation value encoded in UvwTransform
+
+
+   .. py:property:: TextureCombineMode
+      :type: TextureCombineMode
+
+
+      Determines how this texture is combined with others in a material's texture list.
+
+
+   .. py:property:: TextureType
+      :type: TextureType
+
+
+      Controls how the pixels in the bitmap are interpreted
+
+
+   .. py:property:: TreatAsLinear
+      :type: bool
+
+
+      If false, the texture color values should be correctly by the linear workflow pre-process gamma value (in the document) if linear workflow is on. Otherwise, if the values is true, the values should be used raw from the texture.
+
+
+   .. py:property:: UvwTransform
+      :type: Transform
+
+
+      Transform to be applied to each instance of this texture if ApplyUvw is true
+
+
+   .. py:property:: WcsBoxProjected
+      :type: bool
+
+
+      If this texture is used by an object that has an object coordinate system (OCS) frame defined on a mapping channel then that OCS frame is used instead of the WCS.
+
+      :type: Is true if this texture uses world coordinate system (WCS) box projection for texture mapping. Notice
+
+
+   .. py:property:: WcsProjected
+      :type: bool
+
+
+      If this texture is used by an object that has an object coordinate system (OCS) frame defined on a mapping channel then that OCS frame is used instead of the WCS.
+
+      :type: Is true if this texture uses world coordinate system (WCS) projection for texture mapping. Notice
+
+
+   .. py:property:: WrapU
+      :type: TextureUvwWrapping
+
+
+      Texture wrapping mode in the U direction
+
+
+   .. py:property:: WrapV
+      :type: TextureUvwWrapping
+
+
+      Texture wrapping mode in the V direction
+
+
+   .. py:property:: WrapW
+      :type: TextureUvwWrapping
+
+
+      Texture wrapping mode in the W direction
+

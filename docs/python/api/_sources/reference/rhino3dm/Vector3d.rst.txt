@@ -1,0 +1,441 @@
+rhino3dm.Vector3d
+=================
+
+.. py:class:: rhino3dm.Vector3d
+              Vector3d(x: float, y: float, z: float)
+              Vector3d(point: Point3d)
+              Vector3d(vector: Vector3f)
+              Vector3d(arg: Vector3d)
+              Vector3d(arg: collections.abc.Sequence[Any], /)
+
+   Represents the three components of a vector in three-dimensional space, using ``double``-precision floating point numbers.
+
+
+   .. py:method:: Add(vector1: Vector3d, vector2: Vector3d) -> Vector3d
+      :staticmethod:
+
+
+      Sums up two vectors.
+
+      (Provided for languages that do not support operator overloading. You can use the + operator otherwise)
+
+      :param vector1: A vector.
+      :param vector2: A second vector.
+
+      :returns: A new vector that results from the component-wise addition of the two vectors.
+
+
+
+   .. py:method:: AreOrthogonal(x: Vector3d, y: Vector3d, z: Vector3d) -> bool
+      :staticmethod:
+
+
+      Test whether three vectors describe an orthogonal axis system. All vectors must be mutually perpendicular this to be the case.
+
+      :param x: X axis vector.
+      :param y: Y axis vector.
+      :param z: Z axis vector.
+
+      :returns: True if all vectors are non-zero and mutually perpendicular.
+
+
+
+   .. py:method:: AreOrthonormal(x: Vector3d, y: Vector3d, z: Vector3d) -> bool
+      :staticmethod:
+
+
+      Test whether three vectors describe an orthogonal, unit axis system. All vectors must be mutually perpendicular and have unit length for this to be the case.
+
+      :param x: X axis vector.
+      :param y: Y axis vector.
+      :param z: Z axis vector.
+
+      :returns: True if all vectors are non-zero and mutually perpendicular.
+
+
+
+   .. py:method:: AreRighthanded(x: Vector3d, y: Vector3d, z: Vector3d) -> bool
+      :staticmethod:
+
+
+      Test whether three vectors describe a right-handed, orthogonal, unit axis system. The vectors must be orthonormal and follow the right-hand ordering; index-finger=x, middle-finger=y, thumb=z.
+
+      :param x: X axis vector.
+      :param y: Y axis vector.
+      :param z: Z axis vector.
+
+      :returns: True if all vectors are non-zero and mutually perpendicular.
+
+
+
+   .. py:method:: CompareTo(other: Vector3d) -> int
+
+      Compares this ``Vector3d`` with another ``Vector3d``.
+
+      Component evaluation priority is first X, then Y, then Z.
+
+      :param other: The other ``Vector3d`` to use in comparison.
+
+      :returns: if this is identical to other
+                -1: if this.X < other.X
+                -1: if this.X == other.X and this.Y < other.Y
+                -1: if this.X == other.X and this.Y == other.Y and this.Z < other.Z
+                +1: otherwise.
+      :rtype: 0
+
+
+
+   .. py:method:: CrossProduct(a: Vector3d, b: Vector3d) -> Vector3d
+      :staticmethod:
+
+
+      Computes the cross product (or vector product, or exterior product) of two vectors.
+
+      This operation is not commutative.
+
+      :param a: First vector.
+      :param b: Second vector.
+
+      :returns: A new vector that is perpendicular to both a and b,
+                has Length == a.Length \* b.Length \* sin(theta) where theta is the angle between a and b.
+                The resulting vector is oriented according to the right hand rule.
+
+
+
+   .. py:method:: Decompose(v: Vector3d, a: Vector3d, b: Vector3d) -> tuple[bool, float, float]
+      :staticmethod:
+
+
+      Find scalars x and y so that the component of v in the plane of a and b is x\*a + y\*b
+
+      :param a: non-zero and not parallel to b
+      :param b: non-zero and not parallel to a
+
+      :returns: true if the decomposition is successful.
+
+
+
+   .. py:method:: Divide(vector: Vector3d, t: float) -> Vector3d
+      :staticmethod:
+
+
+      Divides a ``Vector3d`` by a number, having the effect of shrinking it.
+
+      (Provided for languages that do not support operator overloading. You can use the / operator otherwise)
+
+      :param vector: A vector.
+      :param t: A number.
+
+      :returns: A new vector that is component-wise divided by t.
+
+
+
+   .. py:method:: Encode() -> dict[str, Any]
+
+      This object as a JSON-compatible dict (rhino3dm only; inverse: ``Decode``).
+
+      :returns: geometry and other objects are stored as their 3dm archive, base64 encoded, with the archive version.
+      :rtype: A dict of numbers and strings
+
+
+
+   .. py:method:: EpsilonEquals(other: Vector3d, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: Equals(vector: Vector3d) -> bool
+
+      Determines whether the specified vector has the same value as the present vector.
+
+      :param vector: The specified vector.
+
+      :returns: true if vector has the same coordinates as this; otherwise false.
+
+
+
+   .. py:method:: IsParallelTo(other: Vector3d) -> int
+                  IsParallelTo(other: Vector3d, angleTolerance: float) -> int
+
+      Determines whether this vector is parallel to another vector, within a provided tolerance.
+
+      :param other: Vector to use for comparison.
+      :param angleTolerance: Angle tolerance (in radians).
+
+      :returns: +1 = both vectors are parallel.
+                0 = vectors are not parallel or at least one of the vectors is zero.
+                -1 = vectors are anti-parallel.
+      :rtype: Parallel indicator
+
+
+
+   .. py:method:: IsPerpendicularTo(other: Vector3d) -> bool
+                  IsPerpendicularTo(other: Vector3d, angleTolerance: float) -> bool
+
+      Determines whether this vector is perpendicular to another vector, within a provided angle tolerance.
+
+      :param other: Vector to use for comparison.
+      :param angleTolerance: Angle tolerance (in radians).
+
+      :returns: true if vectors form Pi-radians (90-degree) angles with each other; otherwise false.
+
+
+
+   .. py:method:: IsTiny(tolerance: float) -> bool
+                  IsTiny() -> bool
+
+      Uses RhinoMath.ZeroTolerance for IsTiny calculation.
+
+      :returns: true if vector is very small, otherwise false.
+
+
+
+   .. py:method:: Multiply(vector: Vector3d, t: float) -> Vector3d
+                  Multiply(t: float, vector: Vector3d) -> Vector3d
+                  Multiply(vector1: Vector3d, vector2: Vector3d) -> float
+      :staticmethod:
+
+
+      Multiplies two vectors together, returning the dot product (or inner product). This differs from the cross product.
+
+      (Provided for languages that do not support operator overloading. You can use the \* operator otherwise)
+
+      :param vector1: A vector.
+      :param vector2: A second vector.
+
+      :returns: A value that results from the evaluation of v1.X\*v2.X + v1.Y\*v2.Y + v1.Z\*v2.Z.
+                This value equals v1.Length \* v2.Length \* cos(alpha), where alpha is the angle between vectors.
+
+
+
+   .. py:method:: Negate(vector: Vector3d) -> Vector3d
+      :staticmethod:
+
+
+      Computes the reversed vector.
+
+      (Provided for languages that do not support operator overloading. You can use the - unary operator otherwise)
+
+      Similar to ``Reverse``\ Reverse(), but static for CLR compliance.
+
+      :param vector: A vector to negate.
+
+      :returns: A new vector where all components were multiplied by -1.
+
+
+
+   .. py:method:: PerpendicularTo(other: Vector3d) -> bool
+                  PerpendicularTo(point0: Point3d, point1: Point3d, point2: Point3d) -> bool
+
+      Set this vector to be perpendicular to a plane defined by 3 points.
+
+      :param point0: The first point.
+      :param point1: The second point.
+      :param point2: The third point.
+
+
+
+   .. py:method:: Reverse() -> bool
+
+      Reverses this vector in place (reverses the direction).
+
+      If this vector is Invalid, no changes will occur and false will be returned.
+
+      Similar to ``Negate``\ Negate, that is only provided for CLR language compliance.
+
+      :returns: true on success or false if the vector is invalid.
+
+
+
+   .. py:method:: Rotate(angleRadians: float, rotationAxis: Vector3d) -> bool
+
+      Rotates this vector around a given axis.
+
+      :param angleRadians: Angle of rotation (in radians).
+      :param rotationAxis: Axis of rotation.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Subtract(vector1: Vector3d, vector2: Vector3d) -> Vector3d
+      :staticmethod:
+
+
+      Subtracts the second vector from the first one.
+
+      (Provided for languages that do not support operator overloading. You can use the - operator otherwise)
+
+      :param vector1: A vector.
+      :param vector2: A second vector.
+
+      :returns: A new vector that results from the component-wise difference of vector1 - vector2.
+
+
+
+   .. py:method:: ToString() -> str
+
+      Returns the string representation of the current vector, in the form X,Y,Z.
+
+      :returns: A string with the current location of the point.
+
+
+
+   .. py:method:: Transform(transformation: Transform) -> None
+
+      Transforms the vector in place.
+
+      The transformation matrix acts on the left of the vector; i.e.,
+
+      result = transformation\*vector
+
+      :param transformation: Transformation matrix to apply.
+
+
+
+   .. py:method:: Unitize() -> bool
+
+      Unitizes the vector in place. A unit vector has length 1 unit.
+
+      An invalid or zero length vector cannot be unitized.
+
+      :returns: true on success or false on failure.
+
+
+
+   .. py:method:: VectorAngle(a: Vector3d, b: Vector3d) -> float
+                  VectorAngle(a: Vector3d, b: Vector3d, plane: Plane) -> float
+                  VectorAngle(v1: Vector3d, v2: Vector3d, vNormal: Vector3d) -> float
+      :staticmethod:
+
+
+      Computes the angle of v1, v2 with a normal vector.
+
+      :param v1: First vector.
+      :param v2: Second vector.
+      :param vNormal: Normal vector.
+
+      :returns: On success, the angle (in radians) between a and b with respect of normal vector; RhinoMath.UnsetValue on failure.
+
+
+
+   .. py:property:: IsUnitVector
+      :type: bool
+
+
+      Gets a value indicating whether or not this is a unit vector. A unit vector has length 1.
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Gets a value indicating whether this vector is valid. A valid vector must be formed of valid component values for x, y and z.
+
+
+   .. py:property:: IsZero
+      :type: bool
+
+
+      Gets a value indicating whether the X, Y, and Z values are all equal to 0.0.
+
+
+   .. py:property:: Length
+      :type: float
+
+
+      Computes the length (or magnitude, or size) of this vector. This is an application of Pythagoras' theorem. If this vector is invalid, its length is considered 0.
+
+
+   .. py:property:: MaximumCoordinate
+      :type: float
+
+
+      Gets the largest (both positive and negative) component value in this vector, as an absolute value.
+
+
+   .. py:property:: MinimumCoordinate
+      :type: float
+
+
+      Gets the smallest (both positive and negative) component value in this vector.
+
+
+   .. py:property:: SquareLength
+      :type: float
+
+
+      Computes the squared length (or magnitude, or size) of this vector. This is an application of Pythagoras' theorem. While the Length property checks for input validity, this property does not. You should check validity in advance, if this vector can be invalid.
+
+
+   .. py:attribute:: Unset
+      :type:  Vector3d
+      :value: Ellipsis
+
+
+      object, /) -> Vector3d
+
+      :type: (arg
+
+
+   .. py:property:: X
+      :type: float
+
+
+      Gets or sets the X (first) component of the vector.
+
+
+   .. py:attribute:: XAxis
+      :type:  Vector3d
+      :value: Ellipsis
+
+
+      object, /) -> Vector3d
+
+      :type: (arg
+
+
+   .. py:property:: Y
+      :type: float
+
+
+      Gets or sets the Y (second) component of the vector.
+
+
+   .. py:attribute:: YAxis
+      :type:  Vector3d
+      :value: Ellipsis
+
+
+      object, /) -> Vector3d
+
+      :type: (arg
+
+
+   .. py:property:: Z
+      :type: float
+
+
+      Gets or sets the Z (third) component of the vector.
+
+
+   .. py:attribute:: ZAxis
+      :type:  Vector3d
+      :value: Ellipsis
+
+
+      object, /) -> Vector3d
+
+      :type: (arg
+
+
+   .. py:attribute:: Zero
+      :type:  Vector3d
+      :value: Ellipsis
+
+
+      object, /) -> Vector3d
+
+      :type: (arg
+

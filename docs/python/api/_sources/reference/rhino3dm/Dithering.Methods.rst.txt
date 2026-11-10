@@ -1,0 +1,31 @@
+rhino3dm.Dithering.Methods
+==========================
+
+.. py:class:: rhino3dm.Dithering.Methods
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Dithering algorithm.
+
+
+   .. py:attribute:: FloydSteinberg
+      :value: 1
+
+
+      Floyd Steinberg algorithm
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``Methods.None`` is not Python syntax; ``Methods['None']`` is the same member). No dithering
+
+
+   .. py:attribute:: SimpleNoise
+      :value: 2
+
+
+      Simple random noise
+

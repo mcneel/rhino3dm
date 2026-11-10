@@ -1,0 +1,35 @@
+rhino3dm.BasepointZero
+======================
+
+.. py:class:: rhino3dm.BasepointZero
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Specifies enumerated constants used to indicate the zero level convention relating to a location on Earth.
+
+   This is used in conjunction with the ``EarthAnchorPoint`` class.
+
+   Deprecated since 8.6.
+
+
+   .. py:attribute:: CenterOfEarth
+      :value: 2
+
+
+      The center of the planet is the convention for 0.
+
+
+   .. py:attribute:: GroundLevel
+      :value: 0
+
+
+      The ground level is the convention for 0.
+
+
+   .. py:attribute:: MeanSeaLevel
+      :value: 1
+
+
+      The mean sea level is the convention for 0.
+

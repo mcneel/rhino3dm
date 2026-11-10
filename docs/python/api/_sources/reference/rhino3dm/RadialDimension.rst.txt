@@ -1,0 +1,132 @@
+rhino3dm.RadialDimension
+========================
+
+.. py:class:: rhino3dm.RadialDimension
+              RadialDimension(dimtype: AnnotationType, plane: Plane, centerpoint: Point3d, radiuspoint: Point3d, dimlinepoint: Point3d)
+
+   Bases: :py:obj:`Dimension`
+
+
+   Represents a dimension of a circular entity that can be measured with radius or diameter.
+
+
+   .. py:method:: AdjustFromPoints(plane: Plane, centerpoint: Point3d, radiuspoint: Point3d, dimlinepoint: Point3d, rotationInPlane: float) -> bool
+
+      Update Dimension geometry from point locations
+
+      :param plane: Dimension's plane
+      :param centerpoint: Dimension's center point
+      :param radiuspoint: Point on dimension radius
+      :param dimlinepoint: Point on dimension line
+      :param rotationInPlane: This parameter is currently ignored
+
+
+
+   .. py:method:: Create(dimStyle: DimensionStyle, dimtype: AnnotationType, plane: Plane, centerpoint: Point3d, radiuspoint: Point3d, dimlinepoint: Point3d) -> RadialDimension
+      :staticmethod:
+
+
+      Initialize Dimension parameters
+
+      :param dimStyle: Dimension's dimstyle
+      :param dimtype: AnnotationType.Diameter or AnnotationType.Radius
+      :param plane: Dimension's plane
+      :param centerpoint: Dimension's center point
+      :param radiuspoint: Point on dimension radius
+      :param dimlinepoint: Point on dimension line
+
+
+
+   .. py:method:: Get3dPoints() -> tuple[bool, Point3d, Point3d, Point3d, Point3d]
+
+      Get locations of dimension's 3d points
+
+
+
+   .. py:method:: GetDisplayLines(style: DimensionStyle, scale: float) -> tuple[bool, list[Line]]
+
+
+   .. py:method:: GetDistanceDisplayText(unitsystem: UnitSystem, style: DimensionStyle) -> str
+
+      Deprecated since 9.0.
+
+
+
+   .. py:method:: GetTextRectangle() -> tuple[bool, list[Point3d]]
+
+
+   .. py:property:: AnnotationType
+      :type: AnnotationType
+
+
+      Type of annotation
+
+
+   .. py:property:: CenterPoint
+      :type: Point2d
+
+
+
+   .. py:property:: DimlinePoint
+      :type: Point2d
+
+
+
+   .. py:property:: IsDiameterDimension
+      :type: bool
+
+
+      Gets a value indicating whether the value refers to the diameter, rather than the radius.
+
+
+   .. py:property:: KneePoint
+      :type: Point2d
+
+
+
+   .. py:property:: LeaderArrowBlockId
+      :type: uuid.UUID
+
+
+
+   .. py:property:: LeaderArrowSize
+      :type: float
+
+
+
+   .. py:property:: LeaderArrowType
+      :type: DimensionStyle
+
+
+
+   .. py:property:: LeaderCurveStyle
+      :type: DimensionStyle
+
+
+
+   .. py:property:: LeaderTextHorizontalAlignment
+      :type: TextHorizontalAlignment
+
+
+      Gets or sets the horizontal alignment of the radial dimension's text
+
+
+   .. py:property:: RadiusPoint
+      :type: Point2d
+
+
+
+   .. py:property:: TextAngleType
+      :type: DimensionStyle
+
+
+
+   .. py:property:: TextLocation
+      :type: DimensionStyle
+
+
+
+   .. py:property:: TextOrientation
+      :type: TextOrientation
+
+

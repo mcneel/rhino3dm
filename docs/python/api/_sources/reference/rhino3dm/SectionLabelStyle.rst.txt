@@ -1,0 +1,31 @@
+rhino3dm.SectionLabelStyle
+==========================
+
+.. py:class:: rhino3dm.SectionLabelStyle
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   The source of sectioning attributes on an object.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``SectionLabelStyle.None`` is not Python syntax; ``SectionLabelStyle['None']`` is the same member). No label
+
+
+   .. py:attribute:: TextDotFromName
+      :value: 1
+
+
+      Label shown as a text dot with content from name
+
+
+   .. py:attribute:: TextFromName
+      :value: 2
+
+
+      Label shown as text with content from name
+

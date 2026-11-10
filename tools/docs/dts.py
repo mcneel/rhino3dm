@@ -276,7 +276,10 @@ def js_only(api, cls, jn, static, value, pyc):
         ts = d['ts'] if isinstance(d['ts'], list) else [d['ts']]
         out = []
         for one in ts:
-            out += tsdoc(d, list(d.get('params') or {})) + [t + one + ';']
+            # each signature documents only the parameters it has (typedoc warns on the others)
+            args = one[one.find('(') + 1:one.rfind(')')]
+            named = [p for p in (d.get('params') or {}) if re.search(r'\b%s\??\s*:' % re.escape(p), args)]
+            out += tsdoc(d, named) + [t + one + ';']
         return out
     if jn in ('get', 'set') and ('__getitem__' in pyc):
         g = pyc['__getitem__'][0][1]

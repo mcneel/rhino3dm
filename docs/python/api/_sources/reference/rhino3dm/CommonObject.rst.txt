@@ -1,0 +1,68 @@
+rhino3dm.CommonObject
+=====================
+
+.. py:class:: rhino3dm.CommonObject
+
+   Base class for .NET classes that wrap C++ unmanaged Rhino classes.
+
+
+   .. py:method:: ComputeMemoryEstimate(obj: CommonObject) -> int
+      :staticmethod:
+
+
+      Computes an estimate of the number of bytes that this object is using in memory.
+
+      This is the same as calling GeometryBase.MemoryEstimate, but works for all CommonObject derived classes.
+
+      :returns: An estimated memory footprint.
+
+
+
+   .. py:method:: Decode(jsonObject: dict[str, Any]) -> CommonObject
+      :staticmethod:
+
+
+      The object a dict from ``Encode`` describes (rhino3dm only).
+
+      :param jsonObject: A dict as ``Encode`` returns it.
+
+
+
+   .. py:method:: Encode() -> dict[str, Any]
+
+      This object as a JSON-compatible dict (rhino3dm only; inverse: ``Decode``).
+
+      :returns: geometry and other objects are stored as their 3dm archive, base64 encoded, with the archive version.
+      :rtype: A dict of numbers and strings
+
+
+
+   .. py:method:: IsValidWithLog() -> tuple[bool, str]
+
+      Determines if an object is valid. Also provides a report on errors if this object happens not to be valid.
+
+      :returns: true if this object is valid; false otherwise.
+
+
+
+   .. py:method:: RdkXml() -> str
+
+      The object's render data (RDK) as XML (rhino3dm only).
+
+      :returns: The XML text, empty when the object has none.
+
+
+
+   .. py:property:: HasUserData
+      :type: bool
+
+
+      Gets true if this class has any custom information attached to it through UserData.
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Tests an object to see if it is valid.
+

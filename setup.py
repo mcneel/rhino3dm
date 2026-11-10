@@ -167,50 +167,110 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
-        "Operating System :: OS Independent",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: MacOS",
+        "Operating System :: POSIX :: Linux",
+        "Topic :: Multimedia :: Graphics :: 3D Modeling",
+        "Topic :: Scientific/Engineering",
         "Topic :: Software Development :: Libraries :: Python Modules",
+        "Typing :: Typed",
     ],
+    keywords=["rhino", "3dm", "opennurbs", "nurbs", "cad", "3d", "geometry", "rhinocommon"],
+    project_urls={
+        "Documentation": "https://mcneel.github.io/rhino3dm/python/api/index.html",
+        "Migration guide": "https://mcneel.github.io/rhino3dm/python/api/migrating.html",
+        "Source": "https://github.com/mcneel/rhino3dm",
+        "Issues": "https://github.com/mcneel/rhino3dm/issues",
+        "Changelog": "https://github.com/mcneel/rhino3dm/blob/main/CHANGELOG.md",
+        "Forum": "https://discourse.mcneel.com/c/rhino-developer/rhino3dm/",
+    },
     description='Python library based on OpenNURBS with a RhinoCommon style',
     long_description=
-"""# rhino3dm.py
-CPython package based on OpenNURBS with a RhinoCommon style
+"""# rhino3dm
+
+**Read, write and create Rhino 3D models (`.3dm` files) in Python.**
+
+rhino3dm brings [openNURBS](https://www.rhino3d.com/opennurbs), the library behind Rhino's file
+format, to Python with [RhinoCommon](https://developer.rhino3d.com/api/rhinocommon/)'s API (Rhino's
+.NET SDK). Use it in scripts, notebooks and web services on Windows, macOS and Linux.
 
 ## Coming from rhino3dm 8.x?
 
-rhino3dm 9.2 is generated from RhinoCommon, so its API is RhinoCommon's, and most 8.x scripts need
-changes. For example, editing an object's geometry no longer changes the file, `out` parameters come
-back as a tuple with the success flag first, and bad arguments raise.
+Most 8.x scripts need changes. For example, editing an object's geometry no longer changes the file,
+`out` parameters come back as a tuple with the success flag first, and bad arguments raise.
 
-* [Migrating to rhino3dm 9.2 (Python)](https://mcneel.github.io/rhino3dm/python/api/migrating.html): what changed, with before-and-after code
-* [Renamed and removed members](https://mcneel.github.io/rhino3dm/python/api/migrating-members.html): every 8.x name and what replaces it
+* [Migrating to rhino3dm 9.2](https://mcneel.github.io/rhino3dm/python/api/migrating.html): what
+  changed, with before-and-after code
+* [Renamed and removed members](https://mcneel.github.io/rhino3dm/python/api/migrating-members.html):
+  every 8.x name and what replaces it
 
-## Links
+## Install
 
-* Project Homepage at: https://github.com/mcneel/rhino3dm
-* Developer samples at: https://github.com/mcneel/rhino-developer-samples/tree/8/rhino3dm/py
-* Forums at: https://discourse.mcneel.com/c/rhino-developer/rhino3dm/
-* Report issue: https://github.com/mcneel/rhino3dm/issues
-
-### Supported platforms
-* Python 3.10, 3.11, 3.12, 3.13, 3.14 - Windows (64 bit)
-* Python 3.10, 3.11, 3.12, 3.13, 3.14 - macos 14, macos 15 universal
-* Python 3.10, 3.11, 3.12, 3.13, 3.14 - Linux via manylinux_2_28_x86_64 and manylinux_2_28_aarch64
-* other architectures, operating systems, and python versions are supported through source distributions
-
-## Test
-
-* start `python`
 ```
-from rhino3dm import *
-import requests  # pip install requests
+pip install rhino3dm
+```
 
-req = requests.get("https://files.mcneel.com/TEST/Rhino Logo.3dm")
-model = File3dm.FromByteArray(req.content)
+Pre-releases, such as betas, install with `pip install --pre rhino3dm`.
+
+## Example
+
+```python
+import rhino3dm
+
+# build a model
+model = rhino3dm.File3dm()
+model.Objects.AddSphere(rhino3dm.Sphere(rhino3dm.Point3d(0, 0, 0), 5))
+model.Objects.AddCircle(rhino3dm.Circle(rhino3dm.Point3d(20, 0, 0), 3))
+model.Objects.AddPoint(rhino3dm.Point3d(10, 10, 10))
+model.Write("example.3dm", 0)
+
+# read it back
+model = rhino3dm.File3dm.Read("example.3dm")
 for obj in model.Objects:
     geometry = obj.Geometry
     bbox = geometry.GetBoundingBox(True)
-    print("{}, {}".format(bbox.Min, bbox.Max))
+    print(geometry.ObjectType.name, bbox.Min, bbox.Max)
+
+# Surface -5,-5,-5 5,5,5
+# Curve 17,-3,0 23,3,0
+# Point 10,10,10 10,10,10
 ```
+
+## Features
+
+* **Files**: read `.3dm` files from any Rhino version and write new ones, on disk or in memory.
+* **Geometry**: points, curves, NURBS curves and surfaces, breps, extrusions, meshes, SubD,
+  point clouds, text and dimensions, with RhinoCommon's members.
+* **Model content**: layers, materials, linetypes, groups, blocks, views, user strings and
+  embedded files.
+* **Typed**: the package ships type hints (`__init__.pyi`) with documentation for every member.
+
+## Documentation
+
+* [API reference](https://mcneel.github.io/rhino3dm/python/api/index.html)
+* [RhinoCommon documentation](https://developer.rhino3d.com/api/rhinocommon/): rhino3dm follows its
+  names and behaviour
+* [Samples](https://github.com/mcneel/rhino-developer-samples/tree/8/rhino3dm/py)
+
+## Platforms
+
+| | Python 3.10 to 3.14 |
+|---|---|
+| Windows | x64, Arm64 |
+| macOS 14 or later | universal (Apple silicon and Intel) |
+| Linux | x86_64, aarch64 (manylinux_2_28) |
+
+Anywhere else, pip builds the package from source, which needs CMake and a C++17 compiler.
+
+## Also for JavaScript and .NET
+
+rhino3dm is also available as [rhino3dm.js](https://www.npmjs.com/package/rhino3dm) (WebAssembly,
+for browsers and Node.js) and [Rhino3dm](https://www.nuget.org/packages/Rhino3dm) for .NET.
+
+## Help
+
+Ask on the [forum](https://discourse.mcneel.com/c/rhino-developer/rhino3dm/), and report bugs on
+[GitHub](https://github.com/mcneel/rhino3dm/issues).
 """,
     long_description_content_type="text/markdown",
     packages=find_packages('src'),

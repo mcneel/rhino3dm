@@ -1,0 +1,32 @@
+rhino3dm.PostEffectCollection
+=============================
+
+.. py:class:: rhino3dm.PostEffectCollection
+              PostEffectCollection(c: PostEffectCollection)
+
+   Represents the collection of post effects in render settings.
+
+
+   .. py:method:: GetSelectedPostEffect(type: PostEffectType) -> tuple[bool, uuid.UUID]
+
+      Gets the selected post effect for a certain type into 'id'. Returns true if successful or false if the selection information could not be found.
+
+
+
+   .. py:method:: MovePostEffectBefore(id_move: uuid.UUID, id_before: uuid.UUID) -> bool
+
+      Move a post effect before another post effect in the list. Param 'id\_move' is the id of the post effect to move. Param 'id\_before' is the id of a post effect before which the post effect should be moved. If this is Guid.Empty, the post effect is moved to the end of the list. If the post effect identified by 'id\_before' is not found, the method will fail. Returns true if successful, else false.
+
+
+
+   .. py:method:: PostEffectDataFromId(id: uuid.UUID) -> PostEffectData
+
+      Get a post effect data for an id.
+
+
+
+   .. py:method:: SetSelectedPostEffect(type: PostEffectType, id: uuid.UUID) -> None
+
+      Sets the selected post effect for a certain type.
+
+

@@ -1,0 +1,38 @@
+rhino3dm.CurveEnd
+=================
+
+.. py:class:: rhino3dm.CurveEnd
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines the extremes of a curve through a flagged enumeration.
+
+
+   .. py:attribute:: Both
+      :value: 3
+
+
+      Both the start and the end of the curve.
+
+
+   .. py:attribute:: End
+      :value: 2
+
+
+      The tail part of the curve.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``CurveEnd.None`` is not Python syntax; ``CurveEnd['None']`` is the same member). Not the start nor the end.
+
+
+   .. py:attribute:: Start
+      :value: 1
+
+
+      The frontal part of the curve.
+

@@ -1,0 +1,69 @@
+rhino3dm.ComponentIndex
+=======================
+
+.. py:class:: rhino3dm.ComponentIndex
+              ComponentIndex(type: ComponentIndexType, index: int)
+
+   Represents an index of an element contained in another object.
+
+
+   .. py:method:: CompareTo(other: ComponentIndex) -> int
+
+      Compares this ``ComponentIndex`` with another ``ComponentIndex``.
+
+      :param other: The other ``ComponentIndex`` to use in comparison
+
+      :returns: if this is identical to other
+                -1: if this.ComponentIndexType < other.ComponentIndexType
+                -1: if this.ComponentIndexType == other.ComponentIndexType and this.Index < other.Index
+                +1: otherwise.
+      :rtype: 0
+
+
+
+   .. py:method:: Equals(other: ComponentIndex) -> bool
+
+      Determines whether the specified ``ComponentIndex`` is equal to the current ``ComponentIndex``, comparing by value.
+
+      :param other: The other ``ComponentIndex`` to compare with.
+
+      :returns: true if other has the same ComponentIndexType and Index as this; otherwise, false.
+
+
+
+   .. py:method:: IsUnset() -> bool
+
+      Return true is this component index is the same as the Unset component index
+
+
+
+   .. py:property:: ComponentIndexType
+      :type: ComponentIndexType
+
+
+      The interpretation of Index depends on the Type value. Type m\_index interpretation (0 based indices) no\_type used when context makes it clear what array is being index brep\_vertex Brep.m\_V[] array index brep\_edge Brep.m\_E[] array index brep\_face Brep.m\_F[] array index brep\_trim Brep.m\_T[] array index brep\_loop Brep.m\_L[] array index mesh\_vertex Mesh.m\_V[] array index meshtop\_vertex MeshTopology.m\_topv[] array index meshtop\_edge MeshTopology.m\_tope[] array index mesh\_face Mesh.m\_F[] array index idef\_part InstanceDefinition.m\_object\_uuid[] array index polycurve\_segment PolyCurve::m\_segment[] array index dim\_linear\_point LinearDimension2::POINT\_INDEX dim\_radial\_point RadialDimension2::POINT\_INDEX dim\_angular\_point AngularDimension2::POINT\_INDEX dim\_ordinate\_point OrdinateDimension2::POINT\_INDEX dim\_text\_point TextEntity2 origin point.
+
+
+   .. py:property:: Index
+      :type: int
+
+
+      The interpretation of m\_index depends on the m\_type value. m\_type m\_index interpretation (0 based indices) no\_type used when context makes it clear what array is being index brep\_vertex Brep.m\_V[] array index brep\_edge Brep.m\_E[] array index brep\_face Brep.m\_F[] array index brep\_trim Brep.m\_T[] array index brep\_loop Brep.m\_L[] array index mesh\_vertex Mesh.m\_V[] array index meshtop\_vertex MeshTopology.m\_topv[] array index meshtop\_edge MeshTopology.m\_tope[] array index mesh\_face Mesh.m\_F[] array index idef\_part InstanceDefinition.m\_object\_uuid[] array index polycurve\_segment PolyCurve::m\_segment[] array index dim\_linear\_point LinearDimension2::POINT\_INDEX dim\_radial\_point RadialDimension2::POINT\_INDEX dim\_angular\_point AngularDimension2::POINT\_INDEX dim\_ordinate\_point OrdinateDimension2::POINT\_INDEX dim\_text\_point TextEntity2 origin point.
+
+
+   .. py:property:: IsSet
+      :type: bool
+
+
+      True if ``ComponentIndexType`` is set to a value between ``ComponentIndexType.BrepVertex`` and ``ComponentIndexType.DimLeaderPoint``.
+
+
+   .. py:attribute:: Unset
+      :type:  ComponentIndex
+      :value: Ellipsis
+
+
+      object, /) -> ComponentIndex
+
+      :type: (arg
+

@@ -1,0 +1,215 @@
+rhino3dm.UnitSystem
+===================
+
+.. py:class:: rhino3dm.UnitSystem
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   ON::LengthUnitSystem identifies a length unit system United States customary length units references: http://www.nist.gov/pml/wmd/metric/upload/frn-59-5442-1959.pdf http://en.wikipedia.org/wiki/United\_States\_customary\_units http://en.wikipedia.org/wiki/International\_yard\_and\_pound
+
+
+   .. py:attribute:: Angstroms
+      :value: 12
+
+
+      1 angstroms = 1.0e-10 meters
+
+
+   .. py:attribute:: AstronomicalUnits
+      :value: 23
+
+
+      //en.wikipedia.org/wiki/Astronomical\_unit (1.4959787e+11 meters) http://units.nist.gov/Pubs/SP811/appenB9.htm (1.495979e+11 meters)
+
+      :type: 1 astronomical unit = 1.4959787e+11 meters An astronomical unit (au) is the mean distance from the center of the earth to the center of the sun. References
+
+      :type: http
+
+
+   .. py:attribute:: Centimeters
+      :value: 3
+
+
+      1 centimeter = 1.0e-2 meters
+
+
+   .. py:attribute:: CustomUnits
+      :value: 11
+
+
+      The name of a custom unit and the conversion to meters are saved in the ON\_UnitSystem class.
+
+
+   .. py:attribute:: Decimeters
+      :value: 14
+
+
+      1 decimeter = 1.0e-1 meters
+
+
+   .. py:attribute:: Dekameters
+      :value: 15
+
+
+      1 dekameter = 1.0e+1 meters
+
+
+   .. py:attribute:: Feet
+      :value: 9
+
+
+      1 foot = 0.3048 meters (12 inches)
+
+
+   .. py:attribute:: Gigameters
+      :value: 18
+
+
+      1 gigameter = 1.0e+9 meters
+
+
+   .. py:attribute:: Hectometers
+      :value: 16
+
+
+      1 hectometer = 1.0e+2 meters
+
+
+   .. py:attribute:: Inches
+      :value: 8
+
+
+      1 inch = 0.0254 meters = 1/12 foot
+
+
+   .. py:attribute:: Kilometers
+      :value: 5
+
+
+      1 kilometer = 1.0e+3 meters
+
+
+   .. py:attribute:: LightYears
+      :value: 24
+
+
+      //en.wikipedia.org/wiki/Light\_year (9.4607304725808e+15 meters) http://units.nist.gov/Pubs/SP811/appenB9.htm (9.46073e+15 meters)
+
+      :type: 1 light year = 9.4607304725808e+15 meters A light year is the distance light travels in one Julian year. The speed of light is exactly 299792458 meters/second. A Julian year is exactly 365.25 \* 86400 seconds and is approximately the time it takes for one earth orbit. References
+
+      :type: http
+
+
+   .. py:attribute:: Megameters
+      :value: 17
+
+
+      1 megameter = 1.0e+6 meters
+
+
+   .. py:attribute:: Meters
+      :value: 4
+
+
+      SI meter length unit
+
+
+   .. py:attribute:: Microinches
+      :value: 6
+
+
+      1 microinches = 2.54e-8 meters = 1.0e-6 inches
+
+
+   .. py:attribute:: Microns
+      :value: 1
+
+
+      1 micron = 1.0e-6 meters
+
+
+   .. py:attribute:: Miles
+      :value: 10
+
+
+      1 US statute mile = 1609.344 meters = 5280 feet
+
+
+   .. py:attribute:: Millimeters
+      :value: 2
+
+
+      1 millimeter = 1.0e-3 meters
+
+
+   .. py:attribute:: Mils
+      :value: 7
+
+
+      1 mil = 2.54e-5 meters = 0.001 inches
+
+
+   .. py:attribute:: Nanometers
+      :value: 13
+
+
+      1 nanometer = 1.0e-9 meters
+
+
+   .. py:attribute:: NauticalMiles
+      :value: 22
+
+
+      //en.wikipedia.org/wiki/Nautical\_mile
+
+      :type: 1 nautical mile = 1852 meters Approximately 1 minute of arc on a terrestrial great circle. Reference
+
+      :type: http
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``UnitSystem.None`` is not Python syntax; ``UnitSystem['None']`` is the same member). ON::LengthUnitSystem::None indicates no length unit system. The scale factor when converting between a specified unit system and None is always 1.0. ON::LengthUnitSystem::None is used as a unit system for models and instance definitions that should be imported or referenced with no scaling applied.
+
+
+   .. py:attribute:: Parsecs
+      :value: 25
+
+
+      //en.wikipedia.org/wiki/Parsec (3.08567758e+16 meters) http://units.nist.gov/Pubs/SP811/appenB9.htm (3.085678e+16)
+
+      :type: 1 parsec = 3.08567758e+16 meters References
+
+      :type: http
+
+
+   .. py:attribute:: PrinterPicas
+      :value: 21
+
+
+      1 printer pica = 1/6 inch
+
+
+   .. py:attribute:: PrinterPoints
+      :value: 20
+
+
+      1 printer point = 1/72 inch
+
+
+   .. py:attribute:: Unset
+      :value: 255
+
+
+      The ON::LengthUnitSystem::Unset is used to indicate no unit system is set. This is a different condition from ON::LengthUnitSystem::None.
+
+
+   .. py:attribute:: Yards
+      :value: 19
+
+
+      1 foot = 0.3048 meters = 12 inches
+

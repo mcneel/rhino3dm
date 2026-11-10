@@ -1,0 +1,226 @@
+rhino3dm.Point2d
+================
+
+.. py:class:: rhino3dm.Point2d
+              Point2d(x: float, y: float)
+              Point2d(vector: Vector2d)
+              Point2d(arg: Point2d)
+              Point2d(point: Point3d)
+              Point2d(arg: collections.abc.Sequence[Any], /)
+
+   Represents the two coordinates of a point in two-dimensional space, using ``double``-precision floating point numbers.
+
+
+   .. py:method:: Add(point: Point2d, vector: Vector2d) -> Point2d
+                  Add(vector: Vector2d, point: Point2d) -> Point2d
+                  Add(point1: Point2d, point2: Point2d) -> Point2d
+      :staticmethod:
+
+
+      Adds a point with a point.
+
+      (Provided for languages that do not support operator overloading. You can use the + operator otherwise)
+
+      :param point1: A point.
+      :param point2: A point.
+
+      :returns: A new point that is coordinate-wise summed with the other point.
+
+
+
+   .. py:method:: CompareTo(other: Point2d) -> int
+
+      Compares this ``Point2d`` with another ``Point2d``.
+
+      Coordinates evaluation priority is first X, then Y.
+
+      :param other: The other ``Point2d`` to use in comparison.
+
+      :returns: if this is identical to other
+                -1: if this.X < other.X
+                -1: if this.X == other.X and this.Y < other.Y
+                +1: otherwise.
+      :rtype: 0
+
+
+
+   .. py:method:: DistanceTo(other: Point2d) -> float
+
+      Computes the distance between two points.
+
+      :param other: Another point.
+
+      :returns: The length of the line between the two points, or 0 if either point is invalid.
+
+
+
+   .. py:method:: DistanceToSquared(other: Point2d) -> float
+
+      Computes the square of the distance between two 2d points.
+
+      This method is usually largely faster than DistanceTo().
+
+      :param other: Other point for squared distance measurement.
+
+      :returns: The squared length of the line between this and the other point; or 0 if any of the points is not valid.
+
+
+
+   .. py:method:: Divide(point: Point2d, t: float) -> Point2d
+      :staticmethod:
+
+
+      Divides a ``Point2d`` by a number.
+
+      (Provided for languages that do not support operator overloading. You can use the / operator otherwise)
+
+      :param point: A point.
+      :param t: A number.
+
+      :returns: A new point that is coordinate-wise divided by t.
+
+
+
+   .. py:method:: Encode() -> dict[str, Any]
+
+      This object as a JSON-compatible dict (rhino3dm only; inverse: ``Decode``).
+
+      :returns: geometry and other objects are stored as their 3dm archive, base64 encoded, with the archive version.
+      :rtype: A dict of numbers and strings
+
+
+
+   .. py:method:: EpsilonEquals(other: Point2d, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: Equals(point: Point2d) -> bool
+
+      Determines whether the specified Point2d has the same values as the present point.
+
+      :param point: The specified point.
+
+      :returns: true if point has the same coordinates as this; otherwise false.
+
+
+
+   .. py:method:: Multiply(point: Point2d, t: float) -> Point2d
+                  Multiply(t: float, point: Point2d) -> Point2d
+      :staticmethod:
+
+
+      Multiplies a ``Point2d`` by a number.
+
+      (Provided for languages that do not support operator overloading. You can use the \* operator otherwise)
+
+      :param t: A number.
+      :param point: A point.
+
+      :returns: A new point that is coordinate-wise multiplied by t.
+
+
+
+   .. py:method:: Negate(point: Point2d) -> Point2d
+      :staticmethod:
+
+
+      Computes the additive inverse of all coordinates in the point, and returns the new point.
+
+      (Provided for languages that do not support operator overloading. You can use the - unary operator otherwise)
+
+      :param point: A point.
+
+      :returns: A point value that, when summed with the point input, yields the ``Origin``.
+
+
+
+   .. py:method:: Subtract(point: Point2d, vector: Vector2d) -> Point2d
+                  Subtract(point1: Point2d, point2: Point2d) -> Vector2d
+      :staticmethod:
+
+
+      Subtracts the second point from the first point.
+
+      (Provided for languages that do not support operator overloading. You can use the - operator otherwise)
+
+      :param point1: A point (minuend).
+      :param point2: A point (subtrahend).
+
+      :returns: A new vector that is point1 coordinate-wise subtracted by point2.
+
+
+
+   .. py:method:: ToString() -> str
+
+      Constructs the string representation for the current point.
+
+      :returns: The point representation in the form X,Y.
+
+
+
+   .. py:method:: Transform(xform: Transform) -> None
+
+      Transforms the present point in place. The transformation matrix acts on the left of the point. i.e.,
+
+      result = transformation\*point
+
+      :param xform: Transformation to apply.
+
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      If any coordinate of a point is UnsetValue, then the point is not valid.
+
+
+   .. py:property:: MaximumCoordinate
+      :type: float
+
+
+      Gets the largest valid coordinate, or RhinoMath.UnsetValue if no coordinate is valid.
+
+
+   .. py:property:: MinimumCoordinate
+      :type: float
+
+
+      Gets the smallest (both positive and negative) valid coordinate, or RhinoMath.UnsetValue if no coordinate is valid.
+
+
+   .. py:attribute:: Origin
+      :type:  Point2d
+      :value: Ellipsis
+
+
+      object, /) -> Point2d
+
+      :type: (arg
+
+
+   .. py:attribute:: Unset
+      :type:  Point2d
+      :value: Ellipsis
+
+
+      object, /) -> Point2d
+
+      :type: (arg
+
+
+   .. py:property:: X
+      :type: float
+
+
+      Gets or sets the X (first) coordinate of the point.
+
+
+   .. py:property:: Y
+      :type: float
+
+
+      Gets or sets the Y (second) coordinate of the point.
+

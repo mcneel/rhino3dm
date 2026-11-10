@@ -1,0 +1,31 @@
+rhino3dm.ViewInfoFocalBlurModes
+===============================
+
+.. py:class:: rhino3dm.ViewInfoFocalBlurModes
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   The different focal blur modes of the ViewInfo
+
+
+   .. py:attribute:: Automatic
+      :value: 1
+
+
+      Auto-focus on selected objects
+
+
+   .. py:attribute:: Manual
+      :value: 2
+
+
+      Fully manual focus
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``ViewInfoFocalBlurModes.None`` is not Python syntax; ``ViewInfoFocalBlurModes['None']`` is the same member). No focal blur
+

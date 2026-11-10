@@ -1,0 +1,120 @@
+rhino3dm.MeshVertexNormalList
+=============================
+
+.. py:class:: rhino3dm.MeshVertexNormalList
+
+   Provides access to the Vertex Normals of a Mesh.
+
+
+   .. py:method:: Add(normal: Vector3f) -> int
+                  Add(x: float, y: float, z: float) -> int
+                  Add(normal: Vector3d) -> int
+
+      Adds a new vertex normal at the end of the list.
+
+      :param normal: new vertex normal.
+
+      :returns: The index of the newly added vertex normal.
+
+
+
+   .. py:method:: AddRange(normals: collections.abc.Sequence[Vector3f]) -> bool
+
+      Appends a collection of normal vectors.
+
+      :param normals: Normals to append.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Clear() -> None
+
+      Clears the vertex normal collection on the mesh.
+
+
+
+   .. py:method:: ComputeNormals() -> bool
+
+      Computes the vertex normals based on the physical shape of the mesh.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Destroy() -> None
+
+      Releases all memory allocated to store vertex normals. The list capacity will be 0 after this call.
+
+      Subsequent calls can add new items.
+
+
+
+   .. py:method:: Flip() -> None
+
+      Reverses direction of all vertex normals
+
+      This is the same as Mesh.Flip(true, false, false)
+
+
+
+   .. py:method:: SetNormal(index: int, normal: Vector3f) -> bool
+                  SetNormal(index: int, normal: Vector3d) -> bool
+                  SetNormal(index: int, x: float, y: float, z: float) -> bool
+
+      Sets or adds a vertex normal to the list.
+
+      If [index] is less than [Count], the existing vertex normal at [index] will be modified.
+
+      If [index] equals [Count], a new vertex normal is appended to the end of the list.
+
+      If [index] is larger than [Count], the function will return false.
+
+      :param index: Index of vertex normal to set.
+      :param x: X component of vertex normal.
+      :param y: Y component of vertex normal.
+      :param z: Z component of vertex normal.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: SetNormals(normals: collections.abc.Sequence[Vector3f]) -> bool
+
+      Sets all normal vectors in one go. This method destroys the current normal array if it exists.
+
+      :param normals: Normals for the entire mesh.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: ToFloatArray() -> list[float]
+
+      Copies all vertex normals to a linear array of float in x,y,z order
+
+      :returns: The float array.
+
+
+
+   .. py:method:: UnitizeNormals() -> bool
+
+      Unitizes all vertex normals.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:property:: Capacity
+      :type: int
+
+
+      Gets or sets the amount of vertex normals that the list can hold without resizing.
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets or sets the number of mesh vertex normals.
+

@@ -1,0 +1,492 @@
+rhino3dm.File3dm
+================
+
+.. py:class:: rhino3dm.File3dm
+
+   Represents a 3dm file, which is stored using the OpenNURBS file standard.
+
+   The 3dm format is the main Rhinoceros storage format.
+
+   Visit http://www.opennurbs.com/ for more details.
+
+
+   .. py:method:: Decode(buffer: str) -> File3dm
+      :staticmethod:
+
+
+      A model read from a base64-encoded .3dm file, as ``File3dm.Encode`` writes it (rhino3dm only).
+
+      :param buffer: The .3dm bytes, base64 encoded.
+
+      :returns: The model, or None when the bytes are not a .3dm file.
+
+
+
+   .. py:method:: Dump() -> str
+
+      Prepares a text dump of the entire model.
+
+      :returns: The text dump.
+
+
+
+   .. py:method:: DumpSummary() -> str
+
+      Prepares a text dump of model properties and settings.
+
+      :returns: The text dump.
+
+
+
+   .. py:method:: Encode() -> str
+                  Encode(options: File3dmWriteOptions) -> str
+
+      The model as a .3dm file, base64 encoded (rhino3dm only; inverse: ``File3dm.Decode``).
+
+      :param options: How to write the file (version, what to include); the default when omitted.
+
+      :returns: The .3dm bytes as a base64 string.
+
+
+
+   .. py:method:: FromByteArray(bytes: File3dm.FromByteArray.bytes) -> File3dm
+      :staticmethod:
+
+
+      Read a 3dm file from a byte array
+
+      :returns: New File3dm on success, null on error.
+
+
+
+   .. py:method:: GetEmbeddedFileAsBase64(path: str) -> str
+                  GetEmbeddedFileAsBase64(path: str, strict: bool) -> str
+
+      The bytes of a file embedded in the model, base64 encoded (rhino3dm only).
+
+      Finds only the files Rhino's renderer embedded, not ones added with EmbeddedFiles.Add. To read any embedded file, take it from File3dm.EmbeddedFiles and call its ToByteArray().
+
+      :param path: The embedded file's path, or (not strict) just its name.
+      :param strict: True: the path must match exactly, case included. False (the default): the path or the file name matches, ignoring case.
+
+      :returns: The file's bytes as a base64 string, empty when no embedded file matches.
+
+
+
+   .. py:method:: Polish() -> None
+
+      This function is only kept for forward assembly compatibility.
+
+      Deprecated since 6.0.
+
+
+
+   .. py:method:: RdkXml() -> str
+
+      The object's render data (RDK) as XML (rhino3dm only).
+
+      :returns: The XML text, empty when the object has none.
+
+
+
+   .. py:method:: Read(path: str) -> File3dm
+      :staticmethod:
+
+
+      Reads a 3dm file from a specified location.
+
+      :param path: The file to read.
+
+      :returns: new File3dm on success, null on error.
+
+      :raises FileNotFoundException: If path does not exist.
+
+
+
+   .. py:method:: ReadArchiveVersion(path: str) -> int
+      :staticmethod:
+
+
+      Reads only the archive 3dm version from an existing 3dm file.
+
+      :param path: The file from which to read the archive version.
+
+      :returns: The 3dm file archive version.
+
+      :raises FileNotFoundException: If path does not exist, is null or cannot be accessed because of permissions.
+
+
+
+   .. py:method:: ReadNotes(path: str) -> str
+      :staticmethod:
+
+
+      Reads only the notes from an existing 3dm file.
+
+      :param path: The file from which to read the notes.
+
+      :returns: The 3dm file notes.
+
+      :raises FileNotFoundException: If path does not exist, is null or cannot be accessed because of permissions.
+
+
+
+   .. py:method:: ReadSettings(path: str) -> File3dm
+      :staticmethod:
+
+
+      Reads only the start section, properties, and settings from a 3dm file at a specified location. The rest of the model (objects, layers, and other tables) is not read.
+
+      :param path: The file to read.
+
+      :returns: new File3dm on success, null on error.
+
+      :raises FileNotFoundException: If path does not exist.
+
+
+
+   .. py:method:: ToByteArray(options: File3dmWriteOptions | None) -> bytes
+                  ToByteArray() -> bytes
+
+      Write to an in-memory byte[]
+
+
+
+   .. py:method:: Write(path: str, options: File3dmWriteOptions | None) -> bool
+                  Write(path: str, version: int) -> bool
+
+      Writes contents of this model to an openNURBS archive. If the model is not valid, then Write will refuse to write it.
+
+      :param path: The file name to use for writing.
+      :param version: Version of the openNURBS archive to write. Must be [2; current version]. Rhino can read its current version, plus earlier file versions except 1. Use latest version when possible.
+                      Alternatively, 0 is a placeholder for the last valid version.
+
+      :returns: true if archive is written with no error. false if errors occur.
+
+
+
+   .. py:method:: WriteMultipleObjects(path: str, geometry: collections.abc.Sequence[GeometryBase] | None) -> bool
+      :staticmethod:
+
+
+      Creates a simple 3dm file that contains a multiple geometric objects.
+
+      :param path: Path to the 3dm file to create.
+      :param geometry: The geometry to be saved in the archive's object table. This is typically some Curves, Surfaces, Breps, Meshs, or SubDs.
+
+      :returns: True if successful, false otherwise.
+
+
+
+   .. py:method:: WriteOneObject(path: str, geometry: GeometryBase) -> bool
+      :staticmethod:
+
+
+      Creates a simple 3dm file that contains a single geometric object.
+
+      :param path: Path to the 3dm file to create.
+      :param geometry: The geometry to be saved in the archive's object table. This is typically a Curve, Surface, Brep, Mesh, or SubD.
+
+      :returns: True if successful, false otherwise.
+
+
+
+   .. py:method:: WriteWithLog(path: str, options: File3dmWriteOptions | None) -> tuple[bool, str]
+                  WriteWithLog(path: str, version: int) -> tuple[bool, str]
+
+      Writes contents of this model to an openNURBS archive. If the model is not valid, then Write will refuse to write it.
+
+      :param path: The file name to use for writing.
+      :param version: Version of the openNURBS archive to write. Must be [2; current version]. Rhino can read its current version, plus earlier file versions except 1. Use latest version when possible.
+                      Alternatively, 0 is a placeholder for the last valid version.
+
+      :returns: true if archive is written with no error. false if errors occur.
+
+
+
+   .. py:property:: AllDimStyles
+      :type: File3dmDimStyleTable
+
+
+      Dimension Styles in this file.
+
+
+   .. py:property:: AllGroups
+      :type: File3dmGroupTable
+
+
+      Groups in this file.
+
+
+   .. py:property:: AllHatchPatterns
+      :type: File3dmHatchPatternTable
+
+
+      Hatch patterns in this file.
+
+
+   .. py:property:: AllInstanceDefinitions
+      :type: File3dmInstanceDefinitionTable
+
+
+      Instance definitions in this file
+
+
+   .. py:property:: AllLayers
+      :type: File3dmLayerTable
+
+
+      Layers in this file.
+
+
+   .. py:property:: AllLinetypes
+      :type: File3dmLinetypeTable
+
+
+      Linetypes in this file.
+
+
+   .. py:property:: AllMaterials
+      :type: File3dmMaterialTable
+
+
+      Materials in this file.
+
+
+   .. py:property:: AllNamedConstructionPlanes
+      :type: File3dmNamedConstructionPlanes
+
+
+      Named construction planes in this file.
+
+
+   .. py:property:: AllNamedViews
+      :type: File3dmViewTable
+
+
+      Named views in this file.
+
+
+   .. py:property:: AllViews
+      :type: File3dmViewTable
+
+
+      Views that represent the RhinoViews which are displayed when Rhino loads this file.
+
+
+   .. py:property:: ApplicationDetails
+      :type: str
+
+
+      Gets or sets details for the application that wrote this file.
+
+
+   .. py:property:: ApplicationName
+      :type: str
+
+
+      Gets or sets the name of the application that wrote this file.
+
+
+   .. py:property:: ApplicationUrl
+      :type: str
+
+
+      Gets or sets a URL for the application that wrote this file.
+
+
+   .. py:property:: ArchiveVersion
+      :type: int
+
+
+      Gets the 3dm file archive version.
+
+
+   .. py:property:: Bitmaps
+      :type: File3dmBitmapTable
+
+
+      The model's embedded bitmaps (rhino3dm only).
+
+
+   .. py:property:: Created
+      :type: datetime.datetime
+
+
+      Get the DateTime that this file was originally created. If the value is not set in the 3dm file, then DateTime.MinValue is returned
+
+
+   .. py:property:: CreatedBy
+      :type: str
+
+
+      Gets a string that names the user who created the file.
+
+
+   .. py:property:: DimStyles
+      :type: File3dmDimStyleTable
+
+
+      Dimension Styles in this file.
+
+
+   .. py:property:: EarthAnchorPoint
+      :type: EarthAnchorPoint
+
+
+      If set, this is the model's location on the earth. This information is used when the model is used with GIS information.
+
+
+   .. py:property:: EmbeddedFiles
+      :type: File3dmEmbeddedFiles
+
+
+      The embedded files in this file.
+
+
+   .. py:property:: HatchPatterns
+      :type: File3dmHatchPatternTable
+
+
+      Hatch patterns in this file
+
+
+   .. py:property:: InstanceDefinitions
+      :type: File3dmInstanceDefinitionTable
+
+
+      Instance definitions in this file.
+
+
+   .. py:property:: LastEdited
+      :type: datetime.datetime
+
+
+      Get the DateTime that this file was last edited. If the value is not set in the 3dm file, then DateTime.MinValue is returned
+
+
+   .. py:property:: LastEditedBy
+      :type: str
+
+
+      Gets a string that names the user who last edited the file.
+
+
+   .. py:property:: Layers
+      :type: File3dmLayerTable
+
+
+      Layers in this file.
+
+
+   .. py:property:: Linetypes
+      :type: File3dmLinetypeTable
+
+
+      Linetypes in this file.
+
+
+   .. py:property:: Manifest
+      :type: ManifestTable
+
+
+      Retrieves the manifest with all object descriptions in this file.
+
+
+   .. py:property:: Materials
+      :type: File3dmMaterialTable
+
+
+      Materials in this file.
+
+
+   .. py:property:: NamedConstructionPlanes
+      :type: File3dmNamedConstructionPlanes
+
+
+      Named construction planes in this file.
+
+
+   .. py:property:: NamedViews
+      :type: File3dmViewTable
+
+
+      Named views in this file.
+
+
+   .. py:property:: Notes
+      :type: File3dmNotes
+
+
+      Gets or sets the model notes.
+
+
+   .. py:property:: Objects
+      :type: File3dmObjectTable
+
+
+      Gets access to the ``File3dmObjectTable`` class associated with this file, which contains all objects.
+
+
+   .. py:property:: PlugInData
+      :type: File3dmPlugInDataTable
+
+
+      Custom plug-in data in this file. This data is not attached to any geometry or attributes
+
+
+   .. py:property:: RenderEnvironments
+      :type: File3dmRenderEnvironments
+
+
+      The render environments in this file.
+
+
+   .. py:property:: RenderMaterials
+      :type: File3dmRenderMaterials
+
+
+      The render materials in this file.
+
+
+   .. py:property:: RenderTextures
+      :type: File3dmRenderTextures
+
+
+      The render textures in this file.
+
+
+   .. py:property:: Revision
+      :type: int
+
+
+      Gets or sets the revision number.
+
+
+   .. py:property:: Settings
+      :type: File3dmSettings
+
+
+      Settings include tolerance, and unit system, and defaults used for creating views and objects.
+
+
+   .. py:property:: StartSectionComments
+      :type: str
+
+
+      Gets or sets the start section comments, which are the comments with which the 3dm file begins.
+
+
+   .. py:property:: Strings
+      :type: File3dmStringTable
+
+
+      Document user strings in this file
+
+
+   .. py:property:: Views
+      :type: File3dmViewTable
+
+
+      Views that represent the RhinoViews which are displayed when Rhino loads this file.
+

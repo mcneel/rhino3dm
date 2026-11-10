@@ -1,0 +1,97 @@
+rhino3dm.TextRunType
+====================
+
+.. py:class:: rhino3dm.TextRunType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Enum where members are also (and must be) ints
+
+
+   .. py:attribute:: ColorTable
+      :value: 11
+
+
+
+   .. py:attribute:: Column
+      :value: 5
+
+
+
+   .. py:attribute:: Field
+      :value: 6
+
+
+
+   .. py:attribute:: FieldValue
+      :value: 7
+
+
+
+   .. py:attribute:: FontTable
+      :value: 10
+
+
+
+   .. py:attribute:: Fontdef
+      :value: 8
+
+
+
+   .. py:attribute:: Header
+      :value: 9
+
+
+
+   .. py:attribute:: ListBegin
+      :value: 13
+
+
+
+   .. py:attribute:: ListEnd
+      :value: 14
+
+
+
+   .. py:attribute:: ListItemBegin
+      :value: 15
+
+
+
+   .. py:attribute:: ListItemEnd
+      :value: 16
+
+
+
+   .. py:attribute:: Newline
+      :value: 2
+
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``TextRunType.None`` is not Python syntax; ``TextRunType['None']`` is the same member).
+
+
+   .. py:attribute:: Paragraph
+      :value: 4
+
+
+
+   .. py:attribute:: Softreturn
+      :value: 3
+
+
+
+   .. py:attribute:: Tab
+      :value: 12
+
+
+
+   .. py:attribute:: Text
+      :value: 1
+
+

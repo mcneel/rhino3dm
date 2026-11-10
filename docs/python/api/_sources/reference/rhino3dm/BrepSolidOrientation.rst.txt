@@ -1,0 +1,38 @@
+rhino3dm.BrepSolidOrientation
+=============================
+
+.. py:class:: rhino3dm.BrepSolidOrientation
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Enumerates all possible Solid Orientations for a Brep.
+
+
+   .. py:attribute:: Inward
+      :value: -1
+
+
+      Brep is a Solid with inward facing normals.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``BrepSolidOrientation.None`` is not Python syntax; ``BrepSolidOrientation['None']`` is the same member). Brep is not a Solid.
+
+
+   .. py:attribute:: Outward
+      :value: 1
+
+
+      Brep is a Solid with outward facing normals.
+
+
+   .. py:attribute:: Unknown
+      :value: 2
+
+
+      Breps is a Solid but no orientation could be computed.
+

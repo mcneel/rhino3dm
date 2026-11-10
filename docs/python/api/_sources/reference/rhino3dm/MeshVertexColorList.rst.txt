@@ -1,0 +1,105 @@
+rhino3dm.MeshVertexColorList
+============================
+
+.. py:class:: rhino3dm.MeshVertexColorList
+
+   Provides access to the vertex colors of a mesh object.
+
+
+   .. py:method:: Add(color: tuple[int, int, int, int]) -> int
+                  Add(red: int, green: int, blue: int) -> int
+
+      Adds a new vertex color to the end of the color list.
+
+      :param red: Red component of color, must be in the 0~255 range.
+      :param green: Green component of color, must be in the 0~255 range.
+      :param blue: Blue component of color, must be in the 0~255 range.
+
+      :returns: The index of the newly added color.
+
+
+
+   .. py:method:: AddRange(colors: collections.abc.Sequence[tuple[Any, Ellipsis]]) -> bool
+
+      Adds an enumerable of colors to the to the vertex color list. For the Mesh to be valid, the number of colors must match the number of vertices.
+
+      :param colors: Colors to append.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: AppendColors(colors: collections.abc.Sequence[tuple[Any, Ellipsis]]) -> bool
+
+      Appends a collection of colors to the vertex color list. For the Mesh to be valid, the number of colors must match the number of vertices.
+
+      :param colors: Colors to append.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Clear() -> None
+
+      Clears the vertex color list on the mesh.
+
+
+
+   .. py:method:: Destroy() -> None
+
+      Releases all memory allocated to store vertex colors. The list capacity will be 0 after this call.
+
+      Subsequent calls can add new items.
+
+
+
+   .. py:method:: SetColor(index: int, color: tuple[int, int, int, int]) -> bool
+                  SetColor(face: MeshFace, color: tuple[int, int, int, int]) -> bool
+                  SetColor(index: int, red: int, green: int, blue: int) -> bool
+
+      Sets or adds a vertex color to the color List.
+
+      If [index] is less than [Count], the existing vertex at [index] will be modified.
+
+      If [index] equals [Count], a new vertex is appended to the end of the vertex list.
+
+      If [index] is larger than [Count], the function will return false.
+
+      :param index: Index of vertex color to set. If index equals Count, then the color will be appended.
+      :param red: Red component of vertex color. Value must be in the 0~255 range.
+      :param green: Green component of vertex color. Value must be in the 0~255 range.
+      :param blue: Blue component of vertex color. Value must be in the 0~255 range.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: SetColors(colors: collections.abc.Sequence[tuple[Any, Ellipsis]]) -> bool
+
+      Sets all the vertex colors in one go. For the Mesh to be valid, the number of colors must match the number of vertices.
+
+      :param colors: Colors to set.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: ToARGBArray() -> list[Any]
+
+      Return colors as an array of integers with packed ARGB values
+
+
+
+   .. py:property:: Capacity
+      :type: int
+
+
+      Gets or sets the total number of vertex colors the internal data structure can hold without resizing.
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets or sets the number of mesh colors.
+

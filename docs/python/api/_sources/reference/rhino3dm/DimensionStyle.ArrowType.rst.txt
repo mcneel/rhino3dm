@@ -1,0 +1,67 @@
+rhino3dm.DimensionStyle.ArrowType
+=================================
+
+.. py:class:: rhino3dm.DimensionStyle.ArrowType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated values for arrowhead shapes.
+
+
+   .. py:attribute:: Dot
+      :value: 3
+
+
+
+   .. py:attribute:: LongTriangle
+      :value: 8
+
+
+
+   .. py:attribute:: LongerTriangle
+      :value: 9
+
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``ArrowType.None`` is not Python syntax; ``ArrowType['None']`` is the same member).
+
+
+   .. py:attribute:: OpenArrow
+      :value: 6
+
+
+
+   .. py:attribute:: Rectangle
+      :value: 7
+
+
+
+   .. py:attribute:: ShortTriangle
+      :value: 5
+
+
+
+   .. py:attribute:: SolidDatumTriangle
+      :value: 10
+
+
+
+   .. py:attribute:: SolidTriangle
+      :value: 2
+
+
+
+   .. py:attribute:: Tick
+      :value: 4
+
+
+
+   .. py:attribute:: UserBlock
+      :value: 1
+
+

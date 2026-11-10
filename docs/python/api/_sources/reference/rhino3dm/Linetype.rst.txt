@@ -1,0 +1,385 @@
+rhino3dm.Linetype
+=================
+
+.. py:class:: rhino3dm.Linetype
+              Linetype(other: Linetype)
+
+   Bases: :py:obj:`ModelComponent`
+
+
+   Base class for all components in a model (document) and manages the index, id and other information common to this type of objects.
+
+   This class parallels the C++ ON\_ModelComponent.
+
+
+   .. py:method:: AddShape(shapeCurve: Curve, offset: float) -> bool
+                  AddShape(text: TextEntity, offset: float) -> bool
+
+      Add text as a shape to this linetype definition
+
+
+
+   .. py:method:: AppendSegment(length: float, isSolid: bool) -> int
+
+      Adds a segment to the pattern.
+
+      :param length: The length of the segment to be added.
+      :param isSolid: If true, the length is interpreted as a line. If false, then the length is interpreted as a space.
+
+      :returns: Index of the added segment.
+
+
+
+   .. py:method:: ClearPattern() -> bool
+
+      Removes all segments from the pattern, unless the pattern is locked (the built-in linetypes, such as ``Continuous``, have locked patterns).
+
+      :returns: true if the linetype has no pattern set afterwards.
+
+
+
+   .. py:method:: CommitChanges() -> bool
+
+
+   .. py:method:: Default() -> None
+
+      Set linetype to default settings.
+
+
+
+   .. py:method:: DeleteAllUserStrings() -> None
+
+
+   .. py:method:: DuplicateLinetype() -> Linetype
+
+      Duplicates a linetype, clears the name, id, and locked bits.
+
+      :returns: The duplicated linetype if successful, null otherwise.
+
+
+
+   .. py:method:: GetSegment(index: int) -> tuple[float, bool]
+
+      Gets the segment information at a index.
+
+      :param index: Zero based index of the segment.
+
+      :raises IndexOutOfRangeException: If the index is unacceptable.
+
+
+
+   .. py:method:: GetTaperPoints() -> list[Point2d]
+
+      Taper points are positions/width combinations along the length of a curve
+
+
+
+   .. py:method:: GetUserString(key: str) -> str
+
+      Gets user string from this geometry.
+
+      :param key: id used to retrieve the string.
+
+      :returns: string associated with the key if successful. null if no key was found.
+
+
+
+   .. py:method:: GetUserStrings() -> list[Any]
+
+      Gets a copy of all (user key string, user value string) pairs attached to this geometry.
+
+      :returns: A new collection.
+
+
+
+   .. py:method:: RemoveAllShapes() -> None
+
+      Remove all shapes from this linetype
+
+
+
+   .. py:method:: RemoveSegment(index: int) -> bool
+
+      Removes a segment in the linetype.
+
+      :param index: Zero based index of the segment to remove.
+
+      :returns: true if the segment index was removed.
+
+
+
+   .. py:method:: RemoveTaper() -> None
+
+      Remove taper information for stroke
+
+
+
+   .. py:method:: SetSegment(index: int, length: float, isSolid: bool) -> bool
+
+      Sets the length and type of the segment at index.
+
+      :param index: Zero based index of the segment.
+      :param length: The length of the segment to be added in millimeters.
+      :param isSolid: If true, the length is interpreted as a line. If false, then the length is interpreted as a space.
+
+      :returns: true if the operation was successful; otherwise false.
+
+
+
+   .. py:method:: SetSegments(segments: collections.abc.Sequence[float]) -> bool
+
+      Set all segments.
+
+      :param segments: An array of segments lengths. Lengths >= 0 are interpreted as a line. Lengths < 0 are interpreted as a space.
+
+      :returns: true if the segments were replaced
+
+
+
+   .. py:method:: SetTaper(startWidth: float, taperPoint: Point2d, endWidth: float) -> None
+                  SetTaper(startWidth: float, endWidth: float) -> None
+
+      Set taper to a simple start width / end width
+
+
+
+   .. py:method:: SetUserString(key: str, value: str) -> bool
+
+      Attach a user string (key,value combination) to this geometry.
+
+      :param key: id used to retrieve this string.
+      :param value: string associated with key.
+
+      :returns: true on success.
+
+
+
+   .. py:property:: AlwaysModelDistances
+      :type: bool
+
+
+      Linetype patterns and widths are typically interpreted as distances on the printed output when printing. In this case AlwaysModelDistances is false (default). When set to true, the linetype pattern and width will be interpreted as being in world distances. This is useful for cases like modeling a road as a single curve.
+
+
+   .. py:attribute:: Border
+      :type:  Linetype
+      :value: Ellipsis
+
+
+      object, /) -> Linetype
+
+      :type: (arg
+
+
+   .. py:attribute:: ByLayer
+      :type:  Linetype
+      :value: Ellipsis
+
+
+      object, /) -> Linetype
+
+      :type: (arg
+
+
+   .. py:attribute:: ByParent
+      :type:  Linetype
+      :value: Ellipsis
+
+
+      object, /) -> Linetype
+
+      :type: (arg
+
+
+   .. py:attribute:: Center
+      :type:  Linetype
+      :value: Ellipsis
+
+
+      object, /) -> Linetype
+
+      :type: (arg
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.LinePattern``.
+
+
+   .. py:attribute:: Continuous
+      :type:  Linetype
+      :value: Ellipsis
+
+
+      object, /) -> Linetype
+
+      :type: (arg
+
+
+   .. py:attribute:: DashDot
+      :type:  Linetype
+      :value: Ellipsis
+
+
+      object, /) -> Linetype
+
+      :type: (arg
+
+
+   .. py:attribute:: Dashed
+      :type:  Linetype
+      :value: Ellipsis
+
+
+      object, /) -> Linetype
+
+      :type: (arg
+
+
+   .. py:attribute:: Dots
+      :type:  Linetype
+      :value: Ellipsis
+
+
+      object, /) -> Linetype
+
+      :type: (arg
+
+
+   .. py:property:: HasShapes
+      :type: bool
+
+
+      Does this linetype have shapes
+
+
+   .. py:attribute:: Hidden
+      :type:  Linetype
+      :value: Ellipsis
+
+
+      object, /) -> Linetype
+
+      :type: (arg
+
+
+   .. py:property:: IsDeleted
+      :type: bool
+
+
+      Gets a value indicating whether this linetype has been deleted and is currently in the Undo buffer.
+
+
+   .. py:property:: IsModified
+      :type: bool
+
+
+      true if this linetype has been modified by LinetypeTable.ModifyLinetype() and the modifications can be undone.
+
+
+   .. py:property:: IsPatternLocked
+      :type: bool
+
+
+      Returns true if the pattern is locked and cannot be modified.
+
+
+   .. py:property:: IsReference
+      :type: bool
+
+
+      Gets a value indicting whether this linetype is a referenced linetype. Referenced linetypes are part of referenced documents.
+
+
+   .. py:property:: LineCapStyle
+      :type: LineCapStyle
+
+
+      Defines how the ends of open curves should be drawn
+
+
+   .. py:property:: LineJoinStyle
+      :type: LineJoinStyle
+
+
+      Defines how the corners of curves should be drawn
+
+
+   .. py:property:: LinetypeIndex
+      :type: int
+
+
+      The index of this linetype.
+
+
+   .. py:property:: Name
+      :type: str
+
+
+      The name of this linetype.
+
+
+   .. py:property:: PatternLength
+      :type: float
+
+
+      Total length of one repeat of the pattern.
+
+
+   .. py:property:: SegmentCount
+      :type: int
+
+
+      Number of segments in the pattern.
+
+
+   .. py:property:: ShapeBounds
+      :type: BoundingBox
+
+
+      The bounding box of the shapes in this linetype definition.
+
+
+   .. py:property:: ShapeGap
+      :type: float
+
+
+      If shapes are present in this linetype, this is the gap around the shape.
+
+
+   .. py:property:: ShapeLocalOffset
+      :type: Vector2d
+
+
+      Local offset applied to shapes
+
+
+   .. py:property:: ShapeSpacing
+      :type: float
+
+
+      If shapes are present in this linetype, this is the distance between shapes
+
+
+   .. py:property:: UserStringCount
+      :type: int
+
+
+      Gets the amount of user strings.
+
+
+   .. py:property:: Width
+      :type: float
+
+
+      Base width for this linetype
+
+
+   .. py:property:: WidthUnits
+      :type: UnitSystem
+
+
+      Unit system that widths are defined in. UnitSystem.None is default and means that the width is defined in pixels.
+

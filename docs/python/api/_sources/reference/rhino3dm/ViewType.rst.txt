@@ -1,0 +1,45 @@
+rhino3dm.ViewType
+=================
+
+.. py:class:: rhino3dm.ViewType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   What a view in a document's view table is: a model view, a layout page, a detail nested inside a layout, or one of Rhino's special editor views.
+
+
+   .. py:attribute:: BlockEditorView
+      :value: 4
+
+
+      The block editor's special view port.
+
+
+   .. py:attribute:: ModelView
+      :value: 0
+
+
+      A standard 3d model space view.
+
+
+   .. py:attribute:: NestedView
+      :value: 2
+
+
+      A model view nested inside another view - a layout detail.
+
+
+   .. py:attribute:: PageView
+      :value: 1
+
+
+      A layout, a.k.a. "paper space". Must be an orthographic top view.
+
+
+   .. py:attribute:: UVEditorView
+      :value: 3
+
+
+      The UV editor's special view port.
+

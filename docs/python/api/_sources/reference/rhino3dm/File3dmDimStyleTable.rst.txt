@@ -1,0 +1,78 @@
+rhino3dm.File3dmDimStyleTable
+=============================
+
+.. py:class:: rhino3dm.File3dmDimStyleTable
+
+   Provides access to annotation styles in the 3dm file.
+
+
+   .. py:method:: Add(item: DimensionStyle) -> None
+
+      Adds an item.
+
+      :param item: The item to add.
+
+
+
+   .. py:method:: Delete(item: DimensionStyle | None) -> bool
+                  Delete(index: int) -> None
+
+      Flags a component as deleted.
+
+      :param index: The index of the item to flag.
+
+      :returns: True on success.
+
+
+
+   .. py:method:: Dump() -> str
+
+      Prepares a text dump of object table.
+
+      :returns: A string containing the dump.
+
+
+
+   .. py:method:: FindId(id: uuid.UUID) -> DimensionStyle
+
+      Uses the guid to find a model component. Deleted objects cannot be found by id. The guid is the value that is stored in the .Id property. In a single document, no two active objects have the same guid. If an object is replaced with a new object, then the guid persists. For example, if the \_Move command moves an object, then the moved object inherits its guid from the starting object. If the Copy command copies an object, then the copy gets a new guid. This guid persists through file saving/opening operations. This function will not find grip objects.
+
+      :param id: ID of model component to search for.
+
+      :returns: Reference to the rhino object with the objectId or null if no such object could be found.
+
+
+
+   .. py:method:: FindIndex(index: int) -> DimensionStyle
+
+      Retrieves a DimensionStyle object based on Index. This search type of search is discouraged. We are moving towards using only IDs for all tables.
+
+      :param index: The index to search for.
+
+      :returns: A DimensionStyle object, or null if none was found.
+
+
+
+   .. py:method:: FindName(name: str) -> DimensionStyle
+
+      Finds a DimensionStyle given its name.
+
+      :param name: The name of the DimensionStyle to be searched.
+
+      :returns: An DimensionStyle, or null on error.
+
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.DimStyle``.
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Returns the count of all items, including deleted ones.
+

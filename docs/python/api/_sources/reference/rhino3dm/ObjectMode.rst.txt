@@ -1,0 +1,38 @@
+rhino3dm.ObjectMode
+===================
+
+.. py:class:: rhino3dm.ObjectMode
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated values for the display and behavior of single objects.
+
+
+   .. py:attribute:: Hidden
+      :value: 1
+
+
+      Not visible, object cannot be selected or changed.
+
+
+   .. py:attribute:: InstanceDefinitionObject
+      :value: 3
+
+
+      Object is part of an InstanceDefinition. The InstanceDefinition m\_object\_uuid[] array will contain this object attribute's id.
+
+
+   .. py:attribute:: Locked
+      :value: 2
+
+
+      Visible, object cannot be selected or changed.
+
+
+   .. py:attribute:: Normal
+      :value: 0
+
+
+      Object mode comes from layer.
+

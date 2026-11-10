@@ -1,0 +1,38 @@
+rhino3dm.SphereSphereIntersection
+=================================
+
+.. py:class:: rhino3dm.SphereSphereIntersection
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Represents all possible cases of a Sphere\|Sphere intersection event.
+
+
+   .. py:attribute:: Circle
+      :value: 2
+
+
+      Spheres intersect at a circle.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``SphereSphereIntersection.None`` is not Python syntax; ``SphereSphereIntersection['None']`` is the same member). Spheres do not intersect.
+
+
+   .. py:attribute:: Overlap
+      :value: 3
+
+
+      Spheres are identical.
+
+
+   .. py:attribute:: Point
+      :value: 1
+
+
+      Spheres touch at a single point.
+

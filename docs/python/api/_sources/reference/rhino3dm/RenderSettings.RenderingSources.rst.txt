@@ -1,0 +1,38 @@
+rhino3dm.RenderSettings.RenderingSources
+========================================
+
+.. py:class:: rhino3dm.RenderSettings.RenderingSources
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Rendering source (render directly from a NamedView or Snapshot)
+
+
+   .. py:attribute:: ActiveViewport
+      :value: 0
+
+
+      Get the rendering view from the currently active viewport (as in all previous versions of Rhino)
+
+
+   .. py:attribute:: NamedView
+      :value: 2
+
+
+      Get the rendering view from a specific named view (see NamedView below)
+
+
+   .. py:attribute:: SnapShot
+      :value: 3
+
+
+      Before rendering, restore the Snapshot specified in Snapshot below, then render.
+
+
+   .. py:attribute:: SpecificViewport
+      :value: 1
+
+
+      Get the rendering view from the named viewport (see NamedViewport below)
+

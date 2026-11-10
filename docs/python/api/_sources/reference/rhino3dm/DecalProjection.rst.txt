@@ -1,0 +1,38 @@
+rhino3dm.DecalProjection
+========================
+
+.. py:class:: rhino3dm.DecalProjection
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Enum where members are also (and must be) ints
+
+
+   .. py:attribute:: Backward
+      :value: 1
+
+
+      Project backward
+
+
+   .. py:attribute:: Both
+      :value: 2
+
+
+      Project forward and backward
+
+
+   .. py:attribute:: Forward
+      :value: 0
+
+
+      Project forward
+
+
+   .. py:attribute:: None_
+      :value: -1
+
+
+      RhinoCommon's ``None`` (``DecalProjection.None`` is not Python syntax; ``DecalProjection['None']`` is the same member). No projection
+

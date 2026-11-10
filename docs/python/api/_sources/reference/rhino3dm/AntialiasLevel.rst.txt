@@ -1,0 +1,38 @@
+rhino3dm.AntialiasLevel
+=======================
+
+.. py:class:: rhino3dm.AntialiasLevel
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Provides the anti-alias levels used for render quality
+
+
+   .. py:attribute:: Draft
+      :value: 1
+
+
+      Draft quality
+
+
+   .. py:attribute:: Good
+      :value: 2
+
+
+      Good quality
+
+
+   .. py:attribute:: High
+      :value: 3
+
+
+      High quality
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``AntialiasLevel.None`` is not Python syntax; ``AntialiasLevel['None']`` is the same member). Low quality
+

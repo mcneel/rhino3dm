@@ -1,0 +1,80 @@
+rhino3dm.Environment.BackgroundProjections
+==========================================
+
+.. py:class:: rhino3dm.Environment.BackgroundProjections
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   The available background projections.
+
+
+   .. py:attribute:: Automatic
+      :value: 4
+
+
+      Automatic.
+
+
+   .. py:attribute:: Box
+      :value: 3
+
+
+      Box.
+
+
+   .. py:attribute:: CubeMap
+      :value: 6
+
+
+      Cube map.
+
+
+   .. py:attribute:: Emap
+      :value: 2
+
+
+      Environment map.
+
+
+   .. py:attribute:: Hemispherical
+      :value: 9
+
+
+      Hemispherical.
+
+
+   .. py:attribute:: HorizontalCrossCubeMap
+      :value: 8
+
+
+      Horizontal cross cube map.
+
+
+   .. py:attribute:: LightProbe
+      :value: 5
+
+
+      Light probe.
+
+
+   .. py:attribute:: Planar
+      :value: 0
+
+
+      Planar.
+
+
+   .. py:attribute:: Spherical
+      :value: 1
+
+
+      Spherical.
+
+
+   .. py:attribute:: VerticalCrossCubeMap
+      :value: 7
+
+
+      Vertical cross cube map.
+

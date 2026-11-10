@@ -1,0 +1,24 @@
+rhino3dm.DimensionStyle.MaskType
+================================
+
+.. py:class:: rhino3dm.DimensionStyle.MaskType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Text mask drawn with background color or explicit color
+
+
+   .. py:attribute:: BackgroundColor
+      :value: 0
+
+
+      Text mask drawn with background color
+
+
+   .. py:attribute:: MaskColor
+      :value: 1
+
+
+      Text mask drawn with explicit color
+

@@ -1,0 +1,70 @@
+rhino3dm.SubDComponent
+======================
+
+.. py:class:: rhino3dm.SubDComponent
+
+   A part of SubD geometry. Common base class for vertices, faces, and edges
+
+
+   .. py:method:: Equals(other: SubDComponent | None) -> bool
+
+      Determines whether this component and another refer to the same component, with the same orientation, in the same SubD.
+
+      :param other: The component to compare with.
+
+
+
+   .. py:method:: GetHashCode() -> int
+
+      Gets a hash code for this component.
+
+
+
+   .. py:property:: Id
+      :type: int
+
+
+      Unique id within the parent SubD for this item
+
+
+   .. py:property:: IsDamaged
+      :type: bool
+
+
+      Returns true if the SubD component is damaged.
+
+
+   .. py:property:: IsDeleted
+      :type: bool
+
+
+      Returns true if the SubD component is deleted.
+
+
+   .. py:property:: IsHidden
+      :type: bool
+
+
+      Returns true if the SubD component is hidden.
+
+
+   .. py:property:: IsHighlighted
+      :type: bool
+
+
+      Returns true if the SubD component is highlighted.
+
+
+   .. py:property:: IsLocked
+      :type: bool
+
+
+      Returns true if the SubD component is locked.
+
+
+   .. py:property:: IsSelected
+      :type: bool
+
+
+      Returns true if the SubD component is selected.
+

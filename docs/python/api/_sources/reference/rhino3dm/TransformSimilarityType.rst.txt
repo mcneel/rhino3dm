@@ -1,0 +1,31 @@
+rhino3dm.TransformSimilarityType
+================================
+
+.. py:class:: rhino3dm.TransformSimilarityType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Lists all possible outcomes for transform similarity.
+
+
+   .. py:attribute:: NotSimilarity
+      :value: 0
+
+
+      Similarity is not preserved. Geometry needs to be deformable for this Transform to operate correctly.
+
+
+   .. py:attribute:: OrientationPreserving
+      :value: 1
+
+
+      Similarity and orientation are preserved.
+
+
+   .. py:attribute:: OrientationReversing
+      :value: -1
+
+
+      Similarity is preserved, but orientation is flipped.
+

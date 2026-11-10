@@ -1,0 +1,85 @@
+rhino3dm.BrepEdge
+=================
+
+.. py:class:: rhino3dm.BrepEdge
+
+   Bases: :py:obj:`CurveProxy`
+
+
+   Represents a single edge curve in a Brep object.
+
+
+   .. py:method:: AdjacentFaces() -> list[Any]
+
+      Gets the indices of all the BrepFaces that use this edge.
+
+
+
+   .. py:method:: SetEdgeCurve(curve3dIndex: int, subDomain: Interval) -> bool
+
+      Set 3d curve geometry used by a b-rep edge.
+
+      :param curve3dIndex: index of 3d curve in m\_C3[] array
+
+      :returns: true if successful
+
+
+
+   .. py:method:: TrimIndices() -> list[Any]
+
+      Gets the indices of all trims associated with this edge.
+
+      :returns: Empty array on failure.
+
+
+
+   .. py:property:: EdgeCurveIndex
+      :type: int
+
+
+      Get the brep.Curves3D[] index of the 3d curve geometry used by this edge or -1.
+
+
+   .. py:property:: EdgeIndex
+      :type: int
+
+
+      Gets the index of this edge in the Brep.Edges collection.
+
+
+   .. py:property:: EndVertex
+      :type: BrepVertex
+
+
+      BrepVertex at end of edge
+
+
+   .. py:property:: StartVertex
+      :type: BrepVertex
+
+
+      BrepVertex at start of edge
+
+
+   .. py:property:: Tolerance
+      :type: float
+
+
+      Gets or sets the accuracy of the edge curve (>=0.0 or RhinoMath.UnsetValue) A value of UnsetValue indicates that the tolerance should be computed.
+
+      The maximum distance from the edge's 3d curve to any surface of a face that has this edge as a portion of its boundary must be <= this tolerance.
+
+
+   .. py:property:: TrimCount
+      :type: int
+
+
+      Gets the number of trim-curves that use this edge.
+
+
+   .. py:property:: Valence
+      :type: EdgeAdjacency
+
+
+      Gets the topological valency of this edge. The topological valency is defined by how many adjacent faces share this edge.
+

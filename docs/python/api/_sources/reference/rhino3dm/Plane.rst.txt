@@ -1,0 +1,335 @@
+rhino3dm.Plane
+==============
+
+.. py:class:: rhino3dm.Plane
+              Plane(arg: Plane)
+              Plane(origin: Point3d, normal: Vector3d)
+              Plane(origin: Point3d, xDirection: Vector3d, yDirection: Vector3d)
+              Plane(origin: Point3d, xPoint: Point3d, yPoint: Point3d)
+              Plane(a: float, b: float, c: float, d: float)
+
+   Represents the value of a center point and two axes in a plane in three dimensions.
+
+
+   .. py:method:: Clone() -> Plane
+
+      Returns a deep copy of this instance.
+
+      :returns: A plane with the same values as this item.
+
+
+
+   .. py:method:: ClosestParameter(testPoint: Point3d) -> tuple[bool, float, float]
+
+      Gets the parameters of the point on the plane closest to a test point.
+
+      :param testPoint: Point to get close to.
+
+      :returns: true if a parameter could be found, false if the point could not be projected successfully.
+
+
+
+   .. py:method:: ClosestPoint(testPoint: Point3d) -> Point3d
+
+      Gets the point on the plane closest to a test point.
+
+      :param testPoint: Point to get close to.
+
+      :returns: The point on the plane that is closest to testPoint, or Point3d.Unset on failure.
+
+
+
+   .. py:method:: CreateFromFrame(origin: Point3d, xDirection: Vector3d, yDirection: Vector3d) -> Plane
+      :staticmethod:
+
+
+      Constructs a plane from a point, and two vectors in the plane.
+
+      :param origin: Point on the plane.
+      :param xDirection: Non-zero vector in the plane that determines the XAxis direction.
+      :param yDirection: Non-zero vector not parallel to xDirection that is used to determine the YAxis direction. Note, yDirection does not have to be perpendicular to xDirection.
+
+      :returns: A valid plane if successful, or Plane.Unset on failure.
+
+
+
+   .. py:method:: CreateFromNormal(origin: Point3d, normal: Vector3d) -> Plane
+      :staticmethod:
+
+
+      Constructs a plane from a point and normal vector.
+
+      :param origin: Point on the plane.
+      :param normal: Non-zero normal to the plane.
+
+      :returns: A valid plane if successful, or Plane.Unset on failure.
+
+
+
+   .. py:method:: CreateFromNormalYup(origin: Point3d, normal: Vector3d, yDirection: Vector3d) -> Plane
+      :staticmethod:
+
+
+      Construct a plane from a point, a normal vector, and a vector that projects to the positive YAxis.
+
+      :param origin: Point on the plane.
+      :param normal: Non-zero normal to the plane.
+      :param yDirection: Non-zero vector, linearly independent from normal, that projects to the positive YAxis of the plane.
+
+      :returns: A valid plane if successful, or Plane.Unset on failure.
+
+
+
+   .. py:method:: CreateFromPoints(origin: Point3d, xPoint: Point3d, yPoint: Point3d) -> Plane
+      :staticmethod:
+
+
+      Construct a plane from three non-collinear points.
+
+      :param origin: Point on the plane.
+      :param xPoint: Second point in the plane. XAxis will be parallel to xPoint-origin.
+      :param yPoint: Third point on the plane that is not collinear with the first two points, where YAxis\*(yPoint-origin) will be > 0.
+
+      :returns: A valid plane if successful, or Plane.Unset on failure.
+
+
+
+   .. py:method:: Decode(jsonObject: dict[str, Any]) -> Plane
+      :staticmethod:
+
+
+      The object a dict from ``Encode`` describes (rhino3dm only).
+
+      :param jsonObject: A dict as ``Encode`` returns it.
+
+
+
+   .. py:method:: DistanceTo(testPoint: Point3d) -> float
+                  DistanceTo(bbox: BoundingBox) -> tuple[bool, float, float]
+
+      Returns the signed minimum and maximum distances from bounding box to this plane.
+
+      :param bbox: bounding box to get distances from
+
+      :returns: false if plane has zero length normal
+
+
+
+   .. py:method:: Encode() -> dict[str, Any]
+
+      This plane as a JSON-compatible dict: ``Origin``, ``XAxis``, ``YAxis``, ``ZAxis``, each ``{'X', 'Y', 'Z'}`` (rhino3dm only; inverse: ``Plane.Decode``).
+
+
+
+   .. py:method:: EpsilonEquals(other: Plane, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: Equals(plane: Plane) -> bool
+
+      Determines if another plane has the same components as this plane.
+
+      :param plane: A plane.
+
+      :returns: true if plane has the same components as this plane; false otherwise.
+
+
+
+   .. py:method:: ExtendThroughBox(box: BoundingBox) -> tuple[bool, Interval, Interval]
+                  ExtendThroughBox(box: Box) -> tuple[bool, Interval, Interval]
+
+      Extends this plane through a bounding box.
+
+      :param box: A box to use as minimal extension boundary.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Flip() -> None
+
+      Flip this plane by swapping out the X and Y axes and inverting the Z axis.
+
+
+
+   .. py:method:: PointAt(u: float, v: float) -> Point3d
+                  PointAt(u: float, v: float, w: float) -> Point3d
+
+      Evaluate a point on the plane.
+
+      :param u: evaluation parameter.
+      :param v: evaluation parameter.
+      :param w: evaluation parameter.
+
+      :returns: plane.origin + u\*plane.xaxis + v\*plane.yaxis + z\*plane.zaxis.
+
+
+
+   .. py:method:: RemapToPlaneSpace(ptSample: Point3d) -> tuple[bool, Point3d]
+
+      Convert a point from World space coordinates into Plane space coordinates.
+
+      D stands for distance, not disease.
+
+      :param ptSample: World point to remap.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Rotate(sinAngle: float, cosAngle: float, axis: Vector3d) -> bool
+                  Rotate(angle: float, axis: Vector3d) -> bool
+                  Rotate(angle: float, axis: Vector3d, centerOfRotation: Point3d) -> bool
+                  Rotate(sinAngle: float, cosAngle: float, axis: Vector3d, centerOfRotation: Point3d) -> bool
+
+      Rotate the plane about a custom anchor point.
+
+      :param sinAngle: Sin(angle)
+      :param cosAngle: Cos(angle)
+      :param axis: Axis of rotation.
+      :param centerOfRotation: Center of rotation.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: ToString() -> str
+
+      Constructs the string representation of this plane.
+
+      :returns: Text.
+
+
+
+   .. py:method:: Transform(xform: Transform) -> bool
+
+      Transform the plane with a Transformation matrix.
+
+      :param xform: Transformation to apply to plane.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Translate(delta: Vector3d) -> bool
+
+      Translate (move) the plane along a vector.
+
+      :param delta: Translation (motion) vector.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: UpdateEquation() -> bool
+
+      Update Equations
+
+      :returns: bool
+
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Gets a value indicating whether or not this is a valid plane. A plane is considered to be valid when all fields contain reasonable information and the equation jibes with point and z-axis.
+
+
+   .. py:property:: Normal
+      :type: Vector3d
+
+
+      Gets the normal of this plane. This is essentially the ZAxis of the plane.
+
+
+   .. py:property:: Origin
+      :type: Point3d
+
+
+      Gets or sets the origin point of this plane.
+
+
+   .. py:property:: OriginX
+      :type: float
+
+
+      Gets or sets the X coordinate of the origin of this plane.
+
+
+   .. py:property:: OriginY
+      :type: float
+
+
+      Gets or sets the Y coordinate of the origin of this plane.
+
+
+   .. py:property:: OriginZ
+      :type: float
+
+
+      Gets or sets the Z coordinate of the origin of this plane.
+
+
+   .. py:attribute:: Unset
+      :type:  Plane
+      :value: Ellipsis
+
+
+      object, /) -> Plane
+
+      :type: (arg
+
+
+   .. py:attribute:: WorldXY
+      :type:  Plane
+      :value: Ellipsis
+
+
+      object, /) -> Plane
+
+      :type: (arg
+
+
+   .. py:attribute:: WorldYZ
+      :type:  Plane
+      :value: Ellipsis
+
+
+      object, /) -> Plane
+
+      :type: (arg
+
+
+   .. py:attribute:: WorldZX
+      :type:  Plane
+      :value: Ellipsis
+
+
+      object, /) -> Plane
+
+      :type: (arg
+
+
+   .. py:property:: XAxis
+      :type: Vector3d
+
+
+      Gets or sets the X axis vector of this plane.
+
+
+   .. py:property:: YAxis
+      :type: Vector3d
+
+
+      Gets or sets the Y axis vector of this plane.
+
+
+   .. py:property:: ZAxis
+      :type: Vector3d
+
+
+      Gets or sets the Z axis vector of this plane.
+

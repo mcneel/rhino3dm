@@ -1,0 +1,44 @@
+rhino3dm.Environment
+====================
+
+.. toctree::
+   :hidden:
+
+   /reference/rhino3dm/Environment.BackgroundProjections
+
+.. py:class:: rhino3dm.Environment
+
+   Bases: :py:obj:`CommonObject`
+
+
+   Represents an environment.
+
+
+   .. py:property:: BackgroundColor
+      :type: tuple[int, int, int, int]
+
+
+      The background color.
+
+
+   .. py:property:: BackgroundImage
+      :type: Texture
+
+
+      The background image texture.
+
+
+   .. py:property:: BackgroundProjection
+      :type: Environment
+
+
+      The background projection.
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rhino3dm.Environment.BackgroundProjections
+
+

@@ -1,0 +1,225 @@
+rhino3dm.File3dmRenderContent
+=============================
+
+.. py:class:: rhino3dm.File3dmRenderContent
+
+   Bases: :py:obj:`ModelComponent`
+
+
+   Base class for all components in a model (document) and manages the index, id and other information common to this type of objects.
+
+   This class parallels the C++ ON\_ModelComponent.
+
+
+   .. py:method:: ChildSlotAmount(childSlotName: str) -> float
+
+      Gets the amount property for the texture in the specified child slot.
+
+      :param childSlotName: The child slot name of the texture.
+
+      :returns: The amount, typically from 0.0 to 100.0; 0.0 if the slot has no amount.
+
+
+
+   .. py:method:: ChildSlotOn(child_slot_name: str) -> bool
+
+      True if a particular child slot is 'on'.
+
+
+
+   .. py:method:: DeleteChild(child_slot_name: str) -> bool
+
+      Deletes any existing child with the specified child slot name. True if successful, else false.
+
+
+
+   .. py:method:: FindChild(child_slot_name: str) -> File3dmRenderContent
+
+      The child with the specified child slot name, or null if no such child exists.
+
+
+
+   .. py:method:: GetParameter(param: str) -> object
+
+      Gets a named parameter. The parameter value or null if not found.
+
+
+
+   .. py:method:: SetChild(child: File3dmRenderContent | None, childSlotName: str) -> bool
+
+      Sets a copy of another render content as the child in the specified child slot, replacing any existing child in that slot.
+
+      :param child: The render content to copy into the child slot.
+      :param childSlotName: The child slot name.
+
+      :returns: True if successful, else false.
+
+
+
+   .. py:method:: SetChildSlotAmount(childSlotName: str, amount: float) -> bool
+
+      Sets the amount property for the texture in the specified child slot.
+
+      :param childSlotName: The child slot name of the texture.
+      :param amount: The texture amount. Values are typically from 0.0 to 100.0.
+
+      :returns: True if successful, else false.
+
+
+
+   .. py:method:: SetChildSlotOn(childSlotName: str, on: bool) -> bool
+
+      Sets the on-ness property for the texture in the specified child slot.
+
+      :param childSlotName: The child slot name of the texture.
+      :param on: Value for the on-ness property.
+
+      :returns: True if successful, else false.
+
+
+
+   .. py:method:: SetParameter(param: str, value: object) -> bool
+
+      Sets a named parameter. True if the parameter was set, else false.
+
+
+
+   .. py:method:: SetXML(xml: str) -> bool
+
+      Sets the render content's state from an XML string.
+
+      :param xml: The XML, as returned by ``XML``.
+
+      :returns: True if successful, else false.
+
+
+
+   .. py:method:: XML(recursive: bool) -> str
+
+      Gets the render content's state as an XML string.
+
+
+
+   .. py:property:: AutoDelete
+      :type: bool
+
+
+      True if the content is automatically deleted when not in use.
+
+
+   .. py:property:: ChildSlotName
+      :type: str
+
+
+      The render content's child slot name.
+
+
+   .. py:property:: Children
+      :type: list[Any]
+
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.RenderContent``.
+
+
+   .. py:property:: GroupId
+      :type: uuid.UUID
+
+
+      The content's group id.
+
+
+   .. py:property:: Hidden
+      :type: bool
+
+
+      True if the content is hidden.
+
+
+   .. py:property:: IsChild
+      :type: bool
+
+
+      True if this is a child of another render content (i.e., has a parent; is not top-level).
+
+
+   .. py:property:: IsTopLevel
+      :type: bool
+
+
+      True if this is a top-level render content (i.e., has no parent; is not a child).
+
+
+   .. py:property:: Kind
+      :type: str
+
+
+      the kind of render content as a string.
+
+
+   .. py:property:: Notes
+      :type: str
+
+
+      The content's notes.
+
+
+   .. py:property:: Parent
+      :type: File3dmRenderContent
+
+
+      The parent content or null if this is the top level object.
+
+
+   .. py:property:: PlugInId
+      :type: uuid.UUID
+
+
+      The content's plug-in id.
+
+
+   .. py:property:: Reference
+      :type: bool
+
+
+      True if the content is a reference content.
+
+
+   .. py:property:: RenderEngineId
+      :type: uuid.UUID
+
+
+      The content's render-engine id.
+
+
+   .. py:property:: Tags
+      :type: str
+
+
+      The content's tags.
+
+
+   .. py:property:: TopLevel
+      :type: File3dmRenderContent
+
+
+      The top-level parent content. Returns this if this is the top-level item.
+
+
+   .. py:property:: TypeId
+      :type: uuid.UUID
+
+
+      The unique id of the content type.
+
+
+   .. py:property:: TypeName
+      :type: str
+
+
+      The internal name of the content type.
+

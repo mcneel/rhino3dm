@@ -1,0 +1,320 @@
+rhino3dm.BoundingBox
+====================
+
+.. py:class:: rhino3dm.BoundingBox
+              BoundingBox(min: Point3d, max: Point3d)
+              BoundingBox(minX: float, minY: float, minZ: float, maxX: float, maxY: float, maxZ: float)
+              BoundingBox(points: collections.abc.Sequence[Point3d])
+              BoundingBox(points: collections.abc.Sequence[Point3d], xform: Transform)
+
+   Represents the value of two points in a bounding box defined by the two extreme corner points.
+
+   This box is therefore aligned to the world X, Y and Z axes.
+
+
+   .. py:method:: ClosestPoint(point: Point3d) -> Point3d
+                  ClosestPoint(point: Point3d, includeInterior: bool) -> Point3d
+
+      Finds the closest point on or in the bounding box.
+
+      :param point: Sample point.
+      :param includeInterior: If false, the point is projected onto the boundary faces only, otherwise the interior of the box is also taken into consideration.
+
+      :returns: The point on or in the box that is closest to the sample point.
+
+
+
+   .. py:method:: Contains(point: Point3d) -> bool
+                  Contains(point: Point3d, strict: bool) -> bool
+                  Contains(box: BoundingBox) -> bool
+                  Contains(box: BoundingBox, strict: bool) -> bool
+
+      Determines whether this bounding box contains another bounding box.
+
+      The user can choose how to treat bounding boxes with coincident surfaces.
+
+      :param box: Box to test.
+      :param strict: If true, the box needs to be fully on the inside of the bounding box. I.e. coincident boxes will be considered 'outside'.
+
+      :returns: true if the box is (strictly) on the inside of this BoundingBox.
+
+
+
+   .. py:method:: Corner(minX: bool, minY: bool, minZ: bool) -> Point3d
+
+      Gets one of the eight corners of the box.
+
+      :param minX: true for the minimum on the X axis; false for the maximum.
+      :param minY: true for the minimum on the Y axis; false for the maximum.
+      :param minZ: true for the minimum on the Z axis; false for the maximum.
+
+      :returns: The requested point.
+
+
+
+   .. py:method:: Decode(jsonObject: dict[str, Any]) -> BoundingBox
+      :staticmethod:
+
+
+      The object a dict from ``Encode`` describes (rhino3dm only).
+
+      :param jsonObject: A dict as ``Encode`` returns it.
+
+
+
+   .. py:method:: Encode() -> dict[str, Any]
+
+      This box as a JSON-compatible dict: ``{'Min': {'X', 'Y', 'Z'}, 'Max': {...}}`` (rhino3dm only; inverse: ``BoundingBox.Decode``).
+
+
+
+   .. py:method:: FurthestPoint(point: Point3d) -> Point3d
+
+      Finds the furthest point on the Box.
+
+      :param point: Sample point.
+
+      :returns: The point on the box that is furthest from the sample point.
+
+
+
+   .. py:method:: GetCorners() -> list[Point3d] | None
+
+      Gets an array filled with the 8 corner points of this box.
+
+      See remarks for the return order.
+
+      [0] Min.X, Min.Y, Min.Z
+
+      [1] Max.X, Min.Y, Min.Z
+
+      [2] Max.X, Max.Y, Min.Z
+
+      [3] Min.X, Max.Y, Min.Z
+
+      [4] Min.X, Min.Y, Max.Z
+
+      [5] Max.X, Min.Y, Max.Z
+
+      [6] Max.X, Max.Y, Max.Z
+
+      [7] Min.X, Max.Y, Max.Z
+
+      :returns: An array of 8 corners.
+
+
+
+   .. py:method:: GetEdges() -> list[Line] | None
+
+      Gets an array of the 12 edges of this box.
+
+      :returns: If the bounding box IsValid, the 12 edges; otherwise, null.
+
+
+
+   .. py:method:: Inflate(amount: float) -> None
+                  Inflate(xAmount: float, yAmount: float, zAmount: float) -> None
+
+      Inflate the box with custom amounts in all directions. Inflating with negative amounts may result in decreasing boxes.
+
+      InValid boxes can not be inflated.
+
+      :param xAmount: Amount (in model units) to inflate this box in the x direction.
+      :param yAmount: Amount (in model units) to inflate this box in the y direction.
+      :param zAmount: Amount (in model units) to inflate this box in the z direction.
+
+
+
+   .. py:method:: Intersection(a: BoundingBox, b: BoundingBox) -> BoundingBox
+      :staticmethod:
+
+
+      Computes the intersection of two bounding boxes.
+
+      The intersection is empty when a and b do not overlap, and when either box is invalid. Invalid boxes are treated as the empty set. Boxes that merely touch do overlap, and produce a valid, degenerate (zero thickness) intersection box.
+
+      To test two boxes for overlap without constructing an intersection box, use ``IsDisjoint``.
+
+      :param a: A first bounding box.
+      :param b: A second bounding box.
+
+      :returns: The intersection bounding box, or ``Unset`` if the intersection is empty.
+
+
+
+   .. py:method:: IsDegenerate(tolerance: float) -> int
+
+      Determines whether a bounding box is degenerate (flat) in one or more directions.
+
+      :param tolerance: Distances <= tolerance will be considered to be zero. If tolerance is negative (default), then a scale invariant tolerance is used.
+
+      :returns: 0 = box is not degenerate 1 = box is a rectangle (degenerate in one direction). 2 = box is a line (degenerate in two directions). 3 = box is a point (degenerate in three directions) 4 = box is not valid.
+
+
+
+   .. py:method:: IsDisjoint(box: BoundingBox) -> bool
+                  IsDisjoint(box: BoundingBox, tolerance: float) -> bool
+
+      Determines whether this bounding box and another bounding box are disjoint, that is, whether they do not intersect, allowing a tolerance for the comparison.
+
+      If either box is invalid, then true is returned.
+
+      :param box: Box to test.
+      :param tolerance: Distance tolerance for the comparison.
+                        When tolerance is positive, the boxes are considered to intersect (not disjoint) if the gap between them is less than or equal to tolerance. This is useful as a coarse pre-check when the boxes may be separated by numerical noise but the underlying geometry actually intersects within a working tolerance.
+                        When tolerance is 0.0, the result is the same as IsDisjoint(box).
+                        When tolerance is negative, the boxes must overlap by more than the absolute value of tolerance to be considered not disjoint.
+
+      :returns: true if this bounding box and box are disjoint.
+
+
+
+   .. py:method:: MakeValid() -> bool
+
+      Ensures that the box is defined in an increasing fashion along X, Y and Z axes. If the Min or Max points are unset, this function will not change the box.
+
+      :returns: true if the box was made valid, false if the box could not be made valid.
+
+
+
+   .. py:method:: MaximumDistanceTo(testPoint: Point3d) -> float
+
+      Finds the largest distance between this bounding box and a test point.
+
+      :param testPoint: A point to test.
+
+      :returns: The maximum distance.
+
+
+
+   .. py:method:: MinimumDistanceTo(testPoint: Point3d) -> float
+
+      Finds the shortest distance between this bounding box and a test point.
+
+      :param testPoint: A point to test.
+
+      :returns: The minimum distance.
+
+
+
+   .. py:method:: PointAt(tx: float, ty: float, tz: float) -> Point3d
+
+      Evaluates the bounding box with normalized parameters.
+
+      The box has idealized side length of 1x1x1.
+
+      :param tx: Normalized (between 0 and 1 is inside the box) parameter along the X direction.
+      :param ty: Normalized (between 0 and 1 is inside the box) parameter along the Y direction.
+      :param tz: Normalized (between 0 and 1 is inside the box) parameter along the Z direction.
+
+      :returns: The point at the {tx, ty, tz} parameters.
+
+
+
+   .. py:method:: ToBrep() -> Brep
+
+      Constructs a ``Brep`` representation of this bounding box.
+
+      :returns: If this operation is successful, a Brep representation of this box; otherwise null.
+
+
+
+   .. py:method:: ToString() -> str
+
+      Constructs the string representation of this aligned bounding box.
+
+      :returns: Text.
+
+
+
+   .. py:method:: Transform(xform: Transform) -> bool
+
+      Updates this bounding box to be the smallest axis aligned bounding box that contains the transformed result of its 8 original corner points.
+
+      :param xform: A transform.
+
+      :returns: true if this operation is successful; otherwise false.
+
+
+
+   .. py:property:: Area
+      :type: float
+
+
+      Gets the area of this BoundingBox.
+
+
+   .. py:property:: Center
+      :type: Point3d
+
+
+      Gets the point in the center of the bounding box.
+
+
+   .. py:property:: Diagonal
+      :type: Vector3d
+
+
+      Gets the diagonal vector of this BoundingBox. The diagonal connects the Min and Max points.
+
+
+   .. py:attribute:: Empty
+      :type:  BoundingBox
+      :value: Ellipsis
+
+
+      object, /) -> BoundingBox
+
+      :type: (arg
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Gets a value that indicates whether or not this bounding box is valid. Empty boxes are not valid, and neither are boxes with unset points.
+
+
+   .. py:property:: Max
+      :type: Point3d
+
+
+      Gets or sets the point in the maximal corner.
+
+
+   .. py:property:: Min
+      :type: Point3d
+
+
+      Gets or sets the point in the minimal corner.
+
+
+   .. py:attribute:: Union
+      :type:  Any
+      :value: Ellipsis
+
+
+      Both forms (static and instance):
+
+      BoundingBox.Union(a, b): Returns a new BoundingBox that represents the union of boxes a and b.
+      BoundingBox.Union(box, point): Returns a new BoundingBox that represents the union of a bounding box and a point.
+      boundingBox.Union(other): Updates this BoundingBox to represent the union of itself and another box.
+      boundingBox.Union(point): Updates this BoundingBox to represent the union of itself and a point.
+
+
+   .. py:attribute:: Unset
+      :type:  BoundingBox
+      :value: Ellipsis
+
+
+      object, /) -> BoundingBox
+
+      :type: (arg
+
+
+   .. py:property:: Volume
+      :type: float
+
+
+      Gets the volume of this BoundingBox.
+

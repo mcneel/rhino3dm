@@ -1,0 +1,59 @@
+rhino3dm.DimensionStyle.ZeroSuppression
+=======================================
+
+.. py:class:: rhino3dm.DimensionStyle.ZeroSuppression
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Marks leading and trailing zeros for removal.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``ZeroSuppression.None`` is not Python syntax; ``ZeroSuppression['None']`` is the same member). No zero suppression.
+
+
+   .. py:attribute:: SuppressLeading
+      :value: 1
+
+
+      Suppress leading zeros.
+
+
+   .. py:attribute:: SuppressLeadingAndTrailing
+      :value: 3
+
+
+      Suppress leading and trailing zeros.
+
+
+   .. py:attribute:: SuppressTrailing
+      :value: 2
+
+
+      Suppress trailing zeros.
+
+
+   .. py:attribute:: SuppressZeroFeet
+      :value: 4
+
+
+      Suppress zero feet.
+
+
+   .. py:attribute:: SuppressZeroFeetAndZeroInches
+      :value: 12
+
+
+      Suppress zero feet and zero inches.
+
+
+   .. py:attribute:: SuppressZeroInches
+      :value: 8
+
+
+      Suppress zero inches.
+

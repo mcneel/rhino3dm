@@ -1,0 +1,19 @@
+rhino3dm.Point
+==============
+
+.. py:class:: rhino3dm.Point(location: Point3d)
+
+   Bases: :py:obj:`GeometryBase`
+
+
+   Represents a geometric point.
+
+   This is fundamentally a class that derives from ``GeometryBase`` and contains a single ``Point3d`` location.
+
+
+   .. py:property:: Location
+      :type: Point3d
+
+
+      Gets or sets the location (position) of this point.
+

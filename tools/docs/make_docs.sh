@@ -28,7 +28,8 @@ python_docs() {
       pip install -q sphinx==8.1.3 sphinx-autoapi==3.4.0 astroid==3.3.8 sphinx-rtd-theme==3.0.2 myst-parser==4.0.0 >/dev/null 2>&1
       cp -r /src/tools/docs/site/python /tmp/site       # autoapi writes its pages beside the sources
       bash /src/tools/docs/guide_pages.sh python /tmp/site   # the migration guide, as site pages
-      sphinx-build -q -b html /tmp/site /out/python 2> /out/python_warnings.log
+      # -d: the doctree cache stays out of the site (23 MB the published pages never use)
+      sphinx-build -q -b html -d /tmp/doctrees /tmp/site /out/python 2> /out/python_warnings.log
       echo "SPHINX EXIT = $?"; echo "warnings: $(grep -c . /out/python_warnings.log)"'
   echo "python: $(find "$OUT/python" -name '*.html' | wc -l | tr -d ' ') pages -> ${OUT#$REPO/}/python"
 }

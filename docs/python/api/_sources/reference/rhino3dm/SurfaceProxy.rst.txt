@@ -1,0 +1,10 @@
+rhino3dm.SurfaceProxy
+=====================
+
+.. py:class:: rhino3dm.SurfaceProxy
+
+   Bases: :py:obj:`Surface`
+
+
+   Provides a base class to brep faces and other surface proxies.
+

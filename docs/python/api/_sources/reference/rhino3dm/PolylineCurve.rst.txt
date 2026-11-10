@@ -1,0 +1,75 @@
+rhino3dm.PolylineCurve
+======================
+
+.. py:class:: rhino3dm.PolylineCurve
+              PolylineCurve(other: PolylineCurve | None)
+              PolylineCurve(points: collections.abc.Sequence[Point3d])
+
+   Bases: :py:obj:`Curve`
+
+
+   Represents the geometry of a set of linked line segments.
+
+   This is fundamentally a class that derives from ``Curve`` and internally contains a ``Polyline``.
+
+
+   .. py:method:: Parameter(index: int) -> float
+
+      Gets a parameter at a specified index in the polyline curve.
+
+      :param index: An index.
+
+      :returns: A parameter.
+
+
+
+   .. py:method:: Point(index: int) -> Point3d
+
+      Gets a point at a specified index in the polyline curve.
+
+      :param index: An index.
+
+      :returns: A point.
+
+
+
+   .. py:method:: SetArcLengthParameterization(tolerance: float) -> None
+
+      Sets the polyline curve to use arc length parameterization for higher quality geometry.
+
+      :param tolerance: Minimum distance tolerance.
+
+
+
+   .. py:method:: SetParameter(index: int, parameter: float) -> None
+
+      Sets a parameter at a specified index in the polyline curve.
+
+      :param index: An index.
+      :param parameter: A parameter to set.
+
+
+
+   .. py:method:: SetPoint(index: int, point: Point3d) -> None
+
+      Sets a point at a specified index in the polyline curve.
+
+      :param index: An index.
+      :param point: A point location to set.
+
+
+
+   .. py:method:: ToPolyline() -> Polyline
+
+      Returns the underlying Polyline, or points.
+
+      :returns: The Polyline if successful, null of the curve has no points.
+
+
+
+   .. py:property:: PointCount
+      :type: int
+
+
+      Gets the number of points in this polyline.
+

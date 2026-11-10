@@ -1,0 +1,73 @@
+rhino3dm.ControlPoint
+=====================
+
+.. py:class:: rhino3dm.ControlPoint
+              ControlPoint(x: float, y: float, z: float)
+              ControlPoint(x: float, y: float, z: float, weight: float)
+              ControlPoint(pt: Point3d)
+              ControlPoint(euclideanPt: Point3d, weight: float)
+              ControlPoint(pt: Point4d)
+
+   Represents control point geometry with three-dimensional position and weight.
+
+
+   .. py:method:: EpsilonEquals(other: ControlPoint, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: Equals(other: ControlPoint) -> bool
+
+      Determines if two points exactly match.
+
+      :param other: The other point.
+
+      :returns: True if the other control point exactly matches this one.
+
+
+
+   .. py:property:: Location
+      :type: Point3d
+
+
+      Gets or sets world 3-D, or Euclidean location of the control point.
+
+
+   .. py:attribute:: Unset
+      :type:  ControlPoint
+      :value: Ellipsis
+
+
+      object, /) -> ControlPoint
+
+      :type: (arg
+
+
+   .. py:property:: Weight
+      :type: float
+
+
+      Gets or sets the weight of this control point.
+
+
+   .. py:property:: X
+      :type: float
+
+
+      Gets or sets the X coordinate of the control point.
+
+
+   .. py:property:: Y
+      :type: float
+
+
+      Gets or sets the Y coordinate of the control point.
+
+
+   .. py:property:: Z
+      :type: float
+
+
+      Gets or sets the Z coordinate of the control point.
+

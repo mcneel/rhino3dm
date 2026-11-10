@@ -1,0 +1,448 @@
+rhino3dm.Layer
+==============
+
+.. py:class:: rhino3dm.Layer
+
+   Bases: :py:obj:`ModelComponent`
+
+
+   Base class for all components in a model (document) and manages the index, id and other information common to this type of objects.
+
+   This class parallels the C++ ON\_ModelComponent.
+
+
+   .. py:method:: CommitChanges() -> bool
+
+      Deprecated since 6.0.
+
+
+
+   .. py:method:: CopyAttributesFrom(otherLayer: Layer) -> None
+
+      Copy typical attributes from another layer
+
+
+
+   .. py:method:: Default() -> None
+
+      Sets layer to default settings.
+
+
+
+   .. py:method:: DeleteAllUserStrings() -> None
+
+
+   .. py:method:: DeleteModelVisible() -> None
+
+      Remove any model visibility setting so the layer's global setting will be used for all viewports.
+
+
+
+   .. py:method:: DeletePerViewportColor(viewportId: uuid.UUID) -> None
+
+      Remove any per viewport layer color setting so the layer's overall setting will be used for all viewports.
+
+      :param viewportId: If not Guid.Empty, then the setting for this viewport will be deleted. If Guid.Empty, the all per viewport layer color settings will be removed.
+
+
+
+   .. py:method:: DeletePerViewportPlotColor(viewportId: uuid.UUID) -> None
+
+      Remove any per viewport layer plot color setting so the layer's overall setting will be used for all viewports.
+
+      :param viewportId: If not Guid.Empty, then the setting for this viewport will be deleted. If Guid.Empty, the all per viewport layer color settings will be removed.
+
+
+
+   .. py:method:: DeletePerViewportPlotWeight(viewportId: uuid.UUID) -> None
+
+      Remove any per viewport layer plot weight setting so the layer's overall setting will be used for all viewports.
+
+      :param viewportId: If not Guid.Empty, then the setting for this viewport will be deleted. If Guid.Empty, the all per viewport layer color settings will be removed.
+
+
+
+   .. py:method:: DeletePerViewportSettings(viewportId: uuid.UUID) -> None
+
+      Deletes per viewport layer settings.
+
+      :param viewportId: If not Guid.Empty, then the settings for that viewport are deleted. If Guid.Empty, then all per viewport settings are deleted.
+
+
+
+   .. py:method:: DeletePerViewportVisible(viewportId: uuid.UUID) -> None
+
+      Remove any per viewport visibility setting so the layer's overall setting will be used for all viewports.
+
+      :param viewportId: If not Guid.Empty, then the setting for this viewport will be deleted. If Guid.Empty, the all per viewport visibility settings will be removed.
+
+
+
+   .. py:method:: DeletePlotColor() -> None
+
+      Removes the plot color for layer. The layer's color will be used for the plot color.
+
+
+
+   .. py:method:: Equals(other: Layer) -> bool
+
+
+   .. py:method:: GetPersistentLocking() -> bool
+
+      The persistent locking setting is used for layers that can be locked by a "parent" object. A common case is when a layer is a child layer (Layer.ParentI is not nil). In this case, when a parent layer is locked, then child layers are also locked. The persistent locking setting determines what happens when the parent is unlocked again.
+
+
+
+   .. py:method:: GetPersistentVisibility() -> bool
+
+      The global persistent visibility setting is used for layers whose visibility can be changed by a "parent" object. A common case is when a layer is a child layer (ParentId is not nil). In this case, when a parent layer is turned off, then child layers are also turned off. The persistent visibility setting determines what happens when the parent is turned on again.
+
+      Returns true if this layer's visibility is controlled by a parent object and the parent is turned on (after being off), then this layer will also be turned on. Returns false if this layer's visibility is controlled by a parent object and the parent layer is turned on (after being off), then this layer will continue to be off.
+
+      When the persistent viability is not explicitly set, this property returns the current value of IsVisible
+
+
+
+   .. py:method:: GetUserString(key: str) -> str
+
+      Gets user string from this geometry.
+
+      :param key: id used to retrieve the string.
+
+      :returns: string associated with the key if successful. null if no key was found.
+
+
+
+   .. py:method:: GetUserStrings() -> list[Any]
+
+      Gets a copy of all (user key string, user value string) pairs attached to this geometry.
+
+      :returns: A new collection.
+
+
+
+   .. py:method:: HasPerViewportSettings(viewportId: uuid.UUID) -> bool
+
+      Verifies that a layer has per viewport settings.
+
+      :param viewportId: If not Guid.Empty, then checks for settings for that specific viewport. If Guid.Empty, then checks for any viewport settings.
+
+      :returns: True if the layer has per viewport settings, false otherwise.
+
+
+
+   .. py:method:: PerViewportColor(viewportId: uuid.UUID) -> tuple[int, int, int, int]
+
+      Gets the display color for this layer.
+
+      :param viewportId: If not Guid.Empty, then the setting applies only to the viewport with the specified id.
+
+      :returns: The display color.
+
+
+
+   .. py:method:: PerViewportIsVisible(viewportId: uuid.UUID) -> bool
+
+      Gets the per viewport visibility of this layer.
+
+      :param viewportId: If not Guid.Empty, then the visibility setting for that viewport is returned. If Guid.Empty, the IsVisible property is returned.
+
+      :returns: Returns true if objects on layer are visible.
+
+
+
+   .. py:method:: PerViewportPersistentVisibility(viewportId: uuid.UUID) -> bool
+
+      Gets the per layer persistent visibility. The persistent viability setting is used for layers whose visibility can be changed by a parent layer. In this case, when a parent layer is turned off, then child layers are also turned off. The persistent visibility setting determines what happens when the parent is turned on again.
+
+      :returns: Return true if this layer's visibility in the specified viewport is controlled by a parent object and the parent is turned on (after being off), then this layer will also be turned on in the specified viewport. Returns false if this layer's visibility in the specified viewport is controlled by a parent object and the parent layer is turned on(after being off), then this layer will continue to be off in the specified viewport.
+
+
+
+   .. py:method:: PerViewportPlotColor(viewportId: uuid.UUID) -> tuple[int, int, int, int]
+
+      Gets the plot color for this layer.
+
+      :param viewportId: If not Guid.Empty, then the setting applies only to the viewport with the specified id.
+
+      :returns: The plot color.
+
+
+
+   .. py:method:: PerViewportPlotWeight(viewportId: uuid.UUID) -> float
+
+      Gets the plot weight, in millimeters, for this layer.
+
+      :param viewportId: If not Guid.Empty, then the setting applies only to the viewport with the specified id.
+
+      :returns: The plot color.
+
+
+
+   .. py:method:: RemoveCustomSectionStyle() -> None
+
+
+   .. py:method:: SetPerViewportColor(viewportId: uuid.UUID, color: tuple[int, int, int, int]) -> None
+
+      Sets the display color for this layer.
+
+      :param viewportId: If not Guid.Empty, then the setting applies only to the viewport with the specified id.
+      :param color: The display color.
+
+
+
+   .. py:method:: SetPerViewportPersistentVisibility(viewportId: uuid.UUID, persistentVisibility: bool) -> None
+
+      Sets the per layer persistent visibility. The persistent viability setting is used for layers whose visibility can be changed by a parent layer. In this case, when a parent layer is turned off, then child layers are also turned off. The persistent visibility setting determines what happens when the parent is turned on again.
+
+      :param viewportId: If not Guid.Empty, then the setting applies only to the viewport with the specified id. If Guid.Empty, then the setting applies to all viewports with per viewport layer settings.
+      :param persistentVisibility: If true, this layer's visibility in the specified viewport is controlled by a parent object and the parent is turned on (after being off), then this layer will also be turned on in the specified viewport. If false, this layer's visibility in the specified viewport is controlled by a parent object and the parent layer is turned on (after being off), then this layer will continue to be off in the specified viewport.
+
+
+
+   .. py:method:: SetPerViewportPlotColor(viewportId: uuid.UUID, color: tuple[int, int, int, int]) -> None
+
+      Sets the plot color for this layer.
+
+      :param viewportId: If not Guid.Empty, then the setting applies only to the viewport with the specified id.
+      :param color: The plot color.
+
+
+
+   .. py:method:: SetPerViewportPlotWeight(viewportId: uuid.UUID, plotWeight: float) -> None
+
+      Sets the plot weight, in millimeters, for this layer.
+
+      :param viewportId: If not Guid.Empty, then the setting applies only to the viewport with the specified id.
+      :param plotWeight: The plot weight in millimeters. A weight of 0.0 indicates the "default" pen weight should be used. A weight of -1.0 indicates the layer should not be printed.
+
+
+
+   .. py:method:: SetPerViewportVisible(viewportId: uuid.UUID, visible: bool) -> None
+
+      Controls layer visibility in specific viewports.
+
+      :param viewportId: If not Guid.Empty, then the setting applies only to the viewport with the specified id. If Guid.Empty, then the setting applies to all viewports with per viewport layer settings.
+      :param visible: true to make layer visible, false to make layer invisible.
+
+
+
+   .. py:method:: SetPersistentLocking(persistentLocking: bool) -> None
+
+      Set the persistent locking setting for this layer
+
+
+
+   .. py:method:: SetPersistentVisibility(persistentVisibility: bool) -> None
+
+      Set the global persistent visibility setting for this layer.
+
+
+
+   .. py:method:: SetUserString(key: str, value: str) -> bool
+
+      Attach a user string (key,value combination) to this geometry.
+
+      :param key: id used to retrieve this string.
+      :param value: string associated with key.
+
+      :returns: true on success.
+
+
+
+   .. py:method:: ToString() -> str
+
+
+   .. py:method:: UnsetModelPersistentVisibility() -> None
+
+      Remove any model persistent visibility setting from this layer.
+
+
+
+   .. py:method:: UnsetPerViewportPersistentVisibility(viewportId: uuid.UUID) -> None
+
+      Remove any per viewport persistent visibility setting so the layer's overall setting will be used for all viewports.
+
+      :param viewportId: If not Guid.Empty, then the setting for this viewport will be deleted. If Guid.Empty, the all per viewport visibility settings will be removed.
+
+
+
+   .. py:method:: UnsetPersistentLocking() -> None
+
+      Remove any explicitly persistent locking settings from this layer
+
+
+
+   .. py:method:: UnsetPersistentVisibility() -> None
+
+      Remove any explicit persistent visibility setting from this layer
+
+
+
+   .. py:property:: Color
+      :type: tuple[int, int, int, int]
+
+
+      Gets or sets the display color for this layer.
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.Layer``.
+
+
+   .. py:property:: Description
+      :type: str
+
+
+      Gets and sets a short description of the layer.
+
+
+   .. py:property:: FullPath
+      :type: str
+
+
+      Gets the full path to this layer. The full path includes nesting information.
+
+
+   .. py:property:: Id
+      :type: uuid.UUID
+
+
+      Gets or sets the ID of this layer object. You typically do not need to assign a custom ID.
+
+
+   .. py:property:: IgesLevel
+      :type: int
+
+
+      Gets or sets the IGES level for this layer.
+
+
+   .. py:property:: IsDeleted
+      :type: bool
+
+
+      Gets a value indicating whether this layer has been deleted and is currently in the Undo buffer.
+
+
+   .. py:property:: IsExpanded
+      :type: bool
+
+
+      Gets or sets a value indicating whether this layer is expanded in the Rhino Layer dialog.
+
+
+   .. py:property:: IsLocked
+      :type: bool
+
+
+      Gets or sets a value indicating the locked state of this layer.
+
+
+   .. py:property:: IsReference
+      :type: bool
+
+
+      Gets a value indicting whether this layer is a referenced layer. Referenced layers are part of referenced documents.
+
+
+   .. py:property:: IsVisible
+      :type: bool
+
+
+      Gets or sets the global visibility of this layer.
+
+
+   .. py:property:: LayerIndex
+      :type: int
+
+
+      Gets or sets the index of this layer.
+
+
+   .. py:property:: LinetypeIndex
+      :type: int
+
+
+      Gets or sets the line-type index for this layer.
+
+
+   .. py:property:: ModelIsVisible
+      :type: bool
+
+
+      Gets or sets the model visiblity of this layer.
+
+
+   .. py:property:: ModelPersistentVisibility
+      :type: bool
+
+
+      Gets or sets the model persistent visibility of this layer. The persistent viability setting is used for layers whose visibility can be changed by a parent layer. In this case, when a parent layer is turned off, then child layers are also turned off. The persistent visibility setting determines what happens when the parent is turned on again.
+
+
+   .. py:property:: Name
+      :type: str
+
+
+      Gets or sets the name of this layer.
+
+
+   .. py:property:: ParentLayerId
+      :type: uuid.UUID
+
+
+      Gets the ID of the parent layer. Layers can be organized in a hierarchical structure, in which case this returns the parent layer ID. If the layer has no parent, Guid.Empty will be returned.
+
+
+   .. py:property:: PerViewportIsVisibleInNewDetails
+      :type: bool
+
+
+      Gets and sets the initial per viewport visibility of this layer in newly created detail views.
+
+
+   .. py:property:: PersistentVisibility
+      :type: bool
+
+
+      Gets or sets the global persistent visibility setting for this layer.
+
+
+   .. py:property:: PlotColor
+      :type: tuple[int, int, int, int]
+
+
+      Gets or sets the plot color for this layer.
+
+
+   .. py:property:: PlotWeight
+      :type: float
+
+
+      Gets or sets the weight of the plotting pen in millimeters. A weight of 0.0 indicates the "default" pen weight should be used. A weight of -1.0 indicates the layer should not be printed.
+
+
+   .. py:property:: RenderMaterialIndex
+      :type: int
+
+
+      Gets or sets the index of render material for objects on this layer that have MaterialSource() == MaterialFromLayer. A material index of -1 indicates no material has been assigned and the material created by the default Material constructor should be used.
+
+
+   .. py:property:: SortIndex
+      :type: int
+
+
+      Runtime index used to sort layers in layer dialog.
+
+
+   .. py:property:: UserStringCount
+      :type: int
+
+
+      Gets the amount of user strings.
+

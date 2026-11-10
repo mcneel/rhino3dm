@@ -1,0 +1,101 @@
+rhino3dm.TextureMappingType
+===========================
+
+.. py:class:: rhino3dm.TextureMappingType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated constants for mapping types such as planar, cylindrical or spherical.
+
+
+   .. py:attribute:: BoxMapping
+      :value: 5
+
+
+      Box mapping type.
+
+
+   .. py:attribute:: BrepMappingPrimitive
+      :value: 8
+
+
+      Mapping primitive is a brep.
+
+
+   .. py:attribute:: CylinderMapping
+      :value: 3
+
+
+      (u, v, w) = longitude, height, radius.
+
+
+   .. py:attribute:: FalseColors
+      :value: 10
+
+
+      Some sort of false color mapping used to set per vertex colors
+
+
+   .. py:attribute:: MeshMappingPrimitive
+      :value: 6
+
+
+      Mapping primitive is a mesh.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``TextureMappingType.None`` is not Python syntax; ``TextureMappingType['None']`` is the same member). No mapping is selected.
+
+
+   .. py:attribute:: OcsMapping
+      :value: 9
+
+
+      OCS mapping type (WCS/WCS Box with object frame).
+
+
+   .. py:attribute:: PlaneMapping
+      :value: 2
+
+
+      (u, v, w) = 3d coordinates wrt frame.
+
+
+   .. py:attribute:: SphereMapping
+      :value: 4
+
+
+      (u, v, w) = longitude,latitude,radius.
+
+
+   .. py:attribute:: SurfaceMappingPrimitive
+      :value: 7
+
+
+      Mapping primitive is a surface.
+
+
+   .. py:attribute:: SurfaceParameters
+      :value: 1
+
+
+      (u, v) = linear transform of surface params, w = 0.
+
+
+   .. py:attribute:: WcsBoxProjection
+      :value: 12
+
+
+      World coordinate system (WCS) box projection.
+
+
+   .. py:attribute:: WcsProjection
+      :value: 11
+
+
+      World coordinate system (WCS) projection.
+

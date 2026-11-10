@@ -1,0 +1,63 @@
+rhino3dm.File3dmWriteOptions
+============================
+
+.. py:class:: rhino3dm.File3dmWriteOptions
+
+   Options used by File3dm.Write
+
+
+   .. py:method:: EnableAnalysisMeshes(objectType: ObjectType, enable: bool) -> None
+
+      Activates saving of analysis meshes for specific types of objects. If you do not specify the state for an object type, its default is used. Currently SubD mesh saving is disabled by default, while Brep and Extrusion is enabled.
+
+      :param objectType: The object type. Mostly mesh, brep, extrusion and SubD (or their flag combinations) make sense here.
+                         DO NOT specify a 'filter' or sub-object type.
+      :param enable: If false, disables saving for this object type.
+
+
+
+   .. py:method:: EnableRenderMeshes(objectType: ObjectType, enable: bool) -> None
+
+      Activates saving of render meshes for specific types of objects. If you do not specify the state for an object type, its default is used. Specifically, currently SubD mesh saving is disabled by default, while Brep and Extrusion is on.
+
+      :param objectType: The object type. Mostly brep, extrusion and SubD (or their flag combinations) make sense here.
+                         DO NOT specify a 'filter' or sub-object type.
+      :param enable: If false, disables saving for this object type.
+
+
+
+   .. py:property:: SaveAnalysisMeshes
+      :type: bool
+
+
+      Include analysis meshes in the file. Default is true
+
+
+   .. py:property:: SaveRenderMeshes
+      :type: bool
+
+
+      Include Render meshes in the file. Default is true
+
+
+   .. py:property:: SaveUserData
+      :type: bool
+
+
+      Include custom user data in the file. Default is true
+
+
+   .. py:property:: Version
+      :type: int
+
+
+      File version. Default is major version number of this assembly version.
+
+      Must be in range [2; current version].
+
+      Alternatively, 0 is a placeholder for the last valid version.
+
+      Rhino can read its current version, plus earlier file versions except 1.
+
+      Use latest version when possible.
+

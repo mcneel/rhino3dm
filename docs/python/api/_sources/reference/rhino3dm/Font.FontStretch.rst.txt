@@ -1,0 +1,64 @@
+rhino3dm.Font.FontStretch
+=========================
+
+.. py:class:: rhino3dm.Font.FontStretch
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Horizontal expansion or contraction of font
+
+
+   .. py:attribute:: Condensed
+      :value: 3
+
+
+
+   .. py:attribute:: Expanded
+      :value: 7
+
+
+
+   .. py:attribute:: Extracondensed
+      :value: 2
+
+
+
+   .. py:attribute:: Extraexpanded
+      :value: 8
+
+
+
+   .. py:attribute:: Medium
+      :value: 5
+
+
+      Default font stretch.
+
+
+   .. py:attribute:: Semicondensed
+      :value: 4
+
+
+
+   .. py:attribute:: Semiexpanded
+      :value: 6
+
+
+
+   .. py:attribute:: Ultracondensed
+      :value: 1
+
+
+
+   .. py:attribute:: Ultraexpanded
+      :value: 9
+
+
+
+   .. py:attribute:: Unset
+      :value: 0
+
+
+      Not set.
+

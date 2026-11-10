@@ -1,0 +1,171 @@
+rhino3dm.ModelComponentType
+===========================
+
+.. py:class:: rhino3dm.ModelComponentType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   The ON\_ModelComponent::Type enum has a value for each explicit component type and two special values, Unset and Mixed. Use an ON\_ModelComponentTypeIterator instance to iterate over the ON\_ModelComponent::Type values.
+
+
+   .. py:attribute:: DimStyle
+      :value: 8
+
+
+      AnnotationDimension style.
+
+
+   .. py:attribute:: EmbeddedFile
+      :value: 15
+
+
+      Embedded file for render texture.
+
+
+   .. py:attribute:: Group
+      :value: 6
+
+
+      Group.
+
+
+   .. py:attribute:: HatchPattern
+      :value: 10
+
+
+      Hatch pattern.
+
+
+   .. py:attribute:: HistoryRecord
+      :value: 13
+
+
+      History record.
+
+
+   .. py:attribute:: Image
+      :value: 1
+
+
+      Embedded image (bitmap) components.
+
+
+   .. py:attribute:: InstanceDefinition
+      :value: 11
+
+
+      Instance definition.
+
+
+   .. py:attribute:: Layer
+      :value: 5
+
+
+      Layer.
+
+
+   .. py:attribute:: LinePattern
+      :value: 4
+
+
+      Line pattern (linetype).
+
+
+   .. py:attribute:: Markup
+      :value: 18
+
+
+      Markup entity
+
+
+   .. py:attribute:: Material
+      :value: 3
+
+
+      Material.
+
+
+   .. py:attribute:: Mixed
+      :value: 254
+
+
+      Multiple component types. Used when a component type filter must include all explicit component types.
+
+
+   .. py:attribute:: ModelGeometry
+      :value: 12
+
+
+      Model objects (points, curves, surfaces, ..., annotation, page details, ...), including objects referenced by instance definitions.
+
+
+   .. py:attribute:: NumOf
+      :value: 20
+
+
+      Number of items above.
+
+
+   .. py:attribute:: ObsoleteValue
+      :value: 16
+
+
+      This value was never used and is now obsolete.
+
+
+   .. py:attribute:: PageViewGroup
+      :value: 19
+
+
+      Page view group.
+
+
+   .. py:attribute:: RenderContent
+      :value: 14
+
+
+      Render content.
+
+
+   .. py:attribute:: RenderLight
+      :value: 9
+
+
+      Render light.
+
+
+   .. py:attribute:: RenderMaterial
+      :value: 3
+
+
+      Render material. Deprecated in favor of Material.
+
+
+   .. py:attribute:: SectionStyle
+      :value: 17
+
+
+      Section style attributes
+
+
+   .. py:attribute:: TextStyle
+      :value: 7
+
+
+      Text style.
+
+
+   .. py:attribute:: TextureMapping
+      :value: 2
+
+
+      Texture mapping.
+
+
+   .. py:attribute:: Unset
+      :value: 0
+
+
+      No value set.
+

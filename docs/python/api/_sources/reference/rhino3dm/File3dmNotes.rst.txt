@@ -1,0 +1,7 @@
+rhino3dm.File3dmNotes
+=====================
+
+.. py:class:: rhino3dm.File3dmNotes
+
+   Represents the notes information stored in a 3dm file.
+

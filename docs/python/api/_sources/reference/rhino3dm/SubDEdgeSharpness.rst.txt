@@ -1,0 +1,349 @@
+rhino3dm.SubDEdgeSharpness
+==========================
+
+.. py:class:: rhino3dm.SubDEdgeSharpness
+              SubDEdgeSharpness(sharpness: float)
+              SubDEdgeSharpness(sharpness0: float, sharpness1: float)
+              SubDEdgeSharpness(sharpnessInterval: Interval)
+
+   Sharpness values for the two ends of a SubD edge.
+
+   A sharp SubD edge is an edge where the limit surface makes a tighter "fillet radius" around the edge than a smooth edge would, while still staying smooth, unlike a crease edge. It is achieved by applying the crease edge subdivision rules for the number of subdivisions given by the sharpness value, and the smooth edge subdivision rules after that. Sharpness can differ at the two ends of an edge.
+
+   This is a value type wrapping two floats, and the default value is ``Smooth``. It is passed to and from the unmanaged library by value.
+
+
+   .. py:method:: EndSharpness(endIndex: int) -> float
+
+      Gets the sharpness at the start or the end of the edge.
+
+      :param endIndex: 0 for the start of the edge, 1 for the end.
+
+      :returns: The sharpness, or NaN if endIndex is out of range.
+
+
+
+   .. py:method:: EqualDelta(s0: SubDEdgeSharpness, s1: SubDEdgeSharpness) -> bool
+      :staticmethod:
+
+
+      Determines whether two sharpnesses have the same ``Delta`` and meet with the same value.
+
+      :param s0: The sharpness of the first edge.
+      :param s1: The sharpness of the second edge.
+
+
+
+   .. py:method:: EqualEndSharpness(s0: SubDEdgeSharpness, s1: SubDEdgeSharpness) -> bool
+      :staticmethod:
+
+
+      Determines whether two sharpnesses meet with the same value, that is, whether s0.``EndSharpness``\ EndSharpness(1) equals s1.EndSharpness(0).
+
+      :param s0: The sharpness of the first edge.
+      :param s1: The sharpness of the second edge.
+
+
+
+   .. py:method:: EqualTrend(s0: SubDEdgeSharpness, s1: SubDEdgeSharpness) -> bool
+      :staticmethod:
+
+
+      Determines whether two sharpnesses have the same ``Trend`` and meet with the same value.
+
+      :param s0: The sharpness of the first edge.
+      :param s1: The sharpness of the second edge.
+
+
+
+   .. py:method:: Equals(other: SubDEdgeSharpness) -> bool
+
+      Determines whether this sharpness has the same end values as another one.
+
+      :param other: The sharpness to compare with.
+
+
+
+   .. py:method:: FromConstantPercentage(percentage: float) -> SubDEdgeSharpness
+      :staticmethod:
+
+
+      Creates a sharpness with the same value at both ends, from a percentage. This is useful in user interface code that expresses sharpness as a percentage.
+
+      :param percentage: Between 0.0 and 100.0, or ``MaxValue`` for a crease.
+
+      :returns: A sharpness with constant value (percentage \* ``MaximumValue`` / 100.0), ``Crease`` if percentage is ``MaxValue``, or ``Nan`` if percentage is out of range.
+
+
+
+   .. py:method:: FromIntervalPercentage(percentage0: float, percentage1: float) -> SubDEdgeSharpness
+                  FromIntervalPercentage(percentageInterval: Interval) -> SubDEdgeSharpness
+      :staticmethod:
+
+
+      Creates a sharpness that varies from one end of the edge to the other, from percentages. This is useful in user interface code that expresses sharpness as a percentage.
+
+      :param percentageInterval: Percentages at the start and end of the edge, each between 0.0 and 100.0, or ``MaxValue`` for a crease.
+
+      :returns: See ``FromIntervalPercentage``.
+
+
+
+   .. py:method:: IsValidValue(candidateValue: float, creaseResult: bool) -> bool
+      :staticmethod:
+
+
+      Determines whether a value can be used as an edge end sharpness.
+
+      :param candidateValue: The value to check.
+      :param creaseResult: The value to return when candidateValue is ``CreaseValue``.
+
+
+
+   .. py:method:: Reversed() -> SubDEdgeSharpness
+
+      Gets this sharpness with its two end values swapped.
+
+
+
+   .. py:method:: Sanitize(sharpness: float) -> float
+                  Sanitize(sharpness: float, invalidInputResult: float) -> float
+      :staticmethod:
+
+
+      Verifies that sharpness is between 0.0 and ``MaximumValue``, and snaps it to an integer when it is within ``Tolerance`` of one.
+
+      :param sharpness: The value to sanitize.
+      :param invalidInputResult: The value to return when sharpness is not valid.
+
+      :returns: A usable sharpness value, or invalidInputResult if sharpness is not valid.
+
+
+
+   .. py:method:: SharpnessFromNormalizedValue(normalizedSliderValue: float) -> float
+      :staticmethod:
+
+
+      Converts a normalized slider value to an edge end sharpness value.
+
+      :param normalizedSliderValue: Between 0.0 and 1.0.
+
+      :returns: normalizedSliderValue scaled to the range 0.0 to ``MaximumValue``, or NaN if it is out of range.
+
+
+
+   .. py:method:: SharpnessFromSliderValue(sliderDomain: Interval, sliderValue: float, invalidInputResult: float) -> float
+      :staticmethod:
+
+
+      Converts a user facing slider value to an edge end sharpness value.
+
+      :param sliderDomain: The non empty domain of the slider, often ``Interval.ZeroToOne``.
+      :param sliderValue: A value in sliderDomain. sliderDomain.T0 maps to 0.0 and sliderDomain.T1 maps to ``MaximumValue``.
+      :param invalidInputResult: The value to return when the input is not valid.
+
+
+
+   .. py:method:: Subdivided(endIndex: int) -> SubDEdgeSharpness
+
+      Gets the sharpness this edge would have after one subdivision.
+
+      :param endIndex: 0 for the start of the edge, 1 for the end.
+
+      :returns: The subdivided sharpness, or ``Smooth`` if endIndex is out of range.
+
+
+
+   .. py:method:: ToPercentage(sharpness: float, creasePercentage: float) -> float
+      :staticmethod:
+
+
+      Converts a sharpness value to a percentage between 0.0 and 100.0.
+
+      :param sharpness: Between 0.0 and ``MaximumValue``, or ``CreaseValue``.
+      :param creasePercentage: The value to return when sharpness is ``CreaseValue``.
+
+      :returns: 100.0 \* sharpness / ``MaximumValue``, creasePercentage for ``CreaseValue``, or NaN if sharpness is not valid.
+
+
+
+   .. py:method:: Union(sharpness0: SubDEdgeSharpness, sharpness1: SubDEdgeSharpness) -> SubDEdgeSharpness
+      :staticmethod:
+
+
+      Gets the union of two sharpness ranges, ignoring the ones that are zero, a crease, or not valid.
+
+      :param sharpness0: The first sharpness.
+      :param sharpness1: The second sharpness.
+
+      :returns: The union of the nonzero valid inputs, or ``Smooth`` if there are none.
+
+
+
+   .. py:property:: Average
+      :type: float
+
+
+      Gets the average of the two end sharpness values.
+
+
+   .. py:attribute:: Crease
+      :type:  SubDEdgeSharpness
+      :value: Ellipsis
+
+
+      object, /) -> SubDEdgeSharpness
+
+      :type: (arg
+
+
+   .. py:property:: Delta
+      :type: float
+
+
+      Gets ``EndSharpness``\ EndSharpness(1) - EndSharpness(0), or NaN if this is neither valid nor a crease.
+
+
+   .. py:property:: IsConstant
+      :type: bool
+
+
+      Gets true if both ends have the same valid sharpness value. ``Crease`` and ``Nan`` are both false; see ``IsConstantOrCrease``.
+
+
+   .. py:property:: IsConstantOrCrease
+      :type: bool
+
+
+      Gets true if both ends have the same valid sharpness value, or if this is ``Crease``.
+
+
+   .. py:property:: IsCrease
+      :type: bool
+
+
+      Gets true if this is ``Crease``.
+
+
+   .. py:property:: IsCreaseOrSharp
+      :type: bool
+
+
+      Gets (``IsCrease`` \|\| ``IsSharp``).
+
+
+   .. py:property:: IsDecreasing
+      :type: bool
+
+
+      Gets true if ``EndSharpness``\ EndSharpness(0) is greater than EndSharpness(1).
+
+
+   .. py:property:: IsIncreasing
+      :type: bool
+
+
+      Gets true if ``EndSharpness``\ EndSharpness(0) is less than EndSharpness(1).
+
+
+   .. py:property:: IsNotValid
+      :type: bool
+
+
+      Gets the opposite of ``IsValid``. ``Crease`` and ``Nan`` are both true.
+
+
+   .. py:property:: IsNotValidNorCrease
+      :type: bool
+
+
+      Gets the opposite of ``IsValidOrCrease``. ``Nan`` is true and ``Crease`` is false.
+
+
+   .. py:property:: IsSharp
+      :type: bool
+
+
+      a crease edge is not a sharp edge.
+
+      :type: Gets true if both ends are valid and at least one is greater than 0.0. ``Crease`` and ``Nan`` are both false
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Gets true if both ends are between 0.0 and ``MaximumValue``. ``Crease`` and ``Nan`` are both false; see ``IsValidOrCrease``.
+
+
+   .. py:property:: IsValidOrCrease
+      :type: bool
+
+
+      Gets true if both ends are between 0.0 and ``MaximumValue``, or if this is ``Crease``.
+
+
+   .. py:property:: IsVariable
+      :type: bool
+
+
+      Gets true if this is valid and the two ends differ. ``Crease`` and ``Nan`` are both false.
+
+
+   .. py:property:: IsZero
+      :type: bool
+
+
+      Gets true if both ends are 0.0, which is the sharpness of a smooth edge.
+
+
+   .. py:attribute:: Maximum
+      :type:  SubDEdgeSharpness
+      :value: Ellipsis
+
+
+      object, /) -> SubDEdgeSharpness
+
+      :type: (arg
+
+
+   .. py:property:: MaximumEndSharpness
+      :type: float
+
+
+      Gets the larger of the two end sharpness values.
+
+
+   .. py:property:: MinimumEndSharpness
+      :type: float
+
+
+      Gets the smaller of the two end sharpness values.
+
+
+   .. py:attribute:: Nan
+      :type:  SubDEdgeSharpness
+      :value: Ellipsis
+
+
+      object, /) -> SubDEdgeSharpness
+
+      :type: (arg
+
+
+   .. py:attribute:: Smooth
+      :type:  SubDEdgeSharpness
+      :value: Ellipsis
+
+
+      object, /) -> SubDEdgeSharpness
+
+      :type: (arg
+
+
+   .. py:property:: Trend
+      :type: int
+
+
+      Gets +1 if the sharpness increases along the edge, -1 if it decreases, and 0 if it is constant. Returns ``RhinoMath.UnsetIntIndex`` if this is not valid.
+

@@ -1,0 +1,38 @@
+rhino3dm.BackgroundStyle
+========================
+
+.. py:class:: rhino3dm.BackgroundStyle
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Constants that define how the background of a viewport should be filled.
+
+
+   .. py:attribute:: Environment
+      :value: 3
+
+
+      Using a Render Environment.
+
+
+   .. py:attribute:: Gradient
+      :value: 2
+
+
+      Two color top/bottom color gradient.
+
+
+   .. py:attribute:: SolidColor
+      :value: 0
+
+
+      Single solid color fill.
+
+
+   .. py:attribute:: WallpaperImage
+      :value: 1
+
+
+      Simple image background wallpaper.
+

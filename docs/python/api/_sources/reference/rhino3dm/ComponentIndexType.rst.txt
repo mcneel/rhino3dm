@@ -1,0 +1,245 @@
+rhino3dm.ComponentIndexType
+===========================
+
+.. py:class:: rhino3dm.ComponentIndexType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated values to represent component index types.
+
+
+   .. py:attribute:: BrepEdge
+      :value: 2
+
+
+      Targets a brep edge index.
+
+
+   .. py:attribute:: BrepFace
+      :value: 3
+
+
+      Targets a brep face index.
+
+
+   .. py:attribute:: BrepLoop
+      :value: 5
+
+
+      Targets a brep loop index.
+
+
+   .. py:attribute:: BrepTrim
+      :value: 4
+
+
+      Targets a brep trim index.
+
+
+   .. py:attribute:: BrepVertex
+      :value: 1
+
+
+      Targets a brep vertex index.
+
+
+   .. py:attribute:: DimAngularPoint
+      :value: 102
+
+
+      Targets an angular dimension point index.
+
+
+   .. py:attribute:: DimCentermarkPoint
+      :value: 105
+
+
+      Targets a centermark point
+
+
+   .. py:attribute:: DimLeaderPoint
+      :value: 106
+
+
+      Targets a leader point
+
+
+   .. py:attribute:: DimLinearPoint
+      :value: 100
+
+
+      Targets a linear dimension point index.
+
+
+   .. py:attribute:: DimOrdinatePoint
+      :value: 103
+
+
+      Targets an ordinate dimension point index.
+
+
+   .. py:attribute:: DimRadialPoint
+      :value: 101
+
+
+      Targets a radial dimension point index.
+
+
+   .. py:attribute:: DimTextPoint
+      :value: 104
+
+
+      Targets a text point index.
+
+
+   .. py:attribute:: ExtrusionBottomProfile
+      :value: 61
+
+
+      3d bottom profile curves. Index identifies profile component
+
+
+   .. py:attribute:: ExtrusionCapSurface
+      :value: 65
+
+
+      Bottom and top cap surfaces. Index 0=bottom, 1=top
+
+
+   .. py:attribute:: ExtrusionPath
+      :value: 66
+
+
+      Extrusion path (axis line). Index -1=entire path, 0=start point, 1=endpoint
+
+
+   .. py:attribute:: ExtrusionTopProfile
+      :value: 62
+
+
+      3d top profile curves. Index identifies profile component
+
+
+   .. py:attribute:: ExtrusionWallEdge
+      :value: 63
+
+
+      0=start, 1=end
+
+      :type: 3d wall edge curve. Index/2
+
+      :type: identifies profile component Index%2
+
+
+   .. py:attribute:: ExtrusionWallSurface
+      :value: 64
+
+
+      Side wall surfaces. Index identifies profile component
+
+
+   .. py:attribute:: GroupMember
+      :value: 51
+
+
+      Targets a group member index.
+
+
+   .. py:attribute:: HatchLoop
+      :value: 81
+
+
+      Targets a hatch loop.
+
+
+   .. py:attribute:: InstanceDefinitionPart
+      :value: 21
+
+
+      Targets an instance definition part index.
+
+
+   .. py:attribute:: InvalidType
+      :value: 0
+
+
+      Not used. This is the default value of the enumeration type.
+
+
+   .. py:attribute:: MeshFace
+      :value: 14
+
+
+      Targets a mesh face index.
+
+
+   .. py:attribute:: MeshNgon
+      :value: 15
+
+
+      Targets a mesh n-gon index.
+
+
+   .. py:attribute:: MeshTopologyEdge
+      :value: 13
+
+
+      Targets a mesh topology edge index.
+
+
+   .. py:attribute:: MeshTopologyVertex
+      :value: 12
+
+
+      Targets a mesh topology vertex index.
+
+
+   .. py:attribute:: MeshVertex
+      :value: 11
+
+
+      Targets a mesh vertex index.
+
+
+   .. py:attribute:: NoType
+      :value: 268435455
+
+
+      Targets no specific type.
+
+
+   .. py:attribute:: PointCloudPoint
+      :value: 41
+
+
+      Targets a point cloud point index.
+
+
+   .. py:attribute:: PolycurveSegment
+      :value: 31
+
+
+      Targets a polycurve segment index.
+
+
+   .. py:attribute:: SubdEdge
+      :value: 72
+
+
+      Targets a SubD edge pointer Id. Ids are not guaranteed to be sequential.
+
+
+   .. py:attribute:: SubdFace
+      :value: 73
+
+
+      Targets a SubD face pointer Id. Ids are not guaranteed to be sequential.
+
+
+   .. py:attribute:: SubdVertex
+      :value: 71
+
+
+      Targets a SubD vertex pointer Id. Ids are not guaranteed to be sequential.
+

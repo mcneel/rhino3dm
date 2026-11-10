@@ -1,0 +1,161 @@
+rhino3dm.Decal
+==============
+
+.. py:class:: rhino3dm.Decal
+
+   Represents a decal, or a picture that can be moved on an object.
+
+
+   .. py:method:: GetTextureMapping() -> TextureMapping
+
+      Gets the Texture Mapping of the decal.
+
+
+
+   .. py:method:: GetUVBounds() -> tuple[float, float, float, float]
+
+      The UV bounds of the decal. Only used when mapping is UV.
+
+
+
+   .. py:method:: HorzSweep() -> tuple[float, float]
+
+      Gets the angles of the decal's arc of 'horizontal sweep'. Replaces StartLatitude and EndLatitude.
+
+
+
+   .. py:method:: SetHorzSweep(sta: float, end: float) -> None
+
+      Sets the angles of the decal's arc of 'horizontal sweep'.
+
+
+
+   .. py:method:: SetUVBounds(min_u: float, min_v: float, max_u: float, max_v: float) -> None
+
+      Sets the UV bounds of the decal. Only used when mapping is UV.
+
+
+
+   .. py:method:: SetVertSweep(sta: float, end: float) -> None
+
+      Sets the angles of the decal's arc of 'vertical sweep'.
+
+
+
+   .. py:method:: UVBounds() -> tuple[float, float, float, float]
+
+      The UV bounds of the decal. Only used when mapping is UV.
+
+
+
+   .. py:method:: VertSweep() -> tuple[float, float]
+
+      Gets the angles of the decal's arc of 'vertical sweep'. Replaces StartLongitude and EndLongitude.
+
+
+
+   .. py:property:: CRC
+      :type: int
+
+
+      The decal CRC identifies a decal by its state. Multiple decals which would be exactly the same would have the same CRC and are culled from the system. If you store this value with the intention of using it to find the decal again later, you must update your stored value whenever the decal state changes. You can detect when a decal changes by watching for the legacy OnUserDataTransformed event or the newer custom event uuidEventDecalUserDataTransformed.
+
+
+   .. py:property:: DecalMapping
+      :type: DecalMapping
+
+
+      Gets the decal's mapping.
+
+      Deprecated since 8.0.
+
+
+   .. py:property:: DecalProjection
+      :type: DecalProjection
+
+
+      Gets the decal's projection. Used only when mapping is planar.
+
+      Deprecated since 8.0.
+
+
+   .. py:property:: Height
+      :type: float
+
+
+      Gets the height of the decal. Only used when mapping is cylindrical.
+
+
+   .. py:property:: IsVisible
+      :type: bool
+
+
+      Gets the decal's visibility.
+
+
+   .. py:property:: MapToInside
+      :type: bool
+
+
+      Used only when mapping is cylindrical or spherical.
+
+      true if texture is mapped to inside of sphere or cylinder, else \\e false.
+
+
+   .. py:property:: Mapping
+      :type: DecalMapping
+
+
+      Gets the decal's mapping.
+
+
+   .. py:property:: Origin
+      :type: Point3d
+
+
+      Gets the origin of the decal in world space.
+
+
+   .. py:property:: Projection
+      :type: DecalProjection
+
+
+      Gets the decal's projection. Used only when mapping is planar.
+
+
+   .. py:property:: Radius
+      :type: float
+
+
+      Gets the radius of the decal. Only used when mapping is cylindrical or spherical.
+
+
+   .. py:property:: TextureInstanceId
+      :type: uuid.UUID
+
+
+      Gets the asset instance id for this decal. This is the instance id of a material or texture.
+
+
+   .. py:property:: Transparency
+      :type: float
+
+
+      Gets the decal's transparency in the range 0 to 1.
+
+
+   .. py:property:: VectorAcross
+      :type: Vector3d
+
+
+      Gets the vector across. For cylindrical and spherical mapping, the vector is unitized.
+
+      The 'across' vector of the decal. For planar mapping the length of the vector is relevant.
+
+
+   .. py:property:: VectorUp
+      :type: Vector3d
+
+
+      For cylindrical and spherical mapping, the vector is unitized.
+

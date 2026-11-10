@@ -1,0 +1,67 @@
+rhino3dm.Hatch
+==============
+
+.. py:class:: rhino3dm.Hatch
+
+   Bases: :py:obj:`GeometryBase`
+
+
+   Represents a hatch in planar boundary loop or loops. This is a 2d entity with a plane defining a local coordinate system. The loops, patterns, angles, etc are all in this local coordinate system. The Hatch object manages the plane and loop array Fill definitions are in the HatchPattern or class derived from HatchPattern Hatch has an index to get the pattern definition from the pattern table.
+
+
+   .. py:method:: CreateFromBrep(brep: Brep, brepFaceIndex: int, hatchPatternIndex: int, rotationRadians: float, scale: float, basePoint: Point3d) -> Hatch
+      :staticmethod:
+
+
+      Create a hatch from a planar face of a Brep
+
+
+
+   .. py:method:: ScalePattern(xform: Transform) -> None
+
+      Scale the hatch's pattern
+
+
+
+   .. py:method:: ToBrep() -> Brep
+
+      Constructs a Brep representation of this hatch.
+
+      :returns: A Brep representation of this hatch if successful, null otherwise.
+
+
+
+   .. py:property:: BasePoint
+      :type: Point3d
+
+
+      Gets or sets the hatch pattern base point
+
+
+   .. py:property:: PatternIndex
+      :type: int
+
+
+      Gets or sets the index of the pattern in the document hatch pattern table.
+
+
+   .. py:property:: PatternRotation
+      :type: float
+
+
+      Gets or sets the relative rotation of the pattern.
+
+
+   .. py:property:: PatternScale
+      :type: float
+
+
+      Gets or sets the scaling factor of the pattern.
+
+
+   .. py:property:: Plane
+      :type: Plane
+
+
+      Gets or sets the hatch plane
+

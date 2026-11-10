@@ -1,0 +1,162 @@
+rhino3dm.SubDVertex
+===================
+
+.. py:class:: rhino3dm.SubDVertex
+
+   Bases: :py:obj:`SubDComponent`
+
+
+   Single vertex of a SubD
+
+
+   .. py:method:: ClearSavedSubdivisionPoints(clearNeighborhood: bool) -> None
+
+      Discards the cached subdivision and surface points for this vertex, so they are recomputed on next use.
+
+      :param clearNeighborhood: If true, the cached points of the neighboring components are discarded too. Moving a control net point changes the surface around it, not just at it, so pass true after an edit unless you know only this vertex is affected.
+
+
+
+   .. py:method:: ComponentIndex() -> ComponentIndex
+
+      Gets the component index of this vertex.
+
+      :returns: The component index.
+
+
+
+   .. py:method:: EdgeAt(index: int) -> SubDEdge
+
+      Retrieve a SubDEdge from this vertex
+
+
+
+   .. py:method:: FaceAt(index: int) -> SubDFace
+
+      Retrieve a SubDFace from this vertex
+
+
+
+   .. py:method:: IsSharp(endCheck: bool) -> bool
+
+      Determines whether the vertex is sharp: a smooth, dart or crease vertex attached to at least one sharp edge.
+
+      :param endCheck: If false, looks for attached edges with any nonzero sharpness; if true, for attached edges with nonzero sharpness at this vertex.
+
+      :returns: True if the vertex is sharp.
+
+
+
+   .. py:method:: SetControlNetPoint(position: Point3d, bClearNeighborhoodCache: bool) -> bool
+
+      Change the location of the "control net" point that this SubDVertex represents
+
+      This method is provided to be able to set multiple control vertices, without clearing the neighborhood cache everytime as the ControlNetPoint property setter does. When you are done modifying your SubD, call subd.UpdateEvaluationCache() to refresh all caches.
+
+      :param position: New position for the vertex' control net point.
+      :param bClearNeighborhoodCache: If true, clear the evaluation cache in the faces around the modified vertex.
+
+      :returns: true if the vertex' control net point was modified.
+
+
+
+   .. py:method:: SurfacePoint() -> Point3d
+
+      The SubD surface point
+
+
+
+   .. py:property:: ControlNetPoint
+      :type: Point3d
+
+
+      Location of the "control net" point that this SubDVertex represents
+
+      The setter of this property will refresh the neighborhood cache around the vertex everytime it is called. This is not efficient if you have multiple vertices to modify. In that case, call vertex.SetControlNetPoint(position, false) for all the vertices you want to modify, then call subd.ClearEvaluationCache()
+
+
+   .. py:property:: EdgeCount
+      :type: int
+
+
+      Number of edges for this vertex
+
+
+   .. py:property:: Edges
+      :type: list[Any]
+
+
+      All edges that this vertex is part of
+
+
+   .. py:property:: FaceCount
+      :type: int
+
+
+      Number of faces for this vertex
+
+
+   .. py:property:: Faces
+      :type: list[Any]
+
+
+      The faces attached to this vertex (rhino3dm only).
+
+
+   .. py:property:: IsCorner
+      :type: bool
+
+
+      Gets true if the vertex is a corner vertex (its tag is Corner).
+
+
+   .. py:property:: IsCrease
+      :type: bool
+
+
+      Gets true if the vertex is a crease vertex (its tag is Crease).
+
+
+   .. py:property:: IsDart
+      :type: bool
+
+
+      Gets true if the vertex is a dart vertex (its tag is Dart).
+
+
+   .. py:property:: IsSmooth
+      :type: bool
+
+
+      Gets true if the vertex is smooth (its tag is Smooth).
+
+
+   .. py:property:: Next
+      :type: SubDVertex
+
+
+      Next vertex in linked list of vertices on this level
+
+
+   .. py:property:: Previous
+      :type: SubDVertex
+
+
+      Previous vertex in linked list of vertices on this level
+
+
+   .. py:property:: Tag
+      :type: SubDVertexTag
+
+
+      identifies the type of subdivision vertex
+
+
+   .. py:property:: VertexSharpness
+      :type: float
+
+
+      the maximum end sharpness at this vertex of the attached sharp edges when the vertex is sharp, otherwise 0.0.
+
+      :type: Gets the vertex sharpness
+

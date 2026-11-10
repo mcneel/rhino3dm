@@ -1,0 +1,38 @@
+rhino3dm.CoordinateSystem
+=========================
+
+.. py:class:: rhino3dm.CoordinateSystem
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated values for coordinate systems to use as references.
+
+
+   .. py:attribute:: Camera
+      :value: 1
+
+
+      The camera coordinate system.
+
+
+   .. py:attribute:: Clip
+      :value: 2
+
+
+      The clip coordinate system.
+
+
+   .. py:attribute:: Screen
+      :value: 3
+
+
+      The screen coordinate system.
+
+
+   .. py:attribute:: World
+      :value: 0
+
+
+      The world coordinate system. This has origin (0,0,0), X unit axis is (1, 0, 0) and Y unit axis is (0, 1, 0).
+

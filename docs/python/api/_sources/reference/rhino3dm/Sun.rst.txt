@@ -1,0 +1,210 @@
+rhino3dm.Sun
+============
+
+.. py:class:: rhino3dm.Sun
+
+   Represents the Sun on a little portion of Earth.
+
+
+   .. py:method:: AltitudeFromValues(latitude: float, longitude: float, timezoneHours: float, daylightMinutes: int, when: datetime.datetime, hours: float, fast: bool) -> float
+      :staticmethod:
+
+
+
+   .. py:method:: ColorFromAltitude(altitudeDegrees: float) -> tuple[int, int, int, int]
+      :staticmethod:
+
+
+      Get sun color based on altitude.
+
+      :param altitudeDegrees: The altitude sun angle in degrees.
+
+      :returns: Returns color for altitude.
+
+
+
+   .. py:method:: GetDateTime(kind: DateTimeKind) -> datetime.datetime
+
+      Get the observer's date and time as a DateTime with kind DateTimeKind.Local.
+
+      Param 'kind' specifies the kind of date and time to retrieve from the sun.
+
+      - If DateTimeKind.Local, the returned DateTime will contain the local sun time, i.e., the time you see in the UI under 'Local'.
+
+      - If DateTimeKind.Utc, the returned DateTime will contain the UTC sun time, i.e., the time you see in the UI under 'UTC', which is the Sun's local time adjusted for its time zone and daylight saving (if any).
+
+      \*\*\*\* Local sun time is to do with the Sun's time zone and not the time zone of the computer.
+
+      \*\*\*\* The returned DateTime object always has a kind of Local even if you requested the sun's UTC date and time. This is because the Sun's time zone is nothing to do with the actual computer's time zone and converting the result would cause further confusion.
+
+
+
+   .. py:method:: SetDateTime(time: datetime.datetime, kind: DateTimeKind) -> None
+
+      Set the observer's date and time. kind specifies the kind of date and time to set to the sun. Note that this is distinct from the DateTimeKind of 'time' which has nothing to do with the sun's local/UTC scenario.
+
+      - If 'kind' is DateTimeKind.Local, the sun's local time will be set, i.e., the time you see in the UI under 'Local'. This is the preferred way to use this function.
+
+      - If 'kind' is DateTimeKind.Utc, the sun's UTC time will be set, i.e., the time you see in the UI under 'UTC'. This is only for completeness; it's not likely to be useful, but if you do use it, be aware that the sun will convert this time to local using its currently set time zone and daylight saving information (not the locale's information).
+
+      Caveat: Local sun time is to do with the Sun's time zone and not the time zone of the computer.
+
+      Caveat: If the supplied DateTime object has a kind of Local, it will be used verbatim. If, however, it has a kind of Utc, it will be converted to local time on the computer using the computer's time zone and daylight saving locale information before being passed to the sun. To avoid confusion, it's best to always use DateTimes with Kind 'Local' when setting the sun's date and time. This is because the Sun's time zone is nothing to do with the actual computer's time zone.
+
+
+
+   .. py:method:: SetPosition(azimuthDegrees: float, altitudeDegrees: float) -> None
+                  SetPosition(when: datetime.datetime, latitudeDegrees: float, longitudeDegrees: float) -> None
+
+      Deprecated since 8.0.
+
+
+
+   .. py:property:: Altitude
+      :type: float
+
+
+      The sun's altitude above the horizon in degrees in the range -90 to +90. Setting this value will also set the sun to manual control mode.
+
+
+   .. py:property:: Azimuth
+      :type: float
+
+
+      This value is not affected by the direction of north.
+
+      :type: The sun's azimuth in degrees. The value increases Eastwards with North as zero. Setting this value will also set the sun to manual control mode. Note
+
+
+   .. py:property:: DaylightSaving
+      :type: bool
+
+
+
+   .. py:property:: DaylightSavingMinutes
+      :type: int
+
+
+      Daylight saving time in minutes
+
+
+   .. py:property:: DaylightSavingOn
+      :type: bool
+
+
+      Daylight saving time 'on' state
+
+
+   .. py:property:: EnableAllowed
+      :type: bool
+
+
+      Whether the sun is allowed to be enabled. This is a separate setting from ``Enabled``.
+
+
+   .. py:property:: Enabled
+      :type: bool
+
+
+      Turn the sun on/off in this document.
+
+
+   .. py:property:: Hash
+      :type: int
+
+
+      Get a hash of the sun state.
+
+
+   .. py:property:: Intensity
+      :type: float
+
+
+      Sun intensity.
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Whether the sun's settings are valid.
+
+
+   .. py:property:: Latitude
+      :type: float
+
+
+      The observer's latitude.
+
+
+   .. py:property:: Light
+      :type: Light
+
+
+      Get a Light which represents the sun. If manual control is in effect, no sun calculation is performed; the function uses the last known values of azimuth and altitude. If manual control is not in effect, the observer's position, date, time, time zone and daylight saving values are used to calculate the position of the sun.
+
+
+   .. py:property:: Longitude
+      :type: float
+
+
+      The observer's longitude.
+
+
+   .. py:property:: ManualControl
+      :type: bool
+
+
+
+   .. py:property:: ManualControlAllowed
+      :type: bool
+
+
+      Whether manual control of the sun is allowed. This is a separate setting from ``ManualControlOn``.
+
+
+   .. py:property:: ManualControlOn
+      :type: bool
+
+
+      Manual control 'on' state. When true, allows the user to set the sun azimuth and altitude directly. When false, the values are computed.
+
+
+   .. py:attribute:: MaxYear
+      :type:  int
+      :value: Ellipsis
+
+
+      object, /) -> int
+
+      :type: (arg
+
+
+   .. py:attribute:: MinYear
+      :type:  int
+      :value: Ellipsis
+
+
+      object, /) -> int
+
+      :type: (arg
+
+
+   .. py:property:: North
+      :type: float
+
+
+      Angle in degrees on world X-Y plane that should be considered north in the model. The angle is measured starting at the x-axis and increases anti-clockwise. The y-axis corresponds to a 'north' angle of 90 degrees.
+
+
+   .. py:property:: TimeZone
+      :type: float
+
+
+      The observer's time zone measured in hours relative to UTC.
+
+
+   .. py:property:: Vector
+      :type: Vector3d
+
+

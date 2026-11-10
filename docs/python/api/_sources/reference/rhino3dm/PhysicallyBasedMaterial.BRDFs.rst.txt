@@ -1,0 +1,20 @@
+rhino3dm.PhysicallyBasedMaterial.BRDFs
+======================================
+
+.. py:class:: rhino3dm.PhysicallyBasedMaterial.BRDFs
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Enum where members are also (and must be) ints
+
+
+   .. py:attribute:: GGX
+      :value: 0
+
+
+
+   .. py:attribute:: Ward
+      :value: 1
+
+

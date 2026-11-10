@@ -1,0 +1,276 @@
+rhino3dm.RhinoMath
+==================
+
+.. py:class:: rhino3dm.RhinoMath
+
+   Provides constants and static methods that are additional to ``Math``.
+
+
+   .. py:method:: Clamp(value: int, bound1: int, bound2: int) -> int
+                  Clamp(value: float, bound1: float, bound2: float) -> float
+      :staticmethod:
+
+
+      Limits a ``double`` to be specified within an interval of two numbers, by specifying a fixed minimum and maximum.
+
+      :param value: A number.
+      :param bound1: A first bound.
+      :param bound2: A second bound. This does not necessarily need to be larger or smaller than bound1.
+
+      :returns: The clamped value.
+
+
+
+   .. py:method:: EpsilonEquals(x: float, y: float, epsilon: float) -> bool
+      :staticmethod:
+
+
+      Compare two doubles for equality within some "epsilon" range
+
+
+
+   .. py:method:: EvaluateNormal(limitDirection: int, ds: Vector3d, dt: Vector3d, dss: Vector3d, dst: Vector3d, dtt: Vector3d) -> tuple[bool, Vector3d]
+      :staticmethod:
+
+
+      Expert tool to evaluate surface unit normal.
+
+      :param limitDirection: Determines which direction is used to compute the limit, where: 0 = default, 1 = from quadrant I, 2 = from quadrant II, etc.
+      :param ds: First partial derivative.
+      :param dt: First partial derivative.
+      :param dss: Second partial derivative.
+      :param dst: Second partial derivative.
+      :param dtt: Second partial derivative.
+
+      :returns: True if successful, false otherwise.
+
+
+
+   .. py:method:: EvaluateNormalPartials(ds: Vector3d, dt: Vector3d, dss: Vector3d, dst: Vector3d, dtt: Vector3d) -> tuple[bool, Vector3d, Vector3d]
+      :staticmethod:
+
+
+      Expert tool to evaluate partial derivatives of surface unit normal.
+
+      :param ds: First partial derivative.
+      :param dt: First partial derivative.
+      :param dss: Second partial derivative.
+      :param dst: Second partial derivative.
+      :param dtt: Second partial derivative.
+
+      :returns: true if Jacobian is non-degenerate, false if Jacobian is degenerate.
+
+
+
+   .. py:method:: EvaluateSectionalCurvature(ds: Vector3d, dt: Vector3d, dss: Vector3d, dst: Vector3d, dtt: Vector3d, planeNormal: Vector3d) -> tuple[bool, Vector3d]
+      :staticmethod:
+
+
+      Expert tool to evaluate sectional curvature from surface derivatives and section plane normal.
+
+      :param ds: First partial derivative.
+      :param dt: First partial derivative.
+      :param dss: Second partial derivative.
+      :param dst: Second partial derivative.
+      :param dtt: Second partial derivative.
+      :param planeNormal: Unit normal to section plane.
+
+      :returns: True if successful. False if first partials are not linearly independent, in which case the k is set to zero.
+
+
+
+   .. py:method:: IsValidDouble(x: float) -> bool
+      :staticmethod:
+
+
+      Determines whether a ``double`` value is valid within the RhinoCommon context.
+
+      Rhino does not use Double.NaN by convention, so this test evaluates to true if:
+
+      x is not equal to RhinoMath.UnsetValue
+
+      System.Double.IsNaN(x) evaluates to false
+
+      System.Double.IsInfinity(x) evaluates to false
+
+      :param x: ``double`` number to test for validity.
+
+      :returns: true if the number if valid, false if the number is NaN, Infinity or Unset.
+
+
+
+   .. py:method:: MetersPerUnit(units: UnitSystem) -> float
+      :staticmethod:
+
+
+      Return number of meters per one unit of a given unit system
+
+
+
+   .. py:method:: ToDegrees(radians: float) -> float
+      :staticmethod:
+
+
+      Convert an angle from radians to degrees.
+
+      :param radians: Radians to convert (180 degrees equals pi radians).
+
+
+
+   .. py:method:: ToRadians(degrees: float) -> float
+      :staticmethod:
+
+
+      Convert an angle from degrees to radians.
+
+      :param degrees: Degrees to convert (180 degrees equals pi radians).
+
+
+
+   .. py:method:: UnitScale(from_: UnitSystem, to: UnitSystem) -> float
+                  UnitScale(from_: UnitSystem, fromMetersPerUnit: float, to: UnitSystem, toMetersPerUnit: float) -> float
+      :staticmethod:
+
+
+      Computes the scale factor for changing the measurements unit systems.
+
+      :param from: The system to convert from.
+      :param fromMetersPerUnit: For custom units, specify the meters per unit.
+      :param to: The system to convert measurements into.
+      :param toMetersPerUnit: For custom units, specify the meters per unit.
+
+      :returns: A scale multiplier.
+
+
+
+   .. py:method:: Wrap(value: float, bound1: float, bound2: float) -> float
+      :staticmethod:
+
+
+      Limits a ``double`` to be specified within an interval of two numbers by repeating the available interval cyclically.
+
+      :param value: A number.
+      :param bound1: A first bound.
+      :param bound2: A second bound. This does not necessarily need to be larger or smaller than bound1.
+
+
+
+   .. py:attribute:: DefaultAngleTolerance
+      :type:  float
+      :value: Ellipsis
+
+
+      object, /) -> float
+
+      :type: (arg
+
+
+   .. py:attribute:: DefaultDistanceToleranceMillimeters
+      :type:  float
+      :value: Ellipsis
+
+
+      object, /) -> float
+
+      :type: (arg
+
+
+   .. py:attribute:: Epsilon
+      :type:  float
+      :value: Ellipsis
+
+
+      object, /) -> float
+
+      :type: (arg
+
+
+   .. py:attribute:: HalfPI
+      :type:  float
+      :value: Ellipsis
+
+
+      object, /) -> float
+
+      :type: (arg
+
+
+   .. py:attribute:: InfiniteRadius
+      :type:  float
+      :value: Ellipsis
+
+
+      object, /) -> float
+
+      :type: (arg
+
+
+   .. py:attribute:: QuarterPI
+      :type:  float
+      :value: Ellipsis
+
+
+      object, /) -> float
+
+      :type: (arg
+
+
+   .. py:attribute:: SqrtEpsilon
+      :type:  float
+      :value: Ellipsis
+
+
+      object, /) -> float
+
+      :type: (arg
+
+
+   .. py:attribute:: Tau
+      :type:  float
+      :value: Ellipsis
+
+
+      object, /) -> float
+
+      :type: (arg
+
+
+   .. py:attribute:: TwoPI
+      :type:  float
+      :value: Ellipsis
+
+
+      object, /) -> float
+
+      :type: (arg
+
+
+   .. py:attribute:: UnsetIntIndex
+      :type:  int
+      :value: Ellipsis
+
+
+      object, /) -> int
+
+      :type: (arg
+
+
+   .. py:attribute:: UnsetValue
+      :type:  float
+      :value: Ellipsis
+
+
+      object, /) -> float
+
+      :type: (arg
+
+
+   .. py:attribute:: ZeroTolerance
+      :type:  float
+      :value: Ellipsis
+
+
+      object, /) -> float
+
+      :type: (arg
+

@@ -1,0 +1,24 @@
+rhino3dm.DracoColorFormat
+=========================
+
+.. py:class:: rhino3dm.DracoColorFormat
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Color format for vertex colors
+
+
+   .. py:attribute:: ARGB
+      :value: 0
+
+
+      Alpha, Red, Green, Blue order
+
+
+   .. py:attribute:: RGBA
+      :value: 1
+
+
+      Red, Green, Blue, Alpha order
+

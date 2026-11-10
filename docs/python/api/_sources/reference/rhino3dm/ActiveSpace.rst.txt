@@ -1,0 +1,45 @@
+rhino3dm.ActiveSpace
+====================
+
+.. py:class:: rhino3dm.ActiveSpace
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines the current working space.
+
+
+   .. py:attribute:: BlockEditorSpace
+      :value: 4
+
+
+      Block Editor space.
+
+
+   .. py:attribute:: ModelSpace
+      :value: 1
+
+
+      3d modeling or "world" space.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``ActiveSpace.None`` is not Python syntax; ``ActiveSpace['None']`` is the same member). There is no working space.
+
+
+   .. py:attribute:: PageSpace
+      :value: 2
+
+
+      page/layout/paper/printing space.
+
+
+   .. py:attribute:: UVEditorSpace
+      :value: 3
+
+
+      UV Editor space.
+

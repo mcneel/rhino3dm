@@ -1,0 +1,28 @@
+rhino3dm.File3dmPlugInDataTable
+===============================
+
+.. py:class:: rhino3dm.File3dmPlugInDataTable
+
+   Table of custom data provided by plug-ins
+
+
+   .. py:method:: Clear() -> None
+
+      Remove all entries from this table.
+
+
+
+   .. py:method:: Dump() -> str
+
+      Prepares a text dump of table.
+
+      :returns: A string containing the dump.
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the number of ``File3dmPlugInData`` objects in this table.
+

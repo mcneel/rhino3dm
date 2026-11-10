@@ -1,0 +1,173 @@
+rhino3dm.MeshVertexList
+=======================
+
+.. py:class:: rhino3dm.MeshVertexList
+
+   Provides access to the vertices and vertex-related functionality of a mesh.
+
+
+   .. py:method:: Add(vertex: Point3d) -> int
+                  Add(vertex: Point3f) -> int
+                  Add(x: float, y: float, z: float) -> int
+
+      Adds a new vertex to the end of the Vertex list.
+
+      :param x: X component of new vertex coordinate.
+      :param y: Y component of new vertex coordinate.
+      :param z: Z component of new vertex coordinate.
+
+      :returns: The index of the newly added vertex.
+
+
+
+   .. py:method:: AddVertices(vertices: collections.abc.Sequence[Point3f]) -> None
+
+      Adds a series of new vertices to the end of the vertex list.
+
+      This overload accepts double-precision points.
+
+      :param vertices: A list, an array or any enumerable set of ``Point3d``.
+
+
+
+   .. py:method:: Clear() -> None
+
+      Clears the Vertex list on the mesh.
+
+
+
+   .. py:method:: CombineIdentical(ignoreNormals: bool, ignoreAdditional: bool) -> bool
+
+      Merges identical vertices.
+
+      :param ignoreNormals: If true, vertex normals will not be taken into consideration when comparing vertices.
+      :param ignoreAdditional: If true, texture coordinates, colors, and principal curvatures will not be taken into consideration when comparing vertices.
+
+      :returns: true if the mesh is changed, in which case the mesh will have fewer vertices than before.
+
+
+
+   .. py:method:: CullUnused() -> int
+
+      Removes all vertices that are currently not used by the Face list.
+
+      :returns: The number of unused vertices that were removed.
+
+
+
+   .. py:method:: Destroy() -> None
+
+      Releases all memory allocated to store faces. The list capacity will be 0 after this call.
+
+      Subsequent calls can add new items.
+
+
+
+   .. py:method:: Hide(vertexIndex: int) -> None
+
+      Hides the vertex at the given index.
+
+      :param vertexIndex: Index of vertex to hide.
+
+
+
+   .. py:method:: HideAll() -> None
+
+      Hides all vertices in the mesh.
+
+
+
+   .. py:method:: IsHidden(vertexIndex: int) -> bool
+
+      Gets a value indicating whether or not a vertex is hidden.
+
+      :param vertexIndex: Index of vertex to query.
+
+      :returns: true if the vertex is hidden, false if it is not.
+
+
+
+   .. py:method:: Point3dAt(index: int) -> Point3d
+
+      Get double precision location at a given index
+
+
+
+   .. py:method:: SetVertex(index: int, x: float, y: float, z: float) -> bool
+                  SetVertex(index: int, x: float, y: float, z: float, updateNormals: bool) -> bool
+                  SetVertex(index: int, vertex: Point3d) -> bool
+                  SetVertex(index: int, vertex: Point3f) -> bool
+
+      Sets or adds a vertex to the Vertex List.
+
+      If [index] is less than [Count], the existing vertex at [index] will be modified.
+
+      If [index] equals [Count], a new vertex is appended to the end of the vertex list.
+
+      If [index] is larger than [Count], the function will return false.
+
+      :param index: Index of vertex to set.
+      :param vertex: Vertex location.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Show(vertexIndex: int) -> None
+
+      Shows the vertex at the given index.
+
+      :param vertexIndex: Index of vertex to show.
+
+
+
+   .. py:method:: ShowAll() -> None
+
+      Shows all vertices in the mesh.
+
+
+
+   .. py:method:: ToFloatArray() -> list[float]
+
+      Copies all vertices to a linear array of float in x,y,z order
+
+      :returns: The float array.
+
+
+
+   .. py:method:: ToPoint3dArray() -> list[Any]
+
+      Copies all vertices to a new array of ``Point3d``.
+
+      :returns: A new array.
+
+
+
+   .. py:method:: ToPoint3fArray() -> list[Any]
+
+      Copies all vertices to a new array of ``Point3f``.
+
+      :returns: A new array.
+
+
+
+   .. py:property:: Capacity
+      :type: int
+
+
+      Gets or sets the total number of vertices the internal data structure can hold without resizing.
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets or sets the number of mesh vertices.
+
+
+   .. py:property:: UseDoublePrecisionVertices
+      :type: bool
+
+
+      Set to true if the vertices should be stored in double precision
+

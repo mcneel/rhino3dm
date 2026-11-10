@@ -1,0 +1,22 @@
+rhino3dm.File3dmPlugInData
+==========================
+
+.. py:class:: rhino3dm.File3dmPlugInData
+
+   Represents custom plug-in data, in the 3dm file, written by a plug-in.
+
+
+   .. py:method:: RdkXml() -> str
+
+      The object's render data (RDK) as XML (rhino3dm only).
+
+      :returns: The XML text, empty when the object has none.
+
+
+
+   .. py:property:: PlugInId
+      :type: uuid.UUID
+
+
+      Gets the id of the plug-in that is associated with this custom data.
+

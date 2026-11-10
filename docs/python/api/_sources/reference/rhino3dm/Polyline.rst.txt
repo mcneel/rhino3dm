@@ -1,0 +1,248 @@
+rhino3dm.Polyline
+=================
+
+.. py:class:: rhino3dm.Polyline
+              Polyline(initialCapacity: int)
+              Polyline(collection: collections.abc.Sequence[Point3d])
+
+   Bases: :py:obj:`Point3dList`
+
+
+   Represents an ordered set of points connected by linear segments.
+
+   Polylines are closed if start and end points coincide.
+
+
+   .. py:method:: CenterPoint() -> Point3d
+
+      Compute the center point of the polyline as the weighted average of all segments.
+
+      :returns: The weighted average of all segments.
+
+
+
+   .. py:method:: ClosestParameter(testPoint: Point3d) -> float
+
+      Gets the parameter along the polyline which is closest to a test-point.
+
+      :param testPoint: Point to approximate.
+
+      :returns: The parameter along the polyline closest to testPoint.
+
+
+
+   .. py:method:: ClosestPoint(testPoint: Point3d) -> Point3d
+
+      Gets the point on the polyline which is closest to a test-point.
+
+      :param testPoint: Point to approximate.
+
+      :returns: The point on the polyline closest to testPoint.
+
+
+
+   .. py:method:: CollapseShortSegments(tolerance: float) -> int
+
+      Collapses all segments until none are shorter than tolerance. This function is significantly slower than DeleteShortSegments, since it recursively operates on the shortest segment. When a segment is collapsed the end-points are placed in the center of the segment.
+
+      :param tolerance: Tolerance to use during collapsing.
+
+      :returns: The number of segments that were collapsed.
+
+
+
+   .. py:method:: CreateCircumscribedPolygon(circle: Circle, sideCount: int) -> Polyline
+      :staticmethod:
+
+
+      Create a regular polygon circumscribe about a circle. The midpoints of the polygon's edges will be tangent to the circle.
+
+      :param circle: The circle.
+      :param sideCount: The number of sides
+
+      :returns: A closed polyline if successful, null otherwise.
+
+
+
+   .. py:method:: CreateInscribedPolygon(circle: Circle, sideCount: int) -> Polyline
+      :staticmethod:
+
+
+      Create a regular polygon inscribed in a circle. The vertices of the polygon will be on the circle.
+
+      :param circle: The circle.
+      :param sideCount: The number of sides
+
+      :returns: A closed polyline if successful, null otherwise.
+
+
+
+   .. py:method:: CreateStarPolygon(circle: Circle, radius: float, cornerCount: int) -> Polyline
+      :staticmethod:
+
+
+      Create a regular star polygon. The star begins at circle.PointAt(0) and the vertices alternate between being on circle and begin on a concentric circle of other\_radius.
+
+      :param circle: The circle.
+      :param radius: The radius of other circle.
+      :param cornerCount: The number of corners on the circle. There will be 2\*cornerCount sides and 2\*cornerCount vertices.
+
+      :returns: A closed polyline if successful, null otherwise.
+
+
+
+   .. py:method:: DeleteShortSegments(tolerance: float) -> int
+
+      Removes all points that are closer than tolerance to the previous point.
+
+      Start and end points are left intact.
+
+      :param tolerance: Vertices closer together than tolerance will be removed.
+
+      :returns: Number of points (and segments) removed.
+
+
+
+   .. py:method:: Duplicate() -> Polyline
+
+      Returns a deep copy of this polyline instance.
+
+      :returns: The duplicated polyline.
+
+
+
+   .. py:method:: GetSegments() -> list[Line] | None
+
+      Constructs an array of line segments that make up the entire polyline.
+
+      :returns: An array of line segments or null if the polyline contains fewer than 2 points.
+
+
+
+   .. py:method:: IsClosedWithinTolerance(tolerance: float) -> bool
+
+      Test a polyline to see if it is closed.
+
+      :param tolerance: The tolerance.
+
+      :returns: Returns true if polyline has 4 or more points, the distance between the start and end points is <= tolerance, and there is a point in the polyline whose distance from the start and end points is > tolerance.
+
+
+
+   .. py:method:: IsConvexLoop(strictlyConvex: bool) -> bool
+
+      Determines if a polyline is convex.
+
+      :param strictlyConvex: If false, collinear segments are considered convex.
+
+      :returns: True if the polyline is a closed, convex loop.
+
+
+
+   .. py:method:: PointAt(t: float) -> Point3d
+
+      Gets the point on the polyline at the given parameter. The integer part of the parameter indicates the index of the segment.
+
+      :param t: Polyline parameter.
+
+      :returns: The point on the polyline at t.
+
+
+
+   .. py:method:: ReduceSegments(tolerance: float) -> int
+
+      Constructs a reduction of this polyline by recursively removing the least significant segments.
+
+      :param tolerance: Tolerance for reduction. Whenever a vertex of the polyline is more significant than tolerance, it will be included in the reduction.
+
+      :returns: The number of vertices that disappeared due to reduction.
+
+
+
+   .. py:method:: SegmentAt(index: int) -> Line
+
+      Gets the line segment at the given index.
+
+      :param index: Index of segment to retrieve.
+
+      :returns: Line segment at index or Line.Unset on failure.
+
+
+
+   .. py:method:: Smooth(amount: float) -> bool
+
+      Smoothen the polyline segments by averaging adjacent vertices. Smoothing requires a polyline with exclusively valid vertices.
+
+      :param amount: Amount to smooth. Zero equals no smoothing, one equals complete smoothing.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: TangentAt(t: float) -> Vector3d
+
+      Gets the unit tangent vector along the polyline at the given parameter. The integer part of the parameter indicates the index of the segment.
+
+      :param t: Polyline parameter.
+
+      :returns: The tangent along the polyline at t.
+
+
+
+   .. py:method:: ToNurbsCurve() -> NurbsCurve
+
+      Constructs a nurbs curve representation of this polyline.
+
+      :returns: A Nurbs curve shaped like this polyline or null on failure.
+
+
+
+   .. py:method:: ToPolylineCurve() -> PolylineCurve
+
+      Constructs a polyline curve representation of this polyline.
+
+      :returns: A curve shaped like this polyline or null on failure.
+
+
+
+   .. py:method:: Trim(domain: Interval) -> Polyline
+
+      Constructs a polyline out of a parameter sub-domain in this curve.
+
+      :param domain: The sub-domain of the polyline. The integer part of the domain parameters indicate the index of the segment.
+
+      :returns: The polyline as defined by the sub-domain, or null on failure.
+
+
+
+   .. py:property:: IsClosed
+      :type: bool
+
+
+      Test a polyline to see if it is closed.
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Gets a value that indicates whether this polyline is valid.
+
+      Valid polylines have at least one segment, no Invalid points and no zero length segments.
+
+      Closed polylines with only two segments are also not considered valid.
+
+
+   .. py:property:: Length
+      :type: float
+
+
+      Gets the total length of the polyline.
+
+
+   .. py:property:: SegmentCount
+      :type: int
+
+
+      Gets the number of segments for this polyline.
+

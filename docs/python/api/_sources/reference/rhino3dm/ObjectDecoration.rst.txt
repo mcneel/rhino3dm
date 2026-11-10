@@ -1,0 +1,38 @@
+rhino3dm.ObjectDecoration
+=========================
+
+.. py:class:: rhino3dm.ObjectDecoration
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines bit mask values to represent object decorations.
+
+
+   .. py:attribute:: BothArrowhead
+      :value: 24
+
+
+      Arrow head at start and end.
+
+
+   .. py:attribute:: EndArrowhead
+      :value: 16
+
+
+      Arrow head at end.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``ObjectDecoration.None`` is not Python syntax; ``ObjectDecoration['None']`` is the same member). There are no object decorations.
+
+
+   .. py:attribute:: StartArrowhead
+      :value: 8
+
+
+      Arrow head at start.
+

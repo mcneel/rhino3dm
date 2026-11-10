@@ -1,0 +1,180 @@
+rhino3dm.SubDEdge
+=================
+
+.. py:class:: rhino3dm.SubDEdge
+
+   Bases: :py:obj:`SubDComponent`
+
+
+   Single edge of a SubD
+
+
+   .. py:method:: ClearSavedSubdivisionPoints(clearNeighborhood: bool) -> None
+
+      Discards the cached subdivision and surface points for this edge, so they are recomputed on next use.
+
+      :param clearNeighborhood: If true, the cached points of the neighboring components are discarded too. Moving a control net point changes the surface around it, not just at it, so pass true after an edit unless you know only this edge is affected.
+
+
+
+   .. py:method:: ComponentIndex() -> ComponentIndex
+
+      Gets the component index of this edge.
+
+      :returns: The component index.
+
+
+
+   .. py:method:: ControlNetCenterNormal(edgeFaceIndex: int) -> Vector3d
+
+      Gets the normal of the control net polygon of one of the faces attached to this edge.
+
+      :param edgeFaceIndex: Index of the attached face (0 <= edgeFaceIndex < FaceCount).
+
+      :returns: The face's control net center normal, or Vector3d.Unset if the input is not valid.
+
+
+
+   .. py:method:: EndSharpness(endIndex: int, useCreaseSharpness: bool) -> float
+
+      Gets the sharpness of this edge at one of its ends.
+
+      :param endIndex: 0 for the ``VertexFrom`` end, 1 for the ``VertexTo`` end.
+      :param useCreaseSharpness: If this edge is a crease and useCreaseSharpness is true, then ``SubDEdgeSharpness.CreaseValue`` is returned.
+
+      :returns: The sharpness at that end, or 0.0 if this edge is not sharp.
+
+
+
+   .. py:method:: FaceAt(index: int) -> SubDFace
+
+      Retrieve a SubDFace from this edge.
+
+
+
+   .. py:method:: GetSharpness(useCreaseSharpness: bool) -> SubDEdgeSharpness
+                  GetSharpness() -> SubDEdgeSharpness
+
+      Gets the sharpness of this edge, reporting ``SubDEdgeSharpness.Crease`` for a crease edge.
+
+      :returns: The sharpness of this edge.
+
+
+
+   .. py:property:: ControlNetCenterPoint
+      :type: Point3d
+
+
+      Gets the average of the edge's two control net points.
+
+
+   .. py:property:: ControlNetLine
+      :type: Line
+
+
+      Line representing the control net end points.
+
+
+   .. py:property:: DartCount
+      :type: int
+
+
+      Gets the number of the edge's end vertices that are dart vertices (0, 1 or 2).
+
+
+   .. py:property:: FaceCount
+      :type: int
+
+
+      Number of faces for this edge.
+
+
+   .. py:property:: Faces
+      :type: list[Any]
+
+
+      The faces attached to this edge (rhino3dm only).
+
+
+   .. py:property:: IsCrease
+      :type: bool
+
+
+      Gets true if the edge is a crease (its tag is Crease).
+
+
+   .. py:property:: IsDartCrease
+      :type: bool
+
+
+      Gets true if the edge is a crease and at least one of its end vertices is a dart vertex.
+
+
+   .. py:property:: IsHardCrease
+      :type: bool
+
+
+      Gets true if the edge is a crease and both of its end vertices are crease or corner vertices.
+
+
+   .. py:property:: IsSharp
+      :type: bool
+
+
+      Gets true if this edge is smooth and has a nonzero sharpness. A crease edge is not a sharp edge.
+
+
+   .. py:property:: IsSmooth
+      :type: bool
+
+
+      Gets true if the edge is smooth (its tag is Smooth or SmoothX).
+
+
+   .. py:property:: Sharpness
+      :type: SubDEdgeSharpness
+
+
+      Gets or sets the sharpness of this edge.
+
+      The getter reports ``SubDEdgeSharpness.Crease`` for a crease edge; use ``GetSharpness``\ GetSharpness(false) to get ``SubDEdgeSharpness.Smooth`` for creases instead.
+
+      Setting this goes through the parent SubD so that the neighboring edges and vertices are updated too. Assign ``SubDEdgeSharpness.Smooth`` to make the edge smooth again.
+
+
+   .. py:property:: SubdivisionPoint
+      :type: Point3d
+
+
+      where its midpoint lands after one subdivision.
+
+      :type: Gets the edge's subdivision point
+
+
+   .. py:property:: Tag
+      :type: SubDEdgeTag
+
+
+      identifies the type of subdivision edge.
+
+
+   .. py:property:: VertexFrom
+      :type: SubDVertex
+
+
+      Start vertex for this edge.
+
+
+   .. py:property:: VertexTo
+      :type: SubDVertex
+
+
+      End vertex for this edge.
+
+
+   .. py:property:: Vertices
+      :type: list[Any]
+
+
+      The edge's two vertices, start then end (rhino3dm only).
+

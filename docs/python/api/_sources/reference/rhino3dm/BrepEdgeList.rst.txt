@@ -1,0 +1,24 @@
+rhino3dm.BrepEdgeList
+=====================
+
+.. py:class:: rhino3dm.BrepEdgeList
+
+   Provides access to all the Edges in a Brep object.
+
+
+   .. py:method:: Add(curve3dIndex: int) -> BrepEdge
+                  Add(startVertexIndex: int, endVertexIndex: int, curve3dIndex: int, subDomain: Interval, edgeTolerance: float) -> BrepEdge
+                  Add(startVertexIndex: int, endVertexIndex: int, curve3dIndex: int, edgeTolerance: float) -> BrepEdge
+                  Add(startVertex: BrepVertex, endVertex: BrepVertex, curve3dIndex: int, subDomain: Interval, edgeTolerance: float) -> BrepEdge
+                  Add(startVertex: BrepVertex, endVertex: BrepVertex, curve3dIndex: int, edgeTolerance: float) -> BrepEdge
+
+      Create and add a new edge to this list
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the number of brep edges.
+

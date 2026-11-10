@@ -1,0 +1,85 @@
+rhino3dm.GroundPlane
+====================
+
+.. py:class:: rhino3dm.GroundPlane
+              GroundPlane(g: GroundPlane)
+
+   Represents an infinite plane for implementation by renderers. See ``RenderPlugIn.SupportsFeature``\ SupportsFeature.
+
+
+   .. py:property:: Altitude
+      :type: float
+
+
+      Height above world XY plane in model units. Auto-altitude is computed if enabled.
+
+
+   .. py:property:: AutoAltitude
+      :type: bool
+
+
+      Determines whether the ground plane is fixed by the Altitude property, or whether it is automatically placed at the lowest point in the model.
+
+
+   .. py:property:: Enabled
+      :type: bool
+
+
+      Determines whether the document ground plane is enabled.
+
+
+   .. py:property:: MaterialInstanceId
+      :type: uuid.UUID
+
+
+      Id of material in material table for this ground plane.
+
+
+   .. py:property:: ShadowOnly
+      :type: bool
+
+
+      Determines whether the ground plane shows the material assigned, or whether it is transparent, but captures shadows.
+
+
+   .. py:property:: ShowUnderside
+      :type: bool
+
+
+      If this is off, the ground plane will not be visible when seen from below.
+
+
+   .. py:property:: TextureOffset
+      :type: Vector2d
+
+
+      Texture mapping offset in world units.
+
+
+   .. py:property:: TextureOffsetLocked
+      :type: bool
+
+
+      Texture offset locked.
+
+
+   .. py:property:: TextureRotation
+      :type: float
+
+
+      Texture mapping rotation around world origin + offset in degrees.
+
+
+   .. py:property:: TextureSize
+      :type: Vector2d
+
+
+      Texture mapping single UV span size in world units.
+
+
+   .. py:property:: TextureSizeLocked
+      :type: bool
+
+
+      Texture size locked.
+

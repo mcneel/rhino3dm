@@ -1,0 +1,319 @@
+rhino3dm.Dimension
+==================
+
+.. toctree::
+   :hidden:
+
+   /reference/rhino3dm/Dimension.ForceArrow
+   /reference/rhino3dm/Dimension.ForceText
+
+.. py:class:: rhino3dm.Dimension
+
+   Bases: :py:obj:`AnnotationBase`
+
+
+   Base class for dimensions
+
+
+   .. py:method:: GetTextTransform(viewport: ViewportInfo, style: DimensionStyle, textScale: float, drawForward: bool) -> Transform
+
+      Get the transform for this text object's text geometry
+
+      :param viewport: Viewport where text is being used
+      :param style: Dimension's DimensionStyle
+      :param textScale: Scale to apply to text
+      :param drawForward: Draw text front-facing
+
+
+
+   .. py:method:: UpdateDimensionText(style: DimensionStyle, units: UnitSystem) -> None
+
+      Remakes dimension text geometry object and sets it on the dimension.
+
+      :param style: The dimension style.
+      :param units: The length units.
+
+
+
+   .. py:property:: AltLengthFactor
+      :type: float
+
+
+
+   .. py:property:: AltLengthResolution
+      :type: int
+
+
+
+   .. py:property:: AltLengthRoundoff
+      :type: float
+
+
+
+   .. py:property:: AltPrefix
+      :type: str
+
+
+
+   .. py:property:: AltSuffix
+      :type: str
+
+
+
+   .. py:property:: AltToleranceResolution
+      :type: int
+
+
+
+   .. py:property:: AltUnitsDisplay
+      :type: bool
+
+
+
+   .. py:property:: AltZeroSuppression
+      :type: DimensionStyle
+
+
+
+   .. py:property:: AlternateBelowLine
+      :type: bool
+
+
+
+   .. py:property:: ArrowBlockId1
+      :type: uuid.UUID
+
+
+
+   .. py:property:: ArrowBlockId2
+      :type: uuid.UUID
+
+
+
+   .. py:property:: ArrowSize
+      :type: float
+
+
+
+   .. py:property:: ArrowheadType1
+      :type: DimensionStyle
+
+
+
+   .. py:property:: ArrowheadType2
+      :type: DimensionStyle
+
+
+
+   .. py:property:: BaselineSpacing
+      :type: float
+
+
+
+   .. py:property:: CentermarkSize
+      :type: float
+
+
+
+   .. py:property:: CentermarkStyle
+      :type: DimensionStyle
+
+
+
+   .. py:property:: DetailMeasured
+      :type: uuid.UUID
+
+
+
+   .. py:property:: DimensionLineExtension
+      :type: float
+
+
+
+   .. py:property:: DistanceScale
+      :type: float
+
+
+
+   .. py:property:: ExtensionLineExtension
+      :type: float
+
+
+
+   .. py:property:: ExtensionLineOffset
+      :type: float
+
+
+
+   .. py:property:: FixedExtensionLength
+      :type: float
+
+
+
+   .. py:property:: FixedLengthExtensionOn
+      :type: bool
+
+
+
+   .. py:property:: ForceArrowPosition
+      :type: Dimension
+
+
+
+   .. py:property:: ForceDimLine
+      :type: bool
+
+
+
+   .. py:property:: ForceDimensionLineBetweenExtensionLines
+      :type: bool
+
+
+
+   .. py:property:: ForceTextPosition
+      :type: Dimension
+
+
+
+   .. py:property:: LengthFactor
+      :type: float
+
+
+
+   .. py:property:: LengthResolution
+      :type: int
+
+
+
+   .. py:property:: LengthRoundoff
+      :type: float
+
+
+
+   .. py:property:: NumericValue
+      :type: float
+
+
+      Gets the numeric value (or measurement), depending on geometry type.
+
+      LinearDimension: distance between arrow tips
+
+      RadialDimension: radius or diameter depending on type
+
+      AngularDimension: angle in radians
+
+
+   .. py:property:: PlainUserText
+      :type: str
+
+
+
+   .. py:property:: Prefix
+      :type: str
+
+
+
+   .. py:property:: Suffix
+      :type: str
+
+
+
+   .. py:property:: SuppressDimensionLine1
+      :type: bool
+
+
+      Suppresses the dimension line and arrowhead between the first extension line and the dimension text.
+
+
+   .. py:property:: SuppressDimensionLine2
+      :type: bool
+
+
+      Suppresses the dimension line and arrowhead between the second extension line and the dimension text.
+
+
+   .. py:property:: SuppressExtension1
+      :type: bool
+
+
+
+   .. py:property:: SuppressExtension2
+      :type: bool
+
+
+
+   .. py:property:: TextAngleType
+      :type: DimensionStyle
+
+
+
+   .. py:property:: TextFormula
+      :type: str
+
+
+
+   .. py:property:: TextLocation
+      :type: DimensionStyle
+
+
+
+   .. py:property:: TextOrientation
+      :type: TextOrientation
+
+
+
+   .. py:property:: TextPosition
+      :type: Point2d
+
+
+      Gets and sets the position of text on the plane.
+
+
+   .. py:property:: TextRotation
+      :type: float
+
+
+
+   .. py:property:: ToleranceFormat
+      :type: DimensionStyle
+
+
+
+   .. py:property:: ToleranceHeightScale
+      :type: float
+
+
+
+   .. py:property:: ToleranceLowerValue
+      :type: float
+
+
+
+   .. py:property:: ToleranceResolution
+      :type: int
+
+
+
+   .. py:property:: ToleranceUpperValue
+      :type: float
+
+
+
+   .. py:property:: UseDefaultTextPoint
+      :type: bool
+
+
+
+   .. py:property:: ZeroSuppression
+      :type: DimensionStyle
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rhino3dm.Dimension.ForceArrow
+   rhino3dm.Dimension.ForceText
+
+

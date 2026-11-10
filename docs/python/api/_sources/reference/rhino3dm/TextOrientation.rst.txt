@@ -1,0 +1,24 @@
+rhino3dm.TextOrientation
+========================
+
+.. py:class:: rhino3dm.TextOrientation
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Method for getting rotation for drawing text
+
+
+   .. py:attribute:: InPlane
+      :value: 0
+
+
+      Text has fixed rotation on a world coordinate plane
+
+
+   .. py:attribute:: InView
+      :value: 1
+
+
+      Text is drawn on a plane perpendicular to view direction horizontal to the screen
+

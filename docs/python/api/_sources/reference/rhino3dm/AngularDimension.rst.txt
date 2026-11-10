@@ -1,0 +1,112 @@
+rhino3dm.AngularDimension
+=========================
+
+.. py:class:: rhino3dm.AngularDimension
+              AngularDimension(line1: Line, pointOnLine1: Point3d, line2: Line, pointOnLine2: Point3d, pointOnAngularDimensionArc: Point3d, bSetExtensionPoints: bool)
+              AngularDimension(plane: Plane, horizontal: Vector3d, centerpoint: Point3d, defpoint1: Point3d, defpoint2: Point3d, dimlinepoint: Point3d)
+              AngularDimension(plane: Plane, horizontal: Vector3d, extpoint1: Point3d, extpoint2: Point3d, dirpoint1: Point3d, dirpoint2: Point3d, dimlinepoint: Point3d)
+              AngularDimension(arc: Arc, offset: float)
+
+   Bases: :py:obj:`Dimension`
+
+
+   Represents a dimension of an entity that can be measured with an angle.
+
+
+   .. py:method:: AdjustFromPoints(plane: Plane, centerpoint: Point3d, defpoint1: Point3d, defpoint2: Point3d, dimlinepoint: Point3d) -> bool
+                  AdjustFromPoints(plane: Plane, extpoint1: Point3d, extpoint2: Point3d, dirpoint1: Point3d, dirpoint2: Point3d, dimlinepoint: Point3d) -> bool
+
+      Update angular dimension from point locations.
+
+      :param plane: Dimension's plane
+      :param extpoint1: Start of first extension line.
+      :param extpoint2: start of second extension line.
+      :param dirpoint1: point on first extension vector.
+      :param dirpoint2: Spoint on second extension vector.
+      :param dimlinepoint: point on dimension line.
+
+      :returns: True if successful, false otherwise.
+
+
+
+   .. py:method:: Create(styleId: uuid.UUID, plane: Plane, extpoint1: Point3d, extpoint2: Point3d, dirpoint1: Point3d, dirpoint2: Point3d, dimlinepoint: Point3d) -> AngularDimension
+      :staticmethod:
+
+
+      Deprecated since 8.0.
+
+
+
+   .. py:method:: Get3dPoints() -> tuple[bool, Point3d, Point3d, Point3d, Point3d, Point3d, Point3d, Point3d]
+
+      Get locations of dimension's 3d points
+
+
+
+   .. py:method:: GetAngleDisplayText(style: DimensionStyle) -> str
+
+
+   .. py:method:: GetDisplayLines(style: DimensionStyle, scale: float) -> tuple[bool, list[Line], list[Arc]]
+
+
+   .. py:method:: GetTextRectangle() -> tuple[bool, list[Point3d]]
+
+
+   .. py:property:: AngleFormat
+      :type: DimensionStyle
+
+
+
+   .. py:property:: AngleResolution
+      :type: int
+
+
+
+   .. py:property:: AngleRoundoff
+      :type: float
+
+
+
+   .. py:property:: AngleZeroSuppression
+      :type: DimensionStyle
+
+
+
+   .. py:property:: ArrowPoint1
+      :type: Point2d
+
+
+
+   .. py:property:: ArrowPoint2
+      :type: Point2d
+
+
+
+   .. py:property:: CenterPoint
+      :type: Point2d
+
+
+
+   .. py:property:: DefPoint1
+      :type: Point2d
+
+
+
+   .. py:property:: DefPoint2
+      :type: Point2d
+
+
+
+   .. py:property:: DimlinePoint
+      :type: Point2d
+
+
+
+   .. py:property:: Radius
+      :type: float
+
+
+      the distance from the center point to the dimension line point.
+
+      :type: Gets the radius of the dimension arc
+

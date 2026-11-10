@@ -1,0 +1,210 @@
+rhino3dm.Font
+=============
+
+.. toctree::
+   :hidden:
+
+   /reference/rhino3dm/Font.FontStretch
+   /reference/rhino3dm/Font.FontStyle
+   /reference/rhino3dm/Font.FontWeight
+
+.. py:class:: rhino3dm.Font(familyName: str)
+              Font(familyName: str, weight: Font, style: Font, stretch: Font, underlined: bool, strikethrough: bool)
+              Font(familyName: str, weight: Font, style: Font, underlined: bool, strikethrough: bool)
+
+   Defines a format for text.
+
+
+   .. py:method:: FromQuartetProperties(quartetName: str, bold: bool, italic: bool) -> Font
+      :staticmethod:
+
+
+
+   .. py:method:: FromRichTextProperties(richTextFontName: str, bold: bool, italic: bool, underlined: bool, strikethrough: bool) -> Font
+      :staticmethod:
+
+
+      Returns a font with the requested rich-text (family) name, preserving that name even when the font is not installed on the current machine. If an installed font matches it is returned; otherwise a "not on device" managed font that keeps the requested name is returned (rendered with a fallback quartet). Use this to author a font by name on a machine that does not have it installed: the Font constructor and ``FromQuartetProperties`` both substitute the family in that case, losing the requested name when the file is written.
+
+      :param richTextFontName: The rich-text font (family) name to store.
+      :param bold: True to select the heavier member of the rich-text quartet.
+      :param italic: True to select the more slanted member of the rich-text quartet.
+      :param underlined: True for underlined text.
+      :param strikethrough: True for strikethrough text.
+
+      :returns: A font that preserves the requested name, or null if none could be created.
+
+
+
+   .. py:method:: GetSubstituteFont() -> Font
+
+      If this font is not installed on the system, try to find a substitute
+
+
+
+   .. py:property:: AscentOfCapital
+      :type: int
+
+
+      The font's typographic capital height, in the design units reported by ``UnitsPerEm``. This is the metric a "text height" is measured against, so text of height h renders its capitals h tall. Zero when the font has no usable metrics.
+
+
+   .. py:property:: Bold
+      :type: bool
+
+
+
+   .. py:property:: Description
+      :type: str
+
+
+      Returns a long description that includes family, face, weight, stretch and style information. Generally not useful for finding matching fonts.
+
+
+   .. py:property:: EnglishFaceName
+      :type: str
+
+
+      Returns English Face name
+
+
+   .. py:property:: EnglishFamilyName
+      :type: str
+
+
+
+   .. py:property:: EnglishQuartetName
+      :type: str
+
+
+
+   .. py:property:: FaceName
+      :type: str
+
+
+      Returns Face name
+
+
+   .. py:property:: FamilyName
+      :type: str
+
+
+
+   .. py:property:: FamilyPlusFaceName
+      :type: str
+
+
+      Returns concatenated Family and Face names
+
+
+   .. py:property:: IsEngravingFont
+      :type: bool
+
+
+
+   .. py:property:: IsGeometricToleranceFont
+      :type: bool
+
+
+
+   .. py:property:: IsInstalled
+      :type: bool
+
+
+      Is this font installed on the system
+
+
+   .. py:property:: IsSimulated
+      :type: bool
+
+
+
+   .. py:property:: IsSingleStrokeFont
+      :type: bool
+
+
+
+   .. py:property:: IsSymbolFont
+      :type: bool
+
+
+
+   .. py:property:: Italic
+      :type: bool
+
+
+
+   .. py:property:: LogfontName
+      :type: str
+
+
+      Returns Windows LOGFONT Face name
+
+
+   .. py:property:: PointSize
+      :type: float
+
+
+
+   .. py:property:: PostScriptName
+      :type: str
+
+
+      Returns the Font PostScriptName - "Apple font name"
+
+
+   .. py:property:: QuartetName
+      :type: str
+
+
+
+   .. py:property:: RichTextFontName
+      :type: str
+
+
+      {\\\\fonttbl...{\\\\fN RichTextFontName;}...}
+
+      :type: Returns the Font RichTextFontName used in RTF strings
+
+
+   .. py:property:: Stretch
+      :type: Font
+
+
+
+   .. py:property:: Strikeout
+      :type: bool
+
+
+
+   .. py:property:: Style
+      :type: Font
+
+
+
+   .. py:property:: Underlined
+      :type: bool
+
+
+
+   .. py:property:: UnitsPerEm
+      :type: int
+
+
+      The number of design units per em in this font's normalized metrics. Together with ``AscentOfCapital`` this converts between an em size - the "font size" used by CSS, SVG, PDF and most page layout - and the height of a capital letter, which is what Rhino means by a text height. Zero when the font has no usable metrics.
+
+
+   .. py:property:: Weight
+      :type: Font
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rhino3dm.Font.FontStretch
+   rhino3dm.Font.FontStyle
+   rhino3dm.Font.FontWeight
+
+

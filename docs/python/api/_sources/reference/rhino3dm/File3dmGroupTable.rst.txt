@@ -1,0 +1,95 @@
+rhino3dm.File3dmGroupTable
+==========================
+
+.. py:class:: rhino3dm.File3dmGroupTable
+
+   Provides access to groups in the 3dm file.
+
+
+   .. py:method:: Add(item: Group) -> None
+
+      Adds an item.
+
+      :param item: The item to add.
+
+
+
+   .. py:method:: AddGroup() -> int
+
+      Adds a new empty group to the group table.
+
+      :returns: >=0 index of new group or -1 on error.
+
+
+
+   .. py:method:: Delete(item: Group | None) -> bool
+                  Delete(index: int) -> None
+                  Delete(id: object) -> bool
+
+      Deletes an item. Items that are deleted are still keeping their space, but the 'IsDeleted' flag is checked.
+
+      :returns: True if an items could be deleted (e.g., it was not locked).
+
+
+
+   .. py:method:: Dump() -> str
+
+      Prepares a text dump of object table.
+
+      :returns: A string containing the dump.
+
+
+
+   .. py:method:: FindId(id: uuid.UUID) -> Group
+
+      Uses the guid to find a model component. Deleted objects cannot be found by id. The guid is the value that is stored in the .Id property. In a single document, no two active objects have the same guid. If an object is replaced with a new object, then the guid persists. For example, if the \_Move command moves an object, then the moved object inherits its guid from the starting object. If the Copy command copies an object, then the copy gets a new guid. This guid persists through file saving/opening operations. This function will not find grip objects.
+
+      :param id: ID of model component to search for.
+
+      :returns: Reference to the rhino object with the objectId or null if no such object could be found.
+
+
+
+   .. py:method:: FindIndex(groupIndex: int) -> Group
+
+      Retrieves a Group object based on an index. This search type of search is discouraged. We are moving towards using only IDs for all tables.
+
+      :param groupIndex: The index to search for.
+
+      :returns: A Group object, or null if none was found.
+
+
+
+   .. py:method:: FindName(name: str) -> Group
+
+      Finds a Group given its name.
+
+      :param name: The name of the Group to be searched.
+
+      :returns: A Group, or null on error.
+
+
+
+   .. py:method:: GroupMembers(groupIndex: int) -> list[Any]
+
+      Gets an array of all of the objects in a group.
+
+      :param groupIndex: The index of the group in this table.
+
+      :returns: Array of objects that belong to the specified group or empty array if no objects could be found.
+
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.Group``.
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Returns the count of all items, including deleted ones.
+

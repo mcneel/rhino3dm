@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""The migration guides (M5), one per language, from one source.
+"""The migration guides, one per language, from one source.
 
     api/migration.md   -> docs/migrating-to-9/python.md, javascript.md
     api/retired.toml   -> docs/migrating-to-9/python-members.md, javascript-members.md
 
-api/migration.md is written by hand (its source is docs/vnext/deviations.md); its header says how a
+api/migration.md is written by hand; its header says how a
 paragraph is marked for one language. The members pages list each retired 8.x member in the language
 that had it (`lang` in retired.toml), with the 8.x and 9.2 names spelled for that language. A row's
 note is kept for the reader, minus the references that only mean something inside this repo
@@ -229,7 +229,7 @@ def members_page(lang):
     other = 'JavaScript' if lang == 'py' else 'Python'
     return (HEADER % 'api/retired.toml' +
             '# Renamed and removed members (%s)\n\n[← Migrating to rhino3dm 9.2 (%s)](%s.md)\n\n' % (title, title, page) +
-            '<!-- D19 -->\nThe 8.x %s members that 9.2 replaces with RhinoCommon\'s, or removes. Members rhino3dm keeps\n'
+            'The 8.x %s members that 9.2 replaces with RhinoCommon\'s, or removes. Members rhino3dm keeps\n'
             'alongside RhinoCommon\'s API are not listed, nor are members only 8.x %s had. Search this\n'
             'page for the name your script uses.\n\n' % (title, other) +
             '| rhino3dm 8.x | 9.2 | Note |\n|---|---|---|\n' + '\n'.join(rows(lang)) + '\n')
@@ -247,8 +247,8 @@ def pages():
 
 
 def unknown_tests():
-    """retired.toml `test` names no test in tests/python or tests/javascript defines (G151: the
-    tests/generated fold renamed them all, and nothing noticed)"""
+    """retired.toml `test` names no test in tests/python or tests/javascript defines (a test
+    rename would otherwise go unnoticed)"""
     names = set()
     for p in glob.glob(os.path.join(ROOT, 'tests', 'python', '*.py')):
         names.update(re.findall(r'\bdef (test_\w+)', open(p).read()))
@@ -258,8 +258,17 @@ def unknown_tests():
     return sorted({x['test'] for x in rows if x.get('test') and x['test'] not in names})
 
 
+# references that only mean something inside the project's working notes: the pages are public
+WORKING_NOTES = re.compile(r'<!--\s*[DGU]\d|\bpilot #\d|docs/vnext|\bLuis\b')
+
+
 def main():
     stale = []
+    for name, text in pages().items():
+        hit = WORKING_NOTES.search(text)
+        if hit:
+            print('docs/migrating-to-9/%s: internal reference %r (remove it from the source)' % (name, hit.group(0)))
+            sys.exit(1)
     missing = unknown_tests()
     if missing:
         print('api/retired.toml names tests that do not exist: %s' % ', '.join(missing))

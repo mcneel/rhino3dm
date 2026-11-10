@@ -1,0 +1,122 @@
+rhino3dm.TextJustification
+==========================
+
+.. py:class:: rhino3dm.TextJustification
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Specifies enumerated constants used to indicate the internal alignment and justification of text.
+
+
+   .. py:attribute:: Bottom
+      :value: 65536
+
+
+      Bottom inner alignment.
+
+
+   .. py:attribute:: BottomCenter
+      :value: 65538
+
+
+      Combination of center justification and bottom alignment.
+
+
+   .. py:attribute:: BottomLeft
+      :value: 65537
+
+
+      Combination of left justification and bottom alignment.
+
+
+   .. py:attribute:: BottomRight
+      :value: 65540
+
+
+      Combination of right justification and bottom alignment.
+
+
+   .. py:attribute:: Center
+      :value: 2
+
+
+      Center justification.
+
+
+   .. py:attribute:: Left
+      :value: 1
+
+
+      Left justification.
+
+
+   .. py:attribute:: Middle
+      :value: 131072
+
+
+      Middle inner alignment.
+
+
+   .. py:attribute:: MiddleCenter
+      :value: 131074
+
+
+      Combination of center justification and middle alignment.
+
+
+   .. py:attribute:: MiddleLeft
+      :value: 131073
+
+
+      Combination of left justification and middle alignment.
+
+
+   .. py:attribute:: MiddleRight
+      :value: 131076
+
+
+      Combination of right justification and middle alignment.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``TextJustification.None`` is not Python syntax; ``TextJustification['None']`` is the same member). The default justification.
+
+
+   .. py:attribute:: Right
+      :value: 4
+
+
+      Right justification.
+
+
+   .. py:attribute:: Top
+      :value: 262144
+
+
+      Top inner alignment.
+
+
+   .. py:attribute:: TopCenter
+      :value: 262146
+
+
+      Combination of center justification and top alignment.
+
+
+   .. py:attribute:: TopLeft
+      :value: 262145
+
+
+      Combination of left justification and top alignment.
+
+
+   .. py:attribute:: TopRight
+      :value: 262148
+
+
+      Combination of right justification and top alignment.
+

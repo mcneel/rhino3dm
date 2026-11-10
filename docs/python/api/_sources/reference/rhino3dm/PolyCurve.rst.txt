@@ -1,0 +1,140 @@
+rhino3dm.PolyCurve
+==================
+
+.. py:class:: rhino3dm.PolyCurve
+
+   Bases: :py:obj:`Curve`
+
+
+   Represents a curve that is the result of joining several (possibly different) types of curves.
+
+
+   .. py:method:: Append(arc: Arc) -> bool
+                  Append(curve: Curve | None) -> bool
+                  Append(line: Line) -> bool
+
+      Appends and matches the start of the line to the end of polycurve. This function will fail if the polycurve is closed.
+
+      :param line: Line segment to append.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: AppendSegment(curve: Curve | None) -> bool
+
+      Appends the curve to the polycurve without changing the new segment's geometry. This function will fail if the PolyCurve is closed or if SegmentCount > 0 and the new segment is closed.
+
+      :param curve: Segment to append.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: DuplicatePolyCurve() -> PolyCurve
+
+      Duplicates this polycurve.
+
+      This is the same as ``Duplicate``.
+
+      :returns: An exact duplicate of this curve.
+
+
+
+   .. py:method:: Explode() -> list[Any]
+
+      Explodes this PolyCurve into a list of Curve segments. This will not explode nested polycurves. Call ``RemoveNesting`` first if you need all individual segments.
+
+      :returns: An array of polycurve segments.
+
+
+
+   .. py:method:: PolyCurveParameter(segmentIndex: int, segmentCurveParameter: float) -> float
+
+      Converts a segment curve parameter to a polycurve parameter.
+
+      :param segmentIndex: Index of segment.
+      :param segmentCurveParameter: Parameter on segment.
+
+      :returns: Polycurve evaluation parameter or UnsetValue if the polycurve curve parameter could not be computed.
+
+
+
+   .. py:method:: RemoveNesting() -> bool
+
+      Explodes nested polycurve segments and reconstructs this curve from the shattered remains. The result will have not have any PolyCurves as segments but it will have identical locus and parameterization.
+
+      :returns: true if any nested PolyCurve was found and absorbed, false if no PolyCurve segments could be found.
+
+
+
+   .. py:method:: SegmentCurve(index: int) -> Curve
+
+      Gets the segment curve at the given index.
+
+      :param index: Index of segment to retrieve.
+
+      :returns: The segment at the given index or null on failure.
+
+
+
+   .. py:method:: SegmentCurveParameter(polycurveParameter: float) -> float
+
+      Converts a polycurve parameter to a segment curve parameter.
+
+      :param polycurveParameter: Parameter on PolyCurve to convert.
+
+      :returns: Segment curve evaluation parameter or UnsetValue if the segment curve parameter could not be computed.
+
+
+
+   .. py:method:: SegmentDomain(segmentIndex: int) -> Interval
+
+      Returns the polycurve sub-domain assigned to a segment curve.
+
+      :param segmentIndex: Index of segment.
+
+      :returns: The polycurve sub-domain assigned to a segment curve. Returns Interval.Unset if segment\_index < 0 or segment\_index >= Count().
+
+
+
+   .. py:method:: SegmentIndex(polycurveParameter: float) -> int
+
+      Finds the segment used for evaluation at polycurve\_parameter.
+
+      :param polycurveParameter: Parameter on polycurve for segment lookup.
+
+      :returns: Index of the segment used for evaluation at polycurve\_parameter. If polycurve\_parameter < Domain.Min(), then 0 is returned. If polycurve\_parameter > Domain.Max(), then Count()-1 is returned.
+
+
+
+   .. py:method:: SegmentIndexes(subdomain: Interval) -> tuple[int, int, int]
+
+      Finds the segments that overlap the Polycurve sub domain.
+
+      :param subdomain: Domain on this PolyCurve.
+
+      :returns: Number of segments that overlap the sub-domain.
+
+
+
+   .. py:property:: HasGap
+      :type: bool
+
+
+      This is a quick way to see if the curve has gaps between the sub curve segments.
+
+
+   .. py:property:: IsNested
+      :type: bool
+
+
+      Gets a value indicating whether or not a PolyCurve contains nested PolyCurves.
+
+
+   .. py:property:: SegmentCount
+      :type: int
+
+
+      Gets the number of segments that make up this Polycurve.
+

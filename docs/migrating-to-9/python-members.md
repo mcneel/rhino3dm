@@ -4,7 +4,6 @@
 
 [← Migrating to rhino3dm 9.2 (Python)](python.md)
 
-<!-- D19 -->
 The 8.x Python members that 9.2 replaces with RhinoCommon's, or removes. Members rhino3dm keeps
 alongside RhinoCommon's API are not listed, nor are members only 8.x JavaScript had. Search this
 page for the name your script uses.

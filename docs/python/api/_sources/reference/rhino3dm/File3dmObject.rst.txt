@@ -1,0 +1,48 @@
+rhino3dm.File3dmObject
+======================
+
+.. py:class:: rhino3dm.File3dmObject
+
+   Bases: :py:obj:`ModelComponent`
+
+
+   Used to store geometry table object definition and attributes in a File3dm.
+
+
+   .. py:method:: GetTextureMapping(mappingChannelId: int) -> tuple[TextureMapping, Transform]
+
+      Gets the texture mapping from the ``File3dmObject`` object.
+
+      :param mappingChannelId: The mapping channel id to search for.
+
+      :returns: The texture mapping if found, null otherwise.
+
+
+
+   .. py:property:: Attributes
+      :type: ObjectAttributes
+
+
+      Gets the attributes that are linked with this document object.
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.ModelGeometry``.
+
+
+   .. py:property:: Geometry
+      :type: GeometryBase
+
+
+      Gets the geometry that is linked with this document object.
+
+
+   .. py:property:: Name
+      :type: str
+
+
+      Gets or sets the Name of the object. Equivalent to this.Attributes.Name.
+

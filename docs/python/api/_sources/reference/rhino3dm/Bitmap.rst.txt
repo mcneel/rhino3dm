@@ -1,0 +1,88 @@
+rhino3dm.Bitmap
+===============
+
+.. py:class:: rhino3dm.Bitmap
+
+   Bases: :py:obj:`ModelComponent`
+
+
+   An image stored in a .3dm file (rhino3dm only; RhinoCommon has no file bitmap class).
+
+
+   .. py:method:: GetUserString(key: str) -> str
+
+      The named string attached to this object (rhino3dm only).
+
+      :param key: The string's name.
+
+      :returns: The text, empty when the key is not set.
+
+
+
+   .. py:method:: GetUserStrings() -> list[Any]
+
+      Every named string attached to this object (rhino3dm only).
+
+      :returns: A list of ``[key, value]`` pairs.
+
+
+
+   .. py:method:: SetUserString(key: str, value: str) -> bool
+
+      Attaches a named string to this object (rhino3dm only).
+
+      :param key: The string's name.
+      :param value: The text; an empty string removes the key.
+
+      :returns: True on success.
+
+
+
+   .. py:property:: BitsPerPixel
+      :type: int
+
+
+      The bits per pixel.
+
+
+   .. py:property:: FileFullPath
+      :type: str
+
+
+      The full path of the image file the bitmap came from.
+
+
+   .. py:property:: Height
+      :type: int
+
+
+      The image height in pixels.
+
+
+   .. py:property:: SizeOfImage
+      :type: int
+
+
+      The bytes of image data.
+
+
+   .. py:property:: SizeOfScan
+      :type: int
+
+
+      The bytes in one row of pixels.
+
+
+   .. py:property:: UserStringCount
+      :type: int
+
+
+      The number of named strings attached to this object (rhino3dm only).
+
+
+   .. py:property:: Width
+      :type: int
+
+
+      The image width in pixels.
+

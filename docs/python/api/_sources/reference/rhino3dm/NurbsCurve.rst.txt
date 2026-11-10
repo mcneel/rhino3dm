@@ -1,0 +1,175 @@
+rhino3dm.NurbsCurve
+===================
+
+.. py:class:: rhino3dm.NurbsCurve(other: NurbsCurve | None)
+              NurbsCurve(degree: int, pointCount: int)
+              NurbsCurve(dimension: int, rational: bool, order: int, pointCount: int)
+
+   Bases: :py:obj:`Curve`
+
+
+   Represents a Non Uniform Rational B-Splines (NURBS) curve.
+
+
+   .. py:method:: Append(nurbsCurve: NurbsCurve) -> bool
+
+      Appends a NURBS curve to this curve.
+
+      :param nurbsCurve: The NURBS curve to append.
+
+
+
+   .. py:method:: ConvertSpanToBezier(spanIndex: int) -> BezierCurve
+
+      Converts a span of the NURBS curve into a Bezier.
+
+      :param spanIndex: The span index, where (0 <= spanIndex <= Points.Count - Order).
+
+      :returns: Bezier curve if successful, null otherwise.
+
+
+
+   .. py:method:: Create(periodic: bool, degree: int, points: collections.abc.Sequence[Point3d]) -> NurbsCurve
+      :staticmethod:
+
+
+      Constructs a 3D NURBS curve from a list of control points.
+
+      :param periodic: If true, create a periodic uniform curve. If false, create a clamped uniform curve.
+      :param degree: (>=1) degree=order-1.
+      :param points: control vertex locations.
+
+      :returns: new NURBS curve on success null on error.
+
+
+
+   .. py:method:: CreateFromArc(arc: Arc) -> NurbsCurve
+      :staticmethod:
+
+
+      Gets a rational degree 2 NURBS curve representation of the arc. Note that the parameterization of NURBS curve does not match arc's transcendental parameterization.
+
+      :returns: Curve on success, null on failure.
+
+
+
+   .. py:method:: CreateFromCircle(circle: Circle) -> NurbsCurve
+      :staticmethod:
+
+
+      Gets a rational degree 2 NURBS curve representation of the circle. Note that the parameterization of NURBS curve does not match circle's transcendental parameterization. Use GetRadianFromNurbFormParameter() and GetParameterFromRadian() to convert between the NURBS curve parameter and the transcendental parameter.
+
+      :returns: Curve on success, null on failure.
+
+
+
+   .. py:method:: CreateFromEllipse(ellipse: Ellipse) -> NurbsCurve
+      :staticmethod:
+
+
+      Gets a rational degree 2 NURBS curve representation of the ellipse.
+
+      Note that the parameterization of the NURBS curve does not match with the transcendental parameterization of the ellipsis.
+
+      :returns: A NURBS curve representation of this ellipse or null if no such representation could be made.
+
+
+
+   .. py:method:: CreateFromLine(line: Line) -> NurbsCurve
+      :staticmethod:
+
+
+      Gets a non-rational, degree 1 NURBS curve representation of the line.
+
+      :returns: Curve on success, null on failure.
+
+
+
+   .. py:method:: GrevilleParameter(index: int) -> float
+
+      Gets the greville (edit point) parameter that belongs to the control point at the specified index.
+
+      :param index: Index of Greville (Edit) point.
+
+
+
+   .. py:method:: GrevilleParameters() -> list[float]
+
+      Gets all Greville parameters for this curve.
+
+
+
+   .. py:method:: GrevillePoint(index: int) -> Point3d
+
+      Gets the Greville parameter that belongs to the control point at the specified index.
+
+      :param index: Index of Greville point.
+
+
+
+   .. py:method:: IncreaseDegree(desiredDegree: int) -> bool
+
+      Increase the degree of this curve.
+
+      :param desiredDegree: The desired degree. Degrees should be number between and including 1 and 11.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: MakePiecewiseBezier(setEndWeightsToOne: bool) -> bool
+
+      Clamps ends and adds knots so the NURBS curve has Bezier spans (all distinct knots have multiplicity = degree).
+
+      :param setEndWeightsToOne: If true and the first or last weight is not one, then the first and last spans are re-parameterized so that the end weights are one.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Reparameterize(c: float) -> bool
+
+      Use a linear fractional transformation to re-parameterize the NURBS curve. This does not change the curve's domain.
+
+      The CV and knot values are values are changed so that output\_nurbs(t) = input\_nurbs(lambda(t)).
+
+      :param c: re-parameterization constant (generally speaking, c should be > 0). The control points and knots are adjusted so that output\_nurbs(t) = input\_nurbs(lambda(t)), where lambda(t) = c\*t/( (c-1)\*t + 1 ). Note that lambda(0) = 0, lambda(1) = 1, lambda'(t) > 0, lambda'(0) = c and lambda'(1) = 1/c.
+
+      :returns: true if successful.
+
+
+
+   .. py:property:: HasBezierSpans
+      :type: bool
+
+
+      Returns true if the NURBS curve has Bezier spans (all distinct knots have multiplicity = degree)
+
+
+   .. py:property:: IsRational
+      :type: bool
+
+
+      Gets a value indicating whether or not the curve is rational. Rational curves have control-points with custom weights.
+
+
+   .. py:property:: Knots
+      :type: NurbsCurveKnotList
+
+
+      Gets access to the knots (or "knot vector") of this NURBS curve.
+
+
+   .. py:property:: Order
+      :type: int
+
+
+      Gets the order of the curve. Order = Degree + 1.
+
+
+   .. py:property:: Points
+      :type: NurbsCurvePointList
+
+
+      Gets access to the control points of this NURBS curve.
+

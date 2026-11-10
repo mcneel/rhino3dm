@@ -1,0 +1,59 @@
+rhino3dm.TextVerticalAlignment
+==============================
+
+.. py:class:: rhino3dm.TextVerticalAlignment
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Vertical location of text attach point relative to text
+
+
+   .. py:attribute:: Bottom
+      :value: 5
+
+
+      Attach to the baseline of the last line. (Independent of glyphs being displayed.)
+
+
+   .. py:attribute:: BottomOfBoundingBox
+      :value: 6
+
+
+      Attach to the bottom of the boudning box of the visible glyphs.
+
+
+   .. py:attribute:: BottomOfTop
+      :value: 2
+
+
+      Attach to baseline of first line. (Independent of glyphs being displayed.)
+
+
+   .. py:attribute:: Middle
+      :value: 3
+
+
+      Attach to middle of text vertical advance. (Independent of glyphs being displayed.)
+
+
+   .. py:attribute:: MiddleOfBottom
+      :value: 4
+
+
+      Attach to middle of an "I" on the last line. (Independent of glyphs being displayed.)
+
+
+   .. py:attribute:: MiddleOfTop
+      :value: 1
+
+
+      Attach to middle of an "I" on the first line. (Independent of glyphs being displayed.)
+
+
+   .. py:attribute:: Top
+      :value: 0
+
+
+      Attach to top of an "I" on the first line. (Independent of glyphs being displayed.)
+

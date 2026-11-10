@@ -5,13 +5,10 @@
 [← Other languages](../migrating-to-9.md)
 
 rhino3dm 9.2's JavaScript bindings are generated from RhinoCommon, the .NET SDK of Rhino,
-so the API is RhinoCommon's: its names, signatures and behaviour. The
-[RhinoCommon documentation](https://developer.rhino3d.com/api/rhinocommon/) describes rhino3dm too, and
-the typings that ship with the package (`rhino3dm.d.ts`) list every
+so the API is RhinoCommon's: its names, signatures and behaviour. The typings that ship with the package (`rhino3dm.d.ts`) list every
 member with its documentation.
 
-rhino3dm 8.x was written by hand and often differed from RhinoCommon. Start with the changes below:
-they are the ones most scripts hit. [Renamed and removed members](javascript-members.md)
+rhino3dm 8.x was written by hand and often differed from RhinoCommon. The changes below are the ones most scripts will hit. [Renamed and removed members](javascript-members.md)
 maps each 8.x member that is gone to its replacement.
 
 [The changes most scripts hit](#the-changes-most-scripts-hit) ·
@@ -24,7 +21,6 @@ maps each 8.x member that is gone to its replacement.
 
 ### 1. Value types are plain objects
 
-<!-- D11 -->
 `Point3d`, `Vector3d`, `Interval`, `Plane`, `Transform`, `BoundingBox` and the other value types are
 plain objects with RhinoCommon's field names (`{X, Y, Z}`, `{T0, T1}`), not arrays. Their methods are
 functions on the type that take the value first:
@@ -43,7 +39,6 @@ with its 9.2 form: `arc.circumference` is `rhino.Arc.circumference(arc)`, `arc.r
 
 ### 2. Properties are properties
 
-<!-- D91 -->
 Where RhinoCommon has a property, so does JS. In 8.x many were functions:
 
 ```js
@@ -66,8 +61,7 @@ functions: `isValidWithLog()`, `subd.sharpEdgeCount()`, `vertex.surfacePoint()`,
 
 ### 3. Editing an object's geometry no longer changes the file
 
-<!-- D1 -->
-`obj.geometry` is a copy-on-write view, as in RhinoCommon: the first edit makes a
+`obj.geometry` is now a copy-on-write view, like it is in RhinoCommon. This means that the first edit makes a
 private copy, and the file stays as it was (no error). To change the file, replace the object:
 
 ```js
@@ -85,25 +79,32 @@ for (const obj of [...doc.objects]) {
 }
 ```
 
-`obj.attributes` still writes through. Faces, meshes and textures work the same
-way ([Geometry](#all-geometry)).
+`obj.attributes` still writes through. A brep face's surface and mesh, an
+extrusion's mesh and a material's textures are copy-on-write views too ([Geometry](#all-geometry)).
 
 ### 4. `out` parameters come back as an array, success first
 
-<!-- D13 -->
-
 ```js
-const [ok, plane] = curve.tryGetPlane()
-const [ok2, left, right, bottom, top, near, far] = viewport.getFrustum()   // 8.x: an object
+// 8.x
+const frustum = viewport.getFrustum()   // an object, or null
+const left = frustum.left, near = frustum.near
+
+// 9.2
+const [ok, left, right, bottom, top, near, far] = viewport.getFrustum()
+const [ok2, plane] = curve.tryGetPlane()   // new in 9.2, same pattern
 ```
 
 ### 5. Editing tables
 
-<!-- D84, D85, D14 -->
-
 ```js
-doc.layers.add(layer)           // returns nothing now; the index is doc.layers.count - 1
-doc.layers.delete(layer)        // or delete(index), which throws for a bad index
+// 8.x
+const index = doc.layers().add(layer)
+doc.layers().delete(layer.id)
+
+// 9.2
+doc.layers.add(layer)             // returns nothing
+const index = doc.layers.count - 1
+doc.layers.delete(layer)          // or delete(index), which throws for a bad index
 ```
 
 `doc.layers.addLayer(name, color)` still returns the index.
@@ -111,25 +112,27 @@ The same goes for the other tables (materials, linetypes, dimension styles, ...)
 
 ### 6. Bad arguments throw
 
-<!-- D9, D53 -->
 RhinoCommon's argument checks run here too: `curve.spanDomain(-1)` throws.
 In 8.x an error inside the
 module aborted it; now it is an exception you can catch ([Errors](#errors)).
 
 ### 7. Null arrays are `null`
 
-<!-- D87, D35 -->
 Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array, for example
 `rhino.BoundingBox.getCorners(box)` of an invalid box.
 
 ## Values and objects
 
-<!-- D11, D59, D51, D92 -->
 - A value type is built with `new`, as in 8.x and RhinoCommon, and gives a plain object
   (`rhino.T.create(...)` is the same call; `instanceof rhino.T` is false). Its operators are functions with RhinoCommon's names:
 
   ```js
-  const box = new rhino.BoundingBox(min, max)   // { Min: {...}, Max: {...} }
+  // 8.x
+  const box = new rhino.BoundingBox([0, 0, 0], [1, 1, 1])   // box.min is [0, 0, 0]
+  const v = [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
+
+  // 9.2
+  const box = new rhino.BoundingBox(min, max)   // { Min: {...}, Max: {...} }: box.Min
   const t = rhino.Transform.multiply(a, b)
   const v = rhino.Vector3d.add(a, b)
   ```
@@ -137,6 +140,10 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array, fo
 - A method that changes the value in C# changes the object you pass, and returns what C# returns:
 
   ```js
+  // 8.x
+  point = rhino.Point3d.transform(point, xform)   // returned a moved copy
+
+  // 9.2
   rhino.Point3d.transform(point, xform)        // point is moved
   const ok = rhino.Vector3d.unitize(vector)    // vector is unitized; ok is false for a zero vector
   ```
@@ -146,79 +153,111 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array, fo
   `rhino.Vector3d.Length(v)`.
 - Overloads share one name, chosen by the arguments: `addTriFace` / `addQuadFace` are `addFace`,
   `appendLine` / `appendArc` / `appendCurve` are `append`, and `toByteArrayOptions(options)` is
-  `toByteArray(options)`. <!-- D20, D54 -->
+  `toByteArray(options)`.
 - Overloads that differ only in float versus double values (`Point3f` versus `Point3d`) keep the
-  double one. <!-- D70 -->
+  double one.
 - Views and table items (`doc.objects`, `brep.faces.get(0)`, a layer from a table) keep their parent
   alive, so dropping the parent is safe. `parent.delete()` still frees it at once and invalidates its
-  views. <!-- D52 -->
+  views.
 - `SubDEdgeSharpness` is a plain object `{sharpness0, sharpness1}`; build one with
-  `new rhino.SubDEdgeSharpness(a, b)`, which checks the values as RhinoCommon does. <!-- D61 -->
+  `new rhino.SubDEdgeSharpness(a, b)`, which checks the values as RhinoCommon does.
 - A color is `{r, g, b, a}` (`a` optional). Anything else, such as an array, throws `TypeError`; 8.x read
   it as black.
 
 ## Files and tables
 
+### Getting items: iterating and indexing
+
+```js
+// 8.x
+for (let i = 0; i < doc.objects().count; i++) {
+  const obj = doc.objects().get(i)
+}
+
+// 9.2
+for (const obj of doc.objects) {
+  ...
+}
+const third = [...doc.objects][2]
+```
+
 - **Iteration** walks the live components (`for (const layer of
   doc.layers)`), skipping deleted ones. 8.x silently stopped at the first deleted item.
-  <!-- D6 -->
 - **`doc.objects.get(i)`** is gone, as in
-  RhinoCommon: iterate, or `[...doc.objects][i]`. `doc.objects.count` works. <!-- D17 -->
-- **Table items are live.** A layer you hold reflects later edits to the file, and
-  throws once its layer is deleted from the file. In 8.x it kept stale
-  data. <!-- D15 -->
-- `doc.layers` and `doc.allLayers` both exist, as in
-  RhinoCommon (also materials, linetypes, dimension styles, instance definitions and hatch patterns).
-  <!-- D16 -->
-- `doc.strings` has RhinoCommon's members: `count`, `getKey(i)`, `getValue(i)`, `getValue(key)`, `setString(key, value)`,
-  `delete(key)`. <!-- D82 -->
-- **Bitmaps**: set `bitmap.fileFullPath = path`, then
-  `doc.bitmaps.add(bitmap)` returns the file's copy.
-  `findId` finds images, and `findIndex(i)` give the
-  i-th image. <!-- D43 -->
+  RhinoCommon: iterate, or `[...doc.objects][i]`. `doc.objects.count` works.
+- **Bitmaps**: `findId` finds images, and `findIndex(i)`
+  give the i-th image.
 - **Decals**: iterate them (`for (const d of
   attributes.decals)`); hidden decals are skipped, as in RhinoCommon. `attributes.decals.count` counts what iteration yields. There is no index: use
-  `[...attributes.decals][i]`. <!-- D31, D74 -->
-- Objects come back as their most specific class: a plane surface is a `PlaneSurface`, not a
-  `Surface`, so `instanceof` checks change. <!-- D8 -->
+  `[...attributes.decals][i]`.
+
+### Table items are live
+
+- A layer you hold reflects later edits to the file, and throws once its
+  layer is deleted from the file. In 8.x it kept stale data.
 - `doc.views.get(i)` and `doc.namedViews.get(i)` are
-  live: the same view while it is in the file, and an exception once it is
-  not. <!-- D57 -->
+  live too: the same view while it is in the file, and an exception once it is
+  not.
+- Objects come back as their most specific class: a plane surface is a `PlaneSurface`, not a
+  `Surface`, so `instanceof` checks change.
+
+### Tables and their members
+
+- `doc.layers` and `doc.allLayers` both exist, as in
+  RhinoCommon (also materials, linetypes, dimension styles, instance definitions and hatch patterns).
+- `doc.strings` has RhinoCommon's members: `count`, `getKey(i)`, `getValue(i)`, `getValue(key)`, `setString(key, value)`,
+  `delete(key)`.
 - `doc.manifest` lists every component of the file. Its images are `Bitmap`
-  objects. <!-- D44 -->
+  objects.
 - `doc.allViews` and `doc.allNamedViews` are not
-  available yet (`views` and `namedViews` are). <!-- D21 -->
-- `doc.embeddedFilePaths()` is `doc.embeddedFiles` (each item's `filename`). Paths are cleaned for
-  the platform, so a path saved on Windows reads with `/` on Linux and macOS. <!-- D69 -->
-- An embedded file's `filename` is read-only. 8.x set it, then added the file; in 9.2
-  `File3dmEmbeddedFile.fromByteArray(bytes, filename)` names it, and `doc.embeddedFiles.add(file)`
-  adds it.
-- `doc.created` and
-  `doc.lastEdited` are new: `Date` values. <!-- D33 -->
+  available yet (`views` and `namedViews` are).
 - `doc.objects.add(geometry, attributes)` adds
   leaders, text and radial or ordinate dimensions too, as 8.x did, although RhinoCommon throws for
-  them. <!-- D71 -->
+  them.
+- **Adding a bitmap**: set `bitmap.fileFullPath = path`, then
+  `doc.bitmaps.add(bitmap)` returns the file's copy.
+
+### Embedded files
+
+```js
+// 8.x
+const file = rhino.EmbeddedFile.fromByteArray(bytes)
+file.fileName = 'logo.png'
+doc.embeddedFiles().add(file)
+const paths = doc.embeddedFilePaths()
+
+// 9.2
+const file = rhino.File3dmEmbeddedFile.fromByteArray(bytes, 'logo.png')
+doc.embeddedFiles.add(file)
+const paths = [...doc.embeddedFiles].map(f => f.filename)
+```
+
+- An embedded file's `filename` is read-only: the name comes from `File3dmEmbeddedFile.fromByteArray(bytes, filename)`.
+- Paths are cleaned for the platform, so a path saved on Windows reads with `/` on Linux and macOS.
+
+### File settings
+
+- `doc.created` and
+  `doc.lastEdited` are new: `Date` values.
 - `ConstructionPlane` and `File3dmWriteOptions`
   are classes (`new rhino.File3dmWriteOptions()`), not plain objects. They gain RhinoCommon's members:
   `showGrid`, `showAxes`, `showZAxis`, and the write
-  options' mesh options. <!-- D32 -->
+  options' mesh options.
 
 ## Geometry
 
 ### All geometry
 
-<!-- D29, D30 -->
 - **Copy-on-write.** Like `obj.geometry`, `face.underlyingSurface()`, `face.getMesh(type)`, `extrusion.getMesh(type)` and
   `material.getBitmapTexture()` (and the other texture getters) return copy-on-write views: an edit
   does not reach the file. Put changes back with `face.setMesh(type, mesh)` or
   `material.setBitmapTexture(texture)`.
 - **Values of invalid inputs follow RhinoCommon.** For example the distance to an unset point is `0.0`
-  (8.x: infinity). <!-- D2 -->
-- `isValidWithLog()` is a function returning `[ok, log]`. <!-- D80 -->
+  (8.x: infinity).
+- `isValidWithLog()` is a function returning `[ok, log]`.
 - Constructors RhinoCommon does not have are gone: `Group()`, `Hatch()`, `RevSurface()`,
   `TextureMapping()`, `Decal()`, `Point()`. Use RhinoCommon's factories (`doc.allGroups.addGroup`, `rhino.Hatch.createFromBrep`,
   `rhino.RevSurface.create`, `rhino.TextureMapping.create*Mapping`, `new rhino.Point(location)`).
-  <!-- D83 -->
 - Some RhinoCommon overloads differ only in their `out` parameters, so JS can reach only
   one of them under RhinoCommon's name. The others have names of their own, listed in each section
   below.
@@ -232,7 +271,7 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array, fo
 
 - `rhino.Curve.createControlPointCurve(points,
   degree)` builds the curve as RhinoCommon does. Two points still give a `LineCurve`, and degree 1
-  still gives a `PolylineCurve`. For a NURBS curve: <!-- D3 -->
+  still gives a `PolylineCurve`. For a NURBS curve:
   - **The domain is `0` to the length of the control polygon.** 8.x used knot spacing 1, so the domain
     was `0` to the number of points minus the degree. The shape is the same, but every parameter
     changes: `pointAt(t)`, `domain` and closest-point results.
@@ -241,7 +280,6 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array, fo
   - **Too few points for the degree lowers the degree** to the number of points minus one. 8.x
     returned `null`. The degree is also clamped to 1–11.
 - `curve.derivativeAt` returns `Vector3d`s (the point first, as a vector).
-  <!-- D78 -->
 - `points.getPoint(i)` returning a `Point4d` is
   `getPoint4d(i)`.
 
@@ -251,81 +289,187 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array, fo
   (`addRange`,
   `removeRange`, `indexOf`, `sort`, `reverse`, `first`, `last`, `toArray`, ...). They are reference
   types: an assignment shares the list. Use `get(i)`, `set(i, p)` and
-  `count`. <!-- D37 -->
+  `count`.
 - `polyline.getSegments()` returns `Line` values,
   not `LineCurve` objects, and `null` with fewer than two points.
-  `list.append(points)` is `addRange(points)`. <!-- D89 -->
+  `list.append(points)` is `addRange(points)`.
 
 ### Surfaces
 
 - `rhino.NurbsSurface.create(...)` with invalid arguments returns
-  `null`. <!-- D4 -->
+  `null`.
 - `points.getPoint(u, v)` returning a `Point4d` is
   `getPoint4d(u, v)`.
 
 ### Breps
 
-- A brep's surface cannot be replaced outside Rhino, so edit the brep itself (for example
-  `brep.transform(xform)`). `face.underlyingSurface()` returns a copy-on-write view: editing it does not change the brep.
-- Editing a `BrepEdge` or `BrepTrim` through a `Curve` method (`edge.reverse()`) throws. <!-- D23 -->
+- Editing a face's surface no longer changes the brep. `face.underlyingSurface()` and `brep.surfaces.get(i)` return copy-on-write
+  views. In 8.x an edit moved the surface inside the brep but left its edges and trims
+  where they were, which made the brep invalid (`brep.isValid` became false) and
+  could write a broken brep to the file. To move the brep, transform
+  it (`brep.transform(xform)`). To use the edited surface, build a new
+  brep from it:
+
+  ```js
+  // 8.x
+  const surface = face.underlyingSurface()
+  surface.transform(xform)      // moved the face's surface inside the brep, not its edges and trims
+  brep.isValid                  // false: the brep is now invalid
+
+  // 9.2
+  const surface = face.underlyingSurface()
+  surface.transform(xform)      // moves a copy: the brep is unchanged
+  const newBrep = rhino.Brep.createFromSurface(surface)
+  ```
+
+- Editing a `BrepEdge` or `BrepTrim` through a `Curve` method (`edge.reverse()`) throws.
 - `face.perFaceColor` of a face without one is `(0, 0, 0, 0)` (8.x
-  `(255, 255, 255, 0)`), and it can be set. <!-- D28 -->
+  `(255, 255, 255, 0)`), and it can be set.
 - `face.getMesh(type)` returns a copy-on-write view: editing it does
   not change the face. Put the change back with `face.setMesh(type, mesh)`.
 
 ### Extrusions
 
-- `extrusion.getMesh(type)` returns a copy-on-write view: editing it
-  does not change the extrusion.
+- Editing the mesh `extrusion.getMesh(type)` returns no longer
+  changes the extrusion or the meshes it stores: it is a copy-on-write view. In 8.x the edit changed
+  the extrusion's stored mesh. Put the change back with `extrusion.setMesh(mesh, type)`.
 
 ### Meshes
 
 - `mesh.faces.get(i)` is a `MeshFace` object (`{A, B, C, D}`), not an
-  array; `rhino.MeshFace.isQuad(face)` tells a quad. <!-- D79 -->
-- `mesh.normals.add(...)` stores the vector as given;
-  `unitizeNormals()` unitizes. 8.x unitized on add. <!-- D66 -->
-- `mesh.getCachedTextureCoordinates(id)` is a view into
-  the mesh, not a copy. <!-- D27 -->
-- `mesh.getCachedTextureCoordinatesFromTexture(file, objectId, texture)` is an overload of
-  `getCachedTextureCoordinates`, and
-  `setCachedTextureCoordinatesFromMaterial` returns
-  nothing. <!-- D65 -->
-
-### SubD
-
-<!-- D26, D88, D60, D24, D25 -->
-- `subd.faces`, `subd.edges` and `subd.vertices` are lists with `count`, iteration and `find(id)`.
-  The `First` / `Next` / `Current` cursors are gone.
+  array:
 
   ```js
   // 8.x
-  const faces = subd.faces()
-  for (let face = faces.first(); face; face = faces.next()) { ... }
+  const [a, b, c, d] = mesh.faces().get(i)
+  const isQuad = c !== d
+
+  // 9.2
+  const face = mesh.faces.get(i)
+  const { A, B, C, D } = face
+  const isQuad = rhino.MeshFace.isQuad(face)
+  ```
+- `mesh.normals.add(x, y, z)` stores the vector as given. 8.x
+  unitized it on add. Unitize afterwards, once the mesh has a normal for each vertex:
+
+  ```js
+  // 8.x
+  mesh.normals().add(0, 0, 5)       // stored as (0, 0, 1)
+
+  // 9.2
+  mesh.normals.add(0, 0, 5)         // stored as (0, 0, 5)
+  mesh.normals.unitizeNormals()     // now (0, 0, 1)
+  ```
+
+- `mesh.getCachedTextureCoordinates(id)` is a view into
+  the mesh, not a copy.
+- `mesh.getCachedTextureCoordinatesFromTexture(file, objectId, texture)` is an overload of
+  `getCachedTextureCoordinates`, and
+  `setCachedTextureCoordinatesFromMaterial` returns
+  nothing.
+
+### SubD
+
+- `subd.faces`, `subd.edges` and `subd.vertices` are lists with `count`, iteration and `find(id)`.
+  The `First` / `Next` / `Current` cursors are gone. In 8.x, `Next()` did not stop after the last
+  component: it returned empty components (`id`
+  0) forever.
+
+  ```js
+  // 8.x
+  const faces = subd.faces()          // a cursor
+  const count = faces.count
+  const face = faces.get(faceId)      // by id
 
   // 9.2
   for (const face of subd.faces) { ... }
+  const count = subd.faces.count
+  const face = subd.faces.find(faceId)
   ```
 
 - A component's neighbours are arrays: `face.edges`, `face.vertices`, `edge.faces`,
-  `edge.vertices`, `vertex.edges` and `vertex.faces`, without 8.x's `First` / `Next` cursor.
-  RhinoCommon's `edgeCount` plus
-  `edgeAt(i)` (also `vertexAt`, `faceAt`) work too, and an edge's vertices are also `vertexFrom` and `vertexTo`.
+  `edge.vertices`, `vertex.edges` and `vertex.faces`, not 8.x's cursors. RhinoCommon's
+  `edgeCount` plus `edgeAt(i)` (also
+  `vertexAt`, `faceAt`) work too, and an edge's vertices are also `vertexFrom` and `vertexTo`.
+
+  ```js
+  // 8.x
+  const edges = face.edges()          // a cursor
+  const count = edges.count
+  const edge = edges.get(0)
+
+  // 9.2
+  const edges = face.edges            // an array
+  const count = edges.length          // or face.edgeCount
+  const edge = edges[0]               // or face.edgeAt(0)
+  const start = edge.vertexFrom, end = edge.vertexTo
+  ```
+
 - `vertex.surfacePoint()` and `subd.sharpEdgeCount()` are
   functions, and `vertex.next` and `vertex.previous` are properties.
-- A component whose SubD changed throws. Components compare equal when
-  they are the same component of the same SubD.
+
+  ```js
+  // 8.x
+  const point = vertex.surfacePoint
+  const following = vertex.next()
+  const sharp = subd.sharpEdgeCount
+
+  // 9.2
+  const point = vertex.surfacePoint()
+  const following = vertex.next
+  const sharp = subd.sharpEdgeCount()
+  ```
+
+- A component whose SubD changed throws; 8.x kept answering as if
+  nothing had changed. Components compare equal when they are the same component of the same SubD
+  (`face.equals(other)`).
+
+  ```js
+  // 8.x
+  const face = subd.faces().get(1)
+  subd.subdivide(1)
+  face.edgeCount         // still answered
+
+  // 9.2
+  const face = subd.faces.find(1)
+  subd.subdivide(1)
+  face.edgeCount         // throws: the component is no longer in its owner
+  ```
+
 - `face.isNotConvex` and `isNotPlanar(tol)` are gone: use `!face.isConvex` and `!face.isPlanar(tol)`.
-  They differ only for a degenerate face; test `face.controlNetCenterNormal` first when that matters. <!-- D72 -->
+  They differ only for a degenerate face; test `face.controlNetCenterNormal` first when that matters.
+
+  ```js
+  // 8.x
+  if (face.isNotConvex || face.isNotPlanar(tol)) { ... }
+
+  // 9.2
+  if (!face.isConvex || !face.isPlanar(tol)) { ... }
+  ```
+
 - `face.perFaceColor` of a face without one is `(0, 0, 0, 0)` (8.x
-  `(255, 255, 255, 0)`), and it can be set. <!-- D28 -->
+  `(255, 255, 255, 0)`), and it can be set.
+
+  ```js
+  // 8.x
+  face.perFaceColor                       // {r: 255, g: 255, b: 255, a: 0} when unset; read-only
+
+  // 9.2
+  face.perFaceColor                       // {r: 0, g: 0, b: 0, a: 0} when unset
+  face.perFaceColor = { r: 255, g: 0, b: 0, a: 255 }
+  ```
 
 ## Annotations
 
-<!-- D39, D67, D68, D46 -->
 - The explicit-parent accessors (`getTextHeight(style)`, `setMaskColor(style, color)`, ...) are gone. Set the parent, then use the
   property, as in RhinoCommon:
 
   ```js
+  // 8.x
+  const style = doc.dimstyles().findId(ann.dimensionStyleId)
+  const height = ann.getTextHeight(style)
+
+  // 9.2
   ann.parentDimensionStyle = doc.dimStyles.findId(ann.dimensionStyleId)
   const height = ann.textHeight
   ```
@@ -338,38 +482,35 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array, fo
   are `points3D` (and `points2D`), and an angular dimension's angle is
   `numericValue`.
 - `Arrowhead` has its static `getPoints(type)` only; its constructors and
-  properties are not bound yet. <!-- D73 -->
+  properties are not bound yet.
 - `textHasRtfFormatting` is true for more than one text run.
   `plainText` joins the runs, and for a dimension it returns the authored text (the
   `<>` formula), not the measurement.
 - WebAssembly has no font engine, so text is not measured: annotation bounding boxes are
-  empty, and `textModelWidth` is -2. <!-- D90 -->
+  empty, and `textModelWidth` is -2.
 
 ## Rendering and settings
 
 - `content.getParameter(name)` returns the value by its type
   (a boolean, number, string, array of numbers, `Color4f` or `Transform`), and `null`
-  when there is no such parameter. 8.x always returned a string. `setParameter` accepts the same values. <!-- D40 -->
+  when there is no such parameter. 8.x always returned a string. `setParameter` accepts the same values.
 - `content.topLevel` of a grandchild is its parent, as in RhinoCommon.
-  <!-- D41 -->
 - `setChildSlotOn(name, on)`
-  and `setChildSlotAmount(name, amount)` take the slot name first. `childSlotAmount` of an unset slot is `0.0`. <!-- D64 -->
+  and `setChildSlotAmount(name, amount)` take the slot name first. `childSlotAmount` of an unset slot is `0.0`.
 - `renderSettings.postEffects` is a `PostEffectCollection` of
   `PostEffectData`: iterate it, or use `postEffectDataFromId(id)`.
-  <!-- D50 -->
 - `pbr.baseColor` (and `emission`, `subsurfaceScatteringColor`) is a `Color4f` (`R`, `G`, `B`, `A`),
-  not an array. <!-- D34 -->
+  not an array.
 - **Sun**: the date is a `Date`: `sun.getDateTime(rhino.DateTimeKind.Local)` and
   `sun.setDateTime(d, rhino.DateTimeKind.Local)`, in place of the year, month, day and hours
   properties. Times are whole seconds. `sunColorFromAltitude` is `rhino.Sun.colorFromAltitude`, which rounds each channel (8.x
-  truncated, so a channel can differ by 1). <!-- D45, D47, D48 -->
+  truncated, so a channel can differ by 1).
 - `mapping.requiresVertexNormals` is gone. Use `mappingType`, `projection` and `capped`.
-  <!-- D49 -->
 - `tryGetMappingBox`, `tryGetMappingCylinder` and `tryGetMappingPlane` with the capped `out` values
   are `tryGetMappingBoxCapped`, `tryGetMappingCylinderCapped` and `tryGetMappingPlaneCapped`.
 - `attributes.drawColor(file)` for a colour by material uses
   Rhino's rules: the material the attributes select, and its PBR base colour when it is physically
-  based. <!-- D63 -->
+  based.
 
 ## Renamed classes
 
@@ -398,7 +539,6 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array, fo
 
 ## Enums
 
-<!-- D76, D77, D18 -->
 - Every enum is RhinoCommon's, with RhinoCommon's names and values. Fifteen 8.x enums had no
   RhinoCommon namesake and are replaced:
 
@@ -422,24 +562,27 @@ Where RhinoCommon returns a `null` array, JS gets `null`, not an empty array, fo
   `DimensionStyleArrowType`).
 - Some values are numbered differently: `DitheringMethods` is
   `None = 0, FloydSteinberg = 1, SimpleNoise = 2` (8.x: `SimpleNoise = 0`), and `PostEffectType` is
-  `Early = 0, ToneMapping = 1, Late = 2`. <!-- D36, D50 -->
+  `Early = 0, ToneMapping = 1, Late = 2`.
 - `LightStyle.Unknown` is `LightStyle.None`.
 - `BlendContinuity`, `CurveExtensionStyle`, `CurveKnotStyle`, `CurveOffsetCornerStyle`, `LoftType`,
   `PointContainment` and `RegionContainment` are gone: no 9.2 member takes or returns them.
 - `DimensionStyleField.ArrowSize` and `LeaderArrowSize` are `Arrowsize` and
   `LeaderArrowsize`, RhinoCommon's spelling.
 - A number or string where an enum is expected throws `TypeError`; 8.x
-  silently used 0. <!-- D55 -->
+  silently used 0.
 
 ## Errors, values and identity
 
 ### Errors
 
-<!-- D9, D10 -->
 An error is a `WebAssembly.Exception`. Read its text with `rhino.getExceptionMessage(e)`, and free it
 with `rhino.decrementExceptionRefcount(e)`, or it leaks:
 
 ```js
+// 8.x
+curve.spanDomain(-1)   // aborted the module: nothing to catch
+
+// 9.2
 try {
   curve.spanDomain(-1)
 } catch (e) {
@@ -454,7 +597,6 @@ Where RhinoCommon accepts `null`, `null` is accepted and behaves as in .NET:
 
 ### Arrays and sequences
 
-<!-- D87, D35, D62 -->
 Wherever RhinoCommon takes a sequence of points, an array works. `getUserStrings()` returns
 an array of `[key, value]` arrays.
 
@@ -462,16 +604,15 @@ an array of `[key, value]` arrays.
 
 - An empty string reads `''` where RhinoCommon returns `null` (`new rhino.ViewInfo().name`,
   the log of `isValidWithLog()` when there is nothing to report): test with
-  `if (!name)`, which is true for both. <!-- D93 -->
+  `if (!name)`, which is true for both.
 - `viewport.screenPort` and
   `getScreenPort()` are RhinoCommon's `(x, y, width, height)`, with y the smaller of top and bottom.
-  A new `new rhino.ViewportInfo()` reads `(0, 0, 1000, 1000)`. <!-- D58, D38 -->
+  A new `new rhino.ViewportInfo()` reads `(0, 0, 1000, 1000)`.
 - `rhino.File3dm.fromByteArray` takes a `Uint8Array` or an `ArrayBuffer`; anything else throws
-  `TypeError`. <!-- D38 -->
+  `TypeError`.
 
 ### Object identity
 
-<!-- D22, D25, D42, D56 -->
 Contents and behaviour follow RhinoCommon, but object identity may not. Accessors such as
 `obj.geometry`, `brep.faces` and
 `brep.faces.get(0)` return a new view each time, so `brep.faces.get(0) === brep.faces.get(0)` is `false`. Compare components by their index or id.

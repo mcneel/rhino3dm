@@ -6400,7 +6400,6 @@ declare module 'rhino3dm' {
 		/**
 		 * An embedded file from its bytes, named `filename` when given: the name it is embedded under (JS only). Add it with `file3dm.embeddedFiles.add(embeddedFile)`.
 		 * @param bytes The file's bytes.
-		 * @param filename The name to embed it under.
 		 */
 		static fromByteArray(bytes: Uint8Array): File3dmEmbeddedFile | null;
 		/**

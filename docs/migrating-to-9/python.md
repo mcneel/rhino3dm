@@ -5,13 +5,10 @@
 [← Other languages](../migrating-to-9.md)
 
 rhino3dm 9.2's Python bindings are generated from RhinoCommon, the .NET SDK of Rhino,
-so the API is RhinoCommon's: its names, signatures and behaviour. The
-[RhinoCommon documentation](https://developer.rhino3d.com/api/rhinocommon/) describes rhino3dm too, and
-the typings that ship with the package (`rhino3dm/__init__.pyi`) list every
+so the API is RhinoCommon's: its names, signatures and behaviour. The typings that ship with the package (`rhino3dm/__init__.pyi`) list every
 member with its documentation.
 
-rhino3dm 8.x was written by hand and often differed from RhinoCommon. Start with the changes below:
-they are the ones most scripts hit. Renamed and removed members](python-members.md)
+rhino3dm 8.x was written by hand and often differed from RhinoCommon. The changes below are the ones most scripts will hit. [Renamed and removed members](python-members.md)
 maps each 8.x member that is gone to its replacement.
 
 [The changes most scripts hit](#the-changes-most-scripts-hit) ·
@@ -23,8 +20,7 @@ maps each 8.x member that is gone to its replacement.
 
 ### 1. Editing an object's geometry no longer changes the file
 
-<!-- D1 -->
-`obj.Geometry` is a copy-on-write view, as in RhinoCommon: the first edit makes a
+`obj.Geometry` is now a copy-on-write view, like it is in RhinoCommon. This means that the first edit makes a
 private copy, and the file stays as it was (no error). To change the file, replace the object:
 
 ```python
@@ -40,24 +36,34 @@ for obj in list(model.Objects):
     model.Objects.Add(geometry, obj.Attributes)
 ```
 
-`obj.Attributes` still writes through. Faces, meshes and textures work the same
-way ([Geometry](#all-geometry)).
+`obj.Attributes` still writes through. A brep face's surface and mesh, an
+extrusion's mesh and a material's textures are copy-on-write views too ([Geometry](#all-geometry)).
 
 ### 2. `out` parameters come back as a tuple, success first
 
-<!-- D13 -->
 ```python
-ok, plane = curve.TryGetPlane()
-ok, left, right, bottom, top, near, far = viewport.GetFrustum()   # 8.x: a dict
+# 8.x
+frustum = viewport.GetFrustum()   # a dict
+left, near = frustum['left'], frustum['near']
+
+# 9.2
+ok, left, right, bottom, top, near, far = viewport.GetFrustum()
+ok, plane = curve.TryGetPlane()   # new in 9.2, same pattern
 ```
 
 ### 3. Editing tables
 
-<!-- D84, D85, D14 -->
 ```python
-model.Write(path, 0)            # 8.x: model.Write(path); 0 is the current version
-model.Layers.Add(layer)         # returns nothing now; the index is len(model.Layers) - 1
-model.Layers.Delete(layer)      # or Delete(index), which raises for a bad index
+# 8.x
+model.Write(path)
+index = model.Layers.Add(layer)
+model.Layers.Delete(layer.Id)
+
+# 9.2
+model.Write(path, 0)              # 0 is the current version
+model.Layers.Add(layer)           # returns nothing
+index = len(model.Layers) - 1
+model.Layers.Delete(layer)        # or Delete(index), which raises for a bad index
 ```
 
 `model.Layers.AddLayer(name, color)` still returns the index.
@@ -65,104 +71,136 @@ The same goes for the other tables (materials, linetypes, dimension styles, ...)
 
 ### 4. In-place methods return nothing
 
-<!-- D86, D5 -->
 ```python
-p.Transform(xform)      # edits p, returns None (8.35 also returned the result)
-ok = v.Unitize()        # bool: False for a zero vector (8.x: None)
+# 8.x
+p = p.Transform(xform)  # edited p and returned it
+v.Unitize()             # returned None
+
+# 9.2
+p.Transform(xform)      # edits p, returns None
+ok = v.Unitize()        # False for a zero vector
 ```
 
 ### 5. Bad arguments raise
 
-<!-- D9, D53 -->
 RhinoCommon's argument checks run here too: `curve.SpanDomain(-1)` raises `IndexError`, and
 `File3dm.Read('missing.3dm')` raises `FileNotFoundError`.
 See [Errors](#errors) for how .NET's exceptions map to Python's.
 
 ### 6. Arrays are lists
 
-<!-- D87, D35 -->
 Array results are lists (8.x returned tuples in places), and `None` where RhinoCommon returns `null`, for example
 `BoundingBox.GetCorners()` of an invalid box.
 
 ## Files and tables
 
+### Getting items: iterating and indexing
+
+```python
+# 8.x
+for i in range(len(model.Objects)):
+    obj = model.Objects[i]
+
+# 9.2
+for obj in model.Objects:
+    ...
+third = list(model.Objects)[2]
+```
+
 - **Iteration** walks the live components (`for layer in model.Layers`), skipping deleted ones. 8.x raised at the first deleted item.
-  <!-- D6 -->
-- **`FindIndex(i)`** returns `None` for a deleted or out-of-range index. `table[i]` still
-  raises `IndexError`. <!-- D7 -->
 - **`model.Objects[i]`** is gone, as in RhinoCommon: iterate, or `list(model.Objects)[i]`.
-  `len(model.Objects)` works. <!-- D17 -->
-- **Table items are live.** A layer you hold reflects later edits to the file, and
-  raises `RuntimeError` once its layer is deleted from the file. In 8.x it kept stale
-  data. <!-- D15 -->
+  `len(model.Objects)` works.
+- **`FindIndex(i)`** returns `None` for a deleted or out-of-range index. `table[i]` still
+  raises `IndexError`.
+- **Bitmaps**: `FindId` finds images, and `FindIndex(i)` / `[i]`
+  give the i-th image.
+- **Decals**: iterate them (`for d in attributes.Decals`); hidden decals are skipped, as in RhinoCommon. `len(attributes.Decals)` counts what iteration yields. There is no index: use
+  `list(attributes.Decals)[i]`.
+
+### Table items are live
+
+- A layer you hold reflects later edits to the file, and raises `RuntimeError` once its
+  layer is deleted from the file. In 8.x it kept stale data.
+- `model.Views[i]` and `NamedViews[i]` are
+  live too: the same view while it is in the file, and a `RuntimeError` once it is
+  not.
+- Objects come back as their most specific class: a plane surface is a `PlaneSurface`, not a
+  `Surface`, so `isinstance` checks change.
+
+### Tables and their members
+
 - `model.Layers` and `model.AllLayers` both exist, as in
   RhinoCommon (also materials, linetypes, dimension styles, instance definitions and hatch patterns).
-  <!-- D16 -->
 - `model.Strings` has RhinoCommon's members: `Count`, `GetKey(i)`,
   `GetValue(i)`, `GetValue(key)`, `SetString(key, value)`, `Delete(key)`. There is no `len` and no
-  indexing. <!-- D82 -->
-- **Bitmaps**: set `bitmap.FileFullPath = path`, then
-  `model.Bitmaps.Add(bitmap)` returns the file's copy.
-  `FindId` finds images, and `FindIndex(i)` / `[i]` give the
-  i-th image. <!-- D43 -->
-- **Decals**: iterate them (`for d in attributes.Decals`); hidden decals are skipped, as in RhinoCommon. `len(attributes.Decals)` counts what iteration yields. There is no index: use
-  `list(attributes.Decals)[i]`. <!-- D31, D74 -->
-- Objects come back as their most specific class: a plane surface is a `PlaneSurface`, not a
-  `Surface`, so `isinstance` checks change. <!-- D8 -->
-- `model.Views[i]` and `NamedViews[i]` are
-  live: the same view while it is in the file, and a `RuntimeError` once it is
-  not. <!-- D57 -->
+  indexing.
 - `File3dm.Manifest` lists every component of the file. Its images are `Bitmap`
-  objects. <!-- D44 -->
+  objects.
 - `File3dm.AllViews` and `AllNamedViews` are not
-  available yet (`Views` and `NamedViews` are). <!-- D21 -->
-- `File3dm.EmbeddedFilePaths()` is `File3dm.EmbeddedFiles` (each item's `Filename`). Paths are cleaned for
-  the platform, so a path saved on Windows reads with `/` on Linux and macOS. <!-- D69 -->
-- An embedded file's `Filename` is read-only. 8.x set it, then added the file; in 9.2
-  `File3dmEmbeddedFile.Read(path)` takes the name from the path, and `EmbeddedFiles.Add(file)` adds
-  it.
-- `File3dm.Created` and `LastEdited` are new: `datetime.datetime` values. <!-- D33 -->
+  available yet (`Views` and `NamedViews` are).
 - `model.Objects.Add(geometry, attributes)` adds
   leaders, text and radial or ordinate dimensions too, as 8.x did, although RhinoCommon throws for
-  them. <!-- D71 -->
+  them.
+- **Adding a bitmap**: set `bitmap.FileFullPath = path`, then
+  `model.Bitmaps.Add(bitmap)` returns the file's copy.
+
+### Embedded files
+
+```python
+# 8.x
+file = rhino3dm.EmbeddedFile.Read(path)
+model.EmbeddedFiles.Add(file)
+paths = model.EmbeddedFilePaths()
+
+# 9.2
+file = rhino3dm.File3dmEmbeddedFile.Read(path)   # named after path
+model.EmbeddedFiles.Add(file)
+paths = [f.Filename for f in model.EmbeddedFiles]
+```
+
+- An embedded file's `Filename` is read-only: the name comes from the path given
+  to `File3dmEmbeddedFile.Read(path)`.
+- Paths are cleaned for the platform, so a path saved on Windows reads with `/` on Linux and macOS.
+
+### File settings
+
+- `File3dm.Created` and `LastEdited` are new: `datetime.datetime` values.
 - `ConstructionPlane` and `File3dmWriteOptions` gain RhinoCommon's members:
   `ShowGrid`, `ShowAxes`, `ShowZAxis`, and the write
-  options' mesh options. <!-- D32 -->
+  options' mesh options.
 
 ## Geometry
 
 ### All geometry
 
-<!-- D29, D30 -->
 - **Copy-on-write.** Like `obj.Geometry`, `BrepFace.UnderlyingSurface()`,
   `BrepFace.GetMesh(type)`, `Extrusion.GetMesh(type)` and `Material.GetBitmapTexture()` (and the other texture getters) return copy-on-write views: an edit
   does not reach the file. Put changes back with `BrepFace.SetMesh(type, mesh)` or
   `Material.SetBitmapTexture(texture)`.
 - **Values of invalid inputs follow RhinoCommon.** For example the distance to an unset point is `0.0`
-  (8.x: infinity). <!-- D2 -->
-- `IsValidWithLog` is a method: `ok, log = obj.IsValidWithLog()`. <!-- D80 -->
+  (8.x: infinity).
+- `IsValidWithLog` is a method: `ok, log = obj.IsValidWithLog()`.
 - Constructors RhinoCommon does not have are gone: `Group()`, `Hatch()`, `RevSurface()`,
   `TextureMapping()`, `Decal()`, `Point()`. Use RhinoCommon's factories (`model.AllGroups.AddGroup`, `Hatch.CreateFromBrep`,
   `RevSurface.Create`, `TextureMapping.Create*Mapping`, `Point(location)`).
-  <!-- D83 -->
 - Some RhinoCommon overloads differ only in their `out` parameters, so Python can reach only
   one of them under RhinoCommon's name. The others have names of their own, listed in each section
   below.
 
 ### Points, vectors and transforms
 
-- `Transform` is a value type, so assignment copies it. <!-- D12 -->
+- `Transform` is a value type, so assignment copies it.
 - `Point3d.Transform` and `Vector3d.Unitize` change the value in place: see
   [the changes most scripts hit](#4-in-place-methods-return-nothing).
 - `Plane.WorldXY`, `Transform.Identity`, `Vector3d.Length` and the other members that are properties
-  in RhinoCommon are properties: `Plane.WorldXY`, not `Plane.WorldXY()`. <!-- D91 -->
+  in RhinoCommon are properties: `Plane.WorldXY`, not `Plane.WorldXY()`.
 - `Transform.DecomposeAffine` with all four `out` values is
   `Transform.DecomposeAffineFull`.
 
 ### Curves
 
 - `Curve.CreateControlPointCurve(points, degree)` builds the curve as RhinoCommon does. Two points still give a `LineCurve`, and degree 1
-  still gives a `PolylineCurve`. For a NURBS curve: <!-- D3 -->
+  still gives a `PolylineCurve`. For a NURBS curve:
   - **The domain is `0` to the length of the control polygon.** 8.x used knot spacing 1, so the domain
     was `0` to the number of points minus the degree. The shape is the same, but every parameter
     changes: `PointAt(t)`, `Domain` and closest-point results.
@@ -171,7 +209,6 @@ Array results are lists (8.x returned tuples in places), and `None` where RhinoC
   - **Too few points for the degree lowers the degree** to the number of points minus one. 8.x
     returned `None`. The degree is also clamped to 1–11.
 - `Curve.DerivativeAt` returns `Vector3d`s (the point first, as a vector).
-  <!-- D78 -->
 - `NurbsCurvePointList.GetPoint(i)` returning a `Point4d` is
   `GetPoint4d(i)`.
 
@@ -179,84 +216,187 @@ Array results are lists (8.x returned tuples in places), and `None` where RhinoC
 
 - `Polyline` and `Point3dList` are RhinoCommon's lists, with all of `RhinoList`'s members
   (`AddRange`, `RemoveRange`, `IndexOf`, `Sort`, `Reverse`, `First`, `Last`, `ToArray`, ...). They are reference
-  types: an assignment shares the list. Index with `[]` and `len()`. <!-- D37 -->
+  types: an assignment shares the list. Index with `[]` and `len()`.
 - `Polyline.GetSegments()` (8.x `GetSegments2()`) returns `Line` values,
   not `LineCurve` objects, and `None` with fewer than two points.
-  `Point3dList.Append(points)` is `AddRange(points)`. <!-- D89 -->
+  `Point3dList.Append(points)` is `AddRange(points)`.
 
 ### Surfaces
 
 - `NurbsSurface.Create(...)` with invalid arguments returns
-  `None`. <!-- D4 -->
+  `None`.
 - `NurbsSurfacePointList.GetPoint(u, v)` returning a `Point4d` is
   `GetPoint4d(u, v)`.
 
 ### Breps
 
-- A brep's surface cannot be replaced outside Rhino, so edit the brep itself (for example
-  `brep.Transform(xform)`). `BrepFace.UnderlyingSurface()` returns a copy-on-write view: editing it does not change the brep.
-- Editing a `BrepEdge` or `BrepTrim` through a `Curve` method (`edge.Reverse()`) raises `RuntimeError`. <!-- D23 -->
+- Editing a face's surface no longer changes the brep. `BrepFace.UnderlyingSurface()` and
+  `brep.Surfaces[i]` return copy-on-write
+  views. In 8.x an edit moved the surface inside the brep but left its edges and trims
+  where they were, which made the brep invalid (`brep.IsValid` became false) and
+  could write a broken brep to the file. To move the brep, transform
+  it (`brep.Transform(xform)`). To use the edited surface, build a new
+  brep from it:
+
+  ```python
+  # 8.x
+  surface = face.UnderlyingSurface()
+  surface.Transform(xform)      # moved the face's surface inside the brep, not its edges and trims
+  brep.IsValid                  # False: the brep is now invalid
+
+  # 9.2
+  surface = face.UnderlyingSurface()
+  surface.Transform(xform)      # moves a copy: the brep is unchanged
+  new_brep = rhino3dm.Brep.CreateFromSurface(surface)
+  ```
+
+- Editing a `BrepEdge` or `BrepTrim` through a `Curve` method (`edge.Reverse()`) raises `RuntimeError`.
 - `BrepFace.PerFaceColor` of a face without one is `(0, 0, 0, 0)` (8.x
-  `(255, 255, 255, 0)`), and it can be set. <!-- D28 -->
+  `(255, 255, 255, 0)`), and it can be set.
 - `BrepFace.GetMesh(type)` returns a copy-on-write view: editing it does
   not change the face. Put the change back with `BrepFace.SetMesh(type, mesh)`.
 
 ### Extrusions
 
-- `Extrusion.GetMesh(type)` returns a copy-on-write view: editing it
-  does not change the extrusion.
+- Editing the mesh `Extrusion.GetMesh(type)` returns no longer
+  changes the extrusion or the meshes it stores: it is a copy-on-write view. In 8.x the edit changed
+  the extrusion's stored mesh. Put the change back with `Extrusion.SetMesh(mesh, type)`.
 
 ### Meshes
 
-- `mesh.Faces[i]` is a `MeshFace` (`A`, `B`, `C`, `D`, `IsQuad`), not a 4-tuple.
-  <!-- D79 -->
-- `MeshVertexNormalList.Add(x, y, z)` stores the vector as given;
-  `UnitizeNormals()` unitizes. 8.x unitized on add. <!-- D66 -->
-- `Mesh.GetCachedTextureCoordinates(id)` is a view into
-  the mesh, not a copy. <!-- D27 -->
-- `Mesh.GetCachedTextureCoordinatesFromTexture(file, objectId, texture)` is an overload of
-  `GetCachedTextureCoordinates`, and
-  `SetCachedTextureCoordinatesFromMaterial` returns
-  nothing. <!-- D65 -->
-
-### SubD
-
-<!-- D26, D88, D60, D24, D25 -->
-- `subd.Faces`, `subd.Edges` and `subd.Vertices` are lists with `len`, iteration and `Find(id)`.
-  The `First` / `Next` / `Current` cursors are gone.
+- `mesh.Faces[i]` is a `MeshFace` (`A`, `B`, `C`, `D`, `IsQuad`), not a 4-tuple:
 
   ```python
   # 8.x
-  face = subd.Faces.First()
-  while face:
-      ...
-      face = subd.Faces.Next()
+  a, b, c, d = mesh.Faces[i]
+  is_quad = c != d
 
   # 9.2
-  for face in subd.Faces:
-      ...
+  face = mesh.Faces[i]
+  a, b, c, d = face.A, face.B, face.C, face.D
+  is_quad = face.IsQuad
+  ```
+- `mesh.Normals.Add(x, y, z)` stores the vector as given. 8.x
+  unitized it on add. Unitize afterwards, once the mesh has a normal for each vertex:
+
+  ```python
+  # 8.x
+  mesh.Normals.Add(0.0, 0.0, 5.0)   # stored as (0, 0, 1)
+
+  # 9.2
+  mesh.Normals.Add(0.0, 0.0, 5.0)   # stored as (0, 0, 5)
+  mesh.Normals.UnitizeNormals()     # now (0, 0, 1)
+  ```
+
+- `Mesh.GetCachedTextureCoordinates(id)` is a view into
+  the mesh, not a copy.
+- `Mesh.GetCachedTextureCoordinatesFromTexture(file, objectId, texture)` is an overload of
+  `GetCachedTextureCoordinates`, and
+  `SetCachedTextureCoordinatesFromMaterial` returns
+  nothing.
+
+### SubD
+
+- `subd.Faces`, `subd.Edges` and `subd.Vertices` are lists with `len`, iteration and `Find(id)`.
+  The `First` / `Next` / `Current` cursors are gone. In 8.x, `Next()` did not stop after the last
+  component: a `while` loop over it never ended, or crashed. `for face in subd.Faces` works in both.
+
+  ```python
+  # 8.x
+  count = subd.Faces.Count
+  face = subd.Faces[face_id]          # by id
+
+  # 9.2
+  count = len(subd.Faces)
+  face = subd.Faces.Find(face_id)
   ```
 
 - A component's neighbours are lists: `face.Edges`, `face.Vertices`, `edge.Faces`, `edge.Vertices`,
-  `vertex.Edges` and `vertex.Faces`, without 8.x's `First` / `Next` cursor.
-  RhinoCommon's `EdgeCount` plus `EdgeAt(i)` (also `VertexAt`, `FaceAt`) work too, and an edge's vertices are also `VertexFrom`
-  and `VertexTo`.
+  `vertex.Edges` and `vertex.Faces`, not 8.x's cursors. RhinoCommon's
+  `EdgeCount` plus `EdgeAt(i)` (also `VertexAt`, `FaceAt`) work too, and an edge's vertices are also `VertexFrom` and `VertexTo`.
+
+  ```python
+  # 8.x
+  edges = face.Edges                  # a cursor
+  count = edges.Count
+  edge = edges[0]
+
+  # 9.2
+  edges = face.Edges                  # a list
+  count = len(edges)                  # or face.EdgeCount
+  edge = edges[0]                     # or face.EdgeAt(0)
+  start, end = edge.VertexFrom, edge.VertexTo
+  ```
+
 - `SubDVertex.SurfacePoint()` is a method, and `Next`, `Previous` and `First` are properties.
   `SubD.SharpEdgeCount()` is a method.
-- A component whose SubD changed raises `RuntimeError`. Components compare equal when
-  they are the same component of the same SubD.
+
+  ```python
+  # 8.x
+  point = vertex.SurfacePoint
+  following = vertex.Next()
+  first = subd.Vertices.First()
+  sharp = subd.SharpEdgeCount
+
+  # 9.2
+  point = vertex.SurfacePoint()
+  following = vertex.Next
+  first = subd.Vertices.First
+  sharp = subd.SharpEdgeCount()
+  ```
+
+- A component whose SubD changed raises `RuntimeError`; 8.x kept answering as if
+  nothing had changed. Components compare equal when they are the same component of the same SubD
+  (`==`).
+
+  ```python
+  # 8.x
+  face = subd.Faces[1]
+  subd.Subdivide(1)
+  face.EdgeCount         # still answered
+
+  # 9.2
+  face = subd.Faces.Find(1)
+  subd.Subdivide(1)
+  face.EdgeCount         # RuntimeError: the component is no longer in its owner
+  ```
+
 - `SubDFace.IsNotConvex` and `IsNotPlanar(tol)` are gone: use `not IsConvex` and `not IsPlanar(tol)`.
-  They differ only for a degenerate face; test `ControlNetCenterNormal.IsZero` first when that matters. <!-- D72 -->
+  They differ only for a degenerate face; test `ControlNetCenterNormal.IsZero` first when that matters.
+
+  ```python
+  # 8.x
+  if face.IsNotConvex or face.IsNotPlanar(tol):
+      ...
+
+  # 9.2
+  if not face.IsConvex or not face.IsPlanar(tol):
+      ...
+  ```
+
 - `SubDFace.PerFaceColor` of a face without one is `(0, 0, 0, 0)` (8.x
-  `(255, 255, 255, 0)`), and it can be set. <!-- D28 -->
+  `(255, 255, 255, 0)`), and it can be set.
+
+  ```python
+  # 8.x
+  face.PerFaceColor                       # (255, 255, 255, 0) when unset; read-only
+
+  # 9.2
+  face.PerFaceColor                       # (0, 0, 0, 0) when unset
+  face.PerFaceColor = (255, 0, 0, 255)
+  ```
 
 ## Annotations
 
-<!-- D39, D67, D68, D46 -->
 - The explicit-parent accessors (`GetTextHeight(style)`, `SetMaskColor(style, color)`, ...) are gone. Set the parent, then use the
   property, as in RhinoCommon:
 
   ```python
+  # 8.x
+  style = model.DimStyles.FindId(ann.DimensionStyleId)
+  height = ann.GetTextHeight(style)
+
+  # 9.2
   ann.ParentDimensionStyle = model.DimStyles.FindId(ann.DimensionStyleId)
   height = ann.TextHeight
   ```
@@ -267,38 +407,35 @@ Array results are lists (8.x returned tuples in places), and `None` where RhinoC
   `(success, p1, p2, ...)`. `Leader.Points` is `Points3D` (and `Points2D`), and an angular dimension's angle is
   `NumericValue`.
 - `Arrowhead` has its static `GetPoints(type)` only; its constructors and
-  properties are not bound yet. <!-- D73 -->
+  properties are not bound yet.
 - `TextHasRtfFormatting` is true for more than one text run.
   `PlainText` joins the runs, and for a dimension it returns the authored text (the
   `<>` formula), not the measurement.
 - On macOS and Windows, text may not be measured: an annotation's `GetBoundingBox` is then empty
   (`IsValid` is false) and `TextModelWidth` is -2. 8.x returned a zero-width box there. Linux
-  measures text. <!-- D90 -->
+  measures text.
 
 ## Rendering and settings
 
 - `RenderContent.GetParameter(name)` returns the value by its type
   (`bool`, `int`, `float`, `str`, `uuid.UUID`, a tuple of doubles, `Color4f`, `Transform`, `bytes`), and `None`
-  when there is no such parameter. 8.x always returned a string. `SetParameter` accepts the same values. <!-- D40 -->
+  when there is no such parameter. 8.x always returned a string. `SetParameter` accepts the same values.
 - `RenderContent.TopLevel` of a grandchild is its parent, as in RhinoCommon.
-  <!-- D41 -->
-- `SetChildSlotOn(name, on)` and `SetChildSlotAmount(name, amount)` take the slot name first. `ChildSlotAmount` of an unset slot is `0.0`. <!-- D64 -->
+- `SetChildSlotOn(name, on)` and `SetChildSlotAmount(name, amount)` take the slot name first. `ChildSlotAmount` of an unset slot is `0.0`.
 - `RenderSettings.PostEffects` is a `PostEffectCollection` of
   `PostEffectData`: iterate it, or use `PostEffectDataFromId(id)`.
-  <!-- D50 -->
 - `PhysicallyBasedMaterial.BaseColor` (and `Emission`, `SubsurfaceScatteringColor`) is a `Color4f` (`R`, `G`, `B`, `A`),
-  not a tuple. Python accepts a 4-sequence where a `Color4f` is expected. <!-- D34 -->
+  not a tuple. Python accepts a 4-sequence where a `Color4f` is expected.
 - **Sun**: the date is a `datetime.datetime`: `sun.GetDateTime(DateTimeKind.Local)`
   and `sun.SetDateTime(d, DateTimeKind.Local)`, in place of the year, month, day and hours
   properties. Times are whole seconds. `SunColorFromAltitude` is `ColorFromAltitude`, which rounds each channel (8.x
-  truncated, so a channel can differ by 1). <!-- D45, D47, D48 -->
+  truncated, so a channel can differ by 1).
 - `TextureMapping.RequiresVertexNormals` is gone. Use `MappingType`, `Projection` and `Capped`.
-  <!-- D49 -->
 - `TextureMapping.TryGetMappingBox`, `TryGetMappingCylinder` and `TryGetMappingPlane` with the capped `out` values
   are `TryGetMappingBoxCapped`, `TryGetMappingCylinderCapped` and `TryGetMappingPlaneCapped`.
 - `ObjectAttributes.DrawColor(file)` for a colour by material uses
   Rhino's rules: the material the attributes select, and its PBR base colour when it is physically
-  based. <!-- D63 -->
+  based.
 
 ## Renamed classes
 
@@ -327,7 +464,6 @@ Array results are lists (8.x returned tuples in places), and `None` where RhinoC
 
 ## Enums
 
-<!-- D76, D77, D18 -->
 - Every enum is RhinoCommon's, with RhinoCommon's names and values. Fifteen 8.x enums had no
   RhinoCommon namesake and are replaced:
 
@@ -350,7 +486,7 @@ Array results are lists (8.x returned tuples in places), and `None` where RhinoC
   An enum is nested in its class, as in RhinoCommon.
 - Some values are numbered differently: `Dithering.Methods` is
   `None = 0, FloydSteinberg = 1, SimpleNoise = 2` (8.x: `SimpleNoise = 0`), and `PostEffectType` is
-  `Early = 0, ToneMapping = 1, Late = 2`. <!-- D36, D50 -->
+  `Early = 0, ToneMapping = 1, Late = 2`.
 - `LightStyle.Unknown` is `LightStyle.None`.
 - `BlendContinuity`, `CurveExtensionStyle`, `CurveKnotStyle`, `CurveOffsetCornerStyle`, `LoftType`,
   `PointContainment` and `RegionContainment` are gone: no 9.2 member takes or returns them.
@@ -358,13 +494,12 @@ Array results are lists (8.x returned tuples in places), and `None` where RhinoC
   (`rhino3dm.LightStyle.None_`). `E['None']` and `getattr(E, 'None')` work too, and the value's name
   is still `'None'`.
 - Enums are integer-like (`int(e)` and `e == 2` work), but passing a plain int where an enum is
-  expected raises `TypeError`. <!-- D55 -->
+  expected raises `TypeError`.
 
 ## Errors, values and identity
 
 ### Errors
 
-<!-- D9, D53, D10 -->
 | .NET | Python |
 |---|---|
 | `IndexOutOfRangeException`, `ArgumentOutOfRangeException` | `IndexError` |
@@ -378,7 +513,6 @@ Where RhinoCommon accepts `null`, `None` is accepted and behaves as in .NET:
 
 ### Arrays and sequences
 
-<!-- D87, D35, D62 -->
 Wherever RhinoCommon takes a sequence of points, any sequence works (a list, a tuple, a
 `Point3dList`). `GetUserStrings()` returns
 a list of `[key, value]` lists.
@@ -387,18 +521,16 @@ a list of `[key, value]` lists.
 
 - `str(point)` is RhinoCommon's `ToString()`: full precision (`0.30000000000000004`, where 8.x printed 6
   significant digits). `str` works on every value type and on classes (`str(layer)` is its full path).
-  <!-- D75 -->
-- `repr(Point3d(1, 2, 3))` is `Point3d(1.0, 2.0, 3.0)`. <!-- D81 -->
+- `repr(Point3d(1, 2, 3))` is `Point3d(1.0, 2.0, 3.0)`.
 - An empty string reads `''` where RhinoCommon returns `null` (`ViewInfo().Name`,
   the log of `IsValidWithLog()` when there is nothing to report): test with
-  `if not name:`, which is true for both. <!-- D93 -->
+  `if not name:`, which is true for both.
 - `ViewportInfo.ScreenPort` and `GetScreenPort()` are RhinoCommon's `(x, y, width, height)`, with y the smaller of top and bottom.
-  A new `ViewportInfo()` reads `(0, 0, 1000, 1000)`. <!-- D58, D38 -->
-- `File3dm.FromByteArray` takes any buffer (`bytes`, `bytearray`, numpy). <!-- D38 -->
+  A new `ViewportInfo()` reads `(0, 0, 1000, 1000)`.
+- `File3dm.FromByteArray` takes any buffer (`bytes`, `bytearray`, numpy).
 
 ### Object identity
 
-<!-- D22, D25, D42, D56 -->
 Contents and behaviour follow RhinoCommon, but object identity may not. Accessors such as
 `obj.Geometry`, `brep.Faces` and `brep.Faces[0]` return a new view each time, so `brep.Faces[0] is brep.Faces[0]` is `False`. Compare components by their index or id.
 `Brep.TryConvertBrep(geometry)` on a file's brep returns

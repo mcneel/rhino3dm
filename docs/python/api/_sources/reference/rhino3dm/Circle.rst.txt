@@ -1,0 +1,215 @@
+rhino3dm.Circle
+===============
+
+.. py:class:: rhino3dm.Circle
+              Circle(radius: float)
+              Circle(plane: Plane, radius: float)
+              Circle(center: Point3d, radius: float)
+              Circle(arc: Arc)
+              Circle(point1: Point3d, point2: Point3d, point3: Point3d)
+              Circle(plane: Plane, center: Point3d, radius: float)
+              Circle(startPoint: Point3d, tangentAtP: Vector3d, pointOnCircle: Point3d)
+
+   Represents a circle in 3D.
+
+   The values used are a radius and an orthonormal frame of the plane containing the circle, with origin at the center.
+
+   The circle is parameterized by radians from 0 to 2 Pi given by
+
+   t -> center + cos(t)\*radius\*xaxis + sin(t)\*radius\*yaxis
+
+   where center, xaxis and yaxis define the orthonormal frame of the circle plane.
+
+   >An IsValid circle has positive radius and an IsValid plane defining the frame.
+
+
+   .. py:method:: ClosestParameter(testPoint: Point3d) -> tuple[bool, float]
+
+      Gets the parameter on the circle which is closest to a test point.
+
+      :param testPoint: Point to project onto the circle.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: ClosestPoint(testPoint: Point3d) -> Point3d
+
+      Gets the point on the circle which is closest to a test point.
+
+      :param testPoint: Point to project onto the circle.
+
+      :returns: The point on the circle that is closest to testPoint or Point3d.Unset on failure.
+
+
+
+   .. py:method:: DerivativeAt(derivative: int, t: float) -> Vector3d
+
+      Determines the value of the Nth derivative at a parameter.
+
+      :param derivative: Which order of derivative is wanted.
+      :param t: Parameter to evaluate derivative. Valid values are 0, 1, 2 and 3.
+
+      :returns: The derivative of the circle at the given parameter.
+
+
+
+   .. py:method:: Encode() -> dict[str, Any]
+
+      This circle as a JSON-compatible dict: ``{'radius': float, 'plane': <Plane.Encode>}`` (rhino3dm only).
+
+
+
+   .. py:method:: EpsilonEquals(other: Circle, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: IsInPlane(plane: Plane, tolerance: float) -> bool
+
+      Evaluates whether or not this circle is co-planar with a given plane.
+
+      :param plane: Plane.
+      :param tolerance: Tolerance to use.
+
+      :returns: true if the circle plane is co-planar with the given plane within tolerance.
+
+
+
+   .. py:method:: PointAt(t: float) -> Point3d
+
+      Circles use trigonometric parameterization: t -> center + cos(t)\*radius\*xaxis + sin(t)\*radius\*yaxis.
+
+      :param t: Parameter of point to evaluate.
+
+      :returns: The point on the circle at the given parameter.
+
+
+
+   .. py:method:: Reverse() -> None
+
+      Reverse the orientation of the circle. Changes the domain from [a,b] to [-b,-a].
+
+
+
+   .. py:method:: Rotate(sinAngle: float, cosAngle: float, axis: Vector3d) -> bool
+                  Rotate(sinAngle: float, cosAngle: float, axis: Vector3d, point: Point3d) -> bool
+                  Rotate(angle: float, axis: Vector3d) -> bool
+                  Rotate(angle: float, axis: Vector3d, point: Point3d) -> bool
+
+      Rotates the circle through a given angle.
+
+      :param angle: Angle (in radians) of the rotation.
+      :param axis: Rotation axis.
+      :param point: Rotation anchor point.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: TangentAt(t: float) -> Vector3d
+
+      Circles use trigonometric parameterization: t -> center + cos(t)\*radius\*xaxis + sin(t)\*radius\*yaxis.
+
+      :param t: Parameter of tangent to evaluate.
+
+      :returns: The tangent at the circle at the given parameter.
+
+
+
+   .. py:method:: ToNurbsCurve() -> NurbsCurve
+
+      Constructs a nurbs curve representation of this circle. This amounts to the same as calling NurbsCurve.CreateFromCircle().
+
+      :returns: A nurbs curve representation of this circle or null if no such representation could be made.
+
+
+
+   .. py:method:: Transform(xform: Transform) -> bool
+
+      Transforms this circle using an transformation matrix.
+
+      Circles may not be transformed accurately if the transformation defines a non-euclidean transformation.
+
+      :param xform: Transformation to apply.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Translate(delta: Vector3d) -> bool
+
+      Moves the circle.
+
+      :param delta: Translation vector.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:property:: BoundingBox
+      :type: BoundingBox
+
+
+      Gets the circle's 3d axis aligned bounding box.
+
+
+   .. py:property:: Center
+      :type: Point3d
+
+
+      Gets or sets the center point of this circle.
+
+
+   .. py:property:: Circumference
+      :type: float
+
+
+      Gets or sets the circumference of this circle.
+
+
+   .. py:property:: Diameter
+      :type: float
+
+
+      Gets or sets the diameter (radius \* 2.0) of this circle. Diameters should be positive values.
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      A valid circle has radius larger than 0.0 and a base plane which is must also be valid.
+
+
+   .. py:property:: Normal
+      :type: Vector3d
+
+
+      Gets the normal vector for this circle.
+
+
+   .. py:property:: Plane
+      :type: Plane
+
+
+      Gets or sets the plane of the circle.
+
+
+   .. py:property:: Radius
+      :type: float
+
+
+      Gets or sets the radius of this circle. Radii should be positive values.
+
+
+   .. py:attribute:: Unset
+      :type:  Circle
+      :value: Ellipsis
+
+
+      object, /) -> Circle
+
+      :type: (arg
+

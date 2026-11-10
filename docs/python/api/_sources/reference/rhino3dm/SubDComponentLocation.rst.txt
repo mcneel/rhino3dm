@@ -1,0 +1,37 @@
+rhino3dm.SubDComponentLocation
+==============================
+
+.. py:class:: rhino3dm.SubDComponentLocation
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   The ON\_SubDComponentLocation enum is used when an ON\_SubD component is referenced and it is important to distinguish between the component's location in the SubD control net and its location in the SubD limit surface.
+
+
+   .. py:attribute:: ControlNet
+      :value: 1
+
+
+      This value is saved in 3dm archives and cannot be changed.
+
+      :type: The component's location in the SubD control net. Note well
+
+
+   .. py:attribute:: Surface
+      :value: 2
+
+
+      This value is saved in 3dm archives and cannot be changed.
+
+      :type: The component's location in the SubD limit surface. Note well
+
+
+   .. py:attribute:: Unset
+      :value: 0
+
+
+      This value is saved in 3dm archives and cannot be changed.
+
+      :type: Not a valid component location and used to indicate the value is not initialized. Note well
+

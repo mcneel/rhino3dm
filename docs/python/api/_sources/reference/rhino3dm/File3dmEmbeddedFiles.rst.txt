@@ -1,0 +1,28 @@
+rhino3dm.File3dmEmbeddedFiles
+=============================
+
+.. py:class:: rhino3dm.File3dmEmbeddedFiles
+
+   .. py:method:: Add(filename: str) -> bool
+                  Add(embeddedFile: File3dmEmbeddedFile) -> bool
+
+      Add a new embedded file and load it from a local file.
+
+
+
+   .. py:method:: FindIndex(index: int) -> File3dmEmbeddedFile
+
+      Retrieves an embedded file based on Index.
+
+      :param index: The index to search for.
+
+      :returns: An embedded file, or null if none was found.
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the number of embedded files in the model.
+

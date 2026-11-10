@@ -1,0 +1,257 @@
+rhino3dm.Light
+==============
+
+.. py:class:: rhino3dm.Light
+
+   Bases: :py:obj:`GeometryBase`
+
+
+   Represents a light that shines in the modeling space.
+
+
+   .. py:method:: GetAttenuation(d: float) -> float
+
+      Gets the attenuation settings (ignored for "directional" and "ambient" lights).
+
+      attenuation = 1/(a0 + d\*a1 + d^2\*a2) where d = distance to light.
+
+      :param d: The distance to evaluate.
+
+      :returns: 0 if a0 + d\*a1 + d^2\*a2 <= 0.
+
+
+
+   .. py:method:: GetSpotLightRadii() -> tuple[bool, float, float]
+
+      Gets the spot light radii.
+
+      :returns: true if operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: SetAttenuation(a0: float, a1: float, a2: float) -> None
+
+      Sets the attenuation settings (ignored for "directional" and "ambient" lights).
+
+      attenuation = 1/(a0 + d\*a1 + d^2\*a2) where d = distance to light.
+
+      :param a0: The new constant attenuation divisor term.
+      :param a1: The new reverse linear attenuation divisor term.
+      :param a2: The new reverse quadratic attenuation divisor term.
+
+
+
+   .. py:property:: Ambient
+      :type: tuple[int, int, int, int]
+
+
+      Gets or sets the ambient color.
+
+
+   .. py:property:: AttenuationVector
+      :type: Vector3d
+
+
+      Gets or Sets the attenuation vector.
+
+
+   .. py:property:: CoordinateSystem
+      :type: CoordinateSystem
+
+
+      Gets a value, determined by LightStyle, that explains whether the camera directions are relative to World or Camera spaces.
+
+
+   .. py:property:: Diffuse
+      :type: tuple[int, int, int, int]
+
+
+      Gets or sets the diffuse color.
+
+
+   .. py:property:: Direction
+      :type: Vector3d
+
+
+      Gets or sets the vector direction of the camera.
+
+
+   .. py:property:: HotSpot
+      :type: float
+
+
+      The hot spot setting runs from 0.0 to 1.0 and is used to provides a linear interface for controlling the focus or concentration of a spotlight. A hot spot setting of 0.0 corresponds to a spot exponent of 128. A hot spot setting of 1.0 corresponds to a spot exponent of 0.0.
+
+
+   .. py:property:: Id
+      :type: uuid.UUID
+
+
+      Gets the ID of this light.
+
+
+   .. py:property:: Intensity
+      :type: float
+
+
+      Gets or sets the light intensity.
+
+
+   .. py:property:: IsDirectionalLight
+      :type: bool
+
+
+      Gets a value indicating whether the light style is ``LightStyle`` CameraDirectional or WorldDirectional.
+
+
+   .. py:property:: IsEnabled
+      :type: bool
+
+
+      Gets or sets a value that defines if the light is turned on (true) or off (false).
+
+
+   .. py:property:: IsLinearLight
+      :type: bool
+
+
+      Gets a value indicating whether the light style is ``LightStyle`` WorldLinear.
+
+
+   .. py:property:: IsPointLight
+      :type: bool
+
+
+      Gets a value indicating whether the light style is ``LightStyle`` CameraPoint or WorldPoint.
+
+
+   .. py:property:: IsRectangularLight
+      :type: bool
+
+
+      Gets a value indicating whether the light style is ``LightStyle`` WorldRectangular.
+
+
+   .. py:property:: IsSpotLight
+      :type: bool
+
+
+      Gets a value indicating whether the light style is ``LightStyle`` CameraSpot or WorldSpot.
+
+
+   .. py:property:: Length
+      :type: Vector3d
+
+
+      Gets or sets the height in linear and rectangular lights.
+
+      (ignored for non-linear/rectangular lights.)
+
+
+   .. py:property:: LightStyle
+      :type: LightStyle
+
+
+      Gets or sets a light style on this camera.
+
+
+   .. py:property:: Location
+      :type: Point3d
+
+
+      Gets or sets the light or 3D position or location.
+
+
+   .. py:property:: Name
+      :type: str
+
+
+      Gets or sets the light name.
+
+
+   .. py:property:: PerpendicularDirection
+      :type: Vector3d
+
+
+      Gets a perpendicular vector to the camera direction.
+
+
+   .. py:property:: PowerCandela
+      :type: float
+
+
+      Gets or sets the light power in candelas (cd).
+
+
+   .. py:property:: PowerLumens
+      :type: float
+
+
+      Gets or sets the light power in lumens (lm).
+
+
+   .. py:property:: PowerWatts
+      :type: float
+
+
+      Gets or sets the light power in watts (W).
+
+
+   .. py:property:: Radius
+      :type: float
+
+
+      Gets or sets the emitter radius (of the emitting sphere, in model units) for point and spot lights.
+
+      Ignored for other light types; linear light radius is derived from ``Width``.
+
+
+   .. py:property:: ShadowIntensity
+      :type: float
+
+
+      Gets or sets the shadow intensity for the light.
+
+
+   .. py:property:: Specular
+      :type: tuple[int, int, int, int]
+
+
+      Gets or sets the specular color.
+
+
+   .. py:property:: SpotAngleRadians
+      :type: float
+
+
+      Gets or sets the spot angle in radians.
+
+      Ignored for non-spot lights.
+
+      angle = 0 to pi/2 (0 to 90 degrees).
+
+
+   .. py:property:: SpotExponent
+      :type: float
+
+
+      The spot exponent varies from 0.0 to 128.0 and provides an exponential interface for controlling the focus or concentration of a spotlight (like the OpenGL GL\_SPOT\_EXPONENT parameter). The spot exponent and hot spot parameters are linked; changing one will change the other. A hot spot setting of 0.0 corresponds to a spot exponent of 128. A hot spot setting of 1.0 corresponds to a spot exponent of 0.0.
+
+
+   .. py:property:: SpotLightShadowIntensity
+      :type: float
+
+
+      Gets or sets the spot light shadow intensity.
+
+      (ignored for non-spot lights.)
+
+
+   .. py:property:: Width
+      :type: Vector3d
+
+
+      Gets or sets the width in linear and rectangular lights.
+
+      (ignored for non-linear/rectangular lights.)
+

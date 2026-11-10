@@ -1,0 +1,224 @@
+rhino3dm.PointCloud
+===================
+
+.. py:class:: rhino3dm.PointCloud
+              PointCloud(points: collections.abc.Sequence[Point3d])
+              PointCloud(other: PointCloud)
+
+   Bases: :py:obj:`GeometryBase`
+
+
+   Represents a collection of coordinates with optional normal vectors and colors.
+
+
+   .. py:method:: Add(point: Point3d) -> None
+                  Add(point: Point3d, color: tuple[int, int, int, int]) -> None
+                  Add(point: Point3d, normal: Vector3d) -> None
+                  Add(point: Point3d, normal: Vector3d, color: tuple[int, int, int, int]) -> None
+                  Add(point: Point3d, normal: Vector3d, color: tuple[int, int, int, int], value: float) -> None
+                  Add(point: Point3d, value: float) -> None
+
+      Appends a point with a value (rhino3dm only; RhinoCommon takes the value with a normal and a color).
+
+      :param point: The point.
+      :param value: The point's value.
+
+
+
+   .. py:method:: AddRange(points: collections.abc.Sequence[Point3d]) -> None
+                  AddRange(points: collections.abc.Sequence[Point3d], normals: collections.abc.Sequence[Vector3d]) -> None
+                  AddRange(points: collections.abc.Sequence[Point3d], colors: collections.abc.Sequence[tuple[Any, Ellipsis]]) -> None
+                  AddRange(points: collections.abc.Sequence[Point3d], normals: collections.abc.Sequence[Vector3d], colors: collections.abc.Sequence[tuple[Any, Ellipsis]]) -> None
+                  AddRange(points: collections.abc.Sequence[Point3d], normals: collections.abc.Sequence[Vector3d], colors: collections.abc.Sequence[tuple[Any, Ellipsis]], values: collections.abc.Sequence[float]) -> None
+                  AddRange(points: collections.abc.Sequence[Point3d], values: collections.abc.Sequence[float]) -> None
+
+      Appends points with their values (rhino3dm only).
+
+      :param points: The points.
+      :param values: One value per point.
+
+
+
+   .. py:method:: AppendNew() -> PointCloudItem
+
+      Appends a new PointCloudItem to the end of this point cloud.
+
+      :returns: The newly appended item.
+
+
+
+   .. py:method:: ClearColors() -> None
+
+      Destroys the color information in this point cloud.
+
+
+
+   .. py:method:: ClearHiddenFlags() -> None
+
+      Destroys the hidden flag information in this point cloud.
+
+
+
+   .. py:method:: ClearNormals() -> None
+
+      Destroys the normal vector information in this point cloud.
+
+
+
+   .. py:method:: ClearPointValues() -> None
+
+      Destroys the extra value information in this point cloud. Extra values can be used to store a user-defined values, such as intensity.
+
+
+
+   .. py:method:: ClosestPoint(testPoint: Point3d) -> int
+
+      Returns index of the closest point in the point cloud to a given test point.
+
+      :param testPoint: .
+
+      :returns: Index of point in the point cloud on success. -1 on failure.
+
+
+
+   .. py:method:: GetColors() -> list[Any]
+
+      Copy all the point colors in this point cloud to an array.
+
+      :returns: An array containing all the colors in this point cloud.
+
+
+
+   .. py:method:: GetNormals() -> list[Any]
+
+      Copy all the normal vectors in this point cloud to an array.
+
+      :returns: An array containing all the normals in this point cloud.
+
+
+
+   .. py:method:: GetPointValues() -> list[Any]
+
+      Copy all the extra point values in this point cloud to an array. Extra values can be used to store a user-defined value, such as intensity.
+
+      :returns: An array containing all the extra point values in this point cloud.
+
+
+
+   .. py:method:: GetPoints() -> list[Any]
+
+      Copy all the point coordinates in this point cloud to an array.
+
+      :returns: An array containing all the points in this point cloud.
+
+
+
+   .. py:method:: GetRandomSubsample(numberOfPoints: int) -> PointCloud
+
+      Returns a random subsample of a point cloud.
+
+      :param numberOfPoints: The number of points the new point cloud should contain.
+
+      :returns: A subsample of this point cloud if success, null otherwise.
+
+
+
+   .. py:method:: Insert(index: int, point: Point3d) -> None
+                  Insert(index: int, point: Point3d, color: tuple[int, int, int, int]) -> None
+                  Insert(index: int, point: Point3d, normal: Vector3d) -> None
+                  Insert(index: int, point: Point3d, normal: Vector3d, color: tuple[int, int, int, int]) -> None
+                  Insert(index: int, point: Point3d, normal: Vector3d, color: tuple[int, int, int, int], value: float) -> None
+                  Insert(index: int, point: Point3d, value: float) -> None
+
+      Inserts a point with a value (rhino3dm only).
+
+      :param index: Where the point goes: 0 to ``Count``.
+      :param point: The point.
+      :param value: The point's value.
+
+
+
+   .. py:method:: InsertNew(index: int) -> PointCloudItem
+
+      Inserts a new ``PointCloudItem`` at a specific position of the point cloud.
+
+      :param index: Index of new item.
+
+      :returns: The newly inserted item.
+
+
+
+   .. py:method:: InsertRange(index: int, points: collections.abc.Sequence[Point3d]) -> None
+
+      Append a collection of points to this point cloud.
+
+      :param index: Index at which to insert the new collection.
+      :param points: Points to append.
+
+
+
+   .. py:method:: Merge(other: PointCloud) -> None
+
+      Merges, or appends, a specified point cloud into this one.
+
+      :param other: PointCloud to merge with this one.
+
+
+
+   .. py:method:: PointAt(index: int) -> Point3d
+
+      Returns the location of the point at a specific index.
+
+      :param index: The index.
+
+
+
+   .. py:method:: RemoveAt(index: int) -> None
+
+      Remove the point at the given index.
+
+      :param index: Index of point to remove.
+
+
+
+   .. py:property:: ContainsColors
+      :type: bool
+
+
+      Gets a value indicating whether or not the points in this point cloud have colors assigned to them.
+
+
+   .. py:property:: ContainsHiddenFlags
+      :type: bool
+
+
+      Gets a value indicating whether or not the points in this point cloud have hidden flags assigned to them.
+
+
+   .. py:property:: ContainsNormals
+      :type: bool
+
+
+      Gets a value indicating whether or not the points in this point cloud have normals assigned to them.
+
+
+   .. py:property:: ContainsPointValues
+      :type: bool
+
+
+      Gets a value indicating whether or not the points in this point cloud have extra values assigned to them. Extra values can be used to store a user-defined values, such as intensity.
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the number of points in this point cloud.
+
+
+   .. py:property:: HiddenPointCount
+      :type: int
+
+
+      Gets the number of points that have their Hidden flag set.
+

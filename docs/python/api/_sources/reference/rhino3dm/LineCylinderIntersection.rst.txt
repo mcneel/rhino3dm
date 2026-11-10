@@ -1,0 +1,38 @@
+rhino3dm.LineCylinderIntersection
+=================================
+
+.. py:class:: rhino3dm.LineCylinderIntersection
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Represents all possible cases of a Line\|Cylinder intersection event.
+
+
+   .. py:attribute:: Multiple
+      :value: 2
+
+
+      Two intersections.
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``LineCylinderIntersection.None`` is not Python syntax; ``LineCylinderIntersection['None']`` is the same member). No intersections.
+
+
+   .. py:attribute:: Overlap
+      :value: 3
+
+
+      Line lies on cylinder.
+
+
+   .. py:attribute:: Single
+      :value: 1
+
+
+      One intersection.
+

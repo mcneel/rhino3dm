@@ -1,0 +1,20 @@
+rhino3dm.SubDEdgeList
+=====================
+
+.. py:class:: rhino3dm.SubDEdgeList
+
+   All edges in a SubD
+
+
+   .. py:method:: Find(id: int) -> SubDEdge
+
+      Find an edge in this SubD with a given id
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the number of SubD edges.
+

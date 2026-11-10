@@ -1,0 +1,27 @@
+rhino3dm.SubDVertexList
+=======================
+
+.. py:class:: rhino3dm.SubDVertexList
+
+   Provides access to all the vertices and vertex-related functionality of a SubD
+
+
+   .. py:method:: Find(id: int) -> SubDVertex
+
+      Find a vertex in this SubD with a given id
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the number of SubD vertices.
+
+
+   .. py:property:: First
+      :type: SubDVertex
+
+
+      First vertex in this linked list of vertices
+

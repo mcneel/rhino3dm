@@ -1,0 +1,52 @@
+rhino3dm.BrepLoopType
+=====================
+
+.. py:class:: rhino3dm.BrepLoopType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Each brep loop has a defined type, e.g. outer, inner or point on surface.
+
+
+   .. py:attribute:: CurveOnSurface
+      :value: 4
+
+
+      "loop" is a curve-on-surface made from a single (open or closed) trim that has type TrimType.CurveOnSurface.
+
+
+   .. py:attribute:: Inner
+      :value: 2
+
+
+      2d loop curves form a simple closed curve with a clockwise orientation.
+
+
+   .. py:attribute:: Outer
+      :value: 1
+
+
+      2d loop curves form a simple closed curve with a counterclockwise orientation.
+
+
+   .. py:attribute:: PointOnSurface
+      :value: 5
+
+
+      "loop" is a PointOnSurface made from a single trim that has type TrimType.PointOnSurface.
+
+
+   .. py:attribute:: Slit
+      :value: 3
+
+
+      Always closed - used internally during splitting operations.
+
+
+   .. py:attribute:: Unknown
+      :value: 0
+
+
+      Unknown loop type.
+

@@ -1,0 +1,315 @@
+rhino3dm.Vector3f
+=================
+
+.. py:class:: rhino3dm.Vector3f
+              Vector3f(x: float, y: float, z: float)
+
+   Represents the three components of a vector in three-dimensional space, using ``Single``-precision floating point numbers.
+
+
+   .. py:method:: Add(vector1: Vector3f, vector2: Vector3f) -> Vector3f
+                  Add(point: Point3f, vector: Vector3f) -> Point3f
+      :staticmethod:
+
+
+      Sums up a point and a vector, and returns a new point.
+
+      (Provided for languages that do not support operator overloading. You can use the + operator otherwise)
+
+      :param point: A point.
+      :param vector: A vector.
+
+      :returns: A new point that results from the addition of point and vector.
+
+
+
+   .. py:method:: CompareTo(other: Vector3f) -> int
+
+      Compares this ``Vector3f`` with another ``Vector3f``.
+
+      Component evaluation priority is first X, then Y, then Z.
+
+      :param other: The other ``Vector3f`` to use in comparison.
+
+      :returns: if this is identical to other
+                -1: if this.X < other.X
+                -1: if this.X == other.X and this.Y < other.Y
+                -1: if this.X == other.X and this.Y == other.Y and this.Z < other.Z
+                +1: otherwise.
+      :rtype: 0
+
+
+
+   .. py:method:: CrossProduct(a: Vector3f, b: Vector3f) -> Vector3f
+      :staticmethod:
+
+
+      Computes the cross product (or vector product, or exterior product) of two vectors.
+
+      This operation is not commutative.
+
+      :param a: First vector.
+      :param b: Second vector.
+
+      :returns: A new vector that is perpendicular to both a and b,
+                has Length == a.Length \* b.Length and
+                with a result that is oriented following the right hand rule.
+
+
+
+   .. py:method:: Divide(vector: Vector3f, t: float) -> Vector3f
+      :staticmethod:
+
+
+      Divides a ``Vector3f`` by a number, having the effect of shrinking it, t times.
+
+      (Provided for languages that do not support operator overloading. You can use the / operator otherwise)
+
+      :param vector: A vector.
+      :param t: A number.
+
+      :returns: A new vector that is component-wise divided by t.
+
+
+
+   .. py:method:: Encode() -> dict[str, Any]
+
+      This object as a JSON-compatible dict (rhino3dm only; inverse: ``Decode``).
+
+      :returns: geometry and other objects are stored as their 3dm archive, base64 encoded, with the archive version.
+      :rtype: A dict of numbers and strings
+
+
+
+   .. py:method:: EpsilonEquals(other: Vector3f, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: Equals(vector: Vector3f) -> bool
+
+      Determines whether the specified vector has the same values as the present vector.
+
+      :param vector: The specified vector.
+
+      :returns: true if vector has the same components as this; otherwise false.
+
+
+
+   .. py:method:: Multiply(vector: Vector3f, t: float) -> Vector3f
+                  Multiply(t: float, vector: Vector3f) -> Vector3f
+                  Multiply(point1: Vector3f, point2: Vector3f) -> float
+      :staticmethod:
+
+
+      Multiplies two ``Vector3f`` together, returning the dot (internal) product of the two. This is not the cross product.
+
+      (Provided for languages that do not support operator overloading. You can use the \* operator otherwise)
+
+      :param point1: The first point.
+      :param point2: The second point.
+
+      :returns: A value that results from the coordinate-wise multiplication of point1 and point2.
+
+
+
+   .. py:method:: Negate(vector: Vector3f) -> Vector3f
+      :staticmethod:
+
+
+      Computes the reversed vector.
+
+      (Provided for languages that do not support operator overloading. You can use the - unary operator otherwise)
+
+      This is similar to ``Reverse``\ Reverse(), but is static for CLR compliance, and with default name.
+
+      :param vector: A vector to negate.
+
+      :returns: A new vector where all components were multiplied by -1.
+
+
+
+   .. py:method:: PerpendicularTo(other: Vector3f) -> bool
+
+      Sets this vector to be perpendicular to another vector. Result is not unitized.
+
+      :param other: Vector to use as guide.
+
+      :returns: true on success, false if input vector is zero or invalid.
+
+
+
+   .. py:method:: Reverse() -> bool
+
+      Reverses this vector in place (reverses the direction).
+
+      If this vector contains RhinoMath.UnsetValue, the reverse will also be invalid and false will be returned.
+
+      Similar to ``Negate``\ Negate, that is only provided for CLR language compliance.
+
+      :returns: true on success or false if the vector is invalid.
+
+
+
+   .. py:method:: Rotate(angleRadians: float, rotationAxis: Vector3f) -> bool
+
+      Rotates this vector around a given axis.
+
+      :param angleRadians: Angle of rotation (in radians).
+      :param rotationAxis: Axis of rotation.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Subtract(vector1: Vector3f, vector2: Vector3f) -> Vector3f
+      :staticmethod:
+
+
+      Subtracts the second vector from the first one.
+
+      (Provided for languages that do not support operator overloading. You can use the - operator otherwise)
+
+      :param vector1: A vector.
+      :param vector2: A second vector.
+
+      :returns: A new vector that results from the component-wise difference of vector1 - vector2.
+
+
+
+   .. py:method:: ToString() -> str
+
+      Constructs the string representation of the current vector.
+
+      :returns: The vector representation in the form X,Y,Z.
+
+
+
+   .. py:method:: Transform(transformation: Transform) -> None
+
+      Transforms the vector in place.
+
+      The transformation matrix acts on the left of the vector; i.e.,
+
+      result = transformation\*vector
+
+      :param transformation: Transformation matrix to apply.
+
+
+
+   .. py:method:: Unitize() -> bool
+
+      Unitizes the vector in place. A unit vector has length 1 unit.
+
+      An invalid or zero length vector cannot be unitized.
+
+      :returns: true on success or false on failure.
+
+
+
+   .. py:property:: IsUnitVector
+      :type: bool
+
+
+      Gets a value indicating whether or not this is a unit vector. A unit vector has length 1.
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Returns an indication regarding the validity of this vector.
+
+
+   .. py:property:: IsZero
+      :type: bool
+
+
+      Gets a value indicating whether the X, Y, and Z values are all equal to 0.0.
+
+
+   .. py:property:: Length
+      :type: float
+
+
+      Computes the length (or magnitude, or size) of this vector. This is an application of Pythagoras' theorem. If this vector is invalid, its length is considered 0.
+
+
+   .. py:property:: SquareLength
+      :type: float
+
+
+      Returns the square length of the vector. This property does not check for the validity of the inputs.
+
+
+   .. py:attribute:: Unset
+      :type:  Vector3f
+      :value: Ellipsis
+
+
+      object, /) -> Vector3f
+
+      :type: (arg
+
+
+   .. py:property:: X
+      :type: float
+
+
+      Gets or sets the X (first) component of this vector.
+
+
+   .. py:attribute:: XAxis
+      :type:  Vector3f
+      :value: Ellipsis
+
+
+      object, /) -> Vector3f
+
+      :type: (arg
+
+
+   .. py:property:: Y
+      :type: float
+
+
+      Gets or sets the Y (second) component of this vector.
+
+
+   .. py:attribute:: YAxis
+      :type:  Vector3f
+      :value: Ellipsis
+
+
+      object, /) -> Vector3f
+
+      :type: (arg
+
+
+   .. py:property:: Z
+      :type: float
+
+
+      Gets or sets the Z (third) component of this vector.
+
+
+   .. py:attribute:: ZAxis
+      :type:  Vector3f
+      :value: Ellipsis
+
+
+      object, /) -> Vector3f
+
+      :type: (arg
+
+
+   .. py:attribute:: Zero
+      :type:  Vector3f
+      :value: Ellipsis
+
+
+      object, /) -> Vector3f
+
+      :type: (arg
+

@@ -1,0 +1,453 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rhino3dm.LightStyle &mdash; rhino3dm.py 9.2.0-beta.0</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f348fe97"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="rhino3dm.Line" href="Line.html" />
+    <link rel="prev" title="rhino3dm.Light" href="Light.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            rhino3dm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../migrating.html">Migrating to rhino3dm 9.2 (Python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../migrating-members.html">Renamed and removed members (Python)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">rhino3dm</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="index.html#attributes">Attributes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#classes">Classes</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="ActiveSpace.html">rhino3dm.ActiveSpace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="AngularDimension.html">rhino3dm.AngularDimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="AnnotationBase.html">rhino3dm.AnnotationBase</a></li>
+<li class="toctree-l4"><a class="reference internal" href="AnnotationType.html">rhino3dm.AnnotationType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="AntialiasLevel.html">rhino3dm.AntialiasLevel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Arc.html">rhino3dm.Arc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ArcArcIntersection.html">rhino3dm.ArcArcIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ArcCurve.html">rhino3dm.ArcCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ArchivableDictionary.html">rhino3dm.ArchivableDictionary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Arrowhead.html">rhino3dm.Arrowhead</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BackgroundStyle.html">rhino3dm.BackgroundStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BasepointZero.html">rhino3dm.BasepointZero</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BezierCurve.html">rhino3dm.BezierCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Bitmap.html">rhino3dm.Bitmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BoundingBox.html">rhino3dm.BoundingBox</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Box.html">rhino3dm.Box</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Brep.html">rhino3dm.Brep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepEdge.html">rhino3dm.BrepEdge</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepEdgeList.html">rhino3dm.BrepEdgeList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepFace.html">rhino3dm.BrepFace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepFaceList.html">rhino3dm.BrepFaceList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepLoop.html">rhino3dm.BrepLoop</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepLoopList.html">rhino3dm.BrepLoopList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepLoopType.html">rhino3dm.BrepLoopType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepSolidOrientation.html">rhino3dm.BrepSolidOrientation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepSurfaceList.html">rhino3dm.BrepSurfaceList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepTrim.html">rhino3dm.BrepTrim</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepTrimList.html">rhino3dm.BrepTrimList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepTrimType.html">rhino3dm.BrepTrimType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepVertex.html">rhino3dm.BrepVertex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BrepVertexList.html">rhino3dm.BrepVertexList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CachedTextureCoordinates.html">rhino3dm.CachedTextureCoordinates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Centermark.html">rhino3dm.Centermark</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Circle.html">rhino3dm.Circle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CircleCircleIntersection.html">rhino3dm.CircleCircleIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Color4f.html">rhino3dm.Color4f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CommonObject.html">rhino3dm.CommonObject</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ComponentIndex.html">rhino3dm.ComponentIndex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ComponentIndexType.html">rhino3dm.ComponentIndexType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Cone.html">rhino3dm.Cone</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ConstructionPlane.html">rhino3dm.ConstructionPlane</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ConstructionPlaneGridDefaults.html">rhino3dm.ConstructionPlaneGridDefaults</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Continuity.html">rhino3dm.Continuity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ControlPoint.html">rhino3dm.ControlPoint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CoordinateSystem.html">rhino3dm.CoordinateSystem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Curve.html">rhino3dm.Curve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CurveEnd.html">rhino3dm.CurveEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CurveEvaluationSide.html">rhino3dm.CurveEvaluationSide</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CurveOrientation.html">rhino3dm.CurveOrientation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CurveProxy.html">rhino3dm.CurveProxy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Cylinder.html">rhino3dm.Cylinder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DateTimeKind.html">rhino3dm.DateTimeKind</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Decal.html">rhino3dm.Decal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DecalMapping.html">rhino3dm.DecalMapping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DecalProjection.html">rhino3dm.DecalProjection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Decals.html">rhino3dm.Decals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DecalsIter.html">rhino3dm.DecalsIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Dimension.html">rhino3dm.Dimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DimensionStyle.html">rhino3dm.DimensionStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Dithering.html">rhino3dm.Dithering</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DracoColorFormat.html">rhino3dm.DracoColorFormat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DracoCompression.html">rhino3dm.DracoCompression</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DracoCompressionOptions.html">rhino3dm.DracoCompressionOptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="EarthAnchorPoint.html">rhino3dm.EarthAnchorPoint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="EarthCoordinateSystem.html">rhino3dm.EarthCoordinateSystem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="EdgeAdjacency.html">rhino3dm.EdgeAdjacency</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Ellipse.html">rhino3dm.Ellipse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Environment.html">rhino3dm.Environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Extrusion.html">rhino3dm.Extrusion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dm.html">rhino3dm.File3dm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmBitmapTable.html">rhino3dm.File3dmBitmapTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmBitmapTableIter.html">rhino3dm.File3dmBitmapTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmCurvePiping.html">rhino3dm.File3dmCurvePiping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmDimStyleTable.html">rhino3dm.File3dmDimStyleTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmDimStyleTableIter.html">rhino3dm.File3dmDimStyleTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmDisplacement.html">rhino3dm.File3dmDisplacement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmEdgeSoftening.html">rhino3dm.File3dmEdgeSoftening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmEmbeddedFile.html">rhino3dm.File3dmEmbeddedFile</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmEmbeddedFiles.html">rhino3dm.File3dmEmbeddedFiles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmEmbeddedFilesIter.html">rhino3dm.File3dmEmbeddedFilesIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmGroupTable.html">rhino3dm.File3dmGroupTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmGroupTableIter.html">rhino3dm.File3dmGroupTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmHatchPatternTable.html">rhino3dm.File3dmHatchPatternTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmHatchPatternTableIter.html">rhino3dm.File3dmHatchPatternTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmInstanceDefinitionTable.html">rhino3dm.File3dmInstanceDefinitionTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmInstanceDefinitionTableIter.html">rhino3dm.File3dmInstanceDefinitionTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmLayerTable.html">rhino3dm.File3dmLayerTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmLayerTableIter.html">rhino3dm.File3dmLayerTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmLinetypeTable.html">rhino3dm.File3dmLinetypeTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmLinetypeTableIter.html">rhino3dm.File3dmLinetypeTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmMaterialTable.html">rhino3dm.File3dmMaterialTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmMaterialTableIter.html">rhino3dm.File3dmMaterialTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmMeshModifiers.html">rhino3dm.File3dmMeshModifiers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmNamedConstructionPlanes.html">rhino3dm.File3dmNamedConstructionPlanes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmNotes.html">rhino3dm.File3dmNotes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmObject.html">rhino3dm.File3dmObject</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmObjectTable.html">rhino3dm.File3dmObjectTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmObjectTableIter.html">rhino3dm.File3dmObjectTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmPlugInData.html">rhino3dm.File3dmPlugInData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmPlugInDataTable.html">rhino3dm.File3dmPlugInDataTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderContent.html">rhino3dm.File3dmRenderContent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderEnvironment.html">rhino3dm.File3dmRenderEnvironment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderEnvironments.html">rhino3dm.File3dmRenderEnvironments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderEnvironmentsIter.html">rhino3dm.File3dmRenderEnvironmentsIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderMaterial.html">rhino3dm.File3dmRenderMaterial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderMaterials.html">rhino3dm.File3dmRenderMaterials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderMaterialsIter.html">rhino3dm.File3dmRenderMaterialsIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderTexture.html">rhino3dm.File3dmRenderTexture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderTextures.html">rhino3dm.File3dmRenderTextures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmRenderTexturesIter.html">rhino3dm.File3dmRenderTexturesIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmSettings.html">rhino3dm.File3dmSettings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmShutLining.html">rhino3dm.File3dmShutLining</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmStringTable.html">rhino3dm.File3dmStringTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmThickening.html">rhino3dm.File3dmThickening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmViewTable.html">rhino3dm.File3dmViewTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="File3dmWriteOptions.html">rhino3dm.File3dmWriteOptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="FileReference.html">rhino3dm.FileReference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="FileReferenceStatus.html">rhino3dm.FileReferenceStatus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Font.html">rhino3dm.Font</a></li>
+<li class="toctree-l4"><a class="reference internal" href="GeometryBase.html">rhino3dm.GeometryBase</a></li>
+<li class="toctree-l4"><a class="reference internal" href="GroundPlane.html">rhino3dm.GroundPlane</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Group.html">rhino3dm.Group</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Hatch.html">rhino3dm.Hatch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="HatchPattern.html">rhino3dm.HatchPattern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="HatchPatternFillType.html">rhino3dm.HatchPatternFillType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="InstanceDefinitionGeometry.html">rhino3dm.InstanceDefinitionGeometry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="InstanceDefinitionLayerStyle.html">rhino3dm.InstanceDefinitionLayerStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="InstanceDefinitionUpdateType.html">rhino3dm.InstanceDefinitionUpdateType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="InstanceReferenceGeometry.html">rhino3dm.InstanceReferenceGeometry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Intersection.html">rhino3dm.Intersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Interval.html">rhino3dm.Interval</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IsoStatus.html">rhino3dm.IsoStatus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ItemColorSource.html">rhino3dm.ItemColorSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="KnotStyle.html">rhino3dm.KnotStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Layer.html">rhino3dm.Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Leader.html">rhino3dm.Leader</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Light.html">rhino3dm.Light</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">rhino3dm.LightStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Line.html">rhino3dm.Line</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineCapStyle.html">rhino3dm.LineCapStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineCircleIntersection.html">rhino3dm.LineCircleIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineCurve.html">rhino3dm.LineCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineCylinderIntersection.html">rhino3dm.LineCylinderIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineJoinStyle.html">rhino3dm.LineJoinStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LineSphereIntersection.html">rhino3dm.LineSphereIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LinearDimension.html">rhino3dm.LinearDimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LinearWorkflow.html">rhino3dm.LinearWorkflow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Linetype.html">rhino3dm.Linetype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ManifestTable.html">rhino3dm.ManifestTable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ManifestTableIter.html">rhino3dm.ManifestTableIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Material.html">rhino3dm.Material</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Mesh.html">rhino3dm.Mesh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshFace.html">rhino3dm.MeshFace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshFaceList.html">rhino3dm.MeshFaceList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshTextureCoordinateList.html">rhino3dm.MeshTextureCoordinateList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshTopologyEdgeList.html">rhino3dm.MeshTopologyEdgeList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshType.html">rhino3dm.MeshType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshVertexColorList.html">rhino3dm.MeshVertexColorList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshVertexList.html">rhino3dm.MeshVertexList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshVertexNormalList.html">rhino3dm.MeshVertexNormalList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshingParameterTextureRange.html">rhino3dm.MeshingParameterTextureRange</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MeshingParameters.html">rhino3dm.MeshingParameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ModelComponent.html">rhino3dm.ModelComponent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ModelComponentType.html">rhino3dm.ModelComponentType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsCurve.html">rhino3dm.NurbsCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsCurveKnotList.html">rhino3dm.NurbsCurveKnotList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsCurvePointList.html">rhino3dm.NurbsCurvePointList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsSurface.html">rhino3dm.NurbsSurface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsSurfaceKnotList.html">rhino3dm.NurbsSurfaceKnotList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NurbsSurfacePointList.html">rhino3dm.NurbsSurfacePointList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectAttributes.html">rhino3dm.ObjectAttributes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectColorSource.html">rhino3dm.ObjectColorSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectDecoration.html">rhino3dm.ObjectDecoration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectLinetypeSource.html">rhino3dm.ObjectLinetypeSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectMaterialSource.html">rhino3dm.ObjectMaterialSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectMode.html">rhino3dm.ObjectMode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectPlotColorSource.html">rhino3dm.ObjectPlotColorSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectPlotWeightSource.html">rhino3dm.ObjectPlotWeightSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectSectionAttributesSource.html">rhino3dm.ObjectSectionAttributesSource</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ObjectType.html">rhino3dm.ObjectType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="OrdinateDimension.html">rhino3dm.OrdinateDimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PageSettings.html">rhino3dm.PageSettings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PhysicallyBasedMaterial.html">rhino3dm.PhysicallyBasedMaterial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Plane.html">rhino3dm.Plane</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PlaneCircleIntersection.html">rhino3dm.PlaneCircleIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PlaneSphereIntersection.html">rhino3dm.PlaneSphereIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PlaneSurface.html">rhino3dm.PlaneSurface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point.html">rhino3dm.Point</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point2d.html">rhino3dm.Point2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point2f.html">rhino3dm.Point2f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point3d.html">rhino3dm.Point3d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point3dList.html">rhino3dm.Point3dList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point3f.html">rhino3dm.Point3f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Point4d.html">rhino3dm.Point4d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PointCloud.html">rhino3dm.PointCloud</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PointCloudItem.html">rhino3dm.PointCloudItem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PolyCurve.html">rhino3dm.PolyCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Polyline.html">rhino3dm.Polyline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PolylineCurve.html">rhino3dm.PolylineCurve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PostEffectCollection.html">rhino3dm.PostEffectCollection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PostEffectCollectionIter.html">rhino3dm.PostEffectCollectionIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PostEffectData.html">rhino3dm.PostEffectData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PostEffectType.html">rhino3dm.PostEffectType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Projection.html">rhino3dm.Projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RadialDimension.html">rhino3dm.RadialDimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RenderChannels.html">rhino3dm.RenderChannels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RenderSettings.html">rhino3dm.RenderSettings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RevSurface.html">rhino3dm.RevSurface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RhinoMath.html">rhino3dm.RhinoMath</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SafeFrame.html">rhino3dm.SafeFrame</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SectionLabelStyle.html">rhino3dm.SectionLabelStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Skylight.html">rhino3dm.Skylight</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Sphere.html">rhino3dm.Sphere</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SphereSphereIntersection.html">rhino3dm.SphereSphereIntersection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubD.html">rhino3dm.SubD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDComponent.html">rhino3dm.SubDComponent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDComponentLocation.html">rhino3dm.SubDComponentLocation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEdge.html">rhino3dm.SubDEdge</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEdgeList.html">rhino3dm.SubDEdgeList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEdgeListIter.html">rhino3dm.SubDEdgeListIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEdgeSharpness.html">rhino3dm.SubDEdgeSharpness</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEdgeTag.html">rhino3dm.SubDEdgeTag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDEndCapStyle.html">rhino3dm.SubDEndCapStyle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDFace.html">rhino3dm.SubDFace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDFaceList.html">rhino3dm.SubDFaceList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDFaceListIter.html">rhino3dm.SubDFaceListIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDTextureCoordinateType.html">rhino3dm.SubDTextureCoordinateType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDVertex.html">rhino3dm.SubDVertex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDVertexList.html">rhino3dm.SubDVertexList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDVertexListIter.html">rhino3dm.SubDVertexListIter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SubDVertexTag.html">rhino3dm.SubDVertexTag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Sun.html">rhino3dm.Sun</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Surface.html">rhino3dm.Surface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="SurfaceProxy.html">rhino3dm.SurfaceProxy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextDot.html">rhino3dm.TextDot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextEntity.html">rhino3dm.TextEntity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextHorizontalAlignment.html">rhino3dm.TextHorizontalAlignment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextJustification.html">rhino3dm.TextJustification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextOrientation.html">rhino3dm.TextOrientation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextRunType.html">rhino3dm.TextRunType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextVerticalAlignment.html">rhino3dm.TextVerticalAlignment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Texture.html">rhino3dm.Texture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureCombineMode.html">rhino3dm.TextureCombineMode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureFilter.html">rhino3dm.TextureFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureMapping.html">rhino3dm.TextureMapping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureMappingType.html">rhino3dm.TextureMappingType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureProjectionModes.html">rhino3dm.TextureProjectionModes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureSpace.html">rhino3dm.TextureSpace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureType.html">rhino3dm.TextureType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TextureUvwWrapping.html">rhino3dm.TextureUvwWrapping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Torus.html">rhino3dm.Torus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Transform.html">rhino3dm.Transform</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TransformRigidType.html">rhino3dm.TransformRigidType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="TransformSimilarityType.html">rhino3dm.TransformSimilarityType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="UnitSystem.html">rhino3dm.UnitSystem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Vector2d.html">rhino3dm.Vector2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Vector3d.html">rhino3dm.Vector3d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Vector3f.html">rhino3dm.Vector3f</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ViewInfo.html">rhino3dm.ViewInfo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ViewInfoFocalBlurModes.html">rhino3dm.ViewInfoFocalBlurModes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ViewSectionBehavior.html">rhino3dm.ViewSectionBehavior</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ViewType.html">rhino3dm.ViewType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ViewportInfo.html">rhino3dm.ViewportInfo</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">rhino3dm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="index.html">rhino3dm</a></li>
+      <li class="breadcrumb-item active">rhino3dm.LightStyle</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/reference/rhino3dm/LightStyle.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="rhino3dm-lightstyle">
+<h1>rhino3dm.LightStyle<a class="headerlink" href="#rhino3dm-lightstyle" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="rhino3dm.LightStyle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">LightStyle</span></span><a class="headerlink" href="#rhino3dm.LightStyle" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
+<p>Defines enumerated values to represent light styles or types, such as directional or spotlight.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.LightStyle.Ambient">
+<span class="sig-name descname"><span class="pre">Ambient</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#rhino3dm.LightStyle.Ambient" title="Link to this definition"></a></dt>
+<dd><p>Ambient light.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.LightStyle.CameraDirectional">
+<span class="sig-name descname"><span class="pre">CameraDirectional</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#rhino3dm.LightStyle.CameraDirectional" title="Link to this definition"></a></dt>
+<dd><p>Light location and direction in camera coordinates. +x points to right, +y points up, +z points towards camera.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.LightStyle.CameraPoint">
+<span class="sig-name descname"><span class="pre">CameraPoint</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#rhino3dm.LightStyle.CameraPoint" title="Link to this definition"></a></dt>
+<dd><p>Light location and direction in camera coordinates. +x points to right, +y points up, +z points towards camera.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.LightStyle.CameraSpot">
+<span class="sig-name descname"><span class="pre">CameraSpot</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#rhino3dm.LightStyle.CameraSpot" title="Link to this definition"></a></dt>
+<dd><p>Light location and direction in camera coordinates. +x points to right, +y points up, +z points towards camera.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.LightStyle.None_">
+<span class="sig-name descname"><span class="pre">None_</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#rhino3dm.LightStyle.None_" title="Link to this definition"></a></dt>
+<dd><p>RhinoCommon’s <code class="docutils literal notranslate"><span class="pre">None</span></code> (<code class="docutils literal notranslate"><span class="pre">LightStyle.None</span></code> is not Python syntax; <code class="docutils literal notranslate"><span class="pre">LightStyle['None']</span></code> is the same member). No light type. This is the default value of the enumeration type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.LightStyle.WorldDirectional">
+<span class="sig-name descname"><span class="pre">WorldDirectional</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#rhino3dm.LightStyle.WorldDirectional" title="Link to this definition"></a></dt>
+<dd><p>Light location and direction in world coordinates.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.LightStyle.WorldLinear">
+<span class="sig-name descname"><span class="pre">WorldLinear</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#rhino3dm.LightStyle.WorldLinear" title="Link to this definition"></a></dt>
+<dd><p>Linear light in world coordinates.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.LightStyle.WorldPoint">
+<span class="sig-name descname"><span class="pre">WorldPoint</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#rhino3dm.LightStyle.WorldPoint" title="Link to this definition"></a></dt>
+<dd><p>Light location and direction in world coordinates.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.LightStyle.WorldRectangular">
+<span class="sig-name descname"><span class="pre">WorldRectangular</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#rhino3dm.LightStyle.WorldRectangular" title="Link to this definition"></a></dt>
+<dd><p>Rectangular light in world coordinates.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rhino3dm.LightStyle.WorldSpot">
+<span class="sig-name descname"><span class="pre">WorldSpot</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#rhino3dm.LightStyle.WorldSpot" title="Link to this definition"></a></dt>
+<dd><p>Light location and direction in world coordinates.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Light.html" class="btn btn-neutral float-left" title="rhino3dm.Light" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Line.html" class="btn btn-neutral float-right" title="rhino3dm.Line" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Robert McNeel &amp; Associates.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

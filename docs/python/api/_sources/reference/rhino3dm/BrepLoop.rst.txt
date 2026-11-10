@@ -1,0 +1,59 @@
+rhino3dm.BrepLoop
+=================
+
+.. py:class:: rhino3dm.BrepLoop
+
+   Bases: :py:obj:`GeometryBase`
+
+
+   Represent a single loop in a Brep object. A loop is composed of a list of trim curves.
+
+
+   .. py:method:: To2dCurve() -> Curve
+
+      Create a 2d curve that traces the entire loop
+
+
+
+   .. py:method:: To3dCurve() -> Curve
+
+      Create a 3D curve that approximates the loop geometry.
+
+      :returns: A 3D curve that approximates the loop or null on failure.
+
+
+
+   .. py:property:: Face
+      :type: BrepFace
+
+
+      BrepFace this loop belongs to.
+
+
+   .. py:property:: IsSurfaceBoundary
+      :type: bool
+
+
+      True if the loop's trims all run along the edge's of the underlying surface's parameter space.
+
+
+   .. py:property:: LoopIndex
+      :type: int
+
+
+      Gets the index of this loop in the Brep.Loops collection.
+
+
+   .. py:property:: LoopType
+      :type: BrepLoopType
+
+
+      type of loop.
+
+
+   .. py:property:: Trims
+      :type: BrepTrimList
+
+
+      List of trims for this loop
+

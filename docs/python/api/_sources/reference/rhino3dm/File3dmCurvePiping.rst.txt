@@ -1,0 +1,62 @@
+rhino3dm.File3dmCurvePiping
+===========================
+
+.. toctree::
+   :hidden:
+
+   /reference/rhino3dm/File3dmCurvePiping.CapTypes
+
+.. py:class:: rhino3dm.File3dmCurvePiping
+
+   Represents the curve piping attached to file3dm object attributes.
+
+
+   .. py:property:: Accuracy
+      :type: int
+
+
+      Specifies the accuracy of the pipe in the range 0 to 100.
+
+
+   .. py:property:: CapType
+      :type: File3dmCurvePiping
+
+
+      Specifies the cap type to use.
+
+
+   .. py:property:: Faceted
+      :type: bool
+
+
+      Specifies whether the pipe is faceted or not.
+
+
+   .. py:property:: On
+      :type: bool
+
+
+      Specifies whether curve piping is enabled or not.
+
+
+   .. py:property:: Radius
+      :type: float
+
+
+      Specifies the radius of the pipe (minimum value 0.0001).
+
+
+   .. py:property:: Segments
+      :type: int
+
+
+      Specifies the number of segments in the pipe (minimum value 2).
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rhino3dm.File3dmCurvePiping.CapTypes
+
+

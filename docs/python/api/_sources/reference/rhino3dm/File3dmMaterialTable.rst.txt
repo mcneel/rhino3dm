@@ -1,0 +1,86 @@
+rhino3dm.File3dmMaterialTable
+=============================
+
+.. py:class:: rhino3dm.File3dmMaterialTable
+
+   Provides access to materials in the 3dm file.
+
+
+   .. py:method:: Add(item: Material) -> None
+
+      Adds an item.
+
+      :param item: The item to add.
+
+
+
+   .. py:method:: AddMaterial(material: Material) -> int
+
+      Adds a material to the model material table
+
+      :returns: The material's index (>=0) is returned. Otherwise, RhinoMath.UnsetIntIndex is returned.
+
+
+
+   .. py:method:: Delete(item: Material | None) -> bool
+                  Delete(index: int) -> None
+
+      Flags a component as deleted.
+
+      :param index: The index of the item to flag.
+
+      :returns: True on success.
+
+
+
+   .. py:method:: Dump() -> str
+
+      Prepares a text dump of object table.
+
+      :returns: A string containing the dump.
+
+
+
+   .. py:method:: FindFromAttributes(attributes: ObjectAttributes) -> Material
+
+      Finds the render material an object with the given attributes uses, following the attributes' material source (the layer, the object or the parent).
+
+      :param attributes: The object attributes.
+
+      :returns: The material from this table, or a copy of the default material when the attributes resolve to no material in this table.
+
+
+
+   .. py:method:: FindId(id: uuid.UUID) -> Material
+
+      Uses the guid to find a model component. Deleted objects cannot be found by id. The guid is the value that is stored in the .Id property. In a single document, no two active objects have the same guid. If an object is replaced with a new object, then the guid persists. For example, if the \_Move command moves an object, then the moved object inherits its guid from the starting object. If the Copy command copies an object, then the copy gets a new guid. This guid persists through file saving/opening operations. This function will not find grip objects.
+
+      :param id: ID of model component to search for.
+
+      :returns: Reference to the rhino object with the objectId or null if no such object could be found.
+
+
+
+   .. py:method:: FindIndex(index: int) -> Material
+
+      Retrieves a material based on Index. This search type of search is discouraged. We are moving towards using only IDs for all tables.
+
+      :param index: The index to search for.
+
+      :returns: A material, or null if none was found.
+
+
+
+   .. py:property:: ComponentType
+      :type: ModelComponentType
+
+
+      Returns ``ModelComponentType.RenderMaterial``.
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Returns the count of all items, including deleted ones.
+

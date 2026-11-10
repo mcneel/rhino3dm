@@ -1,0 +1,24 @@
+rhino3dm.InstanceReferenceGeometry
+==================================
+
+.. py:class:: rhino3dm.InstanceReferenceGeometry(instanceDefinitionId: uuid.UUID, transform: Transform)
+
+   Bases: :py:obj:`GeometryBase`
+
+
+   Represents a reference to the geometry in a block definition.
+
+
+   .. py:property:: ParentIdefId
+      :type: uuid.UUID
+
+
+      The unique id for the parent instance definition of this instance reference.
+
+
+   .. py:property:: Xform
+      :type: Transform
+
+
+      Transformation for this reference.
+

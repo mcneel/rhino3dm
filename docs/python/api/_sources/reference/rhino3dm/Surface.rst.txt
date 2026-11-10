@@ -1,0 +1,419 @@
+rhino3dm.Surface
+================
+
+.. py:class:: rhino3dm.Surface
+
+   Bases: :py:obj:`GeometryBase`
+
+
+   Represents a base class that is common to most RhinoCommon surface types.
+
+   A surface represents an entity that can be all visited by providing two independent parameters, usually called (u, v), or sometimes (s, t).
+
+
+   .. py:method:: Degree(direction: int) -> int
+
+      Returns the maximum algebraic degree of any span (or a good estimate if curve spans are not algebraic).
+
+      :param direction: 0 gets first parameter's domain, 1 gets second parameter's domain.
+
+      :returns: The maximum degree.
+
+
+
+   .. py:method:: Domain(direction: int) -> Interval
+
+      Gets the domain in a direction.
+
+      :param direction: 0 gets first parameter, 1 gets second parameter.
+
+      :returns: An interval value.
+
+
+
+   .. py:method:: Evaluate(u: float, v: float, numberDerivatives: int) -> tuple[bool, Point3d, list[Vector3d]]
+
+      Evaluates a surface mathematically.
+
+      The partial derivatives will be in the order {Su, Sv} for numberDerivatives = 1, {Su, Sv, Suu, Suv, Svv} for 2, {Su, Sv, Suu, Suv, Svv, Suuu, Suuv, Suvv, Svvv} for 3, and similar for higher counts.
+
+      :param u: A U parameter.
+      :param v: A V parameter.
+      :param numberDerivatives: The number of derivatives.
+
+      :returns: true if the operation succeeded; false otherwise.
+
+
+
+   .. py:method:: Extend(direction: int, interval: Interval) -> bool
+
+      Analytically extends the surface to include the interval.
+
+      :param direction: If 0, Surface.Domain(0) will include the interval. (the first surface parameter). If 1, Surface.Domain(1) will include the interval. (the second surface parameter).
+      :param interval: If the interval is not included in surface domain, the surface will be extended so that its domain includes the interval. Note, this method will fail if the surface is closed in the specified direction.
+
+      :returns: True if successful, false otherwise.
+
+
+
+   .. py:method:: FrameAt(u: float, v: float) -> tuple[bool, Plane]
+
+      Computes the orient plane on a surface given a U and V parameter.
+
+      This is the simple evaluation call with no error handling.
+
+      :param u: A first parameter.
+      :param v: A second parameter.
+
+      :returns: true if this operation succeeded; otherwise false.
+
+
+
+   .. py:method:: GetNextDiscontinuity(direction: int, continuityType: Continuity, t0: float, t1: float, cosAngleTolerance: float, curvatureTolerance: float) -> tuple[bool, float]
+                  GetNextDiscontinuity(direction: int, continuityType: Continuity, t0: float, t1: float) -> tuple[bool, float]
+
+      Searches for a derivative, tangent, or curvature discontinuity.
+
+      :param direction: If 0, then "u" parameter is checked. If 1, then the "v" parameter is checked.
+      :param continuityType: The desired continuity.
+      :param t0: Search begins at t0. If there is a discontinuity at t0, it will be ignored. This makes it possible to repeatedly call GetNextDiscontinuity and step through the discontinuities.
+      :param t1: (t0 != t1) If there is a discontinuity at t1 is will be ignored unless c is a locus discontinuity type and t1 is at the start or end of the curve.
+
+      :returns: TRUE if a parametric discontinuity was found strictly between t0 and t1. Note well that all curves are parametrically continuous at the ends of their domains.
+                Locus continuity tests c = (C0\_locus\_continuous, ...,G2\_locus\_continuous): TRUE if a locus discontinuity was found strictly between t0 and t1 or at t1 is the at the end of a curve. Note well that all open curves (IsClosed()=false) are locus discontinuous at the ends of their domains. All closed curves (IsClosed()=true) are at least C0\_locus\_continuous at the ends of their domains.
+      :rtype: Parametric continuity tests c = (C0\_continuous, ..., G2\_continuous)
+
+
+
+   .. py:method:: GetNurbsFormParameterFromSurfaceParameter(surfaceS: float, surfaceT: float) -> tuple[bool, float, float]
+
+      Translates a parameter from the current surface to the parameter space of the surface returned by ``ToNurbsSurface``.
+
+      :param surfaceS: The parameter in the S, or sometimes U, direction, of this surface.
+      :param surfaceT: The parameter in the T, or sometimes V, direction of this surface.
+
+      :returns: True if the operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: GetSpanVector(direction: int) -> list[float] | None
+
+      Gets array of span "knots".
+
+      :param direction: 0 gets first parameter's domain, 1 gets second parameter's domain.
+
+      :returns: An array with span vectors; or null on error.
+
+
+
+   .. py:method:: GetSurfaceParameterFromNurbsFormParameter(nurbsS: float, nurbsT: float) -> tuple[bool, float, float]
+
+      Translates a parameter from a value on the surface returned by ``ToNurbsSurface`` to the current surface.
+
+      :param nurbsS: The parameter in the S, or sometimes U, direction of the NURBS form surface.
+      :param nurbsT: The parameter in the T, or sometimes V, direction of the NURBS form surface.
+
+      :returns: True if the operation succeeded; otherwise, false.
+
+
+
+   .. py:method:: HasNurbsForm() -> int
+
+      Is there a NURBS surface representation of this surface.
+
+      :returns: 0 unable to create NURBS representation with desired accuracy. 1 success - NURBS parameterization matches the surface's 2 success - NURBS point locus matches the surface's and the domain of the NURBS surface is correct. However, This surface's parameterization and the NURBS surface parameterization may not match. This situation happens when getting NURBS representations of surfaces that have a transcendental parameterization like spheres, cylinders, and cones.
+
+
+
+   .. py:method:: IsAtSeam(u: float, v: float) -> int
+
+      Tests if a surface parameter value is at a seam.
+
+      :param u: Surface u parameter to test.
+      :param v: Surface v parameter to test.
+
+      :returns: 0 if not a seam, 1 if u == Domain(0)[i] and srf(u, v) == srf(Domain(0)[1-i], v) 2 if v == Domain(1)[i] and srf(u, v) == srf(u, Domain(1)[1-i]) 3 if 1 and 2 are true.
+
+
+
+   .. py:method:: IsAtSingularity(u: float, v: float, exact: bool) -> bool
+
+      Tests if a surface parameter value is at a singularity.
+
+      :param u: Surface u parameter to test.
+      :param v: Surface v parameter to test.
+      :param exact: If true, test if (u,v) is exactly at a singularity. If false, test if close enough to cause numerical problems.
+
+      :returns: true if surface is singular at (s,t)
+
+
+
+   .. py:method:: IsClosed(direction: int) -> bool
+
+      Gets a value indicating if the surface is closed in a direction.
+
+      :param direction: 0 = U, 1 = V.
+
+      :returns: The indicating boolean value.
+
+
+
+   .. py:method:: IsCone(tolerance: float) -> bool
+                  IsCone() -> bool
+
+      Determines if the surface is a portion of a cone within RhinoMath.ZeroTolerance.
+
+      :returns: true if the surface is a portion of a cone.
+
+
+
+   .. py:method:: IsContinuous(continuityType: Continuity, u: float, v: float) -> bool
+
+      Tests continuity at a surface parameter value.
+
+      :param continuityType: The continuity type to sample.
+      :param u: Surface u parameter to test.
+      :param v: Surface v parameter to test.
+
+      :returns: true if the surface has at least the specified continuity at the (u,v) parameter.
+
+
+
+   .. py:method:: IsCylinder(tolerance: float) -> bool
+                  IsCylinder() -> bool
+
+      Determines if the surface is a portion of a cylinder within RhinoMath.ZeroTolerance.
+
+      :returns: true if the surface is a portion of a cylinder.
+
+
+
+   .. py:method:: IsExtrusion(tolerance: float) -> bool
+                  IsExtrusion() -> bool
+
+      Determines if the surface is a portion of an extrusion within RhinoMath.ZeroTolerance.
+
+      :returns: true if the surface is an extrusion.
+
+
+
+   .. py:method:: IsIsoparametric(bbox: BoundingBox) -> IsoStatus
+                  IsIsoparametric(curve: Curve | None, curveDomain: Interval) -> IsoStatus
+                  IsIsoparametric(curve: Curve | None) -> IsoStatus
+
+      Determines if a 2d curve is isoparametric in the parameter space of this surface.
+
+      :param curve: Curve to test.
+
+      :returns: IsoStatus flag describing the iso-parametric relationship between the surface and the curve.
+
+
+
+   .. py:method:: IsPeriodic(direction: int) -> bool
+
+      Gets a value indicating if the surface is periodic in a direction (default is false).
+
+      :param direction: 0 = U, 1 = V.
+
+      :returns: The indicating boolean value.
+
+
+
+   .. py:method:: IsPlanar(tolerance: float) -> bool
+                  IsPlanar() -> bool
+
+      Tests a surface to see if it is planar to zero tolerance.
+
+      :returns: true if the surface is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).
+
+
+
+   .. py:method:: IsSingular(side: int) -> bool
+
+      true if surface side is collapsed to a point.
+
+      :param side: side of parameter space to test 0 = south, 1 = east, 2 = north, 3 = west.
+
+      :returns: True if this specific side of the surface is singular; otherwise, false.
+
+
+
+   .. py:method:: IsSphere(tolerance: float) -> bool
+                  IsSphere() -> bool
+
+      Determines if the surface is a portion of a sphere within RhinoMath.ZeroTolerance.
+
+      :returns: true if the surface is a portion of a sphere.
+
+
+
+   .. py:method:: IsTorus(tolerance: float) -> bool
+                  IsTorus() -> bool
+
+      Determines if the surface is a portion of a torus within RhinoMath.ZeroTolerance.
+
+      :returns: true if the surface is a portion of a torus.
+
+
+
+   .. py:method:: IsoCurve(iso: IsoStatus) -> Curve
+                  IsoCurve(iso: IsoStatus, t: float) -> Curve
+                  IsoCurve(direction: int, constantParameter: float) -> Curve
+
+      Gets isoparametric curve.
+
+      In this function "direction" indicates which direction the resulting curve runs. 0: horizontal, 1: vertical In the other Surface functions that take a "direction" argument, "direction" indicates if "constantParameter" is a "u" or "v" parameter.
+
+      :param direction: 0 first parameter varies and second parameter is constant e.g., point on IsoCurve(0,c) at t is srf(t,c) This is a horizontal line from left to right
+                        1 first parameter is constant and second parameter varies e.g., point on IsoCurve(1,c) at t is srf(c,t This is a vertical line from bottom to top.
+      :param constantParameter: The parameter that was constant on the original surface.
+
+      :returns: An isoparametric curve or null on error.
+
+
+
+   .. py:method:: NormalAt(u: float, v: float) -> Vector3d
+
+      Computes the surface normal at a point.
+
+      This is the simple evaluation call - it does not support error handling.
+
+      :param u: A U parameter.
+      :param v: A V parameter.
+
+      :returns: The normal.
+
+
+
+   .. py:method:: PointAt(u: float, v: float) -> Point3d
+
+      Evaluates a point at a given parameter.
+
+      :param u: evaluation parameters.
+      :param v: evaluation parameters.
+
+      :returns: Point3d.Unset on failure.
+
+
+
+   .. py:method:: Reverse(direction: int) -> Surface
+
+      Reverses parameterization Domain changes from [a,b] to [-b,-a]
+
+      :param direction: 0 for first parameter's domain, 1 for second parameter's domain.
+
+      :returns: a new reversed surface on success.
+
+
+
+   .. py:method:: SetDomain(direction: int, domain: Interval) -> bool
+
+      Sets the domain in a direction.
+
+      :param direction: 0 sets first parameter's domain, 1 sets second parameter's domain.
+      :param domain: A new domain to be assigned.
+
+      :returns: true if setting succeeded, otherwise false.
+
+
+
+   .. py:method:: SpanCount(direction: int) -> int
+
+      Gets number of smooth nonempty spans in the parameter direction.
+
+      :param direction: 0 gets first parameter's domain, 1 gets second parameter's domain.
+
+      :returns: The span count.
+
+
+
+   .. py:method:: ToBrep() -> Brep
+
+      Converts the surface into a Brep.
+
+      :returns: A Brep with a similar shape like this surface or null.
+
+
+
+   .. py:method:: ToNurbsSurface(tolerance: float) -> tuple[NurbsSurface, int]
+                  ToNurbsSurface() -> NurbsSurface
+
+      Gets a NURBS surface representation of this surface. Default tolerance of 0.0 is used.
+
+      :returns: NurbsSurface on success, null on failure.
+
+
+
+   .. py:method:: Transpose() -> Surface
+
+      Transposes surface parameterization (swap U and V)
+
+      :returns: New transposed surface on success, null on failure.
+
+
+
+   .. py:method:: TryGetCone(tolerance: float) -> tuple[bool, Cone]
+                  TryGetCone() -> tuple[bool, Cone]
+
+      Tests a surface to see if it is a portion of a cone within RhinoMath.ZeroTolerance and return the cone.
+
+      :returns: true if the surface is a portion of a cone.
+
+
+
+   .. py:method:: TryGetCylinder(tolerance: float) -> tuple[bool, Cylinder]
+                  TryGetCylinder() -> tuple[bool, Cylinder]
+
+      Tests a surface to see if it is a portion of a cylinder within RhinoMath.ZeroTolerance and return the cylinder.
+
+      If successful, an infinite cylinder is returned. When a surface has a cylindrical shape, even if its ends are not circles on the cylinder, it returns the axis and radius. You can detect infinite cylinders using Cylinder.IsFinite.
+
+      :returns: true if the surface is a portion of a cylinder.
+
+
+
+   .. py:method:: TryGetFiniteCylinder(tolerance: float) -> tuple[bool, Cylinder]
+
+      Tests a surface with the assumption that it might be a right circular cylinder and returns this geometry.
+
+      If successful, a finite cylinder is returned.
+
+      :param tolerance: tolerance to use when checking.
+
+      :returns: true if the surface is a portion of a cylinder.
+
+
+
+   .. py:method:: TryGetPlane(tolerance: float) -> tuple[bool, Plane]
+                  TryGetPlane() -> tuple[bool, Plane]
+
+      Tests a surface for planarity and return the plane.
+
+      :returns: true if there is a plane such that the maximum distance from the surface to the plane is <= RhinoMath.ZeroTolerance.
+
+
+
+   .. py:method:: TryGetSphere(tolerance: float) -> tuple[bool, Sphere]
+                  TryGetSphere() -> tuple[bool, Sphere]
+
+      Test a surface to see if it is a portion of a sphere and return the sphere.
+
+      :returns: true if the surface is a portion of a sphere.
+
+
+
+   .. py:method:: TryGetTorus(tolerance: float) -> tuple[bool, Torus]
+                  TryGetTorus() -> tuple[bool, Torus]
+
+      Tests a surface to see if it is a portion of a torus within RhinoMath.ZeroTolerance and returns the torus.
+
+      :returns: true if the surface is a portion of a torus.
+
+
+
+   .. py:property:: IsSolid
+      :type: bool
+
+
+      Gets a values indicating whether a surface is solid.
+

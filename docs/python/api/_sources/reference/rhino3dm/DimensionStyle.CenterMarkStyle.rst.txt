@@ -1,0 +1,39 @@
+rhino3dm.DimensionStyle.CenterMarkStyle
+=======================================
+
+.. py:class:: rhino3dm.DimensionStyle.CenterMarkStyle
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Style for drawing centermark for Radial dimensions and Centermark objects
+
+
+   .. py:attribute:: Mark
+      :value: 1
+
+
+      
+
+
+
+      + mark only
+
+
+   .. py:attribute:: MarkAndLines
+      :value: 2
+
+
+      
+
+
+
+      + mark and lines to radius
+
+
+   .. py:attribute:: None_
+      :value: 0
+
+
+      RhinoCommon's ``None`` (``CenterMarkStyle.None`` is not Python syntax; ``CenterMarkStyle['None']`` is the same member). No centermark display
+

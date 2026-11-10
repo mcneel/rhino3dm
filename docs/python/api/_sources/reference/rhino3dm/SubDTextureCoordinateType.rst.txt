@@ -1,0 +1,59 @@
+rhino3dm.SubDTextureCoordinateType
+==================================
+
+.. py:class:: rhino3dm.SubDTextureCoordinateType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   ON\_SubDTextureCoordinateType identifies the way ON\_SubDMeshFragment texture coordinates are set from an ON\_SubDFace.
+
+
+   .. py:attribute:: FromFaceTexturePoints
+      :value: 6
+
+
+      All ON\_SubDMeshFragment texture coordinate values are set by barycentric interpolation of ON\_SubDFace.TexturePoint() values.
+
+
+   .. py:attribute:: FromMapping
+      :value: 7
+
+
+      Texture coordinates are set from an ON\_TextureMapping and transformation specified by ON\_SubD::TextureMappingTag(). In all other cases, ON\_SubD::TextureMappingTag() can be set, but is ignored.
+
+
+   .. py:attribute:: Nan
+      :value: 4
+
+
+      All ON\_SubDMeshFragment texture coordinate values are ON\_DBL\_QNAN.
+
+
+   .. py:attribute:: Packed
+      :value: 2
+
+
+      The face's pack rect is used to set fragment texture coordinates. When possible, adjacent quads with the same ON\_SubDFace::PackId() value are assigned adjacent rectangles in texture space.
+
+
+   .. py:attribute:: Unpacked
+      :value: 1
+
+
+      Each SubDFace uses the unit square in texture space.
+
+
+   .. py:attribute:: Unset
+      :value: 0
+
+
+      Texture domains are not set.
+
+
+   .. py:attribute:: Zero
+      :value: 3
+
+
+      All ON\_SubDMeshFragment texture coordinate values are zero.
+

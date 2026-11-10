@@ -1,0 +1,64 @@
+rhino3dm.BrepTrimType
+=====================
+
+.. py:class:: rhino3dm.BrepTrimType
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Each brep trim has a defined type.
+
+
+   .. py:attribute:: Boundary
+      :value: 1
+
+
+      Trim is connected to an edge, is part of an outer, inner or slit loop, and is the only trim connected to the edge.
+
+
+   .. py:attribute:: CurveOnSurface
+      :value: 5
+
+
+      Trim is connected to an edge, is the only trim in a curve-on-surface loop, and is the only trim connected to the edge.
+
+
+   .. py:attribute:: Mated
+      :value: 2
+
+
+      Trim is connected to an edge, is part of an outer, inner or slit loop, no other trim from the same loop is connected to the edge, and at least one trim from a different loop is connected to the edge.
+
+
+   .. py:attribute:: PointOnSurface
+      :value: 6
+
+
+      Trim is a point on a surface, trim.m\_pbox is records surface parameters, and is the only trim in a point-on-surface loop. This trim is not connected to an edge and has no 2d curve.
+
+
+   .. py:attribute:: Seam
+      :value: 3
+
+
+      trim is connected to an edge, is part of an outer, inner or slit loop, and one other trim from the same loop is connected to the edge. (There can be other mated trims that are also connected to the edge. For example, the non-manifold edge that results when a surface edge lies in the middle of another surface.) Non-manifold "cuts" have seam trims too.
+
+
+   .. py:attribute:: Singular
+      :value: 4
+
+
+      Trim is part of an outer loop, the trim's 2d curve runs along the singular side of a surface, and the trim is NOT connected to an edge. (There is no 3d edge because the surface side is singular.)
+
+
+   .. py:attribute:: Slit
+      :value: 7
+
+
+
+   .. py:attribute:: Unknown
+      :value: 0
+
+
+      Unknown type
+

@@ -1,0 +1,33 @@
+rhino3dm.ArchivableDictionary
+=============================
+
+.. py:class:: rhino3dm.ArchivableDictionary
+
+   Represents a dictionary class that can be attached to objects and can be serialized (saved) at necessity.
+
+   See remarks for layout.
+
+   This is the layout of this object:
+
+   ``BEGINCHUNK (TCODE_ANONYMOUS_CHUNK) |- version (int) |- entry count (int) for entry count entries |- BEGINCHUNK (TCODE_ANONYMOUS_CHUNK) |- key (string) |- entry contents |- ENDCHUNK (TCODE_ANONYMOUS_CHUNK) ENDCHUNK (TCODE_ANONYMOUS_CHUNK)``
+
+
+   .. py:method:: DecodeDict(jsonObject: dict[str, Any]) -> dict[str, Any]
+      :staticmethod:
+
+
+      The dict an ``EncodeDict`` result describes (rhino3dm only).
+
+      :param jsonObject: A dict as ``EncodeDict`` returns it.
+
+
+
+   .. py:method:: EncodeDict(dict: ArchivableDictionary.EncodeDict.dict[str, Any]) -> ArchivableDictionary.EncodeDict.dict[str, Any]
+      :staticmethod:
+
+
+      A dict of values as an ArchivableDictionary, in ``Encode``'s JSON form (rhino3dm only; inverse: ``ArchivableDictionary.DecodeDict``).
+
+      :param dict: A dict of strings, numbers, booleans, points, vectors, and other rhino3dm objects.
+
+

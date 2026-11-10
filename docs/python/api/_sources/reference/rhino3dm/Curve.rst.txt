@@ -1,0 +1,500 @@
+rhino3dm.Curve
+==============
+
+.. py:class:: rhino3dm.Curve
+
+   Bases: :py:obj:`GeometryBase`
+
+
+   Represents a base class that is common to most RhinoCommon curve types.
+
+   A curve represents an entity that can be all visited by providing a single parameter, usually called t.
+
+
+   .. py:method:: ChangeClosedCurveSeam(t: float) -> bool
+
+      If this curve is closed, then modify it so that the start/end point is at curve parameter t.
+
+      :param t: Curve parameter of new start/end point. The returned curves domain will start at t.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: ChangeDimension(desiredDimension: int) -> bool
+
+      Changes the dimension of a curve.
+
+      :param desiredDimension: The desired dimension.
+
+      :returns: true if the curve's dimension was already desiredDimension or if the curve's dimension was successfully changed to desiredDimension; otherwise false.
+
+
+
+   .. py:method:: ClosedCurveOrientation(xform: Transform) -> CurveOrientation
+                  ClosedCurveOrientation() -> CurveOrientation
+                  ClosedCurveOrientation(plane: Plane) -> CurveOrientation
+                  ClosedCurveOrientation(upDirection: Vector3d) -> CurveOrientation
+
+      Determines the orientation (counterclockwise or clockwise) of a closed, planar curve in a given plane. Only works with simple (no self intersections) closed, planar curves.
+
+      :param upDirection: A vector that is considered "up".
+
+      :returns: The orientation of this curve with respect to a defined up direction.
+
+
+
+   .. py:method:: CreateControlPointCurve(points: collections.abc.Sequence[Point3d], degree: int) -> Curve
+                  CreateControlPointCurve(points: collections.abc.Sequence[Point3d]) -> Curve
+      :staticmethod:
+
+
+      Constructs a control-point of degree=3 (or less).
+
+      :param points: Control points of curve.
+
+
+
+   .. py:method:: CurvatureAt(t: float) -> Vector3d
+
+      Evaluate the curvature vector at a curve parameter.
+
+      No error handling.
+
+      :param t: Evaluation parameter.
+
+      :returns: Curvature vector of the curve at the parameter t.
+
+
+
+   .. py:method:: DerivativeAt(t: float, derivativeCount: int, side: CurveEvaluationSide) -> list[Vector3d]
+                  DerivativeAt(t: float, derivativeCount: int) -> list[Vector3d]
+
+      Evaluate the derivatives at the specified curve parameter.
+
+      :param t: Curve parameter to evaluate.
+      :param derivativeCount: Number of derivatives to evaluate, must be at least 0.
+
+      :returns: An array of vectors that represents all the derivatives starting at zero.
+
+
+
+   .. py:method:: Duplicate() -> Curve
+
+      Constructs an exact duplicate of this Curve.
+
+
+
+   .. py:method:: DuplicateCurve() -> Curve
+
+      Constructs an exact duplicate of this curve.
+
+      :returns: An exact copy of this curve.
+
+
+
+   .. py:method:: FrameAt(t: float) -> tuple[bool, Plane]
+
+      Returns a 3d frame at a parameter.
+
+      :param t: Evaluation parameter.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: GetCurveParameterFromNurbsFormParameter(nurbsParameter: float) -> tuple[bool, float]
+
+      Convert a NURBS curve parameter to a curve parameter.
+
+      If HasNurbForm returns 2, this function converts the curve parameter to the NURBS curve parameter.
+
+      :param nurbsParameter: NURBS form parameter.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: GetNextDiscontinuity(continuityType: Continuity, t0: float, t1: float, cosAngleTolerance: float, curvatureTolerance: float) -> tuple[bool, float]
+                  GetNextDiscontinuity(continuityType: Continuity, t0: float, t1: float) -> tuple[bool, float]
+
+      Searches for a derivative, tangent, or curvature discontinuity.
+
+      G1 uses a 1 degree tangent angle tolerance. G2 reports a discontinuity if the curvature vectors differ in direction by more than 2 degrees or in magnitude by more than 5%. These tolerances do not depend on the document's angle tolerance.
+
+      :param continuityType: Type of continuity to search for.
+      :param t0: Search begins at t0. If there is a discontinuity at t0, it will be ignored. This makes it possible to repeatedly call GetNextDiscontinuity() and step through the discontinuities.
+      :param t1: (t0 != t1) If there is a discontinuity at t1 it will be ignored unless continuityType is a locus discontinuity type and t1 is at the start or end of the curve.
+
+      :returns: true if a parametric discontinuity was found strictly between t0 and t1. Note well that all curves are parametrically continuous at the ends of their domains.
+                Locus continuity tests c = (C0\_locus\_continuous, ...,G2\_locus\_continuous): true if a locus discontinuity was found strictly between t0 and t1 or at t1 is the at the end of a curve. Note well that all open curves (IsClosed()=false) are locus discontinuous at the ends of their domains. All closed curves (IsClosed()=true) are at least C0\_locus\_continuous at the ends of their domains.
+      :rtype: Parametric continuity tests c = (C0\_continuous, ..., G2\_continuous)
+
+
+
+   .. py:method:: GetNurbsFormParameterFromCurveParameter(curveParameter: float) -> tuple[bool, float]
+
+      Convert a curve parameter to a NURBS curve parameter.
+
+      If GetNurbForm returns 2, this function converts the curve parameter to the NURBS curve parameter.
+
+      :param curveParameter: Curve parameter.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: HasNurbsForm() -> int
+
+      Does a NURBS curve representation of this curve exist?
+
+      :returns: 0 unable to create NURBS representation with desired accuracy. 1 success - NURBS parameterization matches the curve's to the desired accuracy 2 success - NURBS point locus matches the curve's and the domain of the NURBS curve is correct. However, This curve's parameterization and the NURBS curve parameterization may not match. This situation happens when getting NURBS representations of curves that have a transcendental parameterization like circles.
+
+
+
+   .. py:method:: IsArc(tolerance: float) -> bool
+                  IsArc() -> bool
+
+      Test a curve to see if it can be represented by an arc or circle within RhinoMath.ZeroTolerance.
+
+      :returns: true if the curve can be represented by an arc or a circle within tolerance.
+
+
+
+   .. py:method:: IsCircle(tolerance: float) -> bool
+                  IsCircle() -> bool
+
+      Test a curve to see if it can be represented by a circle within RhinoMath.ZeroTolerance.
+
+      :returns: true if the Curve can be represented by a circle within tolerance.
+
+
+
+   .. py:method:: IsClosable(tolerance: float, minimumAbsoluteSize: float, minimumRelativeSize: float) -> bool
+                  IsClosable(tolerance: float) -> bool
+
+      Decide if it makes sense to close off this curve by moving the endpoint to the start based on start-end gap size and length of curve as approximated by chord defined by 6 points.
+
+      :param tolerance: Maximum allowable distance between start and end. If start - end gap is greater than tolerance, this function will return false.
+
+      :returns: true if start and end points are close enough based on above conditions.
+
+
+
+   .. py:method:: IsContinuous(continuityType: Continuity, t: float) -> bool
+
+      Test continuity at a curve parameter value.
+
+      G1 uses a 1 degree tangent angle tolerance. G2 reports a discontinuity if the curvature vectors differ in direction by more than 2 degrees or in magnitude by more than 5%. These tolerances do not depend on the document's angle tolerance.
+
+      :param continuityType: Type of continuity to test for.
+      :param t: Parameter to test.
+
+      :returns: true if the curve has at least the c type continuity at the parameter t.
+
+
+
+   .. py:method:: IsEllipse(tolerance: float) -> bool
+                  IsEllipse() -> bool
+
+      Test a curve to see if it can be represented by an ellipse within RhinoMath.ZeroTolerance.
+
+      :returns: true if the Curve can be represented by an ellipse within tolerance.
+
+
+
+   .. py:method:: IsInPlane(testPlane: Plane, tolerance: float) -> bool
+                  IsInPlane(testPlane: Plane) -> bool
+
+      Test a curve to see if it lies in a specific plane.
+
+      :param testPlane: Plane to test for.
+
+      :returns: true if the maximum distance from the curve to the testPlane is <= RhinoMath.ZeroTolerance.
+
+
+
+   .. py:method:: IsLinear(tolerance: float) -> bool
+                  IsLinear() -> bool
+
+      Test a curve to see if it is linear to within RhinoMath.ZeroTolerance units (1e-12).
+
+      :returns: true if the curve is linear.
+
+
+
+   .. py:method:: IsPlanar(tolerance: float) -> bool
+                  IsPlanar() -> bool
+
+      Test a curve for planarity.
+
+      :returns: true if the curve is planar (flat) to within RhinoMath.ZeroTolerance units (1e-12).
+
+
+
+   .. py:method:: IsPolyline() -> bool
+
+      Several types of Curve can have the form of a polyline including a degree 1 NurbsCurve, a PolylineCurve, and a PolyCurve all of whose segments are some form of polyline. IsPolyline tests a curve to see if it can be represented as a polyline.
+
+      :returns: true if this curve can be represented as a polyline; otherwise, false.
+
+
+
+   .. py:method:: PointAt(t: float) -> Point3d
+
+      Evaluates point at a curve parameter.
+
+      No error handling.
+
+      :param t: Evaluation parameter.
+
+      :returns: Point (location of curve at the parameter t).
+
+
+
+   .. py:method:: Reverse() -> bool
+
+      Reverses the direction of the curve.
+
+      If reversed, the domain changes from [a,b] to [-b,-a]
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: SetEndPoint(point: Point3d) -> bool
+
+      Forces the curve to end at a specified point. Not all curve types support this operation.
+
+      Some end points cannot be moved. Be sure to check return code
+
+      :param point: New end point of curve.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: SetStartPoint(point: Point3d) -> bool
+
+      Forces the curve to start at a specified point. Not all curve types support this operation.
+
+      Some start points cannot be moved. Be sure to check return code.
+
+      :param point: New start point of curve.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: SpanDomain(spanIndex: int) -> Interval
+
+      Get the domain of the curve span with the given index. Use the SpanCount property to test how many spans there are.
+
+      :param spanIndex: Index of span.
+
+      :returns: Interval of the span with the given index.
+
+
+
+   .. py:method:: SpanVector() -> list[Any]
+
+      Returns the vector of span division parameters for this curve.
+
+      :returns: An array of parameter values that mark the boundaries between spans of the curve.
+
+
+
+   .. py:method:: Split(t: float) -> list[Curve] | None
+
+      Splits (divides) the curve at a series of specified parameters. The parameter must be in the interior of the curve domain.
+
+      :param t: Parameters to split the curve at in the interval returned by Domain().
+
+      :returns: Multiple curves on success, null on failure.
+
+
+
+   .. py:method:: TangentAt(t: float) -> Vector3d
+
+      Evaluates the unit tangent vector at a curve parameter.
+
+      No error handling.
+
+      :param t: Evaluation parameter.
+
+      :returns: Unit tangent vector of the curve at the parameter t.
+
+
+
+   .. py:method:: ToNurbsCurve() -> NurbsCurve
+                  ToNurbsCurve(subdomain: Interval) -> NurbsCurve
+
+      Constructs a NURBS curve representation of this curve.
+
+      :param subdomain: The NURBS representation for this portion of the curve is returned.
+
+      :returns: NURBS representation of the curve on success, null on failure.
+
+
+
+   .. py:method:: TorsionAt(t: float) -> float
+
+      Evaluate the torsion of a curve at a parameter. Sometimes also called the "second curvature", torsion is the rate of change of a curve's osculating plane.
+
+      See Barrett O'Neill, Elementary Differential Geometry, page 69.
+
+      :param t: The evaluation parameter.
+
+      :returns: The torsion if successful.
+
+
+
+   .. py:method:: Trim(t0: float, t1: float) -> Curve
+                  Trim(domain: Interval) -> Curve
+
+      Removes portions of the curve outside the specified interval.
+
+      If curve is open, then trimming interval must be an increasing interval. If curve is closed, and trimming interval is a decreasing interval, then the portion of the curve across the start/end is returned.
+
+      :param domain: Trimming interval.
+
+      :returns: Trimmed curve if successful, null on failure.
+
+
+
+   .. py:method:: TrimInterval(t0: float, t1: float) -> bool
+                  TrimInterval(domain: Interval) -> bool
+
+      Trims the curve in-place by removing portions of the curve outside the specified interval.
+
+      Portions of the curve before curve(domain[0]) and after curve(domain[1]) are removed.
+
+      :param domain: Trimming interval.
+
+      :returns: True if successful, false otherwise.
+
+
+
+   .. py:method:: TryGetArc(plane: Plane, tolerance: float) -> tuple[bool, Arc]
+                  TryGetArc(tolerance: float) -> tuple[bool, Arc]
+                  TryGetArc(plane: Plane) -> tuple[bool, Arc]
+                  TryGetArc() -> tuple[bool, Arc]
+
+      Try to convert this curve into an Arc using RhinoMath.ZeroTolerance.
+
+      :returns: true if the curve could be converted into an arc.
+
+
+
+   .. py:method:: TryGetCircle(tolerance: float) -> tuple[bool, Circle]
+                  TryGetCircle() -> tuple[bool, Circle]
+
+      Try to convert this curve into a circle using RhinoMath.ZeroTolerance.
+
+      :returns: true if the curve could be converted into a Circle.
+
+
+
+   .. py:method:: TryGetEllipse(plane: Plane, tolerance: float) -> tuple[bool, Ellipse]
+                  TryGetEllipse(tolerance: float) -> tuple[bool, Ellipse]
+                  TryGetEllipse(plane: Plane) -> tuple[bool, Ellipse]
+                  TryGetEllipse() -> tuple[bool, Ellipse]
+
+      Try to convert this curve into an Ellipse within RhinoMath.ZeroTolerance.
+
+      :returns: true if the curve could be converted into an Ellipse.
+
+
+
+   .. py:method:: TryGetPlane(tolerance: float) -> tuple[bool, Plane]
+                  TryGetPlane() -> tuple[bool, Plane]
+
+      Test a curve for planarity and return the plane.
+
+      :returns: true if there is a plane such that the maximum distance from the curve to the plane is <= RhinoMath.ZeroTolerance.
+
+
+
+   .. py:method:: TryGetPolyline() -> tuple[bool, Polyline]
+
+      Several types of Curve can have the form of a polyline including a degree 1 NurbsCurve, a PolylineCurve, and a PolyCurve all of whose segments are some form of polyline. IsPolyline tests a curve to see if it can be represented as a polyline.
+
+      :returns: true if this curve can be represented as a polyline; otherwise, false.
+
+
+
+   .. py:property:: Degree
+      :type: int
+
+
+      Gets the maximum algebraic degree of any span or a good estimate if curve spans are not algebraic.
+
+
+   .. py:property:: Dimension
+      :type: int
+
+
+      Gets the dimension of the object.
+
+      The dimension is typically three. For parameter space trimming curves the dimension is two. In rare cases the dimension can be one or greater than three.
+
+
+   .. py:property:: Domain
+      :type: Interval
+
+
+      Gets or sets the domain of the curve.
+
+
+   .. py:property:: IsClosed
+      :type: bool
+
+
+      Gets a value indicating whether or not this curve is a closed curve.
+
+
+   .. py:property:: IsPeriodic
+      :type: bool
+
+
+      Gets a value indicating whether or not this curve is considered to be Periodic.
+
+
+   .. py:property:: PointAtEnd
+      :type: Point3d
+
+
+      Evaluates point at the end of the curve.
+
+
+   .. py:property:: PointAtStart
+      :type: Point3d
+
+
+      Evaluates point at the start of the curve.
+
+
+   .. py:property:: SpanCount
+      :type: int
+
+
+      Gets the number of non-empty smooth (c-infinity) spans in the curve.
+
+
+   .. py:property:: TangentAtEnd
+      :type: Vector3d
+
+
+      Evaluate unit tangent vector at the end of the curve.
+
+      No error handling.
+
+
+   .. py:property:: TangentAtStart
+      :type: Vector3d
+
+
+      Evaluates the unit tangent vector at the start of the curve.
+
+      No error handling.
+

@@ -1,0 +1,643 @@
+rhino3dm.DimensionStyle.Field
+=============================
+
+.. py:class:: rhino3dm.DimensionStyle.Field
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Field identifiers used for file i/o and getting/setting values
+
+
+   .. py:attribute:: AltBelow
+      :value: 77
+
+
+
+   .. py:attribute:: AltRound
+      :value: 70
+
+
+
+   .. py:attribute:: AltToleranceResolution
+      :value: 52
+
+
+
+   .. py:attribute:: AltZeroSuppress
+      :value: 73
+
+
+
+   .. py:attribute:: Alternate
+      :value: 17
+
+
+
+   .. py:attribute:: AlternateDimensionLengthDisplay
+      :value: 110
+
+
+      Alternate dimension length display. See ON\_DimStyle::AlternateDimensionLengthDisplay() for a description of this parameter.
+
+
+   .. py:attribute:: AlternateLengthFactor
+      :value: 18
+
+
+      AlternateLengthFactor is a rarely used. See Length factor for a description of this property.
+
+
+   .. py:attribute:: AlternateLengthResolution
+      :value: 20
+
+
+
+   .. py:attribute:: AlternatePrefix
+      :value: 23
+
+
+
+   .. py:attribute:: AlternateSuffix
+      :value: 24
+
+
+
+   .. py:attribute:: AngleFormat
+      :value: 13
+
+
+
+   .. py:attribute:: AngleResolution
+      :value: 14
+
+
+
+   .. py:attribute:: AngleZeroSuppress
+      :value: 75
+
+
+
+   .. py:attribute:: AngularRound
+      :value: 72
+
+
+
+   .. py:attribute:: ArclengthSymbol
+      :value: 67
+
+
+
+   .. py:attribute:: ArrowBlockId1
+      :value: 81
+
+
+
+   .. py:attribute:: ArrowBlockId2
+      :value: 82
+
+
+
+   .. py:attribute:: ArrowColor
+      :value: 34
+
+
+
+   .. py:attribute:: ArrowColorSource
+      :value: 30
+
+
+
+   .. py:attribute:: ArrowFit
+      :value: 112
+
+
+      Arrow position when arrows won't fit between extensions
+
+
+   .. py:attribute:: ArrowPlotColor
+      :value: 42
+
+
+
+   .. py:attribute:: ArrowPlotColorSource
+      :value: 38
+
+
+
+   .. py:attribute:: ArrowType1
+      :value: 78
+
+
+
+   .. py:attribute:: ArrowType2
+      :value: 79
+
+
+
+   .. py:attribute:: Arrowsize
+      :value: 5
+
+
+
+   .. py:attribute:: BaselineSpacing
+      :value: 54
+
+
+
+   .. py:attribute:: Centermark
+      :value: 7
+
+
+
+   .. py:attribute:: CentermarkStyle
+      :value: 93
+
+
+
+   .. py:attribute:: ClippingArrowSize
+      :value: 119
+
+
+
+   .. py:attribute:: ClippingArrowType1
+      :value: 117
+
+
+
+   .. py:attribute:: ClippingArrowType2
+      :value: 118
+
+
+
+   .. py:attribute:: Count
+      :value: 122
+
+
+      Every enum UINT value that identifies a valid dimension style property is less than the UINT value of Count.
+
+
+   .. py:attribute:: DecimalSeparator
+      :value: 114
+
+
+      Character to use for decimal separator in dimension text
+
+
+   .. py:attribute:: DimLineColor
+      :value: 33
+
+
+
+   .. py:attribute:: DimLineColorSource
+      :value: 29
+
+
+
+   .. py:attribute:: DimLinePlotColor
+      :value: 41
+
+
+
+   .. py:attribute:: DimLinePlotColorSource
+      :value: 37
+
+
+
+   .. py:attribute:: DimLinePlotWeightSource
+      :value: 45
+
+
+
+   .. py:attribute:: DimLinePlotWeight_mm
+      :value: 47
+
+
+
+   .. py:attribute:: DimRadialTextAngleStyle
+      :value: 105
+
+
+
+   .. py:attribute:: DimRadialTextLocation
+      :value: 84
+
+
+      Radial dimension text location above/in/below
+
+
+   .. py:attribute:: DimRadialTextOrientation
+      :value: 103
+
+
+
+   .. py:attribute:: DimTextAngleStyle
+      :value: 104
+
+
+
+   .. py:attribute:: DimTextLocation
+      :value: 10
+
+
+      Linear, angular, and ordinate dimension text location above/in/below
+
+
+   .. py:attribute:: DimTextOrientation
+      :value: 102
+
+
+
+   .. py:attribute:: DimensionLengthDisplay
+      :value: 109
+
+
+      Dimension length display. See ON\_DimStyle::DimensionLengthDisplay() for a description of this parameter.
+
+
+   .. py:attribute:: DimensionLineExtension
+      :value: 25
+
+
+
+   .. py:attribute:: DimensionScale
+      :value: 59
+
+
+
+   .. py:attribute:: DimscaleSource
+      :value: 60
+
+
+
+   .. py:attribute:: DrawForward
+      :value: 96
+
+
+
+   .. py:attribute:: DrawMask
+      :value: 55
+
+
+
+   .. py:attribute:: ExtLineColor
+      :value: 32
+
+
+
+   .. py:attribute:: ExtLineColorSource
+      :value: 28
+
+
+
+   .. py:attribute:: ExtLinePlotColor
+      :value: 40
+
+
+
+   .. py:attribute:: ExtLinePlotColorSource
+      :value: 36
+
+
+
+   .. py:attribute:: ExtLinePlotWeightSource
+      :value: 44
+
+
+
+   .. py:attribute:: ExtLinePlotWeight_mm
+      :value: 46
+
+
+
+   .. py:attribute:: ExtensionLineExtension
+      :value: 3
+
+
+
+   .. py:attribute:: ExtensionLineOffset
+      :value: 4
+
+
+
+   .. py:attribute:: FixedExtensionLength
+      :value: 61
+
+
+
+   .. py:attribute:: FixedExtensionOn
+      :value: 62
+
+
+
+   .. py:attribute:: Font
+      :value: 15
+
+
+
+   .. py:attribute:: ForceDimLine
+      :value: 111
+
+
+      Force dimension line to draw when text is moved outside
+
+
+   .. py:attribute:: Index
+      :value: 2
+
+
+      Dimension style runtime model component index property. Cannot be inherited from parent.
+
+
+   .. py:attribute:: Kerning
+      :value: 115
+
+
+      Enable kerning for placement of characters
+
+
+   .. py:attribute:: LeaderArrowBlock
+      :value: 83
+
+
+
+   .. py:attribute:: LeaderArrowType
+      :value: 80
+
+
+
+   .. py:attribute:: LeaderArrowsize
+      :value: 6
+
+
+
+   .. py:attribute:: LeaderContentAngle
+      :value: 89
+
+
+
+   .. py:attribute:: LeaderContentAngleStyle
+      :value: 87
+
+
+
+   .. py:attribute:: LeaderCurveType
+      :value: 88
+
+
+
+   .. py:attribute:: LeaderHasLanding
+      :value: 90
+
+
+
+   .. py:attribute:: LeaderLandingLength
+      :value: 91
+
+
+
+   .. py:attribute:: LeaderTextHorizontalAlignment
+      :value: 95
+
+
+
+   .. py:attribute:: LeaderTextOrientation
+      :value: 101
+
+
+
+   .. py:attribute:: LeaderTextVerticalAlignment
+      :value: 86
+
+
+
+   .. py:attribute:: LengthFactor
+      :value: 16
+
+
+      LengthFactor is a rarely used. It applies when a model is being drawn to a scale and the dimension length values should be reverse scaled. For example, if a model is drawn at 1/4 scale, a line 5 units long indicates the real world line is 20 units long. In this case setting LengthFactor to 4 would cause a linear dimension applied to that line to display a value of 20.
+
+
+   .. py:attribute:: LengthResolution
+      :value: 12
+
+
+
+   .. py:attribute:: LineSpaceScale
+      :value: 116
+
+
+      Scale applied for line spacing
+
+
+   .. py:attribute:: MaskBorder
+      :value: 58
+
+
+
+   .. py:attribute:: MaskColor
+      :value: 57
+
+
+
+   .. py:attribute:: MaskColorSource
+      :value: 56
+
+
+
+   .. py:attribute:: MaskFlags
+      :value: 92
+
+
+
+   .. py:attribute:: MaskFrameType
+      :value: 11
+
+
+      Text mask frame
+
+
+   .. py:attribute:: Name
+      :value: 1
+
+
+      Dimension style Name property. Cannot be inherited from parent.
+
+
+   .. py:attribute:: Prefix
+      :value: 21
+
+
+
+   .. py:attribute:: Round
+      :value: 71
+
+
+
+   .. py:attribute:: SignedOrdinate
+      :value: 97
+
+
+
+   .. py:attribute:: StackFormat
+      :value: 69
+
+
+
+   .. py:attribute:: StackTextheightScale
+      :value: 68
+
+
+
+   .. py:attribute:: Suffix
+      :value: 22
+
+
+
+   .. py:attribute:: SuppressArrow1
+      :value: 64
+
+
+
+   .. py:attribute:: SuppressArrow2
+      :value: 65
+
+
+
+   .. py:attribute:: SuppressDimLine1
+      :value: 120
+
+
+      Suppress the dimension line and arrowhead between the first extension line and the text.
+
+
+   .. py:attribute:: SuppressDimLine2
+      :value: 121
+
+
+      Suppress the dimension line and arrowhead between the second extension line and the text.
+
+
+   .. py:attribute:: SuppressExtension1
+      :value: 26
+
+
+
+   .. py:attribute:: SuppressExtension2
+      :value: 27
+
+
+
+   .. py:attribute:: TextColor
+      :value: 35
+
+
+
+   .. py:attribute:: TextColorSource
+      :value: 31
+
+
+
+   .. py:attribute:: TextFit
+      :value: 113
+
+
+      Text position when text won't fit between extensions
+
+
+   .. py:attribute:: TextGap
+      :value: 8
+
+
+
+   .. py:attribute:: TextHeight
+      :value: 9
+
+
+
+   .. py:attribute:: TextHorizontalAlignment
+      :value: 94
+
+
+
+   .. py:attribute:: TextMask
+      :value: 99
+
+
+
+   .. py:attribute:: TextOrientation
+      :value: 100
+
+
+
+   .. py:attribute:: TextPlotColor
+      :value: 43
+
+
+
+   .. py:attribute:: TextPlotColorSource
+      :value: 39
+
+
+
+   .. py:attribute:: TextRotation
+      :value: 63
+
+
+
+   .. py:attribute:: TextUnderlined
+      :value: 106
+
+
+
+   .. py:attribute:: TextVerticalAlignment
+      :value: 85
+
+
+
+   .. py:attribute:: TextmoveLeader
+      :value: 66
+
+
+
+   .. py:attribute:: ToleranceFormat
+      :value: 48
+
+
+
+   .. py:attribute:: ToleranceHeightScale
+      :value: 53
+
+
+
+   .. py:attribute:: ToleranceLowerValue
+      :value: 51
+
+
+
+   .. py:attribute:: ToleranceResolution
+      :value: 49
+
+
+
+   .. py:attribute:: ToleranceUpperValue
+      :value: 50
+
+
+
+   .. py:attribute:: UnitSystem
+      :value: 98
+
+
+      Unit system for dimension rendering sizes like TextHeight, TextGap, ArrowSize, ExtOffset, and dozens of other properties that control the appearance and placement of the components used to render a dimension.
+
+
+   .. py:attribute:: Unset
+      :value: 0
+
+
+
+   .. py:attribute:: ZeroSuppress
+      :value: 76
+
+

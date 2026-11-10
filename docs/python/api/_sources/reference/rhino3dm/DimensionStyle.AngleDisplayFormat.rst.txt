@@ -1,0 +1,38 @@
+rhino3dm.DimensionStyle.AngleDisplayFormat
+==========================================
+
+.. py:class:: rhino3dm.DimensionStyle.AngleDisplayFormat
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Display format for angles
+
+
+   .. py:attribute:: DecimalDegrees
+      :value: 0
+
+
+      Decimal Degrees
+
+
+   .. py:attribute:: DegMinSec
+      :value: 1
+
+
+      Degrees Minutes Seconds
+
+
+   .. py:attribute:: Grads
+      :value: 3
+
+
+      Decimal Gradians
+
+
+   .. py:attribute:: Radians
+      :value: 2
+
+
+      Decimal Radians
+

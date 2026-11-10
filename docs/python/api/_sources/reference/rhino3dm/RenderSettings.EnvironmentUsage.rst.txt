@@ -1,0 +1,31 @@
+rhino3dm.RenderSettings.EnvironmentUsage
+========================================
+
+.. py:class:: rhino3dm.RenderSettings.EnvironmentUsage
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   The usage of a render environment.
+
+
+   .. py:attribute:: Background
+      :value: 0
+
+
+      Specifies the 360 background environment.
+
+
+   .. py:attribute:: Reflection
+      :value: 1
+
+
+      Specifies the custom reflective environment. Also used for refraction.
+
+
+   .. py:attribute:: Skylighting
+      :value: 2
+
+
+      Specifies the custom skylighting environment.
+

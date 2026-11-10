@@ -1,0 +1,258 @@
+rhino3dm.Arc
+============
+
+.. py:class:: rhino3dm.Arc
+              Arc(circle: Circle, angleRadians: float)
+              Arc(circle: Circle, angleIntervalRadians: Interval)
+              Arc(plane: Plane, radius: float, angleRadians: float)
+              Arc(center: Point3d, radius: float, angleRadians: float)
+              Arc(plane: Plane, center: Point3d, radius: float, angleRadians: float)
+              Arc(startPoint: Point3d, pointOnInterior: Point3d, endPoint: Point3d)
+              Arc(pointA: Point3d, tangentA: Vector3d, pointB: Point3d)
+
+   Represents the value of a plane, two angles and a radius in a sub-curve of a three-dimensional circle.
+
+   The curve is parameterized by an angle expressed in radians. For an IsValid arc the total subtended angle AngleRadians() = Domain()(1) - Domain()(0) must satisfy 0 < AngleRadians() < 2\*Pi
+
+   The parameterization of the Arc is inherited from the Circle it is derived from. In particular
+
+   t -> center + cos(t)\*radius\*xaxis + sin(t)\*radius\*yaxis
+
+   where xaxis and yaxis, (part of Circle.Plane) form an orthonormal frame of the plane containing the circle.
+
+
+   .. py:method:: BoundingBox() -> BoundingBox
+
+      Computes the 3D axis aligned bounding box for this arc.
+
+      :returns: Bounding box of arc.
+
+
+
+   .. py:method:: ClosestParameter(testPoint: Point3d) -> float
+
+      Gets parameter on the arc closest to a test point.
+
+      :param testPoint: Point to get close to.
+
+      :returns: Parameter (in radians) of the point on the arc that is closest to the test point. If testPoint is the center of the arc, then the starting point of the arc is (arc.Domain()[0]) returned. If no parameter could be found, RhinoMath.UnsetValue is returned.
+
+
+
+   .. py:method:: ClosestPoint(testPoint: Point3d) -> Point3d
+
+      Computes the point on an arc that is closest to a test point.
+
+      :param testPoint: Point to get close to.
+
+      :returns: The point on the arc that is closest to testPoint. If testPoint is the center of the arc, then the starting point of the arc is returned. UnsetPoint on failure.
+
+
+
+   .. py:method:: EpsilonEquals(other: Arc, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: Equals(other: Arc) -> bool
+
+      Determines whether another arc has the same value as this arc.
+
+      :param other: An arc.
+
+      :returns: true if obj is equal to this arc; otherwise false.
+
+
+
+   .. py:method:: PointAt(t: float) -> Point3d
+
+      Gets the point at the given arc parameter.
+
+      :param t: Arc parameter to evaluate.
+
+      :returns: The point at the given parameter.
+
+
+
+   .. py:method:: Reverse() -> None
+
+      Reverses the orientation of the arc. Changes the domain from [a,b] to [-b,-a].
+
+
+
+   .. py:method:: TangentAt(t: float) -> Vector3d
+
+      Gets the tangent at the given parameter.
+
+      :param t: Parameter of tangent to evaluate.
+
+      :returns: The tangent at the arc at the given parameter.
+
+
+
+   .. py:method:: ToNurbsCurve() -> NurbsCurve
+
+      Initializes a nurbs curve representation of this arc. This amounts to the same as calling NurbsCurve.CreateFromArc().
+
+      :returns: A nurbs curve representation of this arc or null if no such representation could be made.
+
+
+
+   .. py:method:: Transform(xform: Transform) -> bool
+
+      Transforms the arc using a Transformation matrix.
+
+      :param xform: Transformations to apply. Note that arcs cannot handle non-euclidean transformations.
+
+      :returns: true on success, false on failure.
+
+
+
+   .. py:method:: Trim(domain: Interval) -> bool
+
+      Sets the arc's angle domain (in radians) to the specified interval, provided it is increasing and its length does not exceed 2.0 \* Math.PI (plus a small tolerance). If the interval length exceeds 2.0 \* Math.PI it will be clamped to exactly 2.0 \* Math.PI. Returns true if the domain was set successfully, false otherwise.
+
+      :param domain: The desired angle domain in radians. Must satisfy domain[0] < domain[1] and domain[1] - domain[0] <= 2.0 \* Math.PI + tolerance.
+
+      :returns: True if the domain was set successfully; false if the interval is not increasing or exceeds the allowed length.
+
+
+
+   .. py:property:: Angle
+      :type: float
+
+
+      Gets or sets the sweep -or subtended- angle (in Radians) for this arc segment. Setting this property only alters the ``EndAngle`` property such that Angle = ``EndAngle`` - ``StartAngle``.
+
+
+   .. py:property:: AngleDegrees
+      :type: float
+
+
+      Gets or sets the sweep -or subtended- angle (in Degrees) for this arc segment.
+
+
+   .. py:property:: AngleDomain
+      :type: Interval
+
+
+      Gets or sets the angle domain (in Radians) of this arc.
+
+
+   .. py:property:: Center
+      :type: Point3d
+
+
+      Gets or sets the center point for this arc.
+
+
+   .. py:property:: Circumference
+      :type: float
+
+
+      Gets the circumference of the circle that is coincident with this arc.
+
+
+   .. py:property:: Diameter
+      :type: float
+
+
+      Gets or sets the Diameter of this arc.
+
+
+   .. py:property:: EndAngle
+      :type: float
+
+
+      Gets or sets the end angle (in Radians) for this arc segment.
+
+
+   .. py:property:: EndAngleDegrees
+      :type: float
+
+
+      Gets or sets the end angle (in Degrees) for this arc segment.
+
+
+   .. py:property:: EndPoint
+      :type: Point3d
+
+
+      Gets the end point of the arc.
+
+
+   .. py:property:: IsCircle
+      :type: bool
+
+
+      Gets a value indicating whether or not this arc is a complete circle.
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Radius>0 and 0<AngleRadians()<=2\*Math.Pi.
+
+      :type: Gets a value indicating whether or not this arc is valid. Detail
+
+
+   .. py:property:: Length
+      :type: float
+
+
+      Gets the length of the arc. (Length = Radius \* (subtended angle in radians)).
+
+
+   .. py:property:: MidPoint
+      :type: Point3d
+
+
+      Gets the mid-point of the arc.
+
+
+   .. py:property:: Plane
+      :type: Plane
+
+
+      Gets or sets the plane in which this arc lies.
+
+
+   .. py:property:: Radius
+      :type: float
+
+
+      Gets or sets the radius of this arc.
+
+
+   .. py:property:: StartAngle
+      :type: float
+
+
+      Gets or sets the start angle (in Radians) for this arc segment.
+
+
+   .. py:property:: StartAngleDegrees
+      :type: float
+
+
+      Gets or sets the start angle (in Degrees) for this arc segment.
+
+
+   .. py:property:: StartPoint
+      :type: Point3d
+
+
+      Gets the start point of the arc.
+
+
+   .. py:attribute:: Unset
+      :type:  Arc
+      :value: Ellipsis
+
+
+      object, /) -> Arc
+
+      :type: (arg
+

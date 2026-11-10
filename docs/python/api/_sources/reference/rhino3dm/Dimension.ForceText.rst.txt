@@ -1,0 +1,40 @@
+rhino3dm.Dimension.ForceText
+============================
+
+.. py:class:: rhino3dm.Dimension.ForceText
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   OBSOLETE enum do not use.
+
+
+   .. py:attribute:: Auto
+      :value: 0
+
+
+
+   .. py:attribute:: HintLeft
+      :value: 5
+
+
+
+   .. py:attribute:: HintRight
+      :value: 4
+
+
+
+   .. py:attribute:: Inside
+      :value: 1
+
+
+
+   .. py:attribute:: Left
+      :value: 3
+
+
+
+   .. py:attribute:: Right
+      :value: 2
+
+

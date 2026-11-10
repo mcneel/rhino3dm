@@ -1,0 +1,235 @@
+rhino3dm.MeshingParameters
+==========================
+
+.. py:class:: rhino3dm.MeshingParameters
+              MeshingParameters(density: float)
+              MeshingParameters(density: float, minimumEdgeLength: float)
+              MeshingParameters(source: MeshingParameters)
+
+   Represents settings used for creating a mesh representation of a brep or surface.
+
+
+   .. py:method:: CopyFrom(source: MeshingParameters) -> None
+
+      Call this method to copy MeshingParameters from another instance.
+
+
+
+   .. py:method:: Decode(jsonObject: dict[str, Any]) -> MeshingParameters
+      :staticmethod:
+
+
+      The object a dict from ``Encode`` describes (rhino3dm only).
+
+      :param jsonObject: A dict as ``Encode`` returns it.
+
+
+
+   .. py:method:: Encode() -> dict[str, Any]
+
+      These settings as a JSON-compatible dict, one key per property (rhino3dm only; inverse: ``MeshingParameters.Decode``).
+
+
+
+   .. py:property:: ClosedObjectPostProcess
+      :type: bool
+
+
+      Gets or sets a value indicating whether or not to post process non-closed meshes that should be closed. If the Brep being meshed is closed, JaggedSeams = false, and ClosedObjectPostProcess = true, and the resulting mesh is not closed, then a post meshing process is applied to find and close gaps in the mesh. Typically the resulting mesh is not closed because the input Brep has a geometric flaw, like loops in trimming curve.
+
+
+   .. py:attribute:: Coarse
+      :type:  MeshingParameters
+      :value: Ellipsis
+
+
+      object, /) -> MeshingParameters
+
+      :type: (arg
+
+
+   .. py:property:: ComputeCurvature
+      :type: bool
+
+
+      Gets or sets a value indicating whether or not surface curvature data will be embedded in the mesh.
+
+
+   .. py:attribute:: Default
+      :type:  MeshingParameters
+      :value: Ellipsis
+
+
+      object, /) -> MeshingParameters
+
+      :type: (arg
+
+
+   .. py:attribute:: DefaultAnalysisMesh
+      :type:  MeshingParameters
+      :value: Ellipsis
+
+
+      object, /) -> MeshingParameters
+
+      :type: (arg
+
+
+   .. py:property:: DoublePrecision
+      :type: bool
+
+
+      Gets or sets a value indicating whether or not the mesh should have double precision vertices in addition to the floats.
+
+
+   .. py:attribute:: FastRenderMesh
+      :type:  MeshingParameters
+      :value: Ellipsis
+
+
+      object, /) -> MeshingParameters
+
+      :type: (arg
+
+
+   .. py:property:: GridAmplification
+      :type: float
+
+
+      Gets or sets the grid amplification factor. Values lower than 1.0 will decrease the number of initial quads, values higher than 1.0 will increase the number of initial quads.
+
+
+   .. py:property:: GridAngle
+      :type: float
+
+
+      Gets or sets the maximum allowed angle difference (in radians) for a single sampling quad. The angle pertains to the surface normals.
+
+
+   .. py:property:: GridAspectRatio
+      :type: float
+
+
+      Gets or sets the maximum allowed aspect ratio of sampling quads.
+
+
+   .. py:property:: GridMaxCount
+      :type: int
+
+
+      Gets or sets the maximum number of grid quads in the initial sampling grid.
+
+
+   .. py:property:: GridMinCount
+      :type: int
+
+
+      Gets or sets the minimum number of grid quads in the initial sampling grid.
+
+
+   .. py:property:: JaggedSeams
+      :type: bool
+
+
+      Gets or sets whether or not the mesh is allowed to have jagged seams. When this flag is set to true, meshes on either side of a Brep Edge will not match up.
+
+
+   .. py:property:: MaximumEdgeLength
+      :type: float
+
+
+      Gets or sets the maximum allowed mesh edge length.
+
+
+   .. py:attribute:: Minimal
+      :type:  MeshingParameters
+      :value: Ellipsis
+
+
+      object, /) -> MeshingParameters
+
+      :type: (arg
+
+
+   .. py:property:: MinimumEdgeLength
+      :type: float
+
+
+      Gets or sets the minimum allowed mesh edge length.
+
+
+   .. py:property:: MinimumTolerance
+      :type: float
+
+
+      Gets or sets the minimum tolerance.
+
+
+   .. py:attribute:: QualityRenderMesh
+      :type:  MeshingParameters
+      :value: Ellipsis
+
+
+      object, /) -> MeshingParameters
+
+      :type: (arg
+
+
+   .. py:property:: RefineAngle
+      :type: float
+
+
+      Gets or sets the mesh parameter refine angle in radians.
+
+
+   .. py:property:: RefineAngleInDegrees
+      :type: float
+
+
+      Gets or sets the mesh parameter refine angle in degrees.
+
+
+   .. py:property:: RefineGrid
+      :type: bool
+
+
+      Gets or sets a value indicating whether or not the sampling grid can be refined when certain tolerances are not met.
+
+
+   .. py:property:: RelativeTolerance
+      :type: float
+
+
+      Gets or sets the relative tolerance.
+
+
+   .. py:property:: SimplePlanes
+      :type: bool
+
+
+      Gets or sets a value indicating whether or not planar areas are allowed to be meshed in a simplified manner.
+
+
+   .. py:attribute:: Smooth
+      :type:  MeshingParameters
+      :value: Ellipsis
+
+
+      object, /) -> MeshingParameters
+
+      :type: (arg
+
+
+   .. py:property:: TextureRange
+      :type: MeshingParameterTextureRange
+
+
+      Gets or sets how and if textures will be packed.
+
+
+   .. py:property:: Tolerance
+      :type: float
+
+
+      Gets or sets the maximum allowed edge deviation. This tolerance is measured between the center of the mesh edge and the surface.
+

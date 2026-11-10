@@ -1,0 +1,92 @@
+rhino3dm.SafeFrame
+==================
+
+.. py:class:: rhino3dm.SafeFrame
+              SafeFrame(sf: SafeFrame)
+
+   Safe frame
+
+
+   .. py:property:: ActionFrameLinked
+      :type: bool
+
+
+      Action Frame Linked, On = Use the same scale for X and Y. Off = use different scales for X and Y.
+
+
+   .. py:property:: ActionFrameOn
+      :type: bool
+
+
+      Turn on the user specified action area, which shown with blue frames.
+
+
+   .. py:property:: ActionFrameXScale
+      :type: float
+
+
+      Action Frame X-scale. This value should be in the range 0..1 but it is not clamped. It is displayed in the UI in the range 0..100.
+
+
+   .. py:property:: ActionFrameYScale
+      :type: float
+
+
+      Action Frame Y-scale. This value should be in the range 0..1 but it is not clamped. It is displayed in the UI in the range 0..100.
+
+
+   .. py:property:: Enabled
+      :type: bool
+
+
+      Determines whether the safe-frame is enabled.
+
+
+   .. py:property:: FieldsOn
+      :type: bool
+
+
+      Show the 4 by 3 field grid in the safe-frame.
+
+
+   .. py:property:: LiveFrameOn
+      :type: bool
+
+
+      Turn on the live area, which shows the size of the rendered view as a yellow frame in the viewport.
+
+
+   .. py:property:: PerspectiveOnly
+      :type: bool
+
+
+      Show the safe-frame only in perspective views.
+
+
+   .. py:property:: TitleFrameLinked
+      :type: bool
+
+
+      Title Frame Linked, On = Use the same scale for X and Y. Off = use different scales for X and Y.
+
+
+   .. py:property:: TitleFrameOn
+      :type: bool
+
+
+      Show a user specified title area frame in orange.
+
+
+   .. py:property:: TitleFrameXScale
+      :type: float
+
+
+      Title Frame X-scale. This value should be in the range 0..1 but it is not clamped. It is displayed in the UI in the range 0..100.
+
+
+   .. py:property:: TitleFrameYScale
+      :type: float
+
+
+      Title Frame Y-scale. This value should be in the range 0..1 but it is not clamped. It is displayed in the UI in the range 0..100.
+

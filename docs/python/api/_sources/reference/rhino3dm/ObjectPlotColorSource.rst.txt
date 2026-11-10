@@ -1,0 +1,38 @@
+rhino3dm.ObjectPlotColorSource
+==============================
+
+.. py:class:: rhino3dm.ObjectPlotColorSource
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated values for the source of plotting/printing color of single objects.
+
+
+   .. py:attribute:: PlotColorFromDisplay
+      :value: 2
+
+
+      use display color.
+
+
+   .. py:attribute:: PlotColorFromLayer
+      :value: 0
+
+
+      use plot color assigned to layer.
+
+
+   .. py:attribute:: PlotColorFromObject
+      :value: 1
+
+
+      use plot color assigned to object.
+
+
+   .. py:attribute:: PlotColorFromParent
+      :value: 3
+
+
+      for objects with parents (like objects in instance references, use parent plot color) if no parent, treat as plot\_color\_from\_layer.
+

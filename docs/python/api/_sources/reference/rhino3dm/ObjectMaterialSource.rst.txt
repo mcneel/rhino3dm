@@ -1,0 +1,31 @@
+rhino3dm.ObjectMaterialSource
+=============================
+
+.. py:class:: rhino3dm.ObjectMaterialSource
+
+   Bases: :py:obj:`enum.IntEnum`
+
+
+   Defines enumerated values for the source of material of single objects.
+
+
+   .. py:attribute:: MaterialFromLayer
+      :value: 0
+
+
+      use material assigned to layer.
+
+
+   .. py:attribute:: MaterialFromObject
+      :value: 1
+
+
+      use material assigned to object.
+
+
+   .. py:attribute:: MaterialFromParent
+      :value: 3
+
+
+      for objects with parents, like definition geometry in instance references and faces in polysurfaces, this value indicates the material definition should come from the parent. If the object does not have an obvious "parent", then treat it the same as material\_from\_layer.
+

@@ -1,0 +1,77 @@
+rhino3dm.LinearWorkflow
+=======================
+
+.. py:class:: rhino3dm.LinearWorkflow
+              LinearWorkflow(src: LinearWorkflow)
+
+   This is the interface to linear workflow settings.
+
+
+   .. py:method:: GetHashCode() -> int
+
+      Get hash code for this object. It is the Hash property cast to int.
+
+
+
+   .. py:property:: Hash
+      :type: int
+
+
+      Linear workflow hash.
+
+
+   .. py:property:: PostProcessFrameBuffer
+      :type: bool
+
+
+      Linear workflow post-process frame buffer enabled state.
+
+
+   .. py:property:: PostProcessGamma
+      :type: float
+
+
+      Linear workflow post-process gamma value.
+
+
+   .. py:property:: PostProcessGammaOn
+      :type: bool
+
+
+      Linear workflow post-process gamma enabled state.
+
+
+   .. py:property:: PostProcessGammaReciprocal
+      :type: float
+
+
+      Reciprocal of linear workflow post-process gamma value.
+
+
+   .. py:property:: PreProcessColors
+      :type: bool
+
+
+      Linear workflow pre-process colors enabled state.
+
+
+   .. py:property:: PreProcessGamma
+      :type: float
+
+
+      Linear workflow pre-process gamma value. This is currently the same as the post-process gamma value.
+
+
+   .. py:property:: PreProcessGammaOn
+      :type: bool
+
+
+      Linear workflow pre-process gamma enabled state.
+
+
+   .. py:property:: PreProcessTextures
+      :type: bool
+
+
+      Linear workflow pre-process textures enabled state.
+

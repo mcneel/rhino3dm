@@ -1,0 +1,129 @@
+rhino3dm.SubD
+=============
+
+.. py:class:: rhino3dm.SubD
+
+   Bases: :py:obj:`GeometryBase`
+
+
+   Subdivision surface
+
+
+   .. py:method:: ClearEdgeSharpness() -> int
+
+      Converts every sharp edge in this SubD to a smooth edge.
+
+      :returns: The number of edges that were changed.
+
+
+
+   .. py:method:: ClearEvaluationCache() -> None
+
+      Clear all cached evaluation information (meshes, surface points, bounding boxes, ...) that depends on edge tags, vertex tags, and the location of vertex control points.
+
+
+
+   .. py:method:: CreateFromCylinder(cylinder: Cylinder, circumferenceFaceCount: int, heightFaceCount: int, endCapStyle: SubDEndCapStyle, endCapEdgeTag: SubDEdgeTag, radiusLocation: SubDComponentLocation) -> SubD
+      :staticmethod:
+
+
+      Creates a SubD form of a cylinder.
+
+      :param cylinder: The defining cylinder.
+      :param circumferenceFaceCount: Number of faces around the cylinder.
+      :param heightFaceCount: Number of faces in the top-to-bottom direction.
+      :param endCapStyle: The end cap style.
+      :param endCapEdgeTag: The end cap edge tag.
+      :param radiusLocation: The SubD component location.
+
+      :returns: A new SubD if successful, or null on failure.
+
+
+
+   .. py:method:: Flip() -> bool
+
+      Reverses the orientation of all SubD normals.
+
+      :returns: True if successful.
+
+
+
+   .. py:method:: SharpEdgeCount() -> int
+
+      Gets the number of sharp edges in this SubD. See ``SubDEdge.IsSharp`` for what makes an edge sharp.
+
+      :returns: The number of sharp edges.
+
+
+
+   .. py:method:: Subdivide(count: int) -> bool
+                  Subdivide() -> bool
+
+      Apply the Catmull-Clark subdivision algorithm and save the results in this SubD.
+
+      :returns: true on success
+
+
+
+   .. py:method:: UpdateAllTagsAndSectorCoefficients() -> int
+
+      Updates vertex tag, edge tag, and edge coefficient values on the active level. After completing custom editing operations that modify the topology of the SubD control net or changing values of vertex or edge tags, the tag and sector coefficients information on nearby components in the edited areas need to be updated.
+
+      :returns: Number of vertices and edges that were changed during the update.
+
+
+
+   .. py:property:: Edges
+      :type: SubDEdgeList
+
+
+      All edges in this SubD
+
+
+   .. py:attribute:: Empty
+      :type:  SubD
+      :value: Ellipsis
+
+
+      object, /) -> SubD
+
+      :type: (arg
+
+
+   .. py:attribute:: ErrorCount
+      :type:  int
+      :value: Ellipsis
+
+
+      object, /) -> int
+
+      :type: (arg
+
+
+   .. py:property:: Faces
+      :type: SubDFaceList
+
+
+      All faces in this SubD
+
+
+   .. py:property:: IsSolid
+      :type: bool
+
+
+      Test SubD to see if the active level is a solid. A "solid" is a closed oriented manifold, or a closed oriented manifold.
+
+
+   .. py:property:: TextureCoordinateType
+      :type: SubDTextureCoordinateType
+
+
+      Gets the texture cordinate type.
+
+
+   .. py:property:: Vertices
+      :type: SubDVertexList
+
+
+      All vertices in this SubD
+

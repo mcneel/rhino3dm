@@ -1,0 +1,109 @@
+rhino3dm.LinearDimension
+========================
+
+.. py:class:: rhino3dm.LinearDimension
+
+   Bases: :py:obj:`Dimension`
+
+
+   Represents a linear dimension
+
+
+   .. py:method:: Create(dimtype: AnnotationType, dimStyle: DimensionStyle, plane: Plane, horizontal: Vector3d, defpoint1: Point3d, defpoint2: Point3d, dimlinepoint: Point3d, rotationInPlane: float) -> LinearDimension
+      :staticmethod:
+
+
+      Initialize Dimension parameters
+
+      :param dimtype: AnnotationType.Rotated or AnnotationType.Aligned
+      :param dimStyle: Dimension's DimensionStyle
+      :param plane: Dimension's plane
+      :param horizontal: Horizontal reference direction
+      :param defpoint1: First definition point
+      :param defpoint2: Second definition point
+      :param dimlinepoint: Point on dimension line
+      :param rotationInPlane: For Rotated style
+
+
+
+   .. py:method:: Get3dPoints() -> tuple[bool, Point3d, Point3d, Point3d, Point3d, Point3d, Point3d]
+
+      Get locations of dimension's 3d points
+
+      :returns: true = success
+
+
+
+   .. py:method:: GetDisplayLines(style: DimensionStyle, scale: float) -> tuple[bool, list[Line]]
+
+
+   .. py:method:: GetDistanceDisplayText(unitsystem: UnitSystem, style: DimensionStyle) -> str
+
+      Deprecated since 9.0.
+
+
+
+   .. py:method:: GetTextRectangle() -> tuple[bool, list[Point3d]]
+
+
+   .. py:method:: SetLocations(extensionLine1End: Point2d, extensionLine2End: Point2d, pointOnDimensionLine: Point2d) -> None
+
+      Sets the three locations of the point, using two-dimensional points that refer to the plane of the annotation.
+
+
+
+   .. py:property:: Aligned
+      :type: bool
+
+
+      Gets or sets a value indicating whether this annotation is aligned.
+
+
+   .. py:property:: AnnotationType
+      :type: AnnotationType
+
+
+      Type of annotation
+
+
+   .. py:property:: Arrowhead1End
+      :type: Point2d
+
+
+      Gets the arrow head end of the first extension line.
+
+
+   .. py:property:: Arrowhead2End
+      :type: Point2d
+
+
+      Gets the arrow head end of the second extension line.
+
+
+   .. py:property:: DimensionLinePoint
+      :type: Point2d
+
+
+      Point on annotation plane where dimension line starts
+
+
+   .. py:property:: DistanceBetweenArrowTips
+      :type: float
+
+
+      Gets the distance between arrow tips.
+
+
+   .. py:property:: ExtensionLine1End
+      :type: Point2d
+
+
+      End of the first extension line.
+
+
+   .. py:property:: ExtensionLine2End
+      :type: Point2d
+
+
+      End of the second extension line.
+

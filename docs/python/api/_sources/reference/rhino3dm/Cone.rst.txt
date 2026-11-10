@@ -1,0 +1,115 @@
+rhino3dm.Cone
+=============
+
+.. py:class:: rhino3dm.Cone
+              Cone(plane: Plane, height: float, radius: float)
+
+   Represents the center plane, radius and height values in a right circular cone.
+
+
+   .. py:method:: AngleInDegrees() -> float
+
+      Computes the angle (in degrees) between the axis and the side of the cone. The angle and the height have the same sign.
+
+      :returns: An angle in degrees.
+
+
+
+   .. py:method:: AngleInRadians() -> float
+
+      Computes the angle (in radians) between the axis and the side of the cone. The angle and the height have the same sign.
+
+      :returns: Math.Atan(Radius / Height) if the height is not 0; 0 if the radius is 0; Math.PI otherwise.
+
+
+
+   .. py:method:: EpsilonEquals(other: Cone, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: ToBrep(capBottom: bool) -> Brep
+
+      Gets a Brep representation of the cone with a single face for the cone, an edge along the cone seam, and vertices at the base and apex ends of this seam edge. The optional cap is a single face with one circular edge starting and ending at the base vertex.
+
+      :param capBottom: true if the bottom should be filled with a surface. false otherwise.
+
+      :returns: A brep (polysurface) representation of this cone values.
+
+
+
+   .. py:method:: ToNurbsSurface() -> NurbsSurface
+
+      Constructs a Nurbs surface representation of this Cone. This is synonymous with calling NurbsSurface.CreateFromCone().
+
+      :returns: A Nurbs surface representation of the cone or null.
+
+
+
+   .. py:method:: ToRevSurface() -> RevSurface
+
+      Constructs a RevSurface representation of this Cone. This is synonymous with calling RevSurface.CreateFromCone().
+
+      :returns: A RevSurface representation of the cone or null.
+
+
+
+   .. py:property:: ApexPoint
+      :type: Point3d
+
+
+      Point at tip of the cone.
+
+
+   .. py:property:: Axis
+      :type: Vector3d
+
+
+      Unit vector axis of cone.
+
+
+   .. py:property:: BasePoint
+      :type: Point3d
+
+
+      Center of base circle.
+
+
+   .. py:property:: Height
+      :type: float
+
+
+      Gets or sets the height of the circular right cone.
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      true if plane is valid, height is not zero and radius is not zero.
+
+
+   .. py:property:: Plane
+      :type: Plane
+
+
+      Gets or sets the base plane of the cone. The apex of the cone is at the plane's origin.
+
+
+   .. py:property:: Radius
+      :type: float
+
+
+      Gets or sets the radius of the cone.
+
+
+   .. py:attribute:: Unset
+      :type:  Cone
+      :value: Ellipsis
+
+
+      object, /) -> Cone
+
+      :type: (arg
+

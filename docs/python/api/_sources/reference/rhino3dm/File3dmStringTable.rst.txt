@@ -1,0 +1,65 @@
+rhino3dm.File3dmStringTable
+===========================
+
+.. py:class:: rhino3dm.File3dmStringTable
+
+   Provides access to document strings in the 3dm file.
+
+
+   .. py:method:: Delete(key: str) -> None
+
+      Removes a document string from the 3dm file.
+
+      :param key: The key to remove.
+
+
+
+   .. py:method:: GetKey(i: int) -> str
+
+      Returns a key value at a given index.
+
+      :param i: The index.
+
+      :returns: The key if successful.
+
+
+
+   .. py:method:: GetValue(i: int) -> str
+                  GetValue(key: str) -> str
+                  GetValue(section: str, entry: str) -> str
+
+      Returns a string value given a section and entry.
+
+      :param section: The section at which to get the value.
+      :param entry: The entry to search for.
+
+      :returns: The string value if successful.
+
+
+
+   .. py:method:: SetString(key: str, value: str) -> str
+                  SetString(section: str, entry: str, value: str) -> str
+
+      Adds or sets a document string in the 3dm file.
+
+      :param section: The section.
+      :param entry: The entry name.
+      :param value: The entry value.
+
+      :returns: The previous value if successful.
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Returns the number of document strings in the 3dm file.
+
+
+   .. py:property:: DocumentUserTextCount
+      :type: int
+
+
+      Returns the number of Section/Entry-style key values.
+

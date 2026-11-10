@@ -1,0 +1,64 @@
+rhino3dm.BrepTrimList
+=====================
+
+.. py:class:: rhino3dm.BrepTrimList
+
+   Provides access to all the Trims in a Brep object
+
+
+   .. py:method:: Add(curve2dIndex: int) -> BrepTrim
+                  Add(edge: BrepEdge, rev3d: bool, loop: BrepLoop, curve2dIndex: int) -> BrepTrim
+                  Add(rev3d: bool, edge: BrepEdge, curve2dIndex: int) -> BrepTrim
+                  Add(rev3d: bool, loop: BrepLoop, curve2dIndex: int) -> BrepTrim
+
+      Add a new trim that will be part of an inner, outer, or slit loop to the brep
+
+      :param rev3d: true if the edge and trim have opposite directions
+      :param loop: trim is appended to this loop
+      :param curve2dIndex: index of 2d trimming curve
+
+      :returns: new trim
+
+
+
+   .. py:method:: AddCurveOnFace(face: BrepFace, edge: BrepEdge, rev3d: bool, curve2dIndex: int) -> BrepTrim
+
+      Add a new curve on face to the brep
+
+      You should set the trim's tolerance and iso values.
+
+      :param face: face that curve lies on
+      :param edge: 3d edge associated with this curve on surface
+      :param rev3d: true if the 3d edge and the 2d parameter space curve have opposite directions.
+      :param curve2dIndex: index of 2d curve in face's parameter space
+
+      :returns: new trim that represents the curve on surface
+
+
+
+   .. py:method:: AddSingularTrim(vertex: BrepVertex, loop: BrepLoop, iso: IsoStatus, curve2dIndex: int) -> BrepTrim
+
+      Add a new singular trim to the brep.
+
+      :param vertex: vertex along collapsed surface edge
+      :param loop: trim is appended to this loop
+      :param curve2dIndex: index of 2d trimming curve
+
+      :returns: new trim
+
+
+
+   .. py:method:: MatchEnds() -> bool
+
+      Matches the endpoints of all trims in the Brep.
+
+      :returns: true if any trim's 2d curve is changed, false otherwise.
+
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the number of brep trims.
+

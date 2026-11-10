@@ -1,0 +1,258 @@
+rhino3dm.Point3d
+================
+
+.. py:class:: rhino3dm.Point3d
+              Point3d(x: float, y: float, z: float)
+              Point3d(vector: Vector3d)
+              Point3d(point: Point3f)
+              Point3d(arg: Point3d)
+              Point3d(point: Point4d)
+              Point3d(arg: collections.abc.Sequence[Any], /)
+
+   Represents the three coordinates of a point in three-dimensional space, using ``double``-precision floating point values.
+
+
+   .. py:method:: Add(point1: Point3d, point2: Point3d) -> Point3d
+                  Add(point: Point3d, vector: Vector3d) -> Point3d
+                  Add(point: Point3d, vector: Vector3f) -> Point3d
+                  Add(vector: Vector3d, point: Point3d) -> Point3d
+      :staticmethod:
+
+
+      Sums up a point and a vector, and returns a new point.
+
+      (Provided for languages that do not support operator overloading. You can use the + operator otherwise)
+
+      :param vector: A vector.
+      :param point: A point.
+
+      :returns: A new point that results from the addition of point and vector.
+
+
+
+   .. py:method:: CompareTo(other: Point3d) -> int
+
+      Compares this ``Point3d`` with another ``Point3d``.
+
+      Component evaluation priority is first X, then Y, then Z.
+
+      :param other: The other ``Point3d`` to use in comparison.
+
+      :returns: if this is identical to other
+                -1: if this.X < other.X
+                -1: if this.X == other.X and this.Y < other.Y
+                -1: if this.X == other.X and this.Y == other.Y and this.Z < other.Z
+                +1: otherwise.
+      :rtype: 0
+
+
+
+   .. py:method:: DistanceTo(other: Point3d) -> float
+
+      Computes the distance between two points.
+
+      :param other: Other point for distance measurement.
+
+      :returns: The length of the line between this and the other point; or 0 if any of the points is not valid.
+
+
+
+   .. py:method:: DistanceToSquared(other: Point3d) -> float
+
+      Computes the square of the distance between two points.
+
+      This method is usually largely faster than DistanceTo().
+
+      :param other: Other point for squared distance measurement.
+
+      :returns: The squared length of the line between this and the other point; or 0 if any of the points is not valid.
+
+
+
+   .. py:method:: Divide(point: Point3d, t: float) -> Point3d
+      :staticmethod:
+
+
+      Divides a ``Point3d`` by a number.
+
+      (Provided for languages that do not support operator overloading. You can use the / operator otherwise)
+
+      :param point: A point.
+      :param t: A number.
+
+      :returns: A new point that is coordinate-wise divided by t.
+
+
+
+   .. py:method:: Encode() -> dict[str, Any]
+
+      This object as a JSON-compatible dict (rhino3dm only; inverse: ``Decode``).
+
+      :returns: geometry and other objects are stored as their 3dm archive, base64 encoded, with the archive version.
+      :rtype: A dict of numbers and strings
+
+
+
+   .. py:method:: EpsilonEquals(other: Point3d, epsilon: float) -> bool
+
+      Check that all values in other are within epsilon of the values in this
+
+
+
+   .. py:method:: Equals(point: Point3d) -> bool
+
+      Determines whether the specified ``Point3d`` has the same values as the present point.
+
+      :param point: The specified point.
+
+      :returns: true if point has the same coordinates as this; otherwise false.
+
+
+
+   .. py:method:: FromPoint3f(point: Point3f) -> Point3d
+      :staticmethod:
+
+
+      Converts a single-precision point in a double-precision point.
+
+      :param point: A point.
+
+      :returns: The resulting point.
+
+
+
+   .. py:method:: Interpolate(pA: Point3d, pB: Point3d, t: float) -> None
+
+      Interpolate between two points.
+
+      :param pA: First point.
+      :param pB: Second point.
+      :param t: Interpolation parameter. If t=0 then this point is set to pA. If t=1 then this point is set to pB. Values of t in between 0.0 and 1.0 result in points between pA and pB.
+
+
+
+   .. py:method:: Multiply(point: Point3d, t: float) -> Point3d
+                  Multiply(t: float, point: Point3d) -> Point3d
+      :staticmethod:
+
+
+      Multiplies a ``Point3d`` by a number.
+
+      (Provided for languages that do not support operator overloading. You can use the \* operator otherwise)
+
+      :param t: A number.
+      :param point: A point.
+
+      :returns: A new point that is coordinate-wise multiplied by t.
+
+
+
+   .. py:method:: Negate(point: Point3d) -> Point3d
+      :staticmethod:
+
+
+      Computes the additive inverse of all coordinates in the point, and returns the new point.
+
+      (Provided for languages that do not support operator overloading. You can use the - unary operator otherwise)
+
+      :param point: A point.
+
+      :returns: A point value that, when summed with the point input, yields the ``Origin``.
+
+
+
+   .. py:method:: Subtract(point: Point3d, vector: Vector3d) -> Point3d
+                  Subtract(point1: Point3d, point2: Point3d) -> Vector3d
+      :staticmethod:
+
+
+      Subtracts a point from another point.
+
+      (Provided for languages that do not support operator overloading. You can use the - operator otherwise)
+
+      :param point1: A point.
+      :param point2: Another point.
+
+      :returns: A new vector that is the difference of point minus vector.
+
+
+
+   .. py:method:: ToString() -> str
+
+      Constructs the string representation for the current point.
+
+      :returns: The point representation in the form X,Y,Z.
+
+
+
+   .. py:method:: Transform(xform: Transform) -> None
+
+      Transforms the present point in place. The transformation matrix acts on the left of the point. i.e.,
+
+      result = transformation\*point
+
+      :param xform: Transformation to apply.
+
+
+
+   .. py:property:: IsValid
+      :type: bool
+
+
+      Each coordinate of the point must pass the ``RhinoMath.IsValidDouble`` test.
+
+
+   .. py:property:: MaximumCoordinate
+      :type: float
+
+
+      Gets the largest (both positive and negative) valid coordinate in this point, or RhinoMath.UnsetValue if no coordinate is valid, as an absolute value.
+
+
+   .. py:property:: MinimumCoordinate
+      :type: float
+
+
+      Gets the smallest (both positive and negative) coordinate value in this point.
+
+
+   .. py:attribute:: Origin
+      :type:  Point3d
+      :value: Ellipsis
+
+
+      object, /) -> Point3d
+
+      :type: (arg
+
+
+   .. py:attribute:: Unset
+      :type:  Point3d
+      :value: Ellipsis
+
+
+      object, /) -> Point3d
+
+      :type: (arg
+
+
+   .. py:property:: X
+      :type: float
+
+
+      Gets or sets the X (first) coordinate of this point.
+
+
+   .. py:property:: Y
+      :type: float
+
+
+      Gets or sets the Y (second) coordinate of this point.
+
+
+   .. py:property:: Z
+      :type: float
+
+
+      Gets or sets the Z (third) coordinate of this point.
+

@@ -1,0 +1,274 @@
+rhino3dm.Point3dList
+====================
+
+.. py:class:: rhino3dm.Point3dList
+              Point3dList(initialCapacity: int)
+              Point3dList(collection: collections.abc.Sequence[Point3d])
+
+   Represents a list of ``Point3d``.
+
+
+   .. py:method:: Add(x: float, y: float, z: float) -> None
+                  Add(item: Point3d) -> None
+
+      Adds an object to the end of the List.
+
+      :param item: Item to append.
+
+
+
+   .. py:method:: AddRange(collection: collections.abc.Sequence[Point3d]) -> None
+
+      Adds the elements of the specified collection to the end of the List.
+
+      :param collection: The collection whose elements should be added to the end of the List. The collection itself cannot be a null reference (Nothing in Visual Basic), but it can contain elements that are a null reference (Nothing in Visual Basic). Objects in collection which cannot be represented as T will throw exceptions.
+
+
+
+   .. py:method:: BinarySearch(item: Point3d) -> int
+
+      Searches the entire sorted List for an element using the default comparer and returns the zero-based index of the element.
+
+      :param item: The object to locate. The value can be a null reference (Nothing in Visual Basic) for reference types.
+
+      :returns: The zero-based index of item in the sorted List, if item is found; otherwise, a negative number that is the bitwise complement of the index of the next element that is larger than item or, if there is no larger element, the bitwise complement of Count.
+
+
+
+   .. py:method:: Clear() -> None
+
+      Removes all elements from the List.
+
+
+
+   .. py:method:: ClosestIndex(testPoint: Point3d) -> int
+
+      Finds the index of the point that is closest to a test point in this list.
+
+      :param testPoint: point to compare against.
+
+      :returns: index of closest point in the list on success. -1 on error.
+
+
+
+   .. py:method:: ClosestIndexInList(list: collections.abc.Sequence[Point3d], testPoint: Point3d) -> int
+      :staticmethod:
+
+
+      Finds the index of the point in a list of points that is closest to a test point.
+
+      :param list: A list of points.
+      :param testPoint: Point to compare against.
+
+      :returns: Index of closest point in the list on success or -1 on error.
+
+
+
+   .. py:method:: ClosestPointInList(list: collections.abc.Sequence[Point3d], testPoint: Point3d) -> Point3d
+      :staticmethod:
+
+
+      Finds the point in a list of points that is closest to a test point.
+
+      :param list: A list of points.
+      :param testPoint: Point to compare against.
+
+      :returns: A point.
+
+      :raises ArgumentException: List must contain at least one point and testPoint must be valid.
+
+
+
+   .. py:method:: Contains(item: Point3d) -> bool
+
+      Determines whether an element is in the List.
+
+      :param item: The object to locate in the List. The value can be a null reference (Nothing in Visual Basic) for reference types.
+
+      :returns: true if item is found in the List; otherwise, false.
+
+
+
+   .. py:method:: Duplicate() -> Point3dList
+
+      Returns a deep copy of this point list instance.
+
+      :returns: The duplicated list.
+
+
+
+   .. py:method:: IndexOf(item: Point3d) -> int
+                  IndexOf(item: Point3d, index: int) -> int
+                  IndexOf(item: Point3d, index: int, count: int) -> int
+
+      Searches for the specified object and returns the zero-based index of the first occurrence within the range of elements in the List that starts at the specified index and contains the specified number of elements.
+
+      :param item: The object to locate in the List. The value can be a null reference (Nothing in Visual Basic) for reference types.
+      :param index: The zero-based starting index of the search.
+      :param count: The number of elements in the section to search.
+
+      :returns: The zero-based index of the first occurrence of item within the entire List, if found; otherwise, -1.
+
+
+
+   .. py:method:: Insert(index: int, item: Point3d) -> None
+
+      Inserts an element into the List at the specified index.
+
+      :param index: The zero-based index at which item should be inserted.
+      :param item: The object to insert. The value can be a null reference (Nothing in Visual Basic) for reference types.
+
+
+
+   .. py:method:: InsertRange(index: int, collection: collections.abc.Sequence[Point3d]) -> None
+
+      Inserts the elements of a collection into the List at the specified index.
+
+      :param index: The zero-based index at which the new elements should be inserted.
+      :param collection: The collection whose elements should be inserted into the List. The collection itself cannot be a null reference (Nothing in Visual Basic), but it can contain elements that are a null reference (Nothing in Visual Basic), if type T is a reference type.
+
+
+
+   .. py:method:: LastIndexOf(item: Point3d) -> int
+                  LastIndexOf(item: Point3d, index: int) -> int
+                  LastIndexOf(item: Point3d, index: int, count: int) -> int
+
+      Searches for the specified object and returns the zero-based index of the last occurrence within the range of elements in the List that contains the specified number of elements and ends at the specified index.
+
+      :param item: The object to locate in the List. The value can be a null reference (Nothing in Visual Basic) for reference types.
+      :param index: The zero-based starting index of the backward search.
+      :param count: The number of elements in the section to search.
+
+      :returns: The zero-based index of the last occurrence of item within the entire the List, if found; otherwise, -1.
+
+
+
+   .. py:method:: RemapIndex(index: int) -> int
+
+      Remap an index in the infinite range onto the List index range.
+
+      :param index: Index to remap.
+
+      :returns: Remapped index.
+
+
+
+   .. py:method:: Remove(item: Point3d) -> bool
+
+      Removes the first occurrence of a specific object from the List.
+
+      :param item: The object to remove from the List. The value can be a null reference (Nothing in Visual Basic) for reference types.
+
+      :returns: true if item is successfully removed; otherwise, false. This method also returns false if item was not found in the List.
+
+
+
+   .. py:method:: RemoveAt(index: int) -> None
+
+      Removes the element at the specified index of the List.
+
+      :param index: The zero-based index of the element to remove.
+
+
+
+   .. py:method:: RemoveRange(index: int, count: int) -> None
+
+      Removes a range of elements from the List.
+
+      :param index: The zero-based starting index of the range of elements to remove.
+      :param count: The number of elements to remove.
+
+
+
+   .. py:method:: Reverse() -> None
+                  Reverse(index: int, count: int) -> None
+
+      Reverses the order of the elements in the specified range.
+
+      :param index: The zero-based starting index of the range to reverse.
+      :param count: The number of elements in the range to reverse.
+
+
+
+   .. py:method:: SetAllX(xValue: float) -> None
+
+      Set all the X values for the points to a single value
+
+
+
+   .. py:method:: SetAllY(yValue: float) -> None
+
+      Set all the Y values for the points to a single value
+
+
+
+   .. py:method:: SetAllZ(zValue: float) -> None
+
+      Set all the Z values for the points to a single value
+
+
+
+   .. py:method:: Sort() -> None
+
+      Sorts the elements in the entire List using the default comparer.
+
+
+
+   .. py:method:: ToArray() -> list[Point3d]
+
+      Constructs an array that contains all items in this list.
+
+      :returns: An array containing all items in this list.
+
+
+
+   .. py:method:: Transform(xform: Transform) -> None
+
+      Applies a transform to all the points in the list.
+
+      :param xform: Transform to apply.
+
+
+
+   .. py:method:: TrimExcess() -> None
+
+      Sets the capacity to the actual number of elements in the List, if that number is less than a threshold value.
+
+      This function differs from the DotNET implementation of List<T> since that one only trims the excess if the excess exceeds 10% of the list length.
+
+
+
+   .. py:property:: BoundingBox
+      :type: BoundingBox
+
+
+      Even though this is a property, it is not a "fast" calculation. Every point is evaluated in order to get the bounding box of the list.
+
+
+   .. py:property:: Capacity
+      :type: int
+
+
+      Gets or sets the total number of elements the internal data structure can hold without resizing.
+
+
+   .. py:property:: Count
+      :type: int
+
+
+      Gets the number of elements actually contained in the List.
+
+
+   .. py:property:: First
+      :type: Point3d
+
+
+      Gets or sets the first item in the list. This is synonymous to calling List[0].
+
+
+   .. py:property:: Last
+      :type: Point3d
+
+
+      Gets or sets the last item in the list. This is synonymous to calling List[Count-1].
+
