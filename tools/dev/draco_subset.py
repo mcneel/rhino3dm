@@ -28,7 +28,8 @@ def closure():
         if f in seen or f.startswith(SKIP_DIRS) or not os.path.exists(os.path.join(SRC, f)):
             continue
         seen.add(f)
-        todo.extend(INCLUDE.findall(open(os.path.join(SRC, f), errors='replace').read()))
+        with open(os.path.join(SRC, f), errors='replace') as fh:
+            todo.extend(INCLUDE.findall(fh.read()))
         if f.endswith('.h') and os.path.exists(os.path.join(SRC, f[:-2] + '.cc')):
             todo.append(f[:-2] + '.cc')
     return sorted(x for x in seen if x.endswith('.cc'))

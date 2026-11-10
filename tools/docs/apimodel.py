@@ -15,6 +15,11 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.insert(0, os.path.join(ROOT, 'tools', 'generate'))
 
 
+def _load_json(path):
+    with open(path) as f:
+        return json.load(f)
+
+
 def _short(cref):
     """`M:Rhino.Geometry.Curve.PointAt(System.Double)` -> `Curve.PointAt`; `T:Rhino.Geometry.Point3d` -> `Point3d`"""
     cref = re.sub(r'^\w:', '', cref)
@@ -100,8 +105,8 @@ def parse_doc(xml, lang='py'):
 
 class Api:
     def __init__(self, manifest=None, docs=None):
-        self.manifest = json.load(open(manifest or os.path.join(ROOT, 'api', 'manifest.json')))['members']
-        rows = json.load(open(docs or os.path.join(ROOT, 'api', 'docs.json')))['docs']
+        self.manifest = _load_json(manifest or os.path.join(ROOT, 'api', 'manifest.json'))['members']
+        rows = _load_json(docs or os.path.join(ROOT, 'api', 'docs.json'))['docs']
         self.docs = {(r['Type'], r['Kind'], r['Name'], r['Signature']): r['Xml'] for r in rows}
         self.type_docs = {r['Type']: r['Xml'] for r in rows if r['Kind'] == 'type'}
         # C# base lists (`RhinoList<Point3d>, ICloneable`): generic bases the registry does not chain
@@ -116,9 +121,10 @@ class Api:
                 self.enum_docs.setdefault(r['Name'], r['Xml'])
             elif r['Kind'] == 'enumvalue':
                 self.enum_docs.setdefault(r['Type'].split('.')[-1].split('+')[-1] + '.' + r['Name'], r['Xml'])
-        self.hand = tomllib.load(open(os.path.join(ROOT, 'api', 'hand-docs.toml'), 'rb'))
+        with open(os.path.join(ROOT, 'api', 'hand-docs.toml'), 'rb') as f:
+            self.hand = tomllib.load(f)
         # value types: field names in order (the sequence constructor's order)
-        vt = json.load(open(os.path.join(ROOT, 'api', 'valuetypes.json')))
+        vt = _load_json(os.path.join(ROOT, 'api', 'valuetypes.json'))
         self.vt_raw = vt['types']
         self.vt_fields = {t['Cs']: [f['Name'] for f in t['Fields']] for t in vt['types'] if t.get('Fields')}
         self.by_type = {}

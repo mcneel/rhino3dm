@@ -5,6 +5,7 @@ import gc
 import sys
 import helpers
 import json
+import math
 
 
 def _subd_box():
@@ -29,7 +30,7 @@ def _subd_first(name):
 
 def _subd_p3(p):
     """a point as a list, 'nan' for an unset coordinate (as the stored answers write it)"""
-    return ['nan' if v != v else v for v in (p.X, p.Y, p.Z)]
+    return ['nan' if math.isnan(v) else v for v in (p.X, p.Y, p.Z)]
 
 
 def _subd_box_geometry():
