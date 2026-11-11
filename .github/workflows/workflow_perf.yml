@@ -1,0 +1,219 @@
+# Performance regression check (tests/perf): this commit's Python, .NET and JavaScript builds against
+# the reference release, gated on the per-task ratio in tests/perf/baseline/ci-ubuntu-x64.json.
+# Manual only: hosted runners are shared, so the tolerance is loose (1.75x) and only large regressions
+# fail. The builds here are Release; the CI workflow's test builds are Debug and cannot be timed.
+# With no baseline yet, the run only reports: commit the `perf-baseline` artifact's JSON to start gating.
+
+name: workflow perf
+on:
+  workflow_dispatch:
+    inputs:
+      reference:
+        description: reference rhino3dm version (PyPI, NuGet, npm)
+        default: '8.35.0'
+      scale:
+        description: model size (small ~30 MB, full ~145 MB)
+        default: small
+      rounds:
+        description: rounds per library (each task keeps its lowest median)
+        default: '3'
+
+permissions:
+  contents: read
+
+env:
+  REF: ${{ inputs.reference }}
+  SCALE: ${{ inputs.scale }}
+  ROUNDS: ${{ inputs.rounds }}
+  REPEATS: '5'
+
+jobs:
+
+  model:
+    name: perf model
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.1.1
+      - uses: actions/setup-python@v5.4.0
+        with:
+          python-version: '3.12'
+      - name: write the model with the reference release
+        run: |
+          python -m venv ref && ref/bin/pip install -q rhino3dm==$REF
+          ref/bin/python tests/perf/gen_model.py model.3dm $SCALE
+      - uses: actions/upload-artifact@v4.3.1
+        with:
+          name: perf-model
+          path: model.3dm
+          retention-days: 3
+
+  python:
+    name: perf python
+    runs-on: ubuntu-latest
+    needs: [model]
+    steps:
+      - uses: actions/checkout@v4.1.1
+      - name: update submodules
+        run: git submodule update --init --recursive
+      - uses: actions/setup-python@v5.4.0
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4.1.7
+        with:
+          name: perf-model
+      - name: build (Release wheel)
+        run: python -m pip install -q --upgrade pip setuptools wheel && python setup.py bdist_wheel
+      - name: run
+        run: |
+          python -m venv ref && ref/bin/pip install -q numpy rhino3dm==$REF
+          python -m venv cur && cur/bin/pip install -q numpy dist/*.whl
+          mkdir -p results
+          for r in $(seq $ROUNDS); do
+            ref/bin/python tests/perf/bench.py tests/models model.3dm $REPEATS > results/python_ref_r$r.json
+            cur/bin/python tests/perf/bench.py tests/models model.3dm $REPEATS > results/python_cur_r$r.json
+          done
+      - uses: actions/upload-artifact@v4.3.1
+        with:
+          name: perf-results-python
+          path: results
+
+  dotnet:
+    name: perf dotnet
+    runs-on: ubuntu-latest
+    needs: [model]
+    steps:
+      - uses: actions/checkout@v4.1.1
+      - name: update submodules
+        run: git submodule update --init --recursive
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/download-artifact@v4.1.7
+        with:
+          name: perf-model
+      # setup runs methodgen, which writes the AutoNativeMethods.cs src/dotnet compiles against
+      - name: build native library
+        run: |
+          python3 script/bootstrap.py -p linux
+          python3 script/setup.py -p linux -v
+          python3 script/build.py -p linux -v
+      - name: run
+        run: |
+          cp -r tests/perf/dotnet tests/perf/ref
+          (cd tests/perf/ref && dotnet build -c Release -p:Rhino3dmVersion=$REF -o out)
+          (cd tests/perf/dotnet && dotnet build -c Release -o out)
+          cp src/build/linux/librhino3dm_native.so tests/perf/dotnet/out/
+          mkdir -p results
+          for r in $(seq $ROUNDS); do
+            dotnet tests/perf/ref/out/PerfBench.dll tests/models model.3dm $REPEATS > results/dotnet_ref_r$r.json
+            dotnet tests/perf/dotnet/out/PerfBench.dll tests/models model.3dm $REPEATS > results/dotnet_cur_r$r.json
+          done
+      - uses: actions/upload-artifact@v4.3.1
+        with:
+          name: perf-results-dotnet
+          path: results
+
+  build_js:
+    name: perf build rhino3dm.js
+    runs-on: ubuntu-latest
+    container:
+      image: emscripten/emsdk:5.0.7
+    steps:
+      - uses: actions/checkout@v4.1.1
+      - name: safe dir
+        run: git config --system --add safe.directory /__w/rhino3dm/rhino3dm
+      - name: update submodules
+        run: git submodule update --init --recursive
+      - name: build (Release, wasm32)
+        run: |
+          python3 script/bootstrap.py -p js
+          python3 script/setup.py -p js -o -v
+          python3 script/build.py -p js -o -v
+          mkdir -p perfjs && cp src/build/javascript/rhino3dm.js src/build/javascript/artifacts_js/rhino3dm.wasm perfjs/
+      - uses: actions/upload-artifact@v4.3.1
+        with:
+          name: perf-rhino3dm.js
+          path: perfjs
+          retention-days: 3
+
+  javascript:
+    name: perf javascript
+    runs-on: ubuntu-latest
+    needs: [model, build_js]
+    steps:
+      - uses: actions/checkout@v4.1.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@v4.1.7
+        with:
+          name: perf-model
+      - uses: actions/download-artifact@v4.1.7
+        with:
+          name: perf-rhino3dm.js
+          path: cur
+      - name: run
+        run: |
+          mkdir ref && (cd ref && npm pack -q rhino3dm@$REF && tar -xzf rhino3dm-$REF.tgz)
+          mkdir -p results
+          for r in $(seq $ROUNDS); do
+            node --expose-gc tests/perf/bench.mjs $PWD/ref/package/rhino3dm.js tests/models model.3dm $REPEATS > results/javascript_ref_r$r.json
+            node --expose-gc tests/perf/bench.mjs $PWD/cur/rhino3dm.js tests/models model.3dm $REPEATS > results/javascript_cur_r$r.json
+          done
+      - uses: actions/upload-artifact@v4.3.1
+        with:
+          name: perf-results-javascript
+          path: results
+
+  compare:
+    name: perf gate
+    runs-on: ubuntu-latest
+    needs: [python, dotnet, javascript]
+    steps:
+      - uses: actions/checkout@v4.1.1
+      - uses: actions/download-artifact@v4.1.7
+        with:
+          pattern: perf-results-*
+          path: results
+          merge-multiple: true
+      - name: compare with the baseline
+        run: |
+          cat > results/run.json <<EOF
+          {"env": "ci-ubuntu-x64", "date": "$(date -u '+%Y-%m-%d %H:%M +0000')", "commit": "$GITHUB_SHA",
+           "branch": "$GITHUB_REF_NAME", "scale": "$SCALE", "rounds": "$ROUNDS", "repeats": "$REPEATS",
+           "builds": "Release builds (workflow perf) vs the published $REF packages",
+           "machine": "GitHub ubuntu-latest, $(nproc) CPUs, $(lscpu | sed -n 's/^Model name: *//p' | head -1)",
+           "notes": "run $GITHUB_RUN_ID"}
+          EOF
+          python3 tests/perf/compare.py results --env ci-ubuntu-x64 --tolerance 1.75 --report report.md
+          rc=$?
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
+        shell: bash {0}
+      # the ratios of this run as a baseline file, for when it should become (or replace) the baseline
+      - name: baseline candidate
+        if: always()
+        run: |
+          python3 tests/perf/compare.py results --env ci-ubuntu-x64 --update > /dev/null || true
+          mkdir -p candidate && cp tests/perf/baseline/ci-ubuntu-x64.json candidate/
+      # this run's page for tests/perf/history (commit it to keep the run on record)
+      - name: record
+        if: always()
+        run: python3 tests/perf/record.py results --out record
+      - uses: actions/upload-artifact@v4.3.1
+        if: always()
+        with:
+          name: perf-record
+          path: record
+      - uses: actions/upload-artifact@v4.3.1
+        if: always()
+        with:
+          name: perf-baseline
+          path: candidate/ci-ubuntu-x64.json
+      - uses: actions/upload-artifact@v4.3.1
+        if: always()
+        with:
+          name: perf-results
+          path: |
+            results
+            report.md

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The reference release: dotnet build -p:Rhino3dmVersion=8.35.0 (NuGet; defines REF).
+       Otherwise this tree's src/dotnet, whose native library the caller copies next to the output. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <TieredPGO>true</TieredPGO>
+    <DefineConstants Condition="'$(Rhino3dmVersion)' != ''">$(DefineConstants);REF</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(Rhino3dmVersion)' == ''">
+    <ProjectReference Include="../../../src/dotnet/Rhino3dm.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Rhino3dmVersion)' != ''">
+    <PackageReference Include="Rhino3dm" Version="$(Rhino3dmVersion)" />
+  </ItemGroup>
+</Project>
