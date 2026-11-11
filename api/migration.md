@@ -914,7 +914,8 @@ a new view of it, not `geometry` itself.
 
 <!-- py -->
 - The module is built with nanobind. On Python 3.12 and newer it is one stable-ABI (`abi3`) module,
-  and it supports free-threaded CPython 3.14t.
+  so one wheel covers 3.12 and every later version. It does not support free-threaded CPython: on
+  3.14t, importing it turns the GIL back on.
 - The package ships typings (`__init__.pyi`) with RhinoCommon's documentation, so editors complete
   and type-check rhino3dm code.
 <!-- /py --><!-- js -->
