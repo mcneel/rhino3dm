@@ -14,6 +14,10 @@
 #   tools/dev/round.sh typings  src/rhino3dm/__init__.pyi + src/js/rhino3dm.d.ts from the last Python
 #                               build's stub (tools/docs); tsc --strict on the .d.ts, mypy --strict +
 #                               stubtest (missing names) on the .pyi
+#   tools/dev/round.sh perf [update|record]   tests/perf: the reference release (8.35) vs the last builds
+#                               (build + dotnet first), gated on tests/perf/baseline/linux-arm64-docker.json;
+#                               `update` rewrites that baseline, `record` adds the run to tests/perf/history
+#                               (PERF_NOTES: its notes). PERF_SCALE=full uses the ~145 MB model
 #   tools/dev/round.sh drift    the typings regenerated into build/dev/typings and compared with the
 #                               committed ones; fails when they differ (also the last step of build/all)
 #
@@ -44,6 +48,32 @@ run() {   # run <image> <script> <args...>
 
 py()   { run $PY_IMAGE /src/tools/dev/container/python.sh "$@"; }
 wasm() { run $WASM_IMAGE /src/tools/dev/container/wasm.sh "$@"; }
+perf() {     # one container per library; the results are gated on the host
+  local env="-e PERF_REF=${PERF_REF:-8.35.0} -e PERF_SCALE=${PERF_SCALE:-small} -e PERF_REPEATS=${PERF_REPEATS:-5} -e PERF_ROUNDS=${PERF_ROUNDS:-3}"
+  local m="-v $REPO:/src -v $WORK:/work -v $VOLUME:/build"
+  rm -rf "$WORK/perf/results" && mkdir -p "$WORK/perf/results"
+  # what record.py needs to say which tree and machine these numbers belong to
+  local dirty=""; git -C "$REPO" diff --quiet HEAD -- src || dirty=" + uncommitted changes in src/"
+  python3 - "$WORK/perf/results/run.json" <<EOF
+import json, sys
+json.dump({'env': 'linux-arm64-docker', 'date': '$(date '+%Y-%m-%d %H:%M %z')',
+  'commit': '$(git -C "$REPO" rev-parse HEAD)', 'branch': '$(git -C "$REPO" branch --show-current)$dirty',
+  'scale': '${PERF_SCALE:-small}', 'rounds': '${PERF_ROUNDS:-3}', 'repeats': '${PERF_REPEATS:-5}',
+  'builds': 'round.sh dev builds (-ffp-contract=off, no LTO) vs the published ${PERF_REF:-8.35.0} packages',
+  'machine': '$(sysctl -n machdep.cpu.brand_string 2>/dev/null || uname -m), Docker $(docker info --format '{{.NCPU}} CPUs' 2>/dev/null)',
+  'notes': '''${PERF_NOTES:-}'''}, open(sys.argv[1], 'w'), indent=1)
+EOF
+  docker run --rm $m $env $PY_IMAGE bash /src/tools/dev/container/perf.sh model || return 1
+  echo "== perf python";  docker run --rm $m $env $PY_IMAGE bash /src/tools/dev/container/perf.sh python || return 1
+  echo "== perf dotnet";  docker run --rm $m $env $DOTNET_IMAGE bash /src/tools/dev/container/perf.sh dotnet || return 1
+  echo "== perf js";      docker run --rm $m $env $NODE_IMAGE bash /src/tools/dev/container/perf.sh js || return 1
+  python3 "$REPO/tests/perf/compare.py" "$WORK/perf/results" --env linux-arm64-docker \
+    --report "$WORK/perf/report.md" $([ "${1:-}" = update ] && echo --update)
+  local rc=$?
+  [ "${1:-}" = record ] && python3 "$REPO/tests/perf/record.py" "$WORK/perf/results"
+  return $rc
+}
+
 dotnet_tests() { echo "== dotnet"; run $DOTNET_IMAGE /src/tools/dev/container/dotnet.sh; }
 
 oracle() {
@@ -87,6 +117,7 @@ case "${1:-}" in
   all)    echo "== oracle"; oracle; both all all; drift; echo "== wasm64"; wasm all 64 | grep -vE "^\| "; dotnet_tests ;;
   wasm64) wasm "${2:-all}" 64 | grep -vE "^\| " ;;
   drift)  drift ;;
+  perf)   perf ${2:-} ;;
   typings) [ -f "$WORK/python/_rhino3dm.raw.pyi" ] || { echo "no $WORK/python/_rhino3dm.raw.pyi: build Python first"; exit 1; }
           python3 "$REPO/tools/docs/pyi.py" "$WORK/python/_rhino3dm.raw.pyi" && python3 "$REPO/tools/docs/dts.py" || exit 1
           mkdir -p "$WORK/tsc" && cp "$REPO/src/js/rhino3dm.d.ts" "$WORK/tsc/"

@@ -1,0 +1,557 @@
+{
+ "run": {
+  "reindex": false,
+  "env": "linux-arm64-docker",
+  "date": "2026-11-11 12:02 +0100",
+  "commit": "d42a65070f2b25bc3560a475ef0d492682b50d47",
+  "branch": "9.x",
+  "scale": "small",
+  "rounds": "3",
+  "repeats": "5",
+  "builds": "round.sh dev builds (-ffp-contract=off, no LTO) vs the published 8.35.0 packages",
+  "machine": "Apple M1 Max, Docker 8 CPUs",
+  "ref_label": "8.35.0",
+  "cur_label": "9.2.0-beta.0",
+  "notes": "Baseline run: tests/perf/baseline/linux-arm64-docker.json holds its ratios",
+  "tag": "baseline",
+  "versions": {
+   "python": {
+    "ref": "8.35.0",
+    "cur": "9.2.0b0",
+    "runtime": "CPython 3.12.3",
+    "rounds": 3
+   },
+   "dotnet": {
+    "ref": "8.35.0.0",
+    "cur": "9.2.0.0",
+    "runtime": ".NET 10.0.12",
+    "rounds": 3
+   },
+   "javascript": {
+    "ref": "8.35.26251.13000",
+    "cur": "9.2.26314.02300",
+    "runtime": "node v24.22.2",
+    "rounds": 3
+   }
+  },
+  "floor_ms": 10.0
+ },
+ "results": {
+  "python": [
+   {
+    "task": "io.read_model_file",
+    "ref_ms": 501.4871669700369,
+    "cur_ms": 178.5973749938421
+   },
+   {
+    "task": "io.read_test_models",
+    "ref_ms": 297.21554199932143,
+    "cur_ms": 100.07699998095632
+   },
+   {
+    "task": "io.from_byte_array_model",
+    "ref_ms": 480.804042017553,
+    "cur_ms": 160.59620899613947
+   },
+   {
+    "task": "io.write_model_file_v8",
+    "ref_ms": 16098.152569524245,
+    "cur_ms": 7036.0634199751075
+   },
+   {
+    "task": "table.iterate_objects_geometry_attrs",
+    "ref_ms": 38.49787497892976,
+    "cur_ms": 3.8728759973309934
+   },
+   {
+    "task": "table.iterate_objects_bbox",
+    "ref_ms": 28.470124991144985,
+    "cur_ms": 3.672500024549663
+   },
+   {
+    "task": "table.iterate_layers",
+    "ref_ms": 0.4171660402789712,
+    "cur_ms": 0.10620802640914917
+   },
+   {
+    "task": "create.populate_model",
+    "ref_ms": 263.3124999701977,
+    "cur_ms": 66.04375003371388
+   },
+   {
+    "task": "create.write_populated_v8",
+    "ref_ms": 6298.351544508478,
+    "cur_ms": 1395.311168016633
+   },
+   {
+    "task": "create.write_50_regular_grid_meshes_v8",
+    "ref_ms": 2321.550792490598,
+    "cur_ms": 954.6467090258375
+   },
+   {
+    "task": "create.write_populated_default_version",
+    "ref_ms": 6257.876211515395,
+    "cur_ms": 1381.6998959810007
+   },
+   {
+    "task": "values.point3d_construct_100k",
+    "ref_ms": 189.85437497030944,
+    "cur_ms": 33.0007920274511
+   },
+   {
+    "task": "values.point3d_distance_100k",
+    "ref_ms": 78.03049997892231,
+    "cur_ms": 10.620375047437847
+   },
+   {
+    "task": "values.point3d_add_100k",
+    "ref_ms": 217.81412500422448,
+    "cur_ms": 20.759791019372642
+   },
+   {
+    "task": "values.point3d_get_xyz_100k",
+    "ref_ms": 161.71054198639467,
+    "cur_ms": 18.1243330007419
+   },
+   {
+    "task": "values.transform_multiply_100k",
+    "ref_ms": 262.3880419996567,
+    "cur_ms": 34.28395796800032
+   },
+   {
+    "task": "values.point3d_transform_100k",
+    "ref_ms": 224.3019579909742,
+    "cur_ms": 8.38537496747449
+   },
+   {
+    "task": "curve.point_at_100k",
+    "ref_ms": 233.2295419764705,
+    "cur_ms": 39.263375045266
+   },
+   {
+    "task": "curve.tangent_at_100k",
+    "ref_ms": 284.73099996335804,
+    "cur_ms": 35.74458399089053
+   },
+   {
+    "task": "curve.point_at_100k_shuffled_1k_curves",
+    "ref_ms": 253.63850098801777,
+    "cur_ms": 56.63537501823157
+   },
+   {
+    "task": "curve.create_control_point_5k",
+    "ref_ms": 254.57579200156033,
+    "cur_ms": 39.71616696799174
+   },
+   {
+    "task": "curve.nurbs_points_read_200x500",
+    "ref_ms": 443.2671249960549,
+    "cur_ms": 56.54779198812321
+   },
+   {
+    "task": "mesh.build_grid_200",
+    "ref_ms": 304.9151669838466,
+    "cur_ms": 53.4272079821676
+   },
+   {
+    "task": "mesh.compute_normals_200",
+    "ref_ms": 6.686958018690348,
+    "cur_ms": 3.03612498100847
+   },
+   {
+    "task": "mesh.vertices_index_loop_40k",
+    "ref_ms": 101.66112502338365,
+    "cur_ms": 8.624750014860183
+   },
+   {
+    "task": "mesh.vertices_to_point3d_array_40k",
+    "ref_ms": 54.874250025022775,
+    "cur_ms": 5.140665976796299
+   },
+   {
+    "task": "mesh.faces_index_loop_40k",
+    "ref_ms": 51.00899998797104,
+    "cur_ms": 8.954582968726754
+   },
+   {
+    "task": "brep.create_from_sphere_1k",
+    "ref_ms": 18.944790994282812,
+    "cur_ms": 5.238999961875379
+   },
+   {
+    "task": "brep.walk_faces_edges",
+    "ref_ms": 6.195207999553531,
+    "cur_ms": 2.6208750205114484
+   },
+   {
+    "task": "subd.walk_components",
+    "ref_ms": 2.58245796430856,
+    "cur_ms": 0.28837501304224133
+   },
+   {
+    "task": "subd.subdivide_1",
+    "ref_ms": 0.41874998714774847,
+    "cur_ms": 0.18566602375358343
+   },
+   {
+    "task": "draco.compress_grid_200",
+    "ref_ms": 198.77833395730704,
+    "cur_ms": 11.970499996095896
+   },
+   {
+    "task": "draco.decompress_grid_200",
+    "ref_ms": 66.49620900861919,
+    "cur_ms": 9.372707980219275
+   },
+   {
+    "task": "json.encode_1k_curves",
+    "ref_ms": 10.751167021226138,
+    "cur_ms": 5.13487501302734
+   },
+   {
+    "task": "json.decode_1k_curves",
+    "ref_ms": 25.69095802027732,
+    "cur_ms": 11.541083047632128
+   },
+   {
+    "task": "attrs.user_strings_10k",
+    "ref_ms": 3437.7898764796555,
+    "cur_ms": 2938.842668518191
+   },
+   {
+    "task": "mesh.vertices_numpy_view_sum_40k",
+    "ref_ms": null,
+    "cur_ms": 52.46366700157523
+   }
+  ],
+  "dotnet": [
+   {
+    "task": "io.read_model_file",
+    "ref_ms": 511.5501,
+    "cur_ms": 183.9676
+   },
+   {
+    "task": "io.read_test_models",
+    "ref_ms": 306.1195,
+    "cur_ms": 148.3738
+   },
+   {
+    "task": "io.from_byte_array_model",
+    "ref_ms": 488.409,
+    "cur_ms": 162.67
+   },
+   {
+    "task": "io.write_model_file_v8",
+    "ref_ms": 15125.4427,
+    "cur_ms": 7077.4409
+   },
+   {
+    "task": "table.iterate_objects_geometry_attrs",
+    "ref_ms": 4.3967,
+    "cur_ms": 2.8668
+   },
+   {
+    "task": "table.iterate_objects_bbox",
+    "ref_ms": 3.8841,
+    "cur_ms": 2.4127
+   },
+   {
+    "task": "table.iterate_layers",
+    "ref_ms": 0.1578,
+    "cur_ms": 0.0929
+   },
+   {
+    "task": "create.populate_model",
+    "ref_ms": 43.7019,
+    "cur_ms": 28.5551
+   },
+   {
+    "task": "create.write_populated_v8",
+    "ref_ms": 1635.1102,
+    "cur_ms": 1579.571
+   },
+   {
+    "task": "create.write_50_regular_grid_meshes_v8",
+    "ref_ms": 2241.7886,
+    "cur_ms": 937.7858
+   },
+   {
+    "task": "create.write_populated_default_version",
+    "ref_ms": 1650.26,
+    "cur_ms": 1580.7409
+   },
+   {
+    "task": "values.transform_multiply_100k",
+    "ref_ms": 0.084,
+    "cur_ms": 0.083
+   },
+   {
+    "task": "values.point3d_transform_100k",
+    "ref_ms": 0.3802,
+    "cur_ms": 0.3737
+   },
+   {
+    "task": "curve.point_at_100k",
+    "ref_ms": 14.5469,
+    "cur_ms": 8.9287
+   },
+   {
+    "task": "curve.tangent_at_100k",
+    "ref_ms": 28.645,
+    "cur_ms": 12.6265
+   },
+   {
+    "task": "curve.point_at_100k_shuffled_1k_curves",
+    "ref_ms": 21.1357,
+    "cur_ms": 12.7822
+   },
+   {
+    "task": "curve.create_control_point_5k",
+    "ref_ms": 7.5795,
+    "cur_ms": 6.7892
+   },
+   {
+    "task": "curve.nurbs_points_read_200x500",
+    "ref_ms": 2.42,
+    "cur_ms": 3.3526
+   },
+   {
+    "task": "mesh.build_grid_200",
+    "ref_ms": 6.891,
+    "cur_ms": 5.7112
+   },
+   {
+    "task": "mesh.compute_normals_200",
+    "ref_ms": 7.9057,
+    "cur_ms": 4.0357
+   },
+   {
+    "task": "mesh.vertices_index_loop_40k",
+    "ref_ms": 0.902,
+    "cur_ms": 0.5782
+   },
+   {
+    "task": "mesh.vertices_to_point3d_array_40k",
+    "ref_ms": 0.9415,
+    "cur_ms": 0.6631
+   },
+   {
+    "task": "mesh.faces_index_loop_40k",
+    "ref_ms": 0.5951,
+    "cur_ms": 0.4416
+   },
+   {
+    "task": "brep.create_from_sphere_1k",
+    "ref_ms": 8.9397,
+    "cur_ms": 4.9792
+   },
+   {
+    "task": "brep.walk_faces_edges",
+    "ref_ms": 0.626,
+    "cur_ms": 0.3692
+   },
+   {
+    "task": "subd.walk_components",
+    "ref_ms": 0.101,
+    "cur_ms": 0.0965
+   },
+   {
+    "task": "subd.subdivide_1",
+    "ref_ms": 0.6285,
+    "cur_ms": 0.3271
+   },
+   {
+    "task": "json.encode_1k_curves",
+    "ref_ms": 5.3629,
+    "cur_ms": 2.6771
+   },
+   {
+    "task": "json.decode_1k_curves",
+    "ref_ms": 15.752,
+    "cur_ms": 12.3448
+   },
+   {
+    "task": "attrs.user_strings_10k",
+    "ref_ms": 3775.3407,
+    "cur_ms": 2490.1821
+   },
+   {
+    "task": "draco.compress_grid_200",
+    "ref_ms": null,
+    "cur_ms": 15.4034
+   },
+   {
+    "task": "draco.decompress_grid_200",
+    "ref_ms": null,
+    "cur_ms": 10.1004
+   }
+  ],
+  "javascript": [
+   {
+    "task": "module.init",
+    "ref_ms": 91.409167,
+    "cur_ms": 107.612667
+   },
+   {
+    "task": "io.from_byte_array_model",
+    "ref_ms": 541.3778329999998,
+    "cur_ms": 430.0888749999999
+   },
+   {
+    "task": "io.read_test_models",
+    "ref_ms": 292.4450830000005,
+    "cur_ms": 138.32012499999973
+   },
+   {
+    "task": "io.write_model_file_v8",
+    "ref_ms": 14305.617507000003,
+    "cur_ms": 15233.683007
+   },
+   {
+    "task": "table.iterate_objects_geometry_attrs",
+    "ref_ms": 10.248417000002519,
+    "cur_ms": 15.81266599999799
+   },
+   {
+    "task": "table.iterate_objects_bbox",
+    "ref_ms": 9.16475000000355,
+    "cur_ms": 19.367624999998952
+   },
+   {
+    "task": "table.iterate_layers",
+    "ref_ms": 0.387416999998095,
+    "cur_ms": 0.5846669999955338
+   },
+   {
+    "task": "create.populate_model",
+    "ref_ms": 95.13450000000012,
+    "cur_ms": 117.79845899999782
+   },
+   {
+    "task": "create.write_populated_v8",
+    "ref_ms": 5797.580836000001,
+    "cur_ms": 1875.6644589999996
+   },
+   {
+    "task": "create.write_50_regular_grid_meshes_v8",
+    "ref_ms": 2226.667668000009,
+    "cur_ms": 2313.244042999999
+   },
+   {
+    "task": "create.write_populated_default_version",
+    "ref_ms": 5634.902086000002,
+    "cur_ms": 1923.1667929999967
+   },
+   {
+    "task": "values.transform_multiply_100k",
+    "ref_ms": 62.571166000008816,
+    "cur_ms": 521.1612920000043
+   },
+   {
+    "task": "values.point3d_transform_100k",
+    "ref_ms": 26.288291000004392,
+    "cur_ms": 232.20433399999456
+   },
+   {
+    "task": "curve.point_at_100k",
+    "ref_ms": 19.462082999991253,
+    "cur_ms": 38.17945900000632
+   },
+   {
+    "task": "curve.tangent_at_100k",
+    "ref_ms": 22.24404200000572,
+    "cur_ms": 41.02150000000256
+   },
+   {
+    "task": "curve.point_at_100k_shuffled_1k_curves",
+    "ref_ms": 29.808875000002445,
+    "cur_ms": 61.92466700001387
+   },
+   {
+    "task": "curve.create_control_point_5k",
+    "ref_ms": 64.47070900000108,
+    "cur_ms": 82.72595799999544
+   },
+   {
+    "task": "mesh.build_grid_200",
+    "ref_ms": 11.475833000004059,
+    "cur_ms": 13.6324159999931
+   },
+   {
+    "task": "mesh.compute_normals_200",
+    "ref_ms": 4.413417000003392,
+    "cur_ms": 2.6818750000093132
+   },
+   {
+    "task": "mesh.vertices_index_loop_40k",
+    "ref_ms": 8.70616699999664,
+    "cur_ms": 13.489334000012605
+   },
+   {
+    "task": "mesh.faces_index_loop_40k",
+    "ref_ms": 27.172208000003593,
+    "cur_ms": 14.431875000009313
+   },
+   {
+    "task": "mesh.toThreejsJSON_40k",
+    "ref_ms": 91.50237499999639,
+    "cur_ms": 116.70741599999019
+   },
+   {
+    "task": "mesh.toThreejsBuffers_40k",
+    "ref_ms": 0.9957079999876441,
+    "cur_ms": 0.9891249999927823
+   },
+   {
+    "task": "brep.create_from_sphere_1k",
+    "ref_ms": 11.887584000010975,
+    "cur_ms": 15.71837499999674
+   },
+   {
+    "task": "brep.walk_faces_edges",
+    "ref_ms": 5.075666999997338,
+    "cur_ms": 2.2051249999931315
+   },
+   {
+    "task": "subd.walk_components",
+    "ref_ms": 1.2596249999915017,
+    "cur_ms": 2.3665409999957774
+   },
+   {
+    "task": "subd.subdivide_1",
+    "ref_ms": 0.46816599999147,
+    "cur_ms": 0.5429169999988517
+   },
+   {
+    "task": "draco.compress_grid_200",
+    "ref_ms": 37.77412500001083,
+    "cur_ms": 57.99275000000489
+   },
+   {
+    "task": "draco.decompress_grid_200",
+    "ref_ms": 26.23545799999556,
+    "cur_ms": 34.953708000000915
+   },
+   {
+    "task": "json.encode_1k_curves",
+    "ref_ms": 9.415874999991502,
+    "cur_ms": 8.651333000001614
+   },
+   {
+    "task": "json.decode_1k_curves",
+    "ref_ms": 19.85458300000755,
+    "cur_ms": 25.097832999992534
+   },
+   {
+    "task": "attrs.user_strings_10k",
+    "ref_ms": 1644.6517090000125,
+    "cur_ms": 2789.280918000004
+   },
+   {
+    "task": "mesh.vertices_toFloatArray_40k",
+    "ref_ms": null,
+    "cur_ms": 26.196834000002127
+   }
+  ]
+ }
+}
