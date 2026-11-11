@@ -763,7 +763,8 @@ a new view of it, not <code class="docutils literal notranslate"><span class="pr
 <h2>Packaging<a class="headerlink" href="#packaging" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>The module is built with nanobind. On Python 3.12 and newer it is one stable-ABI (<code class="docutils literal notranslate"><span class="pre">abi3</span></code>) module,
-and it supports free-threaded CPython 3.14t.</p></li>
+so one wheel covers 3.12 and every later version. It does not support free-threaded CPython: on
+3.14t, importing it turns the GIL back on.</p></li>
 <li><p>The package ships typings (<code class="docutils literal notranslate"><span class="pre">__init__.pyi</span></code>) with RhinoCommon’s documentation, so editors complete
 and type-check rhino3dm code.</p></li>
 </ul>

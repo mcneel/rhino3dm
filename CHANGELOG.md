@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- (py) One stable-ABI (`abi3`) wheel per platform for Python 3.12 and newer, so Python 3.15 and later install a wheel instead of building from source. Python 3.10 and 3.11 keep their own wheels.
+- (py) The module no longer declares free-threading support: on a free-threaded CPython (3.14t), importing it turns the GIL back on (Python prints a `RuntimeWarning`). openNURBS is not safe for parallel use: threads sharing a SubD could get wrong results or crash. There is no free-threaded wheel.
+
 ## [9.2.0-beta.0] - 2026.11.10
 
 rhino3dm vNext: the Python and JavaScript bindings are generated from RhinoCommon, so their API is RhinoCommon's (names, signatures, return shapes). What changes for an 8.x script, per language: [`docs/migrating-to-9.md`](docs/migrating-to-9.md).
