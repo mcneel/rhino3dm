@@ -32,6 +32,13 @@
         if (!t.toWireType || !t.toWireType.rh3dmChecked) missing.push('enum check ' + t.name);
       });
       if (nEnums === 0) missing.push('enum types');
+      // G153: every value object with a heap layout (RH3DM_FAST, gen_pre.js) converts through it
+      var fast = {};
+      Object.keys(registeredTypes).forEach(function (k) {
+        var t = registeredTypes[k];
+        if (t && t.fromWireType && t.fromWireType.rh3dmFast) fast[t.name] = true;
+      });
+      RH3DM_FAST.forEach(function (f) { if (!fast[f.name]) missing.push('fast value ' + f.name); });
     }
     KEEP.forEach(function (km) {
       var C = M[km[0]], proto = C && C.prototype;

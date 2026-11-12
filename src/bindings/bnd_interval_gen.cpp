@@ -465,6 +465,8 @@ using namespace emscripten;
 struct RH3DM_IntervalFns {};
 void initGenInterval(void)
 {
+  static_assert(sizeof(BND_Interval) == 16 && offsetof(BND_Interval, m_t0) == 0 && offsetof(BND_Interval, m_t1) == 8,
+                "BND_Interval: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_Interval>("IntervalValue")
       .field("T0", &BND_Interval::m_t0)
       .field("T1", &BND_Interval::m_t1);
@@ -473,12 +475,12 @@ void initGenInterval(void)
       .class_function("create", optional_override([](double a0, double a1) { return BND_Interval(a0, a1); }))
       .class_function("equals", optional_override([](BND_Interval a0, BND_Interval a1) { return a0 == a1; }))
       .class_function("add", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((RH3DM_JsHasFields(v0, "T0")) && v1.isNumber()) { BND_Interval a0 = v0.as<BND_Interval>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return a0 + a1; }()); }
-        if (v0.isNumber() && (RH3DM_JsHasFields(v1, "T0"))) { double a0 = v0.as<double>(); BND_Interval a1 = v1.as<BND_Interval>(); return emscripten::val([&]() { return a0 + a1; }()); }
+        if (RH3DM_JsHasFields(v0, "T0") && v1.isNumber()) { BND_Interval a0 = RH3DM_JsAs<BND_Interval>(v0); double a1 = RH3DM_JsAs<double>(v1); return RH3DM_JsVal([&]() { return a0 + a1; }()); }
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "T0")) { double a0 = RH3DM_JsAs<double>(v0); BND_Interval a1 = RH3DM_JsAs<BND_Interval>(v1); return RH3DM_JsVal([&]() { return a0 + a1; }()); }
         throw std::invalid_argument("Interval.add: no overload matches the arguments"); }))
       .class_function("subtract", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((RH3DM_JsHasFields(v0, "T0")) && v1.isNumber()) { BND_Interval a0 = v0.as<BND_Interval>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return a0 - a1; }()); }
-        if (v0.isNumber() && (RH3DM_JsHasFields(v1, "T0"))) { double a0 = v0.as<double>(); BND_Interval a1 = v1.as<BND_Interval>(); return emscripten::val([&]() { return a0 - a1; }()); }
+        if (RH3DM_JsHasFields(v0, "T0") && v1.isNumber()) { BND_Interval a0 = RH3DM_JsAs<BND_Interval>(v0); double a1 = RH3DM_JsAs<double>(v1); return RH3DM_JsVal([&]() { return a0 - a1; }()); }
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "T0")) { double a0 = RH3DM_JsAs<double>(v0); BND_Interval a1 = RH3DM_JsAs<BND_Interval>(v1); return RH3DM_JsVal([&]() { return a0 - a1; }()); }
         throw std::invalid_argument("Interval.subtract: no overload matches the arguments"); }))
       .class_function("unset", optional_override([]() { return BND_Interval::Unset(); }))
       .class_function("zeroToOne", optional_override([]() { return BND_Interval::ZeroToOne(); }))
@@ -493,11 +495,11 @@ void initGenInterval(void)
       .class_function("isDecreasing", optional_override([](BND_Interval a0) { return a0.IsDecreasing(); }))
       .class_function("compareTo", optional_override([](BND_Interval a0, BND_Interval a1) { return a0.CompareTo(a1); }))
       .class_function("ToString", optional_override([](BND_Interval a0) { return a0.ToString(); }))
-      .class_function("grow", optional_override([](emscripten::val v0, double a1) { BND_Interval a0 = v0.as<BND_Interval>(); a0.Grow(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
-      .class_function("expand", optional_override([](emscripten::val v0, double a1) { BND_Interval a0 = v0.as<BND_Interval>(); a0.Expand(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
-      .class_function("makeIncreasing", optional_override([](emscripten::val v0) { BND_Interval a0 = v0.as<BND_Interval>(); a0.MakeIncreasing(); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
-      .class_function("reverse", optional_override([](emscripten::val v0) { BND_Interval a0 = v0.as<BND_Interval>(); a0.Reverse(); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
-      .class_function("swap", optional_override([](emscripten::val v0) { BND_Interval a0 = v0.as<BND_Interval>(); a0.Swap(); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("grow", optional_override([](emscripten::val v0, double a1) { BND_Interval a0 = RH3DM_JsAs<BND_Interval>(v0); a0.Grow(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("expand", optional_override([](emscripten::val v0, double a1) { BND_Interval a0 = RH3DM_JsAs<BND_Interval>(v0); a0.Expand(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("makeIncreasing", optional_override([](emscripten::val v0) { BND_Interval a0 = RH3DM_JsAs<BND_Interval>(v0); a0.MakeIncreasing(); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("reverse", optional_override([](emscripten::val v0) { BND_Interval a0 = RH3DM_JsAs<BND_Interval>(v0); a0.Reverse(); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("swap", optional_override([](emscripten::val v0) { BND_Interval a0 = RH3DM_JsAs<BND_Interval>(v0); a0.Swap(); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("parameterAt", optional_override([](BND_Interval a0, double a1) { return a0.ParameterAt(a1); }))
       .class_function("parameterIntervalAt", optional_override([](BND_Interval a0, BND_Interval a1) { return a0.ParameterIntervalAt(a1); }))
       .class_function("normalizedParameterAt", optional_override([](BND_Interval a0, double a1) { return a0.NormalizedParameterAt(a1); }))

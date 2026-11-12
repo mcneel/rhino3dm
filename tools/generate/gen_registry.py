@@ -620,6 +620,15 @@ C_VT = {'ON_3dPoint*': 'Point3d', 'ON_3DPOINT_STRUCT*': 'Point3d',
         'ON_SUBD_EDGE_SHARPNESS_STRUCT*': 'SubDEdgeSharpness'}
 VT_JS_KEY = {}       # generated struct -> JS shape-test property
 VT_JS_FIELDS = {}    # generated struct -> every JS field of its value object (G100: Arc vs Circle)
+# G153: value objects whose JS fields are all plain members (numbers and other such value objects)
+# cross the JS boundary by direct heap reads/writes instead of embind's one wasm call per field:
+# generated struct -> {'id', 'name' (embind's), 'size', 'fields': [(JS name, kind or nested struct,
+# offset)], 'pads': [offset of each padding double]}; ids are the emission order
+JS_FAST = {}
+# every shape test an overload dispatcher makes (js_class_shape): 'X,!Z', 'Z#', 'M00,M01,...' --
+# a field the object owns, `!` one it must lack, `#` one that is a number. bnd_pre_gen.js has one
+# literal-key predicate per spec
+JS_SPECS = set()
 
 
 def field_backed(vt, cs):

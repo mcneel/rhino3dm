@@ -1413,19 +1413,22 @@ def js_class_shape(t):
         # Circle {Plane, Radius} share a first field -- a circle reached the Arc conversion);
         # the shape key is the field set: a subset accepts a superset (js_shadowed)
         fs = VT_JS_FIELDS[t]
+        JS_SPECS.add(','.join(fs))
         return ('object:' + ','.join(sorted(fs)),
                 'RH3DM_JsHasFields({v}, "%s")' % ','.join(fs),        # one call into JS (G152)
-                '{v}.as<%s>()' % t)
+                'RH3DM_JsAs<%s>({v})' % t)
     if t in vt:
-        lacks = ' && !{v}.hasOwnProperty("Z")' if t == 'BND_Point2d' else ''
+        # the whole test is one spec, so one call into JS (G153): `!Z` = lacks Z, `Z#` = Z is a number
+        spec = vt[t] + (',!Z' if t == 'BND_Point2d' else '')
         # a point / vector's Z is a NUMBER: a Box value object has a Z too (an interval), and
         # Box.Contains(box, otherBox) took the point branch
         if t in ('BND_Point3d', 'BND_Vector3d', 'BND_Point3f', 'BND_Vector3f'):
-            lacks += ' && {v}["Z"].isNumber()'
+            spec += '#' if vt[t] == 'Z' else ',Z#'
         # `typeof null` is "object": checked first (PolyCurve.append(null) called hasOwnProperty on null)
+        JS_SPECS.add(spec)
         return ('object:' + vt[t],
-                '(RH3DM_JsHasFields({v}, "%s")%s)' % (vt[t], lacks),
-                '{v}.as<%s>()' % t)
+                'RH3DM_JsHasFields({v}, "%s")' % spec,
+                'RH3DM_JsAs<%s>({v})' % t)
     # a string (and a uuid, a string in JS) and a color ({r, g, b, a} -- lowercase, so no point or
     # vector passes): checked, never `true` -- an unchecked argument let its overload take every
     # call of that arity (PointCloud.add(point, normal) reached add(point, color))

@@ -2005,7 +2005,9 @@ def test_guid_empty_early_return_and_js_sequence_shape():
     key, check, conv = E.js_class_shape('const std::vector<BND_Point3d>&')
     # G130: the elements' shape too (an empty sequence matches any)
     assert key == 'seq:BND_Point3d' and check.format(v='v1').startswith('(RH3DM_JsIsSeq(v1) && (RH3DM_JsSeqFirst(v1).isUndefined() || ')
-    assert 'RH3DM_JsSeqFirst(v1)["Z"].isNumber()' in check.format(v='v1')
+    # G153: one spec, one call into JS -- owns Z, and Z is a number
+    assert 'RH3DM_JsHasFields(RH3DM_JsSeqFirst(v1), "Z#")' in check.format(v='v1')
+    assert E.js_class_shape('BND_Point3d')[2] == 'RH3DM_JsAs<BND_Point3d>({v})'
     assert 'hasOwnProperty("r")' in E.js_class_shape('std::vector<BND_Color>')[1]
     assert conv.format(v='v1') == 'RH3DM_JsSeq<BND_Point3d>(v1)'
 

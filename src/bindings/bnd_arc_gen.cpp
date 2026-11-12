@@ -401,6 +401,8 @@ using namespace emscripten;
 struct RH3DM_ArcFns {};
 void initGenArc(void)
 {
+  static_assert(sizeof(BND_Arc) == 152 && offsetof(BND_Arc, m_plane) == 0 && offsetof(BND_Arc, m_radius) == 128 && offsetof(BND_Arc, m_angle) == 136,
+                "BND_Arc: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_Arc>("ArcValue")
       .field("Plane", &BND_Arc::m_plane)
       .field("Radius", &BND_Arc::m_radius)
@@ -409,13 +411,13 @@ void initGenArc(void)
       .class_function("create", optional_override([]() { return BND_Arc(); }))
       .class_function("unset", optional_override([]() { return BND_Arc::Unset(); }))
       .class_function("create", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "Plane,Radius") && v1.isNumber()) { BND_Circle a0 = v0.as<BND_Circle>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return BND_Arc(a0, a1); }()); }
-        if (RH3DM_JsHasFields(v0, "Plane,Radius") && (RH3DM_JsHasFields(v1, "T0"))) { BND_Circle a0 = v0.as<BND_Circle>(); BND_Interval a1 = v1.as<BND_Interval>(); return emscripten::val([&]() { return BND_Arc(a0, a1); }()); }
+        if (RH3DM_JsHasFields(v0, "Plane,Radius") && v1.isNumber()) { BND_Circle a0 = RH3DM_JsAs<BND_Circle>(v0); double a1 = RH3DM_JsAs<double>(v1); return RH3DM_JsVal([&]() { return BND_Arc(a0, a1); }()); }
+        if (RH3DM_JsHasFields(v0, "Plane,Radius") && RH3DM_JsHasFields(v1, "T0")) { BND_Circle a0 = RH3DM_JsAs<BND_Circle>(v0); BND_Interval a1 = RH3DM_JsAs<BND_Interval>(v1); return RH3DM_JsVal([&]() { return BND_Arc(a0, a1); }()); }
         throw std::invalid_argument("Arc.create: no overload matches the arguments"); }))
       .class_function("create", optional_override([](emscripten::val v0, emscripten::val v1, emscripten::val v2) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis") && v1.isNumber() && v2.isNumber()) { BND_Plane a0 = v0.as<BND_Plane>(); double a1 = v1.as<double>(); double a2 = v2.as<double>(); return emscripten::val([&]() { return BND_Arc(a0, a1, a2); }()); }
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && v1.isNumber() && v2.isNumber()) { BND_Point3d a0 = v0.as<BND_Point3d>(); double a1 = v1.as<double>(); double a2 = v2.as<double>(); return emscripten::val([&]() { return BND_Arc(a0, a1, a2); }()); }
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber()) && (RH3DM_JsHasFields(v2, "Z") && v2["Z"].isNumber())) { BND_Point3d a0 = v0.as<BND_Point3d>(); BND_Point3d a1 = v1.as<BND_Point3d>(); BND_Point3d a2 = v2.as<BND_Point3d>(); return emscripten::val([&]() { return BND_Arc(a0, a1, a2); }()); }
+        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis") && v1.isNumber() && v2.isNumber()) { BND_Plane a0 = RH3DM_JsAs<BND_Plane>(v0); double a1 = RH3DM_JsAs<double>(v1); double a2 = RH3DM_JsAs<double>(v2); return RH3DM_JsVal([&]() { return BND_Arc(a0, a1, a2); }()); }
+        if (RH3DM_JsHasFields(v0, "Z#") && v1.isNumber() && v2.isNumber()) { BND_Point3d a0 = RH3DM_JsAs<BND_Point3d>(v0); double a1 = RH3DM_JsAs<double>(v1); double a2 = RH3DM_JsAs<double>(v2); return RH3DM_JsVal([&]() { return BND_Arc(a0, a1, a2); }()); }
+        if (RH3DM_JsHasFields(v0, "Z#") && RH3DM_JsHasFields(v1, "Z#") && RH3DM_JsHasFields(v2, "Z#")) { BND_Point3d a0 = RH3DM_JsAs<BND_Point3d>(v0); BND_Point3d a1 = RH3DM_JsAs<BND_Point3d>(v1); BND_Point3d a2 = RH3DM_JsAs<BND_Point3d>(v2); return RH3DM_JsVal([&]() { return BND_Arc(a0, a1, a2); }()); }
         throw std::invalid_argument("Arc.create: no overload matches the arguments"); }))
       .class_function("create", optional_override([](BND_Plane a0, BND_Point3d a1, double a2, double a3) { return BND_Arc(a0, a1, a2, a3); }))
       .class_function("isValid", optional_override([](BND_Arc a0) { return a0.IsValid(); }))
@@ -433,14 +435,14 @@ void initGenArc(void)
       .class_function("startAngleDegrees", optional_override([](BND_Arc a0) { return a0.StartAngleDegrees(); }))
       .class_function("endAngleDegrees", optional_override([](BND_Arc a0) { return a0.EndAngleDegrees(); }))
       .class_function("angleDegrees", optional_override([](BND_Arc a0) { return a0.AngleDegrees(); }))
-      .class_function("trim", optional_override([](emscripten::val v0, BND_Interval a1) { BND_Arc a0 = v0.as<BND_Arc>(); auto r = a0.Trim(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("trim", optional_override([](emscripten::val v0, BND_Interval a1) { BND_Arc a0 = RH3DM_JsAs<BND_Arc>(v0); auto r = a0.Trim(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
       .class_function("equals", optional_override([](BND_Arc a0, BND_Arc a1) { return a0.Equals(a1); }))
       .class_function("boundingBox", optional_override([](BND_Arc a0) { return a0.BoundingBox(); }))
       .class_function("pointAt", optional_override([](BND_Arc a0, double a1) { return a0.PointAt(a1); }))
       .class_function("tangentAt", optional_override([](BND_Arc a0, double a1) { return a0.TangentAt(a1); }))
       .class_function("closestParameter", optional_override([](BND_Arc a0, BND_Point3d a1) { return a0.ClosestParameter(a1); }))
       .class_function("closestPoint", optional_override([](BND_Arc a0, BND_Point3d a1) { return a0.ClosestPoint(a1); }))
-      .class_function("reverse", optional_override([](emscripten::val v0) { BND_Arc a0 = v0.as<BND_Arc>(); a0.Reverse(); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("reverse", optional_override([](emscripten::val v0) { BND_Arc a0 = RH3DM_JsAs<BND_Arc>(v0); a0.Reverse(); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("transform", optional_override([](BND_Arc a0, BND_Transform a1) { return a0.Transform(a1); }))
       .class_function("epsilonEquals", optional_override([](BND_Arc a0, BND_Arc a1, double a2) { return a0.EpsilonEquals(a1, a2); }))
       .class_function("toNurbsCurve", optional_override([](BND_Arc a0) { return BND_NurbsCurve::Gen_CreateFromArc(a0); }), allow_raw_pointers());

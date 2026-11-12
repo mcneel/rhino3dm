@@ -329,14 +329,16 @@ using namespace emscripten;
 struct RH3DM_SphereFns {};
 void initGenSphere(void)
 {
+  static_assert(sizeof(BND_Sphere) == 136 && offsetof(BND_Sphere, m_plane) == 0 && offsetof(BND_Sphere, m_radius) == 128,
+                "BND_Sphere: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_Sphere>("SphereValue")
       .field("EquatorialPlane", &BND_Sphere::m_plane)
       .field("Radius", &BND_Sphere::m_radius);
   class_<RH3DM_SphereFns>("Sphere")
       .class_function("create", optional_override([]() { return BND_Sphere(); }))
       .class_function("create", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && v1.isNumber()) { BND_Point3d a0 = v0.as<BND_Point3d>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return BND_Sphere(a0, a1); }()); }
-        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis") && v1.isNumber()) { BND_Plane a0 = v0.as<BND_Plane>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return BND_Sphere(a0, a1); }()); }
+        if (RH3DM_JsHasFields(v0, "Z#") && v1.isNumber()) { BND_Point3d a0 = RH3DM_JsAs<BND_Point3d>(v0); double a1 = RH3DM_JsAs<double>(v1); return RH3DM_JsVal([&]() { return BND_Sphere(a0, a1); }()); }
+        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis") && v1.isNumber()) { BND_Plane a0 = RH3DM_JsAs<BND_Plane>(v0); double a1 = RH3DM_JsAs<double>(v1); return RH3DM_JsVal([&]() { return BND_Sphere(a0, a1); }()); }
         throw std::invalid_argument("Sphere.create: no overload matches the arguments"); }))
       .class_function("unset", optional_override([]() { return BND_Sphere::Unset(); }))
       .class_function("isValid", optional_override([](BND_Sphere a0) { return a0.IsValid(); }))
@@ -354,13 +356,13 @@ void initGenSphere(void)
       .class_function("closestPoint", optional_override([](BND_Sphere a0, BND_Point3d a1) { return a0.ClosestPoint(a1); }))
       .class_function("closestParameter", optional_override([](BND_Sphere a0, BND_Point3d a1) { double longitudeRadians{}; double latitudeRadians{}; auto r = a0.ClosestParameter(a1, longitudeRadians, latitudeRadians); emscripten::val arr = emscripten::val::array(); arr.call<void>("push", r); arr.call<void>("push", longitudeRadians); arr.call<void>("push", latitudeRadians); return arr; }))
       .class_function("rotate", optional_override([](emscripten::val v0, emscripten::val v1, emscripten::val v2, emscripten::val v3) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "EquatorialPlane,Radius") && v1.isNumber() && v2.isNumber() && (RH3DM_JsHasFields(v3, "Z") && v3["Z"].isNumber())) { BND_Sphere a0 = v0.as<BND_Sphere>(); double a1 = v1.as<double>(); double a2 = v2.as<double>(); BND_Vector3d a3 = v3.as<BND_Vector3d>(); return emscripten::val([&]() { auto r = a0.Rotate(a1, a2, a3); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }()); }
-        if (RH3DM_JsHasFields(v0, "EquatorialPlane,Radius") && v1.isNumber() && (RH3DM_JsHasFields(v2, "Z") && v2["Z"].isNumber()) && (RH3DM_JsHasFields(v3, "Z") && v3["Z"].isNumber())) { BND_Sphere a0 = v0.as<BND_Sphere>(); double a1 = v1.as<double>(); BND_Vector3d a2 = v2.as<BND_Vector3d>(); BND_Point3d a3 = v3.as<BND_Point3d>(); return emscripten::val([&]() { auto r = a0.Rotate(a1, a2, a3); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }()); }
+        if (RH3DM_JsHasFields(v0, "EquatorialPlane,Radius") && v1.isNumber() && v2.isNumber() && RH3DM_JsHasFields(v3, "Z#")) { BND_Sphere a0 = RH3DM_JsAs<BND_Sphere>(v0); double a1 = RH3DM_JsAs<double>(v1); double a2 = RH3DM_JsAs<double>(v2); BND_Vector3d a3 = RH3DM_JsAs<BND_Vector3d>(v3); return RH3DM_JsVal([&]() { auto r = a0.Rotate(a1, a2, a3); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }()); }
+        if (RH3DM_JsHasFields(v0, "EquatorialPlane,Radius") && v1.isNumber() && RH3DM_JsHasFields(v2, "Z#") && RH3DM_JsHasFields(v3, "Z#")) { BND_Sphere a0 = RH3DM_JsAs<BND_Sphere>(v0); double a1 = RH3DM_JsAs<double>(v1); BND_Vector3d a2 = RH3DM_JsAs<BND_Vector3d>(v2); BND_Point3d a3 = RH3DM_JsAs<BND_Point3d>(v3); return RH3DM_JsVal([&]() { auto r = a0.Rotate(a1, a2, a3); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }()); }
         throw std::invalid_argument("Sphere.rotate: no overload matches the arguments"); }))
-      .class_function("rotate", optional_override([](emscripten::val v0, double a1, BND_Vector3d a2) { BND_Sphere a0 = v0.as<BND_Sphere>(); auto r = a0.Rotate(a1, a2); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
-      .class_function("rotate", optional_override([](emscripten::val v0, double a1, double a2, BND_Vector3d a3, BND_Point3d a4) { BND_Sphere a0 = v0.as<BND_Sphere>(); auto r = a0.Rotate(a1, a2, a3, a4); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
-      .class_function("translate", optional_override([](emscripten::val v0, BND_Vector3d a1) { BND_Sphere a0 = v0.as<BND_Sphere>(); auto r = a0.Translate(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
-      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Sphere a0 = v0.as<BND_Sphere>(); auto r = a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("rotate", optional_override([](emscripten::val v0, double a1, BND_Vector3d a2) { BND_Sphere a0 = RH3DM_JsAs<BND_Sphere>(v0); auto r = a0.Rotate(a1, a2); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("rotate", optional_override([](emscripten::val v0, double a1, double a2, BND_Vector3d a3, BND_Point3d a4) { BND_Sphere a0 = RH3DM_JsAs<BND_Sphere>(v0); auto r = a0.Rotate(a1, a2, a3, a4); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("translate", optional_override([](emscripten::val v0, BND_Vector3d a1) { BND_Sphere a0 = RH3DM_JsAs<BND_Sphere>(v0); auto r = a0.Translate(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Sphere a0 = RH3DM_JsAs<BND_Sphere>(v0); auto r = a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
       .class_function("epsilonEquals", optional_override([](BND_Sphere a0, BND_Sphere a1, double a2) { return a0.EpsilonEquals(a1, a2); }))
       .class_function("toBrep", optional_override([](BND_Sphere a0) { return BND_Brep::Gen_CreateFromSphere(a0); }), allow_raw_pointers())
       .class_function("toNurbsSurface", optional_override([](BND_Sphere a0) { return BND_NurbsSurface::Gen_CreateFromSphere(a0); }), allow_raw_pointers())

@@ -1217,6 +1217,8 @@ using namespace emscripten;
 struct RH3DM_TransformFns {};
 void initGenTransform(void)
 {
+  static_assert(sizeof(BND_Transform) == 128 && offsetof(BND_Transform, m_00) == 0 && offsetof(BND_Transform, m_01) == 8 && offsetof(BND_Transform, m_02) == 16 && offsetof(BND_Transform, m_03) == 24 && offsetof(BND_Transform, m_10) == 32 && offsetof(BND_Transform, m_11) == 40 && offsetof(BND_Transform, m_12) == 48 && offsetof(BND_Transform, m_13) == 56 && offsetof(BND_Transform, m_20) == 64 && offsetof(BND_Transform, m_21) == 72 && offsetof(BND_Transform, m_22) == 80 && offsetof(BND_Transform, m_23) == 88 && offsetof(BND_Transform, m_30) == 96 && offsetof(BND_Transform, m_31) == 104 && offsetof(BND_Transform, m_32) == 112 && offsetof(BND_Transform, m_33) == 120,
+                "BND_Transform: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_Transform>("TransformValue")
       .field("M00", &BND_Transform::m_00)
       .field("M01", &BND_Transform::m_01)
@@ -1251,8 +1253,8 @@ void initGenTransform(void)
       .class_function("rotation", optional_override([](double a0, double a1, BND_Vector3d a2, BND_Point3d a3) { return BND_Transform::Rotation(a0, a1, a2, a3); }))
       .class_function("rotation", optional_override([](double a0, BND_Point3d a1) { return BND_Transform::Rotation(a0, a1); }))
       .class_function("rotation", optional_override([](emscripten::val v0, emscripten::val v1, emscripten::val v2) -> emscripten::val {
-        if (v0.isNumber() && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber()) && (RH3DM_JsHasFields(v2, "Z") && v2["Z"].isNumber())) { double a0 = v0.as<double>(); BND_Vector3d a1 = v1.as<BND_Vector3d>(); BND_Point3d a2 = v2.as<BND_Point3d>(); return emscripten::val([&]() { return BND_Transform::Rotation(a0, a1, a2); }()); }
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber()) && (RH3DM_JsHasFields(v2, "Z") && v2["Z"].isNumber())) { BND_Vector3d a0 = v0.as<BND_Vector3d>(); BND_Vector3d a1 = v1.as<BND_Vector3d>(); BND_Point3d a2 = v2.as<BND_Point3d>(); return emscripten::val([&]() { return BND_Transform::Rotation(a0, a1, a2); }()); }
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "Z#") && RH3DM_JsHasFields(v2, "Z#")) { double a0 = RH3DM_JsAs<double>(v0); BND_Vector3d a1 = RH3DM_JsAs<BND_Vector3d>(v1); BND_Point3d a2 = RH3DM_JsAs<BND_Point3d>(v2); return RH3DM_JsVal([&]() { return BND_Transform::Rotation(a0, a1, a2); }()); }
+        if (RH3DM_JsHasFields(v0, "Z#") && RH3DM_JsHasFields(v1, "Z#") && RH3DM_JsHasFields(v2, "Z#")) { BND_Vector3d a0 = RH3DM_JsAs<BND_Vector3d>(v0); BND_Vector3d a1 = RH3DM_JsAs<BND_Vector3d>(v1); BND_Point3d a2 = RH3DM_JsAs<BND_Point3d>(v2); return RH3DM_JsVal([&]() { return BND_Transform::Rotation(a0, a1, a2); }()); }
         throw std::invalid_argument("Transform.rotation: no overload matches the arguments"); }))
       .class_function("rotation", optional_override([](BND_Vector3d a0, BND_Vector3d a1, BND_Vector3d a2, BND_Vector3d a3, BND_Vector3d a4, BND_Vector3d a5) { return BND_Transform::Rotation(a0, a1, a2, a3, a4, a5); }))
       .class_function("mirror", optional_override([](BND_Point3d a0, BND_Vector3d a1) { return BND_Transform::Mirror(a0, a1); }))
@@ -1266,8 +1268,8 @@ void initGenTransform(void)
       .class_function("shear", optional_override([](BND_Plane a0, BND_Vector3d a1, BND_Vector3d a2, BND_Vector3d a3) { return BND_Transform::Shear(a0, a1, a2, a3); }))
       .class_function("equals", optional_override([](BND_Transform a0, BND_Transform a1) { return a0 == a1; }))
       .class_function("multiply", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "M00,M01,M02,M03,M10,M11,M12,M13,M20,M21,M22,M23,M30,M31,M32,M33") && RH3DM_JsHasFields(v1, "M00,M01,M02,M03,M10,M11,M12,M13,M20,M21,M22,M23,M30,M31,M32,M33")) { BND_Transform a0 = v0.as<BND_Transform>(); BND_Transform a1 = v1.as<BND_Transform>(); return emscripten::val([&]() { return a0 * a1; }()); }
-        if (RH3DM_JsHasFields(v0, "M00,M01,M02,M03,M10,M11,M12,M13,M20,M21,M22,M23,M30,M31,M32,M33") && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) { BND_Transform a0 = v0.as<BND_Transform>(); BND_Point3d a1 = v1.as<BND_Point3d>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if (RH3DM_JsHasFields(v0, "M00,M01,M02,M03,M10,M11,M12,M13,M20,M21,M22,M23,M30,M31,M32,M33") && RH3DM_JsHasFields(v1, "M00,M01,M02,M03,M10,M11,M12,M13,M20,M21,M22,M23,M30,M31,M32,M33")) { BND_Transform a0 = RH3DM_JsAs<BND_Transform>(v0); BND_Transform a1 = RH3DM_JsAs<BND_Transform>(v1); return RH3DM_JsVal([&]() { return a0 * a1; }()); }
+        if (RH3DM_JsHasFields(v0, "M00,M01,M02,M03,M10,M11,M12,M13,M20,M21,M22,M23,M30,M31,M32,M33") && RH3DM_JsHasFields(v1, "Z#")) { BND_Transform a0 = RH3DM_JsAs<BND_Transform>(v0); BND_Point3d a1 = RH3DM_JsAs<BND_Point3d>(v1); return RH3DM_JsVal([&]() { return a0 * a1; }()); }
         throw std::invalid_argument("Transform.multiply: no overload matches the arguments"); }))
       .class_function("isIdentity", optional_override([](BND_Transform a0) { return a0.IsIdentity(); }))
       .class_function("isValid", optional_override([](BND_Transform a0) { return a0.IsValid(); }))
@@ -1288,8 +1290,8 @@ void initGenTransform(void)
       .class_function("decomposeAffine", optional_override([](BND_Transform a0) { BND_Transform linear{}; BND_Vector3d translation{}; auto r = a0.DecomposeAffine(linear, translation); emscripten::val arr = emscripten::val::array(); arr.call<void>("push", r); arr.call<void>("push", linear); arr.call<void>("push", translation); return arr; }))
       .class_function("decomposeAffineFull", optional_override([](BND_Transform a0) { BND_Vector3d translation{}; BND_Transform rotation{}; BND_Transform orthogonal{}; BND_Vector3d diagonal{}; auto r = a0.DecomposeAffine(translation, rotation, orthogonal, diagonal); emscripten::val arr = emscripten::val::array(); arr.call<void>("push", r); arr.call<void>("push", translation); arr.call<void>("push", rotation); arr.call<void>("push", orthogonal); arr.call<void>("push", diagonal); return arr; }))
       .class_function("isRotation", optional_override([](BND_Transform a0) { return a0.IsRotation(); }))
-      .class_function("affineize", optional_override([](emscripten::val v0) { BND_Transform a0 = v0.as<BND_Transform>(); a0.Affineize(); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
-      .class_function("linearize", optional_override([](emscripten::val v0) { BND_Transform a0 = v0.as<BND_Transform>(); a0.Linearize(); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("affineize", optional_override([](emscripten::val v0) { BND_Transform a0 = RH3DM_JsAs<BND_Transform>(v0); a0.Affineize(); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("linearize", optional_override([](emscripten::val v0) { BND_Transform a0 = RH3DM_JsAs<BND_Transform>(v0); a0.Linearize(); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("orthogonalize", optional_override([](BND_Transform a0, double a1) { return a0.Orthogonalize(a1); }))
       .class_function("decomposeSymmetric", optional_override([](BND_Transform a0) { BND_Transform matrix{}; BND_Vector3d diagonal{}; auto r = a0.DecomposeSymmetric(matrix, diagonal); emscripten::val arr = emscripten::val::array(); arr.call<void>("push", r); arr.call<void>("push", matrix); arr.call<void>("push", diagonal); return arr; }))
       .class_function("determinant", optional_override([](BND_Transform a0) { return a0.Determinant(); }))

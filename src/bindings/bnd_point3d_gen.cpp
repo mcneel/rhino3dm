@@ -575,6 +575,8 @@ using namespace emscripten;
 struct RH3DM_Point3dFns {};
 void initGenPoint3d(void)
 {
+  static_assert(sizeof(BND_Point3d) == 24 && offsetof(BND_Point3d, m_x) == 0 && offsetof(BND_Point3d, m_y) == 8 && offsetof(BND_Point3d, m_z) == 16,
+                "BND_Point3d: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_Point3d>("Point3dValue")
       .field("X", &BND_Point3d::m_x)
       .field("Y", &BND_Point3d::m_y)
@@ -583,20 +585,20 @@ void initGenPoint3d(void)
       .class_function("create", optional_override([]() { return BND_Point3d(); }))
       .class_function("create", optional_override([](double a0, double a1, double a2) { return BND_Point3d(a0, a1, a2); }))
       .class_function("create", optional_override([](emscripten::val v0) -> emscripten::val {
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber())) { BND_Vector3d a0 = v0.as<BND_Vector3d>(); return emscripten::val([&]() { return BND_Point3d(a0); }()); }
-        if (RH3DM_JsHasFields(v0, "X,Y,Z")) { BND_Point3f a0 = v0.as<BND_Point3f>(); return emscripten::val([&]() { return BND_Point3d(a0); }()); }
-        if (RH3DM_JsHasFields(v0, "X,Y,Z,W")) { BND_Point4d a0 = v0.as<BND_Point4d>(); return emscripten::val([&]() { return BND_Point3d(a0); }()); }
+        if (RH3DM_JsHasFields(v0, "Z#")) { BND_Vector3d a0 = RH3DM_JsAs<BND_Vector3d>(v0); return RH3DM_JsVal([&]() { return BND_Point3d(a0); }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y,Z")) { BND_Point3f a0 = RH3DM_JsAs<BND_Point3f>(v0); return RH3DM_JsVal([&]() { return BND_Point3d(a0); }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y,Z,W")) { BND_Point4d a0 = RH3DM_JsAs<BND_Point4d>(v0); return RH3DM_JsVal([&]() { return BND_Point3d(a0); }()); }
         throw std::invalid_argument("Point3d.create: no overload matches the arguments"); }))
       .class_function("origin", optional_override([]() { return BND_Point3d::Origin(); }))
       .class_function("unset", optional_override([]() { return BND_Point3d::Unset(); }))
       .class_function("multiply", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && v1.isNumber()) { BND_Point3d a0 = v0.as<BND_Point3d>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return a0 * a1; }()); }
-        if (v0.isNumber() && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) { double a0 = v0.as<double>(); BND_Point3d a1 = v1.as<BND_Point3d>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if (RH3DM_JsHasFields(v0, "Z#") && v1.isNumber()) { BND_Point3d a0 = RH3DM_JsAs<BND_Point3d>(v0); double a1 = RH3DM_JsAs<double>(v1); return RH3DM_JsVal([&]() { return a0 * a1; }()); }
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "Z#")) { double a0 = RH3DM_JsAs<double>(v0); BND_Point3d a1 = RH3DM_JsAs<BND_Point3d>(v1); return RH3DM_JsVal([&]() { return a0 * a1; }()); }
         throw std::invalid_argument("Point3d.multiply: no overload matches the arguments"); }))
       .class_function("divide", optional_override([](BND_Point3d a0, double a1) { return a0 / a1; }))
       .class_function("add", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) { BND_Point3d a0 = v0.as<BND_Point3d>(); BND_Point3d a1 = v1.as<BND_Point3d>(); return emscripten::val([&]() { return a0 + a1; }()); }
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && RH3DM_JsHasFields(v1, "X,Y,Z")) { BND_Point3d a0 = v0.as<BND_Point3d>(); BND_Vector3f a1 = v1.as<BND_Vector3f>(); return emscripten::val([&]() { return a0 + a1; }()); }
+        if (RH3DM_JsHasFields(v0, "Z#") && RH3DM_JsHasFields(v1, "Z#")) { BND_Point3d a0 = RH3DM_JsAs<BND_Point3d>(v0); BND_Point3d a1 = RH3DM_JsAs<BND_Point3d>(v1); return RH3DM_JsVal([&]() { return a0 + a1; }()); }
+        if (RH3DM_JsHasFields(v0, "Z#") && RH3DM_JsHasFields(v1, "X,Y,Z")) { BND_Point3d a0 = RH3DM_JsAs<BND_Point3d>(v0); BND_Vector3f a1 = RH3DM_JsAs<BND_Vector3f>(v1); return RH3DM_JsVal([&]() { return a0 + a1; }()); }
         throw std::invalid_argument("Point3d.add: no overload matches the arguments"); }))
       .class_function("subtract", optional_override([](BND_Point3d a0, BND_Vector3d a1) { return a0 - a1; }))
       .class_function("negate", optional_override([](BND_Point3d a0) { return -a0; }))
@@ -607,11 +609,11 @@ void initGenPoint3d(void)
       .class_function("maximumCoordinate", optional_override([](BND_Point3d a0) { return a0.MaximumCoordinate(); }))
       .class_function("epsilonEquals", optional_override([](BND_Point3d a0, BND_Point3d a1, double a2) { return a0.EpsilonEquals(a1, a2); }))
       .class_function("compareTo", optional_override([](BND_Point3d a0, BND_Point3d a1) { return a0.CompareTo(a1); }))
-      .class_function("interpolate", optional_override([](emscripten::val v0, BND_Point3d a1, BND_Point3d a2, double a3) { BND_Point3d a0 = v0.as<BND_Point3d>(); a0.Interpolate(a1, a2, a3); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("interpolate", optional_override([](emscripten::val v0, BND_Point3d a1, BND_Point3d a2, double a3) { BND_Point3d a0 = RH3DM_JsAs<BND_Point3d>(v0); a0.Interpolate(a1, a2, a3); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("ToString", optional_override([](BND_Point3d a0) { return a0.ToString(); }))
       .class_function("distanceTo", optional_override([](BND_Point3d a0, BND_Point3d a1) { return a0.DistanceTo(a1); }))
       .class_function("distanceToSquared", optional_override([](BND_Point3d a0, BND_Point3d a1) { return a0.DistanceToSquared(a1); }))
-      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Point3d a0 = v0.as<BND_Point3d>(); a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Point3d a0 = RH3DM_JsAs<BND_Point3d>(v0); a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("encode", &BND_Point3d_Encode, allow_raw_pointers());
 }
 #endif

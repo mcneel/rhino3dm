@@ -389,9 +389,9 @@ void initGenBrep(void)
       .function("append", &BND_Brep::Gen_Append)
       .function("compact", &BND_Brep::Gen_Compact)
       .class_function("createFromBox", optional_override([](emscripten::val v0) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "Plane,X,Y,Z")) return emscripten::val(BND_Brep::Gen_CreateFromBox_3(v0.as<BND_Box>()), emscripten::allow_raw_pointers());
-        if (RH3DM_JsHasFields(v0, "Min,Max")) return emscripten::val(BND_Brep::Gen_CreateFromBox(v0.as<BND_BoundingBox>()), emscripten::allow_raw_pointers());
-        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber())))) return emscripten::val(BND_Brep::Gen_CreateFromBox_2(RH3DM_JsSeq<BND_Point3d>(v0)), emscripten::allow_raw_pointers());
+        if (RH3DM_JsHasFields(v0, "Plane,X,Y,Z")) return emscripten::val(BND_Brep::Gen_CreateFromBox_3(RH3DM_JsAs<BND_Box>(v0)), emscripten::allow_raw_pointers());
+        if (RH3DM_JsHasFields(v0, "Min,Max")) return emscripten::val(BND_Brep::Gen_CreateFromBox(RH3DM_JsAs<BND_BoundingBox>(v0)), emscripten::allow_raw_pointers());
+        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "Z#")))) return emscripten::val(BND_Brep::Gen_CreateFromBox_2(RH3DM_JsSeq<BND_Point3d>(v0)), emscripten::allow_raw_pointers());
         throw std::invalid_argument("Brep.createFromBox: no overload matches the arguments"); }), allow_raw_pointers())
       .class_function("createFromCone", &BND_Brep::Gen_CreateFromCone, allow_raw_pointers())
       .class_function("createFromCylinder", &BND_Brep::Gen_CreateFromCylinder, allow_raw_pointers())
@@ -423,8 +423,8 @@ void initGenBrep(void)
       .function("standardize", &BND_Brep::Gen_Standardize)
       .function("setTolerancesBoxesAndFlags", &BND_Brep::Gen_SetTolerancesBoxesAndFlags_2)
       .class_function("createTrimmedPlane", optional_override([](emscripten::val v0, emscripten::val v1) -> BND_Brep* {
-        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis") && RH3DM_JsIsSeq(v1)) return BND_Brep::Gen_CreateTrimmedPlane(v0.as<BND_Plane>(), RH3DM_JsSeqPtr<BND_Curve>(v1));
-        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis") && v1.instanceof(emscripten::val::module_property("Curve"))) return BND_Brep::Gen_CreateTrimmedPlane_2(v0.as<BND_Plane>(), *v1.as<BND_Curve*>(emscripten::allow_raw_pointers()));
+        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis") && RH3DM_JsIsSeq(v1)) return BND_Brep::Gen_CreateTrimmedPlane(RH3DM_JsAs<BND_Plane>(v0), RH3DM_JsSeqPtr<BND_Curve>(v1));
+        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis") && v1.instanceof(emscripten::val::module_property("Curve"))) return BND_Brep::Gen_CreateTrimmedPlane_2(RH3DM_JsAs<BND_Plane>(v0), *v1.as<BND_Curve*>(emscripten::allow_raw_pointers()));
         throw std::invalid_argument("Brep.createTrimmedPlane: no overload matches the arguments"); }), allow_raw_pointers())
       .function("duplicateBrep", &BND_Brep::Gen_DuplicateBrep, allow_raw_pointers())
       .function("duplicateSubBrep", optional_override([](BND_Brep& self, emscripten::val a0) -> BND_Brep* { return self.Gen_DuplicateSubBrep(RH3DM_JsSeq<int>(a0)); }), allow_raw_pointers())

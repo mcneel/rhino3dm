@@ -451,7 +451,7 @@ void initGenSurface(void)
       .function("isCylinder", &BND_Surface::Gen_IsCylinder)
       .function("isExtrusion", &BND_Surface::Gen_IsExtrusion)
       .function("isIsoparametric", optional_override([](BND_Surface& self, emscripten::val v0) -> RH3DM_IsoStatus {
-        if (RH3DM_JsHasFields(v0, "Min,Max")) return self.Gen_IsIsoparametric(v0.as<BND_BoundingBox>());
+        if (RH3DM_JsHasFields(v0, "Min,Max")) return self.Gen_IsIsoparametric(RH3DM_JsAs<BND_BoundingBox>(v0));
         if ((v0.isNull() || v0.instanceof(emscripten::val::module_property("Curve")))) return self.Gen_IsIsoparametric_3((v0.isNull() ? nullptr : v0.as<BND_Curve*>(emscripten::allow_raw_pointers())));
         throw std::invalid_argument("Surface.isIsoparametric: no overload matches the arguments"); }), allow_raw_pointers())
       .function("isIsoparametric", &BND_Surface::Gen_IsIsoparametric_2, allow_raw_pointers())

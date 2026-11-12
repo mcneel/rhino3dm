@@ -707,8 +707,8 @@ void initGenObjectAttributes(void)
       .function("removeFromGroup", &BND_ObjectAttributes::Gen_RemoveFromGroup)
       .function("removeHideInDetailOverride", &BND_ObjectAttributes::Gen_RemoveHideInDetailOverride)
       .function("setObjectFrame", optional_override([](BND_ObjectAttributes& self, emscripten::val v0) -> void {
-        if (RH3DM_JsHasFields(v0, "M00,M01,M02,M03,M10,M11,M12,M13,M20,M21,M22,M23,M30,M31,M32,M33")) { self.Gen_SetObjectFrame(v0.as<BND_Transform>()); return; }
-        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis")) { self.Gen_SetObjectFrame_2(v0.as<BND_Plane>()); return; }
+        if (RH3DM_JsHasFields(v0, "M00,M01,M02,M03,M10,M11,M12,M13,M20,M21,M22,M23,M30,M31,M32,M33")) { self.Gen_SetObjectFrame(RH3DM_JsAs<BND_Transform>(v0)); return; }
+        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis")) { self.Gen_SetObjectFrame_2(RH3DM_JsAs<BND_Plane>(v0)); return; }
         throw std::invalid_argument("ObjectAttributes.setObjectFrame: no overload matches the arguments"); }), allow_raw_pointers())
       .function("setUserString", &BND_ObjectAttributes::Gen_SetUserString)
       .function("transform", &BND_ObjectAttributes::Gen_Transform)

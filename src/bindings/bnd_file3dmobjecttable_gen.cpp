@@ -557,7 +557,7 @@ void initGenFile3dmObjectTable(void)
       .function("addExtrusion", &BND_File3dmObjectTable::Gen_AddExtrusion, allow_raw_pointers())
       .function("addHatch", &BND_File3dmObjectTable::Gen_AddHatch, allow_raw_pointers())
       .function("addInstanceObject", optional_override([](BND_File3dmObjectTable& self, emscripten::val v0, emscripten::val v1) -> BND_UUID {
-        if (v0.isNumber() && RH3DM_JsHasFields(v1, "M00,M01,M02,M03,M10,M11,M12,M13,M20,M21,M22,M23,M30,M31,M32,M33")) return self.Gen_AddInstanceObject_4(v0.as<int>(), v1.as<BND_Transform>());
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "M00,M01,M02,M03,M10,M11,M12,M13,M20,M21,M22,M23,M30,M31,M32,M33")) return self.Gen_AddInstanceObject_4(v0.as<int>(), RH3DM_JsAs<BND_Transform>(v1));
         if (v0.instanceof(emscripten::val::module_property("InstanceReferenceGeometry")) && (v1.isNull() || v1.instanceof(emscripten::val::module_property("ObjectAttributes")))) return self.Gen_AddInstanceObject(*v0.as<BND_InstanceReferenceGeometry*>(emscripten::allow_raw_pointers()), (v1.isNull() ? nullptr : v1.as<BND_ObjectAttributes*>(emscripten::allow_raw_pointers())));
         throw std::invalid_argument("File3dmObjectTable.addInstanceObject: no overload matches the arguments"); }), allow_raw_pointers())
       .function("addInstanceObject", &BND_File3dmObjectTable::Gen_AddInstanceObject_2, allow_raw_pointers())
@@ -566,10 +566,10 @@ void initGenFile3dmObjectTable(void)
       .function("addMesh", &BND_File3dmObjectTable::Gen_AddMesh, allow_raw_pointers())
       .function("addOrdinateDimension", &BND_File3dmObjectTable::Gen_AddOrdinateDimension, allow_raw_pointers())
       .function("addPoint", optional_override([](BND_File3dmObjectTable& self, emscripten::val v0, emscripten::val v1) -> BND_UUID {
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && (v1.isNull() || v1.instanceof(emscripten::val::module_property("ObjectAttributes")))) return self.Gen_AddPoint(v0.as<BND_Point3d>(), (v1.isNull() ? nullptr : v1.as<BND_ObjectAttributes*>(emscripten::allow_raw_pointers())));
+        if (RH3DM_JsHasFields(v0, "Z#") && (v1.isNull() || v1.instanceof(emscripten::val::module_property("ObjectAttributes")))) return self.Gen_AddPoint(RH3DM_JsAs<BND_Point3d>(v0), (v1.isNull() ? nullptr : v1.as<BND_ObjectAttributes*>(emscripten::allow_raw_pointers())));
         throw std::invalid_argument("File3dmObjectTable.addPoint: no overload matches the arguments"); }), allow_raw_pointers())
       .function("addPointCloud", optional_override([](BND_File3dmObjectTable& self, emscripten::val v0, emscripten::val v1) -> BND_UUID {
-        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber()))) && (v1.isNull() || v1.instanceof(emscripten::val::module_property("ObjectAttributes")))) return self.Gen_AddPointCloud(RH3DM_JsSeq<BND_Point3d>(v0), (v1.isNull() ? nullptr : v1.as<BND_ObjectAttributes*>(emscripten::allow_raw_pointers())));
+        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "Z#"))) && (v1.isNull() || v1.instanceof(emscripten::val::module_property("ObjectAttributes")))) return self.Gen_AddPointCloud(RH3DM_JsSeq<BND_Point3d>(v0), (v1.isNull() ? nullptr : v1.as<BND_ObjectAttributes*>(emscripten::allow_raw_pointers())));
         if (v0.instanceof(emscripten::val::module_property("PointCloud")) && (v1.isNull() || v1.instanceof(emscripten::val::module_property("ObjectAttributes")))) return self.Gen_AddPointCloud_2(*v0.as<BND_PointCloud*>(emscripten::allow_raw_pointers()), (v1.isNull() ? nullptr : v1.as<BND_ObjectAttributes*>(emscripten::allow_raw_pointers())));
         throw std::invalid_argument("File3dmObjectTable.addPointCloud: no overload matches the arguments"); }), allow_raw_pointers())
       .function("addPolyline", optional_override([](BND_File3dmObjectTable& self, emscripten::val a0, const BND_ObjectAttributes* a1) -> BND_UUID { return self.Gen_AddPolyline(RH3DM_JsSeq<BND_Point3d>(a0), a1); }), allow_raw_pointers())
@@ -578,7 +578,7 @@ void initGenFile3dmObjectTable(void)
       .function("addSubD", &BND_File3dmObjectTable::Gen_AddSubD, allow_raw_pointers())
       .function("addSurface", &BND_File3dmObjectTable::Gen_AddSurface, allow_raw_pointers())
       .function("addTextDot", optional_override([](BND_File3dmObjectTable& self, emscripten::val v0, emscripten::val v1) -> BND_UUID {
-        if ((v0.typeOf().as<std::string>() == "string") && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) return self.Gen_AddTextDot_3(v0.as<std::wstring>(), v1.as<BND_Point3d>());
+        if ((v0.typeOf().as<std::string>() == "string") && RH3DM_JsHasFields(v1, "Z#")) return self.Gen_AddTextDot_3(v0.as<std::wstring>(), RH3DM_JsAs<BND_Point3d>(v1));
         if (v0.instanceof(emscripten::val::module_property("TextDot")) && (v1.isNull() || v1.instanceof(emscripten::val::module_property("ObjectAttributes")))) return self.Gen_AddTextDot(*v0.as<BND_TextDot*>(emscripten::allow_raw_pointers()), (v1.isNull() ? nullptr : v1.as<BND_ObjectAttributes*>(emscripten::allow_raw_pointers())));
         throw std::invalid_argument("File3dmObjectTable.addTextDot: no overload matches the arguments"); }), allow_raw_pointers())
       .function("delete", optional_override([](BND_File3dmObjectTable& self, emscripten::val v0) -> emscripten::val {
@@ -590,8 +590,8 @@ void initGenFile3dmObjectTable(void)
       .function("findId", &BND_File3dmObjectTable::Gen_FindId, allow_raw_pointers())
       .function("getBoundingBox", &BND_File3dmObjectTable::Gen_GetBoundingBox)
       .function("addLine", optional_override([](BND_File3dmObjectTable& self, emscripten::val v0, emscripten::val v1) -> BND_UUID {
-        if (RH3DM_JsHasFields(v0, "From,To") && (v1.isNull() || v1.instanceof(emscripten::val::module_property("ObjectAttributes")))) return self.Gen_AddLine_2(v0.as<BND_Line>(), (v1.isNull() ? nullptr : v1.as<BND_ObjectAttributes*>(emscripten::allow_raw_pointers())));
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) return self.Gen_AddLine_3(v0.as<BND_Point3d>(), v1.as<BND_Point3d>());
+        if (RH3DM_JsHasFields(v0, "From,To") && (v1.isNull() || v1.instanceof(emscripten::val::module_property("ObjectAttributes")))) return self.Gen_AddLine_2(RH3DM_JsAs<BND_Line>(v0), (v1.isNull() ? nullptr : v1.as<BND_ObjectAttributes*>(emscripten::allow_raw_pointers())));
+        if (RH3DM_JsHasFields(v0, "Z#") && RH3DM_JsHasFields(v1, "Z#")) return self.Gen_AddLine_3(RH3DM_JsAs<BND_Point3d>(v0), RH3DM_JsAs<BND_Point3d>(v1));
         throw std::invalid_argument("File3dmObjectTable.addLine: no overload matches the arguments"); }), allow_raw_pointers())
       .function("add", &BND_File3dmObjectTable::Gen_Add_2, allow_raw_pointers())
       .function("addAngularDimension", &BND_File3dmObjectTable::Gen_AddAngularDimension_2)
@@ -608,11 +608,11 @@ void initGenFile3dmObjectTable(void)
       .function("addMesh", &BND_File3dmObjectTable::Gen_AddMesh_2)
       .function("addOrdinateDimension", &BND_File3dmObjectTable::Gen_AddOrdinateDimension_2)
       .function("addPoint", optional_override([](BND_File3dmObjectTable& self, emscripten::val v0) -> BND_UUID {
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber())) return self.Gen_AddPoint_2(v0.as<BND_Point3d>());
+        if (RH3DM_JsHasFields(v0, "Z#")) return self.Gen_AddPoint_2(RH3DM_JsAs<BND_Point3d>(v0));
         throw std::invalid_argument("File3dmObjectTable.addPoint: no overload matches the arguments"); }), allow_raw_pointers())
       .function("addPoint", &BND_File3dmObjectTable::Gen_AddPoint_5)
       .function("addPointCloud", optional_override([](BND_File3dmObjectTable& self, emscripten::val v0) -> BND_UUID {
-        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber())))) return self.Gen_AddPointCloud_3(RH3DM_JsSeq<BND_Point3d>(v0));
+        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "Z#")))) return self.Gen_AddPointCloud_3(RH3DM_JsSeq<BND_Point3d>(v0));
         if (v0.instanceof(emscripten::val::module_property("PointCloud"))) return self.Gen_AddPointCloud_4(*v0.as<BND_PointCloud*>(emscripten::allow_raw_pointers()));
         throw std::invalid_argument("File3dmObjectTable.addPointCloud: no overload matches the arguments"); }), allow_raw_pointers())
       .function("addPolyline", optional_override([](BND_File3dmObjectTable& self, emscripten::val a0) -> BND_UUID { return self.Gen_AddPolyline_2(RH3DM_JsSeq<BND_Point3d>(a0)); }), allow_raw_pointers())
