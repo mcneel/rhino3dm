@@ -534,12 +534,12 @@ void initGenFile3dm(void)
       .class_function("readNotes", &BND_File3dm::Gen_ReadNotes)
       .class_function("readSettings", &BND_File3dm::Gen_ReadSettings, allow_raw_pointers())
       .function("write", optional_override([](BND_File3dm& self, emscripten::val v0, emscripten::val v1) -> bool {
-        if ((v0.typeOf().as<std::string>() == "string") && (v1.isNull() || v1.instanceof(emscripten::val::module_property("File3dmWriteOptions")))) return self.Gen_Write(v0.as<std::wstring>(), (v1.isNull() ? nullptr : v1.as<BND_File3dmWriteOptions*>(emscripten::allow_raw_pointers())));
-        if ((v0.typeOf().as<std::string>() == "string") && v1.isNumber()) return self.Gen_Write_2(v0.as<std::wstring>(), v1.as<int>());
+        if (v0.isString() && (v1.isNull() || v1.instanceof(emscripten::val::module_property("File3dmWriteOptions")))) return self.Gen_Write(v0.as<std::wstring>(), (v1.isNull() ? nullptr : v1.as<BND_File3dmWriteOptions*>(emscripten::allow_raw_pointers())));
+        if (v0.isString() && v1.isNumber()) return self.Gen_Write_2(v0.as<std::wstring>(), v1.as<int>());
         throw std::invalid_argument("File3dm.write: no overload matches the arguments"); }), allow_raw_pointers())
       .function("writeWithLog", optional_override([](BND_File3dm& self, emscripten::val v0, emscripten::val v1) -> BND_TUPLE {
-        if ((v0.typeOf().as<std::string>() == "string") && (v1.isNull() || v1.instanceof(emscripten::val::module_property("File3dmWriteOptions")))) return self.Gen_WriteWithLog(v0.as<std::wstring>(), (v1.isNull() ? nullptr : v1.as<BND_File3dmWriteOptions*>(emscripten::allow_raw_pointers())));
-        if ((v0.typeOf().as<std::string>() == "string") && v1.isNumber()) return self.Gen_WriteWithLog_2(v0.as<std::wstring>(), v1.as<int>());
+        if (v0.isString() && (v1.isNull() || v1.instanceof(emscripten::val::module_property("File3dmWriteOptions")))) return self.Gen_WriteWithLog(v0.as<std::wstring>(), (v1.isNull() ? nullptr : v1.as<BND_File3dmWriteOptions*>(emscripten::allow_raw_pointers())));
+        if (v0.isString() && v1.isNumber()) return self.Gen_WriteWithLog_2(v0.as<std::wstring>(), v1.as<int>());
         throw std::invalid_argument("File3dm.writeWithLog: no overload matches the arguments"); }), allow_raw_pointers())
       .function("polish", &BND_File3dm::Gen_Polish)
       .function("toByteArray", optional_override([](BND_File3dm& self, const BND_File3dmWriteOptions* a0) -> emscripten::val { return RH3DM_JsBytesOut(self.Gen_ToByteArray(a0)); }), allow_raw_pointers())

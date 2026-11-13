@@ -61,12 +61,6 @@ void initGenSubDEdgeList(void)
       .function("find", &BND_SubDEdgeList::Gen_Find, allow_raw_pointers())
       .function("iterator", &BND_SubDEdgeList::Gen_iter, allow_raw_pointers());
   class_<BND_SubDEdgeListIter>("SubDEdgeListIter")
-      .function("next", optional_override([](BND_SubDEdgeListIter& it) -> emscripten::val {
-        emscripten::val r = emscripten::val::object();
-        class BND_SubDEdge* p = it.Gen_next();
-        r.set("done", p == nullptr);
-        if (p) r.set("value", emscripten::val(p, emscripten::allow_raw_pointers()));
-        return r;
-      }), allow_raw_pointers());
+      .function("next", &BND_SubDEdgeListIter::Gen_next, allow_raw_pointers());
 }
 #endif

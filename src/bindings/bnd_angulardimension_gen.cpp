@@ -233,7 +233,7 @@ void initGenAngularDimension(void)
       .constructor<>()
       .constructor(optional_override([](emscripten::val v0, emscripten::val v1, emscripten::val v2, emscripten::val v3, emscripten::val v4, emscripten::val v5) -> BND_AngularDimension* {
         if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis") && RH3DM_JsHasFields(v1, "Z#") && RH3DM_JsHasFields(v2, "Z#") && RH3DM_JsHasFields(v3, "Z#") && RH3DM_JsHasFields(v4, "Z#") && RH3DM_JsHasFields(v5, "Z#")) return new BND_AngularDimension(RH3DM_JsAs<BND_Plane>(v0), RH3DM_JsAs<BND_Vector3d>(v1), RH3DM_JsAs<BND_Point3d>(v2), RH3DM_JsAs<BND_Point3d>(v3), RH3DM_JsAs<BND_Point3d>(v4), RH3DM_JsAs<BND_Point3d>(v5));
-        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "Z#") && RH3DM_JsHasFields(v2, "From,To") && RH3DM_JsHasFields(v3, "Z#") && RH3DM_JsHasFields(v4, "Z#") && (v5.typeOf().as<std::string>() == "boolean")) return new BND_AngularDimension(RH3DM_JsAs<BND_Line>(v0), RH3DM_JsAs<BND_Point3d>(v1), RH3DM_JsAs<BND_Line>(v2), RH3DM_JsAs<BND_Point3d>(v3), RH3DM_JsAs<BND_Point3d>(v4), v5.as<bool>());
+        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "Z#") && RH3DM_JsHasFields(v2, "From,To") && RH3DM_JsHasFields(v3, "Z#") && RH3DM_JsHasFields(v4, "Z#") && (v5.isTrue() || v5.isFalse())) return new BND_AngularDimension(RH3DM_JsAs<BND_Line>(v0), RH3DM_JsAs<BND_Point3d>(v1), RH3DM_JsAs<BND_Line>(v2), RH3DM_JsAs<BND_Point3d>(v3), RH3DM_JsAs<BND_Point3d>(v4), v5.isTrue());
         throw std::invalid_argument("AngularDimension: no constructor matches the arguments"); }), allow_raw_pointers())
       .constructor<BND_Plane, BND_Vector3d, BND_Point3d, BND_Point3d, BND_Point3d, BND_Point3d, BND_Point3d>()
       .constructor<BND_Arc, double>()

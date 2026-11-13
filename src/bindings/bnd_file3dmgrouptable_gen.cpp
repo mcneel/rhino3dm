@@ -98,7 +98,7 @@ class BND_Group* BND_File3dmGroupTableIter::Gen_next()
     ON_ModelComponent* p = m_it ? ONX_ModelComponentIterator_GetNext(m_it, &index, &outType, &id) : nullptr;
     if (p) {
       if (outType != types[m_k]) throw std::out_of_range("type");
-      return new BND_Group(m_model, id);
+      return RH3DM_Primed(new BND_Group(m_model, id), p);
     }
     if (m_it) ONX_ModelComponentIterator_Delete(m_it);
     m_it = nullptr;
@@ -164,12 +164,6 @@ void initGenFile3dmGroupTable(void)
       .function("get", &BND_File3dmGroupTable::Gen_FindIndex, allow_raw_pointers())
       .function("iterator", &BND_File3dmGroupTable::Gen_iter, allow_raw_pointers());
   class_<BND_File3dmGroupTableIter>("File3dmGroupTableIter")
-      .function("next", optional_override([](BND_File3dmGroupTableIter& it) -> emscripten::val {
-        emscripten::val r = emscripten::val::object();
-        class BND_Group* p = it.Gen_next();
-        r.set("done", p == nullptr);
-        if (p) r.set("value", emscripten::val(p, emscripten::allow_raw_pointers()));
-        return r;
-      }), allow_raw_pointers());
+      .function("next", &BND_File3dmGroupTableIter::Gen_next, allow_raw_pointers());
 }
 #endif

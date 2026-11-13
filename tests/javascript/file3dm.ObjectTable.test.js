@@ -173,6 +173,23 @@ test('file3dmObjectGeometryOfADeletedObjectRaises', () => {
   helpers.raises(rhino, () => g.pointAtStart, /runtime_error,.*no longer in the File3dm/)
 })
 
+test('file3dmObjectViewsFollowTheFileAsItChanges', () => {
+  // geometry and attributes read before the file changes still read their object after an add, and throw once it is deleted
+  const f = objectTableFileWithLine(rhino)
+  const obj = [...f.objects][0]
+  const g = obj.geometry, a = obj.attributes
+  a.name = 'first'
+  expect(g.pointAtStart.X).toBe(0.0)
+  expect(a.name).toBe('first')
+  f.objects.addPoint(1, 2, 3)
+  expect(g.pointAtStart.X).toBe(0.0)
+  expect(a.name).toBe('first')
+  f.objects.delete(obj.id)
+  expect(f.objects.count).toBe(1)
+  helpers.raises(rhino, () => g.pointAtStart, /runtime_error,.*no longer in the File3dm/)
+  helpers.raises(rhino, () => a.name, /runtime_error,.*no longer in the File3dm/)
+})
+
 test('objectTableAddPolylineAddsACurve', () => {
   // addPolyline adds an object and returns its id; an empty point list adds nothing and returns the empty id
   const P = (x, y, z) => new rhino.Point3d(x, y, z)

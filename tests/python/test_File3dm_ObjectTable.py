@@ -164,6 +164,24 @@ class TestFile3dmObjectTable(unittest.TestCase):
         with self.assertRaises(RuntimeError):                # RhinoCommon's DocumentCollectedException
             g.PointAtStart
 
+    def test_file3dmObjectViewsFollowTheFileAsItChanges(self):
+        """Geometry and Attributes read before the file changes still read their object after an add, and raise once it is deleted."""
+        f = _object_table_file_with_line()
+        obj = next(iter(f.Objects))
+        g, a = obj.Geometry, obj.Attributes
+        a.Name = 'first'
+        self.assertEqual(g.PointAtStart.X, 0.0)
+        self.assertEqual(a.Name, 'first')
+        f.Objects.AddPoint(rhino3dm.Point3d(1, 2, 3))
+        self.assertEqual(g.PointAtStart.X, 0.0)
+        self.assertEqual(a.Name, 'first')
+        f.Objects.Delete(obj.Id)
+        self.assertEqual(f.Objects.Count, 1)
+        with self.assertRaises(RuntimeError):
+            g.PointAtStart
+        with self.assertRaises(RuntimeError):
+            a.Name
+
     def test_objectTableAddPolylineAddsACurve(self):
         """AddPolyline adds an object and returns its id; an empty point list adds nothing and returns the empty id."""
         P = rhino3dm.Point3d

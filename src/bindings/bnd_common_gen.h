@@ -30,6 +30,30 @@
 #endif
 ON_Plane FromPlaneStruct(const ON_PLANE_STRUCT& ps);
 
+// G155: what a File3dm view (file, id) resolved last. RhinoCommon looks the id up on every access;
+// the result is reused here while the file's manifest is unchanged. Adding, removing or renaming a
+// component changes the manifest's version (ON_ComponentManifestImpl::RemoveItem, before
+// ONX_Model::RemoveModelComponent lets the component go), so a view whose object left the file
+// looks again, and throws.
+struct RH3DM_ViewCache {
+  void* p = nullptr;
+  ON__UINT64 ver = 0;
+  template <class F> void* Get(const ONX_Model* model, F resolve) {
+    if (!model) return resolve();
+    const ON__UINT64 v = model->Manifest().ManifestContentVersionNumber();
+    if (p && ver == v) return p;
+    p = resolve();
+    ver = v;
+    return p;
+  }
+  // what a caller resolved already: the first access does not look again
+  void Set(const ONX_Model* model, void* resolved) {
+    p = model ? resolved : nullptr;
+    if (p) ver = model->Manifest().ManifestContentVersionNumber();
+  }
+};
+template <class V, class P> V* RH3DM_Primed(V* view, const P* resolved) { view->RH3DM_Prime(resolved); return view; }
+
 // generated value types (translated RhinoCommon bodies) and the conversions
 // from the C layer's opennurbs values; field-wise, so independent of which
 // C# constructors translated
@@ -888,7 +912,15 @@ inline std::wstring RH3DM_W(const CRhCmnStringHolder& h)
 #if !defined(_WIN32)
   static_assert(sizeof(RHMONO_STRING) == 2, "RHMONO_STRING is UTF-16 outside Windows");
   int n = 0;
-  while (a[n]) n++;
+  bool surrogates = false;
+  for (; a[n]; n++) surrogates = surrogates || (a[n] >= 0xD800 && a[n] <= 0xDFFF);
+  if (!surrogates && sizeof(wchar_t) == 4)
+  {
+    // no pairs to join (nearly every name): each unit is its code point (G156)
+    std::wstring bmp((size_t)n, L' ');
+    for (int i = 0; i < n; i++) bmp[(size_t)i] = (wchar_t)a[i];
+    return bmp;
+  }
   std::wstring out;
   out.resize((size_t)n + 8);
   unsigned int err = 0;
@@ -3240,3 +3272,4 @@ BND_Mesh* RH3DM_Sub_Mesh(ON_Object* (*fn)(void*, int, bool), void* owner, int ke
 BND_Surface* RH3DM_Sub_Surface(ON_Object* (*fn)(void*, int, bool), void* owner, int key, bool cow);
 // views of a File3dmObject's geometry: the most-derived generated class (gen_wrap.cpp)
 BND_GeometryBase* RH3DM_View_GeometryBase(ONX_Model* model, ON_UUID id);
+BND_GeometryBase* RH3DM_View_GeometryBase(ONX_Model* model, ON_UUID id, const ON_Geometry* p);   // p: what (model, id) resolves to

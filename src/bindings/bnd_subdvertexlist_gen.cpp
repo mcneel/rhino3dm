@@ -69,12 +69,6 @@ void initGenSubDVertexList(void)
       .function("find", &BND_SubDVertexList::Gen_Find, allow_raw_pointers())
       .function("iterator", &BND_SubDVertexList::Gen_iter, allow_raw_pointers());
   class_<BND_SubDVertexListIter>("SubDVertexListIter")
-      .function("next", optional_override([](BND_SubDVertexListIter& it) -> emscripten::val {
-        emscripten::val r = emscripten::val::object();
-        class BND_SubDVertex* p = it.Gen_next();
-        r.set("done", p == nullptr);
-        if (p) r.set("value", emscripten::val(p, emscripten::allow_raw_pointers()));
-        return r;
-      }), allow_raw_pointers());
+      .function("next", &BND_SubDVertexListIter::Gen_next, allow_raw_pointers());
 }
 #endif

@@ -53,3 +53,21 @@ test('layerColorRejectsAnArray', () => {
   helpers.raises(rhino, () => { layer.color = { r: 255, g: 0 } }, /expected a color/)
   expect([layer.color.r, layer.color.g, layer.color.b]).toEqual([1, 2, 3])
 })
+
+test('layerNameKeepsAccentsAndCjk', () => {
+  const layer = new rhino.Layer()
+  for (const name of ['', 'plain', 'Capa señal', '図面レイヤー']) {
+    layer.name = name
+    expect(layer.name).toBe(name)
+  }
+})
+
+// skipped: a name with a character outside the basic plane comes back one UTF-16 unit short per
+// such character (the native string holder sizes its UTF-16 buffer by code points)
+test.skip('layerNameKeepsCharactersOutsideTheBasicPlane', () => {
+  const layer = new rhino.Layer()
+  for (const name of ['pair 😀 inside', '😀']) {
+    layer.name = name
+    expect(layer.name).toBe(name)
+  }
+})

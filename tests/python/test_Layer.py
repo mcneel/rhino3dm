@@ -39,6 +39,21 @@ class TestLayer(unittest.TestCase):
         """A layer in no file has its name as FullPath."""
         self.assertEqual(rhino3dm.Layer().FullPath, rhino3dm.Layer().Name)
 
+    def test_layerNameKeepsAccentsAndCjk(self):
+        """Names with accents and CJK characters come back unchanged."""
+        layer = rhino3dm.Layer()
+        for name in ['', 'plain', 'Capa se\u00f1al', '\u56f3\u9762\u30ec\u30a4\u30e4\u30fc']:
+            layer.Name = name
+            self.assertEqual(layer.Name, name)
+
+    @unittest.expectedFailure
+    def test_layerNameKeepsCharactersOutsideTheBasicPlane(self):
+        """A name with a character outside the basic plane comes back unchanged -- it does not: the native string holder sizes its UTF-16 buffer by code points (known, upstream)."""
+        layer = rhino3dm.Layer()
+        for name in ['pair \U0001F600 inside', '\U0001F600']:
+            layer.Name = name
+            self.assertEqual(layer.Name, name)
+
 
 if __name__ == '__main__':
     unittest.main()

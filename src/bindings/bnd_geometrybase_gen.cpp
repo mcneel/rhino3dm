@@ -194,9 +194,9 @@ void initGenGeometryBase(void)
       .function("deleteAllUserStrings", &BND_GeometryBase::Gen_DeleteAllUserStrings)
       .function("duplicate", &BND_GeometryBase::Gen_Duplicate, allow_raw_pointers())
       .function("getBoundingBox", optional_override([](BND_GeometryBase& self, emscripten::val v0) -> emscripten::val {
+        if ((v0.isTrue() || v0.isFalse())) return emscripten::val(self.Gen_GetBoundingBox_4(v0.isTrue()));
         if (RH3DM_JsHasFields(v0, "M00,M01,M02,M03,M10,M11,M12,M13,M20,M21,M22,M23,M30,M31,M32,M33")) return emscripten::val(self.Gen_GetBoundingBox(RH3DM_JsAs<BND_Transform>(v0)));
         if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis")) return emscripten::val(self.Gen_GetBoundingBox_2(RH3DM_JsAs<BND_Plane>(v0)));
-        if ((v0.typeOf().as<std::string>() == "boolean")) return emscripten::val(self.Gen_GetBoundingBox_4(v0.as<bool>()));
         throw std::invalid_argument("GeometryBase.getBoundingBox: no overload matches the arguments"); }), allow_raw_pointers())
       .function("getUserString", &BND_GeometryBase::Gen_GetUserString)
       .function("makeDeformable", &BND_GeometryBase::Gen_MakeDeformable)

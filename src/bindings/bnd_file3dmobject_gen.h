@@ -11,6 +11,7 @@ public:
   mutable ON_ModelGeometryComponent* m_ptr = nullptr;
   ONX_Model* m_model = nullptr;   // a view: the file ...
   ON_UUID m_id = ON_nil_uuid;     // ... and the id it resolves
+  mutable RH3DM_ViewCache m_view;
   explicit BND_File3dmObject(ON_ModelGeometryComponent* owned) : m_ptr(owned) {}
   BND_File3dmObject(ONX_Model* model, ON_UUID id) : m_model(model), m_id(id) {}
   bool RH3DM_IsView() const { return m_ptr == nullptr; }
@@ -20,10 +21,13 @@ public:
   // CommonObject.ConstPointer: a view whose object left the file throws
   ON_ModelGeometryComponent* RH3DM_Const() const {
     if (m_ptr) return m_ptr;
-    ON_ModelGeometryComponent* p = (ON_ModelGeometryComponent*)ONX_Model_ModelObjectGeometryConstPtrFromId(m_model, m_id);
+    ON_ModelGeometryComponent* p = (ON_ModelGeometryComponent*)m_view.Get(m_model, [this]() { return (void*)(ON_ModelGeometryComponent*)ONX_Model_ModelObjectGeometryConstPtrFromId(m_model, m_id); });
     if (!p) throw std::runtime_error("Rhino.FileIO.File3dmObject: the object is no longer in the File3dm");
     return p;
   }
+  // the file's object, or nullptr; and what a caller resolved for (m_model, m_id) already
+  ON_ModelGeometryComponent* RH3DM_ViewPtr() const { return m_model ? (ON_ModelGeometryComponent*)m_view.Get(m_model, [this]() { return (void*)(ON_ModelGeometryComponent*)ONX_Model_ModelObjectGeometryConstPtrFromId(m_model, m_id); }) : nullptr; }
+  template <class P> void RH3DM_Prime(const P* p) const { m_view.Set(m_model, (void*)static_cast<const ON_ModelGeometryComponent*>(p)); }
   // NonConstPointer: copy on write (NonConstOperation -> _InternalDuplicate)
   ON_ModelGeometryComponent* RH3DM_NonConst() const {
     if (!m_ptr) m_ptr = (ON_ModelGeometryComponent*)ON_Object_Duplicate((ON_Object*)RH3DM_Const());   // first write: a private copy, as in .NET

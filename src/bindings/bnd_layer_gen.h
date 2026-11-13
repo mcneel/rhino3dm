@@ -11,6 +11,7 @@ public:
   mutable ON_Layer* m_ptr = nullptr;
   ONX_Model* m_model = nullptr;   // a view: the file ...
   ON_UUID m_id = ON_nil_uuid;     // ... and the id it resolves
+  mutable RH3DM_ViewCache m_view;
   explicit BND_Layer(ON_Layer* owned) : m_ptr(owned) {}
   BND_Layer(ONX_Model* model, ON_UUID id) : m_model(model), m_id(id) {}
   BND_Layer();
@@ -21,13 +22,16 @@ public:
   // CommonObject.ConstPointer: a view whose object left the file throws
   ON_Layer* RH3DM_Const() const {
     if (m_ptr) return m_ptr;
-    ON_Layer* p = (ON_Layer*)ONX_Model_GetModelComponentPointer(m_model, m_id);
+    ON_Layer* p = (ON_Layer*)m_view.Get(m_model, [this]() { return (void*)(ON_Layer*)ONX_Model_GetModelComponentPointer(m_model, m_id); });
     if (!p) throw std::runtime_error("Rhino.DocObjects.Layer: the object is no longer in the File3dm");
     return p;
   }
+  // the file's object, or nullptr; and what a caller resolved for (m_model, m_id) already
+  ON_Layer* RH3DM_ViewPtr() const { return m_model ? (ON_Layer*)m_view.Get(m_model, [this]() { return (void*)(ON_Layer*)ONX_Model_GetModelComponentPointer(m_model, m_id); }) : nullptr; }
+  template <class P> void RH3DM_Prime(const P* p) const { m_view.Set(m_model, (void*)static_cast<const ON_Layer*>(p)); }
   // NonConstPointer: the same object (edits go into the file)
   ON_Layer* RH3DM_NonConst() const {
-    return m_ptr ? m_ptr : (ON_Layer*)ONX_Model_GetModelComponentPointer(m_model, m_id);
+    return m_ptr ? m_ptr : (ON_Layer*)m_view.Get(m_model, [this]() { return (void*)(ON_Layer*)ONX_Model_GetModelComponentPointer(m_model, m_id); });
   }
   ON_ModelComponent* RH3DM_McPtr() const override { return RH3DM_Const(); }
   ON_ModelComponent* RH3DM_McPtrNC() const override { return RH3DM_NonConst(); }

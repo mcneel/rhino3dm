@@ -99,12 +99,6 @@ void initGenPostEffectCollection(void)
       .function("setSelectedPostEffect", &BND_PostEffectCollection::Gen_SetSelectedPostEffect)
       .function("iterator", &BND_PostEffectCollection::Gen_iter, allow_raw_pointers());
   class_<BND_PostEffectCollectionIter>("PostEffectCollectionIter")
-      .function("next", optional_override([](BND_PostEffectCollectionIter& it) -> emscripten::val {
-        emscripten::val r = emscripten::val::object();
-        class BND_PostEffectData* p = it.Gen_next();
-        r.set("done", p == nullptr);
-        if (p) r.set("value", emscripten::val(p, emscripten::allow_raw_pointers()));
-        return r;
-      }), allow_raw_pointers());
+      .function("next", &BND_PostEffectCollectionIter::Gen_next, allow_raw_pointers());
 }
 #endif

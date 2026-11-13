@@ -95,7 +95,7 @@ void initGenFile3dmStringTable(void)
       .function("getKey", &BND_File3dmStringTable::Gen_GetKey)
       .function("getValue", optional_override([](BND_File3dmStringTable& self, emscripten::val v0) -> std::wstring {
         if (v0.isNumber()) return self.Gen_GetValue(v0.as<int>());
-        if ((v0.typeOf().as<std::string>() == "string")) return self.Gen_GetValue_2(v0.as<std::wstring>());
+        if (v0.isString()) return self.Gen_GetValue_2(v0.as<std::wstring>());
         throw std::invalid_argument("File3dmStringTable.getValue: no overload matches the arguments"); }), allow_raw_pointers())
       .function("getValue", &BND_File3dmStringTable::Gen_GetValue_3)
       .function("setString", &BND_File3dmStringTable::Gen_SetString)

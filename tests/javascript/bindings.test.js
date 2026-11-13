@@ -205,3 +205,21 @@ test('valueObjectsCrossAfterTheHeapGrows', () => {
   expect(rhino.Plane.closestPoint(rhino.Plane.worldXY, new rhino.Point3d(4, 5, 6))).toEqual({ X: 4, Y: 5, Z: 0 })
   mesh.delete()
 })
+
+test('tableIteratorFollowsTheIteratorProtocol', () => {
+  // next() yields { done: false, value } per item, then { done: true }; the iterator is its own iterable
+  const f = new rhino.File3dm()
+  f.objects.addPoint(new rhino.Point3d(1, 2, 3), null)
+  f.objects.addPoint(new rhino.Point3d(4, 5, 6), null)
+  const it = f.objects.iterator()
+  expect(it[Symbol.iterator]()).toBe(it)
+  const first = it.next()
+  expect(Object.keys(first).sort()).toEqual(['done', 'value'])
+  expect(first.done).toBe(false)
+  expect(first.value.geometry.location).toEqual({ X: 1, Y: 2, Z: 3 })
+  expect(it.next().value.geometry.location).toEqual({ X: 4, Y: 5, Z: 6 })
+  expect(it.next()).toEqual({ done: true })
+  expect(it.next()).toEqual({ done: true })
+  expect([...f.objects].length).toBe(2)
+  f.delete()
+})

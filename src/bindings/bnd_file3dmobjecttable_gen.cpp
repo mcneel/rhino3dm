@@ -441,7 +441,7 @@ class BND_File3dmObject* BND_File3dmObjectTableIter::Gen_next()
     ON_ModelComponent* p = m_it ? ONX_ModelComponentIterator_GetNext(m_it, &index, &outType, &id) : nullptr;
     if (p) {
       if (outType != types[m_k]) throw std::out_of_range("type");
-      return new BND_File3dmObject(m_model, id);
+      return RH3DM_Primed(new BND_File3dmObject(m_model, id), p);
     }
     if (m_it) ONX_ModelComponentIterator_Delete(m_it);
     m_it = nullptr;
@@ -578,12 +578,12 @@ void initGenFile3dmObjectTable(void)
       .function("addSubD", &BND_File3dmObjectTable::Gen_AddSubD, allow_raw_pointers())
       .function("addSurface", &BND_File3dmObjectTable::Gen_AddSurface, allow_raw_pointers())
       .function("addTextDot", optional_override([](BND_File3dmObjectTable& self, emscripten::val v0, emscripten::val v1) -> BND_UUID {
-        if ((v0.typeOf().as<std::string>() == "string") && RH3DM_JsHasFields(v1, "Z#")) return self.Gen_AddTextDot_3(v0.as<std::wstring>(), RH3DM_JsAs<BND_Point3d>(v1));
+        if (v0.isString() && RH3DM_JsHasFields(v1, "Z#")) return self.Gen_AddTextDot_3(v0.as<std::wstring>(), RH3DM_JsAs<BND_Point3d>(v1));
         if (v0.instanceof(emscripten::val::module_property("TextDot")) && (v1.isNull() || v1.instanceof(emscripten::val::module_property("ObjectAttributes")))) return self.Gen_AddTextDot(*v0.as<BND_TextDot*>(emscripten::allow_raw_pointers()), (v1.isNull() ? nullptr : v1.as<BND_ObjectAttributes*>(emscripten::allow_raw_pointers())));
         throw std::invalid_argument("File3dmObjectTable.addTextDot: no overload matches the arguments"); }), allow_raw_pointers())
       .function("delete", optional_override([](BND_File3dmObjectTable& self, emscripten::val v0) -> emscripten::val {
         if ((v0.isNull() || v0.instanceof(emscripten::val::module_property("File3dmObject")))) return emscripten::val(self.Gen_Delete((v0.isNull() ? nullptr : v0.as<BND_File3dmObject*>(emscripten::allow_raw_pointers()))));
-        if ((v0.typeOf().as<std::string>() == "string")) return emscripten::val(self.Gen_Delete_2(v0.as<BND_UUID>()));
+        if (v0.isString()) return emscripten::val(self.Gen_Delete_2(v0.as<BND_UUID>()));
         if (v0.isNumber()) { self.Gen_Delete_3(v0.as<int>()); return emscripten::val::undefined(); }
         throw std::invalid_argument("File3dmObjectTable.delete: no overload matches the arguments"); }), allow_raw_pointers())
       .function("dump", &BND_File3dmObjectTable::Gen_Dump)
@@ -629,12 +629,6 @@ void initGenFile3dmObjectTable(void)
       .function("addText", &BND_File3dmObjectTable::Gen_AddText_2)
       .function("iterator", &BND_File3dmObjectTable::Gen_iter, allow_raw_pointers());
   class_<BND_File3dmObjectTableIter>("File3dmObjectTableIter")
-      .function("next", optional_override([](BND_File3dmObjectTableIter& it) -> emscripten::val {
-        emscripten::val r = emscripten::val::object();
-        class BND_File3dmObject* p = it.Gen_next();
-        r.set("done", p == nullptr);
-        if (p) r.set("value", emscripten::val(p, emscripten::allow_raw_pointers()));
-        return r;
-      }), allow_raw_pointers());
+      .function("next", &BND_File3dmObjectTableIter::Gen_next, allow_raw_pointers());
 }
 #endif

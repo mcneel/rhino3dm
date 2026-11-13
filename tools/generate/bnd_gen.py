@@ -378,10 +378,15 @@ def js_post_script():
     M.rh3dmPostUnresolved = missing;
     function hold(r, parent) {   // the result keeps its parent alive (a JS reference: GC-safe)
       if (r !== null && typeof r === 'object') {
-        try { Object.defineProperty(r, '__rh3dm_parent', { value: parent, configurable: true }); } catch (e) {}
+        // a class handle: in its embind record (a plain store; defining a property on every
+        // handle cost 0.1 us per result)
+        if (r.$$) r.$$.rh3dmParent = parent;
+        else try { Object.defineProperty(r, '__rh3dm_parent', { value: parent, configurable: true }); } catch (e) {}
       }
       return r;
     }
+    if (typeof ClassHandle !== 'function') missing.push('ClassHandle');
+    else Object.defineProperty(ClassHandle.prototype, '__rh3dm_parent', { get: function () { return this.$$ ? this.$$.rh3dmParent : undefined; }, configurable: true });
     // enum arguments are type-checked (G101, pilot #47; gen_pre.js installs the check as each
     // enum type registers): every enum type must carry it, else it is reported
     if (typeof registeredTypes !== 'object' || registeredTypes === null) missing.push('enum registry');
@@ -468,9 +473,11 @@ def js_post_script():
     ITERS.forEach(function (c) {
       var C = M[c], proto = C && C.prototype, f = proto && proto.next;
       if (typeof f !== 'function') { missing.push('iter ' + c); return; }
-      var w = function () { var r = f.apply(this, arguments); if (r && r.value) hold(r.value, this); return r; };
-      if (f.overloadTable) w.overloadTable = f.overloadTable;
-      proto.next = w;
+      // the registered next returns the item, or null at the end
+      proto.next = function () {
+        var r = f.call(this);
+        return r === null ? { done: true } : { done: false, value: hold(r, this) };
+      };
       proto[Symbol.iterator] = function () { return this; };
     });
     STATIC_PROPS.forEach(function (sp) {
@@ -1045,6 +1052,30 @@ def main():
 #undef RH3DM_GEN_TEMP_DEF
 #endif
 ON_Plane FromPlaneStruct(const ON_PLANE_STRUCT& ps);
+
+// G155: what a File3dm view (file, id) resolved last. RhinoCommon looks the id up on every access;
+// the result is reused here while the file's manifest is unchanged. Adding, removing or renaming a
+// component changes the manifest's version (ON_ComponentManifestImpl::RemoveItem, before
+// ONX_Model::RemoveModelComponent lets the component go), so a view whose object left the file
+// looks again, and throws.
+struct RH3DM_ViewCache {
+  void* p = nullptr;
+  ON__UINT64 ver = 0;
+  template <class F> void* Get(const ONX_Model* model, F resolve) {
+    if (!model) return resolve();
+    const ON__UINT64 v = model->Manifest().ManifestContentVersionNumber();
+    if (p && ver == v) return p;
+    p = resolve();
+    ver = v;
+    return p;
+  }
+  // what a caller resolved already: the first access does not look again
+  void Set(const ONX_Model* model, void* resolved) {
+    p = model ? resolved : nullptr;
+    if (p) ver = model->Manifest().ManifestContentVersionNumber();
+  }
+};
+template <class V, class P> V* RH3DM_Primed(V* view, const P* resolved) { view->RH3DM_Prime(resolved); return view; }
 
 // generated value types (translated RhinoCommon bodies) and the conversions
 // from the C layer's opennurbs values; field-wise, so independent of which
@@ -1836,7 +1867,15 @@ inline std::wstring RH3DM_W(const CRhCmnStringHolder& h)
 #if !defined(_WIN32)
   static_assert(sizeof(RHMONO_STRING) == 2, "RHMONO_STRING is UTF-16 outside Windows");
   int n = 0;
-  while (a[n]) n++;
+  bool surrogates = false;
+  for (; a[n]; n++) surrogates = surrogates || (a[n] >= 0xD800 && a[n] <= 0xDFFF);
+  if (!surrogates && sizeof(wchar_t) == 4)
+  {
+    // no pairs to join (nearly every name): each unit is its code point (G156)
+    std::wstring bmp((size_t)n, L' ');
+    for (int i = 0; i < n; i++) bmp[(size_t)i] = (wchar_t)a[i];
+    return bmp;
+  }
   std::wstring out;
   out.resize((size_t)n + 8);
   unsigned int err = 0;
@@ -1887,8 +1926,10 @@ inline std::vector<RHMONO_STRING> RH3DM_S(const std::wstring& s)
         + '\n'.join('%s* RH3DM_Sub_%s(ON_Object* (*fn)(void*, int, bool), void* owner, int key, bool cow);'
                     % (t['gen'], t['reg']) for t in sub_targets) + '\n' \
         + '// views of a File3dmObject\'s geometry: the most-derived generated class (gen_wrap.cpp)\n' \
-        + '\n'.join('%s* RH3DM_View_%s(ONX_Model* model, ON_UUID id);' % (root['gen'], root['reg'])
-                    for root, _, _ in view_roots) + '\n'
+        + '\n'.join('%s* RH3DM_View_%s(ONX_Model* model, ON_UUID id);\n'
+                    '%s* RH3DM_View_%s(ONX_Model* model, ON_UUID id, const %s* p);   // p: what (model, id) resolves to'
+                    % (root['gen'], root['reg'], root['gen'], root['reg'], r['returns'].replace('const ', '').rstrip('*').strip())
+                    for root, _, r in view_roots) + '\n'
 
     def fname(cls):
         return 'gen_%s' % cls['reg'].lower()
@@ -2061,11 +2102,13 @@ void initGen{reg}(void)
     # RH3DM_View_<root>(model, id): CreateGeometryHelper(ptr, fileObject) -- the
     # most-derived VIEW class of the object's geometry (resolved once to choose)
     for root, viewers, r in view_roots:
+        rt = r['returns'].replace('const ', '').rstrip('*').strip()
         vb = ['%s* RH3DM_View_%s(ONX_Model* model, ON_UUID id)\n{' % (root['gen'], root['reg']),
-              '  const %s* p = %s(model, id);' % (r['returns'].replace('const ', '').rstrip('*').strip(), r['name']),
+              '  return RH3DM_View_%s(model, id, %s(model, id));\n}\n' % (root['reg'], r['name']),
+              '%s* RH3DM_View_%s(ONX_Model* model, ON_UUID id, const %s* p)\n{' % (root['gen'], root['reg'], rt),
               '  if (!p) return nullptr;']
         for d in sorted(viewers, key=lambda d: (-depth(d), d['reg'])):
-            vb.append('  if (%s::Cast(p)) return new %s(model, id);' % (d['on'], d['gen']))
+            vb.append('  if (%s::Cast(p)) return RH3DM_Primed(new %s(model, id), p);' % (d['on'], d['gen']))
         vb.append('  return nullptr;   // a geometry type with no generated class\n}')
         wrap.append('\n'.join(vb))
     # RH3DM_Sub_<T>(fn, owner, key, cow): CreateGeometryHelper on the resolved

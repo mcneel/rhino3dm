@@ -11,6 +11,7 @@ public:
   mutable ON_TextDot* m_ptr = nullptr;
   ONX_Model* m_model = nullptr;   // a view: the file ...
   ON_UUID m_id = ON_nil_uuid;     // ... and the id it resolves
+  mutable RH3DM_ViewCache m_view;
   explicit BND_TextDot(ON_TextDot* owned) : m_ptr(owned) {}
   BND_TextDot(ONX_Model* model, ON_UUID id) : m_model(model), m_id(id) {}
   BND_TextDot(std::wstring text, BND_Point3d location);
@@ -38,10 +39,13 @@ public:
       if (!c) throw std::runtime_error("Rhino.Geometry.TextDot: the component is no longer in its owner");
       return c;
     }
-    ON_TextDot* p = (ON_TextDot*)ONX_Model_ModelObjectGeometry(m_model, m_id);
+    ON_TextDot* p = (ON_TextDot*)m_view.Get(m_model, [this]() { return (void*)(ON_TextDot*)ONX_Model_ModelObjectGeometry(m_model, m_id); });
     if (!p) throw std::runtime_error("Rhino.Geometry.TextDot: the object is no longer in the File3dm");
     return p;
   }
+  // the file's object, or nullptr; and what a caller resolved for (m_model, m_id) already
+  ON_TextDot* RH3DM_ViewPtr() const { return m_model ? (ON_TextDot*)m_view.Get(m_model, [this]() { return (void*)(ON_TextDot*)ONX_Model_ModelObjectGeometry(m_model, m_id); }) : nullptr; }
+  template <class P> void RH3DM_Prime(const P* p) const { m_view.Set(m_model, (void*)static_cast<const ON_TextDot*>(p)); }
   // NonConstPointer: copy on write (NonConstOperation -> _InternalDuplicate)
   ON_TextDot* RH3DM_NonConst() const {
     if (!m_ptr && m_comp && m_comp_cow) {

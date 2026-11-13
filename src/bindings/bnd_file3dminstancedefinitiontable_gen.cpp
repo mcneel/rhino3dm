@@ -168,12 +168,6 @@ void initGenFile3dmInstanceDefinitionTable(void)
       .function("get", &BND_File3dmInstanceDefinitionTable::Gen_FindIndex, allow_raw_pointers())
       .function("iterator", &BND_File3dmInstanceDefinitionTable::Gen_iter, allow_raw_pointers());
   class_<BND_File3dmInstanceDefinitionTableIter>("File3dmInstanceDefinitionTableIter")
-      .function("next", optional_override([](BND_File3dmInstanceDefinitionTableIter& it) -> emscripten::val {
-        emscripten::val r = emscripten::val::object();
-        class BND_InstanceDefinitionGeometry* p = it.Gen_next();
-        r.set("done", p == nullptr);
-        if (p) r.set("value", emscripten::val(p, emscripten::allow_raw_pointers()));
-        return r;
-      }), allow_raw_pointers());
+      .function("next", &BND_File3dmInstanceDefinitionTableIter::Gen_next, allow_raw_pointers());
 }
 #endif

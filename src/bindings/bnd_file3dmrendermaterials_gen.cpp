@@ -72,12 +72,6 @@ void initGenFile3dmRenderMaterials(void)
       .function("iterator", &BND_File3dmRenderMaterials::Gen_iter, allow_raw_pointers())
       .function("find", &BND_File3dmRenderMaterials::Gen_FindId, allow_raw_pointers());
   class_<BND_File3dmRenderMaterialsIter>("File3dmRenderMaterialsIter")
-      .function("next", optional_override([](BND_File3dmRenderMaterialsIter& it) -> emscripten::val {
-        emscripten::val r = emscripten::val::object();
-        class BND_File3dmRenderMaterial* p = it.Gen_next();
-        r.set("done", p == nullptr);
-        if (p) r.set("value", emscripten::val(p, emscripten::allow_raw_pointers()));
-        return r;
-      }), allow_raw_pointers());
+      .function("next", &BND_File3dmRenderMaterialsIter::Gen_next, allow_raw_pointers());
 }
 #endif

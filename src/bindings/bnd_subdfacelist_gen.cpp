@@ -73,12 +73,6 @@ void initGenSubDFaceList(void)
       .function("find", &BND_SubDFaceList::Gen_Find, allow_raw_pointers())
       .function("iterator", &BND_SubDFaceList::Gen_iter, allow_raw_pointers());
   class_<BND_SubDFaceListIter>("SubDFaceListIter")
-      .function("next", optional_override([](BND_SubDFaceListIter& it) -> emscripten::val {
-        emscripten::val r = emscripten::val::object();
-        class BND_SubDFace* p = it.Gen_next();
-        r.set("done", p == nullptr);
-        if (p) r.set("value", emscripten::val(p, emscripten::allow_raw_pointers()));
-        return r;
-      }), allow_raw_pointers());
+      .function("next", &BND_SubDFaceListIter::Gen_next, allow_raw_pointers());
 }
 #endif
