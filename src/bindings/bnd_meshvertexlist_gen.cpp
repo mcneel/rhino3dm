@@ -263,10 +263,10 @@ void initGenMeshVertexList(void)
       .function("toPoint3dArray", &BND_MeshVertexList::Gen_ToPoint3dArray)
       .function("toPoint3fArray", &BND_MeshVertexList::Gen_ToPoint3fArray)
       .function("setVertex", optional_override([](BND_MeshVertexList& self, emscripten::val v0, emscripten::val v1) -> bool {
-        if (v0.isNumber() && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) return self.Gen_SetVertex_3(v0.as<int>(), v1.as<BND_Point3d>());
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "Z#")) return self.Gen_SetVertex_3(v0.as<int>(), RH3DM_JsAs<BND_Point3d>(v1));
         throw std::invalid_argument("MeshVertexList.setVertex: no overload matches the arguments"); }), allow_raw_pointers())
       .function("add", optional_override([](BND_MeshVertexList& self, emscripten::val v0) -> int {
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber())) return self.Gen_Add(v0.as<BND_Point3d>());
+        if (RH3DM_JsHasFields(v0, "Z#")) return self.Gen_Add(RH3DM_JsAs<BND_Point3d>(v0));
         throw std::invalid_argument("MeshVertexList.add: no overload matches the arguments"); }), allow_raw_pointers())
       .function("add", &BND_MeshVertexList::Gen_Add_3)
       .function("addVertices", optional_override([](BND_MeshVertexList& self, emscripten::val a0) -> void { self.Gen_AddVertices(RH3DM_JsSeq<BND_Point3f>(a0)); }), allow_raw_pointers())

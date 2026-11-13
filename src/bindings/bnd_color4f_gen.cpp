@@ -169,6 +169,8 @@ using namespace emscripten;
 struct RH3DM_Color4fFns {};
 void initGenColor4f(void)
 {
+  static_assert(sizeof(BND_Color4f) == 16 && offsetof(BND_Color4f, m_r) == 0 && offsetof(BND_Color4f, m_g) == 4 && offsetof(BND_Color4f, m_b) == 8 && offsetof(BND_Color4f, m_a) == 12,
+                "BND_Color4f: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_Color4f>("Color4fValue")
       .field("R", &BND_Color4f::m_r)
       .field("G", &BND_Color4f::m_g)

@@ -24,6 +24,22 @@ def failthrow_line(ft, call, m):
     return '    if (!(%s)) { %s }' % (call, inner)
 
 
+# the C layer's by-id resolvers that read a member of the model geometry component
+VIEW_VIA_COMPONENT = {'ONX_Model_ModelObjectGeometry': 'Geometry(nullptr)',
+                      'ONX_Model_ModelObjectAttributes': 'Attributes(nullptr)'}
+# the resolvers that return the component itself: an iterator's component is what they find
+VIEW_IS_COMPONENT = ('ONX_Model_GetModelComponentPointer', 'ONX_Model_ModelObjectGeometryConstPtrFromId')
+
+
+def view_resolver(cls):
+    """the by-id resolver of the class holding cls's view state: itself, or the concrete base it extends"""
+    while True:
+        b = BY_REG.get(cls.get('base', ''))
+        if b is None or b['mode'] == 'abstract':
+            return (cls.get('proxy') or {}).get('Resolver')
+        cls = b
+
+
 def emit(p):
     if p.get('scope_plan') is not None:
         # a scoped view's member (G77): the scope's variant when m_scope >= 0
@@ -532,8 +548,16 @@ def emit(p):
         target, resolver, is_root = shape[1], shape[2], shape[3]
         L.append('  %sclass %s* %s(%s)%s {' % (st, target['gen'], name, sig, cq))
         L += guard_lines
+        # a File3dmObject is its model geometry component, which holds both: what the resolver
+        # would find by id again (G155)
+        via = (VIEW_VIA_COMPONENT.get(resolver)
+               if view_resolver(p['cls']) == 'ONX_Model_ModelObjectGeometryConstPtrFromId' else None)
+        if via:
+            L.append('    const ON_ModelGeometryComponent* c = RH3DM_ViewPtr();')
         if is_root:
-            L.append('    return RH3DM_View_%s(m_model, m_id);' % target['reg'])
+            L.append('    return RH3DM_View_%s(m_model, m_id%s);' % (target['reg'], ', c ? c->%s : nullptr' % via if via else ''))
+        elif via:
+            L.append('    return RH3DM_Primed(new %s(m_model, m_id), c ? c->%s : nullptr);' % (target['gen'], via))
         else:
             L.append('    return new %s(m_model, m_id);' % target['gen'])
     elif shape[0] == 'proxywrap':
@@ -1025,10 +1049,14 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
         # RhinoCommon's two CommonObject states: an owned pointer, or a VIEW of
         # (file, id) -- a File3dm proxy (`new Layer(id, file)`) or the const
         # geometry/attributes of a File3dmObject -- that owns nothing and
-        # resolves on every access. Writes: 'resolve' edits the file;
+        # resolves on every access (RhinoCommon looks the id up each time; here the
+        # lookup is kept while the file's manifest is unchanged). Writes: 'resolve' edits the file;
         # 'cow' duplicates once (RhinoCommon NonConstOperation) and detaches.
         pr = cls['proxy']
         rargs = 'm_model' if pr.get('NoId') else 'm_model, m_id'
+        # (file, id): the lookup is kept while the file's manifest is unchanged (G155, RH3DM_ViewCache)
+        resolve = ('{resolver}(m_model)' if pr.get('NoId') else
+                   'm_view.Get(m_model, [this]() {{ return (void*)({on}*){resolver}(m_model, m_id); }})')
         commit = ('''
   // RenderSettings.Commit: the private copy is written back into the file
   void RH3DM_Commit() const {{ if (m_ptr && m_model) %s(m_ptr, m_model); }}''' % pr['Commit']) if pr.get('Commit') else ''
@@ -1052,8 +1080,8 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
       return c;
     }}''') if host else ''
         nonconst = (('''  {on}* RH3DM_NonConst() const {{''' + comp_nc + '''
-    return m_ptr ? m_ptr : ({on}*){resolver}(%s);
-  }}''') % rargs
+    return m_ptr ? m_ptr : ({on}*)%s;
+  }}''') % resolve
                     if pr['NonConst'] == 'resolve' else
                     # no writable pointer in RhinoCommon either (File3dmRenderContent: every
                     # member goes through ConstPointer; G87) -- a write is refused, never guessed
@@ -1081,18 +1109,22 @@ def emit_class(cls, plans, has_default_ctor=False, arg_ctors=()):
   }}''') if host else ''
         storage = '''  mutable {on}* m_ptr = nullptr;
   ONX_Model* m_model = nullptr;   // a view: the file ...
-  ON_UUID m_id = ON_nil_uuid;     // ... and the id it resolves
+  ON_UUID m_id = ON_nil_uuid;     // ... and the id it resolves''' + ('' if pr.get('NoId') else '''
+  mutable RH3DM_ViewCache m_view;''') + '''
   explicit {gen}({on}* owned) : m_ptr(owned) {{}}
   {gen}(ONX_Model* model, ON_UUID id) : m_model(model), m_id(id) {{}}{viewctor}{childlink}{dctor}''' + comp_state + '''{viewcopy}
   ~{gen}() {{ delete {delete_expr}; }}{nocopy}
   // CommonObject.ConstPointer: a view whose object left the file throws
   {on}* RH3DM_Const() const {{
     if (m_ptr) return m_ptr;''' + comp_c + '''
-    {on}* p = ({on}*){resolver}(%s);
+    {on}* p = ({on}*)%s;
     if (!p) throw std::runtime_error("{cs_full}: the object is no longer in the File3dm");
     return p;
-  }}
-  // NonConstPointer: ''' % rargs + ('the same object (edits go into the file)' if pr['NonConst'] == 'resolve'
+  }}''' % resolve + ('' if pr.get('NoId') else '''
+  // the file's object, or nullptr; and what a caller resolved for (m_model, m_id) already
+  {on}* RH3DM_ViewPtr() const {{ return m_model ? ({on}*)%s : nullptr; }}
+  template <class P> void RH3DM_Prime(const P* p) const {{ m_view.Set(m_model, (void*)static_cast<const {on}*>(p)); }}''' % resolve) + '''
+  // NonConstPointer: ''' + ('the same object (edits go into the file)' if pr['NonConst'] == 'resolve'
                              else 'refused' if pr['NonConst'] == 'none' else 'copy on write (NonConstOperation -> _InternalDuplicate)') + '\n' + nonconst + commit + '{override}'
     elif cls['mode'] == 'pointer':
         storage = '''  {on}* m_ptr = nullptr;
@@ -1236,6 +1268,8 @@ class %s* %sIter::Gen_next()
        ('\n      if (!dynamic_cast<const %s*>(p)) continue;' % tp['item']['on']) if tp.get('filter') else '',
        # ManifestTable (G91): RhinoCommon's Instantiate(file, type, id, index) makes each one
        ('%s::%s(m_model, (RH3DM_ModelComponentType)outType, id, index)' % (gen, tp['dispatch'])) if tp.get('dispatch')
+       else 'RH3DM_Primed(new %s(m_model, id), p)' % item
+       if view_resolver(tp['item']) in VIEW_IS_COMPONENT
        else 'new %s(m_model, id)' % item,
        gen, gen, gen)
     if tp.get('find_id'):
@@ -1398,7 +1432,8 @@ def js_class_shape(t):
     if t == 'emscripten::val':                                    # a JS array for a std::vector (G70)
         return 'array', 'RH3DM_JsIsSeq({v})', '{v}'          # or a point list (G83)
     if t == 'bool':
-        return 'boolean', '({v}.typeOf().as<std::string>() == "boolean")', '{v}.as<bool>()'
+        # the two boolean handles are constants: no call into JS (G156)
+        return 'boolean', '({v}.isTrue() || {v}.isFalse())', '{v}.isTrue()'
     enum_js = {v['cpp']: v.get('js', k) for k, v in CS_ENUMS.items()}
     if t in enum_js:
         return ('enum:' + enum_js[t],
@@ -1413,24 +1448,27 @@ def js_class_shape(t):
         # Circle {Plane, Radius} share a first field -- a circle reached the Arc conversion);
         # the shape key is the field set: a subset accepts a superset (js_shadowed)
         fs = VT_JS_FIELDS[t]
+        JS_SPECS.add(','.join(fs))
         return ('object:' + ','.join(sorted(fs)),
                 'RH3DM_JsHasFields({v}, "%s")' % ','.join(fs),        # one call into JS (G152)
-                '{v}.as<%s>()' % t)
+                'RH3DM_JsAs<%s>({v})' % t)
     if t in vt:
-        lacks = ' && !{v}.hasOwnProperty("Z")' if t == 'BND_Point2d' else ''
+        # the whole test is one spec, so one call into JS (G153): `!Z` = lacks Z, `Z#` = Z is a number
+        spec = vt[t] + (',!Z' if t == 'BND_Point2d' else '')
         # a point / vector's Z is a NUMBER: a Box value object has a Z too (an interval), and
         # Box.Contains(box, otherBox) took the point branch
         if t in ('BND_Point3d', 'BND_Vector3d', 'BND_Point3f', 'BND_Vector3f'):
-            lacks += ' && {v}["Z"].isNumber()'
+            spec += '#' if vt[t] == 'Z' else ',Z#'
         # `typeof null` is "object": checked first (PolyCurve.append(null) called hasOwnProperty on null)
+        JS_SPECS.add(spec)
         return ('object:' + vt[t],
-                '(RH3DM_JsHasFields({v}, "%s")%s)' % (vt[t], lacks),
-                '{v}.as<%s>()' % t)
+                'RH3DM_JsHasFields({v}, "%s")' % spec,
+                'RH3DM_JsAs<%s>({v})' % t)
     # a string (and a uuid, a string in JS) and a color ({r, g, b, a} -- lowercase, so no point or
     # vector passes): checked, never `true` -- an unchecked argument let its overload take every
     # call of that arity (PointCloud.add(point, normal) reached add(point, color))
     if t in ('std::wstring', 'BND_UUID', 'std::string', 'const std::wstring&'):
-        return 'string', '({v}.typeOf().as<std::string>() == "string")', '{v}.as<%s>()' % t.replace('const ', '').rstrip('&')
+        return 'string', '{v}.isString()', '{v}.as<%s>()' % t.replace('const ', '').rstrip('&')
     if t in ('BND_Color', 'BND_Color4f'):
         return ('color', '(!{v}.isNull() && {v}.typeOf().as<std::string>() == "object" && {v}.hasOwnProperty("r"))', '{v}.as<%s>()' % t)
     if t in ('const RH3DM_Bytes&', 'RH3DM_Bytes'):   # a byte buffer (G86; by value: G107): a Uint8Array or an array of numbers
@@ -1485,6 +1523,36 @@ def js_branch_order(p, types=None):
 
 # value types JS cannot tell from their double-precision twin (G118)
 JS_FLOAT_TWINS = {'BND_Point3f', 'BND_Vector3f', 'BND_Point2f', 'BND_Vector2f'}
+
+
+def js_cheap_first(ps):
+    """dispatch order, second pass (G156): a branch whose first test costs no call into JS (a
+    boolean) moves ahead of the branches before it that do call -- only past a branch it cannot
+    share a call with (some argument is a boolean / string / number in one and something else in
+    the other), so which branch a call takes never changes"""
+    def kinds(p):
+        return [js_class_shape(t)[0] for t, _ in p['bind_args']]
+
+    def cost(p):
+        k = kinds(p)
+        return 0 if k and k[0] == 'boolean' else 1
+
+    def disjoint(p, q):
+        for a, b in zip(kinds(p), kinds(q)):
+            if a == b or a.startswith('any:') or b.startswith('any:'):
+                continue
+            if 'boolean' in (a, b) or 'string' in (a, b):
+                return True
+            if 'number' in (a, b) and 'enum:' not in a + b:
+                return True
+        return False
+    out = []
+    for p in ps:
+        i = len(out)
+        while i > 0 and cost(p) < cost(out[i - 1]) and disjoint(p, out[i - 1]):
+            i -= 1
+        out.insert(i, p)
+    return out
 
 
 def js_shadowed(shape_lists):
@@ -1827,6 +1895,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         if sh:
             raise SystemExit('%s.%s/%d: JS dispatcher branch unreachable: %s' % (cls['reg'], jn, arity, '; '.join(
                 '%s shadowed by %s' % (ps[i]['cpp'], ps[j]['cpp']) for i, j in sh)))
+        ps = js_cheap_first(ps)
         for p in ps:
             shapes = [js_class_shape(t) for t, _ in p['bind_args']]
             cond = ' && '.join(s[1].format(v='v%d' % i) for i, s in enumerate(shapes)) or 'true'
@@ -1979,6 +2048,7 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
         if shd:
             raise SystemExit('%s constructor/%d: JS dispatcher branch unreachable: %s' % (cls['reg'], arity, '; '.join(
                 'overload %d shadowed by %d' % (i, j) for i, j in shd)))
+        ps = js_cheap_first(ps)
         for p in ps:
             shapes = [js_class_shape(t) for t, _ in p['bind_args']]
             cond = ' && '.join(sh[1].format(v='v%d' % i) for i, sh in enumerate(shapes))
@@ -2045,7 +2115,9 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                                   defs='\n'.join(js))
     if tp:
         # the iterator: Python's __next__ signals the end with StopIteration, JS
-        # with {done: true}; items keep the iterator alive (keep_alive), which
+        # with {done: true} -- built in bnd_post_gen.js from the item or null this
+        # returns (building it here cost five calls into JS per item); items keep
+        # the iterator alive (keep_alive), which
         # keeps the table, which keeps the File3dm
         it = cls['gen'] + 'Iter'
         py_block += ('\n  py::class_<{it}>(m, "{reg}Iter")\n'
@@ -2056,11 +2128,5 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                      '        return p;\n'
                      '      }}, py::keep_alive<0, 1>());').format(it=it, reg=cls['reg'], item=tp['item']['gen'])
         js_block += ('\n  class_<{it}>("{reg}Iter")\n'
-                     '      .function("next", optional_override([]({it}& it) -> emscripten::val {{\n'
-                     '        emscripten::val r = emscripten::val::object();\n'
-                     '        class {item}* p = it.Gen_next();\n'
-                     '        r.set("done", p == nullptr);\n'
-                     '        if (p) r.set("value", emscripten::val(p, emscripten::allow_raw_pointers()));\n'
-                     '        return r;\n'
-                     '      }}), allow_raw_pointers());').format(it=it, reg=cls['reg'], item=tp['item']['gen'])
+                     '      .function("next", &{it}::Gen_next, allow_raw_pointers());').format(it=it, reg=cls['reg'])
     return py_block, js_block

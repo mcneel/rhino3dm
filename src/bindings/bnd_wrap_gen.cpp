@@ -635,39 +635,43 @@ BND_File3dmRenderTexture* RH3DM_Wrap_File3dmRenderTexture(ON_RenderTexture* p)
 
 BND_GeometryBase* RH3DM_View_GeometryBase(ONX_Model* model, ON_UUID id)
 {
-  const ON_Geometry* p = ONX_Model_ModelObjectGeometry(model, id);
+  return RH3DM_View_GeometryBase(model, id, ONX_Model_ModelObjectGeometry(model, id));
+}
+
+BND_GeometryBase* RH3DM_View_GeometryBase(ONX_Model* model, ON_UUID id, const ON_Geometry* p)
+{
   if (!p) return nullptr;
-  if (ON_DimAngular::Cast(p)) return new BND_AngularDimension(model, id);
-  if (ON_Centermark::Cast(p)) return new BND_Centermark(model, id);
-  if (ON_DimLinear::Cast(p)) return new BND_LinearDimension(model, id);
-  if (ON_DimOrdinate::Cast(p)) return new BND_OrdinateDimension(model, id);
-  if (ON_DimRadial::Cast(p)) return new BND_RadialDimension(model, id);
-  if (ON_ArcCurve::Cast(p)) return new BND_ArcCurve(model, id);
-  if (ON_CurveProxy::Cast(p)) return new BND_CurveProxy(model, id);
-  if (ON_Dimension::Cast(p)) return new BND_Dimension(model, id);
-  if (ON_Extrusion::Cast(p)) return new BND_Extrusion(model, id);
-  if (ON_Leader::Cast(p)) return new BND_Leader(model, id);
-  if (ON_LineCurve::Cast(p)) return new BND_LineCurve(model, id);
-  if (ON_NurbsCurve::Cast(p)) return new BND_NurbsCurve(model, id);
-  if (ON_NurbsSurface::Cast(p)) return new BND_NurbsSurface(model, id);
-  if (ON_PlaneSurface::Cast(p)) return new BND_PlaneSurface(model, id);
-  if (ON_PolyCurve::Cast(p)) return new BND_PolyCurve(model, id);
-  if (ON_PolylineCurve::Cast(p)) return new BND_PolylineCurve(model, id);
-  if (ON_RevSurface::Cast(p)) return new BND_RevSurface(model, id);
-  if (ON_SurfaceProxy::Cast(p)) return new BND_SurfaceProxy(model, id);
-  if (ON_Text::Cast(p)) return new BND_TextEntity(model, id);
-  if (ON_Annotation::Cast(p)) return new BND_AnnotationBase(model, id);
-  if (ON_Brep::Cast(p)) return new BND_Brep(model, id);
-  if (ON_Curve::Cast(p)) return new BND_Curve(model, id);
-  if (ON_Hatch::Cast(p)) return new BND_Hatch(model, id);
-  if (ON_InstanceRef::Cast(p)) return new BND_InstanceReferenceGeometry(model, id);
-  if (ON_Light::Cast(p)) return new BND_Light(model, id);
-  if (ON_Mesh::Cast(p)) return new BND_Mesh(model, id);
-  if (ON_Point::Cast(p)) return new BND_Point(model, id);
-  if (ON_PointCloud::Cast(p)) return new BND_PointCloud(model, id);
-  if (ON_SubD::Cast(p)) return new BND_SubD(model, id);
-  if (ON_Surface::Cast(p)) return new BND_Surface(model, id);
-  if (ON_TextDot::Cast(p)) return new BND_TextDot(model, id);
+  if (ON_DimAngular::Cast(p)) return RH3DM_Primed(new BND_AngularDimension(model, id), p);
+  if (ON_Centermark::Cast(p)) return RH3DM_Primed(new BND_Centermark(model, id), p);
+  if (ON_DimLinear::Cast(p)) return RH3DM_Primed(new BND_LinearDimension(model, id), p);
+  if (ON_DimOrdinate::Cast(p)) return RH3DM_Primed(new BND_OrdinateDimension(model, id), p);
+  if (ON_DimRadial::Cast(p)) return RH3DM_Primed(new BND_RadialDimension(model, id), p);
+  if (ON_ArcCurve::Cast(p)) return RH3DM_Primed(new BND_ArcCurve(model, id), p);
+  if (ON_CurveProxy::Cast(p)) return RH3DM_Primed(new BND_CurveProxy(model, id), p);
+  if (ON_Dimension::Cast(p)) return RH3DM_Primed(new BND_Dimension(model, id), p);
+  if (ON_Extrusion::Cast(p)) return RH3DM_Primed(new BND_Extrusion(model, id), p);
+  if (ON_Leader::Cast(p)) return RH3DM_Primed(new BND_Leader(model, id), p);
+  if (ON_LineCurve::Cast(p)) return RH3DM_Primed(new BND_LineCurve(model, id), p);
+  if (ON_NurbsCurve::Cast(p)) return RH3DM_Primed(new BND_NurbsCurve(model, id), p);
+  if (ON_NurbsSurface::Cast(p)) return RH3DM_Primed(new BND_NurbsSurface(model, id), p);
+  if (ON_PlaneSurface::Cast(p)) return RH3DM_Primed(new BND_PlaneSurface(model, id), p);
+  if (ON_PolyCurve::Cast(p)) return RH3DM_Primed(new BND_PolyCurve(model, id), p);
+  if (ON_PolylineCurve::Cast(p)) return RH3DM_Primed(new BND_PolylineCurve(model, id), p);
+  if (ON_RevSurface::Cast(p)) return RH3DM_Primed(new BND_RevSurface(model, id), p);
+  if (ON_SurfaceProxy::Cast(p)) return RH3DM_Primed(new BND_SurfaceProxy(model, id), p);
+  if (ON_Text::Cast(p)) return RH3DM_Primed(new BND_TextEntity(model, id), p);
+  if (ON_Annotation::Cast(p)) return RH3DM_Primed(new BND_AnnotationBase(model, id), p);
+  if (ON_Brep::Cast(p)) return RH3DM_Primed(new BND_Brep(model, id), p);
+  if (ON_Curve::Cast(p)) return RH3DM_Primed(new BND_Curve(model, id), p);
+  if (ON_Hatch::Cast(p)) return RH3DM_Primed(new BND_Hatch(model, id), p);
+  if (ON_InstanceRef::Cast(p)) return RH3DM_Primed(new BND_InstanceReferenceGeometry(model, id), p);
+  if (ON_Light::Cast(p)) return RH3DM_Primed(new BND_Light(model, id), p);
+  if (ON_Mesh::Cast(p)) return RH3DM_Primed(new BND_Mesh(model, id), p);
+  if (ON_Point::Cast(p)) return RH3DM_Primed(new BND_Point(model, id), p);
+  if (ON_PointCloud::Cast(p)) return RH3DM_Primed(new BND_PointCloud(model, id), p);
+  if (ON_SubD::Cast(p)) return RH3DM_Primed(new BND_SubD(model, id), p);
+  if (ON_Surface::Cast(p)) return RH3DM_Primed(new BND_Surface(model, id), p);
+  if (ON_TextDot::Cast(p)) return RH3DM_Primed(new BND_TextDot(model, id), p);
   return nullptr;   // a geometry type with no generated class
 }
 

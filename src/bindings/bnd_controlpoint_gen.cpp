@@ -177,8 +177,8 @@ void initGenControlPoint(void)
       .class_function("create", optional_override([](double a0, double a1, double a2) { return BND_ControlPoint(a0, a1, a2); }))
       .class_function("create", optional_override([](double a0, double a1, double a2, double a3) { return BND_ControlPoint(a0, a1, a2, a3); }))
       .class_function("create", optional_override([](emscripten::val v0) -> emscripten::val {
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber())) { BND_Point3d a0 = v0.as<BND_Point3d>(); return emscripten::val([&]() { return BND_ControlPoint(a0); }()); }
-        if (RH3DM_JsHasFields(v0, "X,Y,Z,W")) { BND_Point4d a0 = v0.as<BND_Point4d>(); return emscripten::val([&]() { return BND_ControlPoint(a0); }()); }
+        if (RH3DM_JsHasFields(v0, "Z#")) { BND_Point3d a0 = RH3DM_JsAs<BND_Point3d>(v0); return RH3DM_JsVal([&]() { return BND_ControlPoint(a0); }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y,Z,W")) { BND_Point4d a0 = RH3DM_JsAs<BND_Point4d>(v0); return RH3DM_JsVal([&]() { return BND_ControlPoint(a0); }()); }
         throw std::invalid_argument("ControlPoint.create: no overload matches the arguments"); }))
       .class_function("create", optional_override([](BND_Point3d a0, double a1) { return BND_ControlPoint(a0, a1); }))
       .class_function("unset", optional_override([]() { return BND_ControlPoint::Unset(); }))

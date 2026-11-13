@@ -65,12 +65,6 @@ void initGenDecals(void)
       .function("clear", &BND_Decals::Gen_Clear)
       .function("iterator", &BND_Decals::Gen_iter, allow_raw_pointers());
   class_<BND_DecalsIter>("DecalsIter")
-      .function("next", optional_override([](BND_DecalsIter& it) -> emscripten::val {
-        emscripten::val r = emscripten::val::object();
-        class BND_Decal* p = it.Gen_next();
-        r.set("done", p == nullptr);
-        if (p) r.set("value", emscripten::val(p, emscripten::allow_raw_pointers()));
-        return r;
-      }), allow_raw_pointers());
+      .function("next", &BND_DecalsIter::Gen_next, allow_raw_pointers());
 }
 #endif

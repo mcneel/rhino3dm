@@ -502,6 +502,8 @@ using namespace emscripten;
 struct RH3DM_MeshFaceFns {};
 void initGenMeshFace(void)
 {
+  static_assert(sizeof(BND_MeshFace) == 16 && offsetof(BND_MeshFace, m_a) == 0 && offsetof(BND_MeshFace, m_b) == 4 && offsetof(BND_MeshFace, m_c) == 8 && offsetof(BND_MeshFace, m_d) == 12,
+                "BND_MeshFace: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_MeshFace>("MeshFaceValue")
       .field("A", &BND_MeshFace::m_a)
       .field("B", &BND_MeshFace::m_b)
@@ -514,15 +516,15 @@ void initGenMeshFace(void)
       .class_function("unset", optional_override([]() { return BND_MeshFace::Unset(); }))
       .class_function("isValid", optional_override([](BND_MeshFace a0) { return a0.IsValid(); }))
       .class_function("isValid", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "A,B,C,D") && v1.isNumber()) { BND_MeshFace a0 = v0.as<BND_MeshFace>(); int a1 = v1.as<int>(); return emscripten::val([&]() { return a0.IsValid(a1); }()); }
-        if (RH3DM_JsHasFields(v0, "A,B,C,D") && RH3DM_JsIsSeq(v1)) { BND_MeshFace a0 = v0.as<BND_MeshFace>(); emscripten::val a1 = v1.as<emscripten::val>(); return emscripten::val([&]() { std::vector<BND_Point3d> a1_v = RH3DM_JsSeq<BND_Point3d>(a1); return a0.IsValid(a1_v); }()); }
+        if (RH3DM_JsHasFields(v0, "A,B,C,D") && v1.isNumber()) { BND_MeshFace a0 = RH3DM_JsAs<BND_MeshFace>(v0); int a1 = RH3DM_JsAs<int>(v1); return RH3DM_JsVal([&]() { return a0.IsValid(a1); }()); }
+        if (RH3DM_JsHasFields(v0, "A,B,C,D") && RH3DM_JsIsSeq(v1)) { BND_MeshFace a0 = RH3DM_JsAs<BND_MeshFace>(v0); emscripten::val a1 = RH3DM_JsAs<emscripten::val>(v1); return RH3DM_JsVal([&]() { std::vector<BND_Point3d> a1_v = RH3DM_JsSeq<BND_Point3d>(a1); return a0.IsValid(a1_v); }()); }
         throw std::invalid_argument("MeshFace.isValid: no overload matches the arguments"); }))
-      .class_function("repair", optional_override([](emscripten::val v0, emscripten::val a1) { BND_MeshFace a0 = v0.as<BND_MeshFace>(); std::vector<BND_Point3d> a1_v = RH3DM_JsSeq<BND_Point3d>(a1); auto r = a0.Repair(a1_v); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("repair", optional_override([](emscripten::val v0, emscripten::val a1) { BND_MeshFace a0 = RH3DM_JsAs<BND_MeshFace>(v0); std::vector<BND_Point3d> a1_v = RH3DM_JsSeq<BND_Point3d>(a1); auto r = a0.Repair(a1_v); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
       .class_function("isValidEx", optional_override([](BND_MeshFace a0, emscripten::val a1) { std::vector<BND_Point3d> a1_v = RH3DM_JsSeq<BND_Point3d>(a1); return a0.IsValidEx(a1_v); }))
       .class_function("isTriangle", optional_override([](BND_MeshFace a0) { return a0.IsTriangle(); }))
       .class_function("isQuad", optional_override([](BND_MeshFace a0) { return a0.IsQuad(); }))
-      .class_function("set", optional_override([](emscripten::val v0, int a1, int a2, int a3) { BND_MeshFace a0 = v0.as<BND_MeshFace>(); a0.Set(a1, a2, a3); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
-      .class_function("set", optional_override([](emscripten::val v0, int a1, int a2, int a3, int a4) { BND_MeshFace a0 = v0.as<BND_MeshFace>(); a0.Set(a1, a2, a3, a4); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("set", optional_override([](emscripten::val v0, int a1, int a2, int a3) { BND_MeshFace a0 = RH3DM_JsAs<BND_MeshFace>(v0); a0.Set(a1, a2, a3); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("set", optional_override([](emscripten::val v0, int a1, int a2, int a3, int a4) { BND_MeshFace a0 = RH3DM_JsAs<BND_MeshFace>(v0); a0.Set(a1, a2, a3, a4); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("flip", optional_override([](BND_MeshFace a0) { return a0.Flip(); }))
       .class_function("equals", optional_override([](BND_MeshFace a0, BND_MeshFace a1) { return a0.Equals(a1); }))
       .class_function("ToString", optional_override([](BND_MeshFace a0) { return a0.ToString(); }))

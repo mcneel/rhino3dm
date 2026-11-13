@@ -11,6 +11,7 @@ public:
   mutable ON_EmbeddedFile* m_ptr = nullptr;
   ONX_Model* m_model = nullptr;   // a view: the file ...
   ON_UUID m_id = ON_nil_uuid;     // ... and the id it resolves
+  mutable RH3DM_ViewCache m_view;
   explicit BND_File3dmEmbeddedFile(ON_EmbeddedFile* owned) : m_ptr(owned) {}
   BND_File3dmEmbeddedFile(ONX_Model* model, ON_UUID id) : m_model(model), m_id(id) {}
   BND_File3dmEmbeddedFile();
@@ -21,10 +22,13 @@ public:
   // CommonObject.ConstPointer: a view whose object left the file throws
   ON_EmbeddedFile* RH3DM_Const() const {
     if (m_ptr) return m_ptr;
-    ON_EmbeddedFile* p = (ON_EmbeddedFile*)ONX_Model_GetModelComponentPointer(m_model, m_id);
+    ON_EmbeddedFile* p = (ON_EmbeddedFile*)m_view.Get(m_model, [this]() { return (void*)(ON_EmbeddedFile*)ONX_Model_GetModelComponentPointer(m_model, m_id); });
     if (!p) throw std::runtime_error("Rhino.FileIO.File3dmEmbeddedFile: the object is no longer in the File3dm");
     return p;
   }
+  // the file's object, or nullptr; and what a caller resolved for (m_model, m_id) already
+  ON_EmbeddedFile* RH3DM_ViewPtr() const { return m_model ? (ON_EmbeddedFile*)m_view.Get(m_model, [this]() { return (void*)(ON_EmbeddedFile*)ONX_Model_GetModelComponentPointer(m_model, m_id); }) : nullptr; }
+  template <class P> void RH3DM_Prime(const P* p) const { m_view.Set(m_model, (void*)static_cast<const ON_EmbeddedFile*>(p)); }
   // NonConstPointer: copy on write (NonConstOperation -> _InternalDuplicate)
   ON_EmbeddedFile* RH3DM_NonConst() const {
     if (!m_ptr) m_ptr = (ON_EmbeddedFile*)ON_Object_Duplicate((ON_Object*)RH3DM_Const());   // first write: a private copy, as in .NET

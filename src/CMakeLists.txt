@@ -82,6 +82,14 @@ if(${RHINO3DM_JS})
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
   else()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Oz")
+    # -Oz is for opennurbs and the bindings (download size). The compression code is small and
+    # its loops are where the time goes: the C sources (zlib, uuid) had no -O flag at all, and
+    # Draco, built as its own Release project until 9.x, had -O3. The last -O on the line wins.
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+    target_compile_options(draco_subset PRIVATE -O3)
+    # every string the bindings return goes through these two UTF conversions, one unit at a time
+    set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/lib/opennurbs/opennurbs_unicode.cpp"
+      "${CMAKE_CURRENT_SOURCE_DIR}/librhino3dm_native/stringholder.cpp" PROPERTIES COMPILE_OPTIONS "-O3")
   endif()
   # WASM64 (wasm memory64) is its own build dimension, independent of NODE.
   # It produces a 64-bit-memory binary that breaks the 4GB limit. Support

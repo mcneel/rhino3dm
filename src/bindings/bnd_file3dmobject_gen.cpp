@@ -17,11 +17,13 @@ BND_TUPLE BND_File3dmObject::Gen_GetTextureMapping(int mappingChannelId) const {
 }
 
 class BND_ObjectAttributes* BND_File3dmObject::Gen_Attributes() const {
-  return new BND_ObjectAttributes(m_model, m_id);
+  const ON_ModelGeometryComponent* c = RH3DM_ViewPtr();
+  return RH3DM_Primed(new BND_ObjectAttributes(m_model, m_id), c ? c->Attributes(nullptr) : nullptr);
 }
 
 class BND_GeometryBase* BND_File3dmObject::Gen_Geometry() const {
-  return RH3DM_View_GeometryBase(m_model, m_id);
+  const ON_ModelGeometryComponent* c = RH3DM_ViewPtr();
+  return RH3DM_View_GeometryBase(m_model, m_id, c ? c->Geometry(nullptr) : nullptr);
 }
 
 void BND_File3dmObject::Gen_set_Name(std::wstring value) {

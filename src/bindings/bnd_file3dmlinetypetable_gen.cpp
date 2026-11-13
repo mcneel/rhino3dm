@@ -152,12 +152,6 @@ void initGenFile3dmLinetypeTable(void)
       .function("get", &BND_File3dmLinetypeTable::Gen_FindIndex, allow_raw_pointers())
       .function("iterator", &BND_File3dmLinetypeTable::Gen_iter, allow_raw_pointers());
   class_<BND_File3dmLinetypeTableIter>("File3dmLinetypeTableIter")
-      .function("next", optional_override([](BND_File3dmLinetypeTableIter& it) -> emscripten::val {
-        emscripten::val r = emscripten::val::object();
-        class BND_Linetype* p = it.Gen_next();
-        r.set("done", p == nullptr);
-        if (p) r.set("value", emscripten::val(p, emscripten::allow_raw_pointers()));
-        return r;
-      }), allow_raw_pointers());
+      .function("next", &BND_File3dmLinetypeTableIter::Gen_next, allow_raw_pointers());
 }
 #endif

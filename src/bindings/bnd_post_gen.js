@@ -16,10 +16,15 @@
     M.rh3dmPostUnresolved = missing;
     function hold(r, parent) {   // the result keeps its parent alive (a JS reference: GC-safe)
       if (r !== null && typeof r === 'object') {
-        try { Object.defineProperty(r, '__rh3dm_parent', { value: parent, configurable: true }); } catch (e) {}
+        // a class handle: in its embind record (a plain store; defining a property on every
+        // handle cost 0.1 us per result)
+        if (r.$$) r.$$.rh3dmParent = parent;
+        else try { Object.defineProperty(r, '__rh3dm_parent', { value: parent, configurable: true }); } catch (e) {}
       }
       return r;
     }
+    if (typeof ClassHandle !== 'function') missing.push('ClassHandle');
+    else Object.defineProperty(ClassHandle.prototype, '__rh3dm_parent', { get: function () { return this.$$ ? this.$$.rh3dmParent : undefined; }, configurable: true });
     // enum arguments are type-checked (G101, pilot #47; gen_pre.js installs the check as each
     // enum type registers): every enum type must carry it, else it is reported
     if (typeof registeredTypes !== 'object' || registeredTypes === null) missing.push('enum registry');
@@ -32,6 +37,13 @@
         if (!t.toWireType || !t.toWireType.rh3dmChecked) missing.push('enum check ' + t.name);
       });
       if (nEnums === 0) missing.push('enum types');
+      // G153: every value object with a heap layout (RH3DM_FAST, gen_pre.js) converts through it
+      var fast = {};
+      Object.keys(registeredTypes).forEach(function (k) {
+        var t = registeredTypes[k];
+        if (t && t.fromWireType && t.fromWireType.rh3dmFast) fast[t.name] = true;
+      });
+      RH3DM_FAST.forEach(function (f) { if (!fast[f.name]) missing.push('fast value ' + f.name); });
     }
     KEEP.forEach(function (km) {
       var C = M[km[0]], proto = C && C.prototype;
@@ -99,9 +111,11 @@
     ITERS.forEach(function (c) {
       var C = M[c], proto = C && C.prototype, f = proto && proto.next;
       if (typeof f !== 'function') { missing.push('iter ' + c); return; }
-      var w = function () { var r = f.apply(this, arguments); if (r && r.value) hold(r.value, this); return r; };
-      if (f.overloadTable) w.overloadTable = f.overloadTable;
-      proto.next = w;
+      // the registered next returns the item, or null at the end
+      proto.next = function () {
+        var r = f.call(this);
+        return r === null ? { done: true } : { done: false, value: hold(r, this) };
+      };
       proto[Symbol.iterator] = function () { return this; };
     });
     STATIC_PROPS.forEach(function (sp) {

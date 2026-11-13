@@ -376,7 +376,7 @@ void initGenMesh(void)
       .function("flip", &BND_Mesh::Gen_Flip_2)
       .function("copyFrom", &BND_Mesh::Gen_CopyFrom)
       .class_function("createQuickHull3D", optional_override([](emscripten::val v0) -> BND_Mesh* {
-        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber())))) return BND_Mesh::Gen_CreateQuickHull3D(RH3DM_JsSeq<BND_Point3d>(v0));
+        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "Z#")))) return BND_Mesh::Gen_CreateQuickHull3D(RH3DM_JsSeq<BND_Point3d>(v0));
         if (v0.instanceof(emscripten::val::module_property("PointCloud"))) return BND_Mesh::Gen_CreateQuickHull3D_2(*v0.as<BND_PointCloud*>(emscripten::allow_raw_pointers()));
         throw std::invalid_argument("Mesh.createQuickHull3D: no overload matches the arguments"); }), allow_raw_pointers())
       .function("duplicateMesh", &BND_Mesh::Gen_DuplicateMesh, allow_raw_pointers())

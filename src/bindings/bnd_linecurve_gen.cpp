@@ -58,13 +58,13 @@ void initGenLineCurve(void)
   class_<BND_LineCurve, base<BND_Curve>>("LineCurve")
       .constructor<>()
       .constructor(optional_override([](emscripten::val v0) -> BND_LineCurve* {
-        if (RH3DM_JsHasFields(v0, "From,To")) return new BND_LineCurve(v0.as<BND_Line>());
+        if (RH3DM_JsHasFields(v0, "From,To")) return new BND_LineCurve(RH3DM_JsAs<BND_Line>(v0));
         if ((v0.isNull() || v0.instanceof(emscripten::val::module_property("LineCurve")))) return new BND_LineCurve((v0.isNull() ? nullptr : v0.as<BND_LineCurve*>(emscripten::allow_raw_pointers())));
         throw std::invalid_argument("LineCurve: no constructor matches the arguments"); }), allow_raw_pointers())
       .constructor<BND_Line, double, double>()
       .constructor(optional_override([](emscripten::val v0, emscripten::val v1) -> BND_LineCurve* {
-        if ((RH3DM_JsHasFields(v0, "X") && !v0.hasOwnProperty("Z")) && (RH3DM_JsHasFields(v1, "X") && !v1.hasOwnProperty("Z"))) return new BND_LineCurve(v0.as<BND_Point2d>(), v1.as<BND_Point2d>());
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) return new BND_LineCurve(v0.as<BND_Point3d>(), v1.as<BND_Point3d>());
+        if (RH3DM_JsHasFields(v0, "X,!Z") && RH3DM_JsHasFields(v1, "X,!Z")) return new BND_LineCurve(RH3DM_JsAs<BND_Point2d>(v0), RH3DM_JsAs<BND_Point2d>(v1));
+        if (RH3DM_JsHasFields(v0, "Z#") && RH3DM_JsHasFields(v1, "Z#")) return new BND_LineCurve(RH3DM_JsAs<BND_Point3d>(v0), RH3DM_JsAs<BND_Point3d>(v1));
         throw std::invalid_argument("LineCurve: no constructor matches the arguments"); }), allow_raw_pointers())
       .property("line", &BND_LineCurve::Gen_Line, &BND_LineCurve::Gen_set_Line)
       .class_function("createControlPointCurve", optional_override([](emscripten::val a0, int a1) -> BND_Curve* { return BND_Curve::Gen_CreateControlPointCurve(RH3DM_JsSeq<BND_Point3d>(a0), a1); }), allow_raw_pointers())

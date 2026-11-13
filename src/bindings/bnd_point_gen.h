@@ -11,6 +11,7 @@ public:
   mutable ON_Point* m_ptr = nullptr;
   ONX_Model* m_model = nullptr;   // a view: the file ...
   ON_UUID m_id = ON_nil_uuid;     // ... and the id it resolves
+  mutable RH3DM_ViewCache m_view;
   explicit BND_Point(ON_Point* owned) : m_ptr(owned) {}
   BND_Point(ONX_Model* model, ON_UUID id) : m_model(model), m_id(id) {}
   BND_Point(BND_Point3d location);
@@ -38,10 +39,13 @@ public:
       if (!c) throw std::runtime_error("Rhino.Geometry.Point: the component is no longer in its owner");
       return c;
     }
-    ON_Point* p = (ON_Point*)ONX_Model_ModelObjectGeometry(m_model, m_id);
+    ON_Point* p = (ON_Point*)m_view.Get(m_model, [this]() { return (void*)(ON_Point*)ONX_Model_ModelObjectGeometry(m_model, m_id); });
     if (!p) throw std::runtime_error("Rhino.Geometry.Point: the object is no longer in the File3dm");
     return p;
   }
+  // the file's object, or nullptr; and what a caller resolved for (m_model, m_id) already
+  ON_Point* RH3DM_ViewPtr() const { return m_model ? (ON_Point*)m_view.Get(m_model, [this]() { return (void*)(ON_Point*)ONX_Model_ModelObjectGeometry(m_model, m_id); }) : nullptr; }
+  template <class P> void RH3DM_Prime(const P* p) const { m_view.Set(m_model, (void*)static_cast<const ON_Point*>(p)); }
   // NonConstPointer: copy on write (NonConstOperation -> _InternalDuplicate)
   ON_Point* RH3DM_NonConst() const {
     if (!m_ptr && m_comp && m_comp_cow) {

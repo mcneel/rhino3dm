@@ -302,6 +302,8 @@ using namespace emscripten;
 struct RH3DM_Point4dFns {};
 void initGenPoint4d(void)
 {
+  static_assert(sizeof(BND_Point4d) == 32 && offsetof(BND_Point4d, m_x) == 0 && offsetof(BND_Point4d, m_y) == 8 && offsetof(BND_Point4d, m_z) == 16 && offsetof(BND_Point4d, m_w) == 24,
+                "BND_Point4d: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_Point4d>("Point4dValue")
       .field("X", &BND_Point4d::m_x)
       .field("Y", &BND_Point4d::m_y)
@@ -314,13 +316,13 @@ void initGenPoint4d(void)
       .class_function("add", optional_override([](BND_Point4d a0, BND_Point4d a1) { return a0 + a1; }))
       .class_function("subtract", optional_override([](BND_Point4d a0, BND_Point4d a1) { return a0 - a1; }))
       .class_function("multiply", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "X,Y,Z,W") && v1.isNumber()) { BND_Point4d a0 = v0.as<BND_Point4d>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return a0 * a1; }()); }
-        if (RH3DM_JsHasFields(v0, "X,Y,Z,W") && RH3DM_JsHasFields(v1, "X,Y,Z,W")) { BND_Point4d a0 = v0.as<BND_Point4d>(); BND_Point4d a1 = v1.as<BND_Point4d>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y,Z,W") && v1.isNumber()) { BND_Point4d a0 = RH3DM_JsAs<BND_Point4d>(v0); double a1 = RH3DM_JsAs<double>(v1); return RH3DM_JsVal([&]() { return a0 * a1; }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y,Z,W") && RH3DM_JsHasFields(v1, "X,Y,Z,W")) { BND_Point4d a0 = RH3DM_JsAs<BND_Point4d>(v0); BND_Point4d a1 = RH3DM_JsAs<BND_Point4d>(v1); return RH3DM_JsVal([&]() { return a0 * a1; }()); }
         throw std::invalid_argument("Point4d.multiply: no overload matches the arguments"); }))
       .class_function("equals", optional_override([](BND_Point4d a0, BND_Point4d a1) { return a0 == a1; }))
       .class_function("epsilonEquals", optional_override([](BND_Point4d a0, BND_Point4d a1, double a2) { return a0.EpsilonEquals(a1, a2); }))
       .class_function("unset", optional_override([]() { return BND_Point4d::Unset(); }))
-      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Point4d a0 = v0.as<BND_Point4d>(); a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Point4d a0 = RH3DM_JsAs<BND_Point4d>(v0); a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("isValid", optional_override([](BND_Point4d a0) { return a0.IsValid(); }))
       .class_function("ToString", optional_override([](BND_Point4d a0) { return a0.ToString(); }))
       .class_function("encode", &BND_Point4d_Encode, allow_raw_pointers());

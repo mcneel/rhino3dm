@@ -135,6 +135,8 @@ using namespace emscripten;
 struct RH3DM_TorusFns {};
 void initGenTorus(void)
 {
+  static_assert(sizeof(BND_Torus) == 144 && offsetof(BND_Torus, m_majorCirclePlane) == 0 && offsetof(BND_Torus, m_majorRadius) == 128 && offsetof(BND_Torus, m_minorRadius) == 136,
+                "BND_Torus: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_Torus>("TorusValue")
       .field("Plane", &BND_Torus::m_majorCirclePlane)
       .field("MajorRadius", &BND_Torus::m_majorRadius)

@@ -30,6 +30,29 @@ def natural_size(t, by_cpp):
     return size
 
 
+JS_LEAF = {'double': ('HEAPF64', 8), 'float': ('HEAPF32', 4), 'int': ('HEAP32', 4), 'unsigned int': ('HEAPU32', 4)}
+JS_LEAF_SIZE = {view: size for view, size in JS_LEAF.values()}
+
+
+def vt_layout(t, by_cpp):
+    """a value struct's C++ layout as the generator predicts it: ([(field, type, offset)], size,
+    alignment). The JS side reads and writes the heap at these offsets (G153), so each binding
+    file static_asserts them against offsetof / sizeof"""
+    off, align, out = 0, 1, []
+    for f in t['Fields']:
+        ft = f['Type']
+        if ft in by_cpp:
+            _, size, a = vt_layout(by_cpp[ft], by_cpp)
+        else:
+            size = a = {'double': 8, 'long long': 8, 'unsigned long long': 8, 'bool': 1}.get(ft, 4)
+        off = (off + a - 1) // a * a
+        out.append((f['Name'], ft, off))
+        off += size
+        align = max(align, a)
+    size = max((off + align - 1) // align * align, t.get('LayoutSize', 0))
+    return out, size, align
+
+
 def vt_file(t):
     # a static class's translated struct (RhinoMath) is internal; the bound class of the same
     # name (registry mode 'static') owns gen_rhinomath (pilot #104)
@@ -309,6 +332,7 @@ def emit_valuetype_bindings(vt, skipped):
     exposed as functions, rhino.Point3d.DistanceTo(p, q), and mutating
     members return the new value since a JS value is a copy."""
     blocks = {}   # C# type -> (py block, js tag decl, js block)
+    by_cpp = {u['Cpp']: u for u in vt['types']}
     # the JS property identifying a value object's shape: its first field's
     # field-backed property name (m_x -> X, m_t0 -> T0, m_origin -> Origin)
     js_key = {}
@@ -553,7 +577,7 @@ def emit_valuetype_bindings(vt, skipped):
                 types, body = ents[0]
                 if '@@SELF@@' in body:   # the value arrives as the JS object, to write back into
                     params = ', '.join(['emscripten::val v0'] + ['%s a%d' % (t, i) for i, t in enumerate(types) if i])
-                    body = '%s a0 = v0.as<%s>(); %s' % (types[0], types[0], body.replace('@@SELF@@', 'RH3DM_JsAssign(v0, a0);'))
+                    body = '%s a0 = RH3DM_JsAs<%s>(v0); %s' % (types[0], types[0], body.replace('@@SELF@@', 'RH3DM_JsAssign(v0, a0);'))
                 else:
                     params = ', '.join('%s a%d' % (t, i) for i, t in enumerate(types))
                 jsl.append('      .class_function("%s", optional_override([](%s) { %s }))'
@@ -566,8 +590,8 @@ def emit_valuetype_bindings(vt, skipped):
             branches = []
             for types, body in ents:
                 cond = ' && '.join(js_check('v%d' % i, t) for i, t in enumerate(types)) or 'true'
-                conv = ' '.join('%s a%d = v%d.as<%s>();' % (t, i, i, t) for i, t in enumerate(types))
-                branches.append('if (%s) { %s return emscripten::val([&]() { %s }()); }'
+                conv = ' '.join('%s a%d = RH3DM_JsAs<%s>(v%d);' % (t, i, t, i) for i, t in enumerate(types))
+                branches.append('if (%s) { %s return RH3DM_JsVal([&]() { %s }()); }'
                                 % (cond, conv, body.replace('@@SELF@@', 'RH3DM_JsAssign(v0, a0);')))
             jsl.append('      .class_function("%s", optional_override([](%s) -> emscripten::val {\n'
                        '        %s\n        throw std::invalid_argument("%s.%s: no overload matches the arguments"); }))'
@@ -630,12 +654,14 @@ def emit_valuetype_bindings(vt, skipped):
         py_block = '\n'.join(pyl)
 
         vfields = []
+        members = {}     # C++ field -> its JS name, for the fields JS reads and writes as they are
         for f in fields:
             if f in field_of or f not in VALUE_FIELD_PROPS.get(cs, {}):
                 if f not in field_of:
                     raise SystemExit('%s.%s: a JS value-object field with no RhinoCommon name -- add it to '
                                      'VALUE_FIELD_PROPS (gen_registry)' % (cs, f))
                 vfields.append('      .field("%s", &%s::%s)' % (field_of[f], T, f))
+                members[f] = field_of[f]
                 continue
             if isinstance(VALUE_FIELD_PROPS[cs][f], str):
                 # the raw field under a RhinoCommon constructor parameter's name (G109): that
@@ -647,6 +673,7 @@ def emit_valuetype_bindings(vt, skipped):
                     raise SystemExit('%s.%s: VALUE_FIELD_PROPS names %s, not constructor parameter %d'
                                      % (cs, f, name, pos))
                 vfields.append('      .field("%s", &%s::%s)' % (name, T, f))
+                members[f] = name
                 continue
             for pp in VALUE_FIELD_PROPS[cs][f]:
                 name, other = (pp if isinstance(pp, tuple) else (pp, None))
@@ -661,6 +688,16 @@ def emit_valuetype_bindings(vt, skipped):
                 vfields.append('      .field("%s", +[](const %s& s) { return %s; }, +%s)'
                                % (name, T, pub(pm, 's.%s()' % pm['Getter']), setter))
         vo = ('  value_object<%s>("%sValue")\n%s;' % (T, reg, '\n'.join(vfields)))
+        # G153: every JS field a plain member that is a number or another such value object -- JS
+        # reads and writes the struct on the heap (bnd_pre_gen.js) instead of calling embind's
+        # getter / setter per field. The offsets it uses are checked here by the compiler
+        layout, size, _ = vt_layout(t, by_cpp)
+        if len(members) == len(fields) and all(ft in JS_LEAF or ft in JS_FAST for _, ft, _ in layout):
+            JS_FAST[T] = {'id': len(JS_FAST), 'name': reg + 'Value', 'size': size,
+                          'fields': [(members[f], ft, off) for f, ft, off in layout],
+                          'pads': list(range(natural_size(t, by_cpp), size, 8))}
+            vo = ('  static_assert(sizeof(%s) == %d%s,\n                "%s: the layout bnd_pre_gen.js reads (G153)");\n'
+                  % (T, size, ''.join(' && offsetof(%s, %s) == %d' % (T, f, off) for f, _, off in layout), T)) + vo
         tag = 'RH3DM_%sFns' % reg
         if any('"create"' in l for l in jsl):
             JS_POST['values'].append(reg)      # `new` calls create (D92)

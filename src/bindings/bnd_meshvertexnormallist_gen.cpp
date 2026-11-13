@@ -166,11 +166,11 @@ void initGenMeshVertexNormalList(void)
       .function("destroy", &BND_MeshVertexNormalList::Gen_Destroy)
       .function("flip", &BND_MeshVertexNormalList::Gen_Flip)
       .function("setNormal", optional_override([](BND_MeshVertexNormalList& self, emscripten::val v0, emscripten::val v1) -> bool {
-        if (v0.isNumber() && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) return self.Gen_SetNormal_2(v0.as<int>(), v1.as<BND_Vector3d>());
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "Z#")) return self.Gen_SetNormal_2(v0.as<int>(), RH3DM_JsAs<BND_Vector3d>(v1));
         throw std::invalid_argument("MeshVertexNormalList.setNormal: no overload matches the arguments"); }), allow_raw_pointers())
       .function("unitizeNormals", &BND_MeshVertexNormalList::Gen_UnitizeNormals)
       .function("add", optional_override([](BND_MeshVertexNormalList& self, emscripten::val v0) -> int {
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber())) return self.Gen_Add_4(v0.as<BND_Vector3d>());
+        if (RH3DM_JsHasFields(v0, "Z#")) return self.Gen_Add_4(RH3DM_JsAs<BND_Vector3d>(v0));
         throw std::invalid_argument("MeshVertexNormalList.add: no overload matches the arguments"); }), allow_raw_pointers())
       .function("add", &BND_MeshVertexNormalList::Gen_Add_2)
       .function("addRange", optional_override([](BND_MeshVertexNormalList& self, emscripten::val a0) -> bool { return self.Gen_AddRange(RH3DM_JsSeq<BND_Vector3f>(a0)); }), allow_raw_pointers())

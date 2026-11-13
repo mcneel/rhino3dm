@@ -439,19 +439,19 @@ void initGenMaterial(void)
       .function("getTransparencyTexture", &BND_Material::Gen_GetTransparencyTexture, allow_raw_pointers())
       .function("setBitmapTexture", optional_override([](BND_Material& self, emscripten::val v0) -> bool {
         if (v0.instanceof(emscripten::val::module_property("Texture"))) return self.Gen_SetBitmapTexture(*v0.as<BND_Texture*>(emscripten::allow_raw_pointers()));
-        if ((v0.typeOf().as<std::string>() == "string")) return self.Gen_SetBitmapTexture_2(v0.as<std::wstring>());
+        if (v0.isString()) return self.Gen_SetBitmapTexture_2(v0.as<std::wstring>());
         throw std::invalid_argument("Material.setBitmapTexture: no overload matches the arguments"); }), allow_raw_pointers())
       .function("setBumpTexture", optional_override([](BND_Material& self, emscripten::val v0) -> bool {
         if (v0.instanceof(emscripten::val::module_property("Texture"))) return self.Gen_SetBumpTexture(*v0.as<BND_Texture*>(emscripten::allow_raw_pointers()));
-        if ((v0.typeOf().as<std::string>() == "string")) return self.Gen_SetBumpTexture_2(v0.as<std::wstring>());
+        if (v0.isString()) return self.Gen_SetBumpTexture_2(v0.as<std::wstring>());
         throw std::invalid_argument("Material.setBumpTexture: no overload matches the arguments"); }), allow_raw_pointers())
       .function("setEnvironmentTexture", optional_override([](BND_Material& self, emscripten::val v0) -> bool {
         if (v0.instanceof(emscripten::val::module_property("Texture"))) return self.Gen_SetEnvironmentTexture(*v0.as<BND_Texture*>(emscripten::allow_raw_pointers()));
-        if ((v0.typeOf().as<std::string>() == "string")) return self.Gen_SetEnvironmentTexture_2(v0.as<std::wstring>());
+        if (v0.isString()) return self.Gen_SetEnvironmentTexture_2(v0.as<std::wstring>());
         throw std::invalid_argument("Material.setEnvironmentTexture: no overload matches the arguments"); }), allow_raw_pointers())
       .function("setTransparencyTexture", optional_override([](BND_Material& self, emscripten::val v0) -> bool {
         if (v0.instanceof(emscripten::val::module_property("Texture"))) return self.Gen_SetTransparencyTexture(*v0.as<BND_Texture*>(emscripten::allow_raw_pointers()));
-        if ((v0.typeOf().as<std::string>() == "string")) return self.Gen_SetTransparencyTexture_2(v0.as<std::wstring>());
+        if (v0.isString()) return self.Gen_SetTransparencyTexture_2(v0.as<std::wstring>());
         throw std::invalid_argument("Material.setTransparencyTexture: no overload matches the arguments"); }), allow_raw_pointers())
       .class_function("maxShine", &BND_Material::Gen_MaxShine)
       .function("commitChanges", &BND_Material::Gen_CommitChanges)

@@ -357,14 +357,16 @@ using namespace emscripten;
 struct RH3DM_SubDEdgeSharpnessFns {};
 void initGenSubDEdgeSharpness(void)
 {
+  static_assert(sizeof(BND_SubDEdgeSharpness) == 8 && offsetof(BND_SubDEdgeSharpness, m_sharpness0) == 0 && offsetof(BND_SubDEdgeSharpness, m_sharpness1) == 4,
+                "BND_SubDEdgeSharpness: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_SubDEdgeSharpness>("SubDEdgeSharpnessValue")
       .field("sharpness0", &BND_SubDEdgeSharpness::m_sharpness0)
       .field("sharpness1", &BND_SubDEdgeSharpness::m_sharpness1);
   class_<RH3DM_SubDEdgeSharpnessFns>("SubDEdgeSharpness")
       .class_function("create", optional_override([]() { return BND_SubDEdgeSharpness(); }))
       .class_function("create", optional_override([](emscripten::val v0) -> emscripten::val {
-        if (v0.isNumber()) { double a0 = v0.as<double>(); return emscripten::val([&]() { return BND_SubDEdgeSharpness(a0); }()); }
-        if ((RH3DM_JsHasFields(v0, "T0"))) { BND_Interval a0 = v0.as<BND_Interval>(); return emscripten::val([&]() { return BND_SubDEdgeSharpness(a0); }()); }
+        if (v0.isNumber()) { double a0 = RH3DM_JsAs<double>(v0); return RH3DM_JsVal([&]() { return BND_SubDEdgeSharpness(a0); }()); }
+        if (RH3DM_JsHasFields(v0, "T0")) { BND_Interval a0 = RH3DM_JsAs<BND_Interval>(v0); return RH3DM_JsVal([&]() { return BND_SubDEdgeSharpness(a0); }()); }
         throw std::invalid_argument("SubDEdgeSharpness.create: no overload matches the arguments"); }))
       .class_function("create", optional_override([](double a0, double a1) { return BND_SubDEdgeSharpness(a0, a1); }))
       .class_function("fromConstantPercentage", optional_override([](double a0) { return BND_SubDEdgeSharpness::FromConstantPercentage(a0); }))

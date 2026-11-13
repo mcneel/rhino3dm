@@ -531,6 +531,8 @@ using namespace emscripten;
 struct RH3DM_BoxFns {};
 void initGenBox(void)
 {
+  static_assert(sizeof(BND_Box) == 176 && offsetof(BND_Box, m_plane) == 0 && offsetof(BND_Box, m_dx) == 128 && offsetof(BND_Box, m_dy) == 144 && offsetof(BND_Box, m_dz) == 160,
+                "BND_Box: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_Box>("BoxValue")
       .field("Plane", &BND_Box::m_plane)
       .field("X", &BND_Box::m_dx)
@@ -541,8 +543,8 @@ void initGenBox(void)
       .class_function("create", optional_override([](BND_BoundingBox a0) { return BND_Box(a0); }))
       .class_function("create", optional_override([](BND_Plane a0, BND_Interval a1, BND_Interval a2, BND_Interval a3) { return BND_Box(a0, a1, a2, a3); }))
       .class_function("create", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis") && RH3DM_JsIsSeq(v1)) { BND_Plane a0 = v0.as<BND_Plane>(); emscripten::val a1 = v1.as<emscripten::val>(); return emscripten::val([&]() { std::vector<BND_Point3d> a1_v = RH3DM_JsSeq<BND_Point3d>(a1); return BND_Box(a0, a1_v); }()); }
-        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis") && RH3DM_JsHasFields(v1, "Min,Max")) { BND_Plane a0 = v0.as<BND_Plane>(); BND_BoundingBox a1 = v1.as<BND_BoundingBox>(); return emscripten::val([&]() { return BND_Box(a0, a1); }()); }
+        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis") && RH3DM_JsIsSeq(v1)) { BND_Plane a0 = RH3DM_JsAs<BND_Plane>(v0); emscripten::val a1 = RH3DM_JsAs<emscripten::val>(v1); return RH3DM_JsVal([&]() { std::vector<BND_Point3d> a1_v = RH3DM_JsSeq<BND_Point3d>(a1); return BND_Box(a0, a1_v); }()); }
+        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis") && RH3DM_JsHasFields(v1, "Min,Max")) { BND_Plane a0 = RH3DM_JsAs<BND_Plane>(v0); BND_BoundingBox a1 = RH3DM_JsAs<BND_BoundingBox>(v1); return RH3DM_JsVal([&]() { return BND_Box(a0, a1); }()); }
         throw std::invalid_argument("Box.create: no overload matches the arguments"); }))
       .class_function("empty", optional_override([]() { return BND_Box::Empty(); }))
       .class_function("unset", optional_override([]() { return BND_Box::Unset(); }))
@@ -555,21 +557,21 @@ void initGenBox(void)
       .class_function("closestPoint", optional_override([](BND_Box a0, BND_Point3d a1) { return a0.ClosestPoint(a1); }))
       .class_function("closestPoint", optional_override([](BND_Box a0, BND_Point3d a1, bool a2) { return a0.ClosestPoint(a1, a2); }))
       .class_function("furthestPoint", optional_override([](BND_Box a0, BND_Point3d a1) { return a0.FurthestPoint(a1); }))
-      .class_function("inflate", optional_override([](emscripten::val v0, double a1) { BND_Box a0 = v0.as<BND_Box>(); a0.Inflate(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
-      .class_function("inflate", optional_override([](emscripten::val v0, double a1, double a2, double a3) { BND_Box a0 = v0.as<BND_Box>(); a0.Inflate(a1, a2, a3); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("inflate", optional_override([](emscripten::val v0, double a1) { BND_Box a0 = RH3DM_JsAs<BND_Box>(v0); a0.Inflate(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("inflate", optional_override([](emscripten::val v0, double a1, double a2, double a3) { BND_Box a0 = RH3DM_JsAs<BND_Box>(v0); a0.Inflate(a1, a2, a3); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("contains", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "Plane,X,Y,Z") && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) { BND_Box a0 = v0.as<BND_Box>(); BND_Point3d a1 = v1.as<BND_Point3d>(); return emscripten::val([&]() { return a0.Contains(a1); }()); }
-        if (RH3DM_JsHasFields(v0, "Plane,X,Y,Z") && RH3DM_JsHasFields(v1, "Min,Max")) { BND_Box a0 = v0.as<BND_Box>(); BND_BoundingBox a1 = v1.as<BND_BoundingBox>(); return emscripten::val([&]() { return a0.Contains(a1); }()); }
-        if (RH3DM_JsHasFields(v0, "Plane,X,Y,Z") && RH3DM_JsHasFields(v1, "Plane,X,Y,Z")) { BND_Box a0 = v0.as<BND_Box>(); BND_Box a1 = v1.as<BND_Box>(); return emscripten::val([&]() { return a0.Contains(a1); }()); }
+        if (RH3DM_JsHasFields(v0, "Plane,X,Y,Z") && RH3DM_JsHasFields(v1, "Z#")) { BND_Box a0 = RH3DM_JsAs<BND_Box>(v0); BND_Point3d a1 = RH3DM_JsAs<BND_Point3d>(v1); return RH3DM_JsVal([&]() { return a0.Contains(a1); }()); }
+        if (RH3DM_JsHasFields(v0, "Plane,X,Y,Z") && RH3DM_JsHasFields(v1, "Min,Max")) { BND_Box a0 = RH3DM_JsAs<BND_Box>(v0); BND_BoundingBox a1 = RH3DM_JsAs<BND_BoundingBox>(v1); return RH3DM_JsVal([&]() { return a0.Contains(a1); }()); }
+        if (RH3DM_JsHasFields(v0, "Plane,X,Y,Z") && RH3DM_JsHasFields(v1, "Plane,X,Y,Z")) { BND_Box a0 = RH3DM_JsAs<BND_Box>(v0); BND_Box a1 = RH3DM_JsAs<BND_Box>(v1); return RH3DM_JsVal([&]() { return a0.Contains(a1); }()); }
         throw std::invalid_argument("Box.contains: no overload matches the arguments"); }))
       .class_function("contains", optional_override([](emscripten::val v0, emscripten::val v1, emscripten::val v2) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "Plane,X,Y,Z") && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber()) && (v2.typeOf().as<std::string>() == "boolean")) { BND_Box a0 = v0.as<BND_Box>(); BND_Point3d a1 = v1.as<BND_Point3d>(); bool a2 = v2.as<bool>(); return emscripten::val([&]() { return a0.Contains(a1, a2); }()); }
-        if (RH3DM_JsHasFields(v0, "Plane,X,Y,Z") && RH3DM_JsHasFields(v1, "Min,Max") && (v2.typeOf().as<std::string>() == "boolean")) { BND_Box a0 = v0.as<BND_Box>(); BND_BoundingBox a1 = v1.as<BND_BoundingBox>(); bool a2 = v2.as<bool>(); return emscripten::val([&]() { return a0.Contains(a1, a2); }()); }
-        if (RH3DM_JsHasFields(v0, "Plane,X,Y,Z") && RH3DM_JsHasFields(v1, "Plane,X,Y,Z") && (v2.typeOf().as<std::string>() == "boolean")) { BND_Box a0 = v0.as<BND_Box>(); BND_Box a1 = v1.as<BND_Box>(); bool a2 = v2.as<bool>(); return emscripten::val([&]() { return a0.Contains(a1, a2); }()); }
+        if (RH3DM_JsHasFields(v0, "Plane,X,Y,Z") && RH3DM_JsHasFields(v1, "Z#") && (v2.isTrue() || v2.isFalse())) { BND_Box a0 = RH3DM_JsAs<BND_Box>(v0); BND_Point3d a1 = RH3DM_JsAs<BND_Point3d>(v1); bool a2 = RH3DM_JsAs<bool>(v2); return RH3DM_JsVal([&]() { return a0.Contains(a1, a2); }()); }
+        if (RH3DM_JsHasFields(v0, "Plane,X,Y,Z") && RH3DM_JsHasFields(v1, "Min,Max") && (v2.isTrue() || v2.isFalse())) { BND_Box a0 = RH3DM_JsAs<BND_Box>(v0); BND_BoundingBox a1 = RH3DM_JsAs<BND_BoundingBox>(v1); bool a2 = RH3DM_JsAs<bool>(v2); return RH3DM_JsVal([&]() { return a0.Contains(a1, a2); }()); }
+        if (RH3DM_JsHasFields(v0, "Plane,X,Y,Z") && RH3DM_JsHasFields(v1, "Plane,X,Y,Z") && (v2.isTrue() || v2.isFalse())) { BND_Box a0 = RH3DM_JsAs<BND_Box>(v0); BND_Box a1 = RH3DM_JsAs<BND_Box>(v1); bool a2 = RH3DM_JsAs<bool>(v2); return RH3DM_JsVal([&]() { return a0.Contains(a1, a2); }()); }
         throw std::invalid_argument("Box.contains: no overload matches the arguments"); }))
       .class_function("getCorners", optional_override([](BND_Box a0) { return RH3DM_JsArray(a0.GetCorners()); }))
-      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Box a0 = v0.as<BND_Box>(); auto r = a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
-      .class_function("repositionBasePlane", optional_override([](emscripten::val v0, BND_Point3d a1) { BND_Box a0 = v0.as<BND_Box>(); a0.RepositionBasePlane(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Box a0 = RH3DM_JsAs<BND_Box>(v0); auto r = a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("repositionBasePlane", optional_override([](emscripten::val v0, BND_Point3d a1) { BND_Box a0 = RH3DM_JsAs<BND_Box>(v0); a0.RepositionBasePlane(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("epsilonEquals", optional_override([](BND_Box a0, BND_Box a1, double a2) { return a0.EpsilonEquals(a1, a2); }));
 }
 #endif

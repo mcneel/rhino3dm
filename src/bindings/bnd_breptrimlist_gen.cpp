@@ -92,8 +92,8 @@ void initGenBrepTrimList(void)
       .function("matchEnds", &BND_BrepTrimList::Gen_MatchEnds)
       .function("add", &BND_BrepTrimList::Gen_Add_2, allow_raw_pointers())
       .function("add", optional_override([](BND_BrepTrimList& self, emscripten::val v0, emscripten::val v1, emscripten::val v2) -> BND_BrepTrim* {
-        if ((v0.typeOf().as<std::string>() == "boolean") && v1.instanceof(emscripten::val::module_property("BrepEdge")) && v2.isNumber()) return self.Gen_Add_3(v0.as<bool>(), *v1.as<BND_BrepEdge*>(emscripten::allow_raw_pointers()), v2.as<int>());
-        if ((v0.typeOf().as<std::string>() == "boolean") && v1.instanceof(emscripten::val::module_property("BrepLoop")) && v2.isNumber()) return self.Gen_Add_4(v0.as<bool>(), *v1.as<BND_BrepLoop*>(emscripten::allow_raw_pointers()), v2.as<int>());
+        if ((v0.isTrue() || v0.isFalse()) && v1.instanceof(emscripten::val::module_property("BrepEdge")) && v2.isNumber()) return self.Gen_Add_3(v0.isTrue(), *v1.as<BND_BrepEdge*>(emscripten::allow_raw_pointers()), v2.as<int>());
+        if ((v0.isTrue() || v0.isFalse()) && v1.instanceof(emscripten::val::module_property("BrepLoop")) && v2.isNumber()) return self.Gen_Add_4(v0.isTrue(), *v1.as<BND_BrepLoop*>(emscripten::allow_raw_pointers()), v2.as<int>());
         throw std::invalid_argument("BrepTrimList.add: no overload matches the arguments"); }), allow_raw_pointers())
       .function("addCurveOnFace", &BND_BrepTrimList::Gen_AddCurveOnFace, allow_raw_pointers())
       .function("addSingularTrim", &BND_BrepTrimList::Gen_AddSingularTrim, allow_raw_pointers());

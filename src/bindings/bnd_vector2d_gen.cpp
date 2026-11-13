@@ -351,6 +351,8 @@ using namespace emscripten;
 struct RH3DM_Vector2dFns {};
 void initGenVector2d(void)
 {
+  static_assert(sizeof(BND_Vector2d) == 16 && offsetof(BND_Vector2d, m_x) == 0 && offsetof(BND_Vector2d, m_y) == 8,
+                "BND_Vector2d: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_Vector2d>("Vector2dValue")
       .field("X", &BND_Vector2d::m_x)
       .field("Y", &BND_Vector2d::m_y);
@@ -359,9 +361,9 @@ void initGenVector2d(void)
       .class_function("create", optional_override([](double a0, double a1) { return BND_Vector2d(a0, a1); }))
       .class_function("Length", optional_override([](BND_Vector2d a0) { return a0.Length(); }))
       .class_function("multiply", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "X,Y") && v1.isNumber()) { BND_Vector2d a0 = v0.as<BND_Vector2d>(); double a1 = v1.as<double>(); return emscripten::val([&]() { return a0 * a1; }()); }
-        if (v0.isNumber() && RH3DM_JsHasFields(v1, "X,Y")) { double a0 = v0.as<double>(); BND_Vector2d a1 = v1.as<BND_Vector2d>(); return emscripten::val([&]() { return a0 * a1; }()); }
-        if (RH3DM_JsHasFields(v0, "X,Y") && RH3DM_JsHasFields(v1, "X,Y")) { BND_Vector2d a0 = v0.as<BND_Vector2d>(); BND_Vector2d a1 = v1.as<BND_Vector2d>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y") && v1.isNumber()) { BND_Vector2d a0 = RH3DM_JsAs<BND_Vector2d>(v0); double a1 = RH3DM_JsAs<double>(v1); return RH3DM_JsVal([&]() { return a0 * a1; }()); }
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "X,Y")) { double a0 = RH3DM_JsAs<double>(v0); BND_Vector2d a1 = RH3DM_JsAs<BND_Vector2d>(v1); return RH3DM_JsVal([&]() { return a0 * a1; }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y") && RH3DM_JsHasFields(v1, "X,Y")) { BND_Vector2d a0 = RH3DM_JsAs<BND_Vector2d>(v0); BND_Vector2d a1 = RH3DM_JsAs<BND_Vector2d>(v1); return RH3DM_JsVal([&]() { return a0 * a1; }()); }
         throw std::invalid_argument("Vector2d.multiply: no overload matches the arguments"); }))
       .class_function("divide", optional_override([](BND_Vector2d a0, double a1) { return a0 / a1; }))
       .class_function("add", optional_override([](BND_Vector2d a0, BND_Vector2d a1) { return a0 + a1; }))
@@ -377,8 +379,8 @@ void initGenVector2d(void)
       .class_function("squareLength", optional_override([](BND_Vector2d a0) { return a0.SquareLength(); }))
       .class_function("isTiny", optional_override([](BND_Vector2d a0, double a1) { return a0.IsTiny(a1); }))
       .class_function("isTiny", optional_override([](BND_Vector2d a0) { return a0.IsTiny(); }))
-      .class_function("unitize", optional_override([](emscripten::val v0) { BND_Vector2d a0 = v0.as<BND_Vector2d>(); auto r = a0.Unitize(); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
-      .class_function("rotate", optional_override([](emscripten::val v0, double a1) { BND_Vector2d a0 = v0.as<BND_Vector2d>(); auto r = a0.Rotate(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("unitize", optional_override([](emscripten::val v0) { BND_Vector2d a0 = RH3DM_JsAs<BND_Vector2d>(v0); auto r = a0.Unitize(); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("rotate", optional_override([](emscripten::val v0, double a1) { BND_Vector2d a0 = RH3DM_JsAs<BND_Vector2d>(v0); auto r = a0.Rotate(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
       .class_function("encode", &BND_Vector2d_Encode, allow_raw_pointers());
 }
 #endif

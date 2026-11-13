@@ -157,6 +157,8 @@ using namespace emscripten;
 struct RH3DM_ConeFns {};
 void initGenCone(void)
 {
+  static_assert(sizeof(BND_Cone) == 144 && offsetof(BND_Cone, m_baseplane) == 0 && offsetof(BND_Cone, m_height) == 128 && offsetof(BND_Cone, m_radius) == 136,
+                "BND_Cone: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_Cone>("ConeValue")
       .field("Plane", &BND_Cone::m_baseplane)
       .field("Height", &BND_Cone::m_height)

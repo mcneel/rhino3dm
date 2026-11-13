@@ -120,6 +120,8 @@ using namespace emscripten;
 struct RH3DM_EllipseFns {};
 void initGenEllipse(void)
 {
+  static_assert(sizeof(BND_Ellipse) == 144 && offsetof(BND_Ellipse, m_plane) == 0 && offsetof(BND_Ellipse, m_radius1) == 128 && offsetof(BND_Ellipse, m_radius2) == 136,
+                "BND_Ellipse: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_Ellipse>("EllipseValue")
       .field("Plane", &BND_Ellipse::m_plane)
       .field("Radius1", &BND_Ellipse::m_radius1)
@@ -127,8 +129,8 @@ void initGenEllipse(void)
   class_<RH3DM_EllipseFns>("Ellipse")
       .class_function("create", optional_override([]() { return BND_Ellipse(); }))
       .class_function("create", optional_override([](emscripten::val v0, emscripten::val v1, emscripten::val v2) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis") && v1.isNumber() && v2.isNumber()) { BND_Plane a0 = v0.as<BND_Plane>(); double a1 = v1.as<double>(); double a2 = v2.as<double>(); return emscripten::val([&]() { return BND_Ellipse(a0, a1, a2); }()); }
-        if ((RH3DM_JsHasFields(v0, "Z") && v0["Z"].isNumber()) && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber()) && (RH3DM_JsHasFields(v2, "Z") && v2["Z"].isNumber())) { BND_Point3d a0 = v0.as<BND_Point3d>(); BND_Point3d a1 = v1.as<BND_Point3d>(); BND_Point3d a2 = v2.as<BND_Point3d>(); return emscripten::val([&]() { return BND_Ellipse(a0, a1, a2); }()); }
+        if (RH3DM_JsHasFields(v0, "Origin,XAxis,YAxis,ZAxis") && v1.isNumber() && v2.isNumber()) { BND_Plane a0 = RH3DM_JsAs<BND_Plane>(v0); double a1 = RH3DM_JsAs<double>(v1); double a2 = RH3DM_JsAs<double>(v2); return RH3DM_JsVal([&]() { return BND_Ellipse(a0, a1, a2); }()); }
+        if (RH3DM_JsHasFields(v0, "Z#") && RH3DM_JsHasFields(v1, "Z#") && RH3DM_JsHasFields(v2, "Z#")) { BND_Point3d a0 = RH3DM_JsAs<BND_Point3d>(v0); BND_Point3d a1 = RH3DM_JsAs<BND_Point3d>(v1); BND_Point3d a2 = RH3DM_JsAs<BND_Point3d>(v2); return RH3DM_JsVal([&]() { return BND_Ellipse(a0, a1, a2); }()); }
         throw std::invalid_argument("Ellipse.create: no overload matches the arguments"); }))
       .class_function("center", optional_override([](BND_Ellipse a0) { return a0.Center(); }))
       .class_function("epsilonEquals", optional_override([](BND_Ellipse a0, BND_Ellipse a1, double a2) { return a0.EpsilonEquals(a1, a2); }));

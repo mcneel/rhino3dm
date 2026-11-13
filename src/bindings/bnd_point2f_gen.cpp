@@ -276,6 +276,8 @@ using namespace emscripten;
 struct RH3DM_Point2fFns {};
 void initGenPoint2f(void)
 {
+  static_assert(sizeof(BND_Point2f) == 8 && offsetof(BND_Point2f, m_x) == 0 && offsetof(BND_Point2f, m_y) == 4,
+                "BND_Point2f: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_Point2f>("Point2fValue")
       .field("X", &BND_Point2f::m_x)
       .field("Y", &BND_Point2f::m_y);
@@ -289,8 +291,8 @@ void initGenPoint2f(void)
       .class_function("compareTo", optional_override([](BND_Point2f a0, BND_Point2f a1) { return a0.CompareTo(a1); }))
       .class_function("ToString", optional_override([](BND_Point2f a0) { return a0.ToString(); }))
       .class_function("multiply", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "X,Y") && v1.isNumber()) { BND_Point2f a0 = v0.as<BND_Point2f>(); float a1 = v1.as<float>(); return emscripten::val([&]() { return a0 * a1; }()); }
-        if (v0.isNumber() && RH3DM_JsHasFields(v1, "X,Y")) { float a0 = v0.as<float>(); BND_Point2f a1 = v1.as<BND_Point2f>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y") && v1.isNumber()) { BND_Point2f a0 = RH3DM_JsAs<BND_Point2f>(v0); float a1 = RH3DM_JsAs<float>(v1); return RH3DM_JsVal([&]() { return a0 * a1; }()); }
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "X,Y")) { float a0 = RH3DM_JsAs<float>(v0); BND_Point2f a1 = RH3DM_JsAs<BND_Point2f>(v1); return RH3DM_JsVal([&]() { return a0 * a1; }()); }
         throw std::invalid_argument("Point2f.multiply: no overload matches the arguments"); }))
       .class_function("divide", optional_override([](BND_Point2f a0, float a1) { return a0 / a1; }))
       .class_function("negate", optional_override([](BND_Point2f a0) { return -a0; }))

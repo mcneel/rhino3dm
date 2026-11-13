@@ -157,3 +157,69 @@ test('overloadDispatchNullReachesTheObjectOverload', () => {
   const pc = new rhino.PolyCurve()
   expect(pc.append(null)).toBe(false)
 })
+
+test('valueObjectsKeepEveryFieldAcrossTheBoundary', () => {
+  // a value object arrives in C++ and comes back with every field, nested ones included, floats as floats
+  const iv = (a, b) => new rhino.Interval(a, b)
+  const plane = { Origin: { X: 1, Y: 2, Z: 3 }, XAxis: { X: 1, Y: 0, Z: 0 }, YAxis: { X: 0, Y: 1, Z: 0 }, ZAxis: { X: 0, Y: 0, Z: 1 } }
+  const box = new rhino.Box(plane, iv(0.5, 1.5), iv(2, 3), iv(-4, 5))
+  expect(box).toEqual({ Plane: { Origin: { X: 1, Y: 2, Z: 3 }, XAxis: { X: 1, Y: 0, Z: 0 }, YAxis: { X: 0, Y: 1, Z: 0 },
+                                 ZAxis: { X: 0, Y: 0, Z: 1 } }, X: { T0: 0.5, T1: 1.5 }, Y: { T0: 2, T1: 3 }, Z: { T0: -4, T1: 5 } })
+  expect(Object.keys(box)).toEqual(['Plane', 'X', 'Y', 'Z'])
+  expect(rhino.Box.contains(box, new rhino.Point3d(2, 4.5, 3))).toBe(true)
+  expect(rhino.Transform.multiply(rhino.Transform.translation(1, 2, 3), rhino.Transform.translation(10, 20, 30)))
+    .toEqual(rhino.Transform.translation(11, 22, 33))
+  expect(new rhino.Point3f(0.1, 0.2, 0.3)).toEqual({ X: Math.fround(0.1), Y: Math.fround(0.2), Z: Math.fround(0.3) })
+  const mesh = new rhino.Mesh()
+  for (const [x, y] of [[0, 0], [1, 0], [1, 1], [0, 1]]) mesh.vertices.add(x, y, 0)
+  mesh.faces.addFace(0, 1, 2, 3)
+  expect(mesh.faces.get(0)).toEqual({ A: 0, B: 1, C: 2, D: 3 })
+  expect(rhino.Point3d.distanceTo({ X: '3', Y: 0, Z: 0 }, { X: 0, Y: 4, Z: 0 })).toBe(5)   // numbers are coerced, as before
+  mesh.delete()
+})
+
+test('valueObjectMissingAFieldThrows', () => {
+  // a value object without one of its fields is a TypeError naming the field, at any depth
+  const p = new rhino.Point3d(0, 0, 0)
+  helpers.raises(rhino, () => rhino.Point3d.distanceTo({ X: 1, Y: 2 }, p), /Missing field: "Z"/)
+  helpers.raises(rhino, () => rhino.Point3d.transform({ X: 1 }, rhino.Transform.identity), /Missing field: "Y"/)
+  const plane = { Origin: { X: 1, Y: 2 }, XAxis: new rhino.Vector3d(1, 0, 0), YAxis: new rhino.Vector3d(0, 1, 0), ZAxis: new rhino.Vector3d(0, 0, 1) }
+  helpers.raises(rhino, () => rhino.Plane.closestPoint(plane, p), /Missing field: "Z"/)
+  expect(() => rhino.Point3d.distanceTo(null, p)).toThrow(TypeError)
+})
+
+test('valueMutatorWritesIntoTheObjectPassed', () => {
+  // a mutating member changes the caller's object in place and keeps its other properties
+  const p = { X: 1, Y: 2, Z: 3, tag: 'mine' }
+  expect(rhino.Point3d.transform(p, rhino.Transform.translation(10, 20, 30))).toBeUndefined()
+  expect(p).toEqual({ X: 11, Y: 22, Z: 33, tag: 'mine' })
+})
+
+test('valueObjectsCrossAfterTheHeapGrows', () => {
+  // value objects still cross correctly once wasm memory has grown
+  const before = rhino.Point3d.add(new rhino.Point3d(1, 2, 3), new rhino.Point3d(10, 20, 30))
+  const mesh = new rhino.Mesh()
+  for (let i = 0; i < 1500000; i++) mesh.vertices.add(i, 0, 0)       // tens of megabytes: past the initial heap
+  expect(mesh.vertices.get(1499999)).toEqual({ X: 1499999, Y: 0, Z: 0 })
+  expect(rhino.Point3d.add(new rhino.Point3d(1, 2, 3), new rhino.Point3d(10, 20, 30))).toEqual(before)
+  expect(rhino.Plane.closestPoint(rhino.Plane.worldXY, new rhino.Point3d(4, 5, 6))).toEqual({ X: 4, Y: 5, Z: 0 })
+  mesh.delete()
+})
+
+test('tableIteratorFollowsTheIteratorProtocol', () => {
+  // next() yields { done: false, value } per item, then { done: true }; the iterator is its own iterable
+  const f = new rhino.File3dm()
+  f.objects.addPoint(new rhino.Point3d(1, 2, 3), null)
+  f.objects.addPoint(new rhino.Point3d(4, 5, 6), null)
+  const it = f.objects.iterator()
+  expect(it[Symbol.iterator]()).toBe(it)
+  const first = it.next()
+  expect(Object.keys(first).sort()).toEqual(['done', 'value'])
+  expect(first.done).toBe(false)
+  expect(first.value.geometry.location).toEqual({ X: 1, Y: 2, Z: 3 })
+  expect(it.next().value.geometry.location).toEqual({ X: 4, Y: 5, Z: 6 })
+  expect(it.next()).toEqual({ done: true })
+  expect(it.next()).toEqual({ done: true })
+  expect([...f.objects].length).toBe(2)
+  f.delete()
+})

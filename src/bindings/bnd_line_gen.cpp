@@ -457,6 +457,8 @@ using namespace emscripten;
 struct RH3DM_LineFns {};
 void initGenLine(void)
 {
+  static_assert(sizeof(BND_Line) == 48 && offsetof(BND_Line, m_from) == 0 && offsetof(BND_Line, m_to) == 24,
+                "BND_Line: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_Line>("LineValue")
       .field("From", &BND_Line::m_from)
       .field("To", &BND_Line::m_to);
@@ -480,29 +482,29 @@ void initGenLine(void)
       .class_function("equals", optional_override([](BND_Line a0, BND_Line a1) { return a0 == a1; }))
       .class_function("epsilonEquals", optional_override([](BND_Line a0, BND_Line a1, double a2) { return a0.EpsilonEquals(a1, a2); }))
       .class_function("ToString", optional_override([](BND_Line a0) { return a0.ToString(); }))
-      .class_function("flip", optional_override([](emscripten::val v0) { BND_Line a0 = v0.as<BND_Line>(); a0.Flip(); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("flip", optional_override([](emscripten::val v0) { BND_Line a0 = RH3DM_JsAs<BND_Line>(v0); a0.Flip(); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
       .class_function("pointAt", optional_override([](BND_Line a0, double a1) { return a0.PointAt(a1); }))
       .class_function("closestParameter", optional_override([](BND_Line a0, BND_Point3d a1) { return a0.ClosestParameter(a1); }))
       .class_function("closestPoint", optional_override([](BND_Line a0, BND_Point3d a1, bool a2) { return a0.ClosestPoint(a1, a2); }))
       .class_function("distanceTo", optional_override([](BND_Line a0, BND_Point3d a1, bool a2) { return a0.DistanceTo(a1, a2); }))
       .class_function("minimumDistanceTo", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "From,To") && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) { BND_Line a0 = v0.as<BND_Line>(); BND_Point3d a1 = v1.as<BND_Point3d>(); return emscripten::val([&]() { return a0.MinimumDistanceTo(a1); }()); }
-        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "From,To")) { BND_Line a0 = v0.as<BND_Line>(); BND_Line a1 = v1.as<BND_Line>(); return emscripten::val([&]() { return a0.MinimumDistanceTo(a1); }()); }
+        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "Z#")) { BND_Line a0 = RH3DM_JsAs<BND_Line>(v0); BND_Point3d a1 = RH3DM_JsAs<BND_Point3d>(v1); return RH3DM_JsVal([&]() { return a0.MinimumDistanceTo(a1); }()); }
+        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "From,To")) { BND_Line a0 = RH3DM_JsAs<BND_Line>(v0); BND_Line a1 = RH3DM_JsAs<BND_Line>(v1); return RH3DM_JsVal([&]() { return a0.MinimumDistanceTo(a1); }()); }
         throw std::invalid_argument("Line.minimumDistanceTo: no overload matches the arguments"); }))
       .class_function("maximumDistanceTo", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "From,To") && (RH3DM_JsHasFields(v1, "Z") && v1["Z"].isNumber())) { BND_Line a0 = v0.as<BND_Line>(); BND_Point3d a1 = v1.as<BND_Point3d>(); return emscripten::val([&]() { return a0.MaximumDistanceTo(a1); }()); }
-        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "From,To")) { BND_Line a0 = v0.as<BND_Line>(); BND_Line a1 = v1.as<BND_Line>(); return emscripten::val([&]() { return a0.MaximumDistanceTo(a1); }()); }
+        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "Z#")) { BND_Line a0 = RH3DM_JsAs<BND_Line>(v0); BND_Point3d a1 = RH3DM_JsAs<BND_Point3d>(v1); return RH3DM_JsVal([&]() { return a0.MaximumDistanceTo(a1); }()); }
+        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "From,To")) { BND_Line a0 = RH3DM_JsAs<BND_Line>(v0); BND_Line a1 = RH3DM_JsAs<BND_Line>(v1); return RH3DM_JsVal([&]() { return a0.MaximumDistanceTo(a1); }()); }
         throw std::invalid_argument("Line.maximumDistanceTo: no overload matches the arguments"); }))
-      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Line a0 = v0.as<BND_Line>(); auto r = a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Line a0 = RH3DM_JsAs<BND_Line>(v0); auto r = a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
       .class_function("pointAtLength", optional_override([](BND_Line a0, double a1) { return a0.PointAtLength(a1); }))
-      .class_function("extend", optional_override([](emscripten::val v0, double a1, double a2) { BND_Line a0 = v0.as<BND_Line>(); auto r = a0.Extend(a1, a2); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("extend", optional_override([](emscripten::val v0, double a1, double a2) { BND_Line a0 = RH3DM_JsAs<BND_Line>(v0); auto r = a0.Extend(a1, a2); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
       .class_function("extendThroughBox", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "Min,Max")) { BND_Line a0 = v0.as<BND_Line>(); BND_BoundingBox a1 = v1.as<BND_BoundingBox>(); return emscripten::val([&]() { auto r = a0.ExtendThroughBox(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }()); }
-        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "Plane,X,Y,Z")) { BND_Line a0 = v0.as<BND_Line>(); BND_Box a1 = v1.as<BND_Box>(); return emscripten::val([&]() { auto r = a0.ExtendThroughBox(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }()); }
+        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "Min,Max")) { BND_Line a0 = RH3DM_JsAs<BND_Line>(v0); BND_BoundingBox a1 = RH3DM_JsAs<BND_BoundingBox>(v1); return RH3DM_JsVal([&]() { auto r = a0.ExtendThroughBox(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }()); }
+        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "Plane,X,Y,Z")) { BND_Line a0 = RH3DM_JsAs<BND_Line>(v0); BND_Box a1 = RH3DM_JsAs<BND_Box>(v1); return RH3DM_JsVal([&]() { auto r = a0.ExtendThroughBox(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }()); }
         throw std::invalid_argument("Line.extendThroughBox: no overload matches the arguments"); }))
       .class_function("extendThroughBox", optional_override([](emscripten::val v0, emscripten::val v1, emscripten::val v2) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "Min,Max") && v2.isNumber()) { BND_Line a0 = v0.as<BND_Line>(); BND_BoundingBox a1 = v1.as<BND_BoundingBox>(); double a2 = v2.as<double>(); return emscripten::val([&]() { auto r = a0.ExtendThroughBox(a1, a2); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }()); }
-        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "Plane,X,Y,Z") && v2.isNumber()) { BND_Line a0 = v0.as<BND_Line>(); BND_Box a1 = v1.as<BND_Box>(); double a2 = v2.as<double>(); return emscripten::val([&]() { auto r = a0.ExtendThroughBox(a1, a2); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }()); }
+        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "Min,Max") && v2.isNumber()) { BND_Line a0 = RH3DM_JsAs<BND_Line>(v0); BND_BoundingBox a1 = RH3DM_JsAs<BND_BoundingBox>(v1); double a2 = RH3DM_JsAs<double>(v2); return RH3DM_JsVal([&]() { auto r = a0.ExtendThroughBox(a1, a2); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }()); }
+        if (RH3DM_JsHasFields(v0, "From,To") && RH3DM_JsHasFields(v1, "Plane,X,Y,Z") && v2.isNumber()) { BND_Line a0 = RH3DM_JsAs<BND_Line>(v0); BND_Box a1 = RH3DM_JsAs<BND_Box>(v1); double a2 = RH3DM_JsAs<double>(v2); return RH3DM_JsVal([&]() { auto r = a0.ExtendThroughBox(a1, a2); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }()); }
         throw std::invalid_argument("Line.extendThroughBox: no overload matches the arguments"); }))
       .class_function("tryGetPlane", optional_override([](BND_Line a0) { BND_Plane plane{}; auto r = a0.TryGetPlane(plane); emscripten::val arr = emscripten::val::array(); arr.call<void>("push", r); arr.call<void>("push", plane); return arr; }));
 }

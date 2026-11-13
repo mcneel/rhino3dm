@@ -471,6 +471,8 @@ using namespace emscripten;
 struct RH3DM_Vector3fFns {};
 void initGenVector3f(void)
 {
+  static_assert(sizeof(BND_Vector3f) == 12 && offsetof(BND_Vector3f, m_x) == 0 && offsetof(BND_Vector3f, m_y) == 4 && offsetof(BND_Vector3f, m_z) == 8,
+                "BND_Vector3f: the layout bnd_pre_gen.js reads (G153)");
   value_object<BND_Vector3f>("Vector3fValue")
       .field("X", &BND_Vector3f::m_x)
       .field("Y", &BND_Vector3f::m_y)
@@ -490,18 +492,18 @@ void initGenVector3f(void)
       .class_function("epsilonEquals", optional_override([](BND_Vector3f a0, BND_Vector3f a1, float a2) { return a0.EpsilonEquals(a1, a2); }))
       .class_function("compareTo", optional_override([](BND_Vector3f a0, BND_Vector3f a1) { return a0.CompareTo(a1); }))
       .class_function("ToString", optional_override([](BND_Vector3f a0) { return a0.ToString(); }))
-      .class_function("unitize", optional_override([](emscripten::val v0) { BND_Vector3f a0 = v0.as<BND_Vector3f>(); auto r = a0.Unitize(); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
-      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Vector3f a0 = v0.as<BND_Vector3f>(); a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
-      .class_function("rotate", optional_override([](emscripten::val v0, double a1, BND_Vector3f a2) { BND_Vector3f a0 = v0.as<BND_Vector3f>(); auto r = a0.Rotate(a1, a2); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
-      .class_function("reverse", optional_override([](emscripten::val v0) { BND_Vector3f a0 = v0.as<BND_Vector3f>(); auto r = a0.Reverse(); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
-      .class_function("perpendicularTo", optional_override([](emscripten::val v0, BND_Vector3f a1) { BND_Vector3f a0 = v0.as<BND_Vector3f>(); auto r = a0.PerpendicularTo(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("unitize", optional_override([](emscripten::val v0) { BND_Vector3f a0 = RH3DM_JsAs<BND_Vector3f>(v0); auto r = a0.Unitize(); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("transform", optional_override([](emscripten::val v0, BND_Transform a1) { BND_Vector3f a0 = RH3DM_JsAs<BND_Vector3f>(v0); a0.Transform(a1); RH3DM_JsAssign(v0, a0); return emscripten::val::undefined(); }))
+      .class_function("rotate", optional_override([](emscripten::val v0, double a1, BND_Vector3f a2) { BND_Vector3f a0 = RH3DM_JsAs<BND_Vector3f>(v0); auto r = a0.Rotate(a1, a2); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("reverse", optional_override([](emscripten::val v0) { BND_Vector3f a0 = RH3DM_JsAs<BND_Vector3f>(v0); auto r = a0.Reverse(); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
+      .class_function("perpendicularTo", optional_override([](emscripten::val v0, BND_Vector3f a1) { BND_Vector3f a0 = RH3DM_JsAs<BND_Vector3f>(v0); auto r = a0.PerpendicularTo(a1); RH3DM_JsAssign(v0, a0); return emscripten::val(r); }))
       .class_function("add", optional_override([](BND_Vector3f a0, BND_Vector3f a1) { return a0 + a1; }))
       .class_function("negate", optional_override([](BND_Vector3f a0) { return -a0; }))
       .class_function("subtract", optional_override([](BND_Vector3f a0, BND_Vector3f a1) { return a0 - a1; }))
       .class_function("multiply", optional_override([](emscripten::val v0, emscripten::val v1) -> emscripten::val {
-        if (RH3DM_JsHasFields(v0, "X,Y,Z") && v1.isNumber()) { BND_Vector3f a0 = v0.as<BND_Vector3f>(); float a1 = v1.as<float>(); return emscripten::val([&]() { return a0 * a1; }()); }
-        if (RH3DM_JsHasFields(v0, "X,Y,Z") && RH3DM_JsHasFields(v1, "X,Y,Z")) { BND_Vector3f a0 = v0.as<BND_Vector3f>(); BND_Vector3f a1 = v1.as<BND_Vector3f>(); return emscripten::val([&]() { return a0 * a1; }()); }
-        if (v0.isNumber() && RH3DM_JsHasFields(v1, "X,Y,Z")) { float a0 = v0.as<float>(); BND_Vector3f a1 = v1.as<BND_Vector3f>(); return emscripten::val([&]() { return a0 * a1; }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y,Z") && v1.isNumber()) { BND_Vector3f a0 = RH3DM_JsAs<BND_Vector3f>(v0); float a1 = RH3DM_JsAs<float>(v1); return RH3DM_JsVal([&]() { return a0 * a1; }()); }
+        if (RH3DM_JsHasFields(v0, "X,Y,Z") && RH3DM_JsHasFields(v1, "X,Y,Z")) { BND_Vector3f a0 = RH3DM_JsAs<BND_Vector3f>(v0); BND_Vector3f a1 = RH3DM_JsAs<BND_Vector3f>(v1); return RH3DM_JsVal([&]() { return a0 * a1; }()); }
+        if (v0.isNumber() && RH3DM_JsHasFields(v1, "X,Y,Z")) { float a0 = RH3DM_JsAs<float>(v0); BND_Vector3f a1 = RH3DM_JsAs<BND_Vector3f>(v1); return RH3DM_JsVal([&]() { return a0 * a1; }()); }
         throw std::invalid_argument("Vector3f.multiply: no overload matches the arguments"); }))
       .class_function("divide", optional_override([](BND_Vector3f a0, double a1) { return a0 / a1; }))
       .class_function("crossProduct", optional_override([](BND_Vector3f a0, BND_Vector3f a1) { return BND_Vector3f::CrossProduct(a0, a1); }))

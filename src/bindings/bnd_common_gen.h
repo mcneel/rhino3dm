@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <ctime>
 #include <cstring>
+#include <cstddef>
 #include <unordered_map>
 
 // The real C-layer contract header: blittable structs, RHMONO_STRING, and
@@ -28,6 +29,30 @@
 #undef RH3DM_GEN_TEMP_DEF
 #endif
 ON_Plane FromPlaneStruct(const ON_PLANE_STRUCT& ps);
+
+// G155: what a File3dm view (file, id) resolved last. RhinoCommon looks the id up on every access;
+// the result is reused here while the file's manifest is unchanged. Adding, removing or renaming a
+// component changes the manifest's version (ON_ComponentManifestImpl::RemoveItem, before
+// ONX_Model::RemoveModelComponent lets the component go), so a view whose object left the file
+// looks again, and throws.
+struct RH3DM_ViewCache {
+  void* p = nullptr;
+  ON__UINT64 ver = 0;
+  template <class F> void* Get(const ONX_Model* model, F resolve) {
+    if (!model) return resolve();
+    const ON__UINT64 v = model->Manifest().ManifestContentVersionNumber();
+    if (p && ver == v) return p;
+    p = resolve();
+    ver = v;
+    return p;
+  }
+  // what a caller resolved already: the first access does not look again
+  void Set(const ONX_Model* model, void* resolved) {
+    p = model ? resolved : nullptr;
+    if (p) ver = model->Manifest().ManifestContentVersionNumber();
+  }
+};
+template <class V, class P> V* RH3DM_Primed(V* view, const P* resolved) { view->RH3DM_Prime(resolved); return view; }
 
 // generated value types (translated RhinoCommon bodies) and the conversions
 // from the C layer's opennurbs values; field-wise, so independent of which
@@ -168,22 +193,64 @@ template <class T> inline emscripten::val RH3DM_JsArray(const std::vector<T>& v)
   emscripten::val a = emscripten::val::array();
   for (size_t i = 0; i < v.size(); i++) a.call<void>("push", emscripten::val(v[i]));
   return a; }
+// G153: value objects cross the JS boundary on the heap. A value struct whose JS fields are all
+// plain members has an id here and a reader / writer / field check in bnd_pre_gen.js (RH3DM_FAST),
+// which also replace embind's per-field conversion of typed arguments and results. The four
+// functions below (defined with EM_JS in bnd_init_gen.cpp) are each ONE call into JS; through
+// emscripten::val the same work was 3-6 calls (as<T>, val(T), a method call and its result)
+template <class T> struct RH3DM_JsFast { static constexpr int id = -1; };
+template <> struct RH3DM_JsFast<BND_Interval> { static constexpr int id = 0; };
+template <> struct RH3DM_JsFast<BND_Point2d> { static constexpr int id = 1; };
+template <> struct RH3DM_JsFast<BND_Vector2d> { static constexpr int id = 2; };
+template <> struct RH3DM_JsFast<BND_Point3d> { static constexpr int id = 3; };
+template <> struct RH3DM_JsFast<BND_Vector3d> { static constexpr int id = 4; };
+template <> struct RH3DM_JsFast<BND_Line> { static constexpr int id = 5; };
+template <> struct RH3DM_JsFast<BND_BoundingBox> { static constexpr int id = 6; };
+template <> struct RH3DM_JsFast<BND_Plane> { static constexpr int id = 7; };
+template <> struct RH3DM_JsFast<BND_Circle> { static constexpr int id = 8; };
+template <> struct RH3DM_JsFast<BND_Arc> { static constexpr int id = 9; };
+template <> struct RH3DM_JsFast<BND_Sphere> { static constexpr int id = 10; };
+template <> struct RH3DM_JsFast<BND_Transform> { static constexpr int id = 11; };
+template <> struct RH3DM_JsFast<BND_Ellipse> { static constexpr int id = 12; };
+template <> struct RH3DM_JsFast<BND_Cone> { static constexpr int id = 13; };
+template <> struct RH3DM_JsFast<BND_Torus> { static constexpr int id = 14; };
+template <> struct RH3DM_JsFast<BND_Box> { static constexpr int id = 15; };
+template <> struct RH3DM_JsFast<BND_Point2f> { static constexpr int id = 16; };
+template <> struct RH3DM_JsFast<BND_Point3f> { static constexpr int id = 17; };
+template <> struct RH3DM_JsFast<BND_Vector3f> { static constexpr int id = 18; };
+template <> struct RH3DM_JsFast<BND_Point4d> { static constexpr int id = 19; };
+template <> struct RH3DM_JsFast<BND_MeshFace> { static constexpr int id = 20; };
+template <> struct RH3DM_JsFast<BND_Color4f> { static constexpr int id = 21; };
+template <> struct RH3DM_JsFast<BND_SubDEdgeSharpness> { static constexpr int id = 22; };
+extern "C" {
+int rh3dm_js_has(void* v, const char* spec);           // v passes the shape test `spec`
+void rh3dm_js_read(void* v, int id, void* out);        // *out = v, a value object (throws on a missing field)
+int rh3dm_js_new(int id, const void* p);               // a handle to a new value object holding *p
+void rh3dm_js_assign(void* v, int id, const void* p);  // Object.assign(v, the value object for *p)
+}
+typedef decltype(std::declval<const emscripten::val&>().as_handle()) RH3DM_EMVAL;
+// a dispatcher's argument as T
+template <class T> inline T RH3DM_JsAs(const emscripten::val& v) {
+  if constexpr (RH3DM_JsFast<T>::id >= 0) { T out; rh3dm_js_read((void*)v.as_handle(), RH3DM_JsFast<T>::id, &out); return out; }
+  else return v.as<T>(); }
+// a dispatcher's result
+template <class T> inline emscripten::val RH3DM_JsVal(const T& x) {
+  if constexpr (RH3DM_JsFast<T>::id >= 0)
+    return emscripten::val::take_ownership((RH3DM_EMVAL)(uintptr_t)rh3dm_js_new(RH3DM_JsFast<T>::id, &x));
+  else return emscripten::val(x); }
 // a value-type mutator (G144): the changed value goes back into the JS object the caller passed,
 // as RhinoCommon changes the struct in place
 template <class T> inline void RH3DM_JsAssign(emscripten::val& target, const T& v) {
-  static const emscripten::val assign = emscripten::val::global("Object")["assign"];  // G152: looked up once
-  assign(target, emscripten::val(v)); }
-// an overload dispatcher's value-object test (G152): a non-null object with every one of `fields`
-// (comma-separated) as an own property, in ONE call into JS (Module.RH3DM_hasFields, gen_pre.js).
-// One hasOwnProperty call per field from C++ crossed into JS ~34 times for Transform.multiply: 59x
-// slower than 8.x. The field arrays are made once per literal
-inline bool RH3DM_JsHasFields(const emscripten::val& v, const char* fields) {
-  static const emscripten::val has = emscripten::val::module_property("RH3DM_hasFields");
-  static std::unordered_map<const char*, emscripten::val> keys;
-  auto it = keys.find(fields);
-  if (it == keys.end())
-    it = keys.emplace(fields, emscripten::val(std::string(fields)).call<emscripten::val>("split", std::string(","))).first;
-  return has(v, it->second).as<bool>(); }
+  if constexpr (RH3DM_JsFast<T>::id >= 0) rh3dm_js_assign((void*)target.as_handle(), RH3DM_JsFast<T>::id, &v);
+  else {
+    static const emscripten::val assign = emscripten::val::global("Object")["assign"];  // G152: looked up once
+    assign(target, emscripten::val(v)); } }
+// an overload dispatcher's shape test (G152, G153): a non-null object that owns every field of
+// `spec` (comma-separated; `!F`: must NOT own F; `F#`: F is a number), in ONE call into JS, where
+// each spec is a predicate with literal keys (RH3DM_HAS, bnd_pre_gen.js). One hasOwnProperty call
+// per field from C++ crossed into JS ~34 times for Transform.multiply: 59x slower than 8.x
+inline bool RH3DM_JsHasFields(const emscripten::val& v, const char* spec) {
+  return rh3dm_js_has((void*)v.as_handle(), spec) != 0; }
 // an array result C# returns as null (D35): null, not the empty array
 template <class T> inline emscripten::val RH3DM_JsArrayOrNull(const std::vector<T>& v) {
   return v.empty() ? emscripten::val::null() : RH3DM_JsArray(v); }
@@ -562,7 +629,7 @@ struct RH3DM_Variant
     case ON_XMLVariant::Types::DoubleArray4: { ON_4dPoint p = v.As4dPoint(); return py::make_tuple(p.x, p.y, p.z, p.w); }
     case ON_XMLVariant::Types::DoubleColor4: { ON_4fColor c = v.AsColor(); BND_Color4f r; r.m_r = c.Red(); r.m_g = c.Green(); r.m_b = c.Blue(); r.m_a = c.Alpha(); return py::cast(r); }
     case ON_XMLVariant::Types::Matrix: { ON_Xform xf = v.AsXform(); BND_Transform t = RH3DM_Val(xf); return py::cast(t); }
-    case ON_XMLVariant::Types::Buffer: { ON_Buffer b = v.AsBuffer(); std::string s((size_t)b.Size(), '\0'); b.SeekFromStart(0); b.Read((ON__UINT64)s.size(), &s[0]); return RH3DM_PyBytes(s.data(), s.size()); }
+    case ON_XMLVariant::Types::Buffer: { ON_Buffer b = v.AsBuffer(); std::string s((size_t)b.Size(), '\\0'); b.SeekFromStart(0); b.Read((ON__UINT64)s.size(), &s[0]); return RH3DM_PyBytes(s.data(), s.size()); }
 #else
     case ON_XMLVariant::Types::Bool: return emscripten::val(v.AsBool());
     case ON_XMLVariant::Types::Integer: return emscripten::val(v.AsInteger());
@@ -617,9 +684,9 @@ inline bool RH3DM_StrStartsWith(const std::wstring& s, const std::wstring& a) { 
 inline bool RH3DM_StrEndsWith(const std::wstring& s, const std::wstring& a)
 { return s.size() >= a.size() && s.compare(s.size() - a.size(), a.size(), a) == 0; }
 #if defined(_WIN32)
-inline std::wstring RH3DM_NewLine() { return L"\r\n"; }
+inline std::wstring RH3DM_NewLine() { return L"\\r\\n"; }
 #else
-inline std::wstring RH3DM_NewLine() { return L"\n"; }
+inline std::wstring RH3DM_NewLine() { return L"\\n"; }
 #endif
 
 // `new SimpleArrayCurvePointer(curves)` (G95): an ON_SimpleArray of the objects' const pointers
@@ -845,7 +912,15 @@ inline std::wstring RH3DM_W(const CRhCmnStringHolder& h)
 #if !defined(_WIN32)
   static_assert(sizeof(RHMONO_STRING) == 2, "RHMONO_STRING is UTF-16 outside Windows");
   int n = 0;
-  while (a[n]) n++;
+  bool surrogates = false;
+  for (; a[n]; n++) surrogates = surrogates || (a[n] >= 0xD800 && a[n] <= 0xDFFF);
+  if (!surrogates && sizeof(wchar_t) == 4)
+  {
+    // no pairs to join (nearly every name): each unit is its code point (G156)
+    std::wstring bmp((size_t)n, L' ');
+    for (int i = 0; i < n; i++) bmp[(size_t)i] = (wchar_t)a[i];
+    return bmp;
+  }
   std::wstring out;
   out.resize((size_t)n + 8);
   unsigned int err = 0;
@@ -3197,3 +3272,4 @@ BND_Mesh* RH3DM_Sub_Mesh(ON_Object* (*fn)(void*, int, bool), void* owner, int ke
 BND_Surface* RH3DM_Sub_Surface(ON_Object* (*fn)(void*, int, bool), void* owner, int key, bool cow);
 // views of a File3dmObject's geometry: the most-derived generated class (gen_wrap.cpp)
 BND_GeometryBase* RH3DM_View_GeometryBase(ONX_Model* model, ON_UUID id);
+BND_GeometryBase* RH3DM_View_GeometryBase(ONX_Model* model, ON_UUID id, const ON_Geometry* p);   // p: what (model, id) resolves to

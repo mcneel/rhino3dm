@@ -1268,6 +1268,23 @@ for _v in list(vars(_m).values()):
 #endif
 
 #if defined(ON_WASM_COMPILE)
+#include <emscripten/em_js.h>
+// G153 (declared in bnd_common_gen.h): one call into JS each. A handle or a pointer is a BigInt
+// here in a memory64 build, hence Number(); the tables are bnd_pre_gen.js's
+EM_JS(int, rh3dm_js_has, (void* v, const char* spec), {
+  return RH3DM_has(Emval.toValue(Number(v)), Number(spec)) ? 1 : 0;
+});
+EM_JS(void, rh3dm_js_read, (void* v, int id, void* out), {
+  var f = RH3DM_FAST[id], o = Emval.toValue(Number(v));
+  f.c(o);
+  f.w(Number(out), o);
+});
+EM_JS(int, rh3dm_js_new, (int id, const void* p), {
+  return Emval.toHandle(RH3DM_FAST[id].r(Number(p)));
+});
+EM_JS(void, rh3dm_js_assign, (void* v, int id, const void* p), {
+  Object.assign(Emval.toValue(Number(v)), RH3DM_FAST[id].r(Number(p)));
+});
 using namespace emscripten;
 void initGenCommonObject(void);
 void initGenGeometryBase(void);

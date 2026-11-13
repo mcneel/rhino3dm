@@ -233,7 +233,7 @@ void initGenPoint3dList(void)
       .constructor<>()
       .constructor(optional_override([](emscripten::val v0) -> BND_Point3dList* {
         if (v0.isNumber()) return new BND_Point3dList(v0.as<int>());
-        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || (RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "Z") && RH3DM_JsSeqFirst(v0)["Z"].isNumber())))) return new BND_Point3dList(RH3DM_JsSeq<BND_Point3d>(v0));
+        if ((RH3DM_JsIsSeq(v0) && (RH3DM_JsSeqFirst(v0).isUndefined() || RH3DM_JsHasFields(RH3DM_JsSeqFirst(v0), "Z#")))) return new BND_Point3dList(RH3DM_JsSeq<BND_Point3d>(v0));
         throw std::invalid_argument("Point3dList: no constructor matches the arguments"); }), allow_raw_pointers())
       .property("boundingBox", &BND_Point3dList::BoundingBox)
       .function("closestIndex", optional_override([](BND_Point3dList& s, BND_Point3d testPoint) { return s.ClosestIndex(testPoint); }))
