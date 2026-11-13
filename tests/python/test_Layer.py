@@ -46,9 +46,10 @@ class TestLayer(unittest.TestCase):
             layer.Name = name
             self.assertEqual(layer.Name, name)
 
-    @unittest.expectedFailure
+    # the native string holder truncates on Linux only; Windows and macOS round-trip
+    @(unittest.expectedFailure if sys.platform.startswith('linux') else (lambda f: f))
     def test_layerNameKeepsCharactersOutsideTheBasicPlane(self):
-        """A name with a character outside the basic plane comes back unchanged -- it does not: the native string holder sizes its UTF-16 buffer by code points (known, upstream)."""
+        """A name with a character outside the basic plane comes back unchanged (on Linux it does not: known, upstream)."""
         layer = rhino3dm.Layer()
         for name in ['pair \U0001F600 inside', '\U0001F600']:
             layer.Name = name
