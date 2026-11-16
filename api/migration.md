@@ -900,6 +900,15 @@ Wherever RhinoCommon takes a sequence of points, [[any sequence works (a list, a
 - [[`File3dm.FromByteArray` takes any buffer (`bytes`, `bytearray`, numpy) ||
   `rhino.File3dm.fromByteArray` takes a `Uint8Array` or an `ArrayBuffer`; anything else throws
   `TypeError`]].
+- <!-- js -->A string read back from a file or an object loses its end when it contains a character
+  outside the Basic Multilingual Plane (an emoji such as 😀, or a rare CJK character): one UTF-16 unit
+  per such character, so `'😀'` reads back `''`. 8.x read these strings correctly. Fixed in 9.3.<!-- /js -->
+<!-- py -->
+- On Linux, a string read back from a file or an object loses its end when it contains a character
+  outside the Basic Multilingual Plane (an emoji such as 😀, or a rare CJK character): one character
+  per such character, so `'😀'` reads back `''`. macOS and Windows read these strings correctly. Fixed
+  in 9.3.
+<!-- /py -->
 
 ### Object identity
 
