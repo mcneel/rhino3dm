@@ -9,7 +9,7 @@ import datetime
 import uuid
 from typing import Any
 import rhino3dm as _rh
-Version: str = '9.2.26314.02300'
+Version: str = '9.2.26320.05040'
 
 class ActiveSpace(enum.IntEnum):
     """Defines the current working space."""

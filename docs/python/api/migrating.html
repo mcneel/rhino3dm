@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Migrating to rhino3dm 9.2 (Python) &mdash; rhino3dm.py 9.2.0-beta.0</title>
+  <title>Migrating to rhino3dm 9.2 (Python) &mdash; rhino3dm.py 9.2.0-beta.1</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=f348fe97"></script>
+      <script src="_static/documentation_options.js?v=57307a8e"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -749,6 +749,10 @@ the log of <code class="docutils literal notranslate"><span class="pre">IsValidW
 <li><p><code class="docutils literal notranslate"><span class="pre">ViewportInfo.ScreenPort</span></code> and <code class="docutils literal notranslate"><span class="pre">GetScreenPort()</span></code> are RhinoCommon’s <code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y,</span> <span class="pre">width,</span> <span class="pre">height)</span></code>, with y the smaller of top and bottom.
 A new <code class="docutils literal notranslate"><span class="pre">ViewportInfo()</span></code> reads <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">1000,</span> <span class="pre">1000)</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">File3dm.FromByteArray</span></code> takes any buffer (<code class="docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="docutils literal notranslate"><span class="pre">bytearray</span></code>, numpy).</p></li>
+<li><p>On Linux, a string read back from a file or an object loses its end when it contains a character
+outside the Basic Multilingual Plane (an emoji such as 😀, or a rare CJK character): one character
+per such character, so <code class="docutils literal notranslate"><span class="pre">'😀'</span></code> reads back <code class="docutils literal notranslate"><span class="pre">''</span></code>. macOS and Windows read these strings correctly. Fixed
+in 9.3.</p></li>
 </ul>
 </section>
 <section id="object-identity">

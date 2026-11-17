@@ -8,7 +8,7 @@
     <AssemblyName>Rhino3dm</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>Rhino</RootNamespace>
-    <Version>9.2.0-beta.0</Version>
+    <Version>9.2.0-beta.1</Version>
     <PackageId>Rhino3dm</PackageId>
     <Authors>Robert McNeel &amp; Associates</Authors>
     <PackageTitle>Read, write and create Rhino 3D models (.3dm files) in .NET</PackageTitle>

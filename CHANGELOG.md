@@ -4,12 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [9.2.0-beta.1] - 2026.11.17
+
+diff: https://github.com/mcneel/rhino3dm/compare/9.2.0-beta.0...9.2.0-beta.1
 
 ### Changed
 
+- (js) Faster: value types (`Point3d`, `Transform`, ...) cross into WebAssembly in one step instead of a call per property, overloaded methods inspect their arguments once, table iteration is cheaper, and zlib, Draco and Unicode conversion are built with `-O3`. Overall about 1.27x faster than 8.35 on the project's benchmarks (RH3DM-217, RH3DM-219).
+- openNURBS submodule to the public 9.2 branch (`39742772`, 2026-11-16). Fixed: writing a model attached five default mesh-modifier records to every object and overwrote modifier settings the object already had, so files were about 10x larger and slower to write (RH-100236).
 - (py) One stable-ABI (`abi3`) wheel per platform for Python 3.12 and newer, so Python 3.15 and later install a wheel instead of building from source. Python 3.10 and 3.11 keep their own wheels.
 - (py) The module no longer declares free-threading support: on a free-threaded CPython (3.14t), importing it turns the GIL back on (Python prints a `RuntimeWarning`). openNURBS is not safe for parallel use: threads sharing a SubD could get wrong results or crash. There is no free-threaded wheel.
+
+### Known issues
+
+- (js; py on Linux) A string containing a character outside the Basic Multilingual Plane (an emoji, a rare CJK character) reads back shortened, one unit per such character. JS in 8.x read these correctly. To be fixed in 9.3; see the migration guide's "Strings and values".
 
 ## [9.2.0-beta.0] - 2026.11.10
 

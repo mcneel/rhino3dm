@@ -562,6 +562,6 @@ Package Contents
 
 .. py:data:: Version
    :type:  str
-   :value: '9.2.26314.02300'
+   :value: '9.2.26320.05040'
 
 

@@ -528,6 +528,10 @@ a list of `[key, value]` lists.
 - `ViewportInfo.ScreenPort` and `GetScreenPort()` are RhinoCommon's `(x, y, width, height)`, with y the smaller of top and bottom.
   A new `ViewportInfo()` reads `(0, 0, 1000, 1000)`.
 - `File3dm.FromByteArray` takes any buffer (`bytes`, `bytearray`, numpy).
+- On Linux, a string read back from a file or an object loses its end when it contains a character
+  outside the Basic Multilingual Plane (an emoji such as 😀, or a rare CJK character): one character
+  per such character, so `'😀'` reads back `''`. macOS and Windows read these strings correctly. Fixed
+  in 9.3.
 
 ### Object identity
 

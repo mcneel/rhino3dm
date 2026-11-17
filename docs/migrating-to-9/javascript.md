@@ -610,6 +610,9 @@ an array of `[key, value]` arrays.
   A new `new rhino.ViewportInfo()` reads `(0, 0, 1000, 1000)`.
 - `rhino.File3dm.fromByteArray` takes a `Uint8Array` or an `ArrayBuffer`; anything else throws
   `TypeError`.
+- A string read back from a file or an object loses its end when it contains a character
+  outside the Basic Multilingual Plane (an emoji such as 😀, or a rare CJK character): one UTF-16 unit
+  per such character, so `'😀'` reads back `''`. 8.x read these strings correctly. Fixed in 9.3.
 
 ### Object identity
 
