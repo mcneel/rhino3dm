@@ -1,6 +1,6 @@
 {
   "name": "rhino3dm",
-  "version": "9.2.0-beta.0",
+  "version": "9.2.0-beta.1",
   "description": "rhino3dm.js: OpenNURBS geometry with an API generated from RhinoCommon, compiled to WebAssembly",
   "main": "rhino3dm.js",
   "module": "rhino3dm.module.js",
