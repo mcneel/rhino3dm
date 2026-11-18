@@ -691,29 +691,38 @@ jobs:
         # an x64 dotnet under emulation would load win-x64 instead and test nothing new
         - name: check dotnet is native arm64
           if: ${{ matrix.os == 'windows-11-arm' }}
-          shell: bash
           run: |
-            dotnet --info
-            dotnet --info | grep -E "RID:\s+win-arm64" || { echo "::error::dotnet is not native win-arm64"; exit 1; }
+            $info = dotnet --info | Out-String
+            $info
+            if ($info -notmatch 'RID:\s+win-arm64') { "::error::dotnet is not native win-arm64"; exit 1 }
         - name: download rhino3dm.net nuget
           uses: actions/download-artifact@v4.1.7
           with:
             name: rhino3dm.net nupkg
             path: tests/dotnet/lib
-        - name: test dotnet
-          shell: bash
+        # the test project references src/dotnet; these test the package packed above instead
+        - name: test dotnet (linux)
+          if: ${{ runner.os == 'Linux' }}
           run: |
             NUGET_FILE="$(find tests/dotnet/lib -type f -name "*.nupkg")"
             FILENAME=$(basename ${NUGET_FILE})
             NAME=${FILENAME%.*}
             VERSION=${NAME:9}
+            dotnet nuget add source $(pwd)/tests/dotnet/lib
             cd tests/dotnet
-            # the test project references src/dotnet; this tests the package packed above instead.
-            # relative --source, not `dotnet nuget add source $(pwd)/...`: NuGet rejects the
-            # Git Bash path on windows ("The source specified is invalid")
-            dotnet restore -p:Rhino3dmVersion=${VERSION} --source lib --source https://api.nuget.org/v3/index.json
-            dotnet build --no-restore -p:Rhino3dmVersion=${VERSION}
+            dotnet build -p:Rhino3dmVersion=${VERSION}
             dotnet test --no-build -p:Rhino3dmVersion=${VERSION}
+        - name: test dotnet (windows)
+          if: ${{ runner.os == 'Windows' }}
+          run: |
+            $pkg = Get-ChildItem tests/dotnet/lib -Recurse -Filter *.nupkg | Select-Object -First 1
+            $version = $pkg.BaseName.Substring('Rhino3dm.'.Length)
+            dotnet nuget add source $pkg.DirectoryName
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+            Set-Location tests/dotnet
+            dotnet build -p:Rhino3dmVersion=$version
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+            dotnet test --no-build -p:Rhino3dmVersion=$version
 
   publish_nuget:
     name: publish Rhino3dm.net to NuGet
