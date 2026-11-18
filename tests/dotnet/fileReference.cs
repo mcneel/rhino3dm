@@ -11,7 +11,7 @@ public class FileReferenceTests
         using var fr = FileReference.CreateFromFullAndRelativePaths("/tmp/textures/wood.png", "textures/wood.png");
         Assert.That(fr, Is.Not.Null);
         Assert.That(fr.IsSet, Is.True);
-        Assert.That(fr.FullPath, Is.EqualTo("/tmp/textures/wood.png"));
+        Assert.That(fr.FullPath, Is.EqualTo(Helpers.NativePath("/tmp/textures/wood.png")));
         Assert.That(fr.RelativePath, Is.EqualTo("textures/wood.png"));
     }
 
