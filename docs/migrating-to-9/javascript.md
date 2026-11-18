@@ -243,6 +243,8 @@ const paths = [...doc.embeddedFiles].map(f => f.filename)
   are classes (`new rhino.File3dmWriteOptions()`), not plain objects. They gain RhinoCommon's members:
   `showGrid`, `showAxes`, `showZAxis`, and the write
   options' mesh options.
+- The model's notes can be written: `doc.notes.notes`, `isVisible`, `isHtml` and
+  `windowRectangle` (`[x, y, width, height]`) are read-write and go into the written file.
 
 ## Geometry
 

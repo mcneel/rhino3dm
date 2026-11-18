@@ -7062,6 +7062,22 @@ declare module 'rhino3dm' {
 	 * Represents the notes information stored in a 3dm file.
 	 */
 	class File3dmNotes {
+		/**
+		 * Gets or sets the text format. If the format is HTML, true; false otherwise.
+		 */
+		isHtml: boolean;
+		/**
+		 * Gets or sets the notes visibility. If the notes are visible, true; false otherwise.
+		 */
+		isVisible: boolean;
+		/**
+		 * Gets or sets the text content of the notes.
+		 */
+		notes: string;
+		/**
+		 * Gets or sets the position of the Notes when they were saved.
+		 */
+		windowRectangle: [number, number, number, number];
 	}
 
 	/**
