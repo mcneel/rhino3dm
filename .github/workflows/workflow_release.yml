@@ -707,13 +707,12 @@ jobs:
             FILENAME=$(basename ${NUGET_FILE})
             NAME=${FILENAME%.*}
             VERSION=${NAME:9}
-            NUGET_SOURCE=$(pwd)/tests/dotnet/lib
-            # Git Bash on windows: hand dotnet a windows path
-            command -v cygpath >/dev/null && NUGET_SOURCE=$(cygpath -m "$NUGET_SOURCE")
-            dotnet nuget add source "$NUGET_SOURCE"
             cd tests/dotnet
-            # the test project references src/dotnet; this tests the package packed above instead
-            dotnet build -p:Rhino3dmVersion=${VERSION}
+            # the test project references src/dotnet; this tests the package packed above instead.
+            # relative --source, not `dotnet nuget add source $(pwd)/...`: NuGet rejects the
+            # Git Bash path on windows ("The source specified is invalid")
+            dotnet restore -p:Rhino3dmVersion=${VERSION} --source lib --source https://api.nuget.org/v3/index.json
+            dotnet build --no-restore -p:Rhino3dmVersion=${VERSION}
             dotnet test --no-build -p:Rhino3dmVersion=${VERSION}
 
   publish_nuget:
