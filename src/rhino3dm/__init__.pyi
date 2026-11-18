@@ -24664,6 +24664,10 @@ class File3dmSettings:
     def ModelUnitSystem(self) -> UnitSystem:
         """Gets or sets the model unit system, using `Rhino.UnitSystem` enumeration."""
 
+    @ModelUnitSystem.setter
+    def ModelUnitSystem(self, value: UnitSystem) -> None:
+        ...
+
     @property
     def ModelUrl(self) -> str:
         """Gets or sets a Uniform Resource Locator (URL) direction for the model."""
@@ -24707,6 +24711,10 @@ class File3dmSettings:
     @property
     def PageUnitSystem(self) -> UnitSystem:
         """Gets or sets the page unit system, using `Rhino.UnitSystem` enumeration."""
+
+    @PageUnitSystem.setter
+    def PageUnitSystem(self, value: UnitSystem) -> None:
+        ...
 
     @property
     def SaveTextureBitmapsInFile(self) -> bool:

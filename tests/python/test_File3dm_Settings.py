@@ -95,5 +95,21 @@ class TestFile3dmSettings(unittest.TestCase):
             self.assertEqual(rhino3dm.File3dm.Read(path).Settings.CurrentLinetypeSource, S.LinetypeFromObject)
 
 
+    def test_settingsUnitSystemsAreSettable(self):
+        """ModelUnitSystem and PageUnitSystem can be set, and survive writing and reading the file."""
+        U = rhino3dm.UnitSystem
+        f = rhino3dm.File3dm()
+        f.Settings.ModelUnitSystem = U.Meters
+        f.Settings.PageUnitSystem = U.Inches
+        self.assertEqual(f.Settings.ModelUnitSystem, U.Meters)
+        self.assertEqual(f.Settings.PageUnitSystem, U.Inches)
+        with helpers.TempDir() as d:
+            path = os.path.join(d, 'units.3dm')
+            self.assertTrue(f.Write(path, 8))
+            read = rhino3dm.File3dm.Read(path)
+            self.assertEqual(read.Settings.ModelUnitSystem, U.Meters)
+            self.assertEqual(read.Settings.PageUnitSystem, U.Inches)
+
+
 if __name__ == "__main__":
     unittest.main()

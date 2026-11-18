@@ -162,6 +162,19 @@ test('file3dmObjectAttributesWriteThroughAndNameChainsToThem', () => {
   expect([...f.objects][0].attributes.name).toBe('via name')
 })
 
+test('file3dmObjectAttributesEditsSurviveAWrite', () => {
+  // layer and user strings set on an object's attributes are in the written file (RH3DM-59)
+  const f = objectTableFileWithLine(rhino)
+  f.layers.addLayer('layer1', { 'r': 30, 'g': 144, 'b': 255, 'a': 255 })
+  f.layers.addLayer('layer2', { 'r': 255, 'g': 215, 'b': 0, 'a': 255 })
+  const a = [...f.objects][0].attributes
+  a.layerIndex = 1
+  expect(a.setUserString('k', 'v')).toBe(true)
+  const back = [...rhino.File3dm.fromByteArray(f.toByteArray()).objects][0].attributes
+  expect(back.layerIndex).toBe(1)
+  expect(back.getUserString('k')).toBe('v')
+})
+
 test('file3dmObjectGeometryOfADeletedObjectRaises', () => {
   // reading the geometry of an object deleted from the file throws (D9)
   const f = objectTableFileWithLine(rhino)
@@ -254,4 +267,18 @@ test('objectTableAddPointTakesXYZ', () => {
   f.objects.addPoint(1, 2, 3)
   const loc = [...f.objects][0].geometry.location
   expect([loc.X, loc.Y, loc.Z]).toEqual([1, 2, 3])
+})
+
+test('tableDeleteWithoutArgumentsFreesTheHandle', () => {
+  // JS only: a table's delete(item) removes an item; delete() with no argument frees the handle
+  const f = new rhino.File3dm()
+  const id = f.objects.addPoint(0, 0, 0)
+  for (const t of [f.objects, f.layers, f.materials, f.allGroups, f.bitmaps, f.dimStyles, f.instanceDefinitions,
+                   f.linetypes, f.hatchPatterns, f.views, f.namedViews, f.strings, f.namedConstructionPlanes]) {
+    t.delete()
+    expect(t.isDeleted()).toBe(true)
+  }
+  expect(f.objects.count).toBe(1)
+  expect(f.objects.delete(id)).toBe(true)
+  expect(f.objects.count).toBe(0)
 })

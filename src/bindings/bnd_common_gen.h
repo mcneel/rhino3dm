@@ -378,6 +378,14 @@ template <> struct type_caster<RH3DM_Bytes> {
     return true; }
   static handle from_cpp(const RH3DM_Bytes& b, rv_policy, cleanup_list*) noexcept {
     return PyBytes_FromStringAndSize((const char*)b.v.data(), (Py_ssize_t)b.v.size()); }
+};
+// a sequence of class objects (G95): None is an empty sequence, as RhinoCommon skips a null
+// IEnumerable (pilot #128: AllInstanceDefinitions.Add(..., None)); the list caster refuses None
+template <class T> struct type_caster<std::vector<const T*, std::allocator<const T*>>>
+  : list_caster<std::vector<const T*, std::allocator<const T*>>, const T*> {
+  bool from_python(handle src, uint8_t flags, cleanup_list* cleanup) noexcept {
+    if (src.is_none()) { this->value.clear(); return true; }
+    return list_caster<std::vector<const T*, std::allocator<const T*>>, const T*>::from_python(src, flags, cleanup); }
 }; } }
 #else
 // a byte[] argument: a Uint8Array (a Node Buffer is one), an ArrayBuffer (as 8.x took), another
@@ -436,8 +444,10 @@ template <class T> inline void RH3DM_SetTupleOwned(BND_TUPLE& t, int i, T* p) {
 template <class T> inline py::list RH3DM_Seq(const std::vector<T>& v) { py::list l; for (const T& x : v) l.append(py::cast(x)); return l; }
 #else
 template <class T> inline emscripten::val RH3DM_Seq(const std::vector<T>& v) { return RH3DM_JsArray(v); }
-// a JS array of class instances (G95): borrowed pointers for the call
+// a JS array of class instances (G95): borrowed pointers for the call; null or undefined is an empty
+// sequence, as RhinoCommon skips a null IEnumerable (pilot #128: instanceDefinitions.add(..., null))
 template<class T> inline std::vector<const T*> RH3DM_JsSeqPtr(const emscripten::val& v) {
+  if (v.isNull() || v.isUndefined()) return {};
   emscripten::val a = v.isArray() ? v : v.call<emscripten::val>("toArray");
   std::vector<const T*> r;
   unsigned n = a["length"].as<unsigned>();

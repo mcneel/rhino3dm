@@ -114,6 +114,10 @@ if(${RHINO3DM_JS})
     # malloc returns null), defeating the point of the build. Raise it past 4GB
     # (link-only flag; only valid with MEMORY64, hence gated here).
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sMAXIMUM_MEMORY=16GB")
+  else()
+    # wasm32 has the same 2GB default cap; 4GB is wasm32's address limit (Emscripten
+    # then treats pointers as unsigned in the JS glue). Larger models need the wasm64 build.
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sMAXIMUM_MEMORY=4GB")
   endif()
   # The remaining -s settings and -lembind are link-only; keep them out of the
   # compile flags so every object doesn't emit a "linker setting ignored during

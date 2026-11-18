@@ -207,6 +207,21 @@ public class File3dmObjectTableTests
         Assert.That(Objects(f)[0].Attributes.Name, Is.EqualTo("via name"));
     }
 
+    // Layer and user strings set on an object's Attributes are in the written file (RH3DM-59).
+    [Test]
+    public void File3dmObjectAttributesEditsSurviveAWrite()
+    {
+        var f = FileWithLine();
+        f.AllLayers.AddLayer("layer1", System.Drawing.Color.FromArgb(255, 30, 144, 255));
+        f.AllLayers.AddLayer("layer2", System.Drawing.Color.FromArgb(255, 255, 215, 0));
+        var a = Objects(f)[0].Attributes;
+        a.LayerIndex = 1;
+        Assert.That(a.SetUserString("k", "v"), Is.True);
+        var back = Objects(File3dm.FromByteArray(f.ToByteArray()))[0].Attributes;
+        Assert.That(back.LayerIndex, Is.EqualTo(1));
+        Assert.That(back.GetUserString("k"), Is.EqualTo("v"));
+    }
+
     // Reading the Geometry of an object deleted from the file throws DocumentCollectedException.
     [Test]
     public void File3dmObjectGeometryOfADeletedObjectRaises()

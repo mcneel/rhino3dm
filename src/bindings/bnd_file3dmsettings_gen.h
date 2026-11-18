@@ -58,11 +58,13 @@ public:
   void Gen_set_ModelBasepoint(BND_Point3d value);
   void Gen_set_ModelDistanceDisplayPrecision(int value);
   void Gen_set_ModelRelativeTolerance(double value);
+  void Gen_set_ModelUnitSystem(RH3DM_UnitSystem value);
   void Gen_set_ModelUrl(std::wstring value);
   void Gen_set_PageAbsoluteTolerance(double value);
   void Gen_set_PageAngleToleranceRadians(double value);
   void Gen_set_PageDistanceDisplayPrecision(int value);
   void Gen_set_PageRelativeTolerance(double value);
+  void Gen_set_PageUnitSystem(RH3DM_UnitSystem value);
   void Gen_set_SaveTextureBitmapsInFile(bool value);
   void* Gen_ConstPointer() const;
   void* Gen_NonConstPointer();
