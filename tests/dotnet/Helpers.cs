@@ -30,6 +30,10 @@ public static class Helpers
     // the path of a file in tests/models
     public static string Model(string name) => Path.Combine(Models, name);
 
+    // a '/'-separated path with this platform's separator: opennurbs stores paths that way,
+    // so "/tmp/a.png" reads back as "\tmp\a.png" on windows
+    public static string NativePath(string path) => path.Replace('/', Path.DirectorySeparatorChar);
+
     // a File3dm read from tests/models
     public static File3dm ReadModel(string name) => File3dm.Read(Model(name));
 

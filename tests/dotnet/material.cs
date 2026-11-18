@@ -107,7 +107,7 @@ public class MaterialTests
         tex.FileName = "/tmp/bump.png";
         tex.TextureType = TextureType.Bump;
         Assert.That(m.SetTexture(tex, tex.TextureType), Is.True);
-        Assert.That(m.GetTexture(TextureType.Bump).FileName, Is.EqualTo("/tmp/bump.png"));
+        Assert.That(m.GetTexture(TextureType.Bump).FileName, Is.EqualTo(Helpers.NativePath("/tmp/bump.png")));
     }
 
     // RenderMaterialInstanceId starts nil and can be set; setting it makes the universal render engine the plug-in.
