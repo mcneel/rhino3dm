@@ -338,6 +338,13 @@ vnext = "SubDComponent.Equals / GetHashCode (hand methods; Python also ==, != an
 reason = "RhinoCommon members (opennurbs_subd.cs, since 8.36) whose bodies are pure C# over the managed ParentSubD reference; the generator does not translate pure class bodies. Retire if it learns to"
 
 [[hand_kept]]
+class = "File3dmNotes"
+members = ["Notes", "IsVisible", "IsHtml", "WindowRectangle"]
+decided = "Luis, 2026-11-18 (RH3DM-208)"
+vnext = "File3dmNotes.Notes / IsVisible / IsHtml / WindowRectangle (hand properties, read-write): the model's ON_3dmNotes; WindowRectangle is (x, y, width, height)"
+reason = "RhinoCommon members (opennurbs_3dm_properties.cs, since 5.0) whose bodies also serve a notes object with no model, kept in managed fields; the translator refuses them (class field m_notes / m_visible / m_html / m_winrect). Every File3dmNotes in rhino3dm is File3dm.Notes. Retire if the generator learns to drop the no-model branch"
+
+[[hand_kept]]
 class = "Mesh"
 members = ["toThreejsBuffers"]
 decided = "Luis, 2026-10-08 (three.js interop; again 2026-10-28)"

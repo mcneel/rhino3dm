@@ -24833,7 +24833,38 @@ class File3dmStringTable:
 
 class File3dmNotes:
     """Represents the notes information stored in a 3dm file."""
-    pass
+
+    @property
+    def Notes(self) -> str:
+        """Gets or sets the text content of the notes."""
+
+    @Notes.setter
+    def Notes(self, arg: str, /) -> None:
+        ...
+
+    @property
+    def IsVisible(self) -> bool:
+        """Gets or sets the notes visibility. If the notes are visible, true; false otherwise."""
+
+    @IsVisible.setter
+    def IsVisible(self, arg: bool, /) -> None:
+        ...
+
+    @property
+    def IsHtml(self) -> bool:
+        """Gets or sets the text format. If the format is HTML, true; false otherwise."""
+
+    @IsHtml.setter
+    def IsHtml(self, arg: bool, /) -> None:
+        ...
+
+    @property
+    def WindowRectangle(self) -> tuple[int, int, int, int]:
+        """Gets or sets the position of the Notes when they were saved."""
+
+    @WindowRectangle.setter
+    def WindowRectangle(self, arg: tuple[Any, ...], /) -> None:
+        ...
 
 class File3dmLayerTable:
     """Provides access to layers in the 3dm file."""

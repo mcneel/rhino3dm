@@ -2,6 +2,7 @@
 // Shaped by RhinoCommon signatures, calling the flat C layer with
 // constants and guards baked from the C# call sites (api/manifest.json).
 #include "bnd_file3dmnotes_gen.h"
+#include "bnd_file3dmnotes.h"
 
 
 
@@ -9,7 +10,10 @@
 void initGenFile3dmNotes(rh3dmpymodule& m)
 {
   py::class_<BND_File3dmNotes>(m, "File3dmNotes")
-;
+      .def_prop_rw("Notes", &BND_File3dmNotes_GetNotes, &BND_File3dmNotes_SetNotes)
+      .def_prop_rw("IsVisible", &BND_File3dmNotes_GetIsVisible, &BND_File3dmNotes_SetIsVisible)
+      .def_prop_rw("IsHtml", &BND_File3dmNotes_GetIsHtml, &BND_File3dmNotes_SetIsHtml)
+      .def_prop_rw("WindowRectangle", &BND_File3dmNotes_GetWindowRectangle, &BND_File3dmNotes_SetWindowRectangle);
 }
 #endif
 
@@ -18,6 +22,9 @@ using namespace emscripten;
 void initGenFile3dmNotes(void)
 {
   class_<BND_File3dmNotes>("File3dmNotes")
-;
+      .property("notes", &BND_File3dmNotes_GetNotes, &BND_File3dmNotes_SetNotes)
+      .property("isVisible", &BND_File3dmNotes_GetIsVisible, &BND_File3dmNotes_SetIsVisible)
+      .property("isHtml", &BND_File3dmNotes_GetIsHtml, &BND_File3dmNotes_SetIsHtml)
+      .property("windowRectangle", &BND_File3dmNotes_GetWindowRectangle, &BND_File3dmNotes_SetWindowRectangle);
 }
 #endif

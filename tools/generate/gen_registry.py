@@ -1652,6 +1652,11 @@ HAND_MEMBERS['Environment'] = [
 HAND_MEMBERS['File3dmEmbeddedFiles'] = [
     _hm('Add', 'method', 'BND_File3dmEmbeddedFiles_AddFile', _F, args=['embeddedFile'], overload=True,
         js='rh3dmAddFile', dispatch=('add', 'File3dmEmbeddedFile'))]
+# Luis 2026-11-18 (RH3DM-208): RhinoCommon's read-write notes. Its bodies branch on a notes object with
+# no model (managed fields, refused: `class field m_notes`); every File3dmNotes here is File3dm.Notes
+HAND_MEMBERS['File3dmNotes'] = [
+    _hm(n, 'property', 'BND_File3dmNotes_Get' + n, _F, set='BND_File3dmNotes_Set' + n)
+    for n in ('Notes', 'IsVisible', 'IsHtml', 'WindowRectangle')]
 HAND_MEMBERS['File3dm'].append(dict(name='destroy', kind='alias', of='delete', py=False, js='destroy'))
 # overloads rhino3dm has and RhinoCommon lacks (Luis 2026-10-30: kept by hand, upstream U38): Python
 # overloads of the generated members (as the old bindings had them), JS the old split names
