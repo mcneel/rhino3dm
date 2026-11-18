@@ -62,3 +62,24 @@ test('viewInfoViewportEditsLandInTheView', () => {
   const g = rhino.File3dm.fromByteArray(f.toByteArray())
   expect(g.views.get(0).viewport.cameraLocation).toEqual(loc)
 })
+
+test('viewInfoViewportDeleteFreesOnlyTheHandle', () => {
+  // JS only: deleting the viewport handle leaves the viewport to its view, so deleting both, in
+  // either order, frees each once
+  for (const viewportFirst of [true, false]) {
+    const v = new rhino.ViewInfo()
+    const vp = v.viewport
+    vp.setCameraLocation({ X: 1, Y: 2, Z: 3 })
+    if (viewportFirst) {
+      vp.delete()
+      expect(v.viewport.cameraLocation).toEqual({ X: 1, Y: 2, Z: 3 })
+      v.delete()
+    } else {
+      v.delete()
+      vp.delete()
+    }
+    expect(vp.isDeleted()).toBe(true)
+  }
+  // the module is still healthy
+  expect(new rhino.ViewInfo().viewport.cameraLocation).toBeDefined()
+})

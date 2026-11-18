@@ -200,6 +200,10 @@ void BND_File3dmSettings::Gen_set_ModelRelativeTolerance(double value) {
   ON_3dmSettings_SetDouble(m_ptr, (UnitsTolerancesSettingsDouble)2, value);
 }
 
+void BND_File3dmSettings::Gen_set_ModelUnitSystem(RH3DM_UnitSystem value) {
+  ON_3dmSettings_GetSetUnitSystem(m_ptr, true, true, (ON::LengthUnitSystem)(int)(value));
+}
+
 void BND_File3dmSettings::Gen_set_ModelUrl(std::wstring value) {
   ON_3dmSettings_SetModelUrl(m_ptr, RH3DM_S(value).data());
 }
@@ -218,6 +222,10 @@ void BND_File3dmSettings::Gen_set_PageDistanceDisplayPrecision(int value) {
 
 void BND_File3dmSettings::Gen_set_PageRelativeTolerance(double value) {
   ON_3dmSettings_SetDouble(m_ptr, (UnitsTolerancesSettingsDouble)5, value);
+}
+
+void BND_File3dmSettings::Gen_set_PageUnitSystem(RH3DM_UnitSystem value) {
+  ON_3dmSettings_GetSetUnitSystem(m_ptr, false, true, (ON::LengthUnitSystem)(int)(value));
 }
 
 void BND_File3dmSettings::Gen_set_SaveTextureBitmapsInFile(bool value) {
@@ -306,13 +314,13 @@ void initGenFile3dmSettings(rh3dmpymodule& m)
       .def_prop_rw("ModelBasepoint", &BND_File3dmSettings::Gen_ModelBasepoint, &BND_File3dmSettings::Gen_set_ModelBasepoint)
       .def_prop_rw("ModelDistanceDisplayPrecision", &BND_File3dmSettings::Gen_ModelDistanceDisplayPrecision, &BND_File3dmSettings::Gen_set_ModelDistanceDisplayPrecision)
       .def_prop_rw("ModelRelativeTolerance", &BND_File3dmSettings::Gen_ModelRelativeTolerance, &BND_File3dmSettings::Gen_set_ModelRelativeTolerance)
-      .def_prop_ro("ModelUnitSystem", &BND_File3dmSettings::Gen_ModelUnitSystem)
+      .def_prop_rw("ModelUnitSystem", &BND_File3dmSettings::Gen_ModelUnitSystem, &BND_File3dmSettings::Gen_set_ModelUnitSystem, py::for_setter(py::arg("value").noconvert()))
       .def_prop_rw("ModelUrl", &BND_File3dmSettings::Gen_ModelUrl, &BND_File3dmSettings::Gen_set_ModelUrl)
       .def_prop_rw("PageAbsoluteTolerance", &BND_File3dmSettings::Gen_PageAbsoluteTolerance, &BND_File3dmSettings::Gen_set_PageAbsoluteTolerance)
       .def_prop_rw("PageAngleToleranceRadians", &BND_File3dmSettings::Gen_PageAngleToleranceRadians, &BND_File3dmSettings::Gen_set_PageAngleToleranceRadians)
       .def_prop_rw("PageDistanceDisplayPrecision", &BND_File3dmSettings::Gen_PageDistanceDisplayPrecision, &BND_File3dmSettings::Gen_set_PageDistanceDisplayPrecision)
       .def_prop_rw("PageRelativeTolerance", &BND_File3dmSettings::Gen_PageRelativeTolerance, &BND_File3dmSettings::Gen_set_PageRelativeTolerance)
-      .def_prop_ro("PageUnitSystem", &BND_File3dmSettings::Gen_PageUnitSystem)
+      .def_prop_rw("PageUnitSystem", &BND_File3dmSettings::Gen_PageUnitSystem, &BND_File3dmSettings::Gen_set_PageUnitSystem, py::for_setter(py::arg("value").noconvert()))
       .def_prop_rw("SaveTextureBitmapsInFile", &BND_File3dmSettings::Gen_SaveTextureBitmapsInFile, &BND_File3dmSettings::Gen_set_SaveTextureBitmapsInFile)
       .def_prop_ro("RenderSettings", &BND_File3dmSettings::Gen_RenderSettings, py::rv_policy::take_ownership, py::keep_alive<0, 1>())
       .def_prop_rw("ModelAngleToleranceDegrees", &BND_File3dmSettings::Gen_ModelAngleToleranceDegrees, &BND_File3dmSettings::Gen_set_ModelAngleToleranceDegrees)
@@ -344,13 +352,13 @@ void initGenFile3dmSettings(void)
       .property("modelBasepoint", &BND_File3dmSettings::Gen_ModelBasepoint, &BND_File3dmSettings::Gen_set_ModelBasepoint)
       .property("modelDistanceDisplayPrecision", &BND_File3dmSettings::Gen_ModelDistanceDisplayPrecision, &BND_File3dmSettings::Gen_set_ModelDistanceDisplayPrecision)
       .property("modelRelativeTolerance", &BND_File3dmSettings::Gen_ModelRelativeTolerance, &BND_File3dmSettings::Gen_set_ModelRelativeTolerance)
-      .property("modelUnitSystem", &BND_File3dmSettings::Gen_ModelUnitSystem)
+      .property("modelUnitSystem", &BND_File3dmSettings::Gen_ModelUnitSystem, &BND_File3dmSettings::Gen_set_ModelUnitSystem)
       .property("modelUrl", &BND_File3dmSettings::Gen_ModelUrl, &BND_File3dmSettings::Gen_set_ModelUrl)
       .property("pageAbsoluteTolerance", &BND_File3dmSettings::Gen_PageAbsoluteTolerance, &BND_File3dmSettings::Gen_set_PageAbsoluteTolerance)
       .property("pageAngleToleranceRadians", &BND_File3dmSettings::Gen_PageAngleToleranceRadians, &BND_File3dmSettings::Gen_set_PageAngleToleranceRadians)
       .property("pageDistanceDisplayPrecision", &BND_File3dmSettings::Gen_PageDistanceDisplayPrecision, &BND_File3dmSettings::Gen_set_PageDistanceDisplayPrecision)
       .property("pageRelativeTolerance", &BND_File3dmSettings::Gen_PageRelativeTolerance, &BND_File3dmSettings::Gen_set_PageRelativeTolerance)
-      .property("pageUnitSystem", &BND_File3dmSettings::Gen_PageUnitSystem)
+      .property("pageUnitSystem", &BND_File3dmSettings::Gen_PageUnitSystem, &BND_File3dmSettings::Gen_set_PageUnitSystem)
       .property("saveTextureBitmapsInFile", &BND_File3dmSettings::Gen_SaveTextureBitmapsInFile, &BND_File3dmSettings::Gen_set_SaveTextureBitmapsInFile)
       .property("renderSettings", &BND_File3dmSettings::Gen_RenderSettings, allow_raw_pointers())
       .property("modelAngleToleranceDegrees", &BND_File3dmSettings::Gen_ModelAngleToleranceDegrees, &BND_File3dmSettings::Gen_set_ModelAngleToleranceDegrees)

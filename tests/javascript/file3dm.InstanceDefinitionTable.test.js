@@ -23,3 +23,12 @@ test('instanceDefinitionTableFindIndex', () => {
   const idx = f.allInstanceDefinitions.add('blk', 'desc', new rhino.Point3d(0, 0, 0), [circle], [new rhino.ObjectAttributes()])
   expect(f.allInstanceDefinitions.findIndex(idx)).toBeInstanceOf(rhino.InstanceDefinitionGeometry)
 })
+
+test('instanceDefinitionTableAddWithoutAttributes', () => {
+  // add(name, description, basePoint, geometry, null) adds the definition: no attributes is allowed
+  const f = new rhino.File3dm()
+  const circle = new rhino.ArcCurve(new rhino.Circle(2.0))
+  const idx = f.allInstanceDefinitions.add('blk', 'desc', { X: 0, Y: 0, Z: 0 }, [circle], null)
+  expect(idx).toBeGreaterThanOrEqual(0)
+  expect(f.allInstanceDefinitions.findIndex(idx).name).toBe('blk')
+})

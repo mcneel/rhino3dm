@@ -36,5 +36,14 @@ class TestFile3dmInstanceDefinitionTable(unittest.TestCase):
         self.assertEqual(f.AllInstanceDefinitions.FindIndex(n0).Name, 'blk')
 
 
+    def test_instanceDefinitionTableAddWithoutAttributes(self):
+        """Add(name, description, basePoint, geometry, None) adds the definition: no attributes is allowed."""
+        f = rhino3dm.File3dm()
+        circle = rhino3dm.ArcCurve(rhino3dm.Circle(2.0))
+        idx = f.AllInstanceDefinitions.Add('blk', 'desc', rhino3dm.Point3d(0, 0, 0), [circle], None)
+        self.assertGreaterEqual(idx, 0)
+        self.assertEqual(f.AllInstanceDefinitions.FindIndex(idx).Name, 'blk')
+
+
 if __name__ == '__main__':
     unittest.main()

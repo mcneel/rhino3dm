@@ -1974,6 +1974,12 @@ def emit_registrations(cls, plans, js_pruned, has_default_ctor=False, arg_ctors=
                 JS_POST['keep_args'].append((cls['reg'], camel(n), ai, static_e))
         if e.lstrip().startswith('.def_prop_rw(') and 'keep_alive<1, 2>' in e:
             JS_POST['keep_set'].append((cls['reg'], camel(n)))
+    # pilot #130: a result this object holds (embind's reference policy) -- its handle's delete()
+    # must not run the destructor
+    for e in js:
+        mb = re.match(r'\s*\.(?:function|property)\("(\w+)".*return_value_policy::reference\(\)', e)
+        if mb:
+            JS_POST['borrowed'].append((cls['reg'], mb.group(1)))
     if cls.get('table') or cls.get('liter'):
         JS_POST['iters'].append(cls['reg'] + 'Iter')
     if cs_enumerable(cls['cs']):

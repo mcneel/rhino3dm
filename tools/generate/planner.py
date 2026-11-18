@@ -913,8 +913,12 @@ def plan(member, cfn, cls):
             return None, 'adopt %s into a value: %s' % (sig_ret, rec.get('PtrCtor'))
         extra_fns.append(C_BY_NAME[h['Delete']])
         shape = ('valadopt', target, h['Delete'], bool(member.get('WrapChecked')))
-    elif sig_ret == 'void' and (cret == 'void' or cret in CVALUE):
-        shape = ('direct', 'void')         # a C status C# ignores is ignored here too
+    elif sig_ret == 'void' and (cret == 'void' or cret in CVALUE
+                                or (member.get('ResultUnused') and (cret.startswith('enum ')
+                                                                    or '::' in (on_enum_type(cret) or '')))):
+        # a C status C# ignores is ignored here too; an enum one as well (pilot #131: the setter of
+        # File3dmSettings.ModelUnitSystem calls the combined ON_3dmSettings_GetSetUnitSystem as a statement)
+        shape = ('direct', 'void')
     else:
         return None, 'return type %s (C: %s)' % (sig_ret, cret)
 

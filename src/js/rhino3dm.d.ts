@@ -8100,7 +8100,7 @@ declare module 'rhino3dm' {
 		/**
 		 * Gets or sets the model unit system, using `Rhino.UnitSystem` enumeration.
 		 */
-		readonly modelUnitSystem: UnitSystem;
+		modelUnitSystem: UnitSystem;
 		/**
 		 * Gets or sets a Uniform Resource Locator (URL) direction for the model.
 		 */
@@ -8128,7 +8128,7 @@ declare module 'rhino3dm' {
 		/**
 		 * Gets or sets the page unit system, using `Rhino.UnitSystem` enumeration.
 		 */
-		readonly pageUnitSystem: UnitSystem;
+		pageUnitSystem: UnitSystem;
 		/**
 		 * Gets or sets the render settings.
 		 */

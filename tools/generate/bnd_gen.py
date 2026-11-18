@@ -370,6 +370,7 @@ def js_post_script():
   var KEEP_ARGS = %s;
   var KEEP_SET = %s;
   var ALIASES = %s;
+  var BORROWED = %s;
   var DISPATCH = %s;
   var SETTERS = %s;
   var VALUES = %s;
@@ -446,6 +447,42 @@ def js_post_script():
       Object.defineProperty(proto, ks[1], { get: g, set: function (v) { s.call(this, v); keep(this, '__rh3dm_set_' + ks[1], v); },
                                             enumerable: d.enumerable, configurable: true });
     });
+    // pilot #130: a result this object holds (ViewInfo.viewport; embind's reference policy) -- its
+    // handle never owns it: delete() releases the handle only (embind would run the destructor, and
+    // the holder frees it again). A count that never reaches 0 keeps embind's own delete() path
+    function borrowed(r) {
+      if (r !== null && typeof r === 'object' && r.$$ && r.$$.count) r.$$.count = { value: Infinity };
+      return r;
+    }
+    BORROWED.forEach(function (b) {
+      var C = M[b[0]], proto = C && C.prototype;
+      var d = proto && Object.getOwnPropertyDescriptor(proto, b[1]);
+      if (!d) { missing.push('borrowed ' + b[0] + '.' + b[1]); return; }
+      if (d.get) {
+        var g = d.get;
+        Object.defineProperty(proto, b[1], { get: function () { return borrowed(g.call(this)); }, set: d.set,
+                                             enumerable: d.enumerable, configurable: true });
+      } else if (typeof d.value === 'function') {
+        var f = d.value;
+        var w = function () { return borrowed(f.apply(this, arguments)); };
+        if (f.overloadTable) w.overloadTable = f.overloadTable;
+        proto[b[1]] = w;
+      } else missing.push('borrowed ' + b[0] + '.' + b[1]);
+    });
+    // pilot #129: a class registering its own `delete` (RhinoCommon's table Delete(item)) hides
+    // embind's delete(): called with no argument it frees the handle, as on every other class
+    if (typeof ClassHandle === 'function') {
+      var free = ClassHandle.prototype['delete'];
+      Object.keys(M).forEach(function (c) {
+        var C = M[c], proto = typeof C === 'function' && C.prototype;
+        if (!proto || !ClassHandle.prototype.isPrototypeOf(proto) || !Object.prototype.hasOwnProperty.call(proto, 'delete')) return;
+        var f = proto['delete'];
+        if (typeof f !== 'function' || f === free) return;
+        var w = function () { return arguments.length === 0 ? free.call(this) : f.apply(this, arguments); };
+        if (f.overloadTable) w.overloadTable = f.overloadTable;
+        proto['delete'] = w;
+      });
+    }
     // G124: JS-only names calling another method (File3dm.destroy -> embind's delete)
     ALIASES.forEach(function (a) {
       var C = M[a[0]], proto = C && C.prototype;
@@ -537,6 +574,7 @@ def js_post_script():
        json.dumps(sorted(set(map(tuple, JS_POST['keep_args']))), separators=(',', ':')),
        json.dumps(sorted(set(map(tuple, JS_POST['keep_set']))), separators=(',', ':')),
        json.dumps(sorted(set(map(tuple, JS_POST['aliases']))), separators=(',', ':')),
+       json.dumps(sorted(set(map(tuple, JS_POST['borrowed']))), separators=(',', ':')),
        json.dumps(sorted(set(map(tuple, JS_POST['dispatch']))), separators=(',', ':')),
        json.dumps(sorted(set(map(tuple, JS_POST['setters']))), separators=(',', ':')), j(JS_POST['values']))
 
@@ -1333,6 +1371,14 @@ template <> struct type_caster<RH3DM_Bytes> {
     return true; }
   static handle from_cpp(const RH3DM_Bytes& b, rv_policy, cleanup_list*) noexcept {
     return PyBytes_FromStringAndSize((const char*)b.v.data(), (Py_ssize_t)b.v.size()); }
+};
+// a sequence of class objects (G95): None is an empty sequence, as RhinoCommon skips a null
+// IEnumerable (pilot #128: AllInstanceDefinitions.Add(..., None)); the list caster refuses None
+template <class T> struct type_caster<std::vector<const T*, std::allocator<const T*>>>
+  : list_caster<std::vector<const T*, std::allocator<const T*>>, const T*> {
+  bool from_python(handle src, uint8_t flags, cleanup_list* cleanup) noexcept {
+    if (src.is_none()) { this->value.clear(); return true; }
+    return list_caster<std::vector<const T*, std::allocator<const T*>>, const T*>::from_python(src, flags, cleanup); }
 }; } }
 #else
 // a byte[] argument: a Uint8Array (a Node Buffer is one), an ArrayBuffer (as 8.x took), another
@@ -1391,8 +1437,10 @@ template <class T> inline void RH3DM_SetTupleOwned(BND_TUPLE& t, int i, T* p) {
 template <class T> inline py::list RH3DM_Seq(const std::vector<T>& v) { py::list l; for (const T& x : v) l.append(py::cast(x)); return l; }
 #else
 template <class T> inline emscripten::val RH3DM_Seq(const std::vector<T>& v) { return RH3DM_JsArray(v); }
-// a JS array of class instances (G95): borrowed pointers for the call
+// a JS array of class instances (G95): borrowed pointers for the call; null or undefined is an empty
+// sequence, as RhinoCommon skips a null IEnumerable (pilot #128: instanceDefinitions.add(..., null))
 template<class T> inline std::vector<const T*> RH3DM_JsSeqPtr(const emscripten::val& v) {
+  if (v.isNull() || v.isUndefined()) return {};
   emscripten::val a = v.isArray() ? v : v.call<emscripten::val>("toArray");
   std::vector<const T*> r;
   unsigned n = a["length"].as<unsigned>();

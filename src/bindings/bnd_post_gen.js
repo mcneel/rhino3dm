@@ -8,6 +8,7 @@
   var KEEP_ARGS = [["Brep","tryConvertBrep",0,true],["Leader","create",2,true],["Leader","createWithRichText",2,true],["LinearDimension","create",1,true],["OrdinateDimension","create",0,true],["RadialDimension","create",0,true],["TextEntity","create",2,true],["TextEntity","createWithRichText",2,true]];
   var KEEP_SET = [["AnnotationBase","parentDimensionStyle"]];
   var ALIASES = [["File3dm","destroy","delete"]];
+  var BORROWED = [["AnnotationBase","parentDimensionStyle"],["File3dmRenderContent","parent"],["File3dmRenderContent","topLevel"],["ViewInfo","viewport"]];
   var DISPATCH = [["File3dmEmbeddedFiles","add","rh3dmAddFile","File3dmEmbeddedFile"]];
   var SETTERS = [["Environment","backgroundImage","rh3dmSetBackgroundImage"]];
   var VALUES = ["Arc","BoundingBox","Box","Circle","Color4f","ComponentIndex","Cone","ControlPoint","Cylinder","Ellipse","Interval","Line","MeshFace","Plane","Point2d","Point2f","Point3d","Point3f","Point4d","Sphere","SubDEdgeSharpness","Torus","Transform","Vector2d","Vector3d","Vector3f"];
@@ -84,6 +85,42 @@
       Object.defineProperty(proto, ks[1], { get: g, set: function (v) { s.call(this, v); keep(this, '__rh3dm_set_' + ks[1], v); },
                                             enumerable: d.enumerable, configurable: true });
     });
+    // pilot #130: a result this object holds (ViewInfo.viewport; embind's reference policy) -- its
+    // handle never owns it: delete() releases the handle only (embind would run the destructor, and
+    // the holder frees it again). A count that never reaches 0 keeps embind's own delete() path
+    function borrowed(r) {
+      if (r !== null && typeof r === 'object' && r.$$ && r.$$.count) r.$$.count = { value: Infinity };
+      return r;
+    }
+    BORROWED.forEach(function (b) {
+      var C = M[b[0]], proto = C && C.prototype;
+      var d = proto && Object.getOwnPropertyDescriptor(proto, b[1]);
+      if (!d) { missing.push('borrowed ' + b[0] + '.' + b[1]); return; }
+      if (d.get) {
+        var g = d.get;
+        Object.defineProperty(proto, b[1], { get: function () { return borrowed(g.call(this)); }, set: d.set,
+                                             enumerable: d.enumerable, configurable: true });
+      } else if (typeof d.value === 'function') {
+        var f = d.value;
+        var w = function () { return borrowed(f.apply(this, arguments)); };
+        if (f.overloadTable) w.overloadTable = f.overloadTable;
+        proto[b[1]] = w;
+      } else missing.push('borrowed ' + b[0] + '.' + b[1]);
+    });
+    // pilot #129: a class registering its own `delete` (RhinoCommon's table Delete(item)) hides
+    // embind's delete(): called with no argument it frees the handle, as on every other class
+    if (typeof ClassHandle === 'function') {
+      var free = ClassHandle.prototype['delete'];
+      Object.keys(M).forEach(function (c) {
+        var C = M[c], proto = typeof C === 'function' && C.prototype;
+        if (!proto || !ClassHandle.prototype.isPrototypeOf(proto) || !Object.prototype.hasOwnProperty.call(proto, 'delete')) return;
+        var f = proto['delete'];
+        if (typeof f !== 'function' || f === free) return;
+        var w = function () { return arguments.length === 0 ? free.call(this) : f.apply(this, arguments); };
+        if (f.overloadTable) w.overloadTable = f.overloadTable;
+        proto['delete'] = w;
+      });
+    }
     // G124: JS-only names calling another method (File3dm.destroy -> embind's delete)
     ALIASES.forEach(function (a) {
       var C = M[a[0]], proto = C && C.prototype;

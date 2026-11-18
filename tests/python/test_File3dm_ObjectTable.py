@@ -155,6 +155,18 @@ class TestFile3dmObjectTable(unittest.TestCase):
         obj.Name = 'via name'
         self.assertEqual(next(iter(f.Objects)).Attributes.Name, 'via name')
 
+    def test_file3dmObjectAttributesEditsSurviveAWrite(self):
+        """Layer and user strings set on an object's Attributes are in the written file (RH3DM-59)."""
+        f = _object_table_file_with_line()
+        f.Layers.AddLayer("layer1", (30, 144, 255, 255))
+        f.Layers.AddLayer("layer2", (255, 215, 0, 255))
+        a = next(iter(f.Objects)).Attributes
+        a.LayerIndex = 1
+        self.assertIs(a.SetUserString('k', 'v'), True)
+        back = next(iter(rhino3dm.File3dm.FromByteArray(f.ToByteArray()).Objects)).Attributes
+        self.assertEqual(back.LayerIndex, 1)
+        self.assertEqual(back.GetUserString('k'), 'v')
+
     def test_file3dmObjectGeometryOfADeletedObjectRaises(self):
         """Reading the Geometry of an object deleted from the file raises RuntimeError (D9)."""
         f = _object_table_file_with_line()

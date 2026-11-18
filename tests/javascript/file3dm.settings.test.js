@@ -84,3 +84,16 @@ test('settingsCurrentLinetypeSource', () => {
   f.settings.currentLinetypeSource = S.LinetypeFromObject
   expect(f.settings.currentLinetypeSource).toBe(S.LinetypeFromObject)
 })
+
+test('settingsUnitSystemsAreSettable', () => {
+  // modelUnitSystem and pageUnitSystem can be set, and survive writing and reading the file
+  const U = rhino.UnitSystem
+  const f = new rhino.File3dm()
+  f.settings.modelUnitSystem = U.Meters
+  f.settings.pageUnitSystem = U.Inches
+  expect(f.settings.modelUnitSystem).toBe(U.Meters)
+  expect(f.settings.pageUnitSystem).toBe(U.Inches)
+  const read = rhino.File3dm.fromByteArray(f.toByteArray())
+  expect(read.settings.modelUnitSystem).toBe(U.Meters)
+  expect(read.settings.pageUnitSystem).toBe(U.Inches)
+})
