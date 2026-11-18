@@ -673,9 +673,14 @@ jobs:
         working-directory: rhino3dm.js
 
   test_dotnet:
-      name: test dotnet
-      runs-on: ubuntu-latest
+      name: test dotnet ${{ matrix.os }}
+      runs-on: ${{ matrix.os }}
       needs: [pack_dotnet]
+      strategy:
+        matrix:
+          # windows-11-arm loads the cross-compiled runtimes/win-arm64 library (RH3DM-187)
+          os: [ubuntu-latest, windows-11-arm]
+        fail-fast: false
       steps:
         - name: checkout
           uses: actions/checkout@v4.1.1
@@ -683,18 +688,29 @@ jobs:
           uses: actions/setup-dotnet@v4
           with:
             dotnet-version: '10.0.x'
+        # an x64 dotnet under emulation would load win-x64 instead and test nothing new
+        - name: check dotnet is native arm64
+          if: ${{ matrix.os == 'windows-11-arm' }}
+          shell: bash
+          run: |
+            dotnet --info
+            dotnet --info | grep -E "RID:\s+win-arm64" || { echo "::error::dotnet is not native win-arm64"; exit 1; }
         - name: download rhino3dm.net nuget
           uses: actions/download-artifact@v4.1.7
           with:
             name: rhino3dm.net nupkg
             path: tests/dotnet/lib
         - name: test dotnet
+          shell: bash
           run: |
             NUGET_FILE="$(find tests/dotnet/lib -type f -name "*.nupkg")"
             FILENAME=$(basename ${NUGET_FILE})
             NAME=${FILENAME%.*}
             VERSION=${NAME:9}
-            dotnet nuget add source $(pwd)/tests/dotnet/lib
+            NUGET_SOURCE=$(pwd)/tests/dotnet/lib
+            # Git Bash on windows: hand dotnet a windows path
+            command -v cygpath >/dev/null && NUGET_SOURCE=$(cygpath -m "$NUGET_SOURCE")
+            dotnet nuget add source "$NUGET_SOURCE"
             cd tests/dotnet
             # the test project references src/dotnet; this tests the package packed above instead
             dotnet build -p:Rhino3dmVersion=${VERSION}
