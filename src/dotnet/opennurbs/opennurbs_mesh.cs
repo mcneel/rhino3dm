@@ -1476,7 +1476,20 @@ namespace Rhino.Geometry
       info.AddValue(nameof(TextureRange), TextureRange, typeof(int));
       info.AddValue(nameof(Tolerance), Tolerance, typeof(double));
       using (var subd = SubDDisplayParameters())
-        info.AddValue(nameof(SubDDisplayParameters), subd.ToEncodedString(), typeof(string));
+      {
+        // .NET 9+ has no BinaryFormatter (PlatformNotSupportedException, a NotSupportedException).
+        // An empty string makes the reader keep its default SubD settings.
+        string encoded;
+        try
+        {
+          encoded = subd.ToEncodedString();
+        }
+        catch (NotSupportedException)
+        {
+          encoded = string.Empty;
+        }
+        info.AddValue(nameof(SubDDisplayParameters), encoded, typeof(string));
+      }
     }
 
 
