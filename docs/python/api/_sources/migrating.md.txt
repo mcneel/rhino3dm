@@ -168,6 +168,8 @@ paths = [f.Filename for f in model.EmbeddedFiles]
 - `ConstructionPlane` and `File3dmWriteOptions` gain RhinoCommon's members:
   `ShowGrid`, `ShowAxes`, `ShowZAxis`, and the write
   options' mesh options.
+- The model's notes can be written: `model.Notes.Notes`, `IsVisible`, `IsHtml` and
+  `WindowRectangle` (`(x, y, width, height)`) are read-write and go into the written file.
 
 ## Geometry
 
