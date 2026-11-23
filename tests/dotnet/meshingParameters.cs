@@ -53,4 +53,19 @@ public class MeshingParametersTests
         mp2.MinimumEdgeLength = 1.0;
         Assert.That(mp3.MinimumEdgeLength, Is.EqualTo(0.25));
     }
+
+    // MeshingParameters serializes on .NET 10, which has no BinaryFormatter for the SubD settings
+    // (Rhino.Compute's mesh calls serialize it), and reads back with its values.
+    [Test]
+    public void MeshingParametersSerializesWithoutBinaryFormatter()
+    {
+        var mp = new MeshingParameters(0.5, 0.25) { Tolerance = 0.01 };
+        var info = new System.Runtime.Serialization.SerializationInfo(typeof(MeshingParameters), new System.Runtime.Serialization.FormatterConverter());
+        mp.GetObjectData(info, default);
+        Assert.That(info.GetString(nameof(MeshingParameters.SubDDisplayParameters)), Is.Not.Null);
+
+        var back = new MeshingParameters(info, default);
+        Assert.That(back.Tolerance, Is.EqualTo(0.01));
+        Assert.That(back.MinimumEdgeLength, Is.EqualTo(0.25));
+    }
 }
