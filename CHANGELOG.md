@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.2.0-beta.2] - 2026.11.23
+
+diff: https://github.com/mcneel/rhino3dm/compare/9.2.0-beta.1...9.2.0-beta.2
+
+### Added
+
+- (py, js) Model notes can be written: `File3dmNotes.Notes`, `IsVisible`, `IsHtml` and `WindowRectangle` (JS: `notes`, `isVisible`, `isHtml`, `windowRectangle`) are read-write and go into the written file, as in RhinoCommon (RH3DM-208).
+- (.NET) The release workflow tests the packed NuGet package on Windows arm64 as well as Linux. The package has carried a native `win-arm64` library since 8.32.0 (RH3DM-187).
+
+### Fixed
+
+- (.NET) On .NET 9 and later, serializing `MeshingParameters` (for example, to send a mesh request to Rhino.Compute) threw `PlatformNotSupportedException`, because .NET 9 removed BinaryFormatter. The SubD display settings are now sent empty there, so the server uses its default SubD settings; .NET Framework is unchanged (RH3DM-224).
+- (py, js) `File3dmSettings.ModelUnitSystem` and `PageUnitSystem` can be set (they were read-only), and the values go into the written file (RH3DM-220).
+- (py, js) Where RhinoCommon accepts a null sequence, `None` (Python) or `null`/`undefined` (JS) is accepted as an empty one, e.g. `InstanceDefinitionTable.Add(name, description, basePoint, geometry, None)` (RH3DM-220).
+- (js) `delete()` with no argument on a table (`File3dm.objects`, `layers`, ...) frees the handle, as on every other class; with an argument it still removes that item. Deleting a result its owner holds (`ViewInfo.viewport`, `AnnotationBase.parentDimensionStyle`, `File3dmRenderContent.parent`/`topLevel`) frees only the handle, so deleting it and its owner, in either order, no longer frees it twice (RH3DM-220).
+
 ## [9.2.0-beta.1] - 2026.11.17
 
 diff: https://github.com/mcneel/rhino3dm/compare/9.2.0-beta.0...9.2.0-beta.1
