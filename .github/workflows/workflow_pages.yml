@@ -1,0 +1,49 @@
+# GitHub Pages: publishes only the API reference (docs/python/api, docs/javascript/api, the 8.x
+# reference in docs/8) and docs/images (logo used by the 8.x JavaScript index). The markdown under
+# docs/ stays in the repository and is not served. Requires Settings > Pages > Source: GitHub Actions.
+
+name: workflow pages
+on:
+  push:
+    branches: [9.x]
+    paths:
+      - 'docs/python/api/**'
+      - 'docs/javascript/api/**'
+      - 'docs/8/**'
+      - 'docs/images/**'
+      - '.github/workflows/workflow_pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4.1.1
+
+      - name: assemble site
+        run: |
+          mkdir -p _site/python _site/javascript
+          cp -R docs/python/api _site/python/api
+          cp -R docs/javascript/api _site/javascript/api
+          cp -R docs/8 _site/8
+          cp -R docs/images _site/images
+          find _site -name '*.md' -print -delete
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
