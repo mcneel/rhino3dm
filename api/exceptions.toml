@@ -70,7 +70,7 @@ type = "Rhino.DocObjects.ViewportInfo"
 parent_view = "ViewInfo"
 nonconst = "NonConstViewportPointer"
 nonconst_native = "ON_3dmView_ViewportPointer"
-reason = "ViewInfo.Viewport edits write through to the view (ViewportInfo.NonConstPointer -> vi.NonConstViewportPointer()); upstream copies on write, so a camera set before File3dm.Views.Add was lost (RH-83697, docs/vnext/RH-83697-viewport-fix-proposal.md)"
+reason = "ViewInfo.Viewport edits write through to the view (ViewportInfo.NonConstPointer -> vi.NonConstViewportPointer()); upstream copies on write, so a camera set before File3dm.Views.Add was lost (RH-83697)"
 
 # -----------------------------------------------------------------------------
 # Upstream portable surface deliberately not shipped. Kept summary-level here;

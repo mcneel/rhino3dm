@@ -107,3 +107,6 @@ Properties/
 .venv/
 tests/SampleCppReadTextEntity/build
 
+
+# internal planning notes (local only)
+docs/vnext/
