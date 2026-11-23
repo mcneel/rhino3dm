@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>rhino3dm.File3dmNotes &mdash; rhino3dm.py 9.2.0-beta.1</title>
+  <title>rhino3dm.File3dmNotes &mdash; rhino3dm.py 9.2.0-beta.2</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=57307a8e"></script>
+      <script src="../../_static/documentation_options.js?v=60c8f0e4"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -354,6 +354,30 @@
 <dt class="sig sig-object py" id="rhino3dm.File3dmNotes">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rhino3dm.</span></span><span class="sig-name descname"><span class="pre">File3dmNotes</span></span><a class="headerlink" href="#rhino3dm.File3dmNotes" title="Link to this definition"></a></dt>
 <dd><p>Represents the notes information stored in a 3dm file.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.File3dmNotes.IsHtml">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsHtml</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#rhino3dm.File3dmNotes.IsHtml" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the text format. If the format is HTML, true; false otherwise.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.File3dmNotes.IsVisible">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsVisible</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#rhino3dm.File3dmNotes.IsVisible" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the notes visibility. If the notes are visible, true; false otherwise.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.File3dmNotes.Notes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Notes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rhino3dm.File3dmNotes.Notes" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the text content of the notes.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rhino3dm.File3dmNotes.WindowRectangle">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WindowRectangle</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rhino3dm.File3dmNotes.WindowRectangle" title="Link to this definition"></a></dt>
+<dd><p>Gets or sets the position of the Notes when they were saved.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
