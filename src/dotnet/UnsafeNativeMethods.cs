@@ -54,6 +54,9 @@ internal partial class UnsafeNativeMethods
             string env_path = Environment.GetEnvironmentVariable("path");
             var sub_directory = Environment.Is64BitProcess ? "\\Win64" : "\\Win32";
             Environment.SetEnvironmentVariable("path", env_path + ";" + dir_name + sub_directory);
+#if NETFRAMEWORK
+            PreloadNativeLibrary(sub_directory);
+#endif
           }
           break;
         default:
@@ -62,6 +65,42 @@ internal partial class UnsafeNativeMethods
       g_paths_set = true;
     }
   }
+
+#if NETFRAMEWORK
+  // RH3DM-201: hosts that shadow-copy assemblies (VSTO / Office add-ins, ASP.NET) report
+  // Location in the shadow-copy cache, which has no Win64/Win32 folder. Load the native
+  // library by full path, also looking in the original folder (CodeBase), so the
+  // DllImports bind to the module that is already loaded.
+  [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+  private static extern IntPtr LoadLibraryW(string lpFileName);
+
+  private static void PreloadNativeLibrary(string subDirectory)
+  {
+    var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+    var dirs = new System.Collections.Generic.List<string>();
+    if (!string.IsNullOrEmpty(assembly.Location))
+      dirs.Add(System.IO.Path.GetDirectoryName(assembly.Location));
+    try
+    {
+      var code_base = new Uri(assembly.CodeBase);
+      if (code_base.IsFile)
+        dirs.Add(System.IO.Path.GetDirectoryName(code_base.LocalPath));
+    }
+    catch (Exception)
+    {
+    }
+
+    foreach (var dir in dirs)
+    {
+      foreach (var candidate in new[] { dir + subDirectory, dir })
+      {
+        var path = System.IO.Path.Combine(candidate, Import.lib + ".dll");
+        if (System.IO.File.Exists(path) && LoadLibraryW(path) != IntPtr.Zero)
+          return;
+      }
+    }
+  }
+#endif
 #endif
 
 

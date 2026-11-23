@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- RH3DM-201: .NET Framework host that shadow-copies Rhino3dm.dll, as VSTO / Office add-ins do.
+       Windows only. dotnet run -c Release (after the native library is built). -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../src/dotnet/Rhino3dm.csproj" />
+  </ItemGroup>
+
+  <!-- Lay the native library out as the package's build/net45/Rhino3dm.props does: Win64\ only,
+       nothing next to the exe (the exe's folder is on the default DLL search path). -->
+  <Target Name="NativeLikeThePackage" AfterTargets="Build">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../../../src/build/windows/win64/Release/librhino3dm_native.dll"
+          DestinationFolder="$(OutDir)Win64" />
+    <Delete Files="$(OutDir)librhino3dm_native.dll" />
+  </Target>
+
+</Project>
