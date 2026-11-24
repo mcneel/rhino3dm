@@ -1,0 +1,383 @@
+{
+ "run": {
+  "reindex": false,
+  "env": "linux-arm64-docker",
+  "date": "2026-11-24 15:55",
+  "commit": "cc0818a8",
+  "branch": "9.x",
+  "scale": "small",
+  "rounds": "3",
+  "repeats": "5",
+  "builds": "reference: the published 9.2.0-beta.2 Linux packages (PyPI manylinux_2_28 aarch64 abi3 wheel, NuGet linux-arm64 native library); current: Release builds of this tree through the new root CMake (python build.py py, python build.py dotnet), working tree uncommitted",
+  "ref_label": "9.2.0-beta.2",
+  "cur_label": "9.2.0-beta.2 + build overhaul (Release)",
+  "notes": "Build overhaul: the published 9.2.0-beta.2 Linux builds against Release builds of the same sources. The released manylinux wheels were Debug builds (setup.py bdist_wheel build --debug) and the Linux .NET native library had no CMAKE_BUILD_TYPE; the overhaul builds both Release",
+  "tag": "beta2-vs-release",
+  "versions": {
+   "python": {
+    "ref": "9.2.0b2",
+    "cur": "9.2.0b2",
+    "runtime": "CPython 3.12.16",
+    "rounds": 3
+   },
+   "dotnet": {
+    "ref": "9.2.0.0",
+    "cur": "9.2.0.0",
+    "runtime": ".NET 10.0.12",
+    "rounds": 3
+   }
+  },
+  "floor_ms": 10.0
+ },
+ "results": {
+  "python": [
+   {
+    "task": "io.read_model_file",
+    "ref_ms": 356.99479100003373,
+    "cur_ms": 169.8052079991612
+   },
+   {
+    "task": "io.read_test_models",
+    "ref_ms": 160.41212500022084,
+    "cur_ms": 96.02666700084228
+   },
+   {
+    "task": "io.from_byte_array_model",
+    "ref_ms": 344.111750000593,
+    "cur_ms": 155.4690840002877
+   },
+   {
+    "task": "io.write_model_file_v8",
+    "ref_ms": 14962.44856949943,
+    "cur_ms": 6602.02252399904
+   },
+   {
+    "task": "table.iterate_objects_geometry_attrs",
+    "ref_ms": 9.468457999901148,
+    "cur_ms": 1.8186670004070038
+   },
+   {
+    "task": "table.iterate_objects_bbox",
+    "ref_ms": 9.078042001419817,
+    "cur_ms": 1.9877499998983694
+   },
+   {
+    "task": "table.iterate_layers",
+    "ref_ms": 0.1552499998069834,
+    "cur_ms": 0.050999999075429514
+   },
+   {
+    "task": "create.populate_model",
+    "ref_ms": 130.77262499973585,
+    "cur_ms": 56.877875000282074
+   },
+   {
+    "task": "create.write_populated_v8",
+    "ref_ms": 1568.7818970009175,
+    "cur_ms": 773.8903339995886
+   },
+   {
+    "task": "create.write_50_regular_grid_meshes_v8",
+    "ref_ms": 2199.8128760005784,
+    "cur_ms": 931.710374999966
+   },
+   {
+    "task": "create.write_populated_default_version",
+    "ref_ms": 1572.2766669996417,
+    "cur_ms": 760.5852920005418
+   },
+   {
+    "task": "values.point3d_construct_100k",
+    "ref_ms": 65.60966699908022,
+    "cur_ms": 18.568374998721993
+   },
+   {
+    "task": "values.point3d_distance_100k",
+    "ref_ms": 15.536875000179862,
+    "cur_ms": 6.769917001292924
+   },
+   {
+    "task": "values.point3d_add_100k",
+    "ref_ms": 64.38816700028838,
+    "cur_ms": 14.124166000328842
+   },
+   {
+    "task": "values.point3d_get_xyz_100k",
+    "ref_ms": 18.81366599991452,
+    "cur_ms": 10.574625001027016
+   },
+   {
+    "task": "values.transform_multiply_100k",
+    "ref_ms": 71.56233299974701,
+    "cur_ms": 25.809957998717437
+   },
+   {
+    "task": "values.point3d_transform_100k",
+    "ref_ms": 9.72974999967846,
+    "cur_ms": 4.530000000158907
+   },
+   {
+    "task": "curve.point_at_100k",
+    "ref_ms": 86.6853749994334,
+    "cur_ms": 22.732041999915964
+   },
+   {
+    "task": "curve.tangent_at_100k",
+    "ref_ms": 95.26395899956697,
+    "cur_ms": 25.928625000233296
+   },
+   {
+    "task": "curve.point_at_100k_shuffled_1k_curves",
+    "ref_ms": 100.64958299881255,
+    "cur_ms": 31.914667000819463
+   },
+   {
+    "task": "curve.create_control_point_5k",
+    "ref_ms": 65.4595829983009,
+    "cur_ms": 26.88608300013584
+   },
+   {
+    "task": "curve.nurbs_points_read_200x500",
+    "ref_ms": 167.05529199862212,
+    "cur_ms": 26.841625000088243
+   },
+   {
+    "task": "mesh.build_grid_200",
+    "ref_ms": 118.82454199985659,
+    "cur_ms": 40.858084001229145
+   },
+   {
+    "task": "mesh.compute_normals_200",
+    "ref_ms": 6.707500000629807,
+    "cur_ms": 3.023958000994753
+   },
+   {
+    "task": "mesh.vertices_index_loop_40k",
+    "ref_ms": 20.33037500041246,
+    "cur_ms": 4.106041998966248
+   },
+   {
+    "task": "mesh.vertices_to_point3d_array_40k",
+    "ref_ms": 16.20504200036521,
+    "cur_ms": 3.2493329999851994
+   },
+   {
+    "task": "mesh.faces_index_loop_40k",
+    "ref_ms": 19.822291000309633,
+    "cur_ms": 4.77912499991362
+   },
+   {
+    "task": "mesh.vertices_numpy_view_sum_40k",
+    "ref_ms": 48.86433399951784,
+    "cur_ms": 11.819666000519646
+   },
+   {
+    "task": "brep.create_from_sphere_1k",
+    "ref_ms": 9.238374999767984,
+    "cur_ms": 4.271750000043539
+   },
+   {
+    "task": "brep.walk_faces_edges",
+    "ref_ms": 3.958332999900449,
+    "cur_ms": 2.41841699971701
+   },
+   {
+    "task": "subd.walk_components",
+    "ref_ms": 0.7838750007067574,
+    "cur_ms": 0.15133300075831357
+   },
+   {
+    "task": "subd.subdivide_1",
+    "ref_ms": 0.3957499993703095,
+    "cur_ms": 0.192000001334236
+   },
+   {
+    "task": "draco.compress_grid_200",
+    "ref_ms": 196.695707998515,
+    "cur_ms": 11.761583000406972
+   },
+   {
+    "task": "draco.decompress_grid_200",
+    "ref_ms": 67.71558299988101,
+    "cur_ms": 8.934499999668333
+   },
+   {
+    "task": "json.encode_1k_curves",
+    "ref_ms": 7.529917000283604,
+    "cur_ms": 4.7891670001263265
+   },
+   {
+    "task": "json.decode_1k_curves",
+    "ref_ms": 19.922125000448432,
+    "cur_ms": 10.352334000344854
+   },
+   {
+    "task": "attrs.user_strings_10k",
+    "ref_ms": 3444.873897499747,
+    "cur_ms": 1946.4407305003988
+   }
+  ],
+  "dotnet": [
+   {
+    "task": "io.read_model_file",
+    "ref_ms": 359.7634,
+    "cur_ms": 176.9958
+   },
+   {
+    "task": "io.read_test_models",
+    "ref_ms": 173.3336,
+    "cur_ms": 98.9578
+   },
+   {
+    "task": "io.from_byte_array_model",
+    "ref_ms": 349.4286,
+    "cur_ms": 159.7431
+   },
+   {
+    "task": "io.write_model_file_v8",
+    "ref_ms": 14934.5297,
+    "cur_ms": 6582.5457
+   },
+   {
+    "task": "table.iterate_objects_geometry_attrs",
+    "ref_ms": 3.8783,
+    "cur_ms": 2.7604
+   },
+   {
+    "task": "table.iterate_objects_bbox",
+    "ref_ms": 3.7194,
+    "cur_ms": 2.2167
+   },
+   {
+    "task": "table.iterate_layers",
+    "ref_ms": 0.1252,
+    "cur_ms": 0.0915
+   },
+   {
+    "task": "create.populate_model",
+    "ref_ms": 43.2688,
+    "cur_ms": 28.2353
+   },
+   {
+    "task": "create.write_populated_v8",
+    "ref_ms": 1589.7048,
+    "cur_ms": 771.56
+   },
+   {
+    "task": "create.write_50_regular_grid_meshes_v8",
+    "ref_ms": 2215.186,
+    "cur_ms": 924.4393
+   },
+   {
+    "task": "create.write_populated_default_version",
+    "ref_ms": 1587.2455,
+    "cur_ms": 773.9782
+   },
+   {
+    "task": "values.transform_multiply_100k",
+    "ref_ms": 0.0831,
+    "cur_ms": 0.0792
+   },
+   {
+    "task": "values.point3d_transform_100k",
+    "ref_ms": 0.3885,
+    "cur_ms": 0.3777
+   },
+   {
+    "task": "curve.point_at_100k",
+    "ref_ms": 14.3046,
+    "cur_ms": 7.7659
+   },
+   {
+    "task": "curve.tangent_at_100k",
+    "ref_ms": 28.2576,
+    "cur_ms": 11.6871
+   },
+   {
+    "task": "curve.point_at_100k_shuffled_1k_curves",
+    "ref_ms": 21.5823,
+    "cur_ms": 11.8021
+   },
+   {
+    "task": "curve.create_control_point_5k",
+    "ref_ms": 8.0554,
+    "cur_ms": 6.012
+   },
+   {
+    "task": "curve.nurbs_points_read_200x500",
+    "ref_ms": 3.7791,
+    "cur_ms": 3.3471
+   },
+   {
+    "task": "mesh.build_grid_200",
+    "ref_ms": 8.168,
+    "cur_ms": 5.3232
+   },
+   {
+    "task": "mesh.compute_normals_200",
+    "ref_ms": 7.6765,
+    "cur_ms": 4.0548
+   },
+   {
+    "task": "mesh.vertices_index_loop_40k",
+    "ref_ms": 0.8767,
+    "cur_ms": 0.579
+   },
+   {
+    "task": "mesh.vertices_to_point3d_array_40k",
+    "ref_ms": 0.9082,
+    "cur_ms": 0.6582
+   },
+   {
+    "task": "mesh.faces_index_loop_40k",
+    "ref_ms": 0.5603,
+    "cur_ms": 0.4228
+   },
+   {
+    "task": "brep.create_from_sphere_1k",
+    "ref_ms": 9.734,
+    "cur_ms": 4.8797
+   },
+   {
+    "task": "brep.walk_faces_edges",
+    "ref_ms": 0.5095,
+    "cur_ms": 0.3351
+   },
+   {
+    "task": "subd.walk_components",
+    "ref_ms": 0.1054,
+    "cur_ms": 0.0967
+   },
+   {
+    "task": "subd.subdivide_1",
+    "ref_ms": 0.6216,
+    "cur_ms": 0.3174
+   },
+   {
+    "task": "json.encode_1k_curves",
+    "ref_ms": 3.9671,
+    "cur_ms": 2.4438
+   },
+   {
+    "task": "json.decode_1k_curves",
+    "ref_ms": 13.1388,
+    "cur_ms": 11.3666
+   },
+   {
+    "task": "attrs.user_strings_10k",
+    "ref_ms": 3700.0974,
+    "cur_ms": 1516.1745
+   },
+   {
+    "task": "draco.compress_grid_200",
+    "ref_ms": null,
+    "cur_ms": 14.3758
+   },
+   {
+    "task": "draco.decompress_grid_200",
+    "ref_ms": null,
+    "cur_ms": 7.8163
+   }
+  ]
+ }
+}

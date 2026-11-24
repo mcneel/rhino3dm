@@ -8,6 +8,49 @@ import gc
 # RH3DM #713 follow-up: Brep loop/trim topology traversal (Py + JS parity).
 
 
+# the twisted cube of the opennurbs brep example: corners, edges as corner pairs, and faces as
+# (SW, SE, NE, NW) corners with their (edge, reversed) sides in south, east, north, west order
+A, B, C, D, E, F, G, H = range(8)
+AB, BC, CD, AD, EF, FG, GH, EH, AE, BF, CG, DH = range(12)
+CUBE_POINTS = [(0, 0, 11), (10, 0, 12), (10, 8, 13), (0, 6, 12), (1, 2, 0), (10, 0, 0), (10, 7, -1), (0, 6, 0)]
+CUBE_EDGES = [(A, B), (B, C), (C, D), (A, D), (E, F), (F, G), (G, H), (E, H), (A, E), (B, F), (C, G), (D, H)]
+CUBE_FACES = [
+    ((A, B, C, D), ((AB, False), (BC, False), (CD, False), (AD, True))),
+    ((B, F, G, C), ((BF, False), (FG, False), (CG, True), (BC, True))),
+    ((F, E, H, G), ((EF, True), (EH, False), (GH, True), (FG, True))),
+    ((E, A, D, H), ((AE, True), (AD, False), (DH, False), (EH, True))),
+    ((E, F, B, A), ((EF, False), (BF, True), (AB, True), (AE, False))),
+    ((D, C, G, H), ((CD, True), (CG, False), (GH, False), (DH, True))),
+]
+CUBE_UV = [(0, 0), (1, 0), (1, 1), (0, 1)]
+
+
+def twisted_cube():
+    """a closed six-face brep built one vertex, edge, face, loop and trim at a time"""
+    iso = [rhino3dm.IsoStatus.South, rhino3dm.IsoStatus.East, rhino3dm.IsoStatus.North, rhino3dm.IsoStatus.West]
+    brep = rhino3dm.Brep()
+    for p in CUBE_POINTS:
+        brep.Vertices.Add(rhino3dm.Point3d(*p), 0.0)
+    for a, b in CUBE_EDGES:
+        line = rhino3dm.LineCurve(rhino3dm.Point3d(*CUBE_POINTS[a]), rhino3dm.Point3d(*CUBE_POINTS[b]))
+        brep.Edges.Add(a, b, brep.AddEdgeCurve(line), 0.0)
+    for corners, sides in CUBE_FACES:
+        srf = rhino3dm.NurbsSurface.Create(3, False, 2, 2, 2, 2)
+        for (u, v), corner in zip(CUBE_UV, corners):
+            srf.Points.SetPoint(u, v, rhino3dm.Point3d(*CUBE_POINTS[corner]))
+        srf.KnotsU.CreateUniformKnots(1.0)
+        srf.KnotsV.CreateUniformKnots(1.0)
+        face = brep.Faces.Add(brep.AddSurface(srf))
+        loop = brep.Loops.Add(rhino3dm.BrepLoopType.Outer, face)
+        for side, (edge, reversed_) in enumerate(sides):
+            line = rhino3dm.LineCurve(rhino3dm.Point2d(*CUBE_UV[side]), rhino3dm.Point2d(*CUBE_UV[(side + 1) % 4]))
+            trim = brep.Trims.Add(brep.Edges[edge], reversed_, loop, brep.AddTrimCurve(line))
+            trim.IsoStatus = iso[side]
+            trim.TrimType = rhino3dm.BrepTrimType.Mated
+            trim.SetTolerances(0.0, 0.0)
+    return brep
+
+
 class TestBrepTopology(unittest.TestCase):
 
     def _box_brep(self):
@@ -218,6 +261,43 @@ class TestBrepTopology(unittest.TestCase):
     def test_brepFaceOuterLoopTrimCount(self):
         """A box face's outer loop has four trims."""
         self.assertEqual(helpers.box_brep().Faces[0].OuterLoop.Trims.Count, 4)
+
+    def test_handRolledBrepIsAValidSolid(self):
+        """A brep built from vertices, edges, faces, loops and trims is a valid closed solid."""
+        b = twisted_cube()
+        self.assertEqual([len(b.Vertices), len(b.Edges), len(b.Faces), len(b.Loops), len(b.Trims)], [8, 12, 6, 6, 24])
+        self.assertEqual(b.Surfaces.Count, 6)
+        self.assertEqual(b.IsValidWithLog(), (True, ''))
+        self.assertEqual(b.IsValidTopology(), (True, ''))
+        self.assertEqual(b.IsValidGeometry(), (True, ''))
+        self.assertEqual(b.IsValidTolerancesAndFlags(), (True, ''))
+        self.assertTrue(b.IsSolid)
+        self.assertTrue(b.IsManifold)
+        self.assertEqual([e.TrimCount for e in b.Edges], [2] * 12)
+        self.assertEqual([len(v.EdgeIndices()) for v in b.Vertices], [3] * 8)
+        self.assertTrue(all(f.OuterLoop.Trims.Count == 4 for f in b.Faces))
+        bbox = b.GetBoundingBox(True)
+        self.assertEqual((bbox.Min.X, bbox.Min.Y, bbox.Min.Z), (0, 0, -1))
+        self.assertEqual((bbox.Max.X, bbox.Max.Y, bbox.Max.Z), (10, 8, 13))
+
+    def test_handRolledBrepTrimKeepsWhatItWasGiven(self):
+        """A trim added with an edge, a direction, a loop and a 2d curve reports them back."""
+        b = twisted_cube()
+        t = b.Trims[3]
+        self.assertEqual((t.Edge.EdgeIndex, t.Loop.LoopIndex, t.Face.FaceIndex, t.TrimCurveIndex), (AD, 0, 0, 3))
+        self.assertTrue(t.IsReversed())
+        self.assertEqual(t.IsoStatus, rhino3dm.IsoStatus.West)
+        self.assertEqual(t.TrimType, rhino3dm.BrepTrimType.Mated)
+        self.assertEqual((t.StartVertex.VertexIndex, t.EndVertex.VertexIndex), (D, A))
+
+    def test_handRolledBrepSurvivesWriteRead(self):
+        """A hand-built brep is still a valid solid after a File3dm write and read."""
+        f = rhino3dm.File3dm()
+        f.Objects.AddBrep(twisted_cube())
+        back = helpers.first_geometry(rhino3dm.File3dm.FromByteArray(f.ToByteArray()), rhino3dm.Brep)
+        self.assertEqual(back.IsValidWithLog(), (True, ''))
+        self.assertTrue(back.IsSolid)
+        self.assertEqual([len(back.Faces), len(back.Edges), len(back.Trims)], [6, 12, 24])
 
 
 if __name__ == '__main__':

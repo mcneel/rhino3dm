@@ -7,6 +7,7 @@ rows of the same environment.
 
 | Date | Commit | Env | Versions | Scale | Python | .NET | JavaScript (wasm32) | JavaScript (wasm64 / memory64) | Notes |
 |---|---|---|---|---|--:|--:|--:|--:|---|
+| [2026-11-24 15:55](2026-11-24_cc0818a8_linux-arm64-docker_beta2-vs-release.md) | `cc0818a8` | linux-arm64-docker | 9.2.0-beta.2 + build overhaul (Release) vs 9.2.0-beta.2 | small | 3.01 | 1.64 |  |  | Build overhaul: the published 9.2.0-beta.2 Linux builds against Release builds of the same sources |
 | [2026-11-16 17:22](2026-11-16_b80c3900_linux-arm64-docker.md) | `b80c3900` | linux-arm64-docker | 9.2.0-beta.1 vs 8.35.0 | small | 5.55 | 1.68 | 1.24 |  | opennurbs bumped to public 9.2 (39742772, PR #141; carries RH-100236 / U49, which the 11-13 run already had as a working-tree patch) |
 | [2026-11-13 12:35](2026-11-13_351d7e0c_linux-arm64-docker.md) | `351d7e0c` | linux-arm64-docker | 9.2.0-beta.0 vs 8.35.0 | small | 5.61 | 1.73 | 1.27 |  | wasm -O3 for zlib/Draco/unicode, G154 table iterators, G155 view cache, G156 overload dispatch and strings (this commit); the only uncommitted change in src/ is the opennurbs submodule's working tree |
 | [2026-11-11 17:23](2026-11-11_dd8908dd_linux-arm64-docker.md) | `dd8908dd` | linux-arm64-docker | 9.2.0-beta.0 vs 8.35.0 | small | 5.07 | 1.63 | 0.86 |  | RH-100236 (opennurbs mesh-modifier user data on every object, temporarily patched into the opennurbs submodule): model writes no longer attach five default mesh-modifier records per object |

@@ -1,45 +1,47 @@
 # Build rhino3dm.py for yourself
 
-## Install the Tools
-
-* Mac
-  * `brew install python3 cmake`
-* Windows
-  * Visual Studio 2019
-  * [Python](https://www.python.org/downloads/windows/)
-  * [CMake](https://cmake.org/download/) (make sure that cmake.exe is added to the `%PATH%`)
-* Linux
-  * Tested with Ubuntu 20.04 LTS
-  * `sudo apt install git python3 python3-dev python3-setuptools cmake gcc g++`
-
-We've been using CMake 16.6.2, but you might be able to get away with an older version.
-
 ## Get the source code
 
-This repo uses [OpenNURBS](https://github.com/mcneel/opennurbs) and [nanobind](https://github.com/wjakob/nanobind) as submodules. Make sure they're properly initialised and updated.
+This repo uses [OpenNURBS](https://github.com/mcneel/opennurbs), [nanobind](https://github.com/wjakob/nanobind) and Draco as submodules:
 
 ```commandline
 git clone --recurse-submodules https://github.com/mcneel/rhino3dm.git
 ```
 
+## Install the tools
+
+* Python 3.10 or later
+* CMake 3.21 or later (the wheel build fetches a newer one from PyPI when it needs to)
+* a C++17 compiler: Xcode on macOS, Visual Studio 2022 on Windows, GCC or Clang on Linux
+
+[Current_Development_Tools.md](../../Current_Development_Tools.md) lists the versions CI uses.
+`python bootstrap.py py` checks them.
+
 ## Compile
 
-* (All platforms) run `python setup.py bdist` in the root directory to compile and configure. The library will compile for the version of python that you are executing.
+```commandline
+python build.py py
+```
 
-* (Windows) If you are on Windows, you can create a Visual Studio project file for editing and compiling code by running the `create_python_vcxproj.py` script in the `src` directory. This is the easiest way to add new code to the project.
+builds a wheel for the Python that runs it into `dist/` (`pip wheel .`, driven by `pyproject.toml`
+and scikit-build-core; on Python 3.12 and later it is one abi3 wheel for every later version).
+`python build.py py --sdist` builds the source distribution (needs `pip install build`).
 
 ## Compile and install a development version
 
-* (All platforms) Alternatively, running `pip install -e .` from the root of the repository will compile the Python extension, copy it in `/src/rhino3dm`, and link `/src/rhino3dm` in your installed packages. Rebuilds will be faster than building a binary distribution. To rebuild after modifying the C++ source files, run `python setup.py develop`.
+```commandline
+pip install -e . --no-build-isolation
+```
+
+installs an editable rhino3dm; `pip install scikit-build-core` first, for `--no-build-isolation`.
+After changing the C++ sources, run it again to rebuild.
+
+For a native build tree to work in (an IDE, compile_commands.json): `cmake --preset py`, then
+`cmake --build --preset py` (build tree: `build/py`).
 
 ## Test
 
-* `cd build_{pyver}/stage` and start `python`
-```
->>> from rhino3dm import *
->>> center = Point3d(1,2,3)
->>> arc = Arc(center, 10, 1)
->>> nc = arc.ToNurbsCurve()
->>> start = nc.PointAtStart
->>> print(start)
+```commandline
+pip install dist/rhino3dm-*.whl
+cd tests/python && python -m unittest discover .
 ```

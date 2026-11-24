@@ -39,56 +39,50 @@
     <NoWarn>$(NoWarn);SYSLIB0011</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup Condition="exists('..\build\windows\win64\Release\librhino3dm_native.dll')">
-    <None Include="..\build\windows\win64\Release\librhino3dm_native.dll">
+  <!-- the native libraries build.py writes (python build.py dotnet): build/native/<rid>; the release
+       workflow gathers every platform's there before packing. macOS is one universal dylib. -->
+  <ItemGroup Condition="exists('..\..\build\native\win-x64\librhino3dm_native.dll')">
+    <None Include="..\..\build\native\win-x64\librhino3dm_native.dll">
       <PackagePath>runtimes\win-x64\native</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Pack>true</Pack>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="exists('..\build\windows\winarm64\Release\librhino3dm_native.dll')">
-    <None Include="..\build\windows\winarm64\Release\librhino3dm_native.dll">
+  <ItemGroup Condition="exists('..\..\build\native\win-arm64\librhino3dm_native.dll')">
+    <None Include="..\..\build\native\win-arm64\librhino3dm_native.dll">
       <PackagePath>runtimes\win-arm64\native</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Pack>true</Pack>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="exists('..\build\macos\Release\librhino3dm_native.dylib')">
-    <None Include="..\build\macos\Release\librhino3dm_native.dylib">
+  <ItemGroup Condition="exists('..\..\build\native\osx\librhino3dm_native.dylib')">
+    <None Include="..\..\build\native\osx\librhino3dm_native.dylib">
       <PackagePath>runtimes\osx-x64\native</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Pack>true</Pack>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="exists('..\build\macos\Release\librhino3dm_native.dylib')">
-    <None Include="..\build\macos\Release\librhino3dm_native.dylib">
+  <ItemGroup Condition="exists('..\..\build\native\osx\librhino3dm_native.dylib')">
+    <None Include="..\..\build\native\osx\librhino3dm_native.dylib">
       <PackagePath>runtimes\osx-arm64\native</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Pack>true</Pack>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="exists('..\build\linux\Release\librhino3dm_native.so')">
-    <None Include="..\build\linux\Release\librhino3dm_native.so">
+  <ItemGroup Condition="exists('..\..\build\native\linux-x64\librhino3dm_native.so')">
+    <None Include="..\..\build\native\linux-x64\librhino3dm_native.so">
       <PackagePath>runtimes\linux-x64\native</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Pack>true</Pack>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="exists('..\build\linux\librhino3dm_native.so')">
-    <None Include="..\build\linux\librhino3dm_native.so">
-      <PackagePath>runtimes\linux-x64\native</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Pack>true</Pack>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup Condition="exists('..\build\linux\arm64\Release\librhino3dm_native.so')">
-    <None Include="..\build\linux\arm64\Release\librhino3dm_native.so">
+  <ItemGroup Condition="exists('..\..\build\native\linux-arm64\librhino3dm_native.so')">
+    <None Include="..\..\build\native\linux-arm64\librhino3dm_native.so">
       <PackagePath>runtimes\linux-arm64\native</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Pack>true</Pack>

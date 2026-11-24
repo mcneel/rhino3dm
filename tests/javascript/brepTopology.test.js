@@ -12,6 +12,49 @@ function boxBrep(rhino) {
     return rhino.Brep.createFromBox(bbox)
 }
 
+// the twisted cube of the opennurbs brep example: corners, edges as corner pairs, and faces as
+// [SW, SE, NE, NW] corners with their [edge, reversed] sides in south, east, north, west order
+const [A, B, C, D, E, F, G, H] = [0, 1, 2, 3, 4, 5, 6, 7]
+const [AB, BC, CD, AD, EF, FG, GH, EH, AE, BF, CG, DH] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+const CUBE_POINTS = [[0, 0, 11], [10, 0, 12], [10, 8, 13], [0, 6, 12], [1, 2, 0], [10, 0, 0], [10, 7, -1], [0, 6, 0]]
+const CUBE_EDGES = [[A, B], [B, C], [C, D], [A, D], [E, F], [F, G], [G, H], [E, H], [A, E], [B, F], [C, G], [D, H]]
+const CUBE_FACES = [
+  [[A, B, C, D], [[AB, false], [BC, false], [CD, false], [AD, true]]],
+  [[B, F, G, C], [[BF, false], [FG, false], [CG, true], [BC, true]]],
+  [[F, E, H, G], [[EF, true], [EH, false], [GH, true], [FG, true]]],
+  [[E, A, D, H], [[AE, true], [AD, false], [DH, false], [EH, true]]],
+  [[E, F, B, A], [[EF, false], [BF, true], [AB, true], [AE, false]]],
+  [[D, C, G, H], [[CD, true], [CG, false], [GH, false], [DH, true]]],
+]
+const CUBE_UV = [[0, 0], [1, 0], [1, 1], [0, 1]]
+
+// a closed six-face brep built one vertex, edge, face, loop and trim at a time
+function twistedCube(rhino) {
+  const iso = [rhino.IsoStatus.South, rhino.IsoStatus.East, rhino.IsoStatus.North, rhino.IsoStatus.West]
+  const brep = new rhino.Brep()
+  for (const p of CUBE_POINTS) brep.vertices.add(new rhino.Point3d(...p), 0.0)
+  for (const [a, b] of CUBE_EDGES) {
+    const line = new rhino.LineCurve(new rhino.Point3d(...CUBE_POINTS[a]), new rhino.Point3d(...CUBE_POINTS[b]))
+    brep.edges.add(a, b, brep.addEdgeCurve(line), 0.0)
+  }
+  for (const [corners, sides] of CUBE_FACES) {
+    const srf = rhino.NurbsSurface.create(3, false, 2, 2, 2, 2)
+    CUBE_UV.forEach(([u, v], i) => srf.points.setPoint(u, v, new rhino.Point3d(...CUBE_POINTS[corners[i]])))
+    srf.knotsU.createUniformKnots(1.0)
+    srf.knotsV.createUniformKnots(1.0)
+    const face = brep.faces.add(brep.addSurface(srf))
+    const loop = brep.loops.add(rhino.BrepLoopType.Outer, face)
+    sides.forEach(([edge, reversed], side) => {
+      const line = new rhino.LineCurve(new rhino.Point2d(...CUBE_UV[side]), new rhino.Point2d(...CUBE_UV[(side + 1) % 4]))
+      const trim = brep.trims.add(brep.edges.get(edge), reversed, loop, brep.addTrimCurve(line))
+      trim.isoStatus = iso[side]
+      trim.trimType = rhino.BrepTrimType.Mated
+      trim.setTolerances(0.0, 0.0)
+    })
+  }
+  return brep
+}
+
 // RH3DM #713 follow-up: Brep loop/trim topology traversal (Py + JS parity).
 test('faceLoopsAndTrims', async () => {
     const brep = boxBrep(rhino)
@@ -242,4 +285,44 @@ test('brepVertexEdgeIndicesOfABox', () => {
 test('brepFaceOuterLoopTrimCount', () => {
   // A box face's outer loop has four trims
   expect(helpers.boxBrep(rhino).faces.get(0).outerLoop.trims.count).toBe(4)
+})
+
+test('handRolledBrepIsAValidSolid', () => {
+  // a brep built from vertices, edges, faces, loops and trims is a valid closed solid
+  const b = twistedCube(rhino)
+  expect([b.vertices.count, b.edges.count, b.faces.count, b.loops.count, b.trims.count]).toEqual([8, 12, 6, 6, 24])
+  expect(b.surfaces.count).toBe(6)
+  expect(b.isValidWithLog()).toEqual([true, ''])
+  expect(b.isValidTopology()).toEqual([true, ''])
+  expect(b.isValidGeometry()).toEqual([true, ''])
+  expect(b.isValidTolerancesAndFlags()).toEqual([true, ''])
+  expect(b.isSolid).toBe(true)
+  expect(b.isManifold).toBe(true)
+  expect([...b.edges].map(e => e.trimCount)).toEqual(Array(12).fill(2))
+  expect([...b.vertices].map(v => v.edgeIndices().length)).toEqual(Array(8).fill(3))
+  expect([...b.faces].every(f => f.outerLoop.trims.count === 4)).toBe(true)
+  const bbox = b.getBoundingBox(true)
+  expect([bbox.Min.X, bbox.Min.Y, bbox.Min.Z]).toEqual([0, 0, -1])
+  expect([bbox.Max.X, bbox.Max.Y, bbox.Max.Z]).toEqual([10, 8, 13])
+})
+
+test('handRolledBrepTrimKeepsWhatItWasGiven', () => {
+  // a trim added with an edge, a direction, a loop and a 2d curve reports them back
+  const b = twistedCube(rhino)
+  const t = b.trims.get(3)
+  expect([t.edge.edgeIndex, t.loop.loopIndex, t.face.faceIndex, t.trimCurveIndex]).toEqual([AD, 0, 0, 3])
+  expect(t.isReversed()).toBe(true)
+  expect(t.isoStatus).toBe(rhino.IsoStatus.West)
+  expect(t.trimType).toBe(rhino.BrepTrimType.Mated)
+  expect([t.startVertex.vertexIndex, t.endVertex.vertexIndex]).toEqual([D, A])
+})
+
+test('handRolledBrepSurvivesWriteRead', () => {
+  // a hand-built brep is still a valid solid after a File3dm write and read
+  const f = new rhino.File3dm()
+  f.objects.addBrep(twistedCube(rhino))
+  const back = helpers.firstGeometry(rhino.File3dm.fromByteArray(f.toByteArray()), rhino.Brep)
+  expect(back.isValidWithLog()).toEqual([true, ''])
+  expect(back.isSolid).toBe(true)
+  expect([back.faces.count, back.edges.count, back.trims.count]).toEqual([6, 12, 24])
 })

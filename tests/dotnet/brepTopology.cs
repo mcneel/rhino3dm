@@ -8,6 +8,57 @@ using Rhino.Geometry.Collections;
 // Brep loop/trim topology traversal (RH3DM #713 follow-up).
 public class BrepTopologyTests
 {
+    // the twisted cube of the opennurbs brep example: corners, edges as corner pairs, and faces as
+    // (SW, SE, NE, NW) corners with their (edge, reversed) sides in south, east, north, west order
+    const int A = 0, B = 1, C = 2, D = 3, E = 4, F = 5, G = 6, H = 7;
+    const int AB = 0, BC = 1, CD = 2, AD = 3, EF = 4, FG = 5, GH = 6, EH = 7, AE = 8, BF = 9, CG = 10, DH = 11;
+    static readonly Point3d[] CubePoints =
+    {
+        new Point3d(0, 0, 11), new Point3d(10, 0, 12), new Point3d(10, 8, 13), new Point3d(0, 6, 12),
+        new Point3d(1, 2, 0), new Point3d(10, 0, 0), new Point3d(10, 7, -1), new Point3d(0, 6, 0),
+    };
+    static readonly (int, int)[] CubeEdges =
+        { (A, B), (B, C), (C, D), (A, D), (E, F), (F, G), (G, H), (E, H), (A, E), (B, F), (C, G), (D, H) };
+    static readonly (int[] Corners, (int Edge, bool Reversed)[] Sides)[] CubeFaces =
+    {
+        (new[] { A, B, C, D }, new[] { (AB, false), (BC, false), (CD, false), (AD, true) }),
+        (new[] { B, F, G, C }, new[] { (BF, false), (FG, false), (CG, true), (BC, true) }),
+        (new[] { F, E, H, G }, new[] { (EF, true), (EH, false), (GH, true), (FG, true) }),
+        (new[] { E, A, D, H }, new[] { (AE, true), (AD, false), (DH, false), (EH, true) }),
+        (new[] { E, F, B, A }, new[] { (EF, false), (BF, true), (AB, true), (AE, false) }),
+        (new[] { D, C, G, H }, new[] { (CD, true), (CG, false), (GH, false), (DH, true) }),
+    };
+    static readonly Point2d[] CubeUV = { new Point2d(0, 0), new Point2d(1, 0), new Point2d(1, 1), new Point2d(0, 1) };
+
+    // a closed six-face brep built one vertex, edge, face, loop and trim at a time
+    static Brep TwistedCube()
+    {
+        var iso = new[] { IsoStatus.South, IsoStatus.East, IsoStatus.North, IsoStatus.West };
+        var brep = new Brep();
+        foreach (var p in CubePoints) brep.Vertices.Add(p, 0.0);
+        foreach (var (a, b) in CubeEdges)
+            brep.Edges.Add(a, b, brep.AddEdgeCurve(new LineCurve(CubePoints[a], CubePoints[b])), 0.0);
+        foreach (var (corners, sides) in CubeFaces)
+        {
+            var srf = NurbsSurface.Create(3, false, 2, 2, 2, 2);
+            for (int i = 0; i < 4; i++)
+                srf.Points.SetPoint((int)CubeUV[i].X, (int)CubeUV[i].Y, CubePoints[corners[i]]);
+            srf.KnotsU.CreateUniformKnots(1.0);
+            srf.KnotsV.CreateUniformKnots(1.0);
+            var face = brep.Faces.Add(brep.AddSurface(srf));
+            var loop = brep.Loops.Add(BrepLoopType.Outer, face);
+            for (int side = 0; side < 4; side++)
+            {
+                var line = new LineCurve(CubeUV[side], CubeUV[(side + 1) % 4]);
+                var trim = brep.Trims.Add(brep.Edges[sides[side].Edge], sides[side].Reversed, loop, brep.AddTrimCurve(line));
+                trim.IsoStatus = iso[side];
+                trim.TrimType = BrepTrimType.Mated;
+                trim.SetTolerances(0.0, 0.0);
+            }
+        }
+        return brep;
+    }
+
     static Brep SphereBoxBrep()
     {
         var sphere = new Sphere(new Point3d(0, 0, 0), 5);
@@ -282,5 +333,52 @@ public class BrepTopologyTests
     public void BrepFaceOuterLoopTrimCount()
     {
         Assert.That(Helpers.BoxBrep().Faces[0].OuterLoop.Trims.Count, Is.EqualTo(4));
+    }
+
+    // A brep built from vertices, edges, faces, loops and trims is a valid closed solid.
+    [Test]
+    public void HandRolledBrepIsAValidSolid()
+    {
+        var b = TwistedCube();
+        Assert.That(new[] { b.Vertices.Count, b.Edges.Count, b.Faces.Count, b.Loops.Count, b.Trims.Count },
+            Is.EqualTo(new[] { 8, 12, 6, 6, 24 }));
+        Assert.That(b.Surfaces.Count, Is.EqualTo(6));
+        Assert.That(b.IsValidWithLog(out string log), Is.True, log);
+        Assert.That(b.IsValidTopology(out log), Is.True, log);
+        Assert.That(b.IsValidGeometry(out log), Is.True, log);
+        Assert.That(b.IsValidTolerancesAndFlags(out log), Is.True, log);
+        Assert.That(b.IsSolid, Is.True);
+        Assert.That(b.IsManifold, Is.True);
+        Assert.That(b.Edges.Select(e => e.TrimCount), Is.EqualTo(Enumerable.Repeat(2, 12)));
+        Assert.That(b.Vertices.Select(v => v.EdgeIndices().Length), Is.EqualTo(Enumerable.Repeat(3, 8)));
+        Assert.That(b.Faces.All(f => f.OuterLoop.Trims.Count == 4), Is.True);
+        var bbox = b.GetBoundingBox(true);
+        Assert.That(bbox.Min, Is.EqualTo(new Point3d(0, 0, -1)));
+        Assert.That(bbox.Max, Is.EqualTo(new Point3d(10, 8, 13)));
+    }
+
+    // A trim added with an edge, a direction, a loop and a 2d curve reports them back.
+    [Test]
+    public void HandRolledBrepTrimKeepsWhatItWasGiven()
+    {
+        var b = TwistedCube();
+        var t = b.Trims[3];
+        Assert.That((t.Edge.EdgeIndex, t.Loop.LoopIndex, t.Face.FaceIndex, t.TrimCurveIndex), Is.EqualTo((AD, 0, 0, 3)));
+        Assert.That(t.IsReversed(), Is.True);
+        Assert.That(t.IsoStatus, Is.EqualTo(IsoStatus.West));
+        Assert.That(t.TrimType, Is.EqualTo(BrepTrimType.Mated));
+        Assert.That((t.StartVertex.VertexIndex, t.EndVertex.VertexIndex), Is.EqualTo((D, A)));
+    }
+
+    // A hand-built brep is still a valid solid after a File3dm write and read.
+    [Test]
+    public void HandRolledBrepSurvivesWriteRead()
+    {
+        var f = new Rhino.FileIO.File3dm();
+        f.Objects.AddBrep(TwistedCube());
+        var back = Helpers.FirstGeometry<Brep>(Rhino.FileIO.File3dm.FromByteArray(f.ToByteArray()));
+        Assert.That(back.IsValidWithLog(out string log), Is.True, log);
+        Assert.That(back.IsSolid, Is.True);
+        Assert.That(new[] { back.Faces.Count, back.Edges.Count, back.Trims.Count }, Is.EqualTo(new[] { 6, 12, 24 }));
     }
 }

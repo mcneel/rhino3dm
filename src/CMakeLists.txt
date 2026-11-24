@@ -58,20 +58,10 @@ set_target_properties(draco_subset PROPERTIES POSITION_INDEPENDENT_CODE ON
 # the bindings (M3 layout): per class, bnd_<class>_gen.* (tools/generate/bnd_gen.py) beside the
 # hand-maintained bnd_<class>.*, plus the core (bindings.*, bnd_common.*, ...)
 file(GLOB bindings_SRC "bindings/*.h" "bindings/*.cpp")
-file(GLOB zlib_SRC "lib/opennurbs/zlib/*.h" "lib/opennurbs/zlib/*.c")
-
-# temporarily rename the 3 cpp files that we don't want to compile on OSX
-file(RENAME "lib/opennurbs/opennurbs_gl.cpp" "lib/opennurbs/opennurbs_gl.skip")
-file(RENAME "lib/opennurbs/opennurbs_unicode_cp932.cpp" "lib/opennurbs/opennurbs_unicode_cp932.skip")
-file(RENAME "lib/opennurbs/opennurbs_unicode_cp949.cpp" "lib/opennurbs/opennurbs_unicode_cp949.skip")
-file(GLOB opennurbs_SRC "lib/opennurbs/*.h" "lib/opennurbs/*.cpp")
-file(RENAME "lib/opennurbs/opennurbs_gl.skip" "lib/opennurbs/opennurbs_gl.cpp")
-file(RENAME "lib/opennurbs/opennurbs_unicode_cp932.skip" "lib/opennurbs/opennurbs_unicode_cp932.cpp")
-file(RENAME "lib/opennurbs/opennurbs_unicode_cp949.skip" "lib/opennurbs/opennurbs_unicode_cp949.cpp")
-
-file(RENAME "lib/opennurbs/android_uuid/gen_uuid_nt.c" "lib/opennurbs/android_uuid/gen_uuid_nt.skip")
-file(GLOB uuid_SRC "lib/opennurbs/android_uuid/*.h" "lib/opennurbs/android_uuid/*.c")
-file(RENAME "lib/opennurbs/android_uuid/gen_uuid_nt.skip" "lib/opennurbs/android_uuid/gen_uuid_nt.c")
+include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/opennurbs_sources.cmake")
+set(zlib_SRC ${RHINO3DM_ZLIB_SRC})
+set(opennurbs_SRC ${RHINO3DM_OPENNURBS_SRC})
+set(uuid_SRC ${RHINO3DM_UUID_SRC})
 
 if(${RHINO3DM_JS})
   # we will eventually want the following warning flags on both compiles
@@ -96,15 +86,15 @@ if(${RHINO3DM_JS})
   # (MDN browser-compat-data, checked 2026-10-07): Chrome 133, Firefox 134,
   # Node 24; Safari still Technology Preview only.
   #
-  # wasm32 is the DEFAULT again since 9.2, as in 8.x (script/setup.py passes
-  # -D WASM64=TRUE only with --wasm64): it runs in every browser and on Node 22,
+  # wasm32 is the DEFAULT again since 9.2, as in 8.x (the js-wasm64* presets in
+  # CMakePresets.json pass -D WASM64=TRUE): it runs in every browser and on Node 22,
   # and it is faster than memory64. The release ships memory64 in the package's
   # wasm64/ folder. opennurbs supports wasm32 since RH-100167 (RH3DM-215).
   if(WASM64)
     message("WASM64 (memory64) build")
     # -sMEMORY64 is a codegen/target flag (wasm32 -> wasm64): it must be applied
-    # at compile time to C sources (zlib, uuid) as well as C++, and to the draco
-    # sub-build (see script/setup.py), or the objects link as mixed
+    # at compile time to C sources (zlib, uuid) as well as C++, and to draco_subset,
+    # or the objects link as mixed
     # wasm32/wasm64 and fail. (It also reaches the link line via CXX flags.)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -sMEMORY64=1")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -sMEMORY64=1")
@@ -282,6 +272,22 @@ if (${RHINO3DM_PY})
   endif()
 
   target_link_libraries(_rhino3dm PRIVATE draco_subset)
+
+  # the wheel (pyproject.toml, scikit-build-core): the module goes into the rhino3dm package
+  install(TARGETS _rhino3dm LIBRARY DESTINATION rhino3dm COMPONENT python)
+endif()
+
+if (MSVC AND TARGET _rhino3dm)
+  # 64-bit only (opennurbs 9): opennurbs refuses WIN32 together with WIN64 on x64
+  # (opennurbs_system.h), so the opennurbs code gets WIN64 in place of CMake's /DWIN32, as
+  # opennurbs's own CMakeLists does (src/lib/opennurbs/CMakeLists.txt, MSVC block). zlib and
+  # Draco read WIN32 and keep it. (This replaces setup.py's WIN32; -> WIN64; .vcxproj edit.)
+  string(REPLACE "/DWIN32" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  string(REPLACE "/DWIN32" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+  target_compile_definitions(_rhino3dm PRIVATE WIN64)
+  target_compile_definitions(opennurbs_static PRIVATE WIN64)
+  target_compile_definitions(zlib_static PRIVATE WIN32)
+  target_compile_definitions(draco_subset PRIVATE WIN32)
 endif()
 
 if (MSVC)

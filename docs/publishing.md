@@ -17,8 +17,7 @@ python3 script/bump_version.py --check      # verify only; non-zero exit if out 
 | `package.json` | `9.0.0-beta` | npm |
 | `src/dotnet/Rhino3dm.csproj` | `9.0.0-beta` | NuGet package version |
 | `src/dotnet/Properties/AssemblyInfo.cs` | `9.0.0.0` | `AssemblyVersion` must be four numeric parts and cannot carry a pre-release suffix |
-| `setup.py` | `9.0.0b0` | PEP 440 — `-beta` is not a valid Python version |
-| `src/rhino3dm/__init__.py` | `9.0.0b0` | PEP 440 |
+| `src/rhino3dm/__init__.py` | `9.0.0b0` | PEP 440 (`-beta` is not a valid Python version); `pyproject.toml` reads the wheel's version from it |
 
 The version in `src/version.txt` is semver: `MAJOR.MINOR.PATCH` with an optional
 `-alpha` / `-beta` / `-rc` suffix, e.g. `9.0.0-beta` or `9.1.0-rc2`. The script fails

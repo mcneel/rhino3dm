@@ -62,7 +62,7 @@ jobs:
         with:
           name: perf-model
       - name: build (Release wheel)
-        run: python -m pip install -q --upgrade pip setuptools wheel && python setup.py bdist_wheel
+        run: python -m pip install -q --upgrade pip && python build.py py
       - name: run
         run: |
           python -m venv ref && ref/bin/pip install -q numpy rhino3dm==$REF
@@ -91,18 +91,17 @@ jobs:
       - uses: actions/download-artifact@v4.1.7
         with:
           name: perf-model
-      # setup runs methodgen, which writes the AutoNativeMethods.cs src/dotnet compiles against
+      # build.py runs methodgen, which writes the AutoNativeMethods.cs src/dotnet compiles against
       - name: build native library
         run: |
-          python3 script/bootstrap.py -p linux
-          python3 script/setup.py -p linux -v
-          python3 script/build.py -p linux -v
+          python3 bootstrap.py dotnet
+          python3 build.py dotnet
       - name: run
         run: |
           cp -r tests/perf/dotnet tests/perf/ref
           (cd tests/perf/ref && dotnet build -c Release -p:Rhino3dmVersion=$REF -o out)
           (cd tests/perf/dotnet && dotnet build -c Release -o out)
-          cp src/build/linux/librhino3dm_native.so tests/perf/dotnet/out/
+          cp build/native/linux-x64/librhino3dm_native.so tests/perf/dotnet/out/
           mkdir -p results
           for r in $(seq $ROUNDS); do
             dotnet tests/perf/ref/out/PerfBench.dll tests/models model.3dm $REPEATS > results/dotnet_ref_r$r.json
@@ -126,10 +125,9 @@ jobs:
         run: git submodule update --init --recursive
       - name: build (Release, wasm32)
         run: |
-          python3 script/bootstrap.py -p js
-          python3 script/setup.py -p js -o -v
-          python3 script/build.py -p js -o -v
-          mkdir -p perfjs && cp src/build/javascript/rhino3dm.js src/build/javascript/artifacts_js/rhino3dm.wasm perfjs/
+          python3 bootstrap.py js
+          python3 build.py js
+          mkdir -p perfjs && cp build/js/dist/rhino3dm.js build/js/dist/rhino3dm.wasm perfjs/
       - uses: actions/upload-artifact@v4.3.1
         with:
           name: perf-rhino3dm.js

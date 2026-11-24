@@ -1,35 +1,54 @@
 # Build Instructions for .NET
-### Get The Source
 
-This repo uses [OpenNURBS](https://github.com/mcneel/opennurbs) and [nanobind](https://github.com/wjakob/nanobind) as submodules, so you need to run another git command after you have cloned. `cd` into the new repository directory and run
-  * `git submodule update --init`
+## Get the source
 
-## Install the Tools
+This repo uses [OpenNURBS](https://github.com/mcneel/opennurbs), [nanobind](https://github.com/wjakob/nanobind) and Draco as submodules:
 
-CMake 3.12.1 is the minimum required CMake version.
+```commandline
+git clone --recurse-submodules https://github.com/mcneel/rhino3dm.git
+```
 
-* Mac
-  * Install Homebrew (https://brew.sh/)
-  * `brew install python2 cmake` (for Python 2.7 compile)
-  * `brew install python3 cmake` (for Python 3.7 compile)
-* Windows
-  * This project uses Visual Studio 2017
-  * Install the flavor of CPython that you prefer to work with from python.org
-  * Install CMake (https://cmake.org/download/) and make sure that cmake.exe is added to the path
-* Linux
-  * Tested with Clang 3.8.0 on Linux Mint 18.3
-  * Install CMake 3.12.1
-  * `sudo aptitude install python2 python3 python2-dev python3-dev uuid uuid-dev`
+## Install the tools
 
-## What needs to be compiled
-The compilation process involves several different pieces that eventually make up rhino3dm as a whole
-  * CMake is used to compile the opennurbs and pinvoke `C` functions into a .DLL, .DYLIB, or .SO depending on what platform you are running on. The compiled native code is compiled to a binary named `rhino3dm_native` or `librhino3dm_native` depending on the platform you are targetting.
-  * A .NET project named methodgen is compiled and executed to generate the C# pInvoke declarations based on the native code exports
-  * A .NET project named rhino3dm is compiled using msbuild or dotnet for .NET core compiles
-  * On Windows, the rhino3dm_native.dll is embedded into the Rhino3dm.dll to allow for a single file
+* CMake 3.21 or later
+* the .NET 10 SDK (`global.json` sets the oldest)
+* a C++17 compiler: Xcode on macOS; Visual Studio 2022 on Windows, with the v142 toolset component
+  for the x64 library (`MSVC v142 - VS 2019 C++ x64/x86 build tools`); GCC or Clang on Linux
+* Python 3.10 or later, to run the scripts
+
+[Current_Development_Tools.md](../../Current_Development_Tools.md) lists the versions CI uses.
+`python bootstrap.py dotnet` checks them; `python bootstrap.py dotnet --install` installs CMake
+and the .NET SDK.
+
+## What is compiled
+
+* **librhino3dm_native**: opennurbs and RhinoCommon's C functions (`src/librhino3dm_native`),
+  compiled with CMake into a `.dll`, `.dylib` or `.so`.
+* **methodgen** (`src/methodgen`) reads the C functions and writes the C# P/Invoke declarations
+  (`src/dotnet/AutoNativeMethods.cs`, `AutoNativeEnums.cs`; not checked in).
+* **Rhino3dm.dll** (`src/dotnet/Rhino3dm.csproj`): RhinoCommon's C# for rhino3dm, built for
+  netstandard2.0, net48 and net10.0. The NuGet package carries each platform's native library under
+  `runtimes/<rid>/native`.
 
 ## Compile
 
-* `python src/build_dotnet.py`
-  * This will compile all of the pieces necessary to create rhino3dm.dll
-  * If you pass `--core` as a command line argument (or are compiling on Linux). The .NET core tools are used instead for compilation. In this case you also need ot have .NET core installed on your computer.
+```commandline
+python build.py dotnet
+```
+
+runs methodgen, builds the native library for this machine into `build/native/<rid>` (`win-x64`,
+`win-arm64`, `osx` (universal), `linux-x64`, `linux-arm64`), then Rhino3dm.dll. Options:
+
+* `--arch arm64` / `--arch x64`: on Windows, the other architecture (cross-compiled)
+* `--library-only`: the native library only
+* `--debug`: Debug builds
+
+`python build.py methodgen` regenerates the P/Invoke declarations alone. The native build trees
+are CMake presets (`build/dotnet-<os>`); `dotnet pack src/dotnet/Rhino3dm.csproj` packs every native
+library present in `build/native`.
+
+## Test
+
+```commandline
+cd tests/dotnet && dotnet test
+```

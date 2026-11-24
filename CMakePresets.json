@@ -1,0 +1,112 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "unix",
+      "hidden": true,
+      "inherits": "base",
+      "generator": "Unix Makefiles",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+
+    {
+      "name": "py",
+      "displayName": "Python extension module (this machine, this Python)",
+      "inherits": "base",
+      "cacheVariables": { "RHINO3DM_TARGET": "python", "CMAKE_BUILD_TYPE": "Release" }
+    },
+
+    {
+      "name": "js",
+      "hidden": true,
+      "inherits": "base",
+      "generator": "Unix Makefiles",
+      "toolchainFile": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+      "cacheVariables": { "RHINO3DM_TARGET": "javascript" }
+    },
+    {
+      "name": "js-wasm32",
+      "displayName": "rhino3dm.js, wasm32 (Node and browsers)",
+      "inherits": "js",
+      "cacheVariables": { "WASM64": "FALSE", "MODULE": "FALSE" }
+    },
+    {
+      "name": "js-wasm32-module",
+      "displayName": "rhino3dm.module.js, wasm32 (ES module for browsers)",
+      "inherits": "js",
+      "cacheVariables": { "WASM64": "FALSE", "MODULE": "TRUE" }
+    },
+    {
+      "name": "js-wasm64",
+      "displayName": "rhino3dm.js, wasm64 / memory64",
+      "inherits": "js",
+      "cacheVariables": { "WASM64": "TRUE", "MODULE": "FALSE" }
+    },
+    {
+      "name": "js-wasm64-module",
+      "displayName": "rhino3dm.module.js, wasm64 / memory64",
+      "inherits": "js",
+      "cacheVariables": { "WASM64": "TRUE", "MODULE": "TRUE" }
+    },
+
+    {
+      "name": "dotnet-windows",
+      "hidden": true,
+      "inherits": "base",
+      "generator": "Visual Studio 17 2022",
+      "cacheVariables": { "RHINO3DM_TARGET": "dotnet" },
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "dotnet-windows-x64",
+      "displayName": ".NET native, Windows x64 (v142 toolset)",
+      "inherits": "dotnet-windows",
+      "architecture": { "value": "x64", "strategy": "set" },
+      "toolset": { "value": "v142", "strategy": "set" }
+    },
+    {
+      "name": "dotnet-windows-arm64",
+      "displayName": ".NET native, Windows arm64",
+      "inherits": "dotnet-windows",
+      "architecture": { "value": "ARM64", "strategy": "set" }
+    },
+    {
+      "name": "dotnet-macos",
+      "displayName": ".NET native, macOS universal (arm64 + x86_64)",
+      "inherits": "unix",
+      "cacheVariables": {
+        "RHINO3DM_TARGET": "dotnet",
+        "MACOS_BUILD": "1",
+        "CMAKE_OSX_ARCHITECTURES": "arm64;x86_64"
+      },
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin" }
+    },
+    {
+      "name": "dotnet-linux",
+      "displayName": ".NET native, Linux (host architecture)",
+      "inherits": "unix",
+      "cacheVariables": { "RHINO3DM_TARGET": "dotnet" },
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "py", "configurePreset": "py", "configuration": "Release", "targets": ["_rhino3dm"] },
+    { "name": "js-wasm32", "configurePreset": "js-wasm32" },
+    { "name": "js-wasm32-module", "configurePreset": "js-wasm32-module" },
+    { "name": "js-wasm64", "configurePreset": "js-wasm64" },
+    { "name": "js-wasm64-module", "configurePreset": "js-wasm64-module" },
+    { "name": "dotnet-windows-x64", "configurePreset": "dotnet-windows-x64", "configuration": "Release", "targets": ["librhino3dm_native"] },
+    { "name": "dotnet-windows-arm64", "configurePreset": "dotnet-windows-arm64", "configuration": "Release", "targets": ["librhino3dm_native"] },
+    { "name": "dotnet-macos", "configurePreset": "dotnet-macos", "configuration": "Release", "targets": ["librhino3dm_native"] },
+    { "name": "dotnet-linux", "configurePreset": "dotnet-linux", "configuration": "Release", "targets": ["librhino3dm_native"] }
+  ]
+}
