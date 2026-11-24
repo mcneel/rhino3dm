@@ -85,7 +85,7 @@ def read_records():
         try:
             records['_updated'] = datetime.datetime.strptime(m.group(2).strip(), '%B %d, %Y').date()
         except ValueError:
-            pass
+            pass  # the date only feeds the staleness warning: an unparseable one means no warning
     with open(GLOBAL_JSON, encoding='utf-8') as f:
         records['minimum_dotnet'] = json.load(f)['sdk']['version']
     return records
@@ -181,7 +181,7 @@ def find_msvc():
 
 def find_libclang():
     try:
-        from importlib.metadata import version, PackageNotFoundError
+        from importlib.metadata import version
         return version('libclang')
     except Exception:
         return None
@@ -200,7 +200,8 @@ FINDERS = {
 def check_tool(tool, records, report):
     if tool == 'compiler':
         if SYSTEM == 'macos':
-            return check_tool('xcode', records, report)
+            check_tool('xcode', records, report)
+            return
         if SYSTEM == 'windows':
             check_tool('msvc', records, report)
             if ARCH == 'x64' and not vswhere('-requires', 'Microsoft.VisualStudio.Component.VC.v142.x86.x64',
@@ -209,21 +210,27 @@ def check_tool(tool, records, report):
                             'installed; the Windows x64 .NET native library is built with it')
             return
         if shutil.which('c++') or shutil.which('g++') or shutil.which('clang++'):
-            return report.ok('compiler: ' + (shutil.which('c++') or shutil.which('g++') or shutil.which('clang++')))
-        return report.error('compiler: no C++ compiler (c++, g++ or clang++) on PATH')
+            report.ok('compiler: ' + (shutil.which('c++') or shutil.which('g++') or shutil.which('clang++')))
+            return
+        report.error('compiler: no C++ compiler (c++, g++ or clang++) on PATH')
+        return
 
     found = FINDERS[tool]()
     current = records.get(f'currently_using_{tool}')
     minimum = records.get(f'minimum_{tool}')
     fix = f' (python bootstrap.py --install {tool})' if tool in INSTALLABLE else ''
     if found is None:
-        return report.error(f'{tool}: not found{fix}')
+        report.error(f'{tool}: not found{fix}')
+        return
     if tool == 'dotnet' and found == '0':
-        return report.error(f'dotnet: no installed SDK satisfies global.json ({minimum} or a later 10.0 SDK){fix}')
+        report.error(f'dotnet: no installed SDK satisfies global.json ({minimum} or a later 10.0 SDK){fix}')
+        return
     if minimum and not at_least(found, minimum):
-        return report.error(f'{tool}: {found} is older than the minimum {minimum}{fix}')
+        report.error(f'{tool}: {found} is older than the minimum {minimum}{fix}')
+        return
     if current and not satisfies(found, current):
-        return report.warn(f'{tool}: {found} (rhino3dm uses {current})')
+        report.warn(f'{tool}: {found} (rhino3dm uses {current})')
+        return
     report.ok(f'{tool}: {found}')
 
 
@@ -299,7 +306,8 @@ def install_cmake(records):
     path = download(records, 'cmake')
     version = records['currently_using_cmake']
     if SYSTEM == 'windows':
-        return sudo(['msiexec', '/i', path, '/quiet', '/norestart', 'ADD_CMAKE_TO_PATH=System'])
+        sudo(['msiexec', '/i', path, '/quiet', '/norestart', 'ADD_CMAKE_TO_PATH=System'])
+        return
     with tempfile.TemporaryDirectory() as tmp:
         top = extract(path, tmp)
         if SYSTEM == 'macos':
@@ -322,8 +330,9 @@ def install_dotnet(records):
             'windows': os.path.join(os.environ.get('ProgramFiles', r'C:\Program Files'), 'dotnet')}[SYSTEM]
     if SYSTEM == 'windows':
         # the SDK zip unpacks beside any SDKs already installed
-        return sudo(['powershell', '-NoProfile', '-Command',
-                     f'Expand-Archive -Force -Path "{path}" -DestinationPath "{dest}"'])
+        sudo(['powershell', '-NoProfile', '-Command',
+              f'Expand-Archive -Force -Path "{path}" -DestinationPath "{dest}"'])
+        return
     sudo(['mkdir', '-p', dest])
     sudo(['tar', '-xzf', path, '-C', dest])
     link_bin(dest, ['dotnet'])
@@ -376,7 +385,8 @@ def set_xcode(version):
         plist = os.path.join(app, 'Contents', 'version.plist')
         found = output(['defaults', 'read', plist, 'CFBundleShortVersionString']) if os.path.exists(plist) else None
         if found and satisfies(found, version):
-            return sudo(['xcode-select', '--switch', app])
+            sudo(['xcode-select', '--switch', app])
+            return
     sys.exit(f'bootstrap.py: no Xcode {version} in /Applications ({", ".join(candidates)})')
 
 
@@ -407,9 +417,11 @@ def main():
         tool, version = args.set
         if tool != 'xcode':
             sys.exit('bootstrap.py: --set supports xcode only (the .NET SDK is chosen by global.json)')
-        return set_xcode(version)
+        set_xcode(version)
+        return
     if args.download:
-        return download(records, args.download)
+        download(records, args.download)
+        return
     if args.install and args.install != 'missing':
         if args.install not in INSTALLERS:
             sys.exit(f'bootstrap.py: cannot install {args.install}; installable: {", ".join(INSTALLABLE)}')
