@@ -110,3 +110,6 @@ tests/SampleCppReadTextEntity/build
 
 # internal planning notes (local only)
 docs/vnext/
+
+# owl documentation model and site (workflow_doc_gen.yml)
+.owl/

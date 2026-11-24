@@ -1,0 +1,121 @@
+# Builds the rhino3dm API references and publishes each to its own Heroku app, which CloudFront
+# serves at https://developer.rhino3d.com/api/<slug>/. Mirrors doc-gen.yml in mcneel/rhino.
+
+name: workflow doc-gen
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Push the built sites to Heroku
+        type: boolean
+        default: true
+
+jobs:
+  build_docs:
+    name: ${{ matrix.slug }}
+    runs-on: ubuntu-latest
+
+    # One documentation set per entry. The slug names the heroku app (mcneel-apidocs-<slug>), the
+    # path CloudFront forwards under, and the artifact, because all three follow from it.
+    # kind picks the build steps; each kind writes its deployable site to ./deploy.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - slug: rhino3dm
+            title: Rhino3dm API
+            kind: dotnet
+            projects: src/dotnet/Rhino3dm.csproj
+            # Rhino3dm multi-targets; net10.0 is the newest surface
+            flags: >-
+              --tfm net10.0
+              --api-versions 9,8
+
+          # - slug: rhino3dm-py
+          #   title: Rhino3dm Python API
+          #   kind: python
+
+          # - slug: rhino3dm-js
+          #   title: Rhino3dm JavaScript API
+          #   kind: js
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+
+      # methodgen parses librhino3dm_native against the opennurbs headers
+      - name: update submodules
+        run: git submodule update --init src/lib/opennurbs
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # ---- dotnet ---------------------------------------------------------------------------------
+
+      - uses: actions/setup-dotnet@v4
+        if: matrix.kind == 'dotnet'
+        with:
+          global-json-file: global.json
+
+      # writes src/dotnet/AutoNativeMethods.cs and AutoNativeEnums.cs (gitignored), which
+      # Rhino3dm.csproj compiles against. The native library itself is not needed for docs.
+      - name: methodgen
+        if: matrix.kind == 'dotnet'
+        run: python3 build.py methodgen
+
+      - name: install owl
+        if: matrix.kind == 'dotnet'
+        run: dotnet tool install McNeel.Owl --tool-path owl-bin
+
+      - name: build documentation site (owl)
+        if: matrix.kind == 'dotnet'
+        # --base is the path CloudFront forwards under
+        # --server adds the node app Heroku runs
+        run: |
+          ./owl-bin/owl build ${{ matrix.projects }} \
+            --name "${{ matrix.title }}" \
+            --logo .github/workflows/doc-gen/docs-icon-dark.svg \
+            --logo-dark .github/workflows/doc-gen/docs-icon-dark.svg \
+            --favicon .github/workflows/doc-gen/docs-favicon.ico \
+            ${{ matrix.flags }} \
+            --out deploy \
+            --base /api/${{ matrix.slug }} \
+            --site-url https://developer.rhino3d.com \
+            --server \
+            --quiet
+
+      - name: upload model
+        if: matrix.kind == 'dotnet'
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: ${{ matrix.slug }}-model
+          path: ${{ github.workspace }}/.owl/json
+          include-hidden-files: true
+          if-no-files-found: error
+
+      # ---- deploy (every kind) --------------------------------------------------------------------
+
+      - name: deploy to heroku
+        if: inputs.deploy
+        run: |
+          cd deploy
+          git init -q
+          git config user.email "bozo@mcneel.com"
+          git config user.name "Bozo"
+          git remote add heroku https://heroku:${{ secrets.HEROKU_API_KEY_EHSAN }}@git.heroku.com/mcneel-apidocs-${{ matrix.slug }}.git
+          git add .
+          git commit -q -m "publish ${{ matrix.title }} from github.com/mcneel/rhino3dm: ${{ github.ref_name }}"
+          git push heroku HEAD:master --force
+
+      - name: invalidate cloudfront cache
+        if: inputs.deploy
+        run: |
+          curl --fail-with-body --location 'https://api.mcneel.com/cloudfront/invalidate' \
+            --header 'Authorization: Basic ${{ secrets.MCNEEL_API_KEY }}' \
+            --header 'Content-Type: application/json' \
+            --data '{"url":"https://developer.rhino3d.com/api/${{ matrix.slug }}/*"}'
