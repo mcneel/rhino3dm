@@ -20,20 +20,10 @@ file(GLOB bindings_SRC "./*.h" "./*.cpp")
 include("${CMAKE_CURRENT_SOURCE_DIR}/../draco_sources.cmake")
 include_directories(${draco_subset_INCLUDE})
 list(APPEND bindings_SRC ${draco_subset_SRC})
-file(GLOB zlib_SRC "../lib/opennurbs/zlib/*.h" "../lib/opennurbs/zlib/*.c")
-
-# temporarily rename the 3 cpp files that we don't want to compile on OSX
-file(RENAME "../lib/opennurbs/opennurbs_gl.cpp" "../lib/opennurbs/opennurbs_gl.skip")
-file(RENAME "../lib/opennurbs/opennurbs_unicode_cp932.cpp" "../lib/opennurbs/opennurbs_unicode_cp932.skip")
-file(RENAME "../lib/opennurbs/opennurbs_unicode_cp949.cpp" "../lib/opennurbs/opennurbs_unicode_cp949.skip")
-file(GLOB opennurbs_SRC "../lib/opennurbs/*.h" "../lib/opennurbs/*.cpp")
-file(RENAME "../lib/opennurbs/opennurbs_gl.skip" "../lib/opennurbs/opennurbs_gl.cpp")
-file(RENAME "../lib/opennurbs/opennurbs_unicode_cp932.skip" "../lib/opennurbs/opennurbs_unicode_cp932.cpp")
-file(RENAME "../lib/opennurbs/opennurbs_unicode_cp949.skip" "../lib/opennurbs/opennurbs_unicode_cp949.cpp")
-file(RENAME "../lib/opennurbs/android_uuid/gen_uuid_nt.c" "../lib/opennurbs/android_uuid/gen_uuid_nt.skip")
-file(GLOB uuid_SRC "../lib/opennurbs/android_uuid/*.h" "../lib/opennurbs/android_uuid/*.c")
-file(RENAME "../lib/opennurbs/android_uuid/gen_uuid_nt.skip" "../lib/opennurbs/android_uuid/gen_uuid_nt.c")
-
+include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/opennurbs_sources.cmake")
+set(zlib_SRC ${RHINO3DM_ZLIB_SRC})
+set(opennurbs_SRC ${RHINO3DM_OPENNURBS_SRC})
+set(uuid_SRC ${RHINO3DM_UUID_SRC})
 
 # C++17 on every platform: opennurbs 9 uses <execution> (std::execution::par_unseq) on MSVC and
 # std::to_chars for doubles
@@ -83,8 +73,9 @@ endif()
 if(MACOS_BUILD)
   # [dan@mcneel.com]: For now, we're dumping all this into the same target.  Once we get 
   # a good handle on CMake, these should be compiled as separate CMake targets and linked accordingly.
+  # universal (arm64 + x86_64): CMAKE_OSX_ARCHITECTURES must be set before the target exists, so
+  # the dotnet-macos preset passes it on the command line
   add_library(librhino3dm_native SHARED ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC})
-  set (CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 endif()
 
 if(IOS)
@@ -123,6 +114,11 @@ endif()
 
 if (WIN32)
   add_library(librhino3dm_native SHARED ${bindings_SRC} ${opennurbs_SRC} ${zlib_SRC})
+  # 64-bit only (opennurbs 9): opennurbs refuses WIN32 together with WIN64 on x64
+  # (opennurbs_system.h), so WIN64 replaces CMake's /DWIN32, as opennurbs's own CMakeLists does
+  # (src/lib/opennurbs/CMakeLists.txt, MSVC block). Replaces the old script/setup.py .vcxproj edit.
+  string(REPLACE "/DWIN32" "/DWIN64" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  string(REPLACE "/DWIN32" "/DWIN64" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 endif()
 
 set_target_properties(librhino3dm_native PROPERTIES PREFIX "")

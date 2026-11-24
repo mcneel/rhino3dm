@@ -27,7 +27,7 @@ from manifest import split_params, PORTABLE_DEFINES, C_SUBDIR
 try:
     import clang.cindex as ci
 except ImportError:
-    raise SystemExit('clang.cindex missing -- run: python3 script/bootstrap.py -p generator')
+    raise SystemExit('clang.cindex missing -- run: python3 bootstrap.py --install libclang')
 
 BUILTIN = {
     'void', 'bool', 'char', 'short', 'int', 'long', 'float', 'double',

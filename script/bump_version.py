@@ -9,8 +9,8 @@ its ecosystem requires:
   src/dotnet/Rhino3dm.csproj              9.0.0-beta   NuGet
   src/dotnet/Properties/AssemblyInfo.cs   9.0.0.0      AssemblyVersion is 4 numeric
                                                        parts and cannot carry a suffix
-  setup.py                                9.0.0b0      PEP 440
-  src/rhino3dm/__init__.py                9.0.0b0      PEP 440
+  src/rhino3dm/__init__.py                9.0.0b0      PEP 440; also the wheel's version (pyproject.toml
+                                                       reads it)
   docs/javascript/RHINO3DM.JS.md          9.0.0-beta   the jsDelivr URLs in its examples (every one;
                                                        it is also the npm package's README)
 
@@ -71,7 +71,6 @@ TARGETS = [
     # anchored to line start so the commented-out sample AssemblyVersion is skipped
     ('src/dotnet/Properties/AssemblyInfo.cs',
      r'(?m)^(\[assembly: AssemblyVersion\(")([^"]+)("\)\])',                                'assembly'),
-    ('setup.py',                            r"(version=')([^']+)(')",                      'pep440'),
     ('src/rhino3dm/__init__.py',            r"(__version__ = ')([^']+)(')",                'pep440'),
     # a 4th element 'all': every match carries the version (at least one must exist)
     ('docs/javascript/RHINO3DM.JS.md',      r'(cdn\.jsdelivr\.net/npm/rhino3dm@)([^/"]+)(/)',  'semver', 'all'),

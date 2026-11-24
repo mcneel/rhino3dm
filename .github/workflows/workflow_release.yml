@@ -70,13 +70,13 @@ jobs:
       - name: info
         run: python --version && cmake --version
       - name: install dependencies
-        run: python -m pip install --upgrade pip setuptools wheel
+        run: python -m pip install --upgrade pip build
       - name: checkout
         uses: actions/checkout@v4.1.1
       - name: update submodules
         run: git submodule update --init --recursive
       - name: build python sdist
-        run: python setup.py sdist build --debug
+        run: python build.py py --sdist
       - name: check sdist
         run: |
           # installs rhino3dm from the source distribution
@@ -90,7 +90,6 @@ jobs:
           # create virtualenv
           python -m venv venv
           . venv/bin/activate
-          pip install wheel
 
           # install
           pip install --verbose ../dist/*.tar.gz
@@ -142,9 +141,9 @@ jobs:
     - name: update submodules
       run: git submodule update --init --recursive
     - name: install dependencies
-      run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install --upgrade pip setuptools wheel
+      run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install --upgrade pip
     - name: build python manylinux
-      run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel build --debug
+      run: /opt/python/${{ matrix.python-version }}/bin/python build.py py
     - name: audit python wheel
       run: auditwheel repair dist/*.whl
     - name: list files
@@ -202,13 +201,13 @@ jobs:
       - name: info
         run: python --version && cmake --version
       - name: install dependencies
-        run: python -m pip install --upgrade pip setuptools wheel
+        run: python -m pip install --upgrade pip
       - name: checkout
         uses: actions/checkout@v4.1.1
       - name: update submodules
         run: git submodule update --init --recursive
       - name: build python ${{ matrix.python-version }} ${{ matrix.os }}
-        run: python setup.py bdist_wheel
+        run: python build.py py
       - name: code-sign native libraries
         env:
           IDENTITY_ID: ${{ secrets.IDENTITY_ID }}
@@ -336,32 +335,21 @@ jobs:
           - os: ubuntu-latest
             target: linux
             image: mcneel/rhino3dm-dev-amazonlinux2023
-            artifact-path: src/build/linux/librhino3dm_native.so
             architecture: ""
-            extra-args: ""
           - os: ubuntu-24.04-arm
             target: linux
             image: ""
-            artifact-path: src/build/linux/librhino3dm_native.so
             architecture: arm64
-            extra-args: ""
           - os: windows-2022
             target: windows
             image: ""
-            # glob picks up the win64 and winarm64 subdirs (preserved into the artifact)
-            artifact-path: src\build\windows\*\Release\librhino3dm_native.dll
             architecture: ""
-            # also cross-build the Windows ARM64 native lib (requires MSVC ARM64 build tools on the runner)
-            extra-args: "--winarm64"
           - os: macos-15
             target: macos
             image: ""
-            artifact-path: src/build/macos/Release/librhino3dm_native.dylib
             architecture: ""
-            extra-args: ""
       fail-fast: false
     steps:
-      # setup.py builds methodgen (net10.0) for every native target
       - name: setup dotnet
         uses: actions/setup-dotnet@v4
         with:
@@ -378,13 +366,16 @@ jobs:
       - name: update submodules
         run: ls && git submodule update --init --recursive
       - name: bootstrap dotnet ${{ matrix.target }}
-        run: python3 script/bootstrap.py -p ${{ matrix.target }}
-      - name: setup dotnet ${{ matrix.target }}
-        run: python3 script/setup.py -p ${{ matrix.target }} -v -l ${{ matrix.extra-args }}
-      - name: build dotnet ${{ matrix.target }}
-        run: python3 script/build.py -p ${{ matrix.target }} -v -l ${{ matrix.extra-args }}
+        run: python3 bootstrap.py dotnet
+      # the native library only (build/native/<rid>); pack_dotnet builds Rhino3dm.dll
+      - name: build native ${{ matrix.target }}
+        run: python3 build.py dotnet --library-only
+      # the Windows ARM64 library, cross-built on x64 (needs the MSVC ARM64 build tools)
+      - name: build native windows arm64
+        if: ${{ matrix.target == 'windows' }}
+        run: python3 build.py dotnet --library-only --arch arm64
       - name: list
-        run: "ls -R src/build/${{ matrix.target }}"
+        run: "ls -R build/native"
       - name: code-sign native libraries
         if: ${{ matrix.target == 'macos' }}
         env:
@@ -393,7 +384,7 @@ jobs:
           MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
           MACOS_KEYCHAIN_TEMP_PWD: ${{ secrets.MACOS_KEYCHAIN_TEMP_PWD }}
         shell: bash
-        run: ./script/codesign-native.sh src/build/macos/Release
+        run: ./script/codesign-native.sh build/native/osx
       - name: notarize native library
         if: ${{ matrix.target == 'macos' }}
         env:
@@ -401,18 +392,18 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           MACDEV_PW: ${{ secrets.MACDEV_PW }}
         shell: bash
-        run: ./script/notarize-native.sh src/build/macos/Release/librhino3dm_native.dylib
+        run: ./script/notarize-native.sh build/native/osx/librhino3dm_native.dylib
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
         if: ${{ matrix.architecture != 'arm64' }}
         with:
-          path: ${{ matrix.artifact-path }}
+          path: build/native
           name: rhino3dm.net ${{ matrix.target }}
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
         if: ${{ matrix.architecture == 'arm64' }}
         with:
-          path: ${{ matrix.artifact-path }}
+          path: build/native
           name: rhino3dm.net ${{ matrix.target }} ${{ matrix.architecture }}
 
   # build_dotnet_arm64:
@@ -463,10 +454,6 @@ jobs:
         uses: actions/setup-python@v5.4.0
         with:
           python-version: '3.12'
-      - name: setup cmake
-        uses: jwlawson/actions-setup-cmake@v2.0.0
-        with:
-          cmake-version: '3.21.1'
       - name: checkout
         uses: actions/checkout@v4.1.1
       - name: update submodules
@@ -475,34 +462,33 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-      - name: bootstrap dotnet
-        run: python script/bootstrap.py -p windows
-      - name: setup dotnet
-        run: python script/setup.py -p windows -v
+      - name: methodgen
+        run: python build.py methodgen
       - name: build dotnet
         run: dotnet build src/dotnet/Rhino3dm.csproj
+      # each artifact is build/native/<rid>/...; together they fill build/native
       - name: download rhino3dm.net linux
         uses: actions/download-artifact@v4.1.7
         with:
           name: rhino3dm.net linux
-          path: src/build/linux/Release/
+          path: build/native
       - name: download rhino3dm.net linux arm64
         uses: actions/download-artifact@v4.1.7
         with:
           name: rhino3dm.net linux arm64
-          path: src/build/linux/arm64/Release/
+          path: build/native
       - name: download rhino3dm.net macos
         uses: actions/download-artifact@v4.1.7
         with:
           name: rhino3dm.net macos
-          path: src/build/macos/Release/
+          path: build/native
       - name: download rhino3dm.net windows
         uses: actions/download-artifact@v4.1.7
         with:
           name: rhino3dm.net windows
-          path: src/build/windows/
+          path: build/native
       - name: list
-        run: "ls -R src/build/"
+        run: "ls -R build/native"
       - name: pack dotnet
         run: dotnet pack src/dotnet/Rhino3dm.csproj
       # the csproj packs a runtime only when its native library exists, so a missing
@@ -538,61 +524,20 @@ jobs:
       - name: update submodules
         run: git submodule update --init --recursive
       - name: bootstrap
-        run: python3 script/bootstrap.py -p js
-      - name: setup js module
-        run: python3 script/setup.py -p js -o -v -m
+        run: python3 bootstrap.py js
+      - name: install uglify-js
+        run: npm install -g uglify-js
+      # every variant, Release, laid out as the npm package: rhino3dm.js / rhino3dm.wasm (wasm32,
+      # the package main), rhino3dm.module.js (ES module), and the memory64 opt-in variant in
+      # wasm64/ so the generated loader's reference to rhino3dm.wasm stays intact. wasm32 is the
+      # default: it runs in every browser (Safari has memory64 only in Technology Preview) and on
+      # Node 22, and it is faster
       - name: build js
-        run: python3 script/build.py -p js -o -v
-      - name: copy files
-        shell: bash
-        run: |
-          mkdir src/build/javascript/artifacts
-          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts/rhino3dm.module.js
-          cp package.json src/build/javascript/artifacts
-          cp docs/javascript/RHINO3DM.JS.md src/build/javascript/artifacts/README.md
-          cp src/js/rhino3dm.d.ts src/build/javascript/artifacts/rhino3dm.d.ts
-      - name: setup js
-        run: python3 script/setup.py -p js -o -v
-      - name: build js
-        run: python3 script/build.py -p js -o -v
-      - name: copy files
-        shell: bash
-        run: |
-          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts
-          mv src/build/javascript/artifacts_js/rhino3dm.wasm src/build/javascript/artifacts
-          npm install -g uglify-js
-          cd src/build/javascript/artifacts
-          uglifyjs rhino3dm.module.js  --compress -o rhino3dm.module.min.js
-          uglifyjs rhino3dm.js  --compress -o rhino3dm.min.js
-      # WASM64 (memory64) opt-in variant, as in 8.x. Shipped in a wasm64/ subdir so the
-      # generated loader's reference to rhino3dm.wasm stays intact. The default (wasm32)
-      # build above remains the package main: it runs in every browser (Safari has
-      # memory64 only in Technology Preview) and on Node 22, and it is faster.
-      - name: setup js wasm64 module
-        run: python3 script/setup.py -p js -o -v -m -w
-      - name: build js wasm64 module
-        run: python3 script/build.py -p js -o -v
-      - name: copy wasm64 module
-        shell: bash
-        run: |
-          mkdir -p src/build/javascript/artifacts/wasm64
-          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts/wasm64/rhino3dm.module.js
-      - name: setup js wasm64
-        run: python3 script/setup.py -p js -o -v -w
-      - name: build js wasm64
-        run: python3 script/build.py -p js -o -v
-      - name: copy wasm64
-        shell: bash
-        run: |
-          mv src/build/javascript/rhino3dm.js src/build/javascript/artifacts/wasm64/rhino3dm.js
-          mv src/build/javascript/artifacts_js/rhino3dm.wasm src/build/javascript/artifacts/wasm64/rhino3dm.wasm
-          cd src/build/javascript/artifacts/wasm64
-          uglifyjs rhino3dm.module.js  --compress -o rhino3dm.module.min.js
-          uglifyjs rhino3dm.js  --compress -o rhino3dm.min.js
+        run: python3 build.py js --all --minify
       - name: artifacts
         uses: actions/upload-artifact@v4.3.1
         with:
-          path: src/build/javascript/artifacts
+          path: build/js/dist
           name: rhino3dm.js
           retention-days: ${{ env.RETENTION_DAYS }}
 

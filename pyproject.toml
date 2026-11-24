@@ -1,0 +1,71 @@
+[build-system]
+requires = ["scikit-build-core>=0.11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "rhino3dm"
+dynamic = ["version"]
+description = "Python library based on OpenNURBS with a RhinoCommon style"
+readme = { file = "src/py/README.md", content-type = "text/markdown" }
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Robert McNeel & Associates", email = "steve@mcneel.com" }]
+keywords = ["rhino", "3dm", "opennurbs", "nurbs", "cad", "3d", "geometry", "rhinocommon"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Multimedia :: Graphics :: 3D Modeling",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Documentation = "https://mcneel.github.io/rhino3dm/python/api/index.html"
+"Migration guide" = "https://mcneel.github.io/rhino3dm/python/api/migrating.html"
+Source = "https://github.com/mcneel/rhino3dm"
+Issues = "https://github.com/mcneel/rhino3dm/issues"
+Changelog = "https://github.com/mcneel/rhino3dm/blob/main/CHANGELOG.md"
+Forum = "https://discourse.mcneel.com/c/rhino-developer/rhino3dm/"
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+# Development.SABIModule (the abi3 module on Python 3.12+) needs CMake 3.26; scikit-build-core
+# fetches a newer CMake from PyPI when the installed one is older
+cmake.version = ">=3.26"
+cmake.build-type = "Release"
+cmake.define = { RHINO3DM_TARGET = "python" }
+build.targets = ["_rhino3dm"]
+# only the extension module: freetype (Linux) has install rules of its own
+install.components = ["python"]
+wheel.packages = ["src/rhino3dm"]
+# one stable-ABI (abi3) wheel for CPython 3.12+; 3.10 / 3.11 and free-threaded interpreters get a
+# version-specific wheel (nanobind applies STABLE_ABI from 3.12, src/CMakeLists.txt)
+wheel.py-api = "cp312"
+# the sdist carries what the Python build compiles, nothing else
+sdist.exclude = [
+    ".github", ".devcontainer.json", ".vscode", "api", "build", "build_verify", "dist", "docs",
+    "script", "tests", "tools", "venv", "node_modules", "package.json", "package-lock.json",
+    "CMakePresets.json", "certificate.p12",
+    "src/build", "src/CMakeFiles", "src/dotnet", "src/js", "src/methodgen", "src/rhinocore_bindings",
+    "src/ios.toolchain.cmake", "src/rhino3dm.egg-info",
+    "src/lib/draco/testdata", "src/lib/draco/third_party", "src/lib/draco/javascript",
+    "src/lib/draco/unity", "src/lib/draco/maya", "src/lib/draco/docs",
+    "src/lib/nanobind/tests", "src/lib/nanobind/docs",
+    "src/lib/opennurbs/example_*", "src/lib/opennurbs/build", "src/lib/opennurbs/CMakeFiles",
+    "**/.git", "**/__pycache__", "**/*.so", "**/*.pyd",
+]
+
+[tool.scikit-build.metadata.version]
+provider = "scikit_build_core.metadata.regex"
+input = "src/rhino3dm/__init__.py"
