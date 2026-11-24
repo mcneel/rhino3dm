@@ -3,6 +3,9 @@
 
 name: workflow doc-gen
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:
